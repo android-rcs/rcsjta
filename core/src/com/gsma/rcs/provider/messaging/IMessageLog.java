@@ -275,10 +275,11 @@ public interface IMessageLog {
 
     /**
      * Get one-one chat messages with unexpired delivery
+     * @param currentTime
      * 
      * @return Cursor
      */
-    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery();
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime);
 
     /**
      * Returns true if delivery for this chat message has expired or false otherwise. Note: false

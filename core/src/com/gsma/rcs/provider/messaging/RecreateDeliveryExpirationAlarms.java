@@ -49,7 +49,8 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
-                cursor = mMessagingLog.getOneToOneChatMessagesWithUnexpiredDelivery();
+                long currentTime = System.currentTimeMillis();
+                cursor = mMessagingLog.getOneToOneChatMessagesWithUnexpiredDelivery(currentTime);
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
                 int chatMessageDeliveryExpirationIdx = cursor
@@ -62,10 +63,9 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     mOneToOneUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(
                             contact, msgId, deliveryExpiration);
                 }
-                if (cursor != null) {
-                    cursor.close();
-                }
-                cursor = mMessagingLog.getOneToOneFileTransfersWithUnexpiredDelivery();
+                cursor.close();
+
+                cursor = mMessagingLog.getOneToOneFileTransfersWithUnexpiredDelivery(currentTime);
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileTransferContactIdx = cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);

@@ -463,6 +463,17 @@ public class MessageLog implements IMessageLog {
         }
     }
 
+    private boolean getDataAsBoolean(Cursor cursor) {
+        try {
+            return cursor.getInt(FIRST_COLUMN_IDX) == 1;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     @Override
     public boolean isMessageRead(String msgId) {
         return (getDataAsInt(getMessageData(MessageData.KEY_READ_STATUS, msgId)) == ReadStatus.READ
@@ -675,9 +686,9 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public void clearMessageDeliveryExpiration(List<String> msgIds) {
-        ContentValues values = new ContentValues();
         String[] selectionArgs = new String[msgIds.size()];
         selectionArgs = msgIds.toArray(selectionArgs);
+        ContentValues values = new ContentValues();
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.update(MessageData.CONTENT_URI, values,
@@ -693,9 +704,9 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery() {
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime) {
         String[] selectionArgs = new String[] {
-            String.valueOf(System.currentTimeMillis())
+            String.valueOf(currentTime)
         };
         return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY, selectionArgs,
@@ -704,6 +715,6 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public boolean isChatMessageExpiredDelivery(String msgId) {
-        return getDataAsInt(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId)) == 1;
+        return getDataAsBoolean(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId));
     }
 }

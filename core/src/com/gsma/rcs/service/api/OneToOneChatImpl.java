@@ -757,13 +757,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 case ChatError.SESSION_INITIATION_CANCELLED:
                     if (message != null) {
                         String msgId = message.getMessageId();
+                        mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
                         String mimeType = message.getMimeType();
                         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
                         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
                                 ReasonCode.FAILED_SEND);
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                                 Status.FAILED, ReasonCode.FAILED_SEND);
-                        mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
                     }
                     break;
                 /*

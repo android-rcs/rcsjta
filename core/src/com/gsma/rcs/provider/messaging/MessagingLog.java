@@ -572,13 +572,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery() {
-        return mMessageLog.getOneToOneChatMessagesWithUnexpiredDelivery();
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime) {
+        return mMessageLog.getOneToOneChatMessagesWithUnexpiredDelivery(currentTime);
     }
 
     @Override
-    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery() {
-        return mFileTransferLog.getOneToOneFileTransfersWithUnexpiredDelivery();
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime) {
+        return mFileTransferLog.getOneToOneFileTransfersWithUnexpiredDelivery(currentTime);
     }
 
     @Override
