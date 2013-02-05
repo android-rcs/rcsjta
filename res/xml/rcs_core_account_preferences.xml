@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/rcs_core_account_main_title" />
+
+	<PreferenceScreen android:key="account_settings"
+		android:title="@string/rcs_core_account_menu_settings"
+		android:summary="@string/rcs_core_account_configure">
+		<intent android:action="com.orangelabs.rcs.SETTINGS" />
+	</PreferenceScreen>
+</PreferenceScreen>

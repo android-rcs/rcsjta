@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<PreferenceCategory android:title="@string/rcs_settings_title_filetransfer_invitation">
+		<CheckBoxPreference
+			android:key="filetransfer_invitation_vibration"
+			android:showDefault="true"
+			android:title="@string/rcs_settings_label_vibrate"
+			android:summary="@string/rcs_settings_summary_filetransfer_vibrate"
+		/>
+
+		<com.orangelabs.rcs.settings.FileTransferInvitationRingtone
+			android:key="filetransfer_invitation_ringtone"
+			android:title="@string/rcs_settings_label_ringtone"
+			android:showDefault="true"
+			android:showSilent="true"
+			android:summary="@string/rcs_settings_summary_filetransfer_ringtone"
+		/>
+		
+	</PreferenceCategory>
+	
+	<PreferenceCategory android:title="@string/rcs_settings_title_chat_invitation">
+		<CheckBoxPreference
+			android:key="chat_invitation_vibration"
+			android:title="@string/rcs_settings_label_vibrate"
+			android:summary="@string/rcs_settings_summary_chat_vibrate"
+			android:showDefault="true"/>
+
+		<com.orangelabs.rcs.settings.ChatInvitationRingtone
+			android:showSilent="true" android:summary="@string/rcs_settings_summary_chat_ringtone" android:title="@string/rcs_settings_label_ringtone" android:showDefault="true" android:key="chat_invitation_ringtone"/>
+	
+	</PreferenceCategory>
+</PreferenceScreen>

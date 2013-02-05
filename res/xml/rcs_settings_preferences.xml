@@ -1,0 +1,49 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+		android:key="rcs_activation"
+		android:title="@string/rcs_settings_label_rcs_service"
+		android:summaryOn="@string/rcs_settings_summary_rcs_service_on"
+		android:summaryOff="@string/rcs_settings_summary_rcs_service_off"/>
+		
+	<CheckBoxPreference
+		android:key="rcs_roaming"
+		android:title="@string/rcs_settings_label_rcs_roaming"
+		android:summary="@string/rcs_settings_summary_rcs_roaming"/>
+
+    <PreferenceScreen
+        android:key="userprofile_settings"
+        android:title="@string/rcs_settings_title_userprofile_settings"
+        android:summary="@string/rcs_settings_summary_userprofile_settings">
+		<intent android:action="android.intent.action.MAIN"
+			android:targetPackage="com.orangelabs.rcs"
+			android:targetClass="com.orangelabs.rcs.settings.UserprofileSettingsDisplay" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="presence_settings"
+        android:title="@string/rcs_settings_title_presence_settings"
+        android:summary="@string/rcs_settings_summary_presence_settings">
+		<intent android:action="android.intent.action.MAIN"
+			android:targetPackage="com.orangelabs.rcs"
+			android:targetClass="com.orangelabs.rcs.settings.PresenceSettingsDisplay" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:title="@string/rcs_settings_title_csh_settings"
+        android:summary="@string/rcs_settings_summary_csh_settings">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.orangelabs.rcs"
+            android:targetClass="com.orangelabs.rcs.settings.CShSettingsDisplay" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:title="@string/rcs_settings_title_messaging_settings"
+        android:summary="@string/rcs_settings_summary_messaging_settings">
+        <intent android:action="android.intent.action.MAIN"
+            android:targetPackage="com.orangelabs.rcs"
+            android:targetClass="com.orangelabs.rcs.settings.MessagingSettingsDisplay" />
+    </PreferenceScreen>
+    
+</PreferenceScreen>

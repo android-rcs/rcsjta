@@ -1,0 +1,63 @@
+<project name="RCS GSMA API" basedir="." default="api">
+
+  <property file="local.properties"/>
+  <property file="project.properties"/>
+  <property name="android_jar" value="${sdk.dir}/platforms/${target}/android.jar"/>
+<!--
+	<property environment="env"/>
+	<property name="android.root" 		value="${env.ANDROID_SDK}"/>
+-->
+	<property name="terminal.root" 		value="${basedir}"/>
+	<property name="terminal.api" 		value="${terminal.root}/rcsjta.jar"/>
+
+  
+
+<!--
+	<property name="terminal.build"		value="${terminal.root}/build"/>
+	<property name="src.path" 			value="${terminal.root}/src"/>
+-->
+<!--
+	<path id="j2se.lib">
+		<fileset dir="${env.JAVA_HOME}/lib/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="j2se.classpath" refid="j2se.lib"/>
+
+	<path id="terminal.classpath">
+    <pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
+	</path>
+-->
+
+  <target name="api" description="GSMA RCS API jar file">
+    <echo>Generate ${terminal.api} file</echo>
+
+    <delete file="${terminal.api}"/>
+    
+    <jar destfile="${terminal.api}" basedir="${terminal.root}/bin/classes">
+    </jar>
+
+         <!-- includesfile="${terminal.root}/jarfiles.txt"> -->
+    
+  </target>
+
+  <target name="docs" description="GSMA RCS API Documentation">
+    <echo>Generate Javadoc</echo>
+
+    <javadoc
+        doctitle="GSMA RCS API"
+        verbose="on"
+        destdir="docs"
+        use="true"
+        access="public" 
+        classpath="${android_jar}:${project.all.jars.path}" 
+        sourcepath="src"
+        packagenames="${project.app.package}.*" 
+        source="1.5"
+        stylesheetfile="./android-developer-docs.css"
+        >
+    </javadoc>
+  </target>
+
+
+</project>
