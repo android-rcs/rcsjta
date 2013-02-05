@@ -1,12 +1,10 @@
-<project name="RCS GSMA API" basedir="." default="api">
+<project name="rcsjta" basedir="." default="api">
 
   <property file="local.properties"/>
   <property file="project.properties"/>
   <property name="android_jar" value="${sdk.dir}/platforms/${target}/android.jar"/>
 	<property name="terminal.root" 		value="${basedir}"/>
 	<property name="terminal.api" 		value="${terminal.root}/rcsjta.jar"/>
-
-  
 
   <target name="api" description="GSMA RCS API jar file">
     <echo>Generate ${terminal.api} file</echo>
