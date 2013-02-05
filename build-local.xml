@@ -29,10 +29,33 @@
         sourcepath="src"
         packagenames="${project.app.package}.*" 
         source="1.5"
-        stylesheetfile="./android-developer-docs.css"
+        stylesheetfile="docs-assets/android-developer-docs.css"
         >
     </javadoc>
-    <copy file="./android-developer-core.css" todir="docs"/>
+    <copy file="docs-assets/android-developer-core.css" todir="docs"/>
+    <mkdir dir="docs/images"/>
+    <copy file="docs-assets/bg_fade.jpg" todir="docs/images"/>
+    <copy file="docs-assets/preliminary.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_community_leftDiv.jpg" todir="docs/images"/>
+    <copy file="docs-assets/hr_gray_side.jpg" todir="docs/images"/>
+    <copy file="docs-assets/hr_gray_main.jpg" todir="docs/images"/>
+    <copy file="docs-assets/bg_home_announcement.png" todir="docs/images"/>
+    <copy file="docs-assets/hr_gray_side.jpg" todir="docs/images"/>
+    <copy file="docs-assets/bg_home_carousel.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_home_carousel_board.png" todir="docs/images"/>
+    <copy file="docs-assets/bg_home_carousel_wheel.png" todir="docs/images"/>
+    <copy file="docs-assets/carousel_buttons_sprite.png" todir="docs/images"/>
+    <copy file="docs-assets/arrow_bluelink_down.png" todir="docs/images"/>
+    <copy file="docs-assets/arrow_bluelink_up.png" todir="docs/images"/>
+    <copy file="docs-assets/triangle-closed-small.png" todir="docs/images"/>
+    <copy file="docs-assets/triangle-opened-small.png" todir="docs/images"/>
+    <copy file="docs-assets/icon_design.png" todir="docs/images"/>
+    <copy file="docs-assets/grad-rule-qv.png" todir="docs/images"/>
+
   </target>
 
 
