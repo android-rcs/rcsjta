@@ -1,0 +1,10 @@
+PREREQUISITES
+
+An Android SDK, properly configured, with android-10 target.
+
+BUILD
+
+Edit local.properties, adjust the value of sdk.dir to the path of your local installation of the Android SDK.
+
+ant relase 
+ant -f build-local.xml docs
