@@ -32,6 +32,7 @@
         stylesheetfile="./android-developer-docs.css"
         >
     </javadoc>
+    <copy file="./android-developer-core.css" todir="docs"/>
   </target>
 
 
