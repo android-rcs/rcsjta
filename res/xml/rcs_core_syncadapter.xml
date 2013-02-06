@@ -5,7 +5,7 @@
 
 <sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
     android:contentAuthority="com.android.contacts"
-    android:accountType="com.orangelabs.rcs"
+    android:accountType="org.gsma.rcs"
     android:supportsUploading="false"
 />
 

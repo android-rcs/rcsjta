@@ -4,7 +4,7 @@
 <!-- for the Account Manager. -->
 
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="com.orangelabs.rcs"
+    android:accountType="org.gsma.rcs"
     android:icon="@drawable/rcs_icon"
     android:smallIcon="@drawable/rcs_icon"
     android:label="@string/rcs_core_account_id"

@@ -8,7 +8,7 @@
 			android:summary="@string/rcs_settings_summary_presence_vibrate"
 		/>
 
-		<com.orangelabs.rcs.settings.PresenceInvitationRingtone
+		<org.gsma.rcs.settings.PresenceInvitationRingtone
 			android:key="presence_invitation_ringtone"
 			android:title="@string/rcs_settings_label_ringtone"
 			android:showDefault="true"

@@ -17,7 +17,7 @@
 			android:summary="@string/rcs_settings_summary_csh_vibrate"
 		/>
 
-		<com.orangelabs.rcs.settings.CShInvitationRingtone
+		<org.gsma.rcs.settings.CShInvitationRingtone
 			android:key="csh_invitation_ringtone"
 			android:title="@string/rcs_settings_label_ringtone"
 			android:showDefault="true"

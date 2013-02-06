@@ -16,8 +16,8 @@
         android:title="@string/rcs_settings_title_userprofile_settings"
         android:summary="@string/rcs_settings_summary_userprofile_settings">
 		<intent android:action="android.intent.action.MAIN"
-			android:targetPackage="com.orangelabs.rcs"
-			android:targetClass="com.orangelabs.rcs.settings.UserprofileSettingsDisplay" />
+			android:targetPackage="org.gsma.rcs"
+			android:targetClass="org.gsma.rcs.settings.UserprofileSettingsDisplay" />
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -25,8 +25,8 @@
         android:title="@string/rcs_settings_title_presence_settings"
         android:summary="@string/rcs_settings_summary_presence_settings">
 		<intent android:action="android.intent.action.MAIN"
-			android:targetPackage="com.orangelabs.rcs"
-			android:targetClass="com.orangelabs.rcs.settings.PresenceSettingsDisplay" />
+			android:targetPackage="org.gsma.rcs"
+			android:targetClass="org.gsma.rcs.settings.PresenceSettingsDisplay" />
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -34,16 +34,16 @@
         android:summary="@string/rcs_settings_summary_csh_settings">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetPackage="com.orangelabs.rcs"
-            android:targetClass="com.orangelabs.rcs.settings.CShSettingsDisplay" />
+            android:targetPackage="org.gsma.rcs"
+            android:targetClass="org.gsma.rcs.settings.CShSettingsDisplay" />
     </PreferenceScreen>
 
     <PreferenceScreen
         android:title="@string/rcs_settings_title_messaging_settings"
         android:summary="@string/rcs_settings_summary_messaging_settings">
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="com.orangelabs.rcs"
-            android:targetClass="com.orangelabs.rcs.settings.MessagingSettingsDisplay" />
+            android:targetPackage="org.gsma.rcs"
+            android:targetClass="org.gsma.rcs.settings.MessagingSettingsDisplay" />
     </PreferenceScreen>
     
 </PreferenceScreen>

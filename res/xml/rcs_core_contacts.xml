@@ -10,105 +10,105 @@
         android:detailColumn="data3"
         android:detailSocialSummary="true"/>
     <ContactsDataKind
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.number"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.number"
         android:summaryColumn="data2"
         android:detailColumn="data3"
         android:detailSocialSummary="false"/>        
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.rcs-status"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.rcs-status"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	 <ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.rcs-status.timestamp"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.rcs-status.timestamp"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.presence-status"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.presence-status"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.free-text"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.free-text"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 -->	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.my-profile"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.my-profile"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 <!--	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.presence.timestamp"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.presence.timestamp"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />      
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.photo-etag"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.photo-etag"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />              
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.timestamp"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.timestamp"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />   
 -->	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.cs-video"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.cs-video"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />   
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.image-sharing"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.image-sharing"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />   
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.video-sharing"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.video-sharing"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_chat_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.im-session"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.im-session"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_ft_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.file-transfer"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.file-transfer"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 <!-- 	<ContactsDataKind android:icon="@drawable/rcs_core_extension_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.extensions"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.extensions"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 -->	<ContactsDataKind android:icon="@drawable/rcs_core_extension_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.support.extension"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.support.extension"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />        
         
 <!-- <ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.presence-discovery"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.presence-discovery"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.social-presence"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.capability.social-presence"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.rcs-contact"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.rcs-contact"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.rcs-capable-contact"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.rcs-capable-contact"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.not-rcs-contact"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.not-rcs-contact"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />        
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.im-blocked"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.im-blocked"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />      
  	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.weblink.updated"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.weblink.updated"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />    
 -->	<ContactsDataKind android:icon="@drawable/rcs_core_eventlog_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.event-log"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.event-log"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />     
 <!-- 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.weblink"
+        android:mimeType="vnd.android.cursor.item/org.gsma.rcs.weblink"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 -->
