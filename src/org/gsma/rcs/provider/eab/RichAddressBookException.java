@@ -20,6 +20,9 @@ package org.gsma.rcs.provider.eab;
  * Class RichAddressBookException.
  */
 public class RichAddressBookException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+	
     /**
      * Creates a new instance of RichAddressBookException.
      *  

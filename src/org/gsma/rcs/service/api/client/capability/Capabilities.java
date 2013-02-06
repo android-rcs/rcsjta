@@ -93,6 +93,6 @@ public class Capabilities
   public void addSupportedExtension(java.lang.String arg1){
   }
   public java.util.ArrayList<java.lang.String> getSupportedExtensions(){
-    return (java.util.ArrayList) null;
+    return (java.util.ArrayList<java.lang.String>) null;
   }
 }

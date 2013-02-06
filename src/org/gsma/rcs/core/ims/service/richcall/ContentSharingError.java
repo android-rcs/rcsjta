@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.service.richcall;
  * Class ContentSharingError.
  */
 public class ContentSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Constant MEDIA_RENDERER_NOT_INITIALIZED.
      */

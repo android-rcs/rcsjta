@@ -20,6 +20,9 @@ package org.gsma.rcs.service.api.client;
  * Class ClientApiException.
  */
 public class ClientApiException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of ClientApiException.
      *  

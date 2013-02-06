@@ -37,10 +37,10 @@ public class MediaRegistry
     return (org.gsma.rcs.core.ims.protocol.rtp.codec.Codec []) null;
   }
   public static java.util.Vector<org.gsma.rcs.core.ims.protocol.rtp.format.video.VideoFormat> getSupportedVideoFormats(){
-    return (java.util.Vector) null;
+    return (java.util.Vector<org.gsma.rcs.core.ims.protocol.rtp.format.video.VideoFormat>) null;
   }
   public static java.util.Vector<org.gsma.rcs.core.ims.protocol.rtp.format.audio.AudioFormat> getSupportedAudioFormats(){
-    return (java.util.Vector) null;
+    return (java.util.Vector<org.gsma.rcs.core.ims.protocol.rtp.format.audio.AudioFormat>) null;
   }
   public static boolean isCodecSupported(java.lang.String arg1){
     return false;

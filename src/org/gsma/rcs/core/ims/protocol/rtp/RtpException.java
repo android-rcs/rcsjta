@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.protocol.rtp;
  * Class RtpException.
  */
 public class RtpException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of RtpException.
      *  

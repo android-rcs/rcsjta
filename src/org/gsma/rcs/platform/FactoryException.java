@@ -20,6 +20,9 @@ package org.gsma.rcs.platform;
  * Class FactoryException.
  */
 public class FactoryException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of FactoryException.
      *  

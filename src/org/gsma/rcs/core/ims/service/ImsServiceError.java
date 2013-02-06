@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.service;
  * The Class ImsServiceError.
  */
 public class ImsServiceError extends Error {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * The Constant UNEXPECTED_EXCEPTION.
      */

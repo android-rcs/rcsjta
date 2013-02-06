@@ -34,7 +34,7 @@ public class GroupChatInfo
     return (java.lang.String) null;
   }
   public java.util.List<java.lang.String> getParticipants(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.lang.String getSessionId(){
     return (java.lang.String) null;

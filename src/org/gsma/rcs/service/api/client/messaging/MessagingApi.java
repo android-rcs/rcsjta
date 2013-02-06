@@ -42,10 +42,10 @@ public class MessagingApi
     return (IFileTransferSession) null;
   }
   public java.util.List<android.os.IBinder> getFileTransferSessionsWith(java.lang.String arg1) throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public java.util.List<android.os.IBinder> getFileTransferSessions() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public IChatSession initiateOne2OneChatSession(java.lang.String arg1, java.lang.String arg2) throws org.gsma.rcs.service.api.client.ClientApiException{
     return (IChatSession) null;
@@ -66,16 +66,16 @@ public class MessagingApi
     return (IChatSession) null;
   }
   public java.util.List<android.os.IBinder> getChatSessionsWith(java.lang.String arg1) throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public java.util.List<android.os.IBinder> getChatSessions() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public java.util.List<android.os.IBinder> getGroupChatSessions() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public java.util.List<android.os.IBinder> getGroupChatSessionsWith(java.lang.String arg1) throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public void setMessageDeliveryStatus(java.lang.String arg1, java.lang.String arg2, java.lang.String arg3) throws org.gsma.rcs.service.api.client.ClientApiException{
   }

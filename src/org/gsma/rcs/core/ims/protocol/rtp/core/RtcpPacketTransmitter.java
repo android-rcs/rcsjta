@@ -38,7 +38,7 @@ public class RtcpPacketTransmitter
   public void close() throws java.io.IOException{
   }
   public java.util.Vector<RtcpSdesPacket> makereports(){
-    return (java.util.Vector) null;
+    return (java.util.Vector<RtcpSdesPacket>) null;
   }
   public void sendByePacket(){
   }

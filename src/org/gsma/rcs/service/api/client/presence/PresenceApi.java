@@ -59,12 +59,12 @@ public class PresenceApi
     return false;
   }
   public java.util.List<java.lang.String> getGrantedContacts() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRevokedContacts() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getBlockedContacts() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
 }

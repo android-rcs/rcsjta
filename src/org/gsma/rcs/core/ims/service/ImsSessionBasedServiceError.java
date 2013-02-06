@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.service;
  * Class ImsSessionBasedServiceError.
  */
 public class ImsSessionBasedServiceError extends ImsServiceError {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Constant SESSION_INITIATION_FAILED.
      */

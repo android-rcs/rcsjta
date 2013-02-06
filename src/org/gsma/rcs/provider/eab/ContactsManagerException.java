@@ -20,6 +20,9 @@ package org.gsma.rcs.provider.eab;
  * Class ContactsManagerException.
  */
 public class ContactsManagerException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of ContactsManagerException.
      *  

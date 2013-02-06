@@ -39,10 +39,10 @@ public class SipApi
     return (ISipSession) null;
   }
   public java.util.List<android.os.IBinder> getSessionsWith(java.lang.String arg1) throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public java.util.List<android.os.IBinder> getSessions() throws org.gsma.rcs.service.api.client.ClientApiException{
-    return (java.util.List) null;
+    return (java.util.List<android.os.IBinder>) null;
   }
   public boolean sendSipInstantMessage(java.lang.String arg1, java.lang.String arg2, java.lang.String arg3, java.lang.String arg4) throws org.gsma.rcs.service.api.client.ClientApiException{
     return false;

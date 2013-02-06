@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.protocol.rtp.media;
  * Class MediaException.
  */
 public class MediaException extends Exception {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of MediaException.
      *  

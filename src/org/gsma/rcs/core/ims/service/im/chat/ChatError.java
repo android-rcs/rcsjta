@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.service.im.chat;
  * Class ChatError.
  */
 public class ChatError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Constant MEDIA_SESSION_FAILED.
      */

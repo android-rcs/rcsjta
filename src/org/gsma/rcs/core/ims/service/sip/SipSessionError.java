@@ -20,6 +20,9 @@ package org.gsma.rcs.core.ims.service.sip;
  * Class SipSessionError.
  */
 public class SipSessionError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Constant SDP_NOT_INITIALIZED.
      */

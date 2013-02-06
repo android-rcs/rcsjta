@@ -20,6 +20,9 @@ package org.gsma.rcs.service.api.client;
  * Class CoreServiceNotAvailableException.
  */
 public class CoreServiceNotAvailableException extends ClientApiException {
+	
+	static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of CoreServiceNotAvailableException.
      */

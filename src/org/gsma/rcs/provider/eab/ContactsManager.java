@@ -48,28 +48,28 @@ public final class ContactsManager
     return (org.gsma.rcs.service.api.client.contacts.ContactInfo) null;
   }
   public java.util.List<java.lang.String> getRcsContactsWithSocialPresence(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getAllContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRcsContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getAvailableContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRcsBlockedContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRcsInvitedContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRcsWillingContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRcsCancelledContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public boolean isRcsValidNumber(java.lang.String arg1){
     return false;
@@ -95,13 +95,13 @@ public final class ContactsManager
   public void setImBlockedForContact(java.lang.String arg1, boolean arg2){
   }
   public java.util.List<java.lang.String> getImBlockedContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getImSessionCapableContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public java.util.List<java.lang.String> getRichcallCapableContacts(){
-    return (java.util.List) null;
+    return (java.util.List<java.lang.String>) null;
   }
   public void removeCancelledPresenceInvitation(java.lang.String arg1){
   }

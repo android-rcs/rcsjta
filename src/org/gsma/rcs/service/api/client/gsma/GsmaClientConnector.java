@@ -37,7 +37,7 @@ public class GsmaClientConnector
     return false;
   }
   public static java.util.Vector<android.content.pm.ApplicationInfo> getRcsClients(android.content.Context arg1){
-    return (java.util.Vector) null;
+    return (java.util.Vector<android.content.pm.ApplicationInfo>) null;
   }
   public static boolean isRcsClientActivated(android.content.Context arg1, java.lang.String arg2){
     return false;

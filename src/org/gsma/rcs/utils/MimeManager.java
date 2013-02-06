@@ -43,10 +43,10 @@ public class MimeManager
     return false;
   }
   public static java.util.Vector<java.lang.String> getSupportedMimeTypes(){
-    return (java.util.Vector) null;
+    return (java.util.Vector<java.lang.String>) null;
   }
   public static java.util.Vector<java.lang.String> getSupportedImageMimeTypes(){
-    return (java.util.Vector) null;
+    return (java.util.Vector<java.lang.String>) null;
   }
   public static java.lang.String getFileExtension(java.lang.String arg1){
     return (java.lang.String) null;
