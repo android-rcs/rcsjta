@@ -16,34 +16,35 @@
 
 package org.gsma.rcs.capability;
 
-
-public class CapabilityApi
-  extends org.gsma.rcs.ClientApi{
-  // Fields
-
-  // Constructors
+public class CapabilityApi extends org.gsma.rcs.ClientApi {
 
   public CapabilityApi(android.content.Context arg1){
     super((android.content.Context) null);
   }
-  // Methods
 
-  public void connectApi(){
+  public void connectApi() {
   }
-  public void disconnectApi(){
+
+  public void disconnectApi() {
   }
+
   public org.gsma.rcs.contacts.ContactInfo getContactInfo(java.lang.String arg1){
     return (org.gsma.rcs.contacts.ContactInfo) null;
   }
+
   public Capabilities requestCapabilities(java.lang.String arg1) throws org.gsma.rcs.ClientApiException{
     return (Capabilities) null;
   }
+
   public void refreshAllCapabilities() throws org.gsma.rcs.ClientApiException{
   }
+
   public Capabilities getMyCapabilities(){
     return (Capabilities) null;
   }
+
   public Capabilities getContactCapabilities(java.lang.String arg1){
     return (Capabilities) null;
   }
+
 }

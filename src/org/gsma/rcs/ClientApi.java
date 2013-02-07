@@ -43,9 +43,9 @@ public abstract class ClientApi {
     /**
      * Creates a new instance of ClientApi.
      *  
-     * @param arg1 The arg1.
+     * @param ctx Application context
      */
-    public ClientApi(android.content.Context arg1) {
+    public ClientApi(android.content.Context ctx) {
 
     }
 
@@ -60,36 +60,36 @@ public abstract class ClientApi {
     /**
      * Adds a api event listener.
      *  
-     * @param arg1 The arg1.
+     * @param listener
      */
-    public void addApiEventListener(ClientApiListener arg1) {
+    public void addApiEventListener(ClientApiListener listener) {
 
     }
 
     /**
      * Removes a api event listener.
      *  
-     * @param arg1 The arg1.
+     * @param listener
      */
-    public void removeApiEventListener(ClientApiListener arg1) {
+    public void removeApiEventListener(ClientApiListener listener) {
 
     }
 
     /**
      * Adds a ims event listener.
      *  
-     * @param arg1 The arg1.
+     * @param listener
      */
-    public void addImsEventListener(ImsEventListener arg1) {
+    public void addImsEventListener(ImsEventListener listener) {
 
     }
 
     /**
      * Removes a ims event listener.
      *  
-     * @param arg1 The arg1.
+     * @param listener
      */
-    public void removeImsEventListener(ImsEventListener arg1) {
+    public void removeImsEventListener(ImsEventListener listener) {
 
     }
 
@@ -102,10 +102,10 @@ public abstract class ClientApi {
 
     /**
      *  
-     * @param arg1 The arg1.
+     * @param ctx Application context
      * @return  The boolean.
      */
-    public boolean isImsConnected(android.content.Context arg1) throws ClientApiException {
+    public boolean isImsConnected(android.content.Context ctx) throws ClientApiException {
         return false;
     }
 

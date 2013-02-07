@@ -20,6 +20,7 @@ package org.gsma.rcs;
  * Class ClientApiUtils.
  */
 public class ClientApiUtils {
+
     /**
      * Constant RCS_SERVICE_NAME.
      */
@@ -44,26 +45,26 @@ public class ClientApiUtils {
 
     /**
      *  
-     * @param arg1 The arg1.
-     * @return  The boolean.
+     * @param ctx Application context
+     * @return <code>true</code> is the RCS service stack is running (in background), otherwise, returns <code>false</code>
      */
-    public static boolean isServiceStarted(android.content.Context arg1) {
+    public static boolean isServiceStarted(android.content.Context ctx) {
         return false;
     }
 
     /**
      *  
-     * @param arg1 The arg1.
+     * @param ctx Application context
      */
-    public static void startRcsService(android.content.Context arg1) {
+    public static void startRcsService(android.content.Context ctx) {
 
     }
 
     /**
      *  
-     * @param arg1 The arg1.
+     * @param ctx Application context
      */
-    public static void stopRcsService(android.content.Context arg1) {
+    public static void stopRcsService(android.content.Context ctx) {
 
     }
 
