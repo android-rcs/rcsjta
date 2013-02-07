@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.provider.sharing;
+package org.gsma.rcs.richcall;
 
 /**
  * Class RichCallProvider.
