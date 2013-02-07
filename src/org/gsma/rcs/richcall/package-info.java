@@ -6,9 +6,9 @@
  * automatically initiated by the RCS stack when the call is
  * established, then the rich call application has just to catch the
  * result to update the button “Share” in the dialer application.
- *
+ * <p>
  * See also the media API for video player and vide recorder.
- *
+ * <p>
  * See classes:
  * RichCallApi
  * RichCallApiIntents

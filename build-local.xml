@@ -29,7 +29,6 @@
         sourcepath="src"
         packagenames="${project.app.package}.*" 
         source="1.5"
-        stylesheetfile="docs-assets/android-developer-docs.css"
         >
     </javadoc>
     <copy file="docs-assets/android-developer-core.css" todir="docs"/>
@@ -60,3 +59,7 @@
 
 
 </project>
+
+<!--
+        stylesheetfile="docs-assets/android-developer-docs.css"
+-->

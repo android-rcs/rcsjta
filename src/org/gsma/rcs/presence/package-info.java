@@ -1,8 +1,8 @@
 /**
  * This API permits to manage social presence info and relationships with its RCS community or RCS contacts.
- *
+ * <p>
  * This API is optional since RCS-e.
- *
+ * <p>
  * See classes:
  * PresenceApi
  * PresenceApiIntents

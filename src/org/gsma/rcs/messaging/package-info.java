@@ -1,7 +1,7 @@
 /**
  * This API permits to offer chat (one-to-one chat and group chat) and
  * file transfer services.
- *
+ * <p>
  * The chat service supports:
  * Delivery report (“message has been delivered”, “message has been displayed”).
  * Is-composing features.
