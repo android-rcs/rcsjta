@@ -14,8 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package org.gsma.rcs.sip;
-
+package org.gsma.rcs.session;
 
 public class SipApi
   extends org.gsma.rcs.ClientApi{

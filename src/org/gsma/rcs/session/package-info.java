@@ -33,4 +33,4 @@
  * 5. If the incoming session is accepted, the SIP API permits to
  * manage the session: session update, terminate the session.
  */
-package  org.gsma.rcs.sip;
+package  org.gsma.rcs.session;

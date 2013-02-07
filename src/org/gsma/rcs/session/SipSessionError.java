@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service.sip;
+package org.gsma.rcs.session;
 
 /**
  * Class SipSessionError.

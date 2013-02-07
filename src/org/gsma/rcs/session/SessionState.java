@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs;
+package org.gsma.rcs.session;
 
 /**
  * Class SessionState.

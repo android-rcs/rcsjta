@@ -14,8 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package org.gsma.rcs.sip;
-
+package org.gsma.rcs.session;
 
 public interface ISipApi extends android.os.IInterface {
   // Classes

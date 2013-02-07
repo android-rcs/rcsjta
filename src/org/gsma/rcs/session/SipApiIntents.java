@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package org.gsma.rcs.sip;
+package org.gsma.rcs.session;
 
 /**
  * Class SipApiIntents.
