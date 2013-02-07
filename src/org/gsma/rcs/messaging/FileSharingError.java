@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service.im.filetransfer;
+package org.gsma.rcs.messaging;
 
 /**
  * Class FileSharingError.
  */
-public class FileSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+public class FileSharingError extends org.gsma.rcs.session.ImsSessionBasedServiceError {
 	
 	static final long serialVersionUID = 1L;
 
@@ -43,8 +43,8 @@ public class FileSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBa
      *  
      * @param arg1 The arg1.
      */
-    public FileSharingError(org.gsma.rcs.core.ims.service.ImsServiceError arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+    public FileSharingError(org.gsma.rcs.session.ImsServiceError arg1) {
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -53,7 +53,7 @@ public class FileSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBa
      * @param arg1 The arg1.
      */
     public FileSharingError(int arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -63,7 +63,7 @@ public class FileSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBa
      * @param arg2 The arg2.
      */
     public FileSharingError(int arg1, String arg2) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
 } // end FileSharingError

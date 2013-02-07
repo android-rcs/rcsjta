@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service;
+package org.gsma.rcs.session;
 
 /**
  * The Class ImsServiceError.

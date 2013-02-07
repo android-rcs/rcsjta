@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service.im.chat;
+package org.gsma.rcs;
 
 /**
  * Class ChatError.
  */
-public class ChatError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+public class ChatError extends org.gsma.rcs.session.ImsSessionBasedServiceError {
 	
 	static final long serialVersionUID = 1L;
 
@@ -48,8 +48,8 @@ public class ChatError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServ
      *  
      * @param arg1 The arg1.
      */
-    public ChatError(org.gsma.rcs.core.ims.service.ImsServiceError arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+    public ChatError(org.gsma.rcs.session.ImsServiceError arg1) {
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -58,7 +58,7 @@ public class ChatError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServ
      * @param arg1 The arg1.
      */
     public ChatError(int arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -68,7 +68,7 @@ public class ChatError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServ
      * @param arg2 The arg2.
      */
     public ChatError(int arg1, String arg2) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
 } // end ChatError

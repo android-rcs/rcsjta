@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service.im.chat.event;
+package org.gsma.rcs;
 
 /**
  * Class User.

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.core.ims.service.richcall;
+package org.gsma.rcs.richcall;
 
 /**
  * Class ContentSharingError.
  */
-public class ContentSharingError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+public class ContentSharingError extends org.gsma.rcs.session.ImsSessionBasedServiceError {
 	
 	static final long serialVersionUID = 1L;
 
@@ -53,8 +53,8 @@ public class ContentSharingError extends org.gsma.rcs.core.ims.service.ImsSessio
      *  
      * @param arg1 The arg1.
      */
-    public ContentSharingError(org.gsma.rcs.core.ims.service.ImsServiceError arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+    public ContentSharingError(org.gsma.rcs.session.ImsServiceError arg1) {
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -63,7 +63,7 @@ public class ContentSharingError extends org.gsma.rcs.core.ims.service.ImsSessio
      * @param arg1 The arg1.
      */
     public ContentSharingError(int arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -73,7 +73,7 @@ public class ContentSharingError extends org.gsma.rcs.core.ims.service.ImsSessio
      * @param arg2 The arg2.
      */
     public ContentSharingError(int arg1, String arg2) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
 } // end ContentSharingError

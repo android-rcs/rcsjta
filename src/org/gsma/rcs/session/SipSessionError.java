@@ -19,7 +19,7 @@ package org.gsma.rcs.session;
 /**
  * Class SipSessionError.
  */
-public class SipSessionError extends org.gsma.rcs.core.ims.service.ImsSessionBasedServiceError {
+public class SipSessionError extends org.gsma.rcs.session.ImsSessionBasedServiceError {
 	
 	static final long serialVersionUID = 1L;
 
@@ -33,8 +33,8 @@ public class SipSessionError extends org.gsma.rcs.core.ims.service.ImsSessionBas
      *  
      * @param arg1 The arg1.
      */
-    public SipSessionError(org.gsma.rcs.core.ims.service.ImsServiceError arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+    public SipSessionError(org.gsma.rcs.session.ImsServiceError arg1) {
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -43,7 +43,7 @@ public class SipSessionError extends org.gsma.rcs.core.ims.service.ImsSessionBas
      * @param arg1 The arg1.
      */
     public SipSessionError(int arg1) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
     /**
@@ -53,7 +53,7 @@ public class SipSessionError extends org.gsma.rcs.core.ims.service.ImsSessionBas
      * @param arg2 The arg2.
      */
     public SipSessionError(int arg1, String arg2) {
-        super((org.gsma.rcs.core.ims.service.ImsServiceError) null);
+        super((org.gsma.rcs.session.ImsServiceError) null);
     }
 
 }

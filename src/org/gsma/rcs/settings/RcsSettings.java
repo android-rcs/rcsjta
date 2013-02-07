@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.provider.settings;
+package org.gsma.rcs.settings;
 
 import android.content.Context;
 import org.gsma.rcs.capability.Capabilities;
