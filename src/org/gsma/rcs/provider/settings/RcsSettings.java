@@ -17,7 +17,7 @@
 package org.gsma.rcs.provider.settings;
 
 import android.content.Context;
-import org.gsma.rcs.service.api.client.capability.Capabilities;
+import org.gsma.rcs.capability.Capabilities;
 
 /**
  * Class RcsSettings.
@@ -752,7 +752,7 @@ public class RcsSettings {
      * @return  The my capabilities.
      */
     public Capabilities getMyCapabilities() {
-        return (org.gsma.rcs.service.api.client.capability.Capabilities) null;
+        return (org.gsma.rcs.capability.Capabilities) null;
     }
 
     /**

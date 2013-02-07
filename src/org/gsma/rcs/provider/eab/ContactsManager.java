@@ -32,8 +32,8 @@ public final class ContactsManager
   }
   public static synchronized void createInstance(android.content.Context arg1){
   }
-  public org.gsma.rcs.service.api.client.presence.PresenceInfo getMyPresenceInfo(){
-    return (org.gsma.rcs.service.api.client.presence.PresenceInfo) null;
+  public org.gsma.rcs.presence.PresenceInfo getMyPresenceInfo(){
+    return (org.gsma.rcs.presence.PresenceInfo) null;
   }
   public void revokeContact(java.lang.String arg1) throws ContactsManagerException{
   }
@@ -44,8 +44,8 @@ public final class ContactsManager
   public java.lang.String [] getRcsMimeTypes(){
     return (java.lang.String []) null;
   }
-  public org.gsma.rcs.service.api.client.contacts.ContactInfo getContactInfo(java.lang.String arg1){
-    return (org.gsma.rcs.service.api.client.contacts.ContactInfo) null;
+  public org.gsma.rcs.contacts.ContactInfo getContactInfo(java.lang.String arg1){
+    return (org.gsma.rcs.contacts.ContactInfo) null;
   }
   public java.util.List<java.lang.String> getRcsContactsWithSocialPresence(){
     return (java.util.List<java.lang.String>) null;
@@ -105,20 +105,20 @@ public final class ContactsManager
   }
   public void removeCancelledPresenceInvitation(java.lang.String arg1){
   }
-  public void setMyInfo(org.gsma.rcs.service.api.client.presence.PresenceInfo arg1) throws ContactsManagerException{
+  public void setMyInfo(org.gsma.rcs.presence.PresenceInfo arg1) throws ContactsManagerException{
   }
-  public void setMyPhotoIcon(org.gsma.rcs.service.api.client.presence.PhotoIcon arg1) throws ContactsManagerException{
+  public void setMyPhotoIcon(org.gsma.rcs.presence.PhotoIcon arg1) throws ContactsManagerException{
   }
-  public void setContactPhotoIcon(java.lang.String arg1, org.gsma.rcs.service.api.client.presence.PhotoIcon arg2) throws ContactsManagerException{
+  public void setContactPhotoIcon(java.lang.String arg1, org.gsma.rcs.presence.PhotoIcon arg2) throws ContactsManagerException{
   }
   public void removeMyPhotoIcon() throws ContactsManagerException{
   }
-  public void setContactInfo(org.gsma.rcs.service.api.client.contacts.ContactInfo arg1, org.gsma.rcs.service.api.client.contacts.ContactInfo arg2) throws ContactsManagerException{
+  public void setContactInfo(org.gsma.rcs.contacts.ContactInfo arg1, org.gsma.rcs.contacts.ContactInfo arg2) throws ContactsManagerException{
   }
   public long getAssociatedRcsRawContact(long arg1, java.lang.String arg2){
     return 0l;
   }
-  public long createRcsContact(org.gsma.rcs.service.api.client.contacts.ContactInfo arg1, long arg2){
+  public long createRcsContact(org.gsma.rcs.contacts.ContactInfo arg1, long arg2){
     return 0l;
   }
   public void removeContactPhotoIcon(java.lang.String arg1) throws ContactsManagerException{
@@ -137,12 +137,12 @@ public final class ContactsManager
   public boolean isContactRcsActive(java.lang.String arg1){
     return false;
   }
-  public void setContactCapabilities(java.lang.String arg1, org.gsma.rcs.service.api.client.capability.Capabilities arg2, int arg3, int arg4){
+  public void setContactCapabilities(java.lang.String arg1, org.gsma.rcs.capability.Capabilities arg2, int arg3, int arg4){
   }
-  public void setContactCapabilities(java.lang.String arg1, org.gsma.rcs.service.api.client.capability.Capabilities arg2){
+  public void setContactCapabilities(java.lang.String arg1, org.gsma.rcs.capability.Capabilities arg2){
   }
-  public org.gsma.rcs.service.api.client.capability.Capabilities getContactCapabilities(java.lang.String arg1){
-    return (org.gsma.rcs.service.api.client.capability.Capabilities) null;
+  public org.gsma.rcs.capability.Capabilities getContactCapabilities(java.lang.String arg1){
+    return (org.gsma.rcs.capability.Capabilities) null;
   }
   public void setContactCapabilitiesTimestamp(java.lang.String arg1, long arg2){
   }
