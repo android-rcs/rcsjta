@@ -28,7 +28,7 @@
  * 4. If an application triggers the SIP Intent, the incoming session
  * invitation is processed (e.g. UI, sound, .etc) and may be accepted
  * (i.e. 200 OK) or rejected (e.g. 486 Busy) by the application or by
- * the ned user.
+ * the ned user. 
  *
  * 5. If the incoming session is accepted, the SIP API permits to
  * manage the session: session update, terminate the session.
