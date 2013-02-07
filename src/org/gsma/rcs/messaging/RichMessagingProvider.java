@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.provider.messaging;
+package org.gsma.rcs.messaging;
 
 /**
  * Class RichMessagingProvider.

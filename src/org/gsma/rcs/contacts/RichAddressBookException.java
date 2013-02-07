@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.rcs.provider.eab;
+package org.gsma.rcs.contacts;
 
 /**
  * Class RichAddressBookException.
