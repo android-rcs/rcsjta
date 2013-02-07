@@ -79,7 +79,7 @@ public class ImdnDocument {
 
     /**
      * Returns the status.
-     *  
+     *
      * @return  The status.
      */
     public String getStatus() {
@@ -88,7 +88,7 @@ public class ImdnDocument {
 
     /**
      * Sets the status.
-     *  
+     *
      * @param arg1 The status.
      */
     public void setStatus(String arg1) {
@@ -97,7 +97,7 @@ public class ImdnDocument {
 
     /**
      * Returns the msg id.
-     *  
+     *
      * @return  The msg id.
      */
     public String getMsgId() {
@@ -106,7 +106,7 @@ public class ImdnDocument {
 
     /**
      * Sets the msg id.
-     *  
+     *
      * @param arg1 The msg id.
      */
     public void setMsgId(String arg1) {

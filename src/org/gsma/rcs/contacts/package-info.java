@@ -11,7 +11,7 @@
  * The additional RCS info for contacts are linked into the native
  * address book database thanks to the ContactContract API of the
  * Android SDK (from 2.x).
- * 
+ *
  * Note: this API is not based on an AIDL interface and may be used
  * even if the RCS service is stopped.
  */

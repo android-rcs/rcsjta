@@ -4,7 +4,7 @@
  * Chat history.
  * File transfer history.
  * Event history which is an aggregation of the previous history and the classic history (SMS, and MMS).
- * 
+ *
  * See class:
  * EventsLogApi
  */

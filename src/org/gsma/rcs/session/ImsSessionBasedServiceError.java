@@ -60,7 +60,7 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 
     /**
      * Creates a new instance of ImsSessionBasedServiceError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ImsSessionBasedServiceError(ImsServiceError arg1) {
@@ -69,7 +69,7 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 
     /**
      * Creates a new instance of ImsSessionBasedServiceError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ImsSessionBasedServiceError(int arg1) {
@@ -78,7 +78,7 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 
     /**
      * Creates a new instance of ImsSessionBasedServiceError.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

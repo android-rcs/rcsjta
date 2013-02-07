@@ -45,7 +45,7 @@ public class ChatError extends org.gsma.rcs.session.ImsSessionBasedServiceError 
 
     /**
      * Creates a new instance of ChatError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ChatError(org.gsma.rcs.session.ImsServiceError arg1) {
@@ -54,7 +54,7 @@ public class ChatError extends org.gsma.rcs.session.ImsSessionBasedServiceError 
 
     /**
      * Creates a new instance of ChatError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ChatError(int arg1) {
@@ -63,7 +63,7 @@ public class ChatError extends org.gsma.rcs.session.ImsSessionBasedServiceError 
 
     /**
      * Creates a new instance of ChatError.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

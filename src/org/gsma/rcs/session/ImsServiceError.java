@@ -45,7 +45,7 @@ public class ImsServiceError extends Error {
 
     /**
      * Instantiates a new ims service error.
-     *  
+     *
      * @param arg1 the arg1
      */
     public ImsServiceError(int arg1) {
@@ -54,7 +54,7 @@ public class ImsServiceError extends Error {
 
     /**
      * Instantiates a new ims service error.
-     *  
+     *
      * @param arg1 the arg1
      * @param arg2 the arg2
      */
@@ -64,7 +64,7 @@ public class ImsServiceError extends Error {
 
     /**
      * Gets the error code.
-     *  
+     *
      * @return  the error code
      */
     public int getErrorCode() {

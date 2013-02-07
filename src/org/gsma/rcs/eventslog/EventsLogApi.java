@@ -377,7 +377,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Creates a new instance of EventsLogApi.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public EventsLogApi(android.content.Context arg1) {
@@ -385,7 +385,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -394,7 +394,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -407,7 +407,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteSpamMessage(String arg1) {
@@ -415,7 +415,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteGroupChatConversation(String arg1) {
@@ -424,7 +424,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the event log content provider uri.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The event log content provider uri.
      */
@@ -434,7 +434,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the one to one chat log content provider uri.
-     *  
+     *
      * @return  The one to one chat log content provider uri.
      */
     public android.net.Uri getOneToOneChatLogContentProviderUri() {
@@ -443,7 +443,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the group chat log content provider uri.
-     *  
+     *
      * @return  The group chat log content provider uri.
      */
     public android.net.Uri getGroupChatLogContentProviderUri() {
@@ -452,7 +452,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the spam box log content provider uri.
-     *  
+     *
      * @return  The spam box log content provider uri.
      */
     public android.net.Uri getSpamBoxLogContentProviderUri() {
@@ -460,7 +460,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void clearHistoryForContact(String arg1) {
@@ -468,7 +468,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteLogEntry(long arg1) {
@@ -476,7 +476,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteSmsEntry(long arg1) {
@@ -484,7 +484,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteMmsEntry(long arg1) {
@@ -492,7 +492,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -501,7 +501,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteImEntry(long arg1) {
@@ -509,7 +509,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteMessagingLogForContact(String arg1) {
@@ -517,7 +517,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void deleteImSessionEntry(String arg1) {
@@ -526,7 +526,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the chat session cursor.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The chat session cursor.
      */
@@ -536,7 +536,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the chat contact cursor.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The chat contact cursor.
      */
@@ -546,7 +546,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the last chat message.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The last chat message.
      */
@@ -556,7 +556,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the spam messages provider uri.
-     *  
+     *
      * @return  The spam messages provider uri.
      */
     public android.net.Uri getSpamMessagesProviderUri() {
@@ -565,7 +565,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the number of unread chat messages.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The number of unread chat messages.
      */
@@ -574,7 +574,7 @@ public class EventsLogApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void clearSpamMessagesForContact(String arg1) {

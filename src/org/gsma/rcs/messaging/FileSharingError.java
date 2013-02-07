@@ -40,7 +40,7 @@ public class FileSharingError extends org.gsma.rcs.session.ImsSessionBasedServic
 
     /**
      * Creates a new instance of FileSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public FileSharingError(org.gsma.rcs.session.ImsServiceError arg1) {
@@ -49,7 +49,7 @@ public class FileSharingError extends org.gsma.rcs.session.ImsSessionBasedServic
 
     /**
      * Creates a new instance of FileSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public FileSharingError(int arg1) {
@@ -58,7 +58,7 @@ public class FileSharingError extends org.gsma.rcs.session.ImsSessionBasedServic
 
     /**
      * Creates a new instance of FileSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

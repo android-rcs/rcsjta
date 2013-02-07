@@ -29,7 +29,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Creates a new instance of VideoRenderer.
-     *  
+     *
      * @param arg1 The arg1 array.
      */
     public VideoRenderer(org.gsma.rcs.media.MediaCodec[] arg1) {
@@ -49,7 +49,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -58,7 +58,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isStarted() {
@@ -67,7 +67,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Adds a listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addListener(org.gsma.rcs.media.IMediaEventListener arg1) {
@@ -83,7 +83,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Sets the media codec.
-     *  
+     *
      * @param arg1 The media codec.
      */
     public void setMediaCodec(org.gsma.rcs.media.MediaCodec arg1) {
@@ -92,7 +92,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Sets the video surface.
-     *  
+     *
      * @param arg1 The video surface.
      */
     public void setVideoSurface(VideoSurfaceView arg1) {
@@ -101,7 +101,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Returns the video start time.
-     *  
+     *
      * @return  The video start time.
      */
     public long getVideoStartTime() {
@@ -110,7 +110,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Returns the local rtp port.
-     *  
+     *
      * @return  The local rtp port.
      */
     public int getLocalRtpPort() {
@@ -118,7 +118,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isOpened() {
@@ -127,7 +127,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Returns the supported media codecs.
-     *  
+     *
      * @return  The supported media codecs array.
      */
     public org.gsma.rcs.media.MediaCodec[] getSupportedMediaCodecs() {
@@ -136,7 +136,7 @@ public class VideoRenderer extends org.gsma.rcs.media.IMediaRenderer.Stub {
 
     /**
      * Returns the media codec.
-     *  
+     *
      * @return  The media codec.
      */
     public org.gsma.rcs.media.MediaCodec getMediaCodec() {

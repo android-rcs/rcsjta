@@ -22,7 +22,7 @@ package org.gsma.rcs.richcall;
 public class RichCallApi extends org.gsma.rcs.ClientApi {
     /**
      * Creates a new instance of RichCallApi.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public RichCallApi(android.content.Context arg1) {
@@ -39,7 +39,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the remote phone number.
-     *  
+     *
      * @return  The remote phone number.
      */
     public String getRemotePhoneNumber() throws org.gsma.rcs.ClientApiException {
@@ -47,7 +47,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The i video sharing session.
@@ -57,7 +57,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -69,7 +69,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the video sharing session.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The video sharing session.
      */
@@ -78,7 +78,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The i image sharing session.
@@ -89,7 +89,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Returns the image sharing session.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The image sharing session.
      */
@@ -99,7 +99,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Sets the multi party call.
-     *  
+     *
      * @param arg1 The multi party call.
      */
     public void setMultiPartyCall(boolean arg1) throws org.gsma.rcs.ClientApiException {
@@ -108,7 +108,7 @@ public class RichCallApi extends org.gsma.rcs.ClientApi {
 
     /**
      * Sets the call hold.
-     *  
+     *
      * @param arg1 The call hold.
      */
     public void setCallHold(boolean arg1) throws org.gsma.rcs.ClientApiException {

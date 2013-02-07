@@ -22,7 +22,7 @@ package org.gsma.rcs.terms;
 public class TermsApi extends org.gsma.rcs.ClientApi {
     /**
      * Creates a new instance of TermsApi.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public TermsApi(android.content.Context arg1) {
@@ -38,7 +38,7 @@ public class TermsApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The boolean.
@@ -48,7 +48,7 @@ public class TermsApi extends org.gsma.rcs.ClientApi {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The boolean.

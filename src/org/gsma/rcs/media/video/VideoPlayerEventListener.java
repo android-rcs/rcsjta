@@ -21,7 +21,7 @@ package org.gsma.rcs.media.video;
  */
 public interface VideoPlayerEventListener {
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void updateDuration(long arg1);

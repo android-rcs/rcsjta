@@ -25,7 +25,7 @@ import org.gsma.rcs.capability.Capabilities;
 public class RcsSettings {
     /**
      * Creates a new instance of RcsSettings.
-     *  
+     *
      * @param arg1 The arg1.
      */
     private RcsSettings(Context arg1) {
@@ -34,7 +34,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip listening port.
-     *  
+     *
      * @return  The sip listening port.
      */
     public int getSipListeningPort() {
@@ -43,7 +43,7 @@ public class RcsSettings {
 
     /**
      * Returns the default rtp port.
-     *  
+     *
      * @return  The default rtp port.
      */
     public int getDefaultRtpPort() {
@@ -52,7 +52,7 @@ public class RcsSettings {
 
     /**
      * Returns the default msrp port.
-     *  
+     *
      * @return  The default msrp port.
      */
     public int getDefaultMsrpPort() {
@@ -61,7 +61,7 @@ public class RcsSettings {
 
     /**
      * Returns the max richcall log entries per contact.
-     *  
+     *
      * @return  The max richcall log entries per contact.
      */
     public int getMaxRichcallLogEntriesPerContact() {
@@ -69,7 +69,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isImageSharingSupported() {
@@ -77,7 +77,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isVideoSharingSupported() {
@@ -85,7 +85,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isImSessionSupported() {
@@ -93,7 +93,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isFileTransferSupported() {
@@ -101,7 +101,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isCsVideoSupported() {
@@ -109,7 +109,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPresenceDiscoverySupported() {
@@ -117,7 +117,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSocialPresenceSupported() {
@@ -125,7 +125,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isImeiUsedAsDeviceId() {
@@ -133,7 +133,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The string.
      */
@@ -142,7 +142,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -151,7 +151,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -160,7 +160,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isServiceActivated() {
@@ -169,7 +169,7 @@ public class RcsSettings {
 
     /**
      * Sets the service activation state.
-     *  
+     *
      * @param arg1 The service activation state.
      */
     public void setServiceActivationState(boolean arg1) {
@@ -177,7 +177,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isRoamingAuthorized() {
@@ -186,7 +186,7 @@ public class RcsSettings {
 
     /**
      * Sets the roaming authorization state.
-     *  
+     *
      * @param arg1 The roaming authorization state.
      */
     public void setRoamingAuthorizationState(boolean arg1) {
@@ -195,7 +195,7 @@ public class RcsSettings {
 
     /**
      * Returns the presence invitation ringtone.
-     *  
+     *
      * @return  The presence invitation ringtone.
      */
     public String getPresenceInvitationRingtone() {
@@ -204,7 +204,7 @@ public class RcsSettings {
 
     /**
      * Sets the presence invitation ringtone.
-     *  
+     *
      * @param arg1 The presence invitation ringtone.
      */
     public void setPresenceInvitationRingtone(String arg1) {
@@ -212,7 +212,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPhoneVibrateForPresenceInvitation() {
@@ -221,7 +221,7 @@ public class RcsSettings {
 
     /**
      * Sets the phone vibrate for presence invitation.
-     *  
+     *
      * @param arg1 The phone vibrate for presence invitation.
      */
     public void setPhoneVibrateForPresenceInvitation(boolean arg1) {
@@ -230,7 +230,7 @@ public class RcsSettings {
 
     /**
      * Returns the c sh invitation ringtone.
-     *  
+     *
      * @return  The c sh invitation ringtone.
      */
     public String getCShInvitationRingtone() {
@@ -239,7 +239,7 @@ public class RcsSettings {
 
     /**
      * Sets the c sh invitation ringtone.
-     *  
+     *
      * @param arg1 The c sh invitation ringtone.
      */
     public void setCShInvitationRingtone(String arg1) {
@@ -247,7 +247,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPhoneVibrateForCShInvitation() {
@@ -256,7 +256,7 @@ public class RcsSettings {
 
     /**
      * Sets the phone vibrate for c sh invitation.
-     *  
+     *
      * @param arg1 The phone vibrate for c sh invitation.
      */
     public void setPhoneVibrateForCShInvitation(boolean arg1) {
@@ -264,7 +264,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPhoneBeepIfCShAvailable() {
@@ -273,7 +273,7 @@ public class RcsSettings {
 
     /**
      * Sets the phone beep if c sh available.
-     *  
+     *
      * @param arg1 The phone beep if c sh available.
      */
     public void setPhoneBeepIfCShAvailable(boolean arg1) {
@@ -282,7 +282,7 @@ public class RcsSettings {
 
     /**
      * Returns the file transfer invitation ringtone.
-     *  
+     *
      * @return  The file transfer invitation ringtone.
      */
     public String getFileTransferInvitationRingtone() {
@@ -291,7 +291,7 @@ public class RcsSettings {
 
     /**
      * Sets the file transfer invitation ringtone.
-     *  
+     *
      * @param arg1 The file transfer invitation ringtone.
      */
     public void setFileTransferInvitationRingtone(String arg1) {
@@ -299,7 +299,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPhoneVibrateForFileTransferInvitation() {
@@ -308,7 +308,7 @@ public class RcsSettings {
 
     /**
      * Sets the phone vibrate for file transfer invitation.
-     *  
+     *
      * @param arg1 The phone vibrate for file transfer invitation.
      */
     public void setPhoneVibrateForFileTransferInvitation(boolean arg1) {
@@ -317,7 +317,7 @@ public class RcsSettings {
 
     /**
      * Returns the chat invitation ringtone.
-     *  
+     *
      * @return  The chat invitation ringtone.
      */
     public String getChatInvitationRingtone() {
@@ -326,7 +326,7 @@ public class RcsSettings {
 
     /**
      * Sets the chat invitation ringtone.
-     *  
+     *
      * @param arg1 The chat invitation ringtone.
      */
     public void setChatInvitationRingtone(String arg1) {
@@ -334,7 +334,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPhoneVibrateForChatInvitation() {
@@ -343,7 +343,7 @@ public class RcsSettings {
 
     /**
      * Sets the phone vibrate for chat invitation.
-     *  
+     *
      * @param arg1 The phone vibrate for chat invitation.
      */
     public void setPhoneVibrateForChatInvitation(boolean arg1) {
@@ -352,7 +352,7 @@ public class RcsSettings {
 
     /**
      * Returns the predefined freetext1.
-     *  
+     *
      * @return  The predefined freetext1.
      */
     public String getPredefinedFreetext1() {
@@ -361,7 +361,7 @@ public class RcsSettings {
 
     /**
      * Sets the predefined freetext1.
-     *  
+     *
      * @param arg1 The predefined freetext1.
      */
     public void setPredefinedFreetext1(String arg1) {
@@ -370,7 +370,7 @@ public class RcsSettings {
 
     /**
      * Returns the predefined freetext2.
-     *  
+     *
      * @return  The predefined freetext2.
      */
     public String getPredefinedFreetext2() {
@@ -379,7 +379,7 @@ public class RcsSettings {
 
     /**
      * Sets the predefined freetext2.
-     *  
+     *
      * @param arg1 The predefined freetext2.
      */
     public void setPredefinedFreetext2(String arg1) {
@@ -388,7 +388,7 @@ public class RcsSettings {
 
     /**
      * Returns the predefined freetext3.
-     *  
+     *
      * @return  The predefined freetext3.
      */
     public String getPredefinedFreetext3() {
@@ -397,7 +397,7 @@ public class RcsSettings {
 
     /**
      * Sets the predefined freetext3.
-     *  
+     *
      * @param arg1 The predefined freetext3.
      */
     public void setPredefinedFreetext3(String arg1) {
@@ -406,7 +406,7 @@ public class RcsSettings {
 
     /**
      * Returns the predefined freetext4.
-     *  
+     *
      * @return  The predefined freetext4.
      */
     public String getPredefinedFreetext4() {
@@ -415,7 +415,7 @@ public class RcsSettings {
 
     /**
      * Sets the predefined freetext4.
-     *  
+     *
      * @param arg1 The predefined freetext4.
      */
     public void setPredefinedFreetext4(String arg1) {
@@ -424,7 +424,7 @@ public class RcsSettings {
 
     /**
      * Returns the min battery level.
-     *  
+     *
      * @return  The min battery level.
      */
     public int getMinBatteryLevel() {
@@ -433,7 +433,7 @@ public class RcsSettings {
 
     /**
      * Sets the min battery level.
-     *  
+     *
      * @param arg1 The min battery level.
      */
     public void setMinBatteryLevel(int arg1) {
@@ -442,7 +442,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims user name.
-     *  
+     *
      * @return  The user profile ims user name.
      */
     public String getUserProfileImsUserName() {
@@ -451,7 +451,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims user name.
-     *  
+     *
      * @param arg1 The user profile ims user name.
      */
     public void setUserProfileImsUserName(String arg1) {
@@ -460,7 +460,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims display name.
-     *  
+     *
      * @return  The user profile ims display name.
      */
     public String getUserProfileImsDisplayName() {
@@ -469,7 +469,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims display name.
-     *  
+     *
      * @param arg1 The user profile ims display name.
      */
     public void setUserProfileImsDisplayName(String arg1) {
@@ -478,7 +478,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims private id.
-     *  
+     *
      * @return  The user profile ims private id.
      */
     public String getUserProfileImsPrivateId() {
@@ -487,7 +487,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims private id.
-     *  
+     *
      * @param arg1 The user profile ims private id.
      */
     public void setUserProfileImsPrivateId(String arg1) {
@@ -496,7 +496,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims password.
-     *  
+     *
      * @return  The user profile ims password.
      */
     public String getUserProfileImsPassword() {
@@ -505,7 +505,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims password.
-     *  
+     *
      * @param arg1 The user profile ims password.
      */
     public void setUserProfileImsPassword(String arg1) {
@@ -514,7 +514,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims realm.
-     *  
+     *
      * @return  The user profile ims realm.
      */
     public String getUserProfileImsRealm() {
@@ -523,7 +523,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims realm.
-     *  
+     *
      * @param arg1 The user profile ims realm.
      */
     public void setUserProfileImsRealm(String arg1) {
@@ -532,7 +532,7 @@ public class RcsSettings {
 
     /**
      * Returns the user profile ims domain.
-     *  
+     *
      * @return  The user profile ims domain.
      */
     public String getUserProfileImsDomain() {
@@ -541,7 +541,7 @@ public class RcsSettings {
 
     /**
      * Sets the user profile ims domain.
-     *  
+     *
      * @param arg1 The user profile ims domain.
      */
     public void setUserProfileImsDomain(String arg1) {
@@ -550,7 +550,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims proxy addr for mobile.
-     *  
+     *
      * @return  The ims proxy addr for mobile.
      */
     public String getImsProxyAddrForMobile() {
@@ -559,7 +559,7 @@ public class RcsSettings {
 
     /**
      * Sets the ims proxy addr for mobile.
-     *  
+     *
      * @param arg1 The ims proxy addr for mobile.
      */
     public void setImsProxyAddrForMobile(String arg1) {
@@ -568,7 +568,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims proxy port for mobile.
-     *  
+     *
      * @return  The ims proxy port for mobile.
      */
     public int getImsProxyPortForMobile() {
@@ -577,7 +577,7 @@ public class RcsSettings {
 
     /**
      * Sets the ims proxy port for mobile.
-     *  
+     *
      * @param arg1 The ims proxy port for mobile.
      */
     public void setImsProxyPortForMobile(int arg1) {
@@ -586,7 +586,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims proxy addr for wifi.
-     *  
+     *
      * @return  The ims proxy addr for wifi.
      */
     public String getImsProxyAddrForWifi() {
@@ -595,7 +595,7 @@ public class RcsSettings {
 
     /**
      * Sets the ims proxy addr for wifi.
-     *  
+     *
      * @param arg1 The ims proxy addr for wifi.
      */
     public void setImsProxyAddrForWifi(String arg1) {
@@ -604,7 +604,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims proxy port for wifi.
-     *  
+     *
      * @return  The ims proxy port for wifi.
      */
     public int getImsProxyPortForWifi() {
@@ -613,7 +613,7 @@ public class RcsSettings {
 
     /**
      * Sets the ims proxy port for wifi.
-     *  
+     *
      * @param arg1 The ims proxy port for wifi.
      */
     public void setImsProxyPortForWifi(int arg1) {
@@ -622,7 +622,7 @@ public class RcsSettings {
 
     /**
      * Returns the xdm server.
-     *  
+     *
      * @return  The xdm server.
      */
     public String getXdmServer() {
@@ -631,7 +631,7 @@ public class RcsSettings {
 
     /**
      * Sets the xdm server.
-     *  
+     *
      * @param arg1 The xdm server.
      */
     public void setXdmServer(String arg1) {
@@ -640,7 +640,7 @@ public class RcsSettings {
 
     /**
      * Returns the xdm login.
-     *  
+     *
      * @return  The xdm login.
      */
     public String getXdmLogin() {
@@ -649,7 +649,7 @@ public class RcsSettings {
 
     /**
      * Sets the xdm login.
-     *  
+     *
      * @param arg1 The xdm login.
      */
     public void setXdmLogin(String arg1) {
@@ -658,7 +658,7 @@ public class RcsSettings {
 
     /**
      * Returns the xdm password.
-     *  
+     *
      * @return  The xdm password.
      */
     public String getXdmPassword() {
@@ -667,7 +667,7 @@ public class RcsSettings {
 
     /**
      * Sets the xdm password.
-     *  
+     *
      * @param arg1 The xdm password.
      */
     public void setXdmPassword(String arg1) {
@@ -676,7 +676,7 @@ public class RcsSettings {
 
     /**
      * Returns the im conference uri.
-     *  
+     *
      * @return  The im conference uri.
      */
     public String getImConferenceUri() {
@@ -685,7 +685,7 @@ public class RcsSettings {
 
     /**
      * Sets the im conference uri.
-     *  
+     *
      * @param arg1 The im conference uri.
      */
     public void setImConferenceUri(String arg1) {
@@ -694,7 +694,7 @@ public class RcsSettings {
 
     /**
      * Returns the end user confirmation request uri.
-     *  
+     *
      * @return  The end user confirmation request uri.
      */
     public String getEndUserConfirmationRequestUri() {
@@ -703,7 +703,7 @@ public class RcsSettings {
 
     /**
      * Sets the end user confirmation request uri.
-     *  
+     *
      * @param arg1 The end user confirmation request uri.
      */
     public void setEndUserConfirmationRequestUri(String arg1) {
@@ -712,7 +712,7 @@ public class RcsSettings {
 
     /**
      * Returns the country code.
-     *  
+     *
      * @return  The country code.
      */
     public String getCountryCode() {
@@ -721,7 +721,7 @@ public class RcsSettings {
 
     /**
      * Sets the country code.
-     *  
+     *
      * @param arg1 The country code.
      */
     public void setCountryCode(String arg1) {
@@ -730,7 +730,7 @@ public class RcsSettings {
 
     /**
      * Returns the country area code.
-     *  
+     *
      * @return  The country area code.
      */
     public String getCountryAreaCode() {
@@ -739,7 +739,7 @@ public class RcsSettings {
 
     /**
      * Sets the country area code.
-     *  
+     *
      * @param arg1 The country area code.
      */
     public void setCountryAreaCode(String arg1) {
@@ -748,7 +748,7 @@ public class RcsSettings {
 
     /**
      * Returns the my capabilities.
-     *  
+     *
      * @return  The my capabilities.
      */
     public Capabilities getMyCapabilities() {
@@ -757,7 +757,7 @@ public class RcsSettings {
 
     /**
      * Returns the supported rcs extensions.
-     *  
+     *
      * @return  The supported rcs extensions.
      */
     public String getSupportedRcsExtensions() {
@@ -766,7 +766,7 @@ public class RcsSettings {
 
     /**
      * Returns the max photo icon size.
-     *  
+     *
      * @return  The max photo icon size.
      */
     public int getMaxPhotoIconSize() {
@@ -775,7 +775,7 @@ public class RcsSettings {
 
     /**
      * Returns the max freetext length.
-     *  
+     *
      * @return  The max freetext length.
      */
     public int getMaxFreetextLength() {
@@ -784,7 +784,7 @@ public class RcsSettings {
 
     /**
      * Returns the max chat participants.
-     *  
+     *
      * @return  The max chat participants.
      */
     public int getMaxChatParticipants() {
@@ -793,7 +793,7 @@ public class RcsSettings {
 
     /**
      * Returns the max chat message length.
-     *  
+     *
      * @return  The max chat message length.
      */
     public int getMaxChatMessageLength() {
@@ -802,7 +802,7 @@ public class RcsSettings {
 
     /**
      * Returns the chat idle duration.
-     *  
+     *
      * @return  The chat idle duration.
      */
     public int getChatIdleDuration() {
@@ -811,7 +811,7 @@ public class RcsSettings {
 
     /**
      * Returns the max file transfer size.
-     *  
+     *
      * @return  The max file transfer size.
      */
     public int getMaxFileTransferSize() {
@@ -820,7 +820,7 @@ public class RcsSettings {
 
     /**
      * Returns the warning max file transfer size.
-     *  
+     *
      * @return  The warning max file transfer size.
      */
     public int getWarningMaxFileTransferSize() {
@@ -829,7 +829,7 @@ public class RcsSettings {
 
     /**
      * Returns the max image sharing size.
-     *  
+     *
      * @return  The max image sharing size.
      */
     public int getMaxImageSharingSize() {
@@ -838,7 +838,7 @@ public class RcsSettings {
 
     /**
      * Returns the max video share duration.
-     *  
+     *
      * @return  The max video share duration.
      */
     public int getMaxVideoShareDuration() {
@@ -847,7 +847,7 @@ public class RcsSettings {
 
     /**
      * Returns the max chat sessions.
-     *  
+     *
      * @return  The max chat sessions.
      */
     public int getMaxChatSessions() {
@@ -856,7 +856,7 @@ public class RcsSettings {
 
     /**
      * Returns the max file transfer sessions.
-     *  
+     *
      * @return  The max file transfer sessions.
      */
     public int getMaxFileTransferSessions() {
@@ -864,7 +864,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSmsFallbackServiceActivated() {
@@ -872,7 +872,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isChatAutoAccepted() {
@@ -880,7 +880,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isGroupChatAutoAccepted() {
@@ -888,7 +888,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isFileTransferAutoAccepted() {
@@ -896,7 +896,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isStoreForwardWarningActivated() {
@@ -905,7 +905,7 @@ public class RcsSettings {
 
     /**
      * Returns the im session start mode.
-     *  
+     *
      * @return  The im session start mode.
      */
     public int getImSessionStartMode() {
@@ -914,7 +914,7 @@ public class RcsSettings {
 
     /**
      * Returns the max chat log entries per contact.
-     *  
+     *
      * @return  The max chat log entries per contact.
      */
     public int getMaxChatLogEntriesPerContact() {
@@ -923,7 +923,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims service polling period.
-     *  
+     *
      * @return  The ims service polling period.
      */
     public int getImsServicePollingPeriod() {
@@ -932,7 +932,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip default protocol for mobile.
-     *  
+     *
      * @return  The sip default protocol for mobile.
      */
     public String getSipDefaultProtocolForMobile() {
@@ -941,7 +941,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip default protocol for wifi.
-     *  
+     *
      * @return  The sip default protocol for wifi.
      */
     public String getSipDefaultProtocolForWifi() {
@@ -950,7 +950,7 @@ public class RcsSettings {
 
     /**
      * Returns the tls certificate root.
-     *  
+     *
      * @return  The tls certificate root.
      */
     public String getTlsCertificateRoot() {
@@ -959,7 +959,7 @@ public class RcsSettings {
 
     /**
      * Returns the tls certificate intermediate.
-     *  
+     *
      * @return  The tls certificate intermediate.
      */
     public String getTlsCertificateIntermediate() {
@@ -968,7 +968,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip transaction timeout.
-     *  
+     *
      * @return  The sip transaction timeout.
      */
     public int getSipTransactionTimeout() {
@@ -977,7 +977,7 @@ public class RcsSettings {
 
     /**
      * Returns the msrp transaction timeout.
-     *  
+     *
      * @return  The msrp transaction timeout.
      */
     public int getMsrpTransactionTimeout() {
@@ -986,7 +986,7 @@ public class RcsSettings {
 
     /**
      * Returns the register expire period.
-     *  
+     *
      * @return  The register expire period.
      */
     public int getRegisterExpirePeriod() {
@@ -995,7 +995,7 @@ public class RcsSettings {
 
     /**
      * Returns the register retry base time.
-     *  
+     *
      * @return  The register retry base time.
      */
     public int getRegisterRetryBaseTime() {
@@ -1004,7 +1004,7 @@ public class RcsSettings {
 
     /**
      * Returns the register retry max time.
-     *  
+     *
      * @return  The register retry max time.
      */
     public int getRegisterRetryMaxTime() {
@@ -1013,7 +1013,7 @@ public class RcsSettings {
 
     /**
      * Returns the publish expire period.
-     *  
+     *
      * @return  The publish expire period.
      */
     public int getPublishExpirePeriod() {
@@ -1022,7 +1022,7 @@ public class RcsSettings {
 
     /**
      * Returns the revoke timeout.
-     *  
+     *
      * @return  The revoke timeout.
      */
     public int getRevokeTimeout() {
@@ -1031,7 +1031,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims auhtentication procedure for mobile.
-     *  
+     *
      * @return  The ims auhtentication procedure for mobile.
      */
     public String getImsAuhtenticationProcedureForMobile() {
@@ -1040,7 +1040,7 @@ public class RcsSettings {
 
     /**
      * Returns the ims auhtentication procedure for wifi.
-     *  
+     *
      * @return  The ims auhtentication procedure for wifi.
      */
     public String getImsAuhtenticationProcedureForWifi() {
@@ -1048,7 +1048,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isTelUriFormatUsed() {
@@ -1057,7 +1057,7 @@ public class RcsSettings {
 
     /**
      * Returns the ringing period.
-     *  
+     *
      * @return  The ringing period.
      */
     public int getRingingPeriod() {
@@ -1066,7 +1066,7 @@ public class RcsSettings {
 
     /**
      * Returns the subscribe expire period.
-     *  
+     *
      * @return  The subscribe expire period.
      */
     public int getSubscribeExpirePeriod() {
@@ -1075,7 +1075,7 @@ public class RcsSettings {
 
     /**
      * Returns the is composing timeout.
-     *  
+     *
      * @return  The is composing timeout.
      */
     public int getIsComposingTimeout() {
@@ -1084,7 +1084,7 @@ public class RcsSettings {
 
     /**
      * Returns the session refresh expire period.
-     *  
+     *
      * @return  The session refresh expire period.
      */
     public int getSessionRefreshExpirePeriod() {
@@ -1092,7 +1092,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isPermanentStateModeActivated() {
@@ -1100,7 +1100,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isTraceActivated() {
@@ -1109,7 +1109,7 @@ public class RcsSettings {
 
     /**
      * Returns the trace level.
-     *  
+     *
      * @return  The trace level.
      */
     public String getTraceLevel() {
@@ -1117,7 +1117,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSipTraceActivated() {
@@ -1126,7 +1126,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip trace file.
-     *  
+     *
      * @return  The sip trace file.
      */
     public String getSipTraceFile() {
@@ -1134,7 +1134,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isMediaTraceActivated() {
@@ -1143,7 +1143,7 @@ public class RcsSettings {
 
     /**
      * Returns the capability refresh timeout.
-     *  
+     *
      * @return  The capability refresh timeout.
      */
     public int getCapabilityRefreshTimeout() {
@@ -1152,7 +1152,7 @@ public class RcsSettings {
 
     /**
      * Returns the capability expiry timeout.
-     *  
+     *
      * @return  The capability expiry timeout.
      */
     public int getCapabilityExpiryTimeout() {
@@ -1161,7 +1161,7 @@ public class RcsSettings {
 
     /**
      * Returns the capability polling period.
-     *  
+     *
      * @return  The capability polling period.
      */
     public int getCapabilityPollingPeriod() {
@@ -1170,7 +1170,7 @@ public class RcsSettings {
 
     /**
      * Sets the supported rcs extensions.
-     *  
+     *
      * @param arg1 The supported rcs extensions.
      */
     public void setSupportedRcsExtensions(String arg1) {
@@ -1178,7 +1178,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isImAlwaysOn() {
@@ -1186,7 +1186,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isImReportsActivated() {
@@ -1195,7 +1195,7 @@ public class RcsSettings {
 
     /**
      * Returns the network access.
-     *  
+     *
      * @return  The network access.
      */
     public int getNetworkAccess() {
@@ -1204,7 +1204,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip timer t1.
-     *  
+     *
      * @return  The sip timer t1.
      */
     public int getSipTimerT1() {
@@ -1213,7 +1213,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip timer t2.
-     *  
+     *
      * @return  The sip timer t2.
      */
     public int getSipTimerT2() {
@@ -1222,7 +1222,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip timer t4.
-     *  
+     *
      * @return  The sip timer t4.
      */
     public int getSipTimerT4() {
@@ -1230,7 +1230,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSipKeepAliveEnabled() {
@@ -1239,7 +1239,7 @@ public class RcsSettings {
 
     /**
      * Returns the sip keep alive period.
-     *  
+     *
      * @return  The sip keep alive period.
      */
     public int getSipKeepAlivePeriod() {
@@ -1248,7 +1248,7 @@ public class RcsSettings {
 
     /**
      * Returns the network apn.
-     *  
+     *
      * @return  The network apn.
      */
     public String getNetworkApn() {
@@ -1257,7 +1257,7 @@ public class RcsSettings {
 
     /**
      * Returns the network operator.
-     *  
+     *
      * @return  The network operator.
      */
     public String getNetworkOperator() {
@@ -1265,7 +1265,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isGruuSupported() {
@@ -1273,7 +1273,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isCpuAlwaysOn() {
@@ -1282,7 +1282,7 @@ public class RcsSettings {
 
     /**
      * Returns the auto config mode.
-     *  
+     *
      * @return  The auto config mode.
      */
     public int getAutoConfigMode() {
@@ -1290,7 +1290,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isProvisioningTermsAccepted() {
@@ -1299,7 +1299,7 @@ public class RcsSettings {
 
     /**
      * Returns the provisioning version.
-     *  
+     *
      * @return  The provisioning version.
      */
     public String getProvisioningVersion() {
@@ -1308,7 +1308,7 @@ public class RcsSettings {
 
     /**
      * Sets the provisioning version.
-     *  
+     *
      * @param arg1 The provisioning version.
      */
     public void setProvisioningVersion(String arg1) {
@@ -1317,7 +1317,7 @@ public class RcsSettings {
 
     /**
      * Sets the provisioning terms accepted.
-     *  
+     *
      * @param arg1 The provisioning terms accepted.
      */
     public void setProvisioningTermsAccepted(boolean arg1) {
@@ -1326,7 +1326,7 @@ public class RcsSettings {
 
     /**
      * Returns the provisioning address.
-     *  
+     *
      * @return  The provisioning address.
      */
     public String getProvisioningAddress() {
@@ -1338,7 +1338,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isUserProfileConfigured() {
@@ -1346,7 +1346,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isGroupChatActivated() {
@@ -1354,7 +1354,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void backupAccountSettings(String arg1) {
@@ -1362,7 +1362,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void restoreAccountSettings(String arg1) {
@@ -1371,7 +1371,7 @@ public class RcsSettings {
 
     /**
      * Returns the photo root directory.
-     *  
+     *
      * @return  The photo root directory.
      */
     public String getPhotoRootDirectory() {
@@ -1380,7 +1380,7 @@ public class RcsSettings {
 
     /**
      * Sets the photo root directory.
-     *  
+     *
      * @param arg1 The photo root directory.
      */
     public void setPhotoRootDirectory(String arg1) {
@@ -1389,7 +1389,7 @@ public class RcsSettings {
 
     /**
      * Returns the video root directory.
-     *  
+     *
      * @return  The video root directory.
      */
     public String getVideoRootDirectory() {
@@ -1398,7 +1398,7 @@ public class RcsSettings {
 
     /**
      * Sets the video root directory.
-     *  
+     *
      * @param arg1 The video root directory.
      */
     public void setVideoRootDirectory(String arg1) {
@@ -1407,7 +1407,7 @@ public class RcsSettings {
 
     /**
      * Returns the file root directory.
-     *  
+     *
      * @return  The file root directory.
      */
     public String getFileRootDirectory() {
@@ -1416,7 +1416,7 @@ public class RcsSettings {
 
     /**
      * Sets the file root directory.
-     *  
+     *
      * @param arg1 The file root directory.
      */
     public void setFileRootDirectory(String arg1) {
@@ -1424,7 +1424,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSecureMsrpOverWifi() {
@@ -1432,7 +1432,7 @@ public class RcsSettings {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isSecureRtpOverWifi() {
@@ -1441,7 +1441,7 @@ public class RcsSettings {
 
     /**
      * Returns the instance.
-     *  
+     *
      * @return  The instance.
      */
     public static RcsSettings getInstance() {
@@ -1450,7 +1450,7 @@ public class RcsSettings {
 
     /**
      * Creates the instance.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public static synchronized void createInstance(Context arg1) {

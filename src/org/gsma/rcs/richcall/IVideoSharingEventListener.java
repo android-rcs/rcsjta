@@ -23,7 +23,7 @@ public interface IVideoSharingEventListener extends android.os.IInterface {
     public void handleSessionStarted() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleSessionAborted(int arg1) throws android.os.RemoteException;
@@ -31,7 +31,7 @@ public interface IVideoSharingEventListener extends android.os.IInterface {
     public void handleSessionTerminatedByRemote() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleSharingError(int arg1) throws android.os.RemoteException;
@@ -48,7 +48,7 @@ public interface IVideoSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -56,7 +56,7 @@ public interface IVideoSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -68,7 +68,7 @@ public interface IVideoSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i video sharing event listener.
          */

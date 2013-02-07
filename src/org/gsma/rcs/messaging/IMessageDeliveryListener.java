@@ -21,7 +21,7 @@ package org.gsma.rcs.messaging;
  */
 public interface IMessageDeliveryListener extends android.os.IInterface {
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -40,7 +40,7 @@ public interface IMessageDeliveryListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -48,7 +48,7 @@ public interface IMessageDeliveryListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -60,7 +60,7 @@ public interface IMessageDeliveryListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i message delivery listener.
          */

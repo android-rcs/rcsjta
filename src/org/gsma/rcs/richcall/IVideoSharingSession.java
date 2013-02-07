@@ -22,21 +22,21 @@ package org.gsma.rcs.richcall;
 public interface IVideoSharingSession extends android.os.IInterface {
     /**
      * Returns the session i d.
-     *  
+     *
      * @return  The session i d.
      */
     public String getSessionID() throws android.os.RemoteException;
 
     /**
      * Returns the remote contact.
-     *  
+     *
      * @return  The remote contact.
      */
     public String getRemoteContact() throws android.os.RemoteException;
 
     /**
      * Returns the session state.
-     *  
+     *
      * @return  The session state.
      */
     public int getSessionState() throws android.os.RemoteException;
@@ -49,21 +49,21 @@ public interface IVideoSharingSession extends android.os.IInterface {
 
     /**
      * Adds a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addSessionListener(IVideoSharingEventListener arg1) throws android.os.RemoteException;
 
     /**
      * Removes a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void removeSessionListener(IVideoSharingEventListener arg1) throws android.os.RemoteException;
 
     /**
      * Sets the media renderer.
-     *  
+     *
      * @param arg1 The media renderer.
      */
     public void setMediaRenderer(org.gsma.rcs.media.IMediaRenderer arg1) throws android.os.RemoteException;
@@ -80,7 +80,7 @@ public interface IVideoSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -88,7 +88,7 @@ public interface IVideoSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -100,7 +100,7 @@ public interface IVideoSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i video sharing session.
          */

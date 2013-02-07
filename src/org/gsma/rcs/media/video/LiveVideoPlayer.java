@@ -29,7 +29,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Creates a new instance of LiveVideoPlayer.
-     *  
+     *
      * @param arg1 The arg1 array.
      */
     public LiveVideoPlayer(org.gsma.rcs.media.MediaCodec[] arg1) {
@@ -49,7 +49,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -58,7 +58,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isStarted() {
@@ -67,7 +67,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Adds a listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addListener(org.gsma.rcs.media.IMediaEventListener arg1) {
@@ -83,7 +83,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Sets the media codec.
-     *  
+     *
      * @param arg1 The media codec.
      */
     public void setMediaCodec(org.gsma.rcs.media.MediaCodec arg1) {
@@ -92,7 +92,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the video start time.
-     *  
+     *
      * @return  The video start time.
      */
     public long getVideoStartTime() {
@@ -101,7 +101,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the local rtp port.
-     *  
+     *
      * @return  The local rtp port.
      */
     public int getLocalRtpPort() {
@@ -109,7 +109,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isOpened() {
@@ -118,7 +118,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the supported media codecs.
-     *  
+     *
      * @return  The supported media codecs array.
      */
     public org.gsma.rcs.media.MediaCodec[] getSupportedMediaCodecs() {
@@ -127,7 +127,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the media codec.
-     *  
+     *
      * @return  The media codec.
      */
     public org.gsma.rcs.media.MediaCodec getMediaCodec() {
@@ -136,7 +136,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the media codec width.
-     *  
+     *
      * @return  The media codec width.
      */
     public int getMediaCodecWidth() {
@@ -145,7 +145,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Returns the media codec height.
-     *  
+     *
      * @return  The media codec height.
      */
     public int getMediaCodecHeight() {
@@ -154,7 +154,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Sets the scaling factor.
-     *  
+     *
      * @param arg1 The scaling factor.
      */
     public void setScalingFactor(float arg1) {
@@ -163,7 +163,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
 
     /**
      * Sets the scaling factor.
-     *  
+     *
      * @param arg1 The scaling factor.
      */
     public void setScalingFactor(boolean arg1) {
@@ -171,7 +171,7 @@ public class LiveVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub implem
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1 array.
      * @param arg2 The arg2.
      */

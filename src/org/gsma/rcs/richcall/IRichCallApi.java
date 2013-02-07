@@ -22,13 +22,13 @@ package org.gsma.rcs.richcall;
 public interface IRichCallApi extends android.os.IInterface {
     /**
      * Returns the remote phone number.
-     *  
+     *
      * @return  The remote phone number.
      */
     public String getRemotePhoneNumber() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The i video sharing session.
@@ -36,7 +36,7 @@ public interface IRichCallApi extends android.os.IInterface {
     public IVideoSharingSession initiateLiveVideoSharing(String arg1, org.gsma.rcs.media.IMediaPlayer arg2) throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -46,14 +46,14 @@ public interface IRichCallApi extends android.os.IInterface {
 
     /**
      * Returns the video sharing session.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The video sharing session.
      */
     public IVideoSharingSession getVideoSharingSession(String arg1) throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The i image sharing session.
@@ -62,7 +62,7 @@ public interface IRichCallApi extends android.os.IInterface {
 
     /**
      * Returns the image sharing session.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The image sharing session.
      */
@@ -70,14 +70,14 @@ public interface IRichCallApi extends android.os.IInterface {
 
     /**
      * Sets the multi party call.
-     *  
+     *
      * @param arg1 The multi party call.
      */
     public void setMultiPartyCall(boolean arg1) throws android.os.RemoteException;
 
     /**
      * Sets the call hold.
-     *  
+     *
      * @param arg1 The call hold.
      */
     public void setCallHold(boolean arg1) throws android.os.RemoteException;
@@ -94,7 +94,7 @@ public interface IRichCallApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -102,7 +102,7 @@ public interface IRichCallApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -114,7 +114,7 @@ public interface IRichCallApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i rich call api.
          */

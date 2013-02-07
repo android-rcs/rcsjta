@@ -50,7 +50,7 @@ public class ContentSharingError extends org.gsma.rcs.session.ImsSessionBasedSer
 
     /**
      * Creates a new instance of ContentSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ContentSharingError(org.gsma.rcs.session.ImsServiceError arg1) {
@@ -59,7 +59,7 @@ public class ContentSharingError extends org.gsma.rcs.session.ImsSessionBasedSer
 
     /**
      * Creates a new instance of ContentSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ContentSharingError(int arg1) {
@@ -68,7 +68,7 @@ public class ContentSharingError extends org.gsma.rcs.session.ImsSessionBasedSer
 
     /**
      * Creates a new instance of ContentSharingError.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

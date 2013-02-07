@@ -23,7 +23,7 @@ public interface ImsEventListener {
     public void handleImsConnected();
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleImsDisconnected(int arg1);

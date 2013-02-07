@@ -67,7 +67,7 @@ public class User {
 
     /**
      * Creates a new instance of User.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -76,7 +76,7 @@ public class User {
     }
 
     /**
-     *  
+     *
      * @return  The string.
      */
     public String toString() {
@@ -85,7 +85,7 @@ public class User {
 
     /**
      * Returns the state.
-     *  
+     *
      * @return  The state.
      */
     public String getState() {
@@ -94,7 +94,7 @@ public class User {
 
     /**
      * Sets the state.
-     *  
+     *
      * @param arg1 The state.
      */
     public void setState(String arg1) {
@@ -103,7 +103,7 @@ public class User {
 
     /**
      * Returns the display name.
-     *  
+     *
      * @return  The display name.
      */
     public String getDisplayName() {
@@ -112,7 +112,7 @@ public class User {
 
     /**
      * Returns the entity.
-     *  
+     *
      * @return  The entity.
      */
     public String getEntity() {
@@ -121,7 +121,7 @@ public class User {
 
     /**
      * Sets the display name.
-     *  
+     *
      * @param arg1 The display name.
      */
     public void setDisplayName(String arg1) {
@@ -129,7 +129,7 @@ public class User {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isMe() {
@@ -138,7 +138,7 @@ public class User {
 
     /**
      * Sets the disconnection method.
-     *  
+     *
      * @param arg1 The disconnection method.
      */
     public void setDisconnectionMethod(String arg1) {
@@ -147,7 +147,7 @@ public class User {
 
     /**
      * Returns the disconnection method.
-     *  
+     *
      * @return  The disconnection method.
      */
     public String getDisconnectionMethod() {
@@ -156,7 +156,7 @@ public class User {
 
     /**
      * Sets the failure reason.
-     *  
+     *
      * @param arg1 The failure reason.
      */
     public void setFailureReason(String arg1) {
@@ -165,7 +165,7 @@ public class User {
 
     /**
      * Returns the failure reason.
-     *  
+     *
      * @return  The failure reason.
      */
     public String getFailureReason() {
@@ -173,7 +173,7 @@ public class User {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The boolean.
      */
@@ -182,7 +182,7 @@ public class User {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The boolean.
      */

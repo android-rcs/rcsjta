@@ -23,7 +23,7 @@ public interface IImageSharingEventListener extends android.os.IInterface {
     public void handleSessionStarted() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleSessionAborted(int arg1) throws android.os.RemoteException;
@@ -31,20 +31,20 @@ public interface IImageSharingEventListener extends android.os.IInterface {
     public void handleSessionTerminatedByRemote() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleSharingError(int arg1) throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
     public void handleSharingProgress(long arg1, long arg2) throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void handleImageTransfered(String arg1) throws android.os.RemoteException;
@@ -61,7 +61,7 @@ public interface IImageSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -69,7 +69,7 @@ public interface IImageSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -81,7 +81,7 @@ public interface IImageSharingEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i image sharing event listener.
          */

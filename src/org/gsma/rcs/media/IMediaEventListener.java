@@ -29,7 +29,7 @@ public interface IMediaEventListener extends android.os.IInterface {
     public void mediaStopped() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void mediaError(String arg1) throws android.os.RemoteException;
@@ -46,7 +46,7 @@ public interface IMediaEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -54,7 +54,7 @@ public interface IMediaEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -66,7 +66,7 @@ public interface IMediaEventListener extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i media event listener.
          */

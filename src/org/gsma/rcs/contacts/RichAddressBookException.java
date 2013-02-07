@@ -25,7 +25,7 @@ public class RichAddressBookException extends Exception {
 	
     /**
      * Creates a new instance of RichAddressBookException.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public RichAddressBookException(String arg1) {

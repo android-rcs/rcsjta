@@ -22,27 +22,27 @@ package org.gsma.rcs.session;
 public interface ISipSession extends android.os.IInterface {
     /**
      * Returns the session i d.
-     *  
+     *
      * @return  The session i d.
      */
     public String getSessionID() throws android.os.RemoteException;
 
     /**
      * Returns the remote contact.
-     *  
+     *
      * @return  The remote contact.
      */
     public String getRemoteContact() throws android.os.RemoteException;
 
     /**
      * Returns the session state.
-     *  
+     *
      * @return  The session state.
      */
     public int getSessionState() throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void acceptSession(String arg1) throws android.os.RemoteException;
@@ -53,35 +53,35 @@ public interface ISipSession extends android.os.IInterface {
 
     /**
      * Adds a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addSessionListener(ISipSessionEventListener arg1) throws android.os.RemoteException;
 
     /**
      * Removes a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void removeSessionListener(ISipSessionEventListener arg1) throws android.os.RemoteException;
 
     /**
      * Returns the feature tag.
-     *  
+     *
      * @return  The feature tag.
      */
     public String getFeatureTag() throws android.os.RemoteException;
 
     /**
      * Returns the local sdp.
-     *  
+     *
      * @return  The local sdp.
      */
     public String getLocalSdp() throws android.os.RemoteException;
 
     /**
      * Returns the remote sdp.
-     *  
+     *
      * @return  The remote sdp.
      */
     public String getRemoteSdp() throws android.os.RemoteException;
@@ -98,7 +98,7 @@ public interface ISipSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -106,7 +106,7 @@ public interface ISipSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -118,7 +118,7 @@ public interface ISipSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i sip session.
          */

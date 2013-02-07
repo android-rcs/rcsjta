@@ -27,7 +27,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -37,7 +37,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -48,7 +48,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -70,7 +70,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -79,7 +79,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isStarted() {
@@ -88,7 +88,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Adds a listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addListener(org.gsma.rcs.media.IMediaEventListener arg1) {
@@ -104,7 +104,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the video width.
-     *  
+     *
      * @return  The video width.
      */
     public int getVideoWidth() {
@@ -113,7 +113,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the video height.
-     *  
+     *
      * @return  The video height.
      */
     public int getVideoHeight() {
@@ -122,7 +122,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Sets the media codec.
-     *  
+     *
      * @param arg1 The media codec.
      */
     public void setMediaCodec(org.gsma.rcs.media.MediaCodec arg1) {
@@ -131,7 +131,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Sets the video surface.
-     *  
+     *
      * @param arg1 The video surface.
      */
     public void setVideoSurface(VideoSurfaceView arg1) {
@@ -140,7 +140,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the video start time.
-     *  
+     *
      * @return  The video start time.
      */
     public long getVideoStartTime() {
@@ -149,7 +149,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the local rtp port.
-     *  
+     *
      * @return  The local rtp port.
      */
     public int getLocalRtpPort() {
@@ -157,7 +157,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean isOpened() {
@@ -166,7 +166,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the supported media codecs.
-     *  
+     *
      * @return  The supported media codecs array.
      */
     public org.gsma.rcs.media.MediaCodec[] getSupportedMediaCodecs() {
@@ -175,7 +175,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the media codec.
-     *  
+     *
      * @return  The media codec.
      */
     public org.gsma.rcs.media.MediaCodec getMediaCodec() {
@@ -184,7 +184,7 @@ public class PrerecordedVideoPlayer extends org.gsma.rcs.media.IMediaPlayer.Stub
 
     /**
      * Returns the video duration.
-     *  
+     *
      * @return  The video duration.
      */
     public long getVideoDuration() {

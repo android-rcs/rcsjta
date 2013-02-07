@@ -30,7 +30,7 @@ public class SipSessionError extends org.gsma.rcs.session.ImsSessionBasedService
 
     /**
      * Creates a new instance of SipSessionError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public SipSessionError(org.gsma.rcs.session.ImsServiceError arg1) {
@@ -39,7 +39,7 @@ public class SipSessionError extends org.gsma.rcs.session.ImsSessionBasedService
 
     /**
      * Creates a new instance of SipSessionError.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public SipSessionError(int arg1) {
@@ -48,7 +48,7 @@ public class SipSessionError extends org.gsma.rcs.session.ImsSessionBasedService
 
     /**
      * Creates a new instance of SipSessionError.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

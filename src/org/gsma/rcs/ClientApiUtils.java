@@ -44,7 +44,7 @@ public class ClientApiUtils {
     }
 
     /**
-     *  
+     *
      * @param ctx Application context
      * @return <code>true</code> is the RCS service stack is running (in background), otherwise, returns <code>false</code>
      */
@@ -53,7 +53,7 @@ public class ClientApiUtils {
     }
 
     /**
-     *  
+     *
      * @param ctx Application context
      */
     public static void startRcsService(android.content.Context ctx) {
@@ -61,7 +61,7 @@ public class ClientApiUtils {
     }
 
     /**
-     *  
+     *
      * @param ctx Application context
      */
     public static void stopRcsService(android.content.Context ctx) {

@@ -27,7 +27,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Creates a new instance of VideoSurfaceView.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public VideoSurfaceView(android.content.Context arg1) {
@@ -36,7 +36,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Creates a new instance of VideoSurfaceView.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */
@@ -46,7 +46,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Creates a new instance of VideoSurfaceView.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -61,7 +61,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Sets the aspect ratio.
-     *  
+     *
      * @param arg1 The aspect ratio.
      * @param arg2 The aspect ratio.
      */
@@ -71,7 +71,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Sets the aspect ratio.
-     *  
+     *
      * @param arg1 The aspect ratio.
      */
     public void setAspectRatio(float arg1) {
@@ -80,7 +80,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
 
     /**
      * Sets the image.
-     *  
+     *
      * @param arg1 The image.
      */
     public void setImage(android.graphics.Bitmap arg1) {
@@ -88,7 +88,7 @@ public class VideoSurfaceView extends android.view.SurfaceView {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      */

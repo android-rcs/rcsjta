@@ -34,7 +34,7 @@ public class RichCallProvider extends android.content.ContentProvider {
 
     /**
      * Returns the type.
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The type.
      */
@@ -43,7 +43,7 @@ public class RichCallProvider extends android.content.ContentProvider {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3 array.
@@ -54,7 +54,7 @@ public class RichCallProvider extends android.content.ContentProvider {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The uri.
@@ -64,7 +64,7 @@ public class RichCallProvider extends android.content.ContentProvider {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2 array.
      * @param arg3 The arg3.
@@ -77,7 +77,7 @@ public class RichCallProvider extends android.content.ContentProvider {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -89,7 +89,7 @@ public class RichCallProvider extends android.content.ContentProvider {
     }
 
     /**
-     *  
+     *
      * @return  The boolean.
      */
     public boolean onCreate() {

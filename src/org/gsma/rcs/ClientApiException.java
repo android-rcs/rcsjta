@@ -25,7 +25,7 @@ public class ClientApiException extends Exception {
 
     /**
      * Creates a new instance of ClientApiException.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public ClientApiException(String arg1) {

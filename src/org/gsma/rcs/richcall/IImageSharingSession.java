@@ -22,42 +22,42 @@ package org.gsma.rcs.richcall;
 public interface IImageSharingSession extends android.os.IInterface {
     /**
      * Returns the session i d.
-     *  
+     *
      * @return  The session i d.
      */
     public String getSessionID() throws android.os.RemoteException;
 
     /**
      * Returns the remote contact.
-     *  
+     *
      * @return  The remote contact.
      */
     public String getRemoteContact() throws android.os.RemoteException;
 
     /**
      * Returns the session state.
-     *  
+     *
      * @return  The session state.
      */
     public int getSessionState() throws android.os.RemoteException;
 
     /**
      * Returns the filename.
-     *  
+     *
      * @return  The filename.
      */
     public String getFilename() throws android.os.RemoteException;
 
     /**
      * Returns the filesize.
-     *  
+     *
      * @return  The filesize.
      */
     public long getFilesize() throws android.os.RemoteException;
 
     /**
      * Returns the file thumbnail.
-     *  
+     *
      * @return  The file thumbnail.
      */
     public String getFileThumbnail() throws android.os.RemoteException;
@@ -70,14 +70,14 @@ public interface IImageSharingSession extends android.os.IInterface {
 
     /**
      * Adds a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void addSessionListener(IImageSharingEventListener arg1) throws android.os.RemoteException;
 
     /**
      * Removes a session listener.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public void removeSessionListener(IImageSharingEventListener arg1) throws android.os.RemoteException;
@@ -94,7 +94,7 @@ public interface IImageSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -102,7 +102,7 @@ public interface IImageSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -114,7 +114,7 @@ public interface IImageSharingSession extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i image sharing session.
          */

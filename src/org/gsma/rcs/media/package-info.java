@@ -10,7 +10,7 @@
  *
  * The supported video encodings are H.263+ and H.264 in low quality
  * (QCIF).
- * 
+ *
  * This API contains by default the following media entities which may
  * be completely replaced by another implementation (e.g. native
  * implementation using hardware codecs) without any impact in the RCS
@@ -19,11 +19,11 @@
  * A live video player using the Camera.
  * A pre-recorder video player.
  * A video renderer.
- * 
+ *
  * The default video codec are software codecs implemented in C++
  * (source code from Android “opencore” framework) and integrated by
  * using a JNI interface.
- * 
+ *
  * Optimization from last API release: the RTP transport layer is part
  * of the media player or renderer in order to avoid to pass each RTP
  * sample via the AIDL interface to the RCS stack.

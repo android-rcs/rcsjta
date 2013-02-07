@@ -21,7 +21,7 @@ package org.gsma.rcs.terms;
  */
 public interface ITermsApi extends android.os.IInterface {
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The boolean.
@@ -29,7 +29,7 @@ public interface ITermsApi extends android.os.IInterface {
     public boolean acceptTerms(String arg1, String arg2) throws android.os.RemoteException;
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @return  The boolean.
@@ -48,7 +48,7 @@ public interface ITermsApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @return  The i binder.
          */
         public android.os.IBinder asBinder() {
@@ -56,7 +56,7 @@ public interface ITermsApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @param arg2 The arg2.
          * @param arg3 The arg3.
@@ -68,7 +68,7 @@ public interface ITermsApi extends android.os.IInterface {
         }
 
         /**
-         *  
+         *
          * @param arg1 The arg1.
          * @return  The i terms api.
          */

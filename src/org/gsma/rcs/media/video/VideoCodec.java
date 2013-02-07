@@ -22,7 +22,7 @@ package org.gsma.rcs.media.video;
 public class VideoCodec {
     /**
      * Creates a new instance of VideoCodec.
-     *  
+     *
      * @param arg1 The arg1.
      * @param arg2 The arg2.
      * @param arg3 The arg3.
@@ -38,7 +38,7 @@ public class VideoCodec {
 
     /**
      * Creates a new instance of VideoCodec.
-     *  
+     *
      * @param arg1 The arg1.
      */
     public VideoCodec(org.gsma.rcs.media.MediaCodec arg1) {
@@ -46,7 +46,7 @@ public class VideoCodec {
     }
 
     /**
-     *  
+     *
      * @return  The string.
      */
     public String toString() {
@@ -54,7 +54,7 @@ public class VideoCodec {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1.
      * @return  The boolean.
      */
@@ -64,7 +64,7 @@ public class VideoCodec {
 
     /**
      * Returns the width.
-     *  
+     *
      * @return  The width.
      */
     public int getWidth() {
@@ -73,7 +73,7 @@ public class VideoCodec {
 
     /**
      * Returns the height.
-     *  
+     *
      * @return  The height.
      */
     public int getHeight() {
@@ -82,7 +82,7 @@ public class VideoCodec {
 
     /**
      * Returns the payload.
-     *  
+     *
      * @return  The payload.
      */
     public int getPayload() {
@@ -91,7 +91,7 @@ public class VideoCodec {
 
     /**
      * Returns the media codec.
-     *  
+     *
      * @return  The media codec.
      */
     public org.gsma.rcs.media.MediaCodec getMediaCodec() {
@@ -100,7 +100,7 @@ public class VideoCodec {
 
     /**
      * Returns the codec name.
-     *  
+     *
      * @return  The codec name.
      */
     public String getCodecName() {
@@ -109,7 +109,7 @@ public class VideoCodec {
 
     /**
      * Returns the clock rate.
-     *  
+     *
      * @return  The clock rate.
      */
     public int getClockRate() {
@@ -118,7 +118,7 @@ public class VideoCodec {
 
     /**
      * Returns the codec params.
-     *  
+     *
      * @return  The codec params.
      */
     public String getCodecParams() {
@@ -127,7 +127,7 @@ public class VideoCodec {
 
     /**
      * Returns the framerate.
-     *  
+     *
      * @return  The framerate.
      */
     public int getFramerate() {
@@ -136,7 +136,7 @@ public class VideoCodec {
 
     /**
      * Returns the bitrate.
-     *  
+     *
      * @return  The bitrate.
      */
     public int getBitrate() {
@@ -144,7 +144,7 @@ public class VideoCodec {
     }
 
     /**
-     *  
+     *
      * @param arg1 The arg1 array.
      * @param arg2 The arg2.
      * @return  The boolean.

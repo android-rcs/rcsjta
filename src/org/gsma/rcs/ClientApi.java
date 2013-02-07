@@ -42,7 +42,7 @@ public abstract class ClientApi {
 
     /**
      * Creates a new instance of ClientApi.
-     *  
+     *
      * @param ctx Application context
      */
     public ClientApi(android.content.Context ctx) {
@@ -59,7 +59,7 @@ public abstract class ClientApi {
 
     /**
      * Adds a api event listener.
-     *  
+     *
      * @param listener
      */
     public void addApiEventListener(ClientApiListener listener) {
@@ -68,7 +68,7 @@ public abstract class ClientApi {
 
     /**
      * Removes a api event listener.
-     *  
+     *
      * @param listener
      */
     public void removeApiEventListener(ClientApiListener listener) {
@@ -77,7 +77,7 @@ public abstract class ClientApi {
 
     /**
      * Adds a ims event listener.
-     *  
+     *
      * @param listener
      */
     public void addImsEventListener(ImsEventListener listener) {
@@ -86,7 +86,7 @@ public abstract class ClientApi {
 
     /**
      * Removes a ims event listener.
-     *  
+     *
      * @param listener
      */
     public void removeImsEventListener(ImsEventListener listener) {
@@ -101,7 +101,7 @@ public abstract class ClientApi {
     }
 
     /**
-     *  
+     *
      * @param ctx Application context
      * @return  The boolean.
      */
