@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,97 +16,100 @@
 
 package org.gsma.rcs.richcall;
 
+import android.net.Uri;
+
 /**
  * Class RichCallData.
  */
 public class RichCallData {
-    /**
-     * Constant CONTENT_URI.
-     */
-    public static final android.net.Uri CONTENT_URI = null;
 
     /**
-     * Constant KEY_ID.
+     * Rich call 
+     */
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.rcs.csh/csh");
+
+    /**
+     * Column name KEY_ID.
      */
     public static final String KEY_ID = "_id";
 
     /**
-     * Constant KEY_CONTACT.
+     * Column name KEY_CONTACT.
      */
     public static final String KEY_CONTACT = "contact";
 
     /**
-     * Constant KEY_DESTINATION.
+     * Column name KEY_DESTINATION.
      */
     public static final String KEY_DESTINATION = "destination";
 
     /**
-     * Constant KEY_MIME_TYPE.
+     * Column name KEY_MIME_TYPE.
      */
     public static final String KEY_MIME_TYPE = "mime_type";
 
     /**
-     * Constant KEY_NAME.
+     * Column name KEY_NAME.
      */
     public static final String KEY_NAME = "name";
 
     /**
-     * Constant KEY_SIZE.
+     * Column name KEY_SIZE.
      */
     public static final String KEY_SIZE = "size";
 
     /**
-     * Constant KEY_DATA.
+     * Column name KEY_DATA.
      */
     public static final String KEY_DATA = "_data";
 
     /**
-     * Constant KEY_TIMESTAMP.
+     * Column name KEY_TIMESTAMP.
      */
     public static final String KEY_TIMESTAMP = "_date";
 
     /**
-     * Constant KEY_NUMBER_MESSAGES.
+     * Column name KEY_NUMBER_MESSAGES.
      */
     public static final String KEY_NUMBER_MESSAGES = "number_of_messages";
 
     /**
-     * Constant KEY_STATUS.
+     * Column name KEY_STATUS.
      */
     public static final String KEY_STATUS = "status";
 
     /**
-     * Constant KEY_SESSION_ID.
+     * Column name KEY_SESSION_ID.
      */
     public static final String KEY_SESSION_ID = "sessionId";
 
     /**
-     * Constant EVENT_INCOMING.
+     * Event direction EVENT_INCOMING.
      */
     public static final int EVENT_INCOMING = 1;
 
     /**
-     * Constant EVENT_OUTGOING.
+     * Event direction EVENT_OUTGOING.
      */
     public static final int EVENT_OUTGOING = 2;
 
     /**
-     * Constant STATUS_STARTED.
+     * Status value STATUS_STARTED.
      */
     public static final int STATUS_STARTED = 0;
 
     /**
-     * Constant STATUS_FAILED.
+     * Status value STATUS_FAILED.
      */
     public static final int STATUS_FAILED = 2;
 
     /**
-     * Constant STATUS_CANCELED.
+     * Status value STATUS_CANCELED.
      */
     public static final int STATUS_CANCELED = 20;
 
     /**
-     * Constant STATUS_TERMINATED.
+     * Status value STATUS_TERMINATED.
      */
     public static final int STATUS_TERMINATED = 1;
 
@@ -117,4 +120,4 @@ public class RichCallData {
 
     }
 
-} // end RichCallData
+}

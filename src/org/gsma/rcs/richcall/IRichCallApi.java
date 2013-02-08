@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,67 +20,71 @@ package org.gsma.rcs.richcall;
  * Class IRichCallApi.
  */
 public interface IRichCallApi extends android.os.IInterface {
+
     /**
-     * Returns the remote phone number.
+     * Returns the remote phone number involved in the current call
      *
      * @return  The remote phone number.
      */
     public String getRemotePhoneNumber() throws android.os.RemoteException;
 
     /**
+     *	Initiate a live video sharing session
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param contact The contact.
+     * @param player The player.
      * @return  The i video sharing session.
      */
-    public IVideoSharingSession initiateLiveVideoSharing(String arg1, org.gsma.rcs.media.IMediaPlayer arg2) throws android.os.RemoteException;
+    public IVideoSharingSession initiateLiveVideoSharing(String contact, org.gsma.rcs.media.IMediaPlayer player) throws android.os.RemoteException;
 
     /**
+     * Initiate a pre-recorded video sharing session
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
+     * @param contact The contact.
+     * @param file The file.
+     * @param player The player
      * @return  The i video sharing session.
      */
-    public IVideoSharingSession initiateVideoSharing(String arg1, String arg2, org.gsma.rcs.media.IMediaPlayer arg3) throws android.os.RemoteException;
+    public IVideoSharingSession initiateVideoSharing(String contact, String file, org.gsma.rcs.media.IMediaPlayer player) throws android.os.RemoteException;
 
     /**
-     * Returns the video sharing session.
+     *	Get the current video sharing session from its session ID
      *
-     * @param arg1 The arg1.
+     * @param id The id.
      * @return  The video sharing session.
      */
-    public IVideoSharingSession getVideoSharingSession(String arg1) throws android.os.RemoteException;
+    public IVideoSharingSession getVideoSharingSession(String id) throws android.os.RemoteException;
 
     /**
+     *	Initiate an image sharing session
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param contact The contact.
+     * @param file The file.
      * @return  The i image sharing session.
      */
-    public IImageSharingSession initiateImageSharing(String arg1, String arg2) throws android.os.RemoteException;
+    public IImageSharingSession initiateImageSharing(String contact, String file) throws android.os.RemoteException;
 
     /**
      * Returns the image sharing session.
      *
-     * @param arg1 The arg1.
+     * @param id The id.
      * @return  The image sharing session.
      */
-    public IImageSharingSession getImageSharingSession(String arg1) throws android.os.RemoteException;
+    public IImageSharingSession getImageSharingSession(String id) throws android.os.RemoteException;
 
     /**
      * Sets the multi party call.
      *
-     * @param arg1 The multi party call.
+     * @param flag The multi party call.
      */
-    public void setMultiPartyCall(boolean arg1) throws android.os.RemoteException;
+    public void setMultiPartyCall(boolean flag) throws android.os.RemoteException;
 
     /**
      * Sets the call hold.
      *
-     * @param arg1 The call hold.
+     * @param flag The call hold.
      */
-    public void setCallHold(boolean arg1) throws android.os.RemoteException;
+    public void setCallHold(boolean flag) throws android.os.RemoteException;
 
     /**
      * Class Stub.

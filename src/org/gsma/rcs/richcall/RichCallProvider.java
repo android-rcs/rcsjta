@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,12 +16,19 @@
 
 package org.gsma.rcs.richcall;
 
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import java.lang.String;
+
 /**
- * Class RichCallProvider.
+ * Rich call content provider
  */
-public class RichCallProvider extends android.content.ContentProvider {
+public class RichCallProvider extends ContentProvider {
+
     /**
-     * Constant TABLE.
+     * Database table name
      */
     public static final String TABLE = "csh";
 
@@ -35,56 +42,52 @@ public class RichCallProvider extends android.content.ContentProvider {
     /**
      * Returns the type.
      *
-     * @param arg1 The arg1.
+     * @param uri
      * @return  The type.
      */
-    public String getType(android.net.Uri arg1) {
-        return (java.lang.String) null;
+    public String getType(Uri uri) {
+        return (String) null;
     }
 
     /**
-     *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3 array.
+     * @param uri
+     * @param where
+     * @param whereArgs
      * @return  The int.
      */
-    public int delete(android.net.Uri arg1, String arg2, String[] arg3) {
+    public int delete(Uri uri, String where, String[] whereArgs) {
         return 0;
     }
 
     /**
-     *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @return  The uri.
+     * @param uri
+     * @param initialValues
+     * @return C
      */
-    public android.net.Uri insert(android.net.Uri arg1, android.content.ContentValues arg2) {
-        return (android.net.Uri) null;
+    public Uri insert(Uri uri, ContentValues initialValues) {
+        return (Uri) null;
     }
 
     /**
-     *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2 array.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
-     * @param arg5 The arg5.
+     * @param uri
+     * @param projectionIn
+     * @param selection
+     * @param selectionArgs
+     * @param sort
      * @return  The cursor.
      */
-    public android.database.Cursor query(android.net.Uri arg1, String[] arg2, String arg3, String[] arg4, String arg5) {
-        return (android.database.Cursor) null;
+    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
+        return (Cursor) null;
     }
 
     /**
-     *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
+     * @param uri
+     * @param values
+     * @param where
+     * @param whereArgs
      * @return  The int.
      */
-    public int update(android.net.Uri arg1, android.content.ContentValues arg2, String arg3, String[] arg4) {
+    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
         return 0;
     }
 
@@ -96,4 +99,4 @@ public class RichCallProvider extends android.content.ContentProvider {
         return false;
     }
 
-} // end RichCallProvider
+}
