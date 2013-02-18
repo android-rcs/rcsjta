@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,22 +17,23 @@
 package org.gsma.rcs.session;
 
 /**
- * Class SessionTerminationReason.
+ * RCS session termination reason
  */
 public interface SessionTerminationReason {
+
     /**
-     * Constant SYSTEM.
+     * Session terminated by the system
      */
     public static final int SYSTEM = 0;
 
     /**
-     * Constant USER.
+     * Session terminated by the user
      */
     public static final int USER = 1;
 
     /**
-     * Constant TIMEOUT.
+     * Session timeout
      */
     public static final int TIMEOUT = 2;
 
-} // end SessionTerminationReason
+}

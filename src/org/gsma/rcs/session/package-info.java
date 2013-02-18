@@ -1,4 +1,6 @@
 /**
+ * Joyn (RCS), IMS and SIP session tools
+ * <p>
  * This API permits to implement new additional IMS services without
  * any impact in the RCS stack. This generic SIP API manages only the
  * signaling flow and is independent from the media part which should
@@ -32,5 +34,19 @@
  * <p>
  * 5. If the incoming session is accepted, the SIP API permits to
  * manage the session: session update, terminate the session.
+ * <p>
+ * This package manages the SIP session on behalf of the
+ * application. The application does not manually manages the SIP
+ * session through this API. For instance, most mechanisms are
+ * listeners to react on state changes and getter methods to query the
+ * state of the session. There are not setter methods.
+ * <p>
+ * This is comparable to the Android VoIP API, see
+ * <code>android.net.sip.SipManager</code> and
+ * <code>android.net.sip.ISipSession</code> and
+ * <p>
+ * The "SIP API" and "Session API" names are confusing, "Extended
+ * Service API" is a possible alternative.
  */
+
 package org.gsma.rcs.session;

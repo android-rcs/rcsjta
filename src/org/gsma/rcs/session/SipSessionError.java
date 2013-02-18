@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -16,44 +16,47 @@
 
 package org.gsma.rcs.session;
 
+import org.gsma.rcs.session.ImsSessionBasedServiceError;
+import org.gsma.rcs.session.ImsServiceError;
+
 /**
- * Class SipSessionError.
+ * SIP session errors constants and utilities
  */
-public class SipSessionError extends org.gsma.rcs.session.ImsSessionBasedServiceError {
+public class SipSessionError extends ImsSessionBasedServiceError {
 	
 	static final long serialVersionUID = 1L;
 
     /**
-     * Constant SDP_NOT_INITIALIZED.
+     * Session Description Protocol (SDP) not initialized
      */
     public static final int SDP_NOT_INITIALIZED = 141;
 
     /**
-     * Creates a new instance of SipSessionError.
+     * Creates a SIP session error object using an IMS error
      *
-     * @param arg1 The arg1.
+     * @param error IMS session error object
      */
-    public SipSessionError(org.gsma.rcs.session.ImsServiceError arg1) {
-        super((org.gsma.rcs.session.ImsServiceError) null);
+    public SipSessionError(ImsServiceError error) {
+        super((ImsServiceError) Null);
     }
 
     /**
-     * Creates a new instance of SipSessionError.
+     * Creates a SIP session error using an IMS error code
      *
-     * @param arg1 The arg1.
+     * @param code Error error code
      */
-    public SipSessionError(int arg1) {
-        super((org.gsma.rcs.session.ImsServiceError) null);
+    public SipSessionError(int code) {
+        super((ImsServiceError) null);
     }
 
     /**
-     * Creates a new instance of SipSessionError.
+     * Creates a SIP session error using an IMS error code and an error message
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param errorCode Error IMS error code
+     * @param message Error message
      */
-    public SipSessionError(int arg1, String arg2) {
-        super((org.gsma.rcs.session.ImsServiceError) null);
+    public SipSessionError(int errorCode, String message) {
+        super((ImsServiceError) null);
     }
 
 }

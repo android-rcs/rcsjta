@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,56 +16,57 @@
 
 package org.gsma.rcs;
 
-/**
- * Class IImsApi.
- */
-public interface IImsApi extends android.os.IInterface {
-    /**
-     *
-     * @return  The boolean.
-     */
-    public boolean isImsConnected() throws android.os.RemoteException;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
+import android.os.RemoteException;
 
-    /**
-     * Class Stub.
-     */
-    public abstract static class Stub extends android.os.Binder implements IImsApi {
-        /**
-         * Creates a new instance of Stub.
-         */
+/**
+ * IMS API Interface
+ * <p>
+ * File generated from AIDL
+ */
+public interface IImsApi extends IInterface {
+
+    public abstract static class Stub extends Binder implements IImsApi {
+
         public Stub() {
             super();
         }
 
-        /**
-         *
-         * @return  The i binder.
-         */
-        public android.os.IBinder asBinder() {
-            return (android.os.IBinder) null;
+        public IBinder asBinder() {
+            return (IBinder) null;
         }
 
         /**
          *
-         * @param arg1 The arg1.
-         * @param arg2 The arg2.
-         * @param arg3 The arg3.
-         * @param arg4 The arg4.
-         * @return  The boolean.
+         * @param code
+         * @param data
+         * @param reply
+         * @param flags
+         * @return true if tansaction complete, false otherwise
          */
-        public boolean onTransact(int arg1, android.os.Parcel arg2, android.os.Parcel arg3, int arg4) throws android.os.RemoteException {
+
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
             return false;
         }
-
         /**
+         * Cast an IBinder object into an ISipApi interface
          *
-         * @param arg1 The arg1.
-         * @return  The i ims api.
+         * @param binder the IBinder
+         * @return  The IMS API object
          */
-        public static IImsApi asInterface(android.os.IBinder arg1) {
+        public static IImsApi asInterface(IBinder binder) {
             return (IImsApi) null;
         }
 
-    } // end Stub
+    }
 
-} // end IImsApi
+    /**
+     *
+     * @return  The status of the IMS connection
+     */
+    public boolean isImsConnected() throws RemoteException;
+
+}

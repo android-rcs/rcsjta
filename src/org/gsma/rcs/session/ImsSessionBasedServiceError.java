@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,73 +17,73 @@
 package org.gsma.rcs.session;
 
 /**
- * Class ImsSessionBasedServiceError.
+ * IMS session errors constants and utilities
  */
 public class ImsSessionBasedServiceError extends ImsServiceError {
 	
 	static final long serialVersionUID = 1L;
 
     /**
-     * Constant SESSION_INITIATION_FAILED.
+     * Session initiation failure
      */
     public static final int SESSION_INITIATION_FAILED = 101;
 
     /**
-     * Constant SESSION_INITIATION_DECLINED.
+     * Session initiation declined by peer
      */
     public static final int SESSION_INITIATION_DECLINED = 102;
 
     /**
-     * Constant SESSION_INITIATION_CANCELLED.
+     * Session initiation cancelled
      */
     public static final int SESSION_INITIATION_CANCELLED = 103;
 
     /**
-     * Constant CHAT_ERROR_CODES.
+     * Chat error
      */
     protected static final int CHAT_ERROR_CODES = 0;
 
     /**
-     * Constant FT_ERROR_CODES.
+     * File transfer error
      */
     protected static final int FT_ERROR_CODES = 0;
 
     /**
-     * Constant RICHCALL_ERROR_CODES.
+     * Rich call error
      */
     protected static final int RICHCALL_ERROR_CODES = 0;
 
     /**
-     * Constant SIP_ERROR_CODES.
+     * SIP error
      */
     protected static final int SIP_ERROR_CODES = 0;
 
     /**
-     * Creates a new instance of ImsSessionBasedServiceError.
+     * Creates an IMS session error using an IMS service error object
      *
-     * @param arg1 The arg1.
+     * @param error The IMS Service error
      */
-    public ImsSessionBasedServiceError(ImsServiceError arg1) {
+    public ImsSessionBasedServiceError(ImsServiceError error) {
         super(0);
     }
 
     /**
-     * Creates a new instance of ImsSessionBasedServiceError.
+     * Creates a IMS session error using an IMS service code error
      *
-     * @param arg1 The arg1.
+     * @param code The IMS error code
      */
-    public ImsSessionBasedServiceError(int arg1) {
+    public ImsSessionBasedServiceError(int code) {
         super(0);
     }
 
     /**
-     * Creates a new instance of ImsSessionBasedServiceError.
+     * Creates a IMS session error using an IMS service code error and a message
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param code IMS error code
+     * @param message Error message
      */
-    public ImsSessionBasedServiceError(int arg1, String arg2) {
+    public ImsSessionBasedServiceError(int code, String message) {
         super(0);
     }
 
-} // end ImsSessionBasedServiceError
+}
