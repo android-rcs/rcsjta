@@ -22,7 +22,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import java.lang.String;
-import java.lang.List;
+import java.util.List;
 
 /**
  * SIP session interface

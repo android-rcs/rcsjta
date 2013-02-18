@@ -60,6 +60,8 @@ public interface ISipSession extends IInterface {
             return (ISipSession) null;
         }
 
+    }
+
     /**
      * Returns the session i d.
      *
@@ -125,7 +127,5 @@ public interface ISipSession extends IInterface {
      * @return  The remote sdp.
      */
     public String getRemoteSdp() throws RemoteException;
-
-    }
 
 }

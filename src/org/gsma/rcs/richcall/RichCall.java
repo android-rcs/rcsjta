@@ -16,6 +16,9 @@
 
 package org.gsma.rcs.richcall;
 
+import android.content.Context;
+import android.net.Uri;
+
 /**
  * Rich call history. This content provider removes old messages if there is no enough space.
  */
@@ -39,14 +42,16 @@ public class RichCall {
 
 	/**
 	 * Add a new entry in the call history 
-	 * 
+	 * <p>
+   * FIXME: java.lang.object should be a MmContent object - missed import from Orange RCS stack
+   * 
 	 * @param contact Remote contact
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
-	 * @param status Call status
+	 * @param status Call status   
 	 */
-    public Uri addCall(String contact, String sessionId, int direction, MmContent content, int status) {
+    public Uri addCall(String contact, String sessionId, int direction, java.lang.Object content, int status) {
         return (Uri) null;
     }
 

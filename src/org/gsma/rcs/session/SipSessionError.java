@@ -37,7 +37,7 @@ public class SipSessionError extends ImsSessionBasedServiceError {
      * @param error IMS session error object
      */
     public SipSessionError(ImsServiceError error) {
-        super((ImsServiceError) Null);
+        super((ImsServiceError) null);
     }
 
     /**
