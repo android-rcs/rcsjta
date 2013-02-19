@@ -157,8 +157,10 @@ echo "Found "`echo $PACKAGES | wc -l `" packages"
 export JAVA_HOME PATH DOCLET_MAIN PATH_DOCLET_JAR JAVADOC
 
 echo "Running JavaDoc"
+set -x
 # Run
 $JAVADOC -doclet $DOCLET_MAIN -docletpath $PATH_DOCLET_JAR -pdf $OUTPUT -config $CUSTOM_CONF -sourcepath $SRCDIR $PACKAGES
+set +x
 
 echo "JavaDoc finished with exit status "$?
 

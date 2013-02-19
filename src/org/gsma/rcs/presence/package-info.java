@@ -11,4 +11,4 @@
  * FavoriteLink
  * Geoloc
  */
-package  org.gsma.rcs.presence;
+package org.gsma.rcs.presence;

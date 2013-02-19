@@ -28,7 +28,6 @@
         classpath="${android_jar}:${project.all.jars.path}" 
         sourcepath="src"
         packagenames="${project.app.package}.*" 
-        source="1.5"
         >
     </javadoc>
     <copy file="docs-assets/android-developer-core.css" todir="docs"/>
@@ -57,9 +56,24 @@
 
   </target>
 
+  <target name="pdf" description="GSMA RCS API Documentation PDF">
+    <echo>Generate PDF documentation</echo>
+
+    <javadoc        
+      verbose="on"
+      doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
+      docletpath="pdfdoclet-1.0.2-all.jar"
+      sourcepath="src"
+      classpath="${android_jar}:${project.all.jars.path}" 
+      packagenames="${project.app.package}.*"
+      access="public"
+      create.links="on"
+    >
+      <doclet>
+        <param name="-pdf" value="rcsjta.pdf"></param>
+      </doclet>
+    </javadoc>
+  </target>
 
 </project>
 
-<!--
-        stylesheetfile="docs-assets/android-developer-docs.css"
--->

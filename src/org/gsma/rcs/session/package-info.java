@@ -48,5 +48,4 @@
  * The "SIP API" and "Session API" names are confusing, "Extended
  * Service API" is a possible alternative.
  */
-
 package org.gsma.rcs.session;

@@ -9,4 +9,4 @@
  * Conference event monitoring (“someone has joined the session”, “someone has left the session”).
  * Rejoin an existing group chat session.
  */
-package src.org.gsma.rcs.messaging;
+package org.gsma.rcs.messaging;

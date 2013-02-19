@@ -8,3 +8,8 @@ Edit local.properties, adjust the value of sdk.dir to the path of your local ins
 
 ant relase 
 ant -f build-local.xml docs
+
+Generate pdf - Do not forget the slash (/) after the src dir, fails otherwise
+
+./gen-pdf-javadoc-pdfdoclet.sh src/ rcsjta.pdf
+
