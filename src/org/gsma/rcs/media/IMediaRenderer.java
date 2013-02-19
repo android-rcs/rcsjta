@@ -82,7 +82,14 @@ public interface IMediaRenderer extends android.os.IInterface {
             return (IMediaRenderer) null;
         }
 
-        public boolean onTransact(int arg1, android.os.Parcel arg2, android.os.Parcel arg3, int arg4) throws android.os.RemoteException{
+        /**
+         * @param code
+         * @param data
+         * @param reply
+         * @param flags
+         * @return true if the transaction is complete, false otherwise
+         */
+        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException{
             return false;
         }
 

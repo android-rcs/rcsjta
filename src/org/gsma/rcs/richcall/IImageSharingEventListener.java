@@ -70,13 +70,13 @@ public interface IImageSharingEventListener extends android.os.IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
-         * @param arg2 The arg2.
-         * @param arg3 The arg3.
-         * @param arg4 The arg4.
+         * @param code
+         * @param data
+         * @param reply
+         * @param flags
          * @return  The boolean.
          */
-        public boolean onTransact(int arg1, android.os.Parcel arg2, android.os.Parcel arg3, int arg4) throws android.os.RemoteException {
+        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException {
             return false;
         }
 

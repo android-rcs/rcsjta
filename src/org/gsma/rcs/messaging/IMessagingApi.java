@@ -42,7 +42,7 @@ public interface IMessagingApi
     public static IMessagingApi asInterface(android.os.IBinder arg1){
       return (IMessagingApi) null;
     }
-    public boolean onTransact(int arg1, android.os.Parcel arg2, android.os.Parcel arg3, int arg4) throws android.os.RemoteException{
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException{
       return false;
     }
   }
