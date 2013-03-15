@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
  android:versionCode="1"
  android:versionName="2.4.12"
- package="org.gsma.rcs">
+ package="org.gsma.joyn">
       
 	<uses-sdk android:minSdkVersion="5"
 		android:targetSdkVersion="15"/>
@@ -29,14 +29,14 @@
 	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
 	 
-	<uses-permission android:name="org.gsma.rcs.permission.RCS"/>	
+	<uses-permission android:name="org.gsma.joyn.permission.RCS"/>	
 	 
-	<permission android:name="org.gsma.rcs.permission.RCS"
+	<permission android:name="org.gsma.joyn.permission.RCS"
         android:label="@string/rcs_core_permission"
         android:description="@string/rcs_core_permission_desc"
         android:protectionLevel="normal" />	 
  
-	<permission android:name="org.gsma.rcs.permission.RCS_EXTENSION"
+	<permission android:name="org.gsma.joyn.permission.RCS_EXTENSION"
         android:label="@string/rcs_core_permission_ext"
         android:description="@string/rcs_core_permission_ext_desc"
         android:protectionLevel="normal" />	 
@@ -50,20 +50,20 @@
 		<!-- the following meta-data is used to provide the value of the intent action that
 		 can be used by other applications to start the joyn client settings screen -->
 		<meta-data android:name="gsma.joyn.settings.activity"
-			android:value="org.gsma.rcs.SETTINGS" />
+			android:value="org.gsma.joyn.SETTINGS" />
 
 		<!-- RCS service -->	
 
-		<service android:name="org.gsma.rcs.service.RcsCoreService">  
+		<service android:name="org.gsma.joyn.service.RcsCoreService">  
 	        <intent-filter>
-	            <action android:name="org.gsma.rcs.SERVICE"/>
-	            <action android:name="org.gsma.rcs.service.api.client.IImsApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.terms.ITermsApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.capability.ICapabilityApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.presence.IPresenceApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.messaging.IMessagingApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.richcall.IRichCallApi"/>
-	            <action android:name="org.gsma.rcs.service.api.client.sip.ISipApi"/>	            
+	            <action android:name="org.gsma.joyn.SERVICE"/>
+	            <action android:name="org.gsma.joyn.service.api.client.IImsApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.terms.ITermsApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.capability.ICapabilityApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.presence.IPresenceApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.messaging.IMessagingApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.richcall.IRichCallApi"/>
+	            <action android:name="org.gsma.joyn.service.api.client.sip.ISipApi"/>	            
 	        </intent-filter>
 	    </service>
 	
@@ -73,7 +73,7 @@
 			android:icon="@drawable/rcs_icon"
 			android:label="@string/rcs_settings_title_settings"
 			android:launchMode="singleInstance"
-			android:name="org.gsma.rcs.settings.RcsSettings"
+			android:name="org.gsma.joyn.settings.RcsSettings"
 		  	android:process=":settings" 
 			>
             <intent-filter>
@@ -84,28 +84,28 @@
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.gsma.rcs.SETTINGS"/>                
+                <action android:name="org.gsma.joyn.SETTINGS"/>                
             </intent-filter>            
  		</activity>
 
-		<activity android:name="org.gsma.rcs.settings.AboutDisplay"
+		<activity android:name="org.gsma.joyn.settings.AboutDisplay"
 		  	android:process=":settings" />
 
-		<activity android:name="org.gsma.rcs.settings.UserprofileRcsSettings"
+		<activity android:name="org.gsma.joyn.settings.UserprofileRcsSettings"
 		  	android:process=":settings" />
 
-		<activity android:name="org.gsma.rcs.settings.PresenceRcsSettings"
+		<activity android:name="org.gsma.joyn.settings.PresenceRcsSettings"
 		  	android:process=":settings" />
 
-		<activity android:name="org.gsma.rcs.settings.CShRcsSettings"
+		<activity android:name="org.gsma.joyn.settings.CShRcsSettings"
 		  	android:process=":settings" />
 
-		<activity android:name="org.gsma.rcs.settings.MessagingRcsSettings"
+		<activity android:name="org.gsma.joyn.settings.MessagingRcsSettings"
 		  	android:process=":settings" />
 
  		<!-- RCS account: authenticator service for user's account information -->
 
-        <service android:exported="true" android:name="org.gsma.rcs.addressbook.AuthenticationService">
+        <service android:exported="true" android:name="org.gsma.joyn.addressbook.AuthenticationService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
@@ -114,7 +114,7 @@
 
         <!-- RCS account: sync adapter service -->
 
-        <service android:exported="true" android:name="org.gsma.rcs.addressbook.SyncAdapterService">
+        <service android:exported="true" android:name="org.gsma.joyn.addressbook.SyncAdapterService">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
@@ -123,7 +123,7 @@
         </service>
         
 		<!-- RCS account: activity to create an account-->
-        <activity android:name="org.gsma.rcs.addressbook.SetupRcsAccount">
+        <activity android:name="org.gsma.joyn.addressbook.SetupRcsAccount">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -132,40 +132,40 @@
         
 		<!-- RCS data providers -->	
 
-		<provider android:authorities="org.gsma.rcs.settings"
-			android:writePermission="org.gsma.rcs.permission.RCS"
-			android:readPermission="org.gsma.rcs.permission.RCS"
-			android:name="org.gsma.rcs.provider.settings.RcsSettingsProvider"/>
+		<provider android:authorities="org.gsma.joyn.settings"
+			android:writePermission="org.gsma.joyn.permission.RCS"
+			android:readPermission="org.gsma.joyn.permission.RCS"
+			android:name="org.gsma.joyn.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="org.gsma.rcs.eab"
-			android:writePermission="org.gsma.rcs.permission.RCS"
-			android:readPermission="org.gsma.rcs.permission.RCS"
-			android:name="org.gsma.rcs.provider.eab.RichAddressBookProvider"/>
+		<provider android:authorities="org.gsma.joyn.eab"
+			android:writePermission="org.gsma.joyn.permission.RCS"
+			android:readPermission="org.gsma.joyn.permission.RCS"
+			android:name="org.gsma.joyn.provider.eab.RichAddressBookProvider"/>
 
-		<provider android:authorities="org.gsma.rcs.messaging"
-			android:writePermission="org.gsma.rcs.permission.RCS"
-			android:readPermission="org.gsma.rcs.permission.RCS"
-			android:name="org.gsma.rcs.provider.messaging.RichMessagingProvider"/>
+		<provider android:authorities="org.gsma.joyn.messaging"
+			android:writePermission="org.gsma.joyn.permission.RCS"
+			android:readPermission="org.gsma.joyn.permission.RCS"
+			android:name="org.gsma.joyn.provider.messaging.RichMessagingProvider"/>
 			
-		<provider android:authorities="org.gsma.rcs.csh"
-			android:writePermission="org.gsma.rcs.permission.RCS"
-			android:readPermission="org.gsma.rcs.permission.RCS"
-			android:name="org.gsma.rcs.provider.sharing.RichCallProvider"/>
+		<provider android:authorities="org.gsma.joyn.csh"
+			android:writePermission="org.gsma.joyn.permission.RCS"
+			android:readPermission="org.gsma.joyn.permission.RCS"
+			android:name="org.gsma.joyn.provider.sharing.RichCallProvider"/>
 			
-		<provider android:authorities="org.gsma.rcs.eventlogs"
-			android:writePermission="org.gsma.rcs.permission.RCS"
-			android:readPermission="org.gsma.rcs.permission.RCS"
-			android:name="org.gsma.rcs.provider.eventlogs.EventLogProvider"/>
+		<provider android:authorities="org.gsma.joyn.eventlogs"
+			android:writePermission="org.gsma.joyn.permission.RCS"
+			android:readPermission="org.gsma.joyn.permission.RCS"
+			android:name="org.gsma.joyn.provider.eventlogs.EventLogProvider"/>
 	
 		<!-- Device events receiver -->	
 
-		<receiver android:name="org.gsma.rcs.service.DeviceBoot">
+		<receiver android:name="org.gsma.joyn.service.DeviceBoot">
 	        <intent-filter>
 	     		<action android:name="android.intent.action.BOOT_COMPLETED"/>
 	        </intent-filter>
 	    </receiver>
 
-		<receiver android:name="org.gsma.rcs.service.DeviceShutdown">
+		<receiver android:name="org.gsma.joyn.service.DeviceShutdown">
 	        <intent-filter>
 	     		<action android:name="android.intent.action.ACTION_SHUTDOWN"/>
 	        </intent-filter>
@@ -173,7 +173,7 @@
 
 		<!-- Changing locale -->	
 
-		<receiver android:name="org.gsma.rcs.addressbook.LocaleChangedReceiver">  
+		<receiver android:name="org.gsma.joyn.addressbook.LocaleChangedReceiver">  
    			<intent-filter>
    				<action android:name="android.intent.action.LOCALE_CHANGED"/>  
    			</intent-filter>  
@@ -181,14 +181,14 @@
 
 		<!-- Outgoing call state -->	
 
-		<receiver android:name="org.gsma.rcs.core.ims.network.gsm.OutgoingCallReceiver">  
+		<receiver android:name="org.gsma.joyn.core.ims.network.gsm.OutgoingCallReceiver">  
  			<intent-filter>
  				<action android:name="android.intent.action.NEW_OUTGOING_CALL"/>  
  			</intent-filter>  
 		</receiver> 
 		
 		<!-- External capability monitoring -->	
-		<receiver android:name="org.gsma.rcs.core.ims.service.capability.ExternalCapabilityMonitoring">  
+		<receiver android:name="org.gsma.joyn.core.ims.service.capability.ExternalCapabilityMonitoring">  
  			<intent-filter>
  				<action android:name="android.intent.action.PACKAGE_ADDED"/>  
  				<action android:name="android.intent.action.PACKAGE_REMOVED"/>  
@@ -197,21 +197,21 @@
 		</receiver>
 		
 		<!-- HTTPS provisioning service -->
-		<service android:name="org.gsma.rcs.provisioning.https.HttpsProvisioningService">  
+		<service android:name="org.gsma.joyn.provisioning.https.HttpsProvisioningService">  
 	        <intent-filter>
-	            <action android:name="org.gsma.rcs.PROVISIONING"/>
+	            <action android:name="org.gsma.joyn.PROVISIONING"/>
 	        </intent-filter>
 	    </service>
 
         <!-- Startup service -->
-        <service android:name="org.gsma.rcs.service.StartService">  
+        <service android:name="org.gsma.joyn.service.StartService">  
             <intent-filter>
-                <action android:name="org.gsma.rcs.STARTUP"/>
+                <action android:name="org.gsma.joyn.STARTUP"/>
             </intent-filter>
         </service>
 
         <!-- Provisioning - Terms and conditions activity -->
-        <activity android:name="org.gsma.rcs.provisioning.TermsAndConditionsRequest">
+        <activity android:name="org.gsma.joyn.provisioning.TermsAndConditionsRequest">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -220,19 +220,19 @@
 
 		<!-- GSMA UI connectors -->
 
-		<receiver android:name="org.gsma.rcs.service.api.server.gsma.GetRcsStatusReceiver">  
+		<receiver android:name="org.gsma.joyn.service.api.server.gsma.GetRcsStatusReceiver">  
  			<intent-filter>
  				<action android:name="android.net.rcs.GET_RCS_STATUS"/>  
  			</intent-filter>  
 		</receiver> 
 
-		<receiver android:name="org.gsma.rcs.service.api.server.gsma.GetMyCapabilitiesReceiver">  
+		<receiver android:name="org.gsma.joyn.service.api.server.gsma.GetMyCapabilitiesReceiver">  
  			<intent-filter>
  				<action android:name="android.net.rcs.GET_MY_CAPABILITIES"/>  
  			</intent-filter>  
 		</receiver> 
 
-		<receiver android:name="org.gsma.rcs.service.api.server.gsma.GetContactCapabilitiesReceiver">  
+		<receiver android:name="org.gsma.joyn.service.api.server.gsma.GetContactCapabilitiesReceiver">  
  			<intent-filter>
  				<action android:name="android.net.rcs.GET_CONTACT_CAPABILITIES"/>  
  			</intent-filter>  
