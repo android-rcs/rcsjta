@@ -16,22 +16,20 @@
 
 package org.gsma.joyn.presence;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class FavoriteLink implements android.os.Parcelable {
-  // Fields
+public class FavoriteLink implements Parcelable {
 
-  public static final android.os.Parcelable.Creator<FavoriteLink> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<FavoriteLink> CREATOR = null;
 
   public FavoriteLink(String arg1){
   }
   public FavoriteLink(String arg1, String arg2){
   }
-  public FavoriteLink(android.os.Parcel arg1){
+  public FavoriteLink(Parcel arg1){
   }
-  // Methods
 
   public String toString(){
     return (String) null;
@@ -44,7 +42,7 @@ public class FavoriteLink implements android.os.Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public String getLink(){
     return (String) null;

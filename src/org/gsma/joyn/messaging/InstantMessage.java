@@ -16,14 +16,16 @@
 
 package org.gsma.joyn.messaging;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class InstantMessage implements android.os.Parcelable {
+public class InstantMessage implements Parcelable {
   // Fields
 
   public static final String MIME_TYPE = "text/plain";
 
-  public static final android.os.Parcelable.Creator<InstantMessage> CREATOR = null;
+  public static final Parcelable.Creator<InstantMessage> CREATOR = null;
 
   // Constructors
 
@@ -31,7 +33,7 @@ public class InstantMessage implements android.os.Parcelable {
   }
   public InstantMessage(String arg1, String arg2, String arg3, boolean arg4, java.util.Date arg5){
   }
-  public InstantMessage(android.os.Parcel arg1){
+  public InstantMessage(Parcel arg1){
   }
   // Methods
 
@@ -41,7 +43,7 @@ public class InstantMessage implements android.os.Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public String getTextMessage(){
     return (String) null;

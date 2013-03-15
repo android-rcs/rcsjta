@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.contacts;
 
+import android.os.ParcelFileDescriptor;
 import java.lang.String;
 
 /**
@@ -109,8 +110,8 @@ public class RichAddressBookProvider extends android.content.ContentProvider {
      * @param arg2 The arg2.
      * @return  The parcel file descriptor.
      */
-    public android.os.ParcelFileDescriptor openFile(android.net.Uri arg1, String arg2) throws java.io.FileNotFoundException {
-        return (android.os.ParcelFileDescriptor) null;
+    public ParcelFileDescriptor openFile(android.net.Uri arg1, String arg2) throws java.io.FileNotFoundException {
+        return (ParcelFileDescriptor) null;
     }
 
 } // end RichAddressBookProvider

@@ -16,27 +16,23 @@
 
 package org.gsma.joyn.media;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class MediaCodec
-  implements android.os.Parcelable
-{
-  // Fields
+public class MediaCodec implements Parcelable {
 
-  public static final android.os.Parcelable.Creator<MediaCodec> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<MediaCodec> CREATOR = null;
 
   public MediaCodec(String arg1){
   }
-  public MediaCodec(android.os.Parcel arg1){
+  public MediaCodec(Parcel arg1){
   }
-  // Methods
 
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public String getCodecName(){
     return (String) null;

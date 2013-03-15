@@ -16,10 +16,11 @@
 
 package org.gsma.joyn.contacts;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class ContactInfo implements android.os.Parcelable {
-  // Fields
+public class ContactInfo implements Parcelable {
 
   public static final int RCS_CAPABLE = 0;
 
@@ -45,25 +46,21 @@ public class ContactInfo implements android.os.Parcelable {
 
   public static final int REGISTRATION_STATUS_OFFLINE = 2;
 
-  public static final android.os.Parcelable.Creator<ContactInfo> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<ContactInfo> CREATOR = null;
 
   public ContactInfo(){
   }
   public ContactInfo(ContactInfo arg1){
   }
-  public ContactInfo(android.os.Parcel arg1){
+  public ContactInfo(Parcel arg1){
   }
-  // Methods
-
   public String toString(){
     return (String) null;
   }
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public String getContact(){
     return (String) null;

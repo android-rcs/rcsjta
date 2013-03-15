@@ -16,16 +16,19 @@
 
 package org.gsma.joyn.capability;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 
-public class Capabilities implements android.os.Parcelable {
+public class Capabilities implements Parcelable {
 
-  public static final android.os.Parcelable.Creator<Capabilities> CREATOR = null;
+  public static final Parcelable.Creator<Capabilities> CREATOR = null;
 
   public Capabilities(){
   }
-  public Capabilities(android.os.Parcel arg1){
+  public Capabilities(Parcel arg1){
   }
 
   public String toString(){
@@ -39,7 +42,7 @@ public class Capabilities implements android.os.Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public boolean isImageSharingSupported(){
     return false;
@@ -88,7 +91,7 @@ public class Capabilities implements android.os.Parcelable {
   }
   public void addSupportedExtension(String arg1){
   }
-  public java.util.ArrayList<String> getSupportedExtensions(){
-    return (java.util.ArrayList<String>) null;
+  public ArrayList<String> getSupportedExtensions(){
+    return (ArrayList<String>) null;
   }
 }

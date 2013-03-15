@@ -16,20 +16,18 @@
 
 package org.gsma.joyn.messaging;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class GeolocPush implements android.os.Parcelable {
-  // Fields
+public class GeolocPush implements Parcelable {
 
-  public static final android.os.Parcelable.Creator<GeolocPush> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<GeolocPush> CREATOR = null;
 
   public GeolocPush(String arg1, double arg2, double arg3, double arg4){
   }
-  public GeolocPush(android.os.Parcel arg1){
+  public GeolocPush(Parcel arg1){
   }
-  // Methods
 
   public String toString(){
     return (String) null;
@@ -37,7 +35,7 @@ public class GeolocPush implements android.os.Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public double getLongitude(){
     return 0.0d;

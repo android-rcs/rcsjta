@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.messaging;
 
+import android.os.IBinder;
 import java.lang.String;
 import java.util.List;
 
@@ -38,11 +39,11 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   public IFileTransferSession getFileTransferSession(String arg1) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
-  public List<android.os.IBinder> getFileTransferSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getFileTransferSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
-  public List<android.os.IBinder> getFileTransferSessions() throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getFileTransferSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
   public IChatSession initiateOne2OneChatSession(String arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
@@ -62,17 +63,17 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   public IChatSession getChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public List<android.os.IBinder> getChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
-  public List<android.os.IBinder> getChatSessions() throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getChatSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
-  public List<android.os.IBinder> getGroupChatSessions() throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getGroupChatSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
-  public List<android.os.IBinder> getGroupChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (List<android.os.IBinder>) null;
+  public List<IBinder> getGroupChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<IBinder>) null;
   }
   public void setMessageDeliveryStatus(String arg1, String arg2, String arg3) throws org.gsma.joyn.ClientApiException{
   }

@@ -16,12 +16,11 @@
 
 package org.gsma.joyn.presence;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class PresenceInfo
-  implements android.os.Parcelable
-{
-  // Fields
+public class PresenceInfo implements Parcelable {
 
   public static final String UNKNOWN = "unknown";
 
@@ -41,15 +40,12 @@ public class PresenceInfo
 
   public static final String RCS_CANCELLED = "cancelled";
 
-  public static final android.os.Parcelable.Creator<PresenceInfo> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<PresenceInfo> CREATOR = null;
 
   public PresenceInfo(){
   }
-  public PresenceInfo(android.os.Parcel arg1){
+  public PresenceInfo(Parcel arg1){
   }
-  // Methods
 
   public String toString(){
     return (String) null;
@@ -62,7 +58,7 @@ public class PresenceInfo
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public void resetTimestamp(){
   }

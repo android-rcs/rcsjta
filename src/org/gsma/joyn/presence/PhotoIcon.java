@@ -16,23 +16,20 @@
 
 package org.gsma.joyn.presence;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.lang.String;
 
-public class PhotoIcon implements android.os.Parcelable {
-  // Fields
+public class PhotoIcon implements Parcelable {
 
-  public static final android.os.Parcelable.Creator<PhotoIcon> CREATOR = null;
-
-  // Constructors
+  public static final Parcelable.Creator<PhotoIcon> CREATOR = null;
 
   public PhotoIcon(byte [] arg1, int arg2, int arg3, String arg4){
   }
   public PhotoIcon(byte [] arg1, int arg2, int arg3){
   }
-  public PhotoIcon(android.os.Parcel arg1){
+  public PhotoIcon(Parcel arg1){
   }
-  // Methods
-
   public String toString(){
     return (String) null;
   }
@@ -48,7 +45,7 @@ public class PhotoIcon implements android.os.Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(android.os.Parcel arg1, int arg2){
+  public void writeToParcel(Parcel arg1, int arg2){
   }
   public int getWidth(){
     return 0;
