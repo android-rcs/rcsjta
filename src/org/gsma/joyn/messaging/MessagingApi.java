@@ -17,16 +17,13 @@
 package org.gsma.joyn.messaging;
 
 import java.lang.String;
+import java.util.List;
 
 public class MessagingApi extends org.gsma.joyn.ClientApi {
-  // Fields
-
-  // Constructors
 
   public MessagingApi(android.content.Context arg1){
     super((android.content.Context) null);
   }
-  // Methods
 
   public void connectApi(){
   }
@@ -35,25 +32,25 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   public IFileTransferSession transferFile(String arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
-  public IFileTransferSession transferFileToGroup(java.util.List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
+  public IFileTransferSession transferFileToGroup(List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
   public IFileTransferSession getFileTransferSession(String arg1) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
-  public java.util.List<android.os.IBinder> getFileTransferSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getFileTransferSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
-  public java.util.List<android.os.IBinder> getFileTransferSessions() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getFileTransferSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
   public IChatSession initiateOne2OneChatSession(String arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession initiateAdhocGroupChatSession(java.util.List<String> arg1) throws org.gsma.joyn.ClientApiException{
+  public IChatSession initiateAdhocGroupChatSession(List<String> arg1) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession initiateAdhocGroupChatSession(java.util.List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
+  public IChatSession initiateAdhocGroupChatSession(List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
   public IChatSession rejoinGroupChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
@@ -65,17 +62,17 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   public IChatSession getChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public java.util.List<android.os.IBinder> getChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
-  public java.util.List<android.os.IBinder> getChatSessions() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getChatSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
-  public java.util.List<android.os.IBinder> getGroupChatSessions() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getGroupChatSessions() throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
-  public java.util.List<android.os.IBinder> getGroupChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<android.os.IBinder>) null;
+  public List<android.os.IBinder> getGroupChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+    return (List<android.os.IBinder>) null;
   }
   public void setMessageDeliveryStatus(String arg1, String arg2, String arg3) throws org.gsma.joyn.ClientApiException{
   }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2013, France Telecom
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,12 @@
 package org.gsma.joyn.contacts;
 
 import java.lang.String;
+import java.util.List;
 
-public final class ContactsManager
-{
-  // Fields
-
-  // Constructors
+public final class ContactsManager {
 
   private ContactsManager(android.content.Context arg1){
   }
-  // Methods
 
   public static ContactsManager getInstance(){
     return (ContactsManager) null;
@@ -48,29 +44,29 @@ public final class ContactsManager
   public org.gsma.joyn.contacts.ContactInfo getContactInfo(String arg1){
     return (org.gsma.joyn.contacts.ContactInfo) null;
   }
-  public java.util.List<String> getRcsContactsWithSocialPresence(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsContactsWithSocialPresence(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getAllContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getAllContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRcsContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getAvailableContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getAvailableContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRcsBlockedContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsBlockedContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRcsInvitedContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsInvitedContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRcsWillingContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsWillingContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRcsCancelledContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRcsCancelledContacts(){
+    return (List<String>) null;
   }
   public boolean isRcsValidNumber(String arg1){
     return false;
@@ -95,14 +91,14 @@ public final class ContactsManager
   }
   public void setImBlockedForContact(String arg1, boolean arg2){
   }
-  public java.util.List<String> getImBlockedContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getImBlockedContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getImSessionCapableContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getImSessionCapableContacts(){
+    return (List<String>) null;
   }
-  public java.util.List<String> getRichcallCapableContacts(){
-    return (java.util.List<String>) null;
+  public List<String> getRichcallCapableContacts(){
+    return (List<String>) null;
   }
   public void removeCancelledPresenceInvitation(String arg1){
   }
