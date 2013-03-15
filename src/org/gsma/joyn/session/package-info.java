@@ -1,6 +1,6 @@
 /**
  * Joyn (RCS), IMS and SIP session tools
- * <p>
+ *
  * This API permits to implement new additional IMS services without
  * any impact in the RCS stack. This generic SIP API manages only the
  * signaling flow and is independent from the media part which should

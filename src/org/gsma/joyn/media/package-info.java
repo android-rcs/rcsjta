@@ -4,7 +4,7 @@
  * this abstraction, the RCS stack manages (i.e. start, stop) the
  * media stream thanks to the SIP call flow (e.g. the stack starts the
  * media only after the SIP ACK).
- * <p>
+ *
  * The media API permits also to forward media error to the stack in
  * order to stop the session (e.g. SIP BYE).
  * <p>

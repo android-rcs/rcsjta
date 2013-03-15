@@ -6,7 +6,7 @@
  * providers, AIDL API and Intents. Several UI may be connected at a time
  * to manage RCS events and to interact with the single stack instance
  * running in background.
- * <p>
+ *
  * The RCS API permits to implement RCS application (e.g. enhanced
  * address book, content sharing, chat, widgets) by hiding RCS
  * protocols complexity.
