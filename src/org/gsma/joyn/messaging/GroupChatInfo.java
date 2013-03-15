@@ -16,33 +16,33 @@
 
 package org.gsma.joyn.messaging;
 
+import java.lang.String;
 
-public class GroupChatInfo
-{
+public class GroupChatInfo {
   // Fields
 
   // Constructors
 
-  public GroupChatInfo(java.lang.String arg1, java.lang.String arg2, java.lang.String arg3, java.util.List<java.lang.String> arg4, java.lang.String arg5){
+  public GroupChatInfo(String arg1, String arg2, String arg3, java.util.List<String> arg4, String arg5){
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
-  public java.lang.String getSubject(){
-    return (java.lang.String) null;
+  public String getSubject(){
+    return (String) null;
   }
-  public java.util.List<java.lang.String> getParticipants(){
-    return (java.util.List<java.lang.String>) null;
+  public java.util.List<String> getParticipants(){
+    return (java.util.List<String>) null;
   }
-  public java.lang.String getSessionId(){
-    return (java.lang.String) null;
+  public String getSessionId(){
+    return (String) null;
   }
-  public java.lang.String getRejoinId(){
-    return (java.lang.String) null;
+  public String getRejoinId(){
+    return (String) null;
   }
-  public java.lang.String getContributionId(){
-    return (java.lang.String) null;
+  public String getContributionId(){
+    return (String) null;
   }
 }

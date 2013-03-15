@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.session;
 
+import java.lang.String;
 import org.gsma.joyn.session.ImsSessionBasedServiceError;
 import org.gsma.joyn.session.ImsServiceError;
 

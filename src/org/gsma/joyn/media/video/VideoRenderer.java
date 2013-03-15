@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.media.video;
 
+import java.lang.String;
+
 /**
  * Class VideoRenderer.
  */

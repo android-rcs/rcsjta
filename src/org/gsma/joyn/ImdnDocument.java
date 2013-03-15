@@ -16,6 +16,8 @@
 
 package org.gsma.joyn;
 
+import java.lang.String;
+
 /**
  * Class ImdnDocument.
  */
@@ -83,7 +85,7 @@ public class ImdnDocument {
      * @return  The status.
      */
     public String getStatus() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -101,7 +103,7 @@ public class ImdnDocument {
      * @return  The msg id.
      */
     public String getMsgId() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

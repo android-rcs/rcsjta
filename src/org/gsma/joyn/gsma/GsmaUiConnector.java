@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.gsma;
 
+import java.lang.String;
+
 /**
  * Class GsmaUiConnector.
  */

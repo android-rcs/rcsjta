@@ -16,6 +16,8 @@
 
 package org.gsma.joyn;
 
+import java.lang.String;
+
 /**
  * IMS session intent names
  */

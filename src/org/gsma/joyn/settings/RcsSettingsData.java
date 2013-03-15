@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.settings;
 
+import java.lang.String;
+
 /**
  * Class RcsSettingsData.
  */

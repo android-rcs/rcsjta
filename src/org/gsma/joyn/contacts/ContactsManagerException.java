@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.contacts;
 
+import java.lang.String;
+
 /**
  * Class ContactsManagerException.
  */

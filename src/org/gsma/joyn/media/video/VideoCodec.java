@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.media.video;
 
+import java.lang.String;
+
 /**
  * Class VideoCodec.
  */
@@ -50,7 +52,7 @@ public class VideoCodec {
      * @return  The string.
      */
     public String toString() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -104,7 +106,7 @@ public class VideoCodec {
      * @return  The codec name.
      */
     public String getCodecName() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -122,7 +124,7 @@ public class VideoCodec {
      * @return  The codec params.
      */
     public String getCodecParams() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

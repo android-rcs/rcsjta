@@ -16,10 +16,9 @@
 
 package org.gsma.joyn.contacts;
 
+import java.lang.String;
 
-public class ContactInfo
-  implements android.os.Parcelable
-{
+public class ContactInfo implements android.os.Parcelable {
   // Fields
 
   public static final int RCS_CAPABLE = 0;
@@ -58,16 +57,16 @@ public class ContactInfo
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
   public int describeContents(){
     return 0;
   }
   public void writeToParcel(android.os.Parcel arg1, int arg2){
   }
-  public java.lang.String getContact(){
-    return (java.lang.String) null;
+  public String getContact(){
+    return (String) null;
   }
   public int getRegistrationState(){
     return 0;
@@ -88,7 +87,7 @@ public class ContactInfo
   }
   public void setPresenceInfo(org.gsma.joyn.presence.PresenceInfo arg1){
   }
-  public void setContact(java.lang.String arg1){
+  public void setContact(String arg1){
   }
   public void setRcsStatus(int arg1){
   }

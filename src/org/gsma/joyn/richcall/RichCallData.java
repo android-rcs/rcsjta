@@ -17,6 +17,7 @@
 package org.gsma.joyn.richcall;
 
 import android.net.Uri;
+import java.lang.String;
 
 /**
  * Class RichCallData.

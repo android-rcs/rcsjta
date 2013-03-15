@@ -16,6 +16,8 @@
 
 package org.gsma.joyn;
 
+import java.lang.String;
+
 /**
  * Class CoreServiceNotAvailableException.
  */
@@ -27,7 +29,7 @@ public class CoreServiceNotAvailableException extends ClientApiException {
      * Creates a new instance of CoreServiceNotAvailableException.
      */
     public CoreServiceNotAvailableException() {
-        super((java.lang.String) null);
+        super((String) null);
     }
 
 } // end CoreServiceNotAvailableException

@@ -17,6 +17,7 @@
 package org.gsma.joyn.richcall;
 
 import android.content.Context;
+import java.lang.String;
 import org.gsma.joyn.ClientApiException;
 import org.gsma.joyn.media.IMediaPlayer;
 
@@ -47,7 +48,7 @@ public class RichCallApi extends org.gsma.joyn.ClientApi {
      * @return  The remote phone number.
      */
     public String getRemotePhoneNumber() throws ClientApiException {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

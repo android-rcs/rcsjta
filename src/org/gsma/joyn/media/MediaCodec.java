@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.media;
 
+import java.lang.String;
 
 public class MediaCodec
   implements android.os.Parcelable
@@ -26,7 +27,7 @@ public class MediaCodec
 
   // Constructors
 
-  public MediaCodec(java.lang.String arg1){
+  public MediaCodec(String arg1){
   }
   public MediaCodec(android.os.Parcel arg1){
   }
@@ -37,19 +38,19 @@ public class MediaCodec
   }
   public void writeToParcel(android.os.Parcel arg1, int arg2){
   }
-  public java.lang.String getCodecName(){
-    return (java.lang.String) null;
+  public String getCodecName(){
+    return (String) null;
   }
-  public void setIntParam(java.lang.String arg1, int arg2){
+  public void setIntParam(String arg1, int arg2){
   }
-  public void setStringParam(java.lang.String arg1, java.lang.String arg2){
+  public void setStringParam(String arg1, String arg2){
   }
-  public int getIntParam(java.lang.String arg1, int arg2){
+  public int getIntParam(String arg1, int arg2){
     return 0;
   }
-  public java.lang.String getStringParam(java.lang.String arg1){
-    return (java.lang.String) null;
+  public String getStringParam(String arg1){
+    return (String) null;
   }
-  public void setCodecName(java.lang.String arg1){
+  public void setCodecName(String arg1){
   }
 }

@@ -47,12 +47,12 @@ public interface IFileTransferSession extends IInterface {
     }
   }
 
-  public java.lang.String getSessionID() throws RemoteException;
-  public java.lang.String getRemoteContact() throws RemoteException;
+  public String getSessionID() throws RemoteException;
+  public String getRemoteContact() throws RemoteException;
   public int getSessionState() throws RemoteException;
-  public java.lang.String getFilename() throws RemoteException;
+  public String getFilename() throws RemoteException;
   public long getFilesize() throws RemoteException;
-  public java.lang.String getFileThumbnail() throws RemoteException;
+  public String getFileThumbnail() throws RemoteException;
   public void acceptSession() throws RemoteException;
   public void rejectSession() throws RemoteException;
   public void cancelSession() throws RemoteException;
@@ -60,6 +60,6 @@ public interface IFileTransferSession extends IInterface {
   public void removeSessionListener(IFileTransferEventListener arg1) throws RemoteException;
   public boolean isGroupTransfer() throws RemoteException;
   public boolean isHttpTransfer() throws RemoteException;
-  public java.util.List<java.lang.String> getContacts() throws RemoteException;
+  public java.util.List<String> getContacts() throws RemoteException;
   public void resumeSession() throws RemoteException;
 }

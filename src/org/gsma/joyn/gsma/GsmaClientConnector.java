@@ -16,16 +16,17 @@
 
 package org.gsma.joyn.gsma;
 
+import java.lang.String;
 
 public class GsmaClientConnector
 {
   // Fields
 
-  public static final java.lang.String GSMA_PREFS_NAME = "gsma.joyn.preferences";
+  public static final String GSMA_PREFS_NAME = "gsma.joyn.preferences";
 
-  public static final java.lang.String GSMA_CLIENT = "gsma.joyn.client";
+  public static final String GSMA_CLIENT = "gsma.joyn.client";
 
-  public static final java.lang.String GSMA_CLIENT_ENABLED = "gsma.joyn.enabled";
+  public static final String GSMA_CLIENT_ENABLED = "gsma.joyn.enabled";
 
   // Constructors
 
@@ -39,10 +40,10 @@ public class GsmaClientConnector
   public static java.util.Vector<android.content.pm.ApplicationInfo> getRcsClients(android.content.Context arg1){
     return (java.util.Vector<android.content.pm.ApplicationInfo>) null;
   }
-  public static boolean isRcsClientActivated(android.content.Context arg1, java.lang.String arg2){
+  public static boolean isRcsClientActivated(android.content.Context arg1, String arg2){
     return false;
   }
-  public static android.content.Intent getRcsSettingsActivityIntent(android.content.Context arg1, java.lang.String arg2){
+  public static android.content.Intent getRcsSettingsActivityIntent(android.content.Context arg1, String arg2){
     return (android.content.Intent) null;
   }
 }

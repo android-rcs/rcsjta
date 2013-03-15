@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.messaging;
 
+import java.lang.String;
+
 /**
  * Class RichMessagingProvider.
  */
@@ -39,7 +41,7 @@ public class RichMessagingProvider extends android.content.ContentProvider {
      * @return  The type.
      */
     public String getType(android.net.Uri arg1) {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

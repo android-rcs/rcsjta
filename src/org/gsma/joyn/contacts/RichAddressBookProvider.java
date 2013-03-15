@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.contacts;
 
+import java.lang.String;
+
 /**
  * Class RichAddressBookProvider.
  */
@@ -44,7 +46,7 @@ public class RichAddressBookProvider extends android.content.ContentProvider {
      * @return  The type.
      */
     public String getType(android.net.Uri arg1) {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

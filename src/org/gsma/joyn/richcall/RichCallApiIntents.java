@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.richcall;
 
+import java.lang.String;
+
 /**
  * Class RichCallApiIntents.
  */

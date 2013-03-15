@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
 
 public class Geoloc
   implements android.os.Parcelable
@@ -32,8 +33,8 @@ public class Geoloc
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
   public int describeContents(){
     return 0;

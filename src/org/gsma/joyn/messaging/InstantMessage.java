@@ -16,21 +16,20 @@
 
 package org.gsma.joyn.messaging;
 
+import java.lang.String;
 
-public class InstantMessage
-  implements android.os.Parcelable
-{
+public class InstantMessage implements android.os.Parcelable {
   // Fields
 
-  public static final java.lang.String MIME_TYPE = "text/plain";
+  public static final String MIME_TYPE = "text/plain";
 
   public static final android.os.Parcelable.Creator<InstantMessage> CREATOR = null;
 
   // Constructors
 
-  public InstantMessage(java.lang.String arg1, java.lang.String arg2, java.lang.String arg3, boolean arg4){
+  public InstantMessage(String arg1, String arg2, String arg3, boolean arg4){
   }
-  public InstantMessage(java.lang.String arg1, java.lang.String arg2, java.lang.String arg3, boolean arg4, java.util.Date arg5){
+  public InstantMessage(String arg1, String arg2, String arg3, boolean arg4, java.util.Date arg5){
   }
   public InstantMessage(android.os.Parcel arg1){
   }
@@ -44,14 +43,14 @@ public class InstantMessage
   }
   public void writeToParcel(android.os.Parcel arg1, int arg2){
   }
-  public java.lang.String getTextMessage(){
-    return (java.lang.String) null;
+  public String getTextMessage(){
+    return (String) null;
   }
-  public java.lang.String getMessageId(){
-    return (java.lang.String) null;
+  public String getMessageId(){
+    return (String) null;
   }
-  public java.lang.String getRemote(){
-    return (java.lang.String) null;
+  public String getRemote(){
+    return (String) null;
   }
   public boolean isImdnDisplayedRequested(){
     return false;

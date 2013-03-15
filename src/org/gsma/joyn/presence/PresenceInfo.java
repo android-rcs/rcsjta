@@ -16,29 +16,30 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
 
 public class PresenceInfo
   implements android.os.Parcelable
 {
   // Fields
 
-  public static final java.lang.String UNKNOWN = "unknown";
+  public static final String UNKNOWN = "unknown";
 
-  public static final java.lang.String ONLINE = "open";
+  public static final String ONLINE = "open";
 
-  public static final java.lang.String OFFLINE = "closed";
+  public static final String OFFLINE = "closed";
 
-  public static final java.lang.String RCS_ACTIVE = "active";
+  public static final String RCS_ACTIVE = "active";
 
-  public static final java.lang.String RCS_REVOKED = "revoked";
+  public static final String RCS_REVOKED = "revoked";
 
-  public static final java.lang.String RCS_BLOCKED = "blocked";
+  public static final String RCS_BLOCKED = "blocked";
 
-  public static final java.lang.String RCS_PENDING_OUT = "pending_out";
+  public static final String RCS_PENDING_OUT = "pending_out";
 
-  public static final java.lang.String RCS_PENDING = "pending";
+  public static final String RCS_PENDING = "pending";
 
-  public static final java.lang.String RCS_CANCELLED = "cancelled";
+  public static final String RCS_CANCELLED = "cancelled";
 
   public static final android.os.Parcelable.Creator<PresenceInfo> CREATOR = null;
 
@@ -50,8 +51,8 @@ public class PresenceInfo
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
   public void setTimestamp(long arg1){
   }
@@ -68,10 +69,10 @@ public class PresenceInfo
   public static long getNewTimestamp(){
     return 0l;
   }
-  public java.lang.String getPresenceStatus(){
-    return (java.lang.String) null;
+  public String getPresenceStatus(){
+    return (String) null;
   }
-  public void setPresenceStatus(java.lang.String arg1){
+  public void setPresenceStatus(String arg1){
   }
   public boolean isOnline(){
     return false;
@@ -79,20 +80,20 @@ public class PresenceInfo
   public boolean isOffline(){
     return false;
   }
-  public java.lang.String getFreetext(){
-    return (java.lang.String) null;
+  public String getFreetext(){
+    return (String) null;
   }
-  public void setFreetext(java.lang.String arg1){
+  public void setFreetext(String arg1){
   }
   public FavoriteLink getFavoriteLink(){
     return (FavoriteLink) null;
   }
-  public java.lang.String getFavoriteLinkUrl(){
-    return (java.lang.String) null;
+  public String getFavoriteLinkUrl(){
+    return (String) null;
   }
   public void setFavoriteLink(FavoriteLink arg1){
   }
-  public void setFavoriteLinkUrl(java.lang.String arg1){
+  public void setFavoriteLinkUrl(String arg1){
   }
   public PhotoIcon getPhotoIcon(){
     return (PhotoIcon) null;

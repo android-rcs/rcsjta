@@ -16,40 +16,39 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
 
-public class FavoriteLink
-  implements android.os.Parcelable
-{
+public class FavoriteLink implements android.os.Parcelable {
   // Fields
 
   public static final android.os.Parcelable.Creator<FavoriteLink> CREATOR = null;
 
   // Constructors
 
-  public FavoriteLink(java.lang.String arg1){
+  public FavoriteLink(String arg1){
   }
-  public FavoriteLink(java.lang.String arg1, java.lang.String arg2){
+  public FavoriteLink(String arg1, String arg2){
   }
   public FavoriteLink(android.os.Parcel arg1){
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
-  public java.lang.String getName(){
-    return (java.lang.String) null;
+  public String getName(){
+    return (String) null;
   }
-  public void setName(java.lang.String arg1){
+  public void setName(String arg1){
   }
   public int describeContents(){
     return 0;
   }
   public void writeToParcel(android.os.Parcel arg1, int arg2){
   }
-  public java.lang.String getLink(){
-    return (java.lang.String) null;
+  public String getLink(){
+    return (String) null;
   }
-  public void setLink(java.lang.String arg1){
+  public void setLink(String arg1){
   }
 }

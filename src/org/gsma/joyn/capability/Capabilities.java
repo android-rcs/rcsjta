@@ -16,10 +16,9 @@
 
 package org.gsma.joyn.capability;
 
+import java.lang.String;
 
-public class Capabilities
-  implements android.os.Parcelable
-{
+public class Capabilities implements android.os.Parcelable {
   // Fields
 
   public static final android.os.Parcelable.Creator<Capabilities> CREATOR = null;
@@ -32,8 +31,8 @@ public class Capabilities
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
   public void setTimestamp(long arg1){
   }
@@ -90,9 +89,9 @@ public class Capabilities
   }
   public void setGeolocationPushSupport(boolean arg1){
   }
-  public void addSupportedExtension(java.lang.String arg1){
+  public void addSupportedExtension(String arg1){
   }
-  public java.util.ArrayList<java.lang.String> getSupportedExtensions(){
-    return (java.util.ArrayList<java.lang.String>) null;
+  public java.util.ArrayList<String> getSupportedExtensions(){
+    return (java.util.ArrayList<String>) null;
   }
 }

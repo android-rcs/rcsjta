@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
+
 /**
  * Interface PresenceApiIntents.
  */

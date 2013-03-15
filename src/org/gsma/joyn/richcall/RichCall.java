@@ -18,6 +18,7 @@ package org.gsma.joyn.richcall;
 
 import android.content.Context;
 import android.net.Uri;
+import java.lang.String;
 
 /**
  * Rich call history. This content provider removes old messages if there is no enough space.

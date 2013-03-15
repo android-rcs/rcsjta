@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.session;
 
+import java.lang.String;
+
 /**
  * IMS session errors constants and utilities
  */

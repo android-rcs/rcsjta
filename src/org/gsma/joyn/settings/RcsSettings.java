@@ -17,6 +17,7 @@
 package org.gsma.joyn.settings;
 
 import android.content.Context;
+import java.lang.String;
 import org.gsma.joyn.capability.Capabilities;
 
 /**
@@ -138,7 +139,7 @@ public class RcsSettings {
      * @return  The string.
      */
     public String readParameter(String arg1) {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -199,7 +200,7 @@ public class RcsSettings {
      * @return  The presence invitation ringtone.
      */
     public String getPresenceInvitationRingtone() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -234,7 +235,7 @@ public class RcsSettings {
      * @return  The c sh invitation ringtone.
      */
     public String getCShInvitationRingtone() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -286,7 +287,7 @@ public class RcsSettings {
      * @return  The file transfer invitation ringtone.
      */
     public String getFileTransferInvitationRingtone() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -321,7 +322,7 @@ public class RcsSettings {
      * @return  The chat invitation ringtone.
      */
     public String getChatInvitationRingtone() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -356,7 +357,7 @@ public class RcsSettings {
      * @return  The predefined freetext1.
      */
     public String getPredefinedFreetext1() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -374,7 +375,7 @@ public class RcsSettings {
      * @return  The predefined freetext2.
      */
     public String getPredefinedFreetext2() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -392,7 +393,7 @@ public class RcsSettings {
      * @return  The predefined freetext3.
      */
     public String getPredefinedFreetext3() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -410,7 +411,7 @@ public class RcsSettings {
      * @return  The predefined freetext4.
      */
     public String getPredefinedFreetext4() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -446,7 +447,7 @@ public class RcsSettings {
      * @return  The user profile ims user name.
      */
     public String getUserProfileImsUserName() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -464,7 +465,7 @@ public class RcsSettings {
      * @return  The user profile ims display name.
      */
     public String getUserProfileImsDisplayName() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -482,7 +483,7 @@ public class RcsSettings {
      * @return  The user profile ims private id.
      */
     public String getUserProfileImsPrivateId() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -500,7 +501,7 @@ public class RcsSettings {
      * @return  The user profile ims password.
      */
     public String getUserProfileImsPassword() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -518,7 +519,7 @@ public class RcsSettings {
      * @return  The user profile ims realm.
      */
     public String getUserProfileImsRealm() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -536,7 +537,7 @@ public class RcsSettings {
      * @return  The user profile ims domain.
      */
     public String getUserProfileImsDomain() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -554,7 +555,7 @@ public class RcsSettings {
      * @return  The ims proxy addr for mobile.
      */
     public String getImsProxyAddrForMobile() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -590,7 +591,7 @@ public class RcsSettings {
      * @return  The ims proxy addr for wifi.
      */
     public String getImsProxyAddrForWifi() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -626,7 +627,7 @@ public class RcsSettings {
      * @return  The xdm server.
      */
     public String getXdmServer() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -644,7 +645,7 @@ public class RcsSettings {
      * @return  The xdm login.
      */
     public String getXdmLogin() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -662,7 +663,7 @@ public class RcsSettings {
      * @return  The xdm password.
      */
     public String getXdmPassword() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -680,7 +681,7 @@ public class RcsSettings {
      * @return  The im conference uri.
      */
     public String getImConferenceUri() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -698,7 +699,7 @@ public class RcsSettings {
      * @return  The end user confirmation request uri.
      */
     public String getEndUserConfirmationRequestUri() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -716,7 +717,7 @@ public class RcsSettings {
      * @return  The country code.
      */
     public String getCountryCode() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -734,7 +735,7 @@ public class RcsSettings {
      * @return  The country area code.
      */
     public String getCountryAreaCode() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -761,7 +762,7 @@ public class RcsSettings {
      * @return  The supported rcs extensions.
      */
     public String getSupportedRcsExtensions() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -936,7 +937,7 @@ public class RcsSettings {
      * @return  The sip default protocol for mobile.
      */
     public String getSipDefaultProtocolForMobile() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -945,7 +946,7 @@ public class RcsSettings {
      * @return  The sip default protocol for wifi.
      */
     public String getSipDefaultProtocolForWifi() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -954,7 +955,7 @@ public class RcsSettings {
      * @return  The tls certificate root.
      */
     public String getTlsCertificateRoot() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -963,7 +964,7 @@ public class RcsSettings {
      * @return  The tls certificate intermediate.
      */
     public String getTlsCertificateIntermediate() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1035,7 +1036,7 @@ public class RcsSettings {
      * @return  The ims auhtentication procedure for mobile.
      */
     public String getImsAuhtenticationProcedureForMobile() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1044,7 +1045,7 @@ public class RcsSettings {
      * @return  The ims auhtentication procedure for wifi.
      */
     public String getImsAuhtenticationProcedureForWifi() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1113,7 +1114,7 @@ public class RcsSettings {
      * @return  The trace level.
      */
     public String getTraceLevel() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1130,7 +1131,7 @@ public class RcsSettings {
      * @return  The sip trace file.
      */
     public String getSipTraceFile() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1252,7 +1253,7 @@ public class RcsSettings {
      * @return  The network apn.
      */
     public String getNetworkApn() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1261,7 +1262,7 @@ public class RcsSettings {
      * @return  The network operator.
      */
     public String getNetworkOperator() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1303,7 +1304,7 @@ public class RcsSettings {
      * @return  The provisioning version.
      */
     public String getProvisioningVersion() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1330,7 +1331,7 @@ public class RcsSettings {
      * @return  The provisioning address.
      */
     public String getProvisioningAddress() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     public void resetUserProfile() {
@@ -1375,7 +1376,7 @@ public class RcsSettings {
      * @return  The photo root directory.
      */
     public String getPhotoRootDirectory() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1393,7 +1394,7 @@ public class RcsSettings {
      * @return  The video root directory.
      */
     public String getVideoRootDirectory() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -1411,7 +1412,7 @@ public class RcsSettings {
      * @return  The file root directory.
      */
     public String getFileRootDirectory() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

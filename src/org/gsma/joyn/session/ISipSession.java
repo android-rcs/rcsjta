@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
+import java.lang.String;
 
 /**
  * Class ISipSession.

@@ -16,24 +16,23 @@
 
 package org.gsma.joyn.messaging;
 
+import java.lang.String;
 
-public class GeolocPush
-  implements android.os.Parcelable
-{
+public class GeolocPush implements android.os.Parcelable {
   // Fields
 
   public static final android.os.Parcelable.Creator<GeolocPush> CREATOR = null;
 
   // Constructors
 
-  public GeolocPush(java.lang.String arg1, double arg2, double arg3, double arg4){
+  public GeolocPush(String arg1, double arg2, double arg3, double arg4){
   }
   public GeolocPush(android.os.Parcel arg1){
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
   public int describeContents(){
     return 0;
@@ -46,10 +45,10 @@ public class GeolocPush
   public double getLatitude(){
     return 0.0d;
   }
-  public java.lang.String getLabel(){
-    return (java.lang.String) null;
+  public String getLabel(){
+    return (String) null;
   }
-  public void getLabel(java.lang.String arg1){
+  public void getLabel(String arg1){
   }
   public double getAltitude(){
     return 0.0d;

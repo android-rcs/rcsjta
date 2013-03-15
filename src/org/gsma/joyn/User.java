@@ -16,6 +16,8 @@
 
 package org.gsma.joyn;
 
+import java.lang.String;
+
 /**
  * Class User.
  */
@@ -80,7 +82,7 @@ public class User {
      * @return  The string.
      */
     public String toString() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -89,7 +91,7 @@ public class User {
      * @return  The state.
      */
     public String getState() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -107,7 +109,7 @@ public class User {
      * @return  The display name.
      */
     public String getDisplayName() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -116,7 +118,7 @@ public class User {
      * @return  The entity.
      */
     public String getEntity() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -151,7 +153,7 @@ public class User {
      * @return  The disconnection method.
      */
     public String getDisconnectionMethod() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**
@@ -169,7 +171,7 @@ public class User {
      * @return  The failure reason.
      */
     public String getFailureReason() {
-        return (java.lang.String) null;
+        return (String) null;
     }
 
     /**

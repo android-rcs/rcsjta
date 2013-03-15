@@ -16,17 +16,16 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
 
-public class PhotoIcon
-  implements android.os.Parcelable
-{
+public class PhotoIcon implements android.os.Parcelable {
   // Fields
 
   public static final android.os.Parcelable.Creator<PhotoIcon> CREATOR = null;
 
   // Constructors
 
-  public PhotoIcon(byte [] arg1, int arg2, int arg3, java.lang.String arg4){
+  public PhotoIcon(byte [] arg1, int arg2, int arg3, String arg4){
   }
   public PhotoIcon(byte [] arg1, int arg2, int arg3){
   }
@@ -34,11 +33,11 @@ public class PhotoIcon
   }
   // Methods
 
-  public java.lang.String toString(){
-    return (java.lang.String) null;
+  public String toString(){
+    return (String) null;
   }
-  public java.lang.String getType(){
-    return (java.lang.String) null;
+  public String getType(){
+    return (String) null;
   }
   public long getSize(){
     return 0l;
@@ -57,12 +56,12 @@ public class PhotoIcon
   public int getHeight(){
     return 0;
   }
-  public java.lang.String getEtag(){
-    return (java.lang.String) null;
+  public String getEtag(){
+    return (String) null;
   }
-  public void setEtag(java.lang.String arg1){
+  public void setEtag(String arg1){
   }
-  public java.lang.String getResolution(){
-    return (java.lang.String) null;
+  public String getResolution(){
+    return (String) null;
   }
 }

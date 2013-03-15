@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.capability;
 
+import java.lang.String;
+
 /**
  * Interface CapabilityApiIntents.
  */

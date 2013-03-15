@@ -16,6 +16,8 @@
 
 package org.gsma.joyn.messaging;
 
+import java.lang.String;
+
 /**
  * Interface MessagingApiIntents.
  */

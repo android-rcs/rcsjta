@@ -16,6 +16,7 @@
 
 package org.gsma.joyn.presence;
 
+import java.lang.String;
 
 public class PresenceApi
   extends org.gsma.joyn.ClientApi{
@@ -38,33 +39,33 @@ public class PresenceApi
   public boolean setMyPresenceInfo(PresenceInfo arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean inviteContact(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean inviteContact(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean acceptSharingInvitation(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean acceptSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean rejectSharingInvitation(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean rejectSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public void ignoreSharingInvitation(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public void ignoreSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
   }
-  public boolean revokeContact(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean revokeContact(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean unrevokeContact(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean unrevokeContact(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean unblockContact(java.lang.String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean unblockContact(String arg1) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public java.util.List<java.lang.String> getGrantedContacts() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<java.lang.String>) null;
+  public java.util.List<String> getGrantedContacts() throws org.gsma.joyn.ClientApiException{
+    return (java.util.List<String>) null;
   }
-  public java.util.List<java.lang.String> getRevokedContacts() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<java.lang.String>) null;
+  public java.util.List<String> getRevokedContacts() throws org.gsma.joyn.ClientApiException{
+    return (java.util.List<String>) null;
   }
-  public java.util.List<java.lang.String> getBlockedContacts() throws org.gsma.joyn.ClientApiException{
-    return (java.util.List<java.lang.String>) null;
+  public java.util.List<String> getBlockedContacts() throws org.gsma.joyn.ClientApiException{
+    return (java.util.List<String>) null;
   }
 }
