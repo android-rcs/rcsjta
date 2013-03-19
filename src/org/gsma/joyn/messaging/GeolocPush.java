@@ -20,6 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.lang.String;
 
+/**
+ * Class GeolocPush.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class GeolocPush implements Parcelable {
 
   public static final Parcelable.Creator<GeolocPush> CREATOR = null;

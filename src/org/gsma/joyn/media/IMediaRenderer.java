@@ -27,6 +27,10 @@ import java.lang.String;
  * Interface IMediaRenderer
  * <p>
  * Generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IMediaRenderer extends IInterface {
 

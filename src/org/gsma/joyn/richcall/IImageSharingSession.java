@@ -27,6 +27,10 @@ import java.lang.String;
  * Interface IImageSharingSession.
  * <p>
  * File generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IImageSharingSession extends IInterface {
     /**
@@ -119,7 +123,7 @@ public interface IImageSharingSession extends IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
+         * @param binder
          * @return  The i image sharing session.
          */
         public static IImageSharingSession asInterface(IBinder binder) {

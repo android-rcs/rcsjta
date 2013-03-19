@@ -26,6 +26,10 @@ import android.os.RemoteException;
  * Interface IVideoSharingEventListener.
  * <p>
  * Generated from AIDL.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IVideoSharingEventListener extends IInterface {
     public void handleSessionStarted() throws RemoteException;
@@ -77,13 +81,13 @@ public interface IVideoSharingEventListener extends IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
+         * @param binder
          * @return  The i video sharing event listener.
          */
         public static IVideoSharingEventListener asInterface(IBinder binder) {
             return (IVideoSharingEventListener) null;
         }
 
-    } // end Stub
+    }
 
-} // end IVideoSharingEventListener
+}

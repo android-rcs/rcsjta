@@ -27,6 +27,10 @@ import java.lang.String;
  * Interface IMediaEventListener.
  * <p>
  * Generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IMediaEventListener extends IInterface {
 
@@ -77,7 +81,7 @@ public interface IMediaEventListener extends IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
+         * @param binder
          * @return  The i media event listener.
          */
         public static IMediaEventListener asInterface(IBinder binder) {

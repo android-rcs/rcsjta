@@ -24,6 +24,15 @@ import android.os.RemoteException;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Interface IpresenceApi.
+ * <p>
+ * Generated from AIDL.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public interface IPresenceApi extends IInterface {
 
   public abstract static class Stub extends Binder implements IPresenceApi {

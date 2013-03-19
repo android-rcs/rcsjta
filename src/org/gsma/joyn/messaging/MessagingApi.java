@@ -20,6 +20,13 @@ import android.os.IBinder;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Class MessagingApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class MessagingApi extends org.gsma.joyn.ClientApi {
 
   public MessagingApi(android.content.Context arg1){

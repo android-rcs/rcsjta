@@ -67,7 +67,6 @@
       classpath="${android_jar}:${project.all.jars.path}" 
       packagenames="${project.app.package}.*"
       access="public"
-      create.links="on"
     >
       <doclet>
         <param name="-pdf" value="rcsjta.pdf"></param>

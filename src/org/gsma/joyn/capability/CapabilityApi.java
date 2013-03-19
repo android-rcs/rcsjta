@@ -18,6 +18,13 @@ package org.gsma.joyn.capability;
 
 import java.lang.String;
 
+/**
+ * Class CapabilityApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class CapabilityApi extends org.gsma.joyn.ClientApi {
 
   public CapabilityApi(android.content.Context arg1){

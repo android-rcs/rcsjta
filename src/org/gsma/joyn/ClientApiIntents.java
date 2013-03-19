@@ -20,6 +20,10 @@ import java.lang.String;
 
 /**
  * Class ClientApiIntents.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class ClientApiIntents {
     /**

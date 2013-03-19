@@ -26,6 +26,10 @@ import android.os.RemoteException;
  * SIP event listener interface
  * <p>
  * File generated from AIDL.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface ISipSessionEventListener extends IInterface {
 

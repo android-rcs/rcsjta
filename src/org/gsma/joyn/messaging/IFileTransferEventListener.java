@@ -27,6 +27,10 @@ import java.lang.String;
  * Interface IFileTransferEventListener.
  * <p>
  * Generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IFileTransferEventListener extends IInterface {
     public void handleSessionStarted() throws RemoteException;
@@ -91,7 +95,7 @@ public interface IFileTransferEventListener extends IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
+         * @param binder
          * @return  The i file transfer event listener.
          */
         public static IFileTransferEventListener asInterface(IBinder binder) {

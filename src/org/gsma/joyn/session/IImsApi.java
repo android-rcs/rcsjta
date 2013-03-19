@@ -26,6 +26,10 @@ import android.os.RemoteException;
  * IMS API Interface
  * <p>
  * File generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IImsApi extends IInterface {
 

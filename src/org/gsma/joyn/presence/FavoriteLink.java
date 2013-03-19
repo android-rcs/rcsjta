@@ -20,6 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.lang.String;
 
+/**
+ * Class FavoriteLink.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class FavoriteLink implements Parcelable {
 
   public static final Parcelable.Creator<FavoriteLink> CREATOR = null;

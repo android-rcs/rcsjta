@@ -18,6 +18,10 @@ package org.gsma.joyn.messaging;
 
 /**
  * Class RichMessaging.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class RichMessaging {
 } // end RichMessaging

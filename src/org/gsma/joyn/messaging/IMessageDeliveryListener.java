@@ -27,13 +27,17 @@ import java.lang.String;
  * Interface IMessageDeliveryListener.
 * <p>
  * File generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IMessageDeliveryListener extends IInterface {
 
     /**
      *
      * @param contact
-     * @param mesgId
+     * @param msgId
      * @param status
      */
     public void handleMessageDeliveryStatus(String contact, String msgId, String status) throws RemoteException;

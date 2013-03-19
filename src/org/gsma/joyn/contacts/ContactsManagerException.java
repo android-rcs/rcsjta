@@ -20,6 +20,10 @@ import java.lang.String;
 
 /**
  * Class ContactsManagerException.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class ContactsManagerException extends Exception {
 	

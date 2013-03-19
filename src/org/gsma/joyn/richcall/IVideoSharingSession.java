@@ -25,8 +25,12 @@ import java.lang.String;
 
 /**
  * Interface IVideoSharingSession.
- *
+ * <p>
  * Generated from AIDL.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IVideoSharingSession extends IInterface {
     /**

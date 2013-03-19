@@ -28,6 +28,10 @@ import org.gsma.joyn.media.IMediaPlayer;
  * Interface IRichCallApi.
  * <p>
  * Generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IRichCallApi extends IInterface {
 
@@ -129,7 +133,7 @@ public interface IRichCallApi extends IInterface {
 
         /**
          *
-         * @param arg1 The arg1.
+         * @param binder
          * @return  The i rich call api.
          */
         public static IRichCallApi asInterface(IBinder binder) {

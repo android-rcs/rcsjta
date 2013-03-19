@@ -22,6 +22,10 @@ import org.gsma.joyn.session.ImsServiceError;
 
 /**
  * SIP session errors constants and utilities
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class SipSessionError extends ImsSessionBasedServiceError {
 	

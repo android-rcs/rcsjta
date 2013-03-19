@@ -20,6 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.lang.String;
 
+/**
+ * Class Geoloc.
+ * 
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class Geoloc implements Parcelable {
 
   public static final Parcelable.Creator<Geoloc> CREATOR = null;

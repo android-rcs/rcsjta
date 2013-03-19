@@ -17,60 +17,66 @@
 package org.gsma.joyn;
 
 import java.lang.String;
+import org.gsma.joyn.session.ImsServiceError;
+import org.gsma.joyn.session.ImsSessionBasedServiceError;
 
 /**
  * Class ChatError.
+ *
+ * @author Jean-Marc AUFFRET (Orange) Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
-public class ChatError extends org.gsma.joyn.session.ImsSessionBasedServiceError {
+public class ChatError extends ImsSessionBasedServiceError {
 	
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
     /**
-     * Constant MEDIA_SESSION_FAILED.
+     * Media session has failed (e.g. MSRP failure)
      */
     public static final int MEDIA_SESSION_FAILED = 111;
 
     /**
-     * Constant SUBSCRIBE_CONFERENCE_FAILED.
+     * Subscription to conference package has failed
      */
     public static final int SUBSCRIBE_CONFERENCE_FAILED = 112;
 
     /**
-     * Constant SESSION_NOT_FOUND.
+     * Group chat session not found in the server 
      */
     public static final int SESSION_NOT_FOUND = 113;
 
     /**
-     * Constant SESSION_RESTART_FAILED.
+     * Group chat restart has failed
      */
     public static final int SESSION_RESTART_FAILED = 114;
 
     /**
-     * Creates a new instance of ChatError.
+     * Constructor, creates a new instance of ChatError.
      *
-     * @param arg1 The arg1.
+     * @param error
      */
-    public ChatError(org.gsma.joyn.session.ImsServiceError arg1) {
-        super((org.gsma.joyn.session.ImsServiceError) null);
+    public ChatError(ImsServiceError error) {
+        super((ImsServiceError) null);
     }
 
     /**
-     * Creates a new instance of ChatError.
+     * Constructor, creates a new instance of ChatError.
      *
-     * @param arg1 The arg1.
+     * @param code
      */
-    public ChatError(int arg1) {
-        super((org.gsma.joyn.session.ImsServiceError) null);
+    public ChatError(int code) {
+        super((ImsServiceError) null);
     }
 
     /**
-     * Creates a new instance of ChatError.
+     * Constructor, creates a new instance of ChatError.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param code
+     * @param msg
      */
-    public ChatError(int arg1, String arg2) {
-        super((org.gsma.joyn.session.ImsServiceError) null);
+    public ChatError(int code, String msg) {
+        super((ImsServiceError) null);
     }
 
-} // end ChatError
+}

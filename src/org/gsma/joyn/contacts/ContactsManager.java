@@ -19,6 +19,13 @@ package org.gsma.joyn.contacts;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Class ConctactManager.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public final class ContactsManager {
 
   private ContactsManager(android.content.Context arg1){

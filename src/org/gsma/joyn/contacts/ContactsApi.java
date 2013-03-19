@@ -19,6 +19,13 @@ package org.gsma.joyn.contacts;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Class ContactApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class ContactsApi {
 
   public ContactsApi(android.content.Context arg1){

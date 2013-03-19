@@ -20,6 +20,10 @@ import java.lang.String;
 
 /**
  * Class ClientApiException.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class ClientApiException extends Exception {
 	

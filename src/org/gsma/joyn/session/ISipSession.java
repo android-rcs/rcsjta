@@ -27,6 +27,10 @@ import java.lang.String;
  * Class ISipSession.
  * <p>
  * File generated from AIDL.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface ISipSession extends IInterface {
 

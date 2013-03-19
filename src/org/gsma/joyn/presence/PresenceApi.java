@@ -19,6 +19,13 @@ package org.gsma.joyn.presence;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Class PresenceApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class PresenceApi extends org.gsma.joyn.ClientApi{
 
   public PresenceApi(android.content.Context arg1){

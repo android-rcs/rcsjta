@@ -18,6 +18,10 @@ package org.gsma.joyn.session;
 
 /**
  * Interface for RCS session termination reason
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface SessionTerminationReason {
 

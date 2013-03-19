@@ -74,7 +74,7 @@
 			android:label="@string/rcs_settings_title_settings"
 			android:launchMode="singleInstance"
 			android:name="org.gsma.joyn.settings.RcsSettings"
-		  	android:process=":settings" 
+		  android:process=":settings" 
 			>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

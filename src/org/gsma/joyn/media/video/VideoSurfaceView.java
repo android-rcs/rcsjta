@@ -18,6 +18,10 @@ package org.gsma.joyn.media.video;
 
 /**
  * Class VideoSurfaceView.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class VideoSurfaceView extends android.view.SurfaceView {
     /**

@@ -18,6 +18,10 @@ package org.gsma.joyn;
 
 /**
  * Interface for IMS event listener interface
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface ImsEventListener {
 

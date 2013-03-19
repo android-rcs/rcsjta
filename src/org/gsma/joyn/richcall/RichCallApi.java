@@ -24,6 +24,10 @@ import org.gsma.joyn.media.IMediaPlayer;
 
 /**
  * Class RichCallApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class RichCallApi extends org.gsma.joyn.ClientApi {
 
@@ -105,7 +109,7 @@ public class RichCallApi extends org.gsma.joyn.ClientApi {
     /**
      * Sets the multi party call.
      *
-     * @param arg1 The multi party call.
+     * @param state 
      */
     public void setMultiPartyCall(boolean state) throws ClientApiException {
 
@@ -114,10 +118,10 @@ public class RichCallApi extends org.gsma.joyn.ClientApi {
     /**
      * Sets the call hold.
      *
-     * @param arg1 The call hold.
+     * @param state
      */
     public void setCallHold(boolean state) throws ClientApiException {
 
     }
 
-} // end RichCallApi
+}

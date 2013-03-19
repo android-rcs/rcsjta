@@ -22,6 +22,13 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class Capabilities.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class Capabilities implements Parcelable {
 
   public static final Parcelable.Creator<Capabilities> CREATOR = null;

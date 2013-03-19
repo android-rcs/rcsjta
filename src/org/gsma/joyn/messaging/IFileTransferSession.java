@@ -28,6 +28,10 @@ import java.util.List;
  * Interface IFileTransferSession
  * <p>
  * Generated from AIDL
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public interface IFileTransferSession extends IInterface {
 

@@ -20,6 +20,10 @@ import java.lang.String;
 
 /**
  * IMS service error constants and utilities
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class ImsServiceError extends Error {
 	

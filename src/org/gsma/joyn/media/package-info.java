@@ -28,4 +28,4 @@
  * of the media player or renderer in order to avoid to pass each RTP
  * sample via the AIDL interface to the RCS stack.
  */
-package  org.gsma.joyn.media;
+package org.gsma.joyn.media;

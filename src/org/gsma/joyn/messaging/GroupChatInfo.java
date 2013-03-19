@@ -19,6 +19,13 @@ package org.gsma.joyn.messaging;
 import java.lang.String;
 import java.util.List;
 
+/**
+ * Class GroupChatInfo
+ * 
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
+ */
 public class GroupChatInfo {
 
   public GroupChatInfo(String arg1, String arg2, String arg3, List<String> arg4, String arg5){

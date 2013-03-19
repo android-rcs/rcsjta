@@ -16,8 +16,15 @@
 
 package org.gsma.joyn;
 
+import org.gsma.joyn.session.IImsApi;
+import org.gsma.joyn.session.ImsEventListener;
+
 /**
  * Class ClientApi.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public abstract class ClientApi {
     /**

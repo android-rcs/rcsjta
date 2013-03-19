@@ -22,6 +22,10 @@ import org.gsma.joyn.capability.Capabilities;
 
 /**
  * Class RcsSettings.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class RcsSettings {
     /**

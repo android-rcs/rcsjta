@@ -22,6 +22,10 @@ import java.lang.String;
 
 /**
  * Rich call history. This content provider removes old messages if there is no enough space.
+ *
+ * @author Jean-Marc AUFFRET (Orange)
+ * @version 1.0
+ * @since 1.0
  */
 public class RichCall {
 
