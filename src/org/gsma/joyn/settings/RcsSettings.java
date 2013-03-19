@@ -351,7 +351,7 @@ public class RcsSettings {
      *
      * @param 
      */
-    public void setPhoneVibrateForChatInvitation(boolean boolean) {
+    public void setPhoneVibrateForChatInvitation(boolean vibrate) {
 
     }
 
