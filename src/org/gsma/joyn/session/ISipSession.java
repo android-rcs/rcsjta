@@ -90,7 +90,7 @@ public interface ISipSession extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void acceptSession(String arg1) throws RemoteException;
 
@@ -101,14 +101,14 @@ public interface ISipSession extends IInterface {
     /**
      * Adds a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void addSessionListener(ISipSessionEventListener arg1) throws RemoteException;
 
     /**
      * Removes a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void removeSessionListener(ISipSessionEventListener arg1) throws RemoteException;
 

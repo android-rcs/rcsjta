@@ -84,14 +84,14 @@ public interface IImageSharingSession extends IInterface {
     /**
      * Adds a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void addSessionListener(IImageSharingEventListener arg1) throws RemoteException;
 
     /**
      * Removes a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void removeSessionListener(IImageSharingEventListener arg1) throws RemoteException;
 

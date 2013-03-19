@@ -32,9 +32,9 @@ public class RichAddressBookException extends Exception {
     /**
      * Creates a new instance of RichAddressBookException.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public RichAddressBookException(String arg1) {
+    public RichAddressBookException(String error) {
         super();
     }
 

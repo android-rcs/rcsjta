@@ -37,7 +37,7 @@ public interface IImageSharingEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleSessionAborted(int arg1) throws RemoteException;
 
@@ -45,20 +45,20 @@ public interface IImageSharingEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleSharingError(int arg1) throws RemoteException;
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
     public void handleSharingProgress(long arg1, long arg2) throws RemoteException;
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleImageTransfered(String arg1) throws RemoteException;
 

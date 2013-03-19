@@ -19,7 +19,8 @@ package org.gsma.joyn.media.video;
 import java.lang.String;
 
 /**
- * Class LiveVideoPlayer.
+ * Class LiveVideoPlayer. Live RTP video player based on H.264 QCIF
+ * format.
  *
  * @author Jean-Marc AUFFRET (Orange)
  * @version 1.0
@@ -36,7 +37,7 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
     /**
      * Creates a new instance of LiveVideoPlayer.
      *
-     * @param arg1 The arg1 array.
+     * @param 
      */
     public LiveVideoPlayer(org.gsma.joyn.media.MediaCodec[] arg1) {
         super();
@@ -56,10 +57,10 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public void open(String arg1, int arg2) {
+    public void open(String remoteHost, int remotePort) {
 
     }
 
@@ -74,9 +75,9 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
     /**
      * Adds a listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void addListener(org.gsma.joyn.media.IMediaEventListener arg1) {
+    public void addListener(org.gsma.joyn.media.IMediaEventListener listener) {
 
     }
 
@@ -90,9 +91,9 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
     /**
      * Sets the media codec.
      *
-     * @param arg1 The media codec.
+     * @param 
      */
-    public void setMediaCodec(org.gsma.joyn.media.MediaCodec arg1) {
+    public void setMediaCodec(org.gsma.joyn.media.MediaCodec mediaCodec) {
 
     }
 
@@ -161,7 +162,7 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
     /**
      * Sets the scaling factor.
      *
-     * @param arg1 The scaling factor.
+     * @param 
      */
     public void setScalingFactor(float arg1) {
 
@@ -170,7 +171,7 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
     /**
      * Sets the scaling factor.
      *
-     * @param arg1 The scaling factor.
+     * @param 
      */
     public void setScalingFactor(boolean arg1) {
 
@@ -178,11 +179,11 @@ public class LiveVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stub imple
 
     /**
      *
-     * @param arg1 The arg1 array.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public void onPreviewFrame(byte[] arg1, android.hardware.Camera arg2) {
+    public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
 
     }
 
-} // end LiveVideoPlayer
+}

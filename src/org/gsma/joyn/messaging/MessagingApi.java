@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class MessagingApi extends org.gsma.joyn.ClientApi {
 
-  public MessagingApi(android.content.Context arg1){
+  public MessagingApi(android.content.Context context){
     super((android.content.Context) null);
   }
 
@@ -37,40 +37,40 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   }
   public void disconnectApi(){
   }
-  public IFileTransferSession transferFile(String arg1, String arg2) throws org.gsma.joyn.ClientApiException{
+    public IFileTransferSession transferFile(String contact, String file) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
   public IFileTransferSession transferFileToGroup(List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
-  public IFileTransferSession getFileTransferSession(String arg1) throws org.gsma.joyn.ClientApiException{
+  public IFileTransferSession getFileTransferSession(String id) throws org.gsma.joyn.ClientApiException{
     return (IFileTransferSession) null;
   }
-  public List<IBinder> getFileTransferSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+  public List<IBinder> getFileTransferSessionsWith(String contact) throws org.gsma.joyn.ClientApiException{
     return (List<IBinder>) null;
   }
   public List<IBinder> getFileTransferSessions() throws org.gsma.joyn.ClientApiException{
     return (List<IBinder>) null;
   }
-  public IChatSession initiateOne2OneChatSession(String arg1, String arg2) throws org.gsma.joyn.ClientApiException{
+  public IChatSession initiateOne2OneChatSession(String contact, String firstMessage) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession initiateAdhocGroupChatSession(List<String> arg1) throws org.gsma.joyn.ClientApiException{
+  public IChatSession initiateAdhocGroupChatSession(List<String> participants) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession initiateAdhocGroupChatSession(List<String> arg1, String arg2) throws org.gsma.joyn.ClientApiException{
+  public IChatSession initiateAdhocGroupChatSession(List<String> participants, String subject) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession rejoinGroupChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
+  public IChatSession rejoinGroupChatSession(String chatId) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession restartGroupChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
+  public IChatSession restartGroupChatSession(String chatId) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public IChatSession getChatSession(String arg1) throws org.gsma.joyn.ClientApiException{
+  public IChatSession getChatSession(String chatId) throws org.gsma.joyn.ClientApiException{
     return (IChatSession) null;
   }
-  public List<IBinder> getChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+  public List<IBinder> getChatSessionsWith(String contact) throws org.gsma.joyn.ClientApiException{
     return (List<IBinder>) null;
   }
   public List<IBinder> getChatSessions() throws org.gsma.joyn.ClientApiException{
@@ -79,13 +79,13 @@ public class MessagingApi extends org.gsma.joyn.ClientApi {
   public List<IBinder> getGroupChatSessions() throws org.gsma.joyn.ClientApiException{
     return (List<IBinder>) null;
   }
-  public List<IBinder> getGroupChatSessionsWith(String arg1) throws org.gsma.joyn.ClientApiException{
+  public List<IBinder> getGroupChatSessionsWith(String chatId) throws org.gsma.joyn.ClientApiException{
     return (List<IBinder>) null;
   }
-  public void setMessageDeliveryStatus(String arg1, String arg2, String arg3) throws org.gsma.joyn.ClientApiException{
+  public void setMessageDeliveryStatus(String contact, String messageId, String status) throws org.gsma.joyn.ClientApiException{
   }
-  public void addMessageDeliveryListener(IMessageDeliveryListener arg1) throws org.gsma.joyn.ClientApiException{
+  public void addMessageDeliveryListener(IMessageDeliveryListener listener) throws org.gsma.joyn.ClientApiException{
   }
-  public void removeMessageDeliveryListener(IMessageDeliveryListener arg1) throws org.gsma.joyn.ClientApiException{
+  public void removeMessageDeliveryListener(IMessageDeliveryListener listener) throws org.gsma.joyn.ClientApiException{
   }
 }

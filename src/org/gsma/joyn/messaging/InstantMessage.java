@@ -36,11 +36,11 @@ public class InstantMessage implements Parcelable {
 
   // Constructors
 
-  public InstantMessage(String arg1, String arg2, String arg3, boolean arg4){
+    public InstantMessage(String messageId, String remote, String message, boolean imdnDispayRequested){
   }
-  public InstantMessage(String arg1, String arg2, String arg3, boolean arg4, java.util.Date arg5){
+  public InstantMessage(String messageId, String remote, String message, boolean imdnDisplayRequested, java.util.Date serverReceiptAt){
   }
-  public InstantMessage(Parcel arg1){
+  public InstantMessage(Parcel source){
   }
   // Methods
 
@@ -50,7 +50,7 @@ public class InstantMessage implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public String getTextMessage(){
     return (String) null;

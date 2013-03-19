@@ -63,21 +63,21 @@ public interface IVideoSharingSession extends IInterface {
     /**
      * Adds a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void addSessionListener(IVideoSharingEventListener arg1) throws RemoteException;
 
     /**
      * Removes a session listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void removeSessionListener(IVideoSharingEventListener arg1) throws RemoteException;
 
     /**
      * Sets the media renderer.
      *
-     * @param arg1 The media renderer.
+     * @param 
      */
     public void setMediaRenderer(org.gsma.joyn.media.IMediaRenderer arg1) throws RemoteException;
 

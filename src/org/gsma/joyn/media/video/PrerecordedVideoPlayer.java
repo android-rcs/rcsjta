@@ -19,7 +19,8 @@ package org.gsma.joyn.media.video;
 import java.lang.String;
 
 /**
- * Class PrerecordedVideoPlayer.
+ * Class PrerecordedVideoPlayer. Pre-recorded video RTP
+ * player. Supports only H.263 QCIF format.
  *
  * @author Jean-Marc AUFFRET (Orange)
  * @version 1.0
@@ -34,32 +35,32 @@ public class PrerecordedVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stu
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public PrerecordedVideoPlayer(String arg1, VideoPlayerEventListener arg2) {
+    public PrerecordedVideoPlayer(String filename, VideoPlayerEventListener listener) {
         super();
     }
 
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
+     * @param 
+     * @param 
+     * @param 
      */
-    public PrerecordedVideoPlayer(VideoCodec arg1, String arg2, VideoPlayerEventListener arg3) {
+    public PrerecordedVideoPlayer(VideoCodec codec, String filename, VideoPlayerEventListener listener) {
         super();
     }
 
     /**
      * Creates a new instance of PrerecordedVideoPlayer.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
+     * @param 
+     * @param 
+     * @param 
      */
-    public PrerecordedVideoPlayer(String arg1, String arg2, VideoPlayerEventListener arg3) {
+    public PrerecordedVideoPlayer(String codec, String filename, VideoPlayerEventListener listener) {
         super();
     }
 
@@ -76,11 +77,11 @@ public class PrerecordedVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stu
     }
 
     /**
-     *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * FIXME: Is not this a copy-paste error?
+     * @param 
+     * @param 
      */
-    public void open(String arg1, int arg2) {
+    public void open(String remoteHost, int remotePort) {
 
     }
 
@@ -95,7 +96,7 @@ public class PrerecordedVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stu
     /**
      * Adds a listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void addListener(org.gsma.joyn.media.IMediaEventListener arg1) {
 
@@ -129,7 +130,7 @@ public class PrerecordedVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stu
     /**
      * Sets the media codec.
      *
-     * @param arg1 The media codec.
+     * @param 
      */
     public void setMediaCodec(org.gsma.joyn.media.MediaCodec arg1) {
 
@@ -138,7 +139,7 @@ public class PrerecordedVideoPlayer extends org.gsma.joyn.media.IMediaPlayer.Stu
     /**
      * Sets the video surface.
      *
-     * @param arg1 The video surface.
+     * @param 
      */
     public void setVideoSurface(VideoSurfaceView arg1) {
 

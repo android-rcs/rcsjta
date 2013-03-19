@@ -41,16 +41,16 @@ public class GsmaClientConnector
   }
   // Methods
 
-  public static boolean isDeviceRcsCompliant(android.content.Context arg1){
+  public static boolean isDeviceRcsCompliant(android.content.Context context){
     return false;
   }
-  public static java.util.Vector<android.content.pm.ApplicationInfo> getRcsClients(android.content.Context arg1){
+  public static java.util.Vector<android.content.pm.ApplicationInfo> getRcsClients(android.content.Context context){
     return (java.util.Vector<android.content.pm.ApplicationInfo>) null;
   }
-  public static boolean isRcsClientActivated(android.content.Context arg1, String arg2){
+  public static boolean isRcsClientActivated(android.content.Context context, String packageName){
     return false;
   }
-  public static android.content.Intent getRcsSettingsActivityIntent(android.content.Context arg1, String arg2){
+  public static android.content.Intent getRcsSettingsActivityIntent(android.content.Context context, String packageName){
     return (android.content.Intent) null;
   }
 }

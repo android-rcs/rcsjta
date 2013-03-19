@@ -31,9 +31,9 @@ public class RcsSettings {
     /**
      * Creates a new instance of RcsSettings.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    private RcsSettings(Context arg1) {
+    private RcsSettings(Context context) {
 
     }
 
@@ -139,28 +139,28 @@ public class RcsSettings {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      * @return  The string.
      */
-    public String readParameter(String arg1) {
+    public String readParameter(String key) {
         return (String) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public void writeParameter(String arg1, String arg2) {
+    public void writeParameter(String key, String value) {
 
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public void insertParameter(String arg1, String arg2) {
+    public void insertParameter(String key, String value) {
 
     }
 
@@ -175,9 +175,9 @@ public class RcsSettings {
     /**
      * Sets the service activation state.
      *
-     * @param arg1 The service activation state.
+     * @param 
      */
-    public void setServiceActivationState(boolean arg1) {
+    public void setServiceActivationState(boolean state) {
 
     }
 
@@ -192,9 +192,9 @@ public class RcsSettings {
     /**
      * Sets the roaming authorization state.
      *
-     * @param arg1 The roaming authorization state.
+     * @param 
      */
-    public void setRoamingAuthorizationState(boolean arg1) {
+    public void setRoamingAuthorizationState(boolean state) {
 
     }
 
@@ -210,9 +210,9 @@ public class RcsSettings {
     /**
      * Sets the presence invitation ringtone.
      *
-     * @param arg1 The presence invitation ringtone.
+     * @param 
      */
-    public void setPresenceInvitationRingtone(String arg1) {
+    public void setPresenceInvitationRingtone(String uri) {
 
     }
 
@@ -227,9 +227,9 @@ public class RcsSettings {
     /**
      * Sets the phone vibrate for presence invitation.
      *
-     * @param arg1 The phone vibrate for presence invitation.
+     * @param 
      */
-    public void setPhoneVibrateForPresenceInvitation(boolean arg1) {
+    public void setPhoneVibrateForPresenceInvitation(boolean vibrate) {
 
     }
 
@@ -245,9 +245,9 @@ public class RcsSettings {
     /**
      * Sets the c sh invitation ringtone.
      *
-     * @param arg1 The c sh invitation ringtone.
+     * @param 
      */
-    public void setCShInvitationRingtone(String arg1) {
+    public void setCShInvitationRingtone(String uri) {
 
     }
 
@@ -262,9 +262,9 @@ public class RcsSettings {
     /**
      * Sets the phone vibrate for c sh invitation.
      *
-     * @param arg1 The phone vibrate for c sh invitation.
+     * @param 
      */
-    public void setPhoneVibrateForCShInvitation(boolean arg1) {
+    public void setPhoneVibrateForCShInvitation(boolean vibrate) {
 
     }
 
@@ -279,9 +279,9 @@ public class RcsSettings {
     /**
      * Sets the phone beep if c sh available.
      *
-     * @param arg1 The phone beep if c sh available.
+     * @param 
      */
-    public void setPhoneBeepIfCShAvailable(boolean arg1) {
+    public void setPhoneBeepIfCShAvailable(boolean beep) {
 
     }
 
@@ -297,9 +297,9 @@ public class RcsSettings {
     /**
      * Sets the file transfer invitation ringtone.
      *
-     * @param arg1 The file transfer invitation ringtone.
+     * @param 
      */
-    public void setFileTransferInvitationRingtone(String arg1) {
+    public void setFileTransferInvitationRingtone(String uri) {
 
     }
 
@@ -314,9 +314,9 @@ public class RcsSettings {
     /**
      * Sets the phone vibrate for file transfer invitation.
      *
-     * @param arg1 The phone vibrate for file transfer invitation.
+     * @param 
      */
-    public void setPhoneVibrateForFileTransferInvitation(boolean arg1) {
+    public void setPhoneVibrateForFileTransferInvitation(boolean vibrate) {
 
     }
 
@@ -332,9 +332,9 @@ public class RcsSettings {
     /**
      * Sets the chat invitation ringtone.
      *
-     * @param arg1 The chat invitation ringtone.
+     * @param 
      */
-    public void setChatInvitationRingtone(String arg1) {
+    public void setChatInvitationRingtone(String uri) {
 
     }
 
@@ -349,9 +349,9 @@ public class RcsSettings {
     /**
      * Sets the phone vibrate for chat invitation.
      *
-     * @param arg1 The phone vibrate for chat invitation.
+     * @param 
      */
-    public void setPhoneVibrateForChatInvitation(boolean arg1) {
+    public void setPhoneVibrateForChatInvitation(boolean boolean) {
 
     }
 
@@ -367,9 +367,9 @@ public class RcsSettings {
     /**
      * Sets the predefined freetext1.
      *
-     * @param arg1 The predefined freetext1.
+     * @param 
      */
-    public void setPredefinedFreetext1(String arg1) {
+    public void setPredefinedFreetext1(String text) {
 
     }
 
@@ -385,9 +385,9 @@ public class RcsSettings {
     /**
      * Sets the predefined freetext2.
      *
-     * @param arg1 The predefined freetext2.
+     * @param 
      */
-    public void setPredefinedFreetext2(String arg1) {
+    public void setPredefinedFreetext2(String text) {
 
     }
 
@@ -403,9 +403,9 @@ public class RcsSettings {
     /**
      * Sets the predefined freetext3.
      *
-     * @param arg1 The predefined freetext3.
+     * @param 
      */
-    public void setPredefinedFreetext3(String arg1) {
+    public void setPredefinedFreetext3(String text) {
 
     }
 
@@ -421,9 +421,9 @@ public class RcsSettings {
     /**
      * Sets the predefined freetext4.
      *
-     * @param arg1 The predefined freetext4.
+     * @param 
      */
-    public void setPredefinedFreetext4(String arg1) {
+    public void setPredefinedFreetext4(String text) {
 
     }
 
@@ -439,7 +439,7 @@ public class RcsSettings {
     /**
      * Sets the min battery level.
      *
-     * @param arg1 The min battery level.
+     * @param 
      */
     public void setMinBatteryLevel(int arg1) {
 
@@ -457,9 +457,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims user name.
      *
-     * @param arg1 The user profile ims user name.
+     * @param 
      */
-    public void setUserProfileImsUserName(String arg1) {
+    public void setUserProfileImsUserName(String value) {
 
     }
 
@@ -475,9 +475,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims display name.
      *
-     * @param arg1 The user profile ims display name.
+     * @param 
      */
-    public void setUserProfileImsDisplayName(String arg1) {
+    public void setUserProfileImsDisplayName(String value) {
 
     }
 
@@ -493,9 +493,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims private id.
      *
-     * @param arg1 The user profile ims private id.
+     * @param 
      */
-    public void setUserProfileImsPrivateId(String arg1) {
+    public void setUserProfileImsPrivateId(String uri) {
 
     }
 
@@ -511,9 +511,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims password.
      *
-     * @param arg1 The user profile ims password.
+     * @param 
      */
-    public void setUserProfileImsPassword(String arg1) {
+    public void setUserProfileImsPassword(String pwd) {
 
     }
 
@@ -529,9 +529,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims realm.
      *
-     * @param arg1 The user profile ims realm.
+     * @param 
      */
-    public void setUserProfileImsRealm(String arg1) {
+    public void setUserProfileImsRealm(String realm) {
 
     }
 
@@ -547,9 +547,9 @@ public class RcsSettings {
     /**
      * Sets the user profile ims domain.
      *
-     * @param arg1 The user profile ims domain.
+     * @param 
      */
-    public void setUserProfileImsDomain(String arg1) {
+    public void setUserProfileImsDomain(String domain) {
 
     }
 
@@ -565,9 +565,9 @@ public class RcsSettings {
     /**
      * Sets the ims proxy addr for mobile.
      *
-     * @param arg1 The ims proxy addr for mobile.
+     * @param 
      */
-    public void setImsProxyAddrForMobile(String arg1) {
+    public void setImsProxyAddrForMobile(String addr) {
 
     }
 
@@ -583,9 +583,9 @@ public class RcsSettings {
     /**
      * Sets the ims proxy port for mobile.
      *
-     * @param arg1 The ims proxy port for mobile.
+     * @param 
      */
-    public void setImsProxyPortForMobile(int arg1) {
+    public void setImsProxyPortForMobile(int port) {
 
     }
 
@@ -601,9 +601,9 @@ public class RcsSettings {
     /**
      * Sets the ims proxy addr for wifi.
      *
-     * @param arg1 The ims proxy addr for wifi.
+     * @param 
      */
-    public void setImsProxyAddrForWifi(String arg1) {
+    public void setImsProxyAddrForWifi(String addr) {
 
     }
 
@@ -619,9 +619,9 @@ public class RcsSettings {
     /**
      * Sets the ims proxy port for wifi.
      *
-     * @param arg1 The ims proxy port for wifi.
+     * @param 
      */
-    public void setImsProxyPortForWifi(int arg1) {
+    public void setImsProxyPortForWifi(int port) {
 
     }
 
@@ -637,9 +637,9 @@ public class RcsSettings {
     /**
      * Sets the xdm server.
      *
-     * @param arg1 The xdm server.
+     * @param 
      */
-    public void setXdmServer(String arg1) {
+    public void setXdmServer(String addr) {
 
     }
 
@@ -655,9 +655,9 @@ public class RcsSettings {
     /**
      * Sets the xdm login.
      *
-     * @param arg1 The xdm login.
+     * @param 
      */
-    public void setXdmLogin(String arg1) {
+    public void setXdmLogin(String value) {
 
     }
 
@@ -673,9 +673,9 @@ public class RcsSettings {
     /**
      * Sets the xdm password.
      *
-     * @param arg1 The xdm password.
+     * @param 
      */
-    public void setXdmPassword(String arg1) {
+    public void setXdmPassword(String pwd) {
 
     }
 
@@ -691,9 +691,9 @@ public class RcsSettings {
     /**
      * Sets the im conference uri.
      *
-     * @param arg1 The im conference uri.
+     * @param 
      */
-    public void setImConferenceUri(String arg1) {
+    public void setImConferenceUri(String uri) {
 
     }
 
@@ -709,9 +709,9 @@ public class RcsSettings {
     /**
      * Sets the end user confirmation request uri.
      *
-     * @param arg1 The end user confirmation request uri.
+     * @param 
      */
-    public void setEndUserConfirmationRequestUri(String arg1) {
+    public void setEndUserConfirmationRequestUri(String uri) {
 
     }
 
@@ -727,9 +727,9 @@ public class RcsSettings {
     /**
      * Sets the country code.
      *
-     * @param arg1 The country code.
+     * @param 
      */
-    public void setCountryCode(String arg1) {
+    public void setCountryCode(String code) {
 
     }
 
@@ -745,9 +745,9 @@ public class RcsSettings {
     /**
      * Sets the country area code.
      *
-     * @param arg1 The country area code.
+     * @param 
      */
-    public void setCountryAreaCode(String arg1) {
+    public void setCountryAreaCode(String code) {
 
     }
 
@@ -1176,9 +1176,9 @@ public class RcsSettings {
     /**
      * Sets the supported rcs extensions.
      *
-     * @param arg1 The supported rcs extensions.
+     * @param 
      */
-    public void setSupportedRcsExtensions(String arg1) {
+    public void setSupportedRcsExtensions(String extensions) {
 
     }
 
@@ -1314,18 +1314,18 @@ public class RcsSettings {
     /**
      * Sets the provisioning version.
      *
-     * @param arg1 The provisioning version.
+     * @param 
      */
-    public void setProvisioningVersion(String arg1) {
+    public void setProvisioningVersion(String version) {
 
     }
 
     /**
      * Sets the provisioning terms accepted.
      *
-     * @param arg1 The provisioning terms accepted.
+     * @param 
      */
-    public void setProvisioningTermsAccepted(boolean arg1) {
+    public void setProvisioningTermsAccepted(boolean state) {
 
     }
 
@@ -1360,17 +1360,17 @@ public class RcsSettings {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void backupAccountSettings(String arg1) {
+    public void backupAccountSettings(String account) {
 
     }
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void restoreAccountSettings(String arg1) {
+    public void restoreAccountSettings(String account) {
 
     }
 
@@ -1386,9 +1386,9 @@ public class RcsSettings {
     /**
      * Sets the photo root directory.
      *
-     * @param arg1 The photo root directory.
+     * @param 
      */
-    public void setPhotoRootDirectory(String arg1) {
+    public void setPhotoRootDirectory(String path) {
 
     }
 
@@ -1404,9 +1404,9 @@ public class RcsSettings {
     /**
      * Sets the video root directory.
      *
-     * @param arg1 The video root directory.
+     * @param 
      */
-    public void setVideoRootDirectory(String arg1) {
+    public void setVideoRootDirectory(String path) {
 
     }
 
@@ -1422,9 +1422,9 @@ public class RcsSettings {
     /**
      * Sets the file root directory.
      *
-     * @param arg1 The file root directory.
+     * @param 
      */
-    public void setFileRootDirectory(String arg1) {
+    public void setFileRootDirectory(String path) {
 
     }
 
@@ -1456,10 +1456,10 @@ public class RcsSettings {
     /**
      * Creates the instance.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public static synchronized void createInstance(Context arg1) {
+    public static synchronized void createInstance(Context context) {
 
     }
 
-} // end RcsSettings
+}

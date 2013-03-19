@@ -31,7 +31,7 @@ import org.gsma.joyn.ClientApiException;
  */
 public class SipApi extends org.gsma.joyn.ClientApi {
 
-    public SipApi(Context arg1){
+    public SipApi(Context context){
         super((Context) null);
     }
 

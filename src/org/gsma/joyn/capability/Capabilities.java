@@ -34,13 +34,13 @@ public class Capabilities implements Parcelable {
 
   public Capabilities(){
   }
-  public Capabilities(Parcel arg1){
+  public Capabilities(Parcel soruce){
   }
 
   public String toString(){
     return (String) null;
   }
-  public void setTimestamp(long arg1){
+  public void setTimestamp(long timestamp){
   }
   public long getTimestamp(){
     return 0l;
@@ -48,54 +48,54 @@ public class Capabilities implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public boolean isImageSharingSupported(){
     return false;
   }
-  public void setImageSharingSupport(boolean arg1){
+  public void setImageSharingSupport(boolean supported){
   }
   public boolean isVideoSharingSupported(){
     return false;
   }
-  public void setVideoSharingSupport(boolean arg1){
+  public void setVideoSharingSupport(boolean supported){
   }
   public boolean isImSessionSupported(){
     return false;
   }
-  public void setImSessionSupport(boolean arg1){
+  public void setImSessionSupport(boolean supported){
   }
   public boolean isFileTransferSupported(){
     return false;
   }
-  public void setFileTransferSupport(boolean arg1){
+  public void setFileTransferSupport(boolean supported){
   }
   public boolean isCsVideoSupported(){
     return false;
   }
-  public void setCsVideoSupport(boolean arg1){
+  public void setCsVideoSupport(boolean supported){
   }
   public boolean isPresenceDiscoverySupported(){
     return false;
   }
-  public void setPresenceDiscoverySupport(boolean arg1){
+  public void setPresenceDiscoverySupport(boolean supported){
   }
   public boolean isSocialPresenceSupported(){
     return false;
   }
-  public void setSocialPresenceSupport(boolean arg1){
+  public void setSocialPresenceSupport(boolean supported){
   }
   public boolean isFileTransferHttpSupported(){
     return false;
   }
-  public void setFileTransferHttpSupport(boolean arg1){
+  public void setFileTransferHttpSupport(boolean supported){
   }
   public boolean isGeolocationPushSupported(){
     return false;
   }
-  public void setGeolocationPushSupport(boolean arg1){
+  public void setGeolocationPushSupport(boolean supported){
   }
-  public void addSupportedExtension(String arg1){
+  public void addSupportedExtension(String tag){
   }
   public ArrayList<String> getSupportedExtensions(){
     return (ArrayList<String>) null;

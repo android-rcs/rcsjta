@@ -28,13 +28,13 @@ import java.util.List;
  */
 public class ContactsApi {
 
-  public ContactsApi(android.content.Context arg1){
+  public ContactsApi(android.content.Context context){
   }
 
   public String [] getRcsMimeTypes(){
     return (String []) null;
   }
-  public ContactInfo getContactInfo(String arg1){
+  public ContactInfo getContactInfo(String contact){
     return (ContactInfo) null;
   }
   public List<String> getRcsContactsWithSocialPresence(){
@@ -61,28 +61,28 @@ public class ContactsApi {
   public List<String> getRcsCancelledContacts(){
     return (List<String>) null;
   }
-  public boolean isRcsValidNumber(String arg1){
+  public boolean isRcsValidNumber(String msisdn){
     return false;
   }
-  public boolean isContactImBlocked(String arg1){
+  public boolean isContactImBlocked(String contact){
     return false;
   }
-  public boolean isNumberBlocked(String arg1){
+  public boolean isNumberBlocked(String msisdn){
     return false;
   }
-  public boolean isNumberShared(String arg1){
+  public boolean isNumberShared(String msisdn){
     return false;
   }
-  public boolean isNumberInvited(String arg1){
+  public boolean isNumberInvited(String msisdn){
     return false;
   }
-  public boolean isNumberWilling(String arg1){
+  public boolean isNumberWilling(String msisdn){
     return false;
   }
-  public boolean isNumberCancelled(String arg1){
+  public boolean isNumberCancelled(String msisdn){
     return false;
   }
-  public void setImBlockedForContact(String arg1, boolean arg2){
+  public void setImBlockedForContact(String contact, boolean status){
   }
   public List<String> getBlockedContactsForIm(){
     return (List<String>) null;
@@ -93,7 +93,7 @@ public class ContactsApi {
   public List<String> getRichcallCapableContacts(){
     return (List<String>) null;
   }
-  public void removeCancelledPresenceInvitation(String arg1){
+  public void removeCancelledPresenceInvitation(String contact){
   }
   public void blockCapability(String arg1, String arg2){
   }

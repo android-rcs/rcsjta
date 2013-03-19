@@ -51,13 +51,13 @@ public class PresenceInfo implements Parcelable {
 
   public PresenceInfo(){
   }
-  public PresenceInfo(Parcel arg1){
+  public PresenceInfo(Parcel source){
   }
 
   public String toString(){
     return (String) null;
   }
-  public void setTimestamp(long arg1){
+  public void setTimestamp(long timestamp){
   }
   public long getTimestamp(){
     return 0l;
@@ -65,7 +65,7 @@ public class PresenceInfo implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public void resetTimestamp(){
   }
@@ -75,7 +75,7 @@ public class PresenceInfo implements Parcelable {
   public String getPresenceStatus(){
     return (String) null;
   }
-  public void setPresenceStatus(String arg1){
+  public void setPresenceStatus(String status){
   }
   public boolean isOnline(){
     return false;
@@ -86,7 +86,7 @@ public class PresenceInfo implements Parcelable {
   public String getFreetext(){
     return (String) null;
   }
-  public void setFreetext(String arg1){
+  public void setFreetext(String text){
   }
   public FavoriteLink getFavoriteLink(){
     return (FavoriteLink) null;
@@ -94,18 +94,18 @@ public class PresenceInfo implements Parcelable {
   public String getFavoriteLinkUrl(){
     return (String) null;
   }
-  public void setFavoriteLink(FavoriteLink arg1){
+  public void setFavoriteLink(FavoriteLink favoriteLink){
   }
-  public void setFavoriteLinkUrl(String arg1){
+  public void setFavoriteLinkUrl(String url){
   }
   public PhotoIcon getPhotoIcon(){
     return (PhotoIcon) null;
   }
-  public void setPhotoIcon(PhotoIcon arg1){
+  public void setPhotoIcon(PhotoIcon photo){
   }
   public Geoloc getGeoloc(){
     return (Geoloc) null;
   }
-  public void setGeoloc(Geoloc arg1){
+  public void setGeoloc(Geoloc geoloc){
   }
 }

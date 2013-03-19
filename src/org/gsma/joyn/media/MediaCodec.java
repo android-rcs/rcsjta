@@ -23,7 +23,7 @@ import java.lang.String;
 /**
  * Class MediaCodec.
  *
- * @author Jean-Marc AUFFRET (Orange)
+ * @author hlxn7157 (Orange)
  * @version 1.0
  * @since 1.0
  */
@@ -31,29 +31,29 @@ public class MediaCodec implements Parcelable {
 
   public static final Parcelable.Creator<MediaCodec> CREATOR = null;
 
-  public MediaCodec(String arg1){
+  public MediaCodec(String codecName){
   }
-  public MediaCodec(Parcel arg1){
+  public MediaCodec(Parcel source){
   }
 
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public String getCodecName(){
     return (String) null;
   }
-  public void setIntParam(String arg1, int arg2){
+  public void setIntParam(String key, int value){
   }
-  public void setStringParam(String arg1, String arg2){
+  public void setStringParam(String key, String value){
   }
-  public int getIntParam(String arg1, int arg2){
+  public int getIntParam(String key, int defaultValue){
     return 0;
   }
-  public String getStringParam(String arg1){
+  public String getStringParam(String key){
     return (String) null;
   }
-  public void setCodecName(String arg1){
+  public void setCodecName(String codecName){
   }
 }

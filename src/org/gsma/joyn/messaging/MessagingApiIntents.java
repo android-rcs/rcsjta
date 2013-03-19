@@ -41,4 +41,4 @@ public interface MessagingApiIntents {
      */
     public static final String CHAT_SESSION_REPLACED = "org.gsma.joyn.messaging.CHAT_SESSION_REPLACED";
 
-} // end MessagingApiIntents
+}

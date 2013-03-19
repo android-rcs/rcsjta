@@ -57,9 +57,9 @@ public class ContactInfo implements Parcelable {
 
   public ContactInfo(){
   }
-  public ContactInfo(ContactInfo arg1){
+  public ContactInfo(ContactInfo info){
   }
-  public ContactInfo(Parcel arg1){
+  public ContactInfo(Parcel source){
   }
   public String toString(){
     return (String) null;
@@ -67,7 +67,7 @@ public class ContactInfo implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel destination, int flags){
   }
   public String getContact(){
     return (String) null;
@@ -84,20 +84,20 @@ public class ContactInfo implements Parcelable {
   public org.gsma.joyn.presence.PresenceInfo getPresenceInfo(){
     return (org.gsma.joyn.presence.PresenceInfo) null;
   }
-  public void setCapabilities(org.gsma.joyn.capability.Capabilities arg1){
+  public void setCapabilities(org.gsma.joyn.capability.Capabilities capabilities){
   }
   public org.gsma.joyn.capability.Capabilities getCapabilities(){
     return (org.gsma.joyn.capability.Capabilities) null;
   }
-  public void setPresenceInfo(org.gsma.joyn.presence.PresenceInfo arg1){
+  public void setPresenceInfo(org.gsma.joyn.presence.PresenceInfo info){
   }
-  public void setContact(String arg1){
+  public void setContact(String contact){
   }
-  public void setRcsStatus(int arg1){
+  public void setRcsStatus(int rcsStatus){
   }
-  public void setRegistrationState(int arg1){
+  public void setRegistrationState(int registrationState){
   }
-  public void setRcsStatusTimestamp(long arg1){
+  public void setRcsStatusTimestamp(long timestamp){
   }
   public boolean isRcsContact(){
     return false;

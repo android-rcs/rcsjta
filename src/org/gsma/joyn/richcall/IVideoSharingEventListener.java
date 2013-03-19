@@ -36,7 +36,7 @@ public interface IVideoSharingEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleSessionAborted(int arg1) throws RemoteException;
 
@@ -44,7 +44,7 @@ public interface IVideoSharingEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleSharingError(int arg1) throws RemoteException;
 

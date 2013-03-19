@@ -74,10 +74,10 @@ public class User {
     /**
      * Creates a new instance of User.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param entity
+     * @param me
      */
-    public User(String arg1, boolean arg2) {
+    public User(String entity, boolean me) {
 
     }
 
@@ -101,9 +101,9 @@ public class User {
     /**
      * Sets the state.
      *
-     * @param arg1 The state.
+     * @param state
      */
-    public void setState(String arg1) {
+    public void setState(String state) {
 
     }
 
@@ -128,9 +128,9 @@ public class User {
     /**
      * Sets the display name.
      *
-     * @param arg1 The display name.
+     * @param displayName
      */
-    public void setDisplayName(String arg1) {
+    public void setDisplayName(String displayName) {
 
     }
 
@@ -145,9 +145,9 @@ public class User {
     /**
      * Sets the disconnection method.
      *
-     * @param arg1 The disconnection method.
+     * @param method
      */
-    public void setDisconnectionMethod(String arg1) {
+    public void setDisconnectionMethod(String method) {
 
     }
 
@@ -163,9 +163,9 @@ public class User {
     /**
      * Sets the failure reason.
      *
-     * @param arg1 The failure reason.
+     * @param reason
      */
-    public void setFailureReason(String arg1) {
+    public void setFailureReason(String reason) {
 
     }
 
@@ -180,20 +180,20 @@ public class User {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param state
      * @return  The boolean.
      */
-    public static boolean isConnected(String arg1) {
+    public static boolean isConnected(String state) {
         return false;
     }
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param state
      * @return  The boolean.
      */
-    public static boolean isDisconnected(String arg1) {
+    public static boolean isDisconnected(String state) {
         return false;
     }
 
-} // end User
+}

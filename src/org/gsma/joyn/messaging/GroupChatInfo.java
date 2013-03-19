@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class GroupChatInfo {
 
-  public GroupChatInfo(String arg1, String arg2, String arg3, List<String> arg4, String arg5){
+  public GroupChatInfo(String sessionId, String rejoinId, String contributionId, List<String> participants, String subject){
   }
 
   public String toString(){

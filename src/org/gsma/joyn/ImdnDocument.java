@@ -95,9 +95,9 @@ public class ImdnDocument {
     /**
      * Sets the status.
      *
-     * @param arg1 The status.
+     * @param 
      */
-    public void setStatus(String arg1) {
+    public void setStatus(String status) {
 
     }
 
@@ -113,9 +113,9 @@ public class ImdnDocument {
     /**
      * Sets the msg id.
      *
-     * @param arg1 The msg id.
+     * @param 
      */
-    public void setMsgId(String arg1) {
+    public void setMsgId(String messageId) {
 
     }
 

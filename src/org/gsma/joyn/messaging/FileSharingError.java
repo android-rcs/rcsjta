@@ -47,29 +47,29 @@ public class FileSharingError extends org.gsma.joyn.session.ImsSessionBasedServi
     /**
      * Creates a new instance of FileSharingError.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public FileSharingError(org.gsma.joyn.session.ImsServiceError arg1) {
+    public FileSharingError(org.gsma.joyn.session.ImsServiceError error) {
         super((org.gsma.joyn.session.ImsServiceError) null);
     }
 
     /**
      * Creates a new instance of FileSharingError.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public FileSharingError(int arg1) {
+    public FileSharingError(int code) {
         super((org.gsma.joyn.session.ImsServiceError) null);
     }
 
     /**
      * Creates a new instance of FileSharingError.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public FileSharingError(int arg1, String arg2) {
+    public FileSharingError(int code, String message) {
         super((org.gsma.joyn.session.ImsServiceError) null);
     }
 
-} // end FileSharingError
+}

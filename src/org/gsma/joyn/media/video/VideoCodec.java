@@ -29,14 +29,14 @@ public class VideoCodec {
     /**
      * Creates a new instance of VideoCodec.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4.
-     * @param arg5 The arg5.
-     * @param arg6 The arg6.
-     * @param arg7 The arg7.
-     * @param arg8 The arg8.
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
      */
     public VideoCodec(String arg1, int arg2, int arg3, String arg4, int arg5, int arg6, int arg7, int arg8) {
 
@@ -45,7 +45,7 @@ public class VideoCodec {
     /**
      * Creates a new instance of VideoCodec.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public VideoCodec(org.gsma.joyn.media.MediaCodec arg1) {
 
@@ -61,10 +61,10 @@ public class VideoCodec {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      * @return  The boolean.
      */
-    public boolean compare(VideoCodec arg1) {
+    public boolean compare(VideoCodec codec) {
         return false;
     }
 
@@ -151,8 +151,8 @@ public class VideoCodec {
 
     /**
      *
-     * @param arg1 The arg1 array.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      * @return  The boolean.
      */
     public static boolean checkVideoCodec(org.gsma.joyn.media.MediaCodec[] arg1, VideoCodec arg2) {

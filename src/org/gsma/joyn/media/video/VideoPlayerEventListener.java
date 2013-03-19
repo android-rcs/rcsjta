@@ -26,9 +26,9 @@ package org.gsma.joyn.media.video;
 public interface VideoPlayerEventListener {
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void updateDuration(long arg1);
+    public void updateDuration(long progress);
 
     public void endOfStream();
 

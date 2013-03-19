@@ -31,11 +31,11 @@ public class FavoriteLink implements Parcelable {
 
   public static final Parcelable.Creator<FavoriteLink> CREATOR = null;
 
-  public FavoriteLink(String arg1){
+  public FavoriteLink(String link){
   }
-  public FavoriteLink(String arg1, String arg2){
+    public FavoriteLink(String name, String link){
   }
-  public FavoriteLink(Parcel arg1){
+  public FavoriteLink(Parcel source){
   }
 
   public String toString(){
@@ -44,16 +44,16 @@ public class FavoriteLink implements Parcelable {
   public String getName(){
     return (String) null;
   }
-  public void setName(String arg1){
+  public void setName(String name){
   }
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public String getLink(){
     return (String) null;
   }
-  public void setLink(String arg1){
+  public void setLink(String link){
   }
 }

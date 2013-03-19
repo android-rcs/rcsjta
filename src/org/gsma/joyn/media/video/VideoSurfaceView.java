@@ -32,30 +32,30 @@ public class VideoSurfaceView extends android.view.SurfaceView {
     /**
      * Creates a new instance of VideoSurfaceView.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public VideoSurfaceView(android.content.Context arg1) {
+    public VideoSurfaceView(android.content.Context context) {
         super((android.content.Context) null);
     }
 
     /**
      * Creates a new instance of VideoSurfaceView.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public VideoSurfaceView(android.content.Context arg1, android.util.AttributeSet arg2) {
+    public VideoSurfaceView(android.content.Context context, android.util.AttributeSet attrs) {
         super((android.content.Context) null);
     }
 
     /**
      * Creates a new instance of VideoSurfaceView.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
+     * @param 
+     * @param 
+     * @param 
      */
-    public VideoSurfaceView(android.content.Context arg1, android.util.AttributeSet arg2, int arg3) {
+    public VideoSurfaceView(android.content.Context context, android.util.AttributeSet attrs, int defStyle) {
         super((android.content.Context) null);
     }
 
@@ -66,38 +66,38 @@ public class VideoSurfaceView extends android.view.SurfaceView {
     /**
      * Sets the aspect ratio.
      *
-     * @param arg1 The aspect ratio.
-     * @param arg2 The aspect ratio.
+     * @param 
+     * @param 
      */
-    public void setAspectRatio(int arg1, int arg2) {
+    public void setAspectRatio(int width, int height) {
 
     }
 
     /**
      * Sets the aspect ratio.
      *
-     * @param arg1 The aspect ratio.
+     * @param 
      */
-    public void setAspectRatio(float arg1) {
+    public void setAspectRatio(float ratio) {
 
     }
 
     /**
      * Sets the image.
      *
-     * @param arg1 The image.
+     * @param 
      */
-    public void setImage(android.graphics.Bitmap arg1) {
+    public void setImage(android.graphics.Bitmap bmp) {
 
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    protected void onMeasure(int arg1, int arg2) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
     }
 
-} // end VideoSurfaceView
+}

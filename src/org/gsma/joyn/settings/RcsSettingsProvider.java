@@ -16,6 +16,10 @@
 
 package org.gsma.joyn.settings;
 
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import java.lang.String;
 
 /**
@@ -25,7 +29,7 @@ import java.lang.String;
  * @version 1.0
  * @since 1.0
  */
-public class RcsSettingsProvider extends android.content.ContentProvider {
+public class RcsSettingsProvider extends ContentProvider {
     /**
      * Constant DATABASE_NAME.
      */
@@ -41,56 +45,56 @@ public class RcsSettingsProvider extends android.content.ContentProvider {
     /**
      * Returns the type.
      *
-     * @param arg1 The arg1.
+     * @param 
      * @return  The type.
      */
-    public String getType(android.net.Uri arg1) {
+    public String getType(Uri uri) {
         return (String) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3 array.
+     * @param 
+     * @param 
+     * @param 
      * @return  The int.
      */
-    public int delete(android.net.Uri arg1, String arg2, String[] arg3) {
+    public int delete(Uri uri, String where, String[] whereArgs) {
         return 0;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      * @return  The uri.
      */
-    public android.net.Uri insert(android.net.Uri arg1, android.content.ContentValues arg2) {
-        return (android.net.Uri) null;
+    public Uri insert(Uri uri, ContentValues initialValues) {
+        return (Uri) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2 array.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
-     * @param arg5 The arg5.
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
      * @return  The cursor.
      */
-    public android.database.Cursor query(android.net.Uri arg1, String[] arg2, String arg3, String[] arg4, String arg5) {
-        return (android.database.Cursor) null;
+    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
+        return (Cursor) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
+     * @param 
+     * @param 
+     * @param 
+     * @param 
      * @return  The int.
      */
-    public int update(android.net.Uri arg1, android.content.ContentValues arg2, String arg3, String[] arg4) {
+    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
         return 0;
     }
 
@@ -102,4 +106,4 @@ public class RcsSettingsProvider extends android.content.ContentProvider {
         return false;
     }
 
-} // end RcsSettingsProvider
+}

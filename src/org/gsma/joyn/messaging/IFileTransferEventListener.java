@@ -37,7 +37,7 @@ public interface IFileTransferEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleSessionAborted(int arg1) throws RemoteException;
 
@@ -45,20 +45,20 @@ public interface IFileTransferEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
     public void handleTransferProgress(long arg1, long arg2) throws RemoteException;
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleTransferError(int arg1) throws RemoteException;
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public void handleFileTransfered(String arg1) throws RemoteException;
 

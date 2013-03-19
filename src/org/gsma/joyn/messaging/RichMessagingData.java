@@ -21,7 +21,7 @@ import java.lang.String;
 /**
  * Class RichMessagingData.
  *
- * @author Jean-Marc AUFFRET (Orange)
+ * @authro mhsm6403 (Orange)
  * @version 1.0
  * @since 1.0
  */

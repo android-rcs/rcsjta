@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class PresenceApi extends org.gsma.joyn.ClientApi{
 
-  public PresenceApi(android.content.Context arg1){
+  public PresenceApi(android.content.Context context){
     super((android.content.Context) null);
   }
 
@@ -39,27 +39,27 @@ public class PresenceApi extends org.gsma.joyn.ClientApi{
   public PresenceInfo getMyPresenceInfo(){
     return (PresenceInfo) null;
   }
-  public boolean setMyPresenceInfo(PresenceInfo arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean setMyPresenceInfo(PresenceInfo info) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean inviteContact(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean inviteContact(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean acceptSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean acceptSharingInvitation(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean rejectSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean rejectSharingInvitation(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public void ignoreSharingInvitation(String arg1) throws org.gsma.joyn.ClientApiException{
+  public void ignoreSharingInvitation(String contact) throws org.gsma.joyn.ClientApiException{
   }
-  public boolean revokeContact(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean revokeContact(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean unrevokeContact(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean unrevokeContact(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
-  public boolean unblockContact(String arg1) throws org.gsma.joyn.ClientApiException{
+  public boolean unblockContact(String contact) throws org.gsma.joyn.ClientApiException{
     return false;
   }
   public List<String> getGrantedContacts() throws org.gsma.joyn.ClientApiException{

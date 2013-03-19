@@ -20,7 +20,8 @@ import java.lang.String;
 import java.util.List;
 
 /**
- * Class ConctactManager.
+ * Class ConctactManager. Utility methods for interfacing with the
+ * Android SDK ContactsProvider.
  *
  * @author Jean-Marc AUFFRET (Orange)
  * @version 1.0
@@ -28,22 +29,22 @@ import java.util.List;
  */
 public final class ContactsManager {
 
-  private ContactsManager(android.content.Context arg1){
+  private ContactsManager(android.content.Context context) {
   }
 
   public static ContactsManager getInstance(){
     return (ContactsManager) null;
   }
-  public static synchronized void createInstance(android.content.Context arg1){
+  public static synchronized void createInstance(android.content.Context context){
   }
   public org.gsma.joyn.presence.PresenceInfo getMyPresenceInfo(){
     return (org.gsma.joyn.presence.PresenceInfo) null;
   }
-  public void revokeContact(String arg1) throws ContactsManagerException{
+  public void revokeContact(String contact) throws ContactsManagerException{
   }
-  public void unrevokeContact(String arg1) throws ContactsManagerException{
+  public void unrevokeContact(String contact) throws ContactsManagerException{
   }
-  public void unblockContact(String arg1) throws ContactsManagerException{
+  public void unblockContact(String contact) throws ContactsManagerException{
   }
   public String [] getRcsMimeTypes(){
     return (String []) null;
@@ -75,28 +76,28 @@ public final class ContactsManager {
   public List<String> getRcsCancelledContacts(){
     return (List<String>) null;
   }
-  public boolean isRcsValidNumber(String arg1){
+  public boolean isRcsValidNumber(String msisdn){
     return false;
   }
-  public boolean isImBlockedForContact(String arg1){
+  public boolean isImBlockedForContact(String contact){
     return false;
   }
-  public boolean isNumberBlocked(String arg1){
+  public boolean isNumberBlocked(String msisdn){
     return false;
   }
-  public boolean isNumberShared(String arg1){
+  public boolean isNumberShared(String msisdn){
     return false;
   }
-  public boolean isNumberInvited(String arg1){
+  public boolean isNumberInvited(String msisdn){
     return false;
   }
-  public boolean isNumberWilling(String arg1){
+  public boolean isNumberWilling(String msisdn){
     return false;
   }
-  public boolean isNumberCancelled(String arg1){
+  public boolean isNumberCancelled(String msisdn){
     return false;
   }
-  public void setImBlockedForContact(String arg1, boolean arg2){
+  public void setImBlockedForContact(String contact, boolean flag){
   }
   public List<String> getImBlockedContacts(){
     return (List<String>) null;
@@ -107,65 +108,65 @@ public final class ContactsManager {
   public List<String> getRichcallCapableContacts(){
     return (List<String>) null;
   }
-  public void removeCancelledPresenceInvitation(String arg1){
+  public void removeCancelledPresenceInvitation(String contact){
   }
-  public void setMyInfo(org.gsma.joyn.presence.PresenceInfo arg1) throws ContactsManagerException{
+  public void setMyInfo(org.gsma.joyn.presence.PresenceInfo newPresenceInfo) throws ContactsManagerException{
   }
-  public void setMyPhotoIcon(org.gsma.joyn.presence.PhotoIcon arg1) throws ContactsManagerException{
+  public void setMyPhotoIcon(org.gsma.joyn.presence.PhotoIcon photo) throws ContactsManagerException{
   }
-  public void setContactPhotoIcon(String arg1, org.gsma.joyn.presence.PhotoIcon arg2) throws ContactsManagerException{
+  public void setContactPhotoIcon(String contact, org.gsma.joyn.presence.PhotoIcon photo) throws ContactsManagerException{
   }
   public void removeMyPhotoIcon() throws ContactsManagerException{
   }
-  public void setContactInfo(org.gsma.joyn.contacts.ContactInfo arg1, org.gsma.joyn.contacts.ContactInfo arg2) throws ContactsManagerException{
+  public void setContactInfo(org.gsma.joyn.contacts.ContactInfo newInfo, org.gsma.joyn.contacts.ContactInfo oldInfo) throws ContactsManagerException{
   }
-  public long getAssociatedRcsRawContact(long arg1, String arg2){
+  public long getAssociatedRcsRawContact(long arg1, String msisdn){
     return 0l;
   }
-  public long createRcsContact(org.gsma.joyn.contacts.ContactInfo arg1, long arg2){
+  public long createRcsContact(org.gsma.joyn.contacts.ContactInfo info, long rawContactId){
     return 0l;
   }
-  public void removeContactPhotoIcon(String arg1) throws ContactsManagerException{
+  public void removeContactPhotoIcon(String contact) throws ContactsManagerException{
   }
-  public void setContactSharingStatus(String arg1, String arg2, String arg3) throws ContactsManagerException{
+  public void setContactSharingStatus(String contact, String status, String reason) throws ContactsManagerException{
   }
-  public int getContactSharingStatus(String arg1){
+  public int getContactSharingStatus(String contact){
     return 0;
   }
-  public void blockContact(String arg1) throws ContactsManagerException{
+  public void blockContact(String contact) throws ContactsManagerException{
   }
   public void flushContactProvider(){
   }
-  public void modifyRcsContactInProvider(String arg1, int arg2){
+  public void modifyRcsContactInProvider(String contact, int rcsStatus){
   }
-  public boolean isContactRcsActive(String arg1){
+    public boolean isContactRcsActive(String contact){
     return false;
   }
-  public void setContactCapabilities(String arg1, org.gsma.joyn.capability.Capabilities arg2, int arg3, int arg4){
+    public void setContactCapabilities(String contact, org.gsma.joyn.capability.Capabilities capabilities, int contactType, int registrationState){
   }
-  public void setContactCapabilities(String arg1, org.gsma.joyn.capability.Capabilities arg2){
+  public void setContactCapabilities(String contact, org.gsma.joyn.capability.Capabilities capabilities){
   }
-  public org.gsma.joyn.capability.Capabilities getContactCapabilities(String arg1){
+  public org.gsma.joyn.capability.Capabilities getContactCapabilities(String contact){
     return (org.gsma.joyn.capability.Capabilities) null;
   }
-  public void setContactCapabilitiesTimestamp(String arg1, long arg2){
+  public void setContactCapabilitiesTimestamp(String contact, long timestamp){
   }
   public long createMyContact(){
     return 0l;
   }
-  public boolean isSimAssociated(long arg1){
+  public boolean isSimAssociated(long rawContactId){
     return false;
   }
-  public boolean isRcsAssociated(String arg1){
+    public boolean isRcsAssociated(String msisdn){
     return false;
   }
-  public boolean isOnlySimAssociated(String arg1){
+  public boolean isOnlySimAssociated(String msisdn){
     return false;
   }
-  public boolean isSimAccount(long arg1){
+  public boolean isSimAccount(long rawContactId){
     return false;
   }
-  public String getContactPhotoEtag(String arg1){
+    public String getContactPhotoEtag(String contact){
     return (String) null;
   }
   public void updateStrings(){

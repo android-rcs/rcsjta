@@ -57,16 +57,16 @@ public class ContentSharingError extends org.gsma.joyn.session.ImsSessionBasedSe
     /**
      * Creates a new instance of ContentSharingError.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public ContentSharingError(org.gsma.joyn.session.ImsServiceError arg1) {
+    public ContentSharingError(org.gsma.joyn.session.ImsServiceError error) {
         super((org.gsma.joyn.session.ImsServiceError) null);
     }
 
     /**
      * Creates a new instance of ContentSharingError.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
     public ContentSharingError(int arg1) {
         super((org.gsma.joyn.session.ImsServiceError) null);
@@ -75,10 +75,10 @@ public class ContentSharingError extends org.gsma.joyn.session.ImsSessionBasedSe
     /**
      * Creates a new instance of ContentSharingError.
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public ContentSharingError(int arg1, String arg2) {
+    public ContentSharingError(int code, String message) {
         super((org.gsma.joyn.session.ImsServiceError) null);
     }
 

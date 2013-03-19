@@ -44,9 +44,9 @@ public interface IMediaEventListener extends IInterface {
 
     /**
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void mediaError(String arg1) throws RemoteException;
+    public void mediaError(String error) throws RemoteException;
 
     /**
      * Class Stub.

@@ -32,9 +32,9 @@ public class ContactsManagerException extends Exception {
     /**
      * Creates a new instance of ContactsManagerException.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public ContactsManagerException(String arg1) {
+    public ContactsManagerException(String error) {
         super();
     }
 

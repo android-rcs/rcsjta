@@ -22,7 +22,7 @@ import java.lang.String;
 /**
  * Class RichCallData.
  *
- * @author Jean-Marc AUFFRET (Orange)
+ * @author mhsm6403 (Orange)
  * @version 1.0
  * @since 1.0
  */

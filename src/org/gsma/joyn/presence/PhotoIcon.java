@@ -31,11 +31,11 @@ public class PhotoIcon implements Parcelable {
 
   public static final Parcelable.Creator<PhotoIcon> CREATOR = null;
 
-  public PhotoIcon(byte [] arg1, int arg2, int arg3, String arg4){
+  public PhotoIcon(byte [] content, int width, int height, String etag) {
   }
-  public PhotoIcon(byte [] arg1, int arg2, int arg3){
+  public PhotoIcon(byte [] content, int width, int height) {
   }
-  public PhotoIcon(Parcel arg1){
+  public PhotoIcon(Parcel source){
   }
   public String toString(){
     return (String) null;
@@ -52,7 +52,7 @@ public class PhotoIcon implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public int getWidth(){
     return 0;
@@ -63,7 +63,7 @@ public class PhotoIcon implements Parcelable {
   public String getEtag(){
     return (String) null;
   }
-  public void setEtag(String arg1){
+  public void setEtag(String etag1){
   }
   public String getResolution(){
     return (String) null;

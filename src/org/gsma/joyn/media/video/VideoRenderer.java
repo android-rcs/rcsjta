@@ -36,7 +36,7 @@ public class VideoRenderer extends org.gsma.joyn.media.IMediaRenderer.Stub {
     /**
      * Creates a new instance of VideoRenderer.
      *
-     * @param arg1 The arg1 array.
+     * @param 
      */
     public VideoRenderer(org.gsma.joyn.media.MediaCodec[] arg1) {
         super();
@@ -56,10 +56,10 @@ public class VideoRenderer extends org.gsma.joyn.media.IMediaRenderer.Stub {
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      */
-    public void open(String arg1, int arg2) {
+    public void open(String remoteHost, int remotePort) {
 
     }
 
@@ -74,9 +74,9 @@ public class VideoRenderer extends org.gsma.joyn.media.IMediaRenderer.Stub {
     /**
      * Adds a listener.
      *
-     * @param arg1 The arg1.
+     * @param 
      */
-    public void addListener(org.gsma.joyn.media.IMediaEventListener arg1) {
+    public void addListener(org.gsma.joyn.media.IMediaEventListener listener) {
 
     }
 
@@ -90,7 +90,7 @@ public class VideoRenderer extends org.gsma.joyn.media.IMediaRenderer.Stub {
     /**
      * Sets the media codec.
      *
-     * @param arg1 The media codec.
+     * @param 
      */
     public void setMediaCodec(org.gsma.joyn.media.MediaCodec arg1) {
 
@@ -99,7 +99,7 @@ public class VideoRenderer extends org.gsma.joyn.media.IMediaRenderer.Stub {
     /**
      * Sets the video surface.
      *
-     * @param arg1 The video surface.
+     * @param 
      */
     public void setVideoSurface(VideoSurfaceView arg1) {
 

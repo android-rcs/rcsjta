@@ -31,10 +31,10 @@ public class Geoloc implements Parcelable {
 
   public static final Parcelable.Creator<Geoloc> CREATOR = null;
 
-  public Geoloc(double arg1, double arg2, double arg3){
+  public Geoloc(double latitude, double longitude, double altitude){
   }
 
-  public Geoloc(Parcel arg1){
+  public Geoloc(Parcel source){
   }
 
   public String toString(){
@@ -43,7 +43,7 @@ public class Geoloc implements Parcelable {
   public int describeContents(){
     return 0;
   }
-  public void writeToParcel(Parcel arg1, int arg2){
+  public void writeToParcel(Parcel dest, int flags){
   }
   public double getLongitude(){
     return 0.0d;
@@ -54,10 +54,10 @@ public class Geoloc implements Parcelable {
   public double getAltitude(){
     return 0.0d;
   }
-  public void setLatitude(double arg1){
+  public void setLatitude(double latitude){
   }
-  public void setLongitude(double arg1){
+  public void setLongitude(double longitude){
   }
-  public void setAltitude(double arg1){
+  public void setAltitude(double altitude){
   }
 }

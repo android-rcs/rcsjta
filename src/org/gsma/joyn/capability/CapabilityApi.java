@@ -27,7 +27,7 @@ import java.lang.String;
  */
 public class CapabilityApi extends org.gsma.joyn.ClientApi {
 
-  public CapabilityApi(android.content.Context arg1){
+  public CapabilityApi(android.content.Context context){
     super((android.content.Context) null);
   }
 
@@ -37,11 +37,11 @@ public class CapabilityApi extends org.gsma.joyn.ClientApi {
   public void disconnectApi() {
   }
 
-  public org.gsma.joyn.contacts.ContactInfo getContactInfo(String arg1){
+  public org.gsma.joyn.contacts.ContactInfo getContactInfo(String contact){
     return (org.gsma.joyn.contacts.ContactInfo) null;
   }
 
-  public Capabilities requestCapabilities(String arg1) throws org.gsma.joyn.ClientApiException{
+  public Capabilities requestCapabilities(String contact) throws org.gsma.joyn.ClientApiException{
     return (Capabilities) null;
   }
 
@@ -52,7 +52,7 @@ public class CapabilityApi extends org.gsma.joyn.ClientApi {
     return (Capabilities) null;
   }
 
-  public Capabilities getContactCapabilities(String arg1){
+  public Capabilities getContactCapabilities(String contact){
     return (Capabilities) null;
   }
 

@@ -47,18 +47,18 @@ public class RichAddressBookProvider extends android.content.ContentProvider {
     /**
      * Returns the type.
      *
-     * @param arg1 The arg1.
+     * @param 
      * @return  The type.
      */
-    public String getType(android.net.Uri arg1) {
+    public String getType(android.net.Uri uri) {
         return (String) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3 array.
+     * @param 
+     * @param 
+     * @param 
      * @return  The int.
      */
     public int delete(android.net.Uri arg1, String arg2, String[] arg3) {
@@ -67,36 +67,36 @@ public class RichAddressBookProvider extends android.content.ContentProvider {
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      * @return  The uri.
      */
-    public android.net.Uri insert(android.net.Uri arg1, android.content.ContentValues arg2) {
+    public android.net.Uri insert(android.net.Uri uri, android.content.ContentValues initialValues) {
         return (android.net.Uri) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2 array.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
-     * @param arg5 The arg5.
+     * @param 
+     * @param 
+     * @param 
+     * @param 
+     * @param 
      * @return  The cursor.
      */
-    public android.database.Cursor query(android.net.Uri arg1, String[] arg2, String arg3, String[] arg4, String arg5) {
+    public android.database.Cursor query(android.net.Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
         return (android.database.Cursor) null;
     }
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
-     * @param arg3 The arg3.
-     * @param arg4 The arg4 array.
+     * @param 
+     * @param 
+     * @param 
+     * @param 
      * @return  The int.
      */
-    public int update(android.net.Uri arg1, android.content.ContentValues arg2, String arg3, String[] arg4) {
+    public int update(android.net.Uri uri, android.content.ContentValues values, String where, String[] whereArgs) {
         return 0;
     }
 
@@ -110,11 +110,11 @@ public class RichAddressBookProvider extends android.content.ContentProvider {
 
     /**
      *
-     * @param arg1 The arg1.
-     * @param arg2 The arg2.
+     * @param 
+     * @param 
      * @return  The parcel file descriptor.
      */
-    public ParcelFileDescriptor openFile(android.net.Uri arg1, String arg2) throws java.io.FileNotFoundException {
+    public ParcelFileDescriptor openFile(android.net.Uri uri, String mode) throws java.io.FileNotFoundException {
         return (ParcelFileDescriptor) null;
     }
 
