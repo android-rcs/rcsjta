@@ -20,7 +20,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.lang.String;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class Capabilities.

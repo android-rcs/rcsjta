@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.joyn;
+package org.gsma.joyn.session;
 
 import java.lang.String;
 

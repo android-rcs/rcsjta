@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gsma.joyn;
+package org.gsma.joyn.session;
 
 /**
  * Interface for IMS event listener interface

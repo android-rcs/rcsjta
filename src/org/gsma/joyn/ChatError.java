@@ -23,7 +23,7 @@ import org.gsma.joyn.session.ImsSessionBasedServiceError;
 /**
  * Class ChatError.
  *
- * @author Jean-Marc AUFFRET (Orange) Jean-Marc AUFFRET (Orange)
+ * @author Jean-Marc AUFFRET (Orange)
  * @version 1.0
  * @since 1.0
  */

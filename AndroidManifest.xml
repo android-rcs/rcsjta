@@ -102,106 +102,25 @@
 
 		<activity android:name="org.gsma.joyn.settings.MessagingRcsSettings"
 		  	android:process=":settings" />
-
- 		<!-- RCS account: authenticator service for user's account information -->
-
-        <service android:exported="true" android:name="org.gsma.joyn.addressbook.AuthenticationService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/rcs_core_authenticator"/>
-        </service>
-
-        <!-- RCS account: sync adapter service -->
-
-        <service android:exported="true" android:name="org.gsma.joyn.addressbook.SyncAdapterService">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
-            </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/rcs_core_syncadapter"/>
-            <meta-data android:name="android.provider.CONTACTS_STRUCTURE" android:resource="@xml/rcs_core_contacts"/>
-        </service>
-        
-		<!-- RCS account: activity to create an account-->
-        <activity android:name="org.gsma.joyn.addressbook.SetupRcsAccount">
-			<intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-		</activity>
         
 		<!-- RCS data providers -->	
 
 		<provider android:authorities="org.gsma.joyn.settings"
 			android:writePermission="org.gsma.joyn.permission.RCS"
 			android:readPermission="org.gsma.joyn.permission.RCS"
-			android:name="org.gsma.joyn.provider.settings.RcsSettingsProvider"/>
-
-		<provider android:authorities="org.gsma.joyn.eab"
-			android:writePermission="org.gsma.joyn.permission.RCS"
-			android:readPermission="org.gsma.joyn.permission.RCS"
-			android:name="org.gsma.joyn.provider.eab.RichAddressBookProvider"/>
+			android:name="org.gsma.joyn.settings.RcsSettingsProvider"/>
 
 		<provider android:authorities="org.gsma.joyn.messaging"
 			android:writePermission="org.gsma.joyn.permission.RCS"
 			android:readPermission="org.gsma.joyn.permission.RCS"
-			android:name="org.gsma.joyn.provider.messaging.RichMessagingProvider"/>
+			android:name="org.gsma.joyn.messaging.RichMessagingProvider"/>
 			
 		<provider android:authorities="org.gsma.joyn.csh"
 			android:writePermission="org.gsma.joyn.permission.RCS"
 			android:readPermission="org.gsma.joyn.permission.RCS"
-			android:name="org.gsma.joyn.provider.sharing.RichCallProvider"/>
+			android:name="org.gsma.joyn.richcall.RichCallProvider"/>
 			
-		<provider android:authorities="org.gsma.joyn.eventlogs"
-			android:writePermission="org.gsma.joyn.permission.RCS"
-			android:readPermission="org.gsma.joyn.permission.RCS"
-			android:name="org.gsma.joyn.provider.eventlogs.EventLogProvider"/>
-	
 		<!-- Device events receiver -->	
-
-		<receiver android:name="org.gsma.joyn.service.DeviceBoot">
-	        <intent-filter>
-	     		<action android:name="android.intent.action.BOOT_COMPLETED"/>
-	        </intent-filter>
-	    </receiver>
-
-		<receiver android:name="org.gsma.joyn.service.DeviceShutdown">
-	        <intent-filter>
-	     		<action android:name="android.intent.action.ACTION_SHUTDOWN"/>
-	        </intent-filter>
-	    </receiver>
-
-		<!-- Changing locale -->	
-
-		<receiver android:name="org.gsma.joyn.addressbook.LocaleChangedReceiver">  
-   			<intent-filter>
-   				<action android:name="android.intent.action.LOCALE_CHANGED"/>  
-   			</intent-filter>  
-		</receiver> 
-
-		<!-- Outgoing call state -->	
-
-		<receiver android:name="org.gsma.joyn.core.ims.network.gsm.OutgoingCallReceiver">  
- 			<intent-filter>
- 				<action android:name="android.intent.action.NEW_OUTGOING_CALL"/>  
- 			</intent-filter>  
-		</receiver> 
-		
-		<!-- External capability monitoring -->	
-		<receiver android:name="org.gsma.joyn.core.ims.service.capability.ExternalCapabilityMonitoring">  
- 			<intent-filter>
- 				<action android:name="android.intent.action.PACKAGE_ADDED"/>  
- 				<action android:name="android.intent.action.PACKAGE_REMOVED"/>  
-				<data android:scheme="package"/> 
- 			</intent-filter>  
-		</receiver>
-		
-		<!-- HTTPS provisioning service -->
-		<service android:name="org.gsma.joyn.provisioning.https.HttpsProvisioningService">  
-	        <intent-filter>
-	            <action android:name="org.gsma.joyn.PROVISIONING"/>
-	        </intent-filter>
-	    </service>
 
         <!-- Startup service -->
         <service android:name="org.gsma.joyn.service.StartService">  
@@ -209,14 +128,6 @@
                 <action android:name="org.gsma.joyn.STARTUP"/>
             </intent-filter>
         </service>
-
-        <!-- Provisioning - Terms and conditions activity -->
-        <activity android:name="org.gsma.joyn.provisioning.TermsAndConditionsRequest">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
 
 		<!-- GSMA UI connectors -->
 
