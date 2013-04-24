@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ android:versionCode="1"
+ android:versionName="3.0.0"
+ package="com.orangelabs.rcs">
+      
+	<uses-sdk android:minSdkVersion="5"
+		android:targetSdkVersion="15"/>
+
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.CALL_PHONE"/>
+	<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>  
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+	<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+	 
+	<uses-permission android:name="com.orangelabs.rcs.permission.RCS"/>	
+	 
+	<permission android:name="com.orangelabs.rcs.permission.RCS"
+        android:label="@string/rcs_core_permission"
+        android:description="@string/rcs_core_permission_desc"
+        android:protectionLevel="normal" />	 
+ 
+	<permission android:name="com.orangelabs.rcs.permission.RCS_EXTENSION"
+        android:label="@string/rcs_core_permission_ext"
+        android:description="@string/rcs_core_permission_ext_desc"
+        android:protectionLevel="normal" />	 
+
+	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
+		
+		<!-- the following meta-data is used to identify the application as a joyn client -->
+		<meta-data android:name="gsma.joyn.client"
+			android:value="true" />
+		
+		<!-- the following meta-data is used to provide the value of the intent action that
+		 can be used by other applications to start the joyn client settings screen -->
+		<meta-data android:name="gsma.joyn.settings.activity"
+			android:value="com.orangelabs.rcs.SETTINGS" />
+
+		<!-- RCS service -->	
+
+		<service android:name="com.orangelabs.rcs.service.RcsCoreService">  
+	        <intent-filter>
+	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
+	            
+	            <action android:name="com.orangelabs.rcs.SERVICE"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.IImsApi"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.terms.ITermsApi"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.presence.IPresenceApi"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.messaging.IMessagingApi"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.richcall.IRichCallApi"/>
+	            <action android:name="com.orangelabs.rcs.service.api.client.sip.ISipApi"/>	            
+	        </intent-filter>
+	    </service>
+	
+		<!-- RCS settings application -->
+	
+		<activity android:clearTaskOnLaunch="true"
+			android:icon="@drawable/rcs_icon"
+			android:label="@string/rcs_settings_title_settings"
+			android:launchMode="singleInstance"
+			android:name="com.orangelabs.rcs.settings.SettingsDisplay"
+		  	android:process=":settings" 
+			>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>            
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="com.orangelabs.rcs.SETTINGS"/>                
+            </intent-filter>            
+ 		</activity>
+
+		<activity android:name="com.orangelabs.rcs.settings.AboutDisplay"
+		  	android:process=":settings" />
+
+		<activity android:name="com.orangelabs.rcs.settings.UserprofileSettingsDisplay"
+		  	android:process=":settings" />
+
+		<activity android:name="com.orangelabs.rcs.settings.PresenceSettingsDisplay"
+		  	android:process=":settings" />
+
+		<activity android:name="com.orangelabs.rcs.settings.CShSettingsDisplay"
+		  	android:process=":settings" />
+
+		<activity android:name="com.orangelabs.rcs.settings.MessagingSettingsDisplay"
+		  	android:process=":settings" />
+
+ 		<!-- RCS account: authenticator service for user's account information -->
+
+        <service android:exported="true" android:name="com.orangelabs.rcs.addressbook.AuthenticationService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/rcs_core_authenticator"/>
+        </service>
+
+        <!-- RCS account: sync adapter service -->
+
+        <service android:exported="true" android:name="com.orangelabs.rcs.addressbook.SyncAdapterService">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/rcs_core_syncadapter"/>
+            <meta-data android:name="android.provider.CONTACTS_STRUCTURE" android:resource="@xml/rcs_core_contacts"/>
+        </service>
+        
+		<!-- RCS account: activity to create an account-->
+        <activity android:name="com.orangelabs.rcs.addressbook.SetupRcsAccount">
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+		</activity>
+        
+		<!-- RCS data providers -->	
+
+		<provider android:authorities="com.orangelabs.rcs.settings"
+			android:writePermission="com.orangelabs.rcs.permission.RCS"
+			android:readPermission="com.orangelabs.rcs.permission.RCS"
+			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
+
+		<provider android:authorities="com.orangelabs.rcs.eab"
+			android:writePermission="com.orangelabs.rcs.permission.RCS"
+			android:readPermission="com.orangelabs.rcs.permission.RCS"
+			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
+
+		<provider android:authorities="com.orangelabs.rcs.messaging"
+			android:writePermission="com.orangelabs.rcs.permission.RCS"
+			android:readPermission="com.orangelabs.rcs.permission.RCS"
+			android:name="com.orangelabs.rcs.provider.messaging.RichMessagingProvider"/>
+			
+		<provider android:authorities="com.orangelabs.rcs.csh"
+			android:writePermission="com.orangelabs.rcs.permission.RCS"
+			android:readPermission="com.orangelabs.rcs.permission.RCS"
+			android:name="com.orangelabs.rcs.provider.sharing.RichCallProvider"/>
+			
+		<provider android:authorities="com.orangelabs.rcs.eventlogs"
+			android:writePermission="com.orangelabs.rcs.permission.RCS"
+			android:readPermission="com.orangelabs.rcs.permission.RCS"
+			android:name="com.orangelabs.rcs.provider.eventlogs.EventLogProvider"/>
+	
+		<!-- Device events receiver -->	
+
+		<receiver android:name="com.orangelabs.rcs.service.DeviceBoot">
+	        <intent-filter>
+	     		<action android:name="android.intent.action.BOOT_COMPLETED"/>
+	        </intent-filter>
+	    </receiver>
+
+		<receiver android:name="com.orangelabs.rcs.service.DeviceShutdown">
+	        <intent-filter>
+	     		<action android:name="android.intent.action.ACTION_SHUTDOWN"/>
+	        </intent-filter>
+	    </receiver>
+
+		<!-- Changing locale -->	
+
+		<receiver android:name="com.orangelabs.rcs.addressbook.LocaleChangedReceiver">  
+   			<intent-filter>
+   				<action android:name="android.intent.action.LOCALE_CHANGED"/>  
+   			</intent-filter>  
+		</receiver> 
+
+		<!-- Outgoing call state -->	
+
+		<receiver android:name="com.orangelabs.rcs.core.ims.network.gsm.OutgoingCallReceiver">  
+ 			<intent-filter>
+ 				<action android:name="android.intent.action.NEW_OUTGOING_CALL"/>  
+ 			</intent-filter>  
+		</receiver> 
+		
+		<!-- External capability monitoring -->	
+		<receiver android:name="com.orangelabs.rcs.core.ims.service.capability.ExternalCapabilityMonitoring">  
+ 			<intent-filter>
+ 				<action android:name="android.intent.action.PACKAGE_ADDED"/>  
+ 				<action android:name="android.intent.action.PACKAGE_REMOVED"/>  
+				<data android:scheme="package"/> 
+ 			</intent-filter>  
+		</receiver>
+		
+		<!-- HTTPS provisioning service -->
+		<service android:name="com.orangelabs.rcs.provisioning.https.HttpsProvisioningService">  
+	        <intent-filter>
+	            <action android:name="com.orangelabs.rcs.PROVISIONING"/>
+	        </intent-filter>
+	    </service>
+
+        <!-- Startup service -->
+        <service android:name="com.orangelabs.rcs.service.StartService">  
+            <intent-filter>
+                <action android:name="com.orangelabs.rcs.STARTUP"/>
+            </intent-filter>
+        </service>
+
+        <!-- Provisioning - Terms and conditions activity -->
+        <activity android:name="com.orangelabs.rcs.provisioning.TermsAndConditionsRequest">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+		<!-- GSMA UI connectors -->
+
+		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetRcsStatusReceiver">  
+ 			<intent-filter>
+ 				<action android:name="android.net.rcs.GET_RCS_STATUS"/>  
+ 			</intent-filter>  
+		</receiver> 
+
+		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetMyCapabilitiesReceiver">  
+ 			<intent-filter>
+ 				<action android:name="android.net.rcs.GET_MY_CAPABILITIES"/>  
+ 			</intent-filter>  
+		</receiver> 
+
+		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetContactCapabilitiesReceiver">  
+ 			<intent-filter>
+ 				<action android:name="android.net.rcs.GET_CONTACT_CAPABILITIES"/>  
+ 			</intent-filter>  
+		</receiver> 
+
+    </application> 
+
+</manifest>

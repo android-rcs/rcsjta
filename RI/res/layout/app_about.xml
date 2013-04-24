@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent">
+	
+		<ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginTop="10px"
+		android:layout_marginBottom="10px"
+		android:src="@drawable/rcs_icon">
+		</ImageView>
+
+		<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical|center_horizontal"
+		android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+		android:layout_marginBottom="10px"
+		android:text="@string/label_about_title"/>
+		
+		<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+		android:gravity="center_vertical|center_horizontal"
+		android:layout_marginBottom="10px"
+        android:id="@+id/release"/>
+		
+		<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:gravity="center_vertical|center_horizontal"
+		android:layout_marginBottom="10px"
+        android:id="@+id/api"/>
+		
+		<TextView android:layout_width="fill_parent"
+		android:gravity="center_vertical|center_horizontal"
+		android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_about_more_info" android:autoLink="web"/>
+
+</LinearLayout>

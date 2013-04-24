@@ -1,0 +1,70 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/title_codecs_managed_by_stack">
+        <CheckBoxPreference
+            android:key="managed_by_stack"
+            android:showDefault="true"
+            android:title="@string/title_codecs_managed_by_stack"
+            android:summary="@string/summary_codecs_managed_by_stack"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/title_codecs_selection">
+        <CheckBoxPreference
+            android:key="codec0"
+            android:showDefault="true"
+            android:title="@string/label_codec0"
+            android:summary="@string/summary_codec0"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="codec1"
+            android:showDefault="true"
+            android:title="@string/label_codec1"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="codec2"
+            android:showDefault="true"
+            android:title="@string/label_codec2"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="codec3"
+            android:showDefault="true"
+            android:title="@string/label_codec3"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="codec4"
+            android:showDefault="true"
+            android:title="@string/label_codec4"
+            android:defaultValue="false" />
+        <ListPreference
+            android:key="custom_level"
+            android:showDefault="true"
+            android:title="@string/label_custom_level"
+            android:dialogTitle="@string/label_custom_level"
+            android:entries="@array/list_level_label"
+            android:entryValues="@array/list_level_value" />
+        <ListPreference
+            android:key="custom_size"
+            android:showDefault="true"
+            android:title="@string/label_custom_size"
+            android:dialogTitle="@string/label_custom_size"
+            android:entries="@array/list_size_label"
+            android:entryValues="@array/list_size_value" />
+        <ListPreference
+            android:key="custom_framerate"
+            android:showDefault="true"
+            android:title="@string/label_custom_framerate"
+            android:dialogTitle="@string/label_custom_framerate"
+            android:entries="@array/list_framerate_label"
+            android:entryValues="@array/list_framerate_value" />
+        <ListPreference
+            android:key="custom_bitrate"
+            android:showDefault="true"
+            android:title="@string/label_custom_bitrate"
+            android:dialogTitle="@string/label_custom_bitrate"
+            android:entries="@array/list_bitrate_label"
+            android:entryValues="@array/list_bitrate_value" />
+    </PreferenceCategory>
+</PreferenceScreen>
+

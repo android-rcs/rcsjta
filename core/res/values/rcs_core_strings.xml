@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rcs_core_application_title">joyn service</string>	
+	<string name="rcs_core_rcs_notification_title">joyn service</string>
+	<string name="rcs_core_permission">joyn</string>	
+	<string name="rcs_core_permission_ext">joyn extensions</string>	
+	<string name="rcs_core_permission_desc">joyn</string>
+	<string name="rcs_core_permission_ext_desc">joyn extensions</string>
+		
+	<string name="rcs_core_loaded">joyn service is loaded</string>
+	<string name="rcs_core_failed">joyn service has failed</string>
+	<string name="rcs_core_started">joyn service is started</string>
+	<string name="rcs_core_stopped">joyn service is stopped</string>
+	<string name="rcs_core_ims_connected">Connected to joyn platform</string>
+	<string name="rcs_core_ims_connection_failed">Can\'t connect to joyn platform</string>
+	<string name="rcs_core_ims_disconnected">Disconnected from joyn platform</string>
+    <string name="rcs_core_ims_battery_disconnected">Disconnected from joyn platform (Battery low)</string>
+
+	<!-- Strings associated to ContactsContract menus -->
+	<string name="rcs_core_my_profile">\u0020My joyn profile</string>	
+	<string name="rcs_core_contact_file_transfer">Transfer a file</string>
+	<string name="rcs_core_contact_im_session">Initiate a chat session</string>
+	<string name="rcs_core_contact_cs_video">Video call</string>
+	<string name="rcs_core_contact_extensions">Extensions</string>
+	
+	<!-- Strings linked to joyn account -->
+    <string name="rcs_core_account_id">joyn</string>
+	<string name="rcs_core_account_username">Rich Communication Suite</string>
+	<string name="rcs_core_account_main_title">General settings</string>
+	<string name="rcs_core_account_menu_settings">Settings</string>
+	<string name="rcs_core_account_configure">Configure joyn service</string>
+	<string name="rcs_core_account_stopping_after_deletion">The joyn service will be stopped as the joyn account was deleted</string>
+
+    <!-- Terms and Conditions -->
+    <string name="rcs_core_terms_accept">Accept</string>
+    <string name="rcs_core_terms_decline">Decline</string>
+	<string name="rcs_core_terms_ok">Ok</string>
+
+</resources>

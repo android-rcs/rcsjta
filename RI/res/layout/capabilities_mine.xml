@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:stretchColumns="1"
+	    android:paddingTop="10dip">
+
+		<TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_capabilities"
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+	        <CheckBox android:id="@+id/image_sharing"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+	         android:textStyle="bold"
+			 android:clickable="false"
+             android:text="@string/label_capabilities_image" />
+	    </TableRow>
+	    
+	    <TableRow>
+	        <TextView android:text=""
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+	        <CheckBox android:id="@+id/video_sharing"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+	         android:textStyle="bold"
+			 android:clickable="false"
+             android:text="@string/label_capabilities_video" />
+	    </TableRow>
+	    
+	    <TableRow>
+	        <TextView android:text=""
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+	        <CheckBox android:id="@+id/file_transfer"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+	         android:textStyle="bold"
+			 android:clickable="false"
+             android:text="@string/label_capabilities_ft" />
+	    </TableRow>
+	    
+	    <TableRow>
+	        <TextView android:text=""
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+	        <CheckBox android:id="@+id/im"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+	         android:textStyle="bold"
+			 android:clickable="false"
+             android:text="@string/label_capabilities_im" />
+	    </TableRow>
+
+		<TableRow>
+	        <TextView android:text="@string/label_capabilities_extensions"
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+	        <TextView android:id="@+id/extensions"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	</TableLayout>
+	
+</ScrollView>

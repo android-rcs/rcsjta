@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ android:versionCode="1"
+ android:versionName="3.0.0"
+ package="com.orangelabs.rcs.ri">
+
+	<uses-sdk android:minSdkVersion="5"
+		android:targetSdkVersion="15"/>
+	
+	<uses-permission android:name="android.permission.GET_TASKS"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+	<uses-permission android:name="android.permission.CALL_PHONE"/>
+	<uses-permission android:name="android.permission.CAMERA"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission android:name="com.orangelabs.rcs.permission.RCS"/>
+
+
+    <application android:icon="@drawable/app_icon" android:label="@string/app_name">
+
+        <uses-library android:name="com.google.android.maps"/>
+        
+		<!-- Main -->
+        <activity android:name=".RcsRI">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".AboutRI"/>
+
+		<!-- Capabilities RI -->
+
+        <activity android:name=".CapabilitiesRI"/>
+
+        <activity android:name=".capabilities.RequestCapabilities"/>
+
+		<activity android:name=".capabilities.MyCapabilities"/>
+
+		<activity android:name=".capabilities.RefreshCapabilities"/>
+		
+
+		<!-- Messaging RI -->
+        <activity android:name=".MessagingRI"/>
+
+        
+        <!-- Rich call RI -->
+        <activity android:name=".RichCallRI"/>
+        
+</application>
+
+</manifest>

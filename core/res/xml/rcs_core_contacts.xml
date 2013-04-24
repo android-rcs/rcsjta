@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContactsSource xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- This definition is important for the contact detail plugin -->
+	<ContactsDataKind android:icon="@drawable/rcs_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.my-profile"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />
+	<ContactsDataKind android:icon="@drawable/rcs_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.cs-video"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />   
+	<ContactsDataKind android:icon="@drawable/rcs_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.image-sharing"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />   
+	<ContactsDataKind android:icon="@drawable/rcs_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.video-sharing"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />
+	<ContactsDataKind android:icon="@drawable/rcs_core_chat_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.im-session"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />
+	<ContactsDataKind android:icon="@drawable/rcs_core_ft_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.file-transfer"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />
+	<ContactsDataKind android:icon="@drawable/rcs_core_extension_icon"
+        android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.support.extension"
+        android:summaryColumn="data2" android:detailColumn="data3"
+        android:detailSocialSummary="false" />        
+</ContactsSource>
+

@@ -1,0 +1,195 @@
+<FindBugsFilter>
+    <!--
+        Suppress all warnings in the NIST stack,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Package name="~javax2\..*"/>
+    </Match>
+    <Match>
+        <Package name="~gov2\..*"/>
+    </Match>
+
+    <!--
+        Suppress all warnings in the DNSJava,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Package name="~org\..*"/>
+    </Match>
+
+    <!--
+        Suppress all warnings in Manifest and R,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Class name="~.*R\$.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*Manifest\$.*"/>
+    </Match>
+
+    <!--
+        Suppress NM_METHOD_NAMING_CONVENTION warnings in encoder,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h263.encoder.NativeH263Encoder" />
+        <Or>
+            <Method name="InitEncoder" />
+            <Method name="EncodeFrame" />
+            <Method name="DeinitEncoder" />
+        </Or>
+        <Bug pattern="NM_METHOD_NAMING_CONVENTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.encoder.NativeH264Encoder" />
+        <Or>
+            <Method name="InitEncoder" />
+            <Method name="EncodeFrame" />
+            <Method name="DeinitEncoder" />
+        </Or>
+        <Bug pattern="NM_METHOD_NAMING_CONVENTION" />
+    </Match>
+
+    <!--
+        Suppress NN_NAKED_NOTIFY warning in FifoBuffer,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.protocol.msrp.FifoBuffer" />
+        <Method name="unblockRead" />
+        <Bug pattern="NN_NAKED_NOTIFY" />
+    </Match>
+
+    <!--
+        Suppress NN_NAKED_NOTIFY warning in FifoBuffer,
+        switch has been checked and is intentional.
+    -->
+    <Match>
+        <Class name="com.orangelabs.rcs.utils.FifoBuffer" />
+        <Method name="close" />
+        <Bug pattern="NN_NAKED_NOTIFY" />
+    </Match>
+
+    <!--
+        Suppress REC_CATCH_EXCEPTION warning in top level
+        methods.
+    -->
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
+        <Method name="handle200OK" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession" />
+        <Method name="addParticipant" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession" />
+        <Method name="addParticipants" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
+        <Method name="handle200OK" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnManager" />
+        <Method name="sendSipMessageDeliveryStatus" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.protocol.msrp.ChunkReceiver" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
+        <Method name="handle200OK" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingFileSharingSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
+        <Method name="handle200OK" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.TerminatingImageTransferSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.protocol.sip.SipInterface" />
+        <Method name="&lt;init&gt;" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
+        <Method name="handle200OK" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
+        <Method name="run" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+    <Match>
+        <Class name="com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService"/>
+        <Method name="sendSipMessage" />
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+
+</FindBugsFilter>
