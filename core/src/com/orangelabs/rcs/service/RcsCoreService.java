@@ -20,7 +20,6 @@ package com.orangelabs.rcs.service;
 
 import java.util.Vector;
 
-import org.gsma.joyn.capability.CapabilityServiceImpl;
 import org.gsma.joyn.capability.ICapabilityService;
 
 import android.app.Notification;
@@ -62,6 +61,7 @@ import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
+import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.client.ClientApiIntents;
 import com.orangelabs.rcs.service.api.client.IImsApi;
 import com.orangelabs.rcs.service.api.client.ImsApiIntents;

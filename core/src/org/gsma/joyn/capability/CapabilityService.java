@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.gsma.joyn.JoynContactFormatException;
 import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
@@ -50,7 +51,7 @@ public class CapabilityService extends JoynService {
     public final static String INTENT_EXTENSIONS = "org.gsma.joyn.capability.EXTENSION";
     
 	/**
-	 * Extension base anme
+	 * Extension base name
 	 */
 	public final static String EXTENSION_BASE_NAME = "+g.3gpp.iari-ref";
 
@@ -160,8 +161,9 @@ public class CapabilityService extends JoynService {
 	 * 
 	 * @param contact Contact
 	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
 	 */
-	public void requestCapabilities(String contact) throws JoynServiceException {
+	public void requestCapabilities(String contact) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				api.requestCapabilities(contact);
@@ -183,8 +185,9 @@ public class CapabilityService extends JoynService {
 	 * 
 	 * @param contacts List of contacts
 	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
 	 */
-	public void requestCapabilities(List<String> contacts) throws JoynServiceException {
+	public void requestCapabilities(List<String> contacts) throws JoynServiceException, JoynContactFormatException {
 		for(int i=0; i < contacts.size(); i++) {
 			requestCapabilities(contacts.get(i));
 		}
@@ -232,8 +235,9 @@ public class CapabilityService extends JoynService {
 	 * @param contacts Set of contacts
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
 	 */
-	public void addCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException {
+	public void addCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				Iterator<String> list = contacts.iterator();
@@ -255,8 +259,9 @@ public class CapabilityService extends JoynService {
 	 * @param contacts Set of contacts
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
 	 */
-	public void removeCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException {
+	public void removeCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				Iterator<String> list = contacts.iterator();

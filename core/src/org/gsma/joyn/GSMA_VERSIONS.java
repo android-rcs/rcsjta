@@ -18,19 +18,23 @@
 package org.gsma.joyn;
 
 /**
- * Joyn service exception
- *  
+ * GSMA standard versions
+ * 
  * @author jexa7410
  */
-public class JoynServiceException extends java.lang.Exception {
-	static final long serialVersionUID = 1L;
+public class GSMA_VERSIONS {
+	/**
+	 * GSMA RCS 2.0 version
+	 */
+	public final static int RCS_2 = 0;
 	
 	/**
-	 * Constructor
-	 *
-	 * @param error Error message
+	 * GSMA RCS-e hotfixes version
 	 */
-	public JoynServiceException(String error) {
-		super(error);
-	}
+	public final static int RCSE_HOTFIXES_1_2 = 1;
+	
+	/**
+	 * GSMA RCS-e Blackbird version
+	 */
+	public final static int RCSE_BLACKBIRD_BASE = 2;
 }

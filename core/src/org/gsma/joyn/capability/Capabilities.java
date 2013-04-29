@@ -61,7 +61,7 @@ public class Capabilities implements Parcelable {
 	 * 
 	 * @param TODO
 	 */
-	protected Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, ArrayList<String> extensions) {
+	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, ArrayList<String> extensions) {
 		this.imageSharing = imageSharing; 
 		this.videoSharing = videoSharing; 
 		this.imSession = imSession; 
