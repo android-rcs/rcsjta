@@ -1,77 +1,37 @@
-<project name="rcsjta" basedir="." default="api">
+<project name="GSMA Terminal API" basedir=".">
 
-  <property file="local.properties"/>
-  <property file="project.properties"/>
-  <property name="android_jar" value="${sdk.dir}/platforms/${target}/android.jar"/>
-	<property name="terminal.root" 		value="${basedir}"/>
-	<property name="terminal.api" 		value="${terminal.root}/rcsjta.jar"/>
+	<property environment="env"/>
+	<property name="android.root" 		value="${env.ANDROID_SDK}"/>
+	<property name="terminal.root" 		value="."/>
+	<property name="terminal.api" 		value="${terminal.root}/core/rcs_api.jar"/>
+	<property name="terminal.build"		value="${terminal.root}/core/build"/>
+	<property name="src.path" 		value="${terminal.root}/core/src"/>
 
-  <target name="api" description="GSMA RCS API jar file">
-    <echo>Generate ${terminal.api} file</echo>
+	<path id="j2se.lib">
+		<fileset dir="${env.JAVA_HOME}/lib/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="j2se.classpath" refid="j2se.lib"/>
 
-    <delete file="${terminal.api}"/>
-    
-    <jar destfile="${terminal.api}" basedir="${terminal.root}/bin/classes">
-    </jar>
-    
-  </target>
+	<path id="terminal.classpath">
+       	<pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
+	</path>
 
-  <target name="docs" description="GSMA RCS API Documentation">
+    <!-- Generate RCS API DOCS -->
+
+    <target name="docs" description="GSMA RCS Terminal API Documentation">
     <echo>Generate Javadoc</echo>
-
-    <javadoc
-        doctitle="GSMA RCS API"
+    <javadoc doctitle="GSMA RCS Terminal API"
         verbose="on"
         destdir="docs"
         use="true"
         access="public" 
         classpath="${android_jar}:${project.all.jars.path}" 
-        sourcepath="src"
-        packagenames="${project.app.package}.*" 
-        >
+        sourcepath="${src.path}"
+        packagenames="org.gsma.joyn.*">
     </javadoc>
-    <copy file="docs-assets/android-developer-core.css" todir="docs"/>
-    <mkdir dir="docs/images"/>
-    <copy file="docs-assets/bg_fade.jpg" todir="docs/images"/>
-    <copy file="docs-assets/preliminary.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_images_sprite.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_community_leftDiv.jpg" todir="docs/images"/>
-    <copy file="docs-assets/hr_gray_side.jpg" todir="docs/images"/>
-    <copy file="docs-assets/hr_gray_main.jpg" todir="docs/images"/>
-    <copy file="docs-assets/bg_home_announcement.png" todir="docs/images"/>
-    <copy file="docs-assets/hr_gray_side.jpg" todir="docs/images"/>
-    <copy file="docs-assets/bg_home_carousel.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_home_carousel_board.png" todir="docs/images"/>
-    <copy file="docs-assets/bg_home_carousel_wheel.png" todir="docs/images"/>
-    <copy file="docs-assets/carousel_buttons_sprite.png" todir="docs/images"/>
-    <copy file="docs-assets/arrow_bluelink_down.png" todir="docs/images"/>
-    <copy file="docs-assets/arrow_bluelink_up.png" todir="docs/images"/>
-    <copy file="docs-assets/triangle-closed-small.png" todir="docs/images"/>
-    <copy file="docs-assets/triangle-opened-small.png" todir="docs/images"/>
-    <copy file="docs-assets/icon_design.png" todir="docs/images"/>
-    <copy file="docs-assets/grad-rule-qv.png" todir="docs/images"/>
 
-  </target>
-
-  <target name="pdf" description="GSMA RCS API Documentation PDF">
-    <echo>Generate PDF documentation</echo>
-
-    <javadoc        
-      verbose="on"
-      doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
-      docletpath="pdfdoclet-1.0.2-all.jar"
-      sourcepath="src"
-      classpath="${android_jar}:${project.all.jars.path}" 
-      packagenames="${project.app.package}.*"
-      access="public"
-    >
-      <doclet>
-        <param name="-pdf" value="rcsjta.pdf"></param>
-      </doclet>
-    </javadoc>
   </target>
 
 </project>

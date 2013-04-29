@@ -6,7 +6,7 @@ BUILD
 
 Edit local.properties, adjust the value of sdk.dir to the path of your local installation of the Android SDK.
 
-ant relase 
+ant release 
 ant -f build-local.xml docs
 
 Generate pdf - Do not forget the slash (/) after the src dir, fails otherwise
