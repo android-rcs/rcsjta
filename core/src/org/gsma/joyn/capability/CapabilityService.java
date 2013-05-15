@@ -93,21 +93,30 @@ public class CapabilityService extends JoynService {
         }
     }
     
-	/**
+    /**
+     * Returns true if connected to the service, else returns false
+     * 
+     * @return Boolean
+     */
+    public boolean isServiceConnected() {
+    	return (api != null);
+    }
+
+    /**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	api = ICapabilityService.Stub.asInterface(service);
         	if (serviceListener != null) {
-        		serviceListener.handleServiceConnected();
+        		serviceListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	api = null;
         	if (serviceListener != null) {
-        		serviceListener.handleServiceDisconnected();
+        		serviceListener.onServiceDisconnected(JoynService.CONNECTION_LOST);
         	}
         }
     };
@@ -133,11 +142,15 @@ public class CapabilityService extends JoynService {
     
     /**
      * Returns the capabilities of a given contact from the local database. This
-     * method doesn’t request any network update to the remote contact.
+     * method doesn’t request any network update to the remote contact. The parameter
+     * contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
+     * supported an exception is thrown.
      * 
      * @param contact Contact
      * @return Capabilities
      * @throws JoynServiceException
+	 * @throws JoynContactFormatException
      */
     public Capabilities getContactCapabilities(String contact) throws JoynServiceException {
 		if (api != null) {
@@ -152,21 +165,25 @@ public class CapabilityService extends JoynService {
     }    
 
     /**
-	 * Requests capabilities of a remote contact. This method initiates in background a
-	 * new capability request to the remote contact by sending a SIP OPTIONS. The result
-	 * of the capability request is then broadcasted asynchronously to the applications
-	 * via the Intent CONTACT_CAPABILITIES. A capability resfresh is only sent if the
-	 * timestamp associated to the capability has expired (the expiration value is fixed
-	 * via MNO provisioning).
-	 * 
+	 * Requests capabilities to a remote contact. This method initiates in background
+	 * a new capability request to the remote contact by sending a SIP OPTIONS. The
+	 * result of the capability request is sent asynchronously via callback method of
+	 * the capabilities listener. A capability resfresh is only sent if the timestamp
+	 * associated to the capability has expired (the expiration value is fixed via MNO
+	 * provisioning). The parameter contact supports the following formats: MSISDN in
+	 * national or international format, SIP address, SIP-URI or Tel-URI. If the format
+	 * of the contact is not supported an exception is thrown. The result of the
+	 * capability refresh request is provided to all the clients that have registered
+	 * the listener for this event.
+   	 * 
 	 * @param contact Contact
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-	public void requestCapabilities(String contact) throws JoynServiceException, JoynContactFormatException {
+	public void requestContactCapabilities(String contact) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				api.requestCapabilities(contact);
+				api.requestContactCapabilities(contact);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -176,25 +193,54 @@ public class CapabilityService extends JoynService {
 	}
 
     /**
-	 * Requests capabilities for a group of remote contacts. This method initiates in
-	 * background new capability requests to remote contacts by sending a SIP OPTIONS
-	 * for each contact. The result of the capability request is then broadcasted
-	 * asynchronously to the applications via the Intent CONTACT_CAPABILITIES. A
-	 * capability resfresh is only sent if the timestamp associated to the capability
-	 * has expired (the expiration value is fixed via MNO provisioning).
+     * Requests capabilities for a group of remote contacts. This method initiates
+     * in background new capability requests to the remote contact by sending a
+     * SIP OPTIONS. The result of the capability request is sent asynchronously via
+     * callback method of the capabilities listener. A capability refresh is only
+     * sent if the timestamp associated to the capability has expired (the expiration
+     * value is fixed via MNO provisioning). The parameter contact supports the
+     * following formats: MSISDN in national or international format, SIP address,
+     * SIP-URI or Tel-URI. If the format of the contact is not supported an exception
+     * is thrown. The result of the capability refresh request is provided to all the
+     * clients that have registered the listener for this event.
 	 * 
 	 * @param contacts List of contacts
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-	public void requestCapabilities(List<String> contacts) throws JoynServiceException, JoynContactFormatException {
+	public void requestContactCapabilities(List<String> contacts) throws JoynServiceException, JoynContactFormatException {
 		for(int i=0; i < contacts.size(); i++) {
-			requestCapabilities(contacts.get(i));
+			requestContactCapabilities(contacts.get(i));
+		}
+	}
+
+    /**
+	 * Requests capabilities for all contacts existing in the local address book. This
+	 * method initiates in background new capability requests for each contact of the
+	 * address book by sending SIP OPTIONS. The result of a capability request is sent
+	 * asynchronously via callback method of the capabilities listener. A capability
+	 * refresh is only sent if the timestamp associated to the capability has expired
+	 * (the expiration value is fixed via MNO provisioning). The result of the capability
+	 * refresh request is provided to all the clients that have registered the listener
+	 * for this event.
+	 * 
+	 * @param contacts List of contacts
+	 * @throws JoynServiceException
+	 */
+	public void requestAllContactsCapabilities() throws JoynServiceException, JoynContactFormatException {
+		if (api != null) {
+			try {
+				api.requestAllContactsCapabilities();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
 		}
 	}
 
 	/**
-	 * Registers a listener for receiving capabilities of contacts
+	 * Registers a capabilities listener on any contact
 	 * 
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
@@ -212,7 +258,7 @@ public class CapabilityService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a listener of capabilities
+	 * Unregisters a capabilities listener
 	 * 
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
@@ -230,7 +276,7 @@ public class CapabilityService extends JoynService {
 	}
 
 	/**
-	 * Registers a listener for receiving capabilities of a given contact
+	 * Registers a capabilities listener on a list of contacts
 	 * 
 	 * @param contacts Set of contacts
 	 * @param listener Capabilities listener
@@ -254,7 +300,7 @@ public class CapabilityService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a listener of capabilities for a given contact
+	 * Unregisters a capabilities listener on a list of contacts
 	 * 
 	 * @param contacts Set of contacts
 	 * @param listener Capabilities listener

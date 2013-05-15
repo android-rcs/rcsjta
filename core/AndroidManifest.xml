@@ -137,7 +137,7 @@
 			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab"
+		<provider android:authorities="com.orangelabs.rcs.eab" android:exported="false"
 			android:writePermission="com.orangelabs.rcs.permission.RCS"
 			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
@@ -238,6 +238,11 @@
  			</intent-filter>  
 		</receiver> 
 
+		<!-- RCS Terminal API -->
+		
+		<provider android:authorities="org.gsma.joyn.capability"
+			android:name="org.gsma.joyn.capability.CapabilitiesProvider"/>
+		
     </application> 
 
 </manifest>

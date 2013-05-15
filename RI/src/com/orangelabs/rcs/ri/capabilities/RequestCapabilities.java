@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.List;
+import java.util.Set;
 
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
@@ -98,7 +98,6 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
         try {
 	        capabilityApi.removeCapabilitiesListener(capabilitiesListener);
         } catch(JoynServiceException e) {
-        	// TODO
         }
 
         // Disconnect API
@@ -106,9 +105,11 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     }
 
     /**
-     * Service connected
+     * Callback called when service is connected. This method is called when the
+     * service is well connected to the RCS service (binding procedure successfull):
+     * this means the methods of the API may be used.
      */
-    public void handleServiceConnected() {
+    public void onServiceConnected() {
         // Update refresh button
         Spinner spinner = (Spinner)findViewById(R.id.contact);
         Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
@@ -123,14 +124,18 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 	        // Register capabilities listener
 	        capabilityApi.addCapabilitiesListener(capabilitiesListener);
         } catch(JoynServiceException e) {
-        	// TODO
         }
     }
     
     /**
-     * Service has been disconnected
+     * Callback called when service has been disconnected. This method is called when
+     * the service is disconnected from the RCS service (e.g. service deactivated). The
+     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
+     * INTERNAL_ERROR.
+     * 
+     * @param reason Disconnection reason
      */
-    public void handleServiceDisconnected() {
+    public void onServiceDisconnected(int reason) {
 		Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disconnected));
     }    
     
@@ -141,6 +146,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 			try {
+		        // Get selected contact
 				String contact = getContactAtPosition(position);
 				
 				// Get current capabilities
@@ -211,7 +217,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     		public void run() {
 		    	try {
 			        // Request new capabilities 
-			        capabilityApi.requestCapabilities(contact);
+			        capabilityApi.requestContactCapabilities(contact);
 			    } catch(JoynServiceNotAvailableException e) {
 					Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
 			    } catch(JoynServiceException e) {
@@ -243,9 +249,8 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             // Set extensions
     		extensions.setVisibility(View.VISIBLE);
             String result = "";
-            List<String> extensionList = capabilities.getSupportedExtensions();
-            for(int i=0; i<extensionList.size(); i++) {
-            	String value = extensionList.get(i);
+            Set<String> extensionList = capabilities.getSupportedExtensions();
+	        for(String value : extensionList) {
             	result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
             }
             extensions.setText(result);    		
@@ -257,12 +262,12 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
      */
     private ICapabilitiesListener capabilitiesListener = new ICapabilitiesListener.Stub() {
 	    /**
-	     * Handle new capabilities
+	     * Callback called when new capabilities are received for a given contact
 	     * 
 	     * @param contact Contact
 	     * @param capabilities Capabilities
 	     */
-	    public void handleNewCapabilities(final String contact, final Capabilities capabilities) {
+	    public void onCapabilitiesReceived(final String contact, final Capabilities capabilities) {
 			handler.post(new Runnable(){
 				public void run(){
 					// Check if this intent concerns the current selected contact					

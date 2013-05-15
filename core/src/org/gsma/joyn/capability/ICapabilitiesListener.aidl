@@ -2,6 +2,9 @@ package org.gsma.joyn.capability;
 
 import org.gsma.joyn.capability.Capabilities;
 
+/**
+ * Capabilities listener
+ */
 interface ICapabilitiesListener {
-	void handleNewCapabilities(in String contact, in Capabilities capabilities);
+	void onCapabilitiesReceived(in String contact, in Capabilities capabilities);
 }

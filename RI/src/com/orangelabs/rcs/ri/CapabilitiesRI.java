@@ -26,9 +26,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.capabilities.RequestCapabilities;
 import com.orangelabs.rcs.ri.capabilities.MyCapabilities;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.capabilities.RequestAllCapabilities;
+import com.orangelabs.rcs.ri.capabilities.RequestCapabilities;
 
 /**
  * Capabilities RI
@@ -65,8 +65,7 @@ public class CapabilitiesRI extends ListActivity {
                 break;
                 
 	        case 2:
-	        	Utils.showMessage(this, getString(R.string.label_not_implemented));
-               	// TODO startActivity(new Intent(this, RefreshCapabilities.class));
+               	startActivity(new Intent(this, RequestAllCapabilities.class));
                 break;
         }
     }

@@ -46,7 +46,7 @@
 
 		<activity android:name=".capabilities.MyCapabilities"/>
 
-		<activity android:name=".capabilities.RefreshCapabilities"/>
+		<activity android:name=".capabilities.RequestAllCapabilities"/>
 		
 
 		<!-- Messaging RI -->

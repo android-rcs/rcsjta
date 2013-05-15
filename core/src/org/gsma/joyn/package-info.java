@@ -17,7 +17,7 @@
  * - File Transfer API: transfer a file.<br>
  * - Video Share API: live video sharing during a CS call.<br>
  * - Image Share API: image sharing during a CS call.<br>
- * - UX API: image sharing during a CS call.<br>
+ * - UX API: links third party applications with RCS applications.<br>
  * <p>
  * The RCS API uses the following Android concepts:<br>
  * - Intents mechanism to broadcast incoming events (e.g. notification) and
@@ -34,8 +34,8 @@
  * <p>
  * Note: The supported formats for a contact used as a method parameter are:<br>
  * - Phone number in national or international format (e.g. +33xxx).<br>
- * - SIP address (eg. "John" <sip:+33xxx@domain.com>).<br>
+ * - SIP address (e.g. "John" <sip:+33xxx@domain.com>).<br>
  * - SIP-URI (e.g. sip:+33xxx@domain.com).<br>
- * - Tel-URI (eg. tel:+33xxx).<br>
+ * - Tel-URI (e.g. tel:+33xxx).<br>
  */
 package org.gsma.joyn;

@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.List;
+import java.util.Set;
 
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
@@ -71,9 +71,11 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
     }
     
     /**
-     * Service connected
+     * Callback called when service is connected. This method is called when the
+     * service is well connected to the RCS service (binding procedure successfull):
+     * this means the methods of the API may be used.
      */
-    public void handleServiceConnected() {
+    public void onServiceConnected() {
     	try {
     		// Get the current capabilities from the RCS contacts API
         	Capabilities capabilities = capabilityApi.getMyCapabilities();
@@ -91,9 +93,8 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
 	        // Set extensions
 	        TextView extensions = (TextView)findViewById(R.id.extensions);
 	        String result = "";
-	        List<String> extensionList = capabilities.getSupportedExtensions();
-	        for(int i=0; i<extensionList.size(); i++) {
-	        	String value = extensionList.get(i);
+	        Set<String> extensionList = capabilities.getSupportedExtensions();
+	        for(String value : extensionList) {
 	        	result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
 	        }
 	        extensions.setText(result);
@@ -105,9 +106,14 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
     }
 
     /**
-     * Service has been disconnected
+     * Callback called when service has been disconnected. This method is called when
+     * the service is disconnected from the RCS service (e.g. service deactivated). The
+     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
+     * INTERNAL_ERROR.
+     * 
+     * @param reason Disconnection reason
      */
-    public void handleServiceDisconnected() {
+    public void onServiceDisconnected(int reason) {
 		Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_disconnected));
     }    
 }

@@ -26,6 +26,13 @@ import android.content.Context;
  */
 public abstract class JoynService {
 	/**
+	 * Disconnection states
+	 */
+	public final static int CONNECTION_LOST = 0;
+	public final static int SERVICE_DISABLED = 1;
+	public final static int INTERNAL_ERROR = 2;
+    
+    /**
 	 * Application context
 	 */
 	protected Context ctx;
@@ -55,4 +62,11 @@ public abstract class JoynService {
      * Disconnects from the API
      */
     public abstract void disconnect();	
+
+    /**
+     * Returns true if connected to the service, else returns false
+     * 
+     * @return Boolean
+     */
+    public abstract boolean isServiceConnected();
 }

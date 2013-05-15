@@ -24,12 +24,19 @@ package org.gsma.joyn;
  */
 public interface JoynServiceListener {
     /**
-     * Service connected
+     * Callback called when service is connected. This method is called when the
+     * service is well connected to the RCS service (binding procedure successfull):
+     * this means the methods of the API may be used.
      */
-    public void handleServiceConnected();
+    public void onServiceConnected();
 
     /**
-     * Service has been disconnected
+     * Callback called when service has been disconnected. This method is called when
+     * the service is disconnected from the RCS service (e.g. service deactivated). The
+     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
+     * INTERNAL_ERROR.
+     * 
+     * @param reason Disconnection reason
      */
-    public void handleServiceDisconnected();
+    public void onServiceDisconnected(int reason);
 }

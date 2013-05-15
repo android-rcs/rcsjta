@@ -11,7 +11,9 @@ interface ICapabilityService {
 
 	Capabilities getContactCapabilities(in String contact);
 
-	void requestCapabilities(in String contact);
+	void requestContactCapabilities(in String contact);
+
+	void requestAllContactsCapabilities();
 
 	void addCapabilitiesListener(in ICapabilitiesListener listener);
 

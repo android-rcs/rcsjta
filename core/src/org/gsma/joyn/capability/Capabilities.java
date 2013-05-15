@@ -19,7 +19,9 @@
 package org.gsma.joyn.capability;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,14 +56,18 @@ public class Capabilities implements Parcelable {
 	/**
 	 * List of supported extensions
 	 */
-	private ArrayList<String> extensions = new ArrayList<String>();
+	private Set<String> extensions = new HashSet<String>();
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param TODO
+	 * @param imageSharing Image sharing support
+	 * @param videoSharing Video sharing support
+	 * @param imSession IM/Chat support
+	 * @param fileTransfer File transfer support
+	 * @param extensions Set of supported extensions
 	 */
-	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, ArrayList<String> extensions) {
+	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, Set<String> extensions) {
 		this.imageSharing = imageSharing; 
 		this.videoSharing = videoSharing; 
 		this.imSession = imSession; 
@@ -79,7 +85,10 @@ public class Capabilities implements Parcelable {
 		this.videoSharing = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
-		source.readStringList(this.extensions);
+
+		List<String> exts = new ArrayList<String>();
+		source.readStringList(exts);
+		this.extensions = new HashSet<String>(exts);		
     }
 
 	/**
@@ -103,8 +112,10 @@ public class Capabilities implements Parcelable {
     	dest.writeInt(videoSharing ? 1 : 0);
     	dest.writeInt(imSession ? 1 : 0);
     	dest.writeInt(fileTransfer ? 1 : 0);
-		if (extensions!=null && extensions.size()>0){
-			dest.writeStringList(extensions);
+		if (extensions != null) {
+			List<String> exts = new ArrayList<String>();
+			exts.addAll(extensions);
+			dest.writeStringList(exts);
 		}
     }
 
@@ -173,7 +184,7 @@ public class Capabilities implements Parcelable {
 	 * 
 	 * @return List of feature tags
 	 */
-	public List<String> getSupportedExtensions() {
+	public Set<String> getSupportedExtensions() {
 		return extensions;
 	}
 }

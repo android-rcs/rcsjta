@@ -154,7 +154,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,		RcsSettingsData.FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,		RcsSettingsData.TRUE);
+            addParameter(db, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,			"");
             addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, 		"300");
