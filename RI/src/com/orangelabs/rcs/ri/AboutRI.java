@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.ri;
 
-import org.gsma.joyn.Build;
+import org.gsma.joyn.JoynService.Build;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
@@ -50,8 +50,33 @@ public class AboutRI extends Activity {
         TextView releaseView = (TextView)findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
-        String apiRelease = Build.GSMA_SUPPORTED_VERSION + "_" + Build.API_CODENAME + "_" + Build.API_RELEASE;
+        String apiRelease = getBuildNumber() + ", " + getGsmaVersion();
         TextView apiView = (TextView)findViewById(R.id.api);
         apiView.setText(getString(R.string.label_about_api, apiRelease));
     }
+
+	/**
+	 * Returns the string representation of the current build
+	 * 
+	 * @return String
+	 */
+	private static String getBuildNumber() {
+		return Build.API_CODENAME + " " + Build.API_VERSION + "." + Build.API_INCREMENTAL;
+	}
+    
+	/**
+	 * Returns the string representation of the supported GSMA version
+	 * 
+	 * @return String
+	 */
+	private static String getGsmaVersion() {
+		switch(Build.GSMA_VERSION) {
+			case Build.GSMA_CODES.RCSE_HOTFIXES_1_2:
+				return "RCS-e hotfixes";
+			case Build.GSMA_CODES.RCSE_BLACKBIRD:
+				return "RCS-e Blackbird";
+			default:
+				return "Unknown";
+		}
+	}
 }

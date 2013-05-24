@@ -21,6 +21,7 @@ package com.orangelabs.rcs.service;
 import java.util.Vector;
 
 import org.gsma.joyn.capability.ICapabilityService;
+import org.gsma.joyn.ft.IFileTransferService;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -62,6 +63,7 @@ import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
+import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
 import com.orangelabs.rcs.service.api.client.ClientApiIntents;
 import com.orangelabs.rcs.service.api.client.IImsApi;
 import com.orangelabs.rcs.service.api.client.ImsApiIntents;
@@ -106,14 +108,19 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
 	private CpuManager cpuManager = new CpuManager();
 
-	// --------------------- GSMA API -------------------------
+	// --------------------- RCSJTA API -------------------------
 	
 	/**
 	 * Capability API
 	 */
     private CapabilityServiceImpl capabilityApi = new CapabilityServiceImpl(); 
 
-	// --------------------- GSMA API -------------------------
+	/**
+	 * File transfer API
+	 */
+    private FileTransferServiceImpl ftApi = new FileTransferServiceImpl(); 
+
+    // --------------------- RCS API -------------------------
     
 	/**
 	 * IMS API
@@ -184,10 +191,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	    }
 
     	// Close APIs
+		capabilityApi.close();
+		ftApi.close();
     	imsApi.close();
     	termsApi.close();
 		presenceApi.close();
-		capabilityApi.close();
 		richcallApi.close();
 		messagingApi.close();
 		sipApi.close();
@@ -358,6 +366,18 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public IBinder onBind(Intent intent) {    	
+        if (ICapabilityService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("Capability service API binding");
+    		}
+            return capabilityApi;
+        } else
+        if (IFileTransferService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("File transfer service API binding");
+    		}
+            return ftApi;
+        } else
         if (IImsApi.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("IMS API binding");
@@ -375,12 +395,6 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Presence API binding");
     		}
             return presenceApi;
-        } else
-        if (ICapabilityService.class.getName().equals(intent.getAction())) {
-    		if (logger.isActivated()) {
-    			logger.debug("Capability service API binding");
-    		}
-            return capabilityApi;
         } else
         if (IMessagingApi.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
@@ -1015,7 +1029,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		
     	// Broadcast the invitation
-    	messagingApi.receiveFileTransferInvitation(session);
+    	ftApi.receiveFileTransferInvitation(session);
 	}
     
 	/**

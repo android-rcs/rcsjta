@@ -1,5 +1,6 @@
 package com.orangelabs.rcs.ri.capabilities;
 
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.capability.CapabilityService;
 
@@ -50,9 +51,9 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
         setTitle(R.string.menu_refresh_capabilities);
         
 		// Set buttons callback
-        Button btn = (Button)findViewById(R.id.refresh_btn);
-        btn.setOnClickListener(btnSyncListener);        
-        btn.setEnabled(false);
+        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
+        refreshBtn.setOnClickListener(btnSyncListener);        
+        refreshBtn.setEnabled(false);
         
         // Instanciate API
         capabilityApi = new CapabilityService(getApplicationContext(), this);
@@ -75,21 +76,34 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
-        Button btn = (Button)findViewById(R.id.refresh_btn);
-        btn.setEnabled(true);
+        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
+        refreshBtn.setEnabled(true);
     }
     
     /**
      * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated). The
-     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
-     * INTERNAL_ERROR.
+     * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param reason Disconnection reason
+     * @param error Error
+     * @see JoynService.Error
      */
-    public void onServiceDisconnected(int reason) {
+    public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disconnected));
-    }    
+	}    
+
+    /**
+     * Callback called when service is registered to the RCS/IMS platform
+     */
+    public void onServiceRegistered() {
+    	// Not used here
+    }
+    
+    /**
+     * Callback called when service is unregistered from the RCS/IMS platform
+     */
+    public void onServiceUnregistered() {
+    	// Not used here
+    }
 
     /**
      * Publish button listener
@@ -133,7 +147,7 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
     			// Refresh all contacts
         		api.requestAllContactsCapabilities();
         	} catch(Exception e) {
-        		// Display error
+    	    	e.printStackTrace();
         		Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_refresh_failed));
         	}
         	return null;

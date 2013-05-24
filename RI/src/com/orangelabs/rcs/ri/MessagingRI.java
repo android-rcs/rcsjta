@@ -19,12 +19,14 @@
 package com.orangelabs.rcs.ri;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.orangelabs.rcs.ri.messaging.InitiateFileTransfer;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 
@@ -57,33 +59,32 @@ public class MessagingRI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSMA startActivity(new Intent(this, InitiateFileTransfer.class));
+            	startActivity(new Intent(this, InitiateFileTransfer.class));
 	            break;
 	            
 	        case 1:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSMA startActivity(new Intent(this, InitiateChat.class));
+            	// TODO startActivity(new Intent(this, InitiateChat.class));
 	            break;
 	            
 	        case 2:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSMA startActivity(new Intent(this, InitiateGroupChat.class));
+            	// TODO startActivity(new Intent(this, InitiateGroupChat.class));
 	            break;
 	            
 	        case 3: 
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSMA startActivity(new Intent(this, ChatList.class));
+            	// TODO startActivity(new Intent(this, ChatList.class));
 	            break;
 	            
 	        case 4:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSMA startActivity(new Intent(this, BlockContact.class));
+            	// TODO startActivity(new Intent(this, BlockContact.class));
 	        	break;
 
 	        case 5:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO GSMA startActivity(new Intent(this, SpamBox.class));
+	        	// TODO startActivity(new Intent(this, SpamBox.class));
 	        	break;
         }
     }

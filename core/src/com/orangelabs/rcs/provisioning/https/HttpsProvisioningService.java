@@ -489,7 +489,6 @@ public class HttpsProvisioningService extends Service {
 	    	TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
             // Build provisioning address if empty in settings 
             String requestUri = RcsSettings.getInstance().getProvisioningAddress();
-            String oldRequestUri = "";
             if (requestUri.length() == 0) {
     	    	String ope = tm.getSimOperator();
                 // Cancel operation if no valid SIM operator
@@ -501,7 +500,6 @@ public class HttpsProvisioningService extends Service {
                 }
                 String mnc = ope.substring(3);
                 String mcc = ope.substring(0, 3);
-                oldRequestUri = "config." + mcc + mnc + ".rcse";
                 while (mnc.length() < 3) { // Set mnc on 3 digits
                     mnc = "0" + mnc;
                 }
@@ -546,17 +544,7 @@ public class HttpsProvisioningService extends Service {
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 
 			// Execute first HTTP request
-            HttpResponse response = null;
-            try {
-                response = executeRequest("http", requestUri, client, localContext);
-            } catch (UnknownHostException e) {
-                // If the new URI is not reachable, try the old
-                if (logger.isActivated()) {
-                    logger.debug("The server " + requestUri + " can't be reachable, try with the old URI");
-                }
-                requestUri = oldRequestUri;
-                response = executeRequest("http",requestUri, client, localContext);
-            }
+            HttpResponse response = executeRequest("http", requestUri, client, localContext);
             result.code = response.getStatusLine().getStatusCode(); 
 			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
 			if (result.code != 200) {

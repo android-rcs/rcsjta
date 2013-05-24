@@ -28,18 +28,6 @@
 	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
 	 
-	<uses-permission android:name="com.orangelabs.rcs.permission.RCS"/>	
-	 
-	<permission android:name="com.orangelabs.rcs.permission.RCS"
-        android:label="@string/rcs_core_permission"
-        android:description="@string/rcs_core_permission_desc"
-        android:protectionLevel="normal" />	 
- 
-	<permission android:name="com.orangelabs.rcs.permission.RCS_EXTENSION"
-        android:label="@string/rcs_core_permission_ext"
-        android:description="@string/rcs_core_permission_ext_desc"
-        android:protectionLevel="normal" />	 
-
 	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
 		
 		<!-- the following meta-data is used to identify the application as a joyn client -->
@@ -56,7 +44,8 @@
 		<service android:name="com.orangelabs.rcs.service.RcsCoreService">  
 	        <intent-filter>
 	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
-	            
+	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
+	            	            
 	            <action android:name="com.orangelabs.rcs.SERVICE"/>
 	            <action android:name="com.orangelabs.rcs.service.api.client.IImsApi"/>
 	            <action android:name="com.orangelabs.rcs.service.api.client.terms.ITermsApi"/>
@@ -133,28 +122,18 @@
 		<!-- RCS data providers -->	
 
 		<provider android:authorities="com.orangelabs.rcs.settings"
-			android:writePermission="com.orangelabs.rcs.permission.RCS"
-			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab" android:exported="false"
-			android:writePermission="com.orangelabs.rcs.permission.RCS"
-			android:readPermission="com.orangelabs.rcs.permission.RCS"
+		<provider android:authorities="com.orangelabs.rcs.eab"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
 		<provider android:authorities="com.orangelabs.rcs.messaging"
-			android:writePermission="com.orangelabs.rcs.permission.RCS"
-			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.messaging.RichMessagingProvider"/>
 			
 		<provider android:authorities="com.orangelabs.rcs.csh"
-			android:writePermission="com.orangelabs.rcs.permission.RCS"
-			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.sharing.RichCallProvider"/>
 			
 		<provider android:authorities="com.orangelabs.rcs.eventlogs"
-			android:writePermission="com.orangelabs.rcs.permission.RCS"
-			android:readPermission="com.orangelabs.rcs.permission.RCS"
 			android:name="com.orangelabs.rcs.provider.eventlogs.EventLogProvider"/>
 	
 		<!-- Device events receiver -->	
@@ -238,7 +217,7 @@
  			</intent-filter>  
 		</receiver> 
 
-		<!-- RCS Terminal API -->
+		<!-- GSMA RCS Terminal API -->
 		
 		<provider android:authorities="org.gsma.joyn.capability"
 			android:name="org.gsma.joyn.capability.CapabilitiesProvider"/>

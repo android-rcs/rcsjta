@@ -42,10 +42,9 @@
 <string name="label_receive_image">Received image %s</string>
 
 <!-- About menu -->
-<string name="label_about_title">RCS-e Reference Implementation</string>
+<string name="label_about_title">Reference Implementation</string>
 <string name="label_about_release">Release %s</string>
 <string name="label_about_api">API %s</string>
-<string name="label_about_more_info">More info at http://code.google.com/p/android-rcs-ims-stack/</string>
 
 <!-- capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>

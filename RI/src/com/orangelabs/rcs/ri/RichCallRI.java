@@ -54,17 +54,17 @@ public class RichCallRI extends ListActivity {
         switch(position) {
 	        case 0:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO GSSMA startActivity(new Intent(this, InitiateImageSharing.class));
+            	// TODO startActivity(new Intent(this, InitiateImageSharing.class));
                 break;
                 
 	        case 1:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO GSSMA startActivity(new Intent(this, InitiateOutgoingVisioSharing.class));
+	        	// TODO startActivity(new Intent(this, InitiateOutgoingVisioSharing.class));
                 break;            
                                 
 	        case 2:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO GSMA startActivity(new Intent(this, InitiateGeolocSharing.class));
+	        	// TODO startActivity(new Intent(this, InitiateGeolocSharing.class));
                 break;
         }
     }

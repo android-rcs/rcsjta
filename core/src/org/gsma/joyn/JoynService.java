@@ -25,14 +25,85 @@ import android.content.Context;
  * @author jexa7410
  */
 public abstract class JoynService {
-	/**
-	 * Disconnection states
-	 */
-	public final static int CONNECTION_LOST = 0;
-	public final static int SERVICE_DISABLED = 1;
-	public final static int INTERNAL_ERROR = 2;
+    /**
+     * Information about the current build
+     */
+    public static class Build {
+        /**
+         * List of GSMA versions
+         */
+        public static class GSMA_CODES {
+	    	/**
+	    	 * GSMA RCS-e hotfixes version
+	    	 */
+	    	public final static int RCSE_HOTFIXES_1_2 = 0;
+	    	
+	    	/**
+	    	 * GSMA RCS-e Blackbird version
+	    	 */
+	    	public final static int RCSE_BLACKBIRD = 1;
+        }
+        
+        /**
+         * List of version codes
+         */
+        public static class VERSION_CODES {
+        	/**
+        	 * The original first version of joyn API
+        	 */
+        	public final static int BASE = 1;
+        }
+    	
+    	/**
+    	 * GSMA version number
+    	 */
+    	public static final int GSMA_VERSION = GSMA_CODES.RCSE_HOTFIXES_1_2;
+
+    	/**
+    	 * API release implementor name
+    	 */
+    	public static final String API_CODENAME = "OrangeLabs";
+
+    	/**
+    	 * API version number
+    	 * 
+    	 * @see Build.VERSION_CODES
+    	 */
+    	public static final int API_VERSION = VERSION_CODES.BASE;
+
+    	/**
+    	 * Internal number used by the underlying source control to represent this build
+    	 */
+    	public static final int API_INCREMENTAL = 0;
+   	   	    	
+    	private Build() {
+        }    	
+    }
     
     /**
+     * Service error
+     */
+    public static class Error {
+    	/**
+    	 * Internal error
+    	 */
+    	public final static int INTERNAL_ERROR = 0;
+
+    	/**
+    	 * Service has been disabled
+    	 */
+    	public final static int SERVICE_DISABLED = 1;
+    	    	
+    	/**
+    	 * Service connection has been lost
+    	 */
+    	public final static int CONNECTION_LOST = 2;
+        
+    	private Error() {
+        }    	
+    }
+
+	/**
 	 * Application context
 	 */
 	protected Context ctx;
@@ -41,6 +112,11 @@ public abstract class JoynService {
 	 * Service listener
 	 */
 	protected JoynServiceListener serviceListener;
+	
+	/**
+	 * Registration state
+	 */
+	private boolean registered = false;
 	
 	/**
 	 * Constructor
@@ -64,9 +140,18 @@ public abstract class JoynService {
     public abstract void disconnect();	
 
     /**
-     * Returns true if connected to the service, else returns false
+     * Returns true if the service is connected, else returns false
      * 
      * @return Boolean
      */
     public abstract boolean isServiceConnected();
+
+    /**
+     * Returns true if the service is registered to the platform, else returns false
+     * 
+     * @return Boolean
+     */
+    public boolean isServiceRegistered() {
+    	return registered;
+    }
 }

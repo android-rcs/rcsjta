@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.capabilities;
 
 import java.util.Set;
 
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
@@ -99,21 +100,36 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
 	        }
 	        extensions.setText(result);
 	    } catch(JoynServiceNotAvailableException e) {
+	    	e.printStackTrace();
 			Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_disabled));
 	    } catch(JoynServiceException e) {
+	    	e.printStackTrace();
 			Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_failed));
 	    }
     }
 
     /**
      * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated). The
-     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
-     * INTERNAL_ERROR.
+     * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param reason Disconnection reason
+     * @param error Error
+     * @see JoynService.Error
      */
-    public void onServiceDisconnected(int reason) {
+    public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_disconnected));
-    }    
+    }
+    
+    /**
+     * Callback called when service is registered to the RCS/IMS platform
+     */
+    public void onServiceRegistered() {
+    	// Not used here
+    }
+    
+    /**
+     * Callback called when service is unregistered from the RCS/IMS platform
+     */
+    public void onServiceUnregistered() {
+    	// Not used here
+    }
 }

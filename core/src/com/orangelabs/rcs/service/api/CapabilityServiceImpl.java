@@ -102,7 +102,23 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Capabilities
      */
 	public Capabilities getContactCapabilities(String contact) {
-		return null;
+		if (logger.isActivated()) {
+			logger.info("Get capabilities for contact " + contact);
+		}
+
+		// Read capabilities in the local database
+		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
+		if (capabilities != null) {
+    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
+			return new Capabilities(
+    				capabilities.isImageSharingSupported(),
+    				capabilities.isVideoSharingSupported(),
+    				capabilities.isImSessionSupported(),
+    				capabilities.isFileTransferSupported(),
+    				exts); 
+		} else {
+			return null;
+		}
 	}
 
     /**

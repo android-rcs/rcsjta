@@ -25,25 +25,6 @@ package com.orangelabs.rcs.service.api.client.messaging;
  */
 public interface MessagingApiIntents {
     /**
-     * Intent broadcasted when a new file transfer invitation has been received
-     * 
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>contact</em> - Contact phone number.</li>
-     *   <li><em>contactDisplayname</em> - Display name associated to the contact.</li>
-     *   <li><em>sessionId</em> - Session ID of the file transfer session.</li>
-     *   <li><em>chatSessionId</em> - Session ID of the chat session associated to the file
-     *    transfer (may be null if the file transfer is outside of a chat).</li>
-     *   <li><em>filename</em> - Name of the file.</li>
-     *   <li><em>filesize</em> - Size of the file in bytes.</li>
-     *   <li><em>filetype</em> - Type of file encoding.</li>
-     *   <li><em>thumbnail</em> - Path for the file thumbnail.</li>
-     * </ul>
-     * </ul>
-     */
-	public final static String FILE_TRANSFER_INVITATION = "com.orangelabs.rcs.messaging.FILE_TRANSFER_INVITATION";
-	
-    /**
      * Intent broadcasted when a new chat invitation has been received
      * 
      * <p>The intent will have the following extra values:

@@ -19,7 +19,6 @@
 package org.gsma.joyn.capability;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.gsma.joyn.JoynContactFormatException;
@@ -116,7 +115,7 @@ public class CapabilityService extends JoynService {
         public void onServiceDisconnected(ComponentName className) {
         	api = null;
         	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(JoynService.CONNECTION_LOST);
+        		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };
@@ -152,7 +151,7 @@ public class CapabilityService extends JoynService {
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public Capabilities getContactCapabilities(String contact) throws JoynServiceException {
+    public Capabilities getContactCapabilities(String contact) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				return api.getContactCapabilities(contact);
@@ -208,9 +207,10 @@ public class CapabilityService extends JoynService {
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-	public void requestContactCapabilities(List<String> contacts) throws JoynServiceException, JoynContactFormatException {
-		for(int i=0; i < contacts.size(); i++) {
-			requestContactCapabilities(contacts.get(i));
+	public void requestContactCapabilities(Set<String> contacts) throws JoynServiceException, JoynContactFormatException {
+		Iterator<String> values = contacts.iterator();
+		while(values.hasNext()) {
+			requestContactCapabilities(values.next());
 		}
 	}
 
@@ -227,7 +227,7 @@ public class CapabilityService extends JoynService {
 	 * @param contacts List of contacts
 	 * @throws JoynServiceException
 	 */
-	public void requestAllContactsCapabilities() throws JoynServiceException, JoynContactFormatException {
+	public void requestAllContactsCapabilities() throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.requestAllContactsCapabilities();

@@ -32,11 +32,20 @@ public interface JoynServiceListener {
 
     /**
      * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated). The
-     * reason code may have the following values: CONNECTION_LOST, SERVICE_DISABLED,
-     * INTERNAL_ERROR.
+     * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param reason Disconnection reason
+     * @param error Error
+     * @see JoynService.Error
      */
-    public void onServiceDisconnected(int reason);
+    public void onServiceDisconnected(int error);
+    
+    /**
+     * Callback called when service is registered to the RCS/IMS platform
+     */
+    public void onServiceRegistered();
+    
+    /**
+     * Callback called when service is unregistered from the RCS/IMS platform
+     */
+    public void onServiceUnregistered();
 }

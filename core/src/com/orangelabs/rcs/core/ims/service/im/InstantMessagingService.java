@@ -293,8 +293,6 @@ public class InstantMessagingService extends ImsService {
 				PhoneUtils.formatNumberToSipUri(contact),
 				thumbnailImage);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 
