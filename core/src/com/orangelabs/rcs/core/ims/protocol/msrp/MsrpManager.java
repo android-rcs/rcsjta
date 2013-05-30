@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * MSRP manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MsrpManager {
 	/**

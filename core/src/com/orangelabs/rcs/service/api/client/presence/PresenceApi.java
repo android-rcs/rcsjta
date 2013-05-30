@@ -35,7 +35,7 @@ import com.orangelabs.rcs.service.api.client.CoreServiceNotAvailableException;
 /**
  * Presence API
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceApi extends ClientApi {
 	/**

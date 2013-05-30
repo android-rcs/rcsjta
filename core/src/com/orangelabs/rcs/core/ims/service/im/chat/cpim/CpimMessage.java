@@ -25,7 +25,7 @@ import com.orangelabs.rcs.utils.DateUtils;
 /**
  * CPIM message
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CpimMessage {
 	/**

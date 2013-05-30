@@ -25,7 +25,7 @@ import android.text.format.Time;
 /**
  * Date utility functions
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class DateUtils {
 	/**

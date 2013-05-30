@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * CPIM parser (see RFC3862)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CpimParser {
 	/**

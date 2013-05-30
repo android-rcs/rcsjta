@@ -25,7 +25,7 @@ import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
 /**
  * Originating live video content sharing session (streaming)
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStreamingSession {
     /**

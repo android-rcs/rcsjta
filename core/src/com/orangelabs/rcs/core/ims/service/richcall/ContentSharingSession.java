@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.IdGenerator;
 /**
  * Content sharing session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class ContentSharingSession extends ImsServiceSession {
 	/**

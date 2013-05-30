@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:stretchColumns="1"
+	    android:paddingTop="10dip">
+	
+        <Spinner android:id="@+id/contact"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+	
+	    <TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_selected_img"
+			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<TextView android:id="@+id/uri"
+			 android:singleLine="true"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	    
+	    <TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_progress_status"
+ 			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<TextView android:id="@+id/progress_status"
+			 android:singleLine="true"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	
+	    <TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_progress_bar"
+			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<ProgressBar android:id="@+id/progress_bar"
+ 			 style="?android:attr/progressBarStyleHorizontal"
+			 android:gravity="left"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+
+	    <TableRow android:padding="5dip"></TableRow>
+	
+		<Button android:text="@string/label_dial"
+		 android:layout_marginLeft="5dip"
+ 		 android:layout_marginRight="5dip"
+		 android:id="@+id/dial_btn"/>
+
+		<Button android:text="@string/label_select_picture"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/select_btn"/>
+
+		<Button android:text="@string/label_initiate_sharing"
+ 		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/invite_btn"/>
+	
+	</TableLayout>
+	
+</ScrollView>	

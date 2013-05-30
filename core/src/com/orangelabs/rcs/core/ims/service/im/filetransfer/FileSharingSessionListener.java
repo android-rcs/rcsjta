@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 /**
  * File transfer session listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface FileSharingSessionListener extends ImsSessionListener  {
 	/**

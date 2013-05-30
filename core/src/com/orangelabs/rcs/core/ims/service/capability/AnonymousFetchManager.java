@@ -38,7 +38,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Capability discovery manager using anonymous fetch procedure
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AnonymousFetchManager implements DiscoveryManager {
 	   /**

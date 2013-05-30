@@ -21,25 +21,9 @@ package com.orangelabs.rcs.service.api.client.richcall;
 /**
  * Rich call API intents
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichCallApiIntents {
-	/**
-     * Intent broadcasted when a new image sharing invitation has been received
-     * 
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>contact</em> - Contact phone number.</li>
-     *   <li><em>contactDisplayname</em> - Display name associated to the contact.</li>
-     *   <li><em>sessionId</em> - Session ID of the file transfer session.</li>
-     *   <li><em>filename</em> - Name of the file.</li>
-     *   <li><em>filesize</em> - Size of the file in bytes.</li>
-     *   <li><em>filetype</em> - Type of file encoding.</li>
-     * </ul>
-     * </ul>
-     */
-	public final static String IMAGE_SHARING_INVITATION = "com.orangelabs.rcs.richcall.IMAGE_SHARING_INVITATION";
-
     /**
      * Intent broadcasted when a new video sharing invitation has been received
      * 

@@ -29,7 +29,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Messaging settings display
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MessagingSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
 	private CheckBoxPreference filetransfer_vibrate;

@@ -46,7 +46,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * Capability utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CapabilityUtils {
 	

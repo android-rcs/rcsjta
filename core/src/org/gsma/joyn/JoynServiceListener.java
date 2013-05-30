@@ -20,7 +20,7 @@ package org.gsma.joyn;
 /**
  * Joyn service event listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface JoynServiceListener {
     /**

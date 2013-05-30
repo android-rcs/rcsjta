@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionBasedServiceError;
 /**
  * File transfer error
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileSharingError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;

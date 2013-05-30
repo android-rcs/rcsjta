@@ -43,7 +43,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * Abstract 1-1 chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class OneOneChatSession extends ChatSession {
 	/**

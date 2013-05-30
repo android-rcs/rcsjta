@@ -22,7 +22,7 @@ package com.orangelabs.rcs.core.ims.service.presence.xdm;
 /**
  * HTTP request
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class HttpRequest {
 	/**

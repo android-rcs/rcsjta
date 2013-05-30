@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Resource list document
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RlmiDocument {
 	private String uri = null;

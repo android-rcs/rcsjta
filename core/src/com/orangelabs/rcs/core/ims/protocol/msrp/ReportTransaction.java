@@ -22,7 +22,7 @@ import java.util.Hashtable;
 /**
  * Report transaction
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ReportTransaction extends Object {
     /**

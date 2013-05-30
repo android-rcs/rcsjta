@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * Datagram connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface DatagramConnection {
 	/**

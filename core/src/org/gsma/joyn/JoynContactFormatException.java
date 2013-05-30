@@ -26,7 +26,7 @@ package org.gsma.joyn;
  * - SIP-URI (e.g. sip:+33xxx@domain.com).<br>
  * - Tel-URI (eg. tel:+33xxx).
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class JoynContactFormatException extends JoynServiceException {
 	static final long serialVersionUID = 1L;

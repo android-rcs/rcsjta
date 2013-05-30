@@ -31,7 +31,7 @@ import android.os.IBinder;
 /**
  * Client API
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class ClientApi {
 	/**

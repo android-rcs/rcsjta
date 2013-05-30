@@ -26,7 +26,7 @@ import android.os.Parcelable;
 /**
  * Capabilities
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Capabilities {
 	/**

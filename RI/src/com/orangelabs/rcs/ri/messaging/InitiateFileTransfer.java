@@ -58,7 +58,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Initiate file transfer
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class InitiateFileTransfer extends Activity implements JoynServiceListener {
 	/**
@@ -122,12 +122,8 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	inviteBtn.setEnabled(false);
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
+        selectBtn.setEnabled(false);
                
-        // Disable button if no contact available
-        if (spinner.getAdapter().getCount() == 0) {
-        	selectBtn.setEnabled(false);
-        }
-        	        
         // Instanciate API
         ftApi = new FileTransferService(getApplicationContext(), this);
         
@@ -161,7 +157,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     public void onDestroy() {
     	super.onDestroy();
 
-        // Remove session listener
+        // Remove file transfer listener
         if (fileTransfer != null) {
         	try {
         		fileTransfer.removeEventListener(ftListener);
@@ -181,6 +177,13 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     public void onServiceConnected() {
         Button inviteBtn = (Button)findViewById(R.id.invite_btn);
         inviteBtn.setEnabled(true);
+
+        // Disable button if no contact available
+        Spinner spinner = (Spinner)findViewById(R.id.contact);
+        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        if (spinner.getAdapter().getCount() != 0) {
+        	selectBtn.setEnabled(true);
+        }
     }
     
     /**
@@ -252,6 +255,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
             		e.printStackTrace();
 					handler.post(new Runnable(){
 						public void run(){
+    						hideProgressDialog();
 							Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed));
 						}
 					});

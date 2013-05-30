@@ -18,7 +18,7 @@ import com.orangelabs.rcs.core.ims.security.cert.KeyStoreManager;
 /**
  * Android secure socket connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidSecureSocketConnection extends AndroidSocketConnection {
 	/**

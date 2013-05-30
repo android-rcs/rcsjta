@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * RCTP SR packet
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpSenderReportPacket extends RtcpPacket {
 	public int ssrc;

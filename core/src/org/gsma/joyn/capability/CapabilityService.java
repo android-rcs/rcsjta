@@ -42,6 +42,8 @@ import android.os.IBinder;
  * The parameter contact in the API supports the following formats:
  * MSISDN in national or international format, SIP address, SIP-URI
  * or Tel-URI.
+ * 
+ * @author Jean-Marc AUFFRET
  */
 public class CapabilityService extends JoynService {
     /**
@@ -245,7 +247,7 @@ public class CapabilityService extends JoynService {
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
 	 */
-	public void addCapabilitiesListener(ICapabilitiesListener listener) throws JoynServiceException {
+	public void addCapabilitiesListener(CapabilitiesListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.addCapabilitiesListener(listener);
@@ -263,7 +265,7 @@ public class CapabilityService extends JoynService {
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
 	 */
-	public void removeCapabilitiesListener(ICapabilitiesListener listener) throws JoynServiceException {
+	public void removeCapabilitiesListener(CapabilitiesListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.removeCapabilitiesListener(listener);

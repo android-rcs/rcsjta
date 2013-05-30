@@ -23,7 +23,7 @@ import javax2.sip.message.Response;
 /**
  * SIP response
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipResponse extends SipMessage {
 	

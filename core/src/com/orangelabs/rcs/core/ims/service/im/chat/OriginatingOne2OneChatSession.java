@@ -31,7 +31,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating one-to-one chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingOne2OneChatSession extends OneOneChatSession {	
 	/**

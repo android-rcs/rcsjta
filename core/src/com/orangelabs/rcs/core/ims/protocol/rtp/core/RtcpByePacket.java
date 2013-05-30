@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * RTCP BYE packet
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpByePacket extends RtcpPacket {
 

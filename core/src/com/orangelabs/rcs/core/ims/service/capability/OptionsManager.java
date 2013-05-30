@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Capability discovery manager using options procedure
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OptionsManager implements DiscoveryManager {
 	/**

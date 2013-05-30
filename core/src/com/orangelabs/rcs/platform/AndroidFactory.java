@@ -27,7 +27,7 @@ import com.orangelabs.rcs.platform.registry.RegistryFactory;
 /**
  * Android platform
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidFactory {
 	/**

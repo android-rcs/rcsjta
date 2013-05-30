@@ -21,11 +21,11 @@ package org.gsma.joyn.ft;
 /**
  * File transfer service configuration
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransferServiceConfiguration {
 	/**
-	 * Returns the File Size Warning configuration. It can return null if this
+	 * Returns the File Size Warning configuration. It returns 0 if this
 	 * value was not set by the autoconfiguration server (no need to warn).
 	 * 
 	 * @return Size in kilobytes 
@@ -35,7 +35,7 @@ public class FileTransferServiceConfiguration {
 	}
 			
 	/**
-	 * Returns the Max File Size configuration. It can return null if this
+	 * Returns the Max File Size configuration. It returns 0 if this
 	 * value was not set by the autoconfiguration server.
 	 * 
 	 * @return Size in kilobytes

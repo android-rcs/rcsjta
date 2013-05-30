@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format;
 /**
  * Dummy format 
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class DummyFormat extends Format {
 	

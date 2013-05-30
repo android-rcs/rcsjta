@@ -18,16 +18,13 @@
 
 package com.orangelabs.rcs.service.api.client.contacts;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.service.api.client.presence.PresenceInfo;
 
 /**
  * Contact info
  */
-public class ContactInfo implements Parcelable {
+public class ContactInfo {
     /**
      * The contact is RCS capable but there is no special presence relationship with the user
      */
@@ -137,74 +134,6 @@ public class ContactInfo implements Parcelable {
 		this.capabilities = info.capabilities;
 		this.presenceInfo = info.getPresenceInfo();		
 	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-	 */
-	public ContactInfo(Parcel source) {
-		byte flag = source.readByte();
-		if (flag > 0) {
-			this.capabilities = Capabilities.CREATOR.createFromParcel(source);
-		} else {
-			this.capabilities = null;
-		}
-		
-		flag = source.readByte();
-		if (flag > 0) {
-			this.presenceInfo = PresenceInfo.CREATOR.createFromParcel(source);
-		} else {
-			this.presenceInfo = null;
-		}
-		
-		contact = source.readString();
-		
-		rcsStatus = source.readInt();
-		
-		rcsStatusTimestamp = source.readLong();
-		
-		registrationState = source.readInt();
-    }
-	
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-// TODO GSMA    	dest.writeParcelable(capabilities, flags);
-    	dest.writeParcelable(presenceInfo, flags);
-    	dest.writeString(contact);
-    	dest.writeInt(rcsStatus);
-    	dest.writeLong(rcsStatusTimestamp);
-    	dest.writeInt(registrationState);
-    }
-
-    /**
-     * Parcelable creator
-     */
-    public static final Parcelable.Creator<ContactInfo> CREATOR
-            = new Parcelable.Creator<ContactInfo>() {
-        public ContactInfo createFromParcel(Parcel source) {
-            return new ContactInfo(source);
-        }
-
-        public ContactInfo[] newArray(int size) {
-            return new ContactInfo[size];
-        }
-    };	
 
     /**
 	 * Set the capabilities

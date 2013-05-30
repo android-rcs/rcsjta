@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Dummy packet source stream (used to pass NAT)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class DummyPacketSourceStream extends Thread implements ProcessorInputStream {
 

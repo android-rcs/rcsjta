@@ -29,7 +29,7 @@ import java.io.IOException;
 /**
  * RTP packet transmitter
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtpPacketTransmitter {
 

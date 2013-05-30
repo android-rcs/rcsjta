@@ -24,7 +24,7 @@ import android.os.Parcelable;
 /**
  * Photo icon
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PhotoIcon implements Parcelable {
 	/**

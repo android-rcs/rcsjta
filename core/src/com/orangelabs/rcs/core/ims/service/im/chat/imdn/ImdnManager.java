@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * IMDN manager (see RFC5438)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImdnManager extends Thread {
     /**

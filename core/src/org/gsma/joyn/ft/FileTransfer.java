@@ -5,7 +5,7 @@ import org.gsma.joyn.JoynServiceException;
 /**
  * File transfer
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransfer {
 

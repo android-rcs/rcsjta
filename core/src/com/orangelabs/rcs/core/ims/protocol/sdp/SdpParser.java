@@ -24,7 +24,7 @@ import java.util.Vector;
 /**
  * SDP parser
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SdpParser extends Parser {
 	/**

@@ -33,7 +33,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Extends a one-to-one chat session to an ad-hoc session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ExtendOneOneChatSession extends GroupChatSession {
 	/**

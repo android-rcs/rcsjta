@@ -33,7 +33,7 @@ import com.orangelabs.rcs.service.api.client.CoreServiceNotAvailableException;
 /**
  * SIP API
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipApi extends ClientApi {
 	/**

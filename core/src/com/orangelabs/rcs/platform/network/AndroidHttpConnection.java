@@ -28,7 +28,7 @@ import java.net.URL;
 /**
  * Android HTTP connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidHttpConnection implements HttpConnection {
 	/**

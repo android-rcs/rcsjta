@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Options request task
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OptionsRequestTask implements Runnable {
     /**

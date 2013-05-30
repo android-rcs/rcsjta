@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.capability;
 /**
  * Discovery manager interface
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface DiscoveryManager {
 	/**

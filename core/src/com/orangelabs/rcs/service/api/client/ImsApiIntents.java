@@ -20,7 +20,7 @@ package com.orangelabs.rcs.service.api.client;
 /**
  * IMS API intents
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImsApiIntents {
     /**

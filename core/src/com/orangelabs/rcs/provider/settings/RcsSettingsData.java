@@ -24,7 +24,7 @@ import android.net.Uri;
 /**
  * RCS settings data constants
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RcsSettingsData {
 	/**

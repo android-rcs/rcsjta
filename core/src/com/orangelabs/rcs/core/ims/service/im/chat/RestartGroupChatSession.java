@@ -37,7 +37,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Restart group chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RestartGroupChatSession extends GroupChatSession {
 	/**

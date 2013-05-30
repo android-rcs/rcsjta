@@ -20,7 +20,7 @@ package com.orangelabs.rcs.service.api.client.terms;
 /**
  * Terms API intents
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TermsApiIntents {
     /**

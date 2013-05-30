@@ -35,7 +35,7 @@ import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 /**
  * Rich call API
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichCallApi extends ClientApi {
 	/**
@@ -189,85 +189,6 @@ public class RichCallApi extends ClientApi {
 			throw new CoreServiceNotAvailableException();
 		}
 	}	
-
-	/**
-	 * Initiate an image sharing session
-	 * 
-	 * @param contact Contact
-	 * @param file Image file
-	 * @return Image sharing session
-	 * @throws ClientApiException
-	 */
-	public IImageSharingSession initiateImageSharing(String contact, String file) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	return coreApi.initiateImageSharing(contact, file, false);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
-	
-	/**
-	 * Initiate an image sharing session
-	 * 
-	 * @param contact Contact
-	 * @param file Image file
-	 * @param thumbnail Thumbnail option
-	 * @return Image sharing session
-	 * @throws ClientApiException
-	 */
-	public IImageSharingSession initiateImageSharing(String contact, String file, boolean thumbnail) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	return coreApi.initiateImageSharing(contact, file, thumbnail);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
-	
-	/**
-	 * Get an image sharing session from its session ID
-	 * 
-	 * @param id Session ID
-	 * @return Session
-	 * @throws ClientApiException
-	 */
-	public IImageSharingSession getImageSharingSession(String id) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	return coreApi.getImageSharingSession(id);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
-
-	/**
-	 * Get list of current image sharing sessions with a contact
-	 * 
-	 * @param contact Contact
-	 * @return List of sessions
-	 * @throws ClientApiException
-	 */
-	public List<IBinder> getImageSharingSessionsWith(String contact) throws ClientApiException {
-   	if (coreApi != null) {
-			try {
-		    	return coreApi.getImageSharingSessionsWith(contact);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
 	
 	/**
 	 * Set multiparty call

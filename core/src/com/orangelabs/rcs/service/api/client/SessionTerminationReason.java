@@ -22,7 +22,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 /**
  * Session termination reason
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface SessionTerminationReason {
 	/**

@@ -24,7 +24,7 @@ import android.os.Parcelable;
 /**
  * Geoloc info
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Geoloc implements Parcelable {	
 	/**

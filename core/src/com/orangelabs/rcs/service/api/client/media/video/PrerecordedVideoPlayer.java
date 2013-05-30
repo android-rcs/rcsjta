@@ -49,7 +49,7 @@ import java.util.Vector;
 /**
  * Pre-recorded video RTP player. Supports only H.263 QCIF format.
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PrerecordedVideoPlayer extends IMediaPlayer.Stub implements RtpStreamListener {
 

@@ -64,7 +64,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * SIP message factory
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipMessageFactory {
 	/**

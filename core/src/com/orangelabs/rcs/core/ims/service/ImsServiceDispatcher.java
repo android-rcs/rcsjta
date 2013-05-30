@@ -44,7 +44,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * IMS service dispatcher
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImsServiceDispatcher extends Thread {
     /**
@@ -132,8 +132,6 @@ public class ImsServiceDispatcher extends Thread {
 		if (logger.isActivated()) {
 			logger.debug("Receive " + request.getMethod() + " request");
 		}
-		
-		// TODO : add below the dispatch of sip request and call the VOIP service features
 		
 		// Check the IP address of the request-URI
 		String localIpAddress = imsModule.getCurrentNetworkInterface().getNetworkAccess().getIpAddress();

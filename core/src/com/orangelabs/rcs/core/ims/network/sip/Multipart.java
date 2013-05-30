@@ -24,7 +24,7 @@ import javax2.sip.header.ContentTypeHeader;
 /**
  * Multipart content for SIP message
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Multipart {
 	/**

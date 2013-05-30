@@ -34,9 +34,9 @@ import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * File transfer
+ * File transfer implemnentation
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingSessionListener {
 	
@@ -110,7 +110,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     /**
      * Returns the MIME type of the file to be transferred
      * 
-     * @return TYpe
+     * @return Type
      */
     public String getFileType() {
         return session.getContent().getEncoding();
@@ -120,7 +120,6 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 * Returns the state of the file transfer
 	 * 
 	 * @return State 
-	 * @see FileTransferState
 	 */
 	public int getState() {
 		// TODO

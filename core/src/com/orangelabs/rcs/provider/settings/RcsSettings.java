@@ -37,7 +37,7 @@ import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 /**
  * RCS settings
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RcsSettings {
 	/**

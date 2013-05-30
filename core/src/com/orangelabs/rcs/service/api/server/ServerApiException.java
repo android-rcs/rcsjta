@@ -23,7 +23,7 @@ import android.os.RemoteException;
 /**
  * Server API exception
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ServerApiException extends RemoteException {
 	static final long serialVersionUID = 1L;

@@ -27,7 +27,7 @@ import java.net.Socket;
 /**
  * Android socket connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidSocketConnection implements SocketConnection {
 	/**

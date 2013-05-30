@@ -24,7 +24,7 @@ import android.content.Intent;
 /**
  * Outgoing call event receiver
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OutgoingCallReceiver extends BroadcastReceiver {
     @Override

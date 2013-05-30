@@ -44,7 +44,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Subscribe manager for presence event
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceSubscribeManager extends SubscribeManager {
 	/**

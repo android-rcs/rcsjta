@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.audio;
 /**
  * G711 PCMU audio format
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PcmuAudioFormat extends AudioFormat {
 

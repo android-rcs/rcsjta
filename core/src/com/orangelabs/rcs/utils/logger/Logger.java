@@ -23,7 +23,7 @@ import com.orangelabs.rcs.platform.logger.AndroidAppender;
 /**
  * Logger
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Logger {
 	/**

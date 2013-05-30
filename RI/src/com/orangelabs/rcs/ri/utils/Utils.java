@@ -42,7 +42,7 @@ import com.orangelabs.rcs.ri.R;
 /**
  * Utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Utils {
 	/**

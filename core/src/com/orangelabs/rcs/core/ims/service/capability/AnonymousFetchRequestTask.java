@@ -43,7 +43,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Anonymous fetch procedure which permits to request the capabilities
  * for a given contact thanks to a one shot subscribe.
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AnonymousFetchRequestTask {
     /**

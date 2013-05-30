@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service;
 /**
  * IMS session based service error
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImsSessionBasedServiceError extends ImsServiceError {
 	static final long serialVersionUID = 1L;

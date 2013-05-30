@@ -49,7 +49,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating content sharing session (transfer)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingImageTransferSession extends ImageTransferSession implements MsrpEventListener {
 	/**

@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Provisioning parser
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ProvisioningParser {
     /**

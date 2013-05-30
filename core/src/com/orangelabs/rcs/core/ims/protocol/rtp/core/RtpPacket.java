@@ -27,7 +27,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Packet;
 /**
  * Abstract RTP packet
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  * @author Deutsche Telekom
  */
 public class RtpPacket extends Packet {

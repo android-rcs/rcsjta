@@ -47,7 +47,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Abstract Group chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class GroupChatSession extends ChatSession {
 	/**

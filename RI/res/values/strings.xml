@@ -4,12 +4,9 @@
 <!-- Application -->
 <string name="app_name">joyn RI</string>
 <string name="menu_address_book">Address book</string>
-<string name="menu_eventlog">Event Log</string>
-<string name="menu_spambox">Spam box</string>
-<string name="menu_settings">Settings</string>
+<string name="menu_ux">UX</string>
 <string name="menu_about">About</string>
 <string name="label_ab_not_found">The address book is not found, launch it manually from your device home screen.</string>
-<string name="label_presence_service_not_activated">The presence service is not activated</string>
 <string name="label_battery_running_low">Battery running low (less than %d%%)\nStopping joyn services</string>
 
 <!-- Commons -->
@@ -46,13 +43,20 @@
 <string name="label_about_release">Release %s</string>
 <string name="label_about_api">API %s</string>
 
-<!-- capabilities menu -->
+<!-- Intents menu -->
+<string name="menu_intents">Intents</string>
+<string name="menu_clients">Clients</string>
+<string name="menu_apps">Applications</string>
+<string name="label_no_clients">No other client detected on the device</string>
+
+<!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>
 <string name="menu_my_capabilities">My capabilities</string>
 <string name="menu_capabilities_request">Request capabilities</string>
 <string name="menu_refresh_capabilities">Refresh all capabilities</string>
 <string name="menu_request_capabilities">Request capabilities</string>
 <string name="menu_block_capabilities">Block/unblock capabilities</string>
+<string name="menu_spambox">Spambox</string>
 <string name="label_refresh_failed">Could not refresh contacts</string>
 <string name="label_refresh_success">Contacts has been refreshed</string>
 <string name="label_capabilities">Capabilities:</string>
@@ -64,69 +68,8 @@
 <string name="label_capabilities_ft">File transfer</string>
 <string name="label_capabilities_ft_http">File transfer HTTP</string>
 <string name="label_capabilities_im">IM session</string>
-<string name="label_capabilities_presence_discovery">Presence discovery</string>
-<string name="label_capabilities_social_presence">Social presence</string>
-<string name="label_capabilities_geolocation_push">Geolocation push</string>
-<string name="label_capabilities_file_transfer_thumbnail">File transfer thumbnail</string>
 <string name="label_capabilities_extensions">Extensions:</string>
-
-<!--  Presence menu -->
-<string name="menu_presence">Presence</string>
-<string name="menu_presence_info">Edit my presence info</string>
-<string name="menu_eab">Enhanced Address Book</string>
-<string name="menu_manage_contacts">Manage my joyn contacts</string>
-<string name="menu_granted_contacts">List of granted contacts</string>
-<string name="menu_blocked_contacts">List of blocked contacts</string>
-<string name="menu_revoked_contacts">List of revoked contacts</string>
-<string name="label_select_presence_status">Select a status</string>
-<string name="label_freetext">Freetext:</string>
-<string name="label_favoritelink">Favorite link:</string>
-<string name="label_photo">Photo icon:</string>
-<string name="label_phone_number">Phone number:</string>
-<string name="label_contact_type">Type:</string>
-<string name="label_last_modified">Last modified:</string>
-<string name="label_last_capabilities_modified">Last modified:</string>
-<string name="label_presence_status">Presence status:</string>
-<string name="label_publish">Publish</string>
-<string name="label_select_photo">Select photo</string>
-<string name="label_delete_photo">Delete photo</string>
-<string name="label_invite">Invite</string>
-<string name="label_block">Block</string>
-<string name="label_revoke">Revoke</string>
-<string name="label_unblock">Unblock</string>
-<string name="label_unrevoke">Unrevoke</string>
-<string name="label_publish_ok">Publish with success</string>
-<string name="label_publish_ko">Publish has failed</string>
-<string name="label_invite_contact_ok">Contact has been invited with success</string>
-<string name="label_invite_contact_ko">Contact can\'t be invited</string>
-<string name="label_block_contact_ok">Contact has been blocked with success</string>
-<string name="label_block_contact_ko">Contact can\'t be blocked</string>
-<string name="label_revoke_contact_ok">Contact has been revoked with success</string>
-<string name="label_revoke_contact_ko">Contact can\'t be revoked</string>
-<string name="label_unblock_contact_ok">Contact has been unblocked with success</string>
-<string name="label_unblock_contact_ko">Contact can\'t be unblocked</string>
-<string name="label_unrevoke_contact_ok">Contact has been unrevoked with success</string>
-<string name="label_unrevoke_contact_ko">Contact can\'t be unrevoked</string>
-<string name="label_contact_list_failed">Can\'t read XDM server list</string>
-<string name="label_list_empty">No item in the list</string>
-<string name="label_read_eab_ko">Can\'t read the EAB</string>
-<string name="label_request_ok">Request initiated with success</string>
-<string name="label_request_ko">Request has failed</string>
-<string name="label_request_in_background">Request has been sent in background to %s</string>
-<string name="label_browser_bookmarks">Browser bookmarks</string>
-<string name="label_predefined_freetext">Pre-defined freetext</string>
-<string name="title_presence_invitation">New invitation to share profile</string>
-<string name="label_rcs_contact">joyn</string>
-<string name="label_normal_contact">Not joyn</string>
-<string name="label_presence_capabilities">Capabilities:</string>
-<string name="label_presence_info_changed">%s has changed his social presence info</string>
-<string name="label_presence_list_empty">Empty result</string>
-<string name="title_normal_contact">Contact</string>
-<string name="label_not_rcs_capable">This contact is not joyn capable</string>
-<string-array name="presence_status_label">
-    <item>Available</item>
-    <item>Offline</item>
-</string-array>
+<string name="label_request_in_background">Request has been sent in background for %s</string>
 
 <!--  Messaging menu -->
 <string name="menu_messaging">Messaging</string>
@@ -191,19 +134,14 @@
 <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
 <string name="label_rejoin_unauthorized">You can\'t rejoin or restart the session because you have left the session voluntary</string>
 <string name="label_me">Me</string>
-<string name="label_geoloc_prefix">Geoloc</string>
-<string name="label_ft_thumb">File thumbnail</string>
 
 <!--  Rich call menu -->
-<string name="menu_richcall">Rich call</string>
+<string name="menu_richcall">Sharing</string>
 <string name="menu_initiate_image_sharing">Initiate image sharing</string>
-<string name="menu_initiate_prerecorded_video_sharing">Initiate pre-recorded video sharing</string>
 <string name="menu_initiate_video_sharing">Initiate video sharing</string>
-<string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
 <string name="menu_video_settings">Video settings</string>
 <string name="label_image_sharing_canceled">Image sharing session has been canceled</string>
 <string name="label_video_sharing_canceled">Video sharing session has been canceled</string>
-<string name="label_geoloc_sharing_canceled">Geoloc sharing session has been canceled</string>
 <string name="label_progress_status">Status:</string>
 <string name="label_progress_bar">Progress:</string>
 <string name="label_sharing_aborted">Sharing aborted</string>
@@ -221,7 +159,6 @@
 <string name="label_select_file">Select file</string>
 <string name="title_recv_image_sharing">New image sharing invitation</string>
 <string name="title_recv_video_sharing">New video sharing invitation</string>
-<string name="title_recv_geoloc_sharing">New geoloc sharing invitation</string>
 <string name="label_out_of_memory">No enough memory to display the image</string>
 <string name="label_csh_failed">Sharing has failed or is aborted (error code %d)</string>
 <string name="label_end_of_media">End of media</string>
@@ -303,19 +240,6 @@
     <item>384</item>
 </string-array>
 
-<!-- Event Log -->
-<string name="menu_filter">Change filter</string>
-<string name="menu_clear_log">Clear log</string>
-<string name="title_eventlog_dialog_filter_logs_title">Filter</string>
-<string name="title_eventlog_confirm_dialog_delete_title">Delete</string>
-<string name="label_eventlog_confirm_delete_message">This message will be deleted.</string>
-<string name="label_eventlog_empty">Log is empty</string>
-<string name="label_eventlog_group_chat">Group chat</string>
-<string name="label_eventlog_chat">Chat</string>
-<string name="label_eventlog_session_started">started</string>
-<string name="label_eventlog_session_failed">failed</string>
-<string name="label_eventlog_session_terminated">terminated</string>
-
 <!--  Quick contact badge -->
 <string name="label_quick_chat">Chat</string>
 <string name="label_quick_ft">File transfer</string>
@@ -330,21 +254,6 @@
 
 <string name="label_accept_terms_failed">Accept terms has failed, retry later</string>
 <string name="label_reject_terms_failed">Reject terms has failed, retry later</string>
-
-<!-- Geolocation push -->
-<string name="label_select_geoloc">Select from a map</string>
-<string name="menu_showus_map">Show us in a map</string>
-<string name="menu_send_geoloc">Send geoloc</string>
-<string name="title_edit_geoloc">Edit a geoloc</string>
-<string name="title_display_geoloc">Show a geoloc</string>
-<string name="label_send_geoloc_failed">Send geoloc has failed</string>
-<string name="label_location">Label:</string>
-<string name="label_latitude">Latitude:</string>
-<string name="label_longitude">Longitude:</string>
-<string name="label_altitude">Altitude:</string>
-<string name="label_accuracy">Accuracy:</string>
-<string name="label_select_geoloc_map">Use a long click to select a location on the map.</string>
-<string name="label_geoloc_not_found">No geoloc info to display!</string>
 
 </resources>
 

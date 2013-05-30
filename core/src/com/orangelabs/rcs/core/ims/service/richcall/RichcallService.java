@@ -58,7 +58,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * current content sharing when the call terminates, to process capability
  * request from remote and to request remote capabilities.
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichcallService extends ImsService {
     /**
@@ -230,8 +230,6 @@ public class RichcallService extends ImsService {
 				PhoneUtils.formatNumberToSipUri(contact),
 				thumbnailImage);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 

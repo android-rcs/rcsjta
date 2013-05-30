@@ -33,7 +33,7 @@ import java.io.IOException;
 /**
  * RTP output stream
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener {
     /**

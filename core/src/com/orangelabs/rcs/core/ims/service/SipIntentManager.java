@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * SIP intent manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipIntentManager {
 	/**

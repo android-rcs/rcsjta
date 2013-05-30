@@ -22,7 +22,7 @@ package com.orangelabs.rcs.core.content;
 /**
  * Photo content
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PhotoContent extends MmContent {
 	/**

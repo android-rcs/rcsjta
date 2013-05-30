@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Codec chain
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CodecChain {
 	/**

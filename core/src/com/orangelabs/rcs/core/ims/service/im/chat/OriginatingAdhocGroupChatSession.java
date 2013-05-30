@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating ad-hoc group chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	/**

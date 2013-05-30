@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 /**
  * RTCP report
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpReport {
 	public int ssrc;

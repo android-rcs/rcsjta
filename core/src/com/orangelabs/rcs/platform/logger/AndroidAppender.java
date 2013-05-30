@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Android appender 
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidAppender extends Appender {
 	/**

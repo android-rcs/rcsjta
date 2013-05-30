@@ -33,7 +33,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Messaging RI
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MessagingRI extends ListActivity {
     @Override

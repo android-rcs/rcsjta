@@ -71,7 +71,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Contains utility methods for interfacing with the Android SDK ContactsProvider.
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  * @author Deutsche Telekom AG
  */
 public final class ContactsManager {

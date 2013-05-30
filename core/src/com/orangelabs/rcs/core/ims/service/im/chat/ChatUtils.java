@@ -57,7 +57,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * Chat utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ChatUtils {
 	/**

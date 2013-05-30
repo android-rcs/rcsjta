@@ -10,7 +10,7 @@ import android.content.Intent;
 /**
  * Client API utils
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ClientApiUtils {
 	/**

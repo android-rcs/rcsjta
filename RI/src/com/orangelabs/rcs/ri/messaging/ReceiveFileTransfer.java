@@ -54,7 +54,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Received file transfer
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ReceiveFileTransfer extends Activity implements JoynServiceListener {
     /**
@@ -258,7 +258,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      */
     private OnClickListener acceptBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {     
-        	  	
         	// Accept invitation
         	acceptInvitation();
         }
@@ -269,7 +268,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      */    
     private OnClickListener declineBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-        	
         	// Reject invitation
         	rejectInvitation();
         	
@@ -420,20 +418,20 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         
         // Send notification
-		String sessionId = invitation.getStringExtra("sessionId");
+		String transferId = invitation.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
 		NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(sessionId, Utils.NOTIF_ID_FT, notif);
+        notificationManager.notify(transferId, Utils.NOTIF_ID_FT, notif);
     }
     
 	/**
      * Remove file transfer notification
      * 
      * @param context Context
-     * @param sessionId Session ID
+     * @param transferId Transfer ID
      */
-    public static void removeFileTransferNotification(Context context, String sessionId) {
+    public static void removeFileTransferNotification(Context context, String transferId) {
 		NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(sessionId, Utils.NOTIF_ID_FT);
+		notificationManager.cancel(transferId, Utils.NOTIF_ID_FT);
     }
 
     /**

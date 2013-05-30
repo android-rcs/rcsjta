@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Abstract MSRP connection between two end points
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class MsrpConnection {
 	/**

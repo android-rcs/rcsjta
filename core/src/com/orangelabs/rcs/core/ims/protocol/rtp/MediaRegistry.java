@@ -32,7 +32,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoFormat;
 /**
  * Media registry that handles the supported codecs
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MediaRegistry {
 

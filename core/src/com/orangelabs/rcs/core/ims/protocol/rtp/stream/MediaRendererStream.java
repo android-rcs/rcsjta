@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Media renderer stream 
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MediaRendererStream implements ProcessorOutputStream {
 	/**

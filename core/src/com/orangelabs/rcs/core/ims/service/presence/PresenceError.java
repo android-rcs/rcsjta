@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 /**
  * Presence error
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceError extends ImsServiceError {
 	static final long serialVersionUID = 1L;

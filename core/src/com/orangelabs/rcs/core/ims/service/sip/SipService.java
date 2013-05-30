@@ -41,7 +41,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * SIP service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipService extends ImsService {
 	/**

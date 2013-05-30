@@ -25,7 +25,7 @@ import android.net.Uri;
 /**
  * Content provider contains file transfer history
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransferProvider extends ContentProvider {
 	@Override

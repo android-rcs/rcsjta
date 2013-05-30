@@ -29,7 +29,7 @@ import java.util.Vector;
 /**
  * RTCP packet transmitter
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpPacketTransmitter extends Thread {
     /**

@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Conference-Info parser
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ConferenceInfoParser extends DefaultHandler {
 	

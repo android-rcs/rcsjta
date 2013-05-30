@@ -51,7 +51,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating Store & Forward session for push notifications
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession implements MsrpEventListener {
 	/**

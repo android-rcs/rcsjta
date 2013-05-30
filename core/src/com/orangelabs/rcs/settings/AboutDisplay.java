@@ -29,7 +29,7 @@ import android.widget.TextView;
 /**
  * About the application display
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AboutDisplay extends Activity {
 

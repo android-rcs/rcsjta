@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Group chat info
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class GroupChatInfo {
 	/**

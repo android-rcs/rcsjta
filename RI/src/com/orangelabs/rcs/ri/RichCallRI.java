@@ -19,18 +19,20 @@
 package com.orangelabs.rcs.ri;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.orangelabs.rcs.ri.richcall.InitiateImageSharing;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Rich call RI
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichCallRI extends ListActivity {
 	@Override
@@ -43,8 +45,7 @@ public class RichCallRI extends ListActivity {
         // Set items
         String[] items = {
     		getString(R.string.menu_initiate_image_sharing),
-    		getString(R.string.menu_initiate_video_sharing),
-    		getString(R.string.menu_initiate_geoloc_sharing)
+    		getString(R.string.menu_initiate_video_sharing)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -53,19 +54,13 @@ public class RichCallRI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, InitiateImageSharing.class));
+	        	startActivity(new Intent(this, InitiateImageSharing.class));
                 break;
                 
 	        case 1:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
 	        	// TODO startActivity(new Intent(this, InitiateOutgoingVisioSharing.class));
                 break;            
-                                
-	        case 2:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO startActivity(new Intent(this, InitiateGeolocSharing.class));
-                break;
         }
     }
 }

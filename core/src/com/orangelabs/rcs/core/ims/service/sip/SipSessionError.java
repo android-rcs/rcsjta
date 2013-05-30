@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionBasedServiceError;
 /**
  * SIP session error
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipSessionError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;

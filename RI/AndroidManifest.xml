@@ -34,7 +34,15 @@
 
         <activity android:name=".AboutRI"/>
 
-		<!-- Capabilities RI -->
+		<!-- Intents RI -->
+        
+        <activity android:name="com.orangelabs.rcs.ri.IntentsRI"/>
+
+        <activity android:name=".intents.Clients"/>
+
+        <activity android:name=".intents.Intents"/>
+        
+        <!-- Capabilities RI -->
 
         <activity android:name=".CapabilitiesRI"/>
 
@@ -53,22 +61,13 @@
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.capability.file-transfer"/>
-            </intent-filter>
-			<intent-filter>
-                <action android:name="android.net.rcs.INITIATE_FT"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="text/x-vcard"/>
+                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.file-transfer"/>
             </intent-filter>
 		</activity>
         
 		<receiver android:name=".messaging.FileTransferInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.ft.FILE_TRANSFER_INVITATION"/>
+		    	<action android:name="org.gsma.joyn.ft.action.NEW_FILE_TRANSFER"/>
             </intent-filter>
         </receiver>
 
@@ -76,6 +75,16 @@
         
         <!-- Rich call RI -->
         <activity android:name=".RichCallRI"/>
+
+        <activity android:name=".richcall.InitiateImageSharing"/>
+        
+		<receiver android:name=".richcall.ImageSharingInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.ish.action.NEW_IMAGE_SHARING"/>
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".richcall.ReceiveImageSharing"/>
         
 </application>
 

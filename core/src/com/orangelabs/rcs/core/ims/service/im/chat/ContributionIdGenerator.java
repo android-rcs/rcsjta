@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.DeviceUtils;
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ContributionIdGenerator {
 	/**

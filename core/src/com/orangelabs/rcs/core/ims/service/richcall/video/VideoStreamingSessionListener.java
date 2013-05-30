@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 /**
  * Content sharing streaming session listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface VideoStreamingSessionListener extends ImsSessionListener  {
     /**

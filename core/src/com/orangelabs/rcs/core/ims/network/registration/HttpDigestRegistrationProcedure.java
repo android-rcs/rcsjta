@@ -32,7 +32,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * HTTP Digest MD5 registration procedure
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  * @author Deutsche Telekom AG
  */
 public class HttpDigestRegistrationProcedure extends RegistrationProcedure {

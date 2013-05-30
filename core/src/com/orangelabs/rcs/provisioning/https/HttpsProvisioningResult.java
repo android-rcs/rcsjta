@@ -21,7 +21,7 @@ package com.orangelabs.rcs.provisioning.https;
 /**
  * HTTPS provisioning result
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class HttpsProvisioningResult {
     /**

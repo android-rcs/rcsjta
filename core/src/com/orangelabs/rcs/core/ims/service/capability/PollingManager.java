@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Polling manager which updates capabilities periodically
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PollingManager extends PeriodicRefresher {
 	/**

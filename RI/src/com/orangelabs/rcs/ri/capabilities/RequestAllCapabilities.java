@@ -21,7 +21,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Request capabilities of all contacts
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RequestAllCapabilities extends Activity implements JoynServiceListener {
     /**

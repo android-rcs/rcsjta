@@ -43,7 +43,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating one-to-one chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingOne2OneChatSession extends OneOneChatSession implements MsrpEventListener {
 	/**

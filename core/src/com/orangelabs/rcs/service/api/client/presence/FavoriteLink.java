@@ -24,7 +24,7 @@ import android.os.Parcelable;
 /**
  * Favorite link
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FavoriteLink implements Parcelable {	
 	/**

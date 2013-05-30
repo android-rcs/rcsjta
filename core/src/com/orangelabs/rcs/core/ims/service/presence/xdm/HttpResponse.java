@@ -23,7 +23,7 @@ import java.util.Hashtable;
 /**
  * HTTP response
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class HttpResponse {
 	/**

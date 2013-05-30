@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Session description
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SessionDescription {
 	public Vector<TimeDescription> timeDescriptions;

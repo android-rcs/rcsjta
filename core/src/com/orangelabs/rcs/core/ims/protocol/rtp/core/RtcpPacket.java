@@ -25,7 +25,7 @@ import java.io.IOException;
 /**
  * Abstract RCTP packet
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class RtcpPacket extends Packet {
     /**

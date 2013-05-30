@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 /**
  * MSRP contants
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface MsrpConstants {
 	public static final String MSRP_PROTOCOL = "msrp";

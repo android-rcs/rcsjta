@@ -47,7 +47,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating file transfer session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingFileSharingSession extends FileSharingSession implements MsrpEventListener {
 	/**

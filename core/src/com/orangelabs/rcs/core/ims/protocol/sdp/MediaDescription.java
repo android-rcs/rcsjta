@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Media description
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MediaDescription {
 	/**

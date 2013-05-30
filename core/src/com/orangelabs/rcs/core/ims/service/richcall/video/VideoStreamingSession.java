@@ -36,7 +36,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Video sharing streaming session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class VideoStreamingSession extends ContentSharingSession {
     /**

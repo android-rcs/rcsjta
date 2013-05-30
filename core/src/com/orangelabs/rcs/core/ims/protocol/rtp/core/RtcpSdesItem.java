@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 /**
  * RCTP SDES item
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpSdesItem {
 	public int type;

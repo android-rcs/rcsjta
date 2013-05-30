@@ -46,7 +46,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating geoloc sharing session (transfer)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingGeolocTransferSession extends GeolocTransferSession implements MsrpEventListener {
 	/**

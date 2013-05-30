@@ -31,7 +31,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating SIP session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingSipSession extends GenericSipSession {
 	/**

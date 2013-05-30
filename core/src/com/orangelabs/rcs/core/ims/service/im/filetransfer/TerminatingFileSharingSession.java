@@ -45,7 +45,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating file transfer session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingFileSharingSession extends FileSharingSession implements MsrpEventListener {
 	/**

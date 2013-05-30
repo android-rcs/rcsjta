@@ -41,7 +41,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terms & conditions service via SIP
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TermsConditionsService extends ImsService {
 	/**

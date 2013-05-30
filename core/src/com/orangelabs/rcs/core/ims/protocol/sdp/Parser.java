@@ -25,7 +25,7 @@ import java.util.Vector;
 /**
  * Generic parser
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 class Parser {
 	/**

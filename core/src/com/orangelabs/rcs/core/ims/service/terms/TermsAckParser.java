@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terms & condition request parser
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TermsAckParser extends DefaultHandler {
 	/* SAMPLE:

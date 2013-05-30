@@ -25,7 +25,7 @@ import android.content.Intent;
 /**
  * File transfer invitation receiver
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransferInvitationReceiver extends BroadcastReceiver {
 	@Override

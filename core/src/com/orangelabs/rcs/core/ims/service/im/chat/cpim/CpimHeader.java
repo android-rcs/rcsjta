@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat.cpim;
 /**
  * CPIM header
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CpimHeader {
 	/***

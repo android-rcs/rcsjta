@@ -32,7 +32,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Geoloc sharing transfer session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class GeolocTransferSession extends ContentSharingSession {
 	/**

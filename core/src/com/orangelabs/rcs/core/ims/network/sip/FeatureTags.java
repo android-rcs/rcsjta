@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.network.sip;
 /**
  * Feature tags
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FeatureTags {
 	/**

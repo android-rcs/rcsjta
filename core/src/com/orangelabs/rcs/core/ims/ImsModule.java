@@ -134,9 +134,6 @@ public class ImsModule implements SipEventListener {
         // Create capability discovery service
         services[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this);
         
-        // Create IP call service
-        // TODO : add here the VOIP service instanciation
-        
         // Create IM service (mandatory)
         services[ImsService.IM_SERVICE] = new InstantMessagingService(this);
         

@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * IM session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImSession extends IChatSession.Stub implements ChatSessionListener {
 	

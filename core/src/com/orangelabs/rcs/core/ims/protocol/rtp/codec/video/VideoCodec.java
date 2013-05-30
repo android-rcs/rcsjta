@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.Codec;
 /**
  * Video codec abstract class
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class VideoCodec extends Codec {
 }

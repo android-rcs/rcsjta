@@ -21,7 +21,7 @@ package com.orangelabs.rcs.service.api.client;
 /**
  * IMS disconnection reason
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface ImsDisconnectionReason {
 	/**

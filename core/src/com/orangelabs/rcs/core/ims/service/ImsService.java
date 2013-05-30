@@ -34,7 +34,7 @@ import java.util.Vector;
 /**
  * Abstract IMS service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class ImsService {
     /**

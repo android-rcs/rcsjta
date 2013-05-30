@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service;
 /**
  * IMS service error
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImsServiceError extends Error {
 	static final long serialVersionUID = 1L;

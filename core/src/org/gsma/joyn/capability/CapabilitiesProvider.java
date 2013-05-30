@@ -17,17 +17,14 @@
  ******************************************************************************/
 package org.gsma.joyn.capability;
 
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
 
 /**
  * Content provider contains capabilities of contacts
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
-public class CapabilitiesProvider extends ContentProvider {
+public class CapabilitiesProvider {
     /**
      * Content provider URI
      */
@@ -79,51 +76,4 @@ public class CapabilitiesProvider extends ContentProvider {
      * <P>Type: TEXT</P>
      */
     public static final String COLUMN_EXTENSIONS = "capability_extensions";
-    
-    // this array must contain all public columns
-    private static final String[] COLUMNS = new String[] {
-        COLUMN_CONTACT_NUMBER,
-        COLUMN_IMAGE_SHARE,
-        COLUMN_VIDEO_SHARE,
-        COLUMN_FILE_TRANSFER,
-        COLUMN_IM_SESSION,
-        COLUMN_EXTENSIONS
-    };
-
-	@Override
-	public boolean onCreate() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	@Override
-	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int delete(Uri arg0, String arg1, String[] arg2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String getType(Uri uri) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * RTP packet receiver
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtpPacketReceiver {
     /**

@@ -37,7 +37,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Subscribe manager for presence watcher info event
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class WatcherInfoSubscribeManager extends SubscribeManager {
 	/**

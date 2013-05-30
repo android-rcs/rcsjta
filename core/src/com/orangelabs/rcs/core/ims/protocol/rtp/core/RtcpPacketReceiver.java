@@ -39,7 +39,7 @@ import java.util.Vector;
 /**
  * RTCP packet receiver
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpPacketReceiver extends Thread {
 	/**

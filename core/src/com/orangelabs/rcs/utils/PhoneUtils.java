@@ -27,7 +27,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Phone utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PhoneUtils {
 	/**

@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.sdp;
 /**
  * Media attribute
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MediaAttribute {
 	/**

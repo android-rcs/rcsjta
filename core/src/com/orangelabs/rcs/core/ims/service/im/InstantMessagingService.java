@@ -65,7 +65,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Instant messaging services (1-1 chat, group chat and file transfer)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class InstantMessagingService extends ImsService {
     /**

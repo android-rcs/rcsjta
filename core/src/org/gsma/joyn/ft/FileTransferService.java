@@ -40,6 +40,8 @@ import android.os.IBinder;
  * The parameter contact in the API supports the following formats:
  * MSISDN in national or international format, SIP address, SIP-URI
  * or Tel-URI.
+ * 
+ * @author Jean-Marc AUFFRET 
  */
 public class FileTransferService extends JoynService {
 	/**
@@ -146,7 +148,7 @@ public class FileTransferService extends JoynService {
     /**
      * Returns the list of file transfers in progress
      * 
-     * @return List of file transfer
+     * @return List of file transfers
      * @throws JoynServiceException
      */
     public Set<FileTransfer> getFileTransfers() throws JoynServiceException {
@@ -188,13 +190,14 @@ public class FileTransferService extends JoynService {
     /**
      * Returns a current file transfer from its invitation Intent
      * 
+     * @param intent Invitation intent
      * @return File transfer or null if not found
      * @throws JoynServiceException
      */
-    public FileTransfer getFileTransferFor(Intent ftIntent) throws JoynServiceException {
+    public FileTransfer getFileTransferFor(Intent intent) throws JoynServiceException {
 		if (api != null) {
 			try {
-				String transferId = ftIntent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
+				String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
 				if (transferId != null) {
 					return getFileTransfer(transferId);
 				} else {
@@ -209,7 +212,7 @@ public class FileTransferService extends JoynService {
     }     
     
     /**
-	 * Registers a new file transfer invitation listener
+	 * Registers a file transfer invitation listener
 	 * 
 	 * @param listener New file transfer listener
 	 * @throws JoynServiceException
@@ -227,7 +230,7 @@ public class FileTransferService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a new file transfer invitation listener
+	 * Unregisters a file transfer invitation listener
 	 * 
 	 * @param listener New file transfer listener
 	 * @throws JoynServiceException

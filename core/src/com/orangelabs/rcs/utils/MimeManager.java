@@ -25,7 +25,7 @@ import java.util.Vector;
 /**
  * MIME manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MimeManager {
 	/**

@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Capability discovery service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CapabilityService extends ImsService implements AddressBookEventListener {
 	/**

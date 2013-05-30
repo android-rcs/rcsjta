@@ -25,7 +25,7 @@ import android.os.Parcelable;
 /**
  * Instant message
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class InstantMessage implements Parcelable {
 	/**

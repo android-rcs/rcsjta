@@ -3,7 +3,7 @@ package org.gsma.joyn.ft;
 /**
  * File transfer event listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class FileTransferListener extends IFileTransferListener.Stub {
 	/**

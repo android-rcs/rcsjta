@@ -38,7 +38,7 @@ import com.orangelabs.rcs.R;
 /**
  * RCS settings provider
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RcsSettingsProvider extends ContentProvider {
 	/**

@@ -38,7 +38,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Generic subscribe manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class SubscribeManager extends PeriodicRefresher {
 	/**

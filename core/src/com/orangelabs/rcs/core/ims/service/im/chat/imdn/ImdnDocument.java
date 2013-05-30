@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 /**
  * IMDN document
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImdnDocument {
 	/**

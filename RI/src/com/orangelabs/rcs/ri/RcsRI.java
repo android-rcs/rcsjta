@@ -33,7 +33,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * RCS RI application
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RcsRI extends ListActivity {
     @Override
@@ -52,6 +52,7 @@ public class RcsRI extends ListActivity {
     		getString(R.string.menu_capabilities),
     		getString(R.string.menu_messaging),
     		getString(R.string.menu_richcall),
+    		getString(R.string.menu_intents),
     		getString(R.string.menu_about)
         };
     	setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -85,6 +86,10 @@ public class RcsRI extends ListActivity {
         		break;
         		
         	case 4:
+        		startActivity(new Intent(this, IntentsRI.class));
+        		break;
+
+        	case 5:
         		startActivity(new Intent(this, AboutRI.class));
         		break;
     	}

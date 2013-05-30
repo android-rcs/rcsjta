@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.service.presence.pidf;
 /**
  * Status icon
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class StatusIcon {
 	private String url = null;

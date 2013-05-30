@@ -42,7 +42,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating geoloc sharing session (transfer)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class OriginatingGeolocTransferSession extends GeolocTransferSession implements MsrpEventListener {
 	/**

@@ -46,7 +46,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating Store & Forward session for messages
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession implements MsrpEventListener {
 	/**

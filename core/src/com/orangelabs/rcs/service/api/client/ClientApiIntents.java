@@ -21,7 +21,7 @@ package com.orangelabs.rcs.service.api.client;
 /**
  * Client API intents
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ClientApiIntents {
     /**

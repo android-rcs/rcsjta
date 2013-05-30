@@ -30,7 +30,7 @@ import com.orangelabs.rcs.service.api.client.CoreServiceNotAvailableException;
 /**
  * Terms & conditions API
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TermsApi extends ClientApi {
 

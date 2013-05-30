@@ -32,7 +32,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Media processor. A processor receives an input stream, use a codec chain
  * to filter the data before to send it to the output stream.
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Processor extends Thread {
 	/**

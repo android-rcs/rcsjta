@@ -30,7 +30,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * XCAP photo-icon response parser
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class XcapPhotoIconResponseParser extends DefaultHandler {
 

@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Mobile access network
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MobileNetworkAccess extends NetworkAccess {
 	/**

@@ -45,7 +45,8 @@
 	        <intent-filter>
 	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
 	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
-	            	            
+	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
+	            	            	            
 	            <action android:name="com.orangelabs.rcs.SERVICE"/>
 	            <action android:name="com.orangelabs.rcs.service.api.client.IImsApi"/>
 	            <action android:name="com.orangelabs.rcs.service.api.client.terms.ITermsApi"/>
@@ -74,7 +75,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <action android:name="com.orangelabs.rcs.SETTINGS"/>                
-            </intent-filter>            
+            </intent-filter>
+            <intent-filter>
+        		<category android:name="android.intent.category.LAUNCHER" />
+        		<category android:name="android.intent.category.DEFAULT" />
+   	            <action android:name="org.gsma.joyn.client.SETTINGS"/>
+            </intent-filter>   	            
  		</activity>
 
 		<activity android:name="com.orangelabs.rcs.settings.AboutDisplay"
@@ -197,31 +203,12 @@
             </intent-filter>
         </activity>
 
-		<!-- GSMA UI connectors -->
-
-		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetRcsStatusReceiver">  
- 			<intent-filter>
- 				<action android:name="android.net.rcs.GET_RCS_STATUS"/>  
- 			</intent-filter>  
-		</receiver> 
-
-		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetMyCapabilitiesReceiver">  
- 			<intent-filter>
- 				<action android:name="android.net.rcs.GET_MY_CAPABILITIES"/>  
- 			</intent-filter>  
-		</receiver> 
-
-		<receiver android:name="com.orangelabs.rcs.service.api.server.gsma.GetContactCapabilitiesReceiver">  
- 			<intent-filter>
- 				<action android:name="android.net.rcs.GET_CONTACT_CAPABILITIES"/>  
- 			</intent-filter>  
-		</receiver> 
-
-		<!-- GSMA RCS Terminal API -->
-		
-		<provider android:authorities="org.gsma.joyn.capability"
-			android:name="org.gsma.joyn.capability.CapabilitiesProvider"/>
-		
-    </application> 
+		<receiver android:name="com.orangelabs.rcs.service.GetStatusReceiver">
+	        <intent-filter>
+	     		<action android:name="com.orangelabs.rcs.client.GET_STATUS"/>
+	        </intent-filter>
+	    </receiver>
+        
+	</application> 
 
 </manifest>

@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.service.presence.xdm;
 /**
  * HTTP GET request
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class HttpGetRequest extends HttpRequest {
 	/**

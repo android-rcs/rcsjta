@@ -279,13 +279,6 @@ public class Core {
 	}
 	
 	/**
-	 * Returns the IP call service
-	 * 
-	 * @return IP call service
-	 */
-	// TODO : add here a VOIP service getter
-
-	/**
 	 * Returns the SIP service
 	 * 
 	 * @return SIP service

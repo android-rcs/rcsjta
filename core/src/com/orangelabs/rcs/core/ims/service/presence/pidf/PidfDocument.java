@@ -25,7 +25,7 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.geoloc.Geopriv;
 /**
  * PIDF presence document
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PidfDocument {
 	private String entity = null;

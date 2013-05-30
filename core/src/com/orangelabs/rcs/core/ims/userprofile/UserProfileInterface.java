@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.userprofile;
 /**
  * User profile interface
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class UserProfileInterface {
 	/**

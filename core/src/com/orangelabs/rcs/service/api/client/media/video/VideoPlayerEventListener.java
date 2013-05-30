@@ -21,7 +21,7 @@ package com.orangelabs.rcs.service.api.client.media.video;
 /**
  * Video player event listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface VideoPlayerEventListener {
 	/**

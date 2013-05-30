@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 /**
  * Buffer
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Buffer {
 	/**

@@ -3,7 +3,7 @@ package com.orangelabs.rcs.service.api.client;
 /**
  * Client API permissions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ClientApiPermission {
 	/**

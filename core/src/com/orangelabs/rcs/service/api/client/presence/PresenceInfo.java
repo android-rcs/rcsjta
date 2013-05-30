@@ -26,7 +26,7 @@ import android.os.Parcelable;
 /**
  * Presence info
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceInfo implements Parcelable {
 	/**

@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.event;
 /**
  * RTCP events listener interface
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface RtcpEventListener {
 	/**

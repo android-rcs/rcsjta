@@ -27,7 +27,7 @@ import android.content.SharedPreferences;
 /**
  * Android registry factory
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidRegistryFactory extends RegistryFactory {
 	/**

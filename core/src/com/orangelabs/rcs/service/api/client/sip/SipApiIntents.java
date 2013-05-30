@@ -21,7 +21,7 @@ package com.orangelabs.rcs.service.api.client.sip;
 /**
  * SIP API intents
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SipApiIntents {
 	/**

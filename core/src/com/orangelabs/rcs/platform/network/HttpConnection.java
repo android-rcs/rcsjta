@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * HTTP connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface HttpConnection {
 	/**

@@ -25,7 +25,7 @@ import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 /**
  * Geoloc sharing transfer session listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface GeolocTransferSessionListener extends ImsSessionListener  {
     /**

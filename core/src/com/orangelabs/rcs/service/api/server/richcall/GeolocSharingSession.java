@@ -39,7 +39,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Geoloc sharing session
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class GeolocSharingSession extends IGeolocSharingSession.Stub implements GeolocTransferSessionListener {
 

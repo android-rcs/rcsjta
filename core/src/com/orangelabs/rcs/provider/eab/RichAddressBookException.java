@@ -21,7 +21,7 @@ package com.orangelabs.rcs.provider.eab;
 /**
  * Rich address book exception
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichAddressBookException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;

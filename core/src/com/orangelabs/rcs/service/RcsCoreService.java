@@ -21,7 +21,9 @@ package com.orangelabs.rcs.service;
 import java.util.Vector;
 
 import org.gsma.joyn.capability.ICapabilityService;
+import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.ft.IFileTransferService;
+import org.gsma.joyn.ish.IImageSharingService;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -63,13 +65,14 @@ import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
+import com.orangelabs.rcs.service.api.ContactsServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
+import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.client.ClientApiIntents;
 import com.orangelabs.rcs.service.api.client.IImsApi;
 import com.orangelabs.rcs.service.api.client.ImsApiIntents;
 import com.orangelabs.rcs.service.api.client.ImsDisconnectionReason;
 import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.client.gsma.GsmaUiConnector;
 import com.orangelabs.rcs.service.api.client.messaging.IMessagingApi;
 import com.orangelabs.rcs.service.api.client.presence.FavoriteLink;
 import com.orangelabs.rcs.service.api.client.presence.Geoloc;
@@ -81,7 +84,6 @@ import com.orangelabs.rcs.service.api.client.richcall.IRichCallApi;
 import com.orangelabs.rcs.service.api.client.sip.ISipApi;
 import com.orangelabs.rcs.service.api.client.terms.ITermsApi;
 import com.orangelabs.rcs.service.api.server.ImsApiService;
-import com.orangelabs.rcs.service.api.server.gsma.GsmaUtils;
 import com.orangelabs.rcs.service.api.server.messaging.MessagingApiService;
 import com.orangelabs.rcs.service.api.server.presence.PresenceApiService;
 import com.orangelabs.rcs.service.api.server.richcall.RichCallApiService;
@@ -95,7 +97,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * RCS core service. This service offers a flat API to any other process (activities)
  * to access to RCS features. This service is started automatically at device boot.
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RcsCoreService extends Service implements CoreListener {
 	/**
@@ -111,6 +113,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	// --------------------- RCSJTA API -------------------------
 	
 	/**
+	 * Contacts API
+	 */
+    private ContactsServiceImpl contactsApi = new ContactsServiceImpl(); 
+
+    /**
 	 * Capability API
 	 */
     private CapabilityServiceImpl capabilityApi = new CapabilityServiceImpl(); 
@@ -119,6 +126,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 * File transfer API
 	 */
     private FileTransferServiceImpl ftApi = new FileTransferServiceImpl(); 
+
+	/**
+	 * Image sharing API
+	 */
+    private ImageSharingServiceImpl ishApi = new ImageSharingServiceImpl(); 
 
     // --------------------- RCS API -------------------------
     
@@ -152,11 +164,6 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
 	private SipApiService sipApi = new SipApiService(); 
 	
-	/**
-	 * IP call API
-	 */
-	// TODO : add here the VOIPApiService instanciation
-
     /**
      * Account changed broadcast receiver
      */
@@ -191,8 +198,10 @@ public class RcsCoreService extends Service implements CoreListener {
 	    }
 
     	// Close APIs
+	    contactsApi.close();
 		capabilityApi.close();
 		ftApi.close();
+		ishApi.close();
     	imsApi.close();
     	termsApi.close();
 		presenceApi.close();
@@ -297,9 +306,6 @@ public class RcsCoreService extends Service implements CoreListener {
 	        // Show a first notification
 	    	addRcsServiceNotification(false, getString(R.string.rcs_core_loaded));
 
-	    	// Update GSMA client API
-	    	GsmaUtils.setClientActivationState(getApplicationContext(), true);
-	    	
 			// Send service intent 
 			intent = new Intent(ClientApiIntents.SERVICE_STATUS);
 			intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STARTED);
@@ -340,9 +346,6 @@ public class RcsCoreService extends Service implements CoreListener {
 			logger.debug("Stop RCS core service");
 		}
 
-    	// Update GSMA client API
-    	GsmaUtils.setClientActivationState(getApplicationContext(), false);
-		
 		// Send service intent 
 		Intent intent = new Intent(ClientApiIntents.SERVICE_STATUS);
 		intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STOPPING);
@@ -366,6 +369,12 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public IBinder onBind(Intent intent) {    	
+        if (IContactsService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("Contacts service API binding");
+    		}
+            return contactsApi;
+        } else
         if (ICapabilityService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("Capability service API binding");
@@ -377,6 +386,12 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("File transfer service API binding");
     		}
             return ftApi;
+        } else
+        if (IImageSharingService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("Image sharing service API binding");
+    		}
+            return ishApi;
         } else
         if (IImsApi.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
@@ -481,11 +496,6 @@ public class RcsCoreService extends Service implements CoreListener {
 		Intent intent = new Intent(ImsApiIntents.IMS_STATUS);
 		intent.putExtra("status", true);
 		getApplicationContext().sendBroadcast(intent);
-
-		// Send GSMA UI Connector intent
-		Intent intentGsma = new Intent(GsmaUiConnector.ACTION_REGISTRATION_CHANGED);
-		intentGsma.putExtra(GsmaUiConnector.EXTRA_REGISTRATION_STATUS, true);
-		getApplicationContext().sendBroadcast(intentGsma);
     }
 
     /**
@@ -501,11 +511,6 @@ public class RcsCoreService extends Service implements CoreListener {
 		intent.putExtra("status", false);
 		intent.putExtra("reason", reason);
 		getApplicationContext().sendBroadcast(intent);
-
-		// Send GSMA UI Connector intent
-		Intent intentGsma = new Intent(GsmaUiConnector.ACTION_REGISTRATION_CHANGED);
-		intentGsma.putExtra(GsmaUiConnector.EXTRA_REGISTRATION_STATUS, false);
-		getApplicationContext().sendBroadcast(intentGsma);
     }
     
     /**
@@ -987,7 +992,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
 		// Broadcast the invitation
-		richcallApi.receiveImageSharingInvitation(session);
+		ishApi.receiveImageSharingInvitation(session);
     }
     
     /**

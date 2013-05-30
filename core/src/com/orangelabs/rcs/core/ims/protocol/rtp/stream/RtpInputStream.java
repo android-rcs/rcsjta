@@ -37,7 +37,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * RTP input stream
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtpInputStream implements ProcessorInputStream {
     /**

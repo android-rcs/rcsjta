@@ -25,7 +25,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 /**
  * Abstract registration procedure
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class RegistrationProcedure {
 	/**

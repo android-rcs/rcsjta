@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
 /**
  * H264 video format
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class H264VideoFormat extends VideoFormat {
 

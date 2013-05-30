@@ -1,7 +1,6 @@
 package com.orangelabs.rcs.service.api.client.richcall;
 
 import com.orangelabs.rcs.service.api.client.richcall.IVideoSharingSession;
-import com.orangelabs.rcs.service.api.client.richcall.IImageSharingSession;
 import com.orangelabs.rcs.service.api.client.richcall.IGeolocSharingSession;
 import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
 import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
@@ -25,15 +24,6 @@ interface IRichCallApi {
 
 	// Get list of current video sharing sessions with a contact
 	List<IBinder> getVideoSharingSessionsWith(in String contact);	
-
-	// Initiate an image sharing session
-	IImageSharingSession initiateImageSharing(in String contact, in String file, in boolean thumbnail);
-
-	// Get current image sharing session from its session ID
-	IImageSharingSession getImageSharingSession(in String id);
-
-	// Get list of current image sharing sessions with a contact
-	List<IBinder> getImageSharingSessionsWith(in String contact);	
 
 	// Set multiparty call
 	void setMultiPartyCall(in boolean flag);

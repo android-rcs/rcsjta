@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Chunks sender
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ChunkSender extends Thread {
 	/**

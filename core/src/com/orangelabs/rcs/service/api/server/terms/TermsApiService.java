@@ -31,7 +31,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terms & conditions API service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TermsApiService extends ITermsApi.Stub {
 	/**

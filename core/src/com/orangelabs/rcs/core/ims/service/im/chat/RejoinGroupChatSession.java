@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Rejoin a group chat session
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RejoinGroupChatSession extends GroupChatSession {
 	/**

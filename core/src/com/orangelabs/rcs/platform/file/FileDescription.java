@@ -21,7 +21,7 @@ package com.orangelabs.rcs.platform.file;
 /**
  * File description
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class FileDescription {
 	/**

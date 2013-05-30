@@ -22,7 +22,7 @@ import android.content.Context;
 /**
  * Abstract joyn service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class JoynService {
     /**
@@ -56,6 +56,8 @@ public abstract class JoynService {
     	
     	/**
     	 * GSMA version number
+    	 * 
+    	 * @see Build.GSMA_CODES
     	 */
     	public static final int GSMA_VERSION = GSMA_CODES.RCSE_HOTFIXES_1_2;
 

@@ -29,7 +29,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Chat invitation ringtone
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ChatInvitationRingtone extends RingtonePreference {
 

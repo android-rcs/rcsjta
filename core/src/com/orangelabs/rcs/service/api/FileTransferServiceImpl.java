@@ -47,6 +47,11 @@ import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+/**
+ * File transfer service implementation
+ * 
+ * @author Jean-Marc AUFFRET
+ */
 public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	/**
 	 * List of file transfer sessions
@@ -139,7 +144,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		FileTransferServiceImpl.addFileTransferSession(sessionApi);
     	
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(FileTransferIntent.FILE_TRANSFER_INVITATION);
+    	Intent intent = new Intent(FileTransferIntent.ACTION_NEW_FILE_TRANSFER);
     	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
     	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
@@ -268,7 +273,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }    
     
     /**
-	 * Registers a new file transfer invitation listener
+	 * Registers a file transfer invitation listener
 	 * 
 	 * @param listener New file transfer listener
 	 * @throws ServerApiException
@@ -282,7 +287,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	}
 
 	/**
-	 * Unregisters a new file transfer invitation listener
+	 * Unregisters a file transfer invitation listener
 	 * 
 	 * @param listener New file transfer listener
 	 * @throws ServerApiException

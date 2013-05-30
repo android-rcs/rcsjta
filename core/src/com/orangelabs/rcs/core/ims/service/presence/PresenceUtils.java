@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.presence;
 /**
  * Presence utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceUtils {
 	/**

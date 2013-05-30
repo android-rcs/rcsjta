@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.media;
 /**
  * Media listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface MediaListener {
 	/**

@@ -35,7 +35,6 @@ import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
-import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -47,7 +46,6 @@ import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
 import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
 import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 import com.orangelabs.rcs.service.api.client.richcall.IGeolocSharingSession;
-import com.orangelabs.rcs.service.api.client.richcall.IImageSharingSession;
 import com.orangelabs.rcs.service.api.client.richcall.IRichCallApi;
 import com.orangelabs.rcs.service.api.client.richcall.IVideoSharingSession;
 import com.orangelabs.rcs.service.api.client.richcall.RichCallApiIntents;
@@ -59,14 +57,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Rich call API service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichCallApiService extends IRichCallApi.Stub {
-	/**
-	 * List of image sharing sessions
-	 */
-    private static Hashtable<String, IImageSharingSession> imageSharingSessions = new Hashtable<String, IImageSharingSession>();
-
 	/**
 	 * List of video sharing sessions
 	 */
@@ -96,32 +89,7 @@ public class RichCallApiService extends IRichCallApi.Stub {
 	 */
 	public void close() {
 		// Clear lists of sessions
-		imageSharingSessions.clear();
 		videoSharingSessions.clear();
-	}
-
-	/**
-     * Add an image sharing session in the list
-     * 
-     * @param session Image sharing session
-     */
-	protected static void addImageSharingSession(ImageSharingSession session) {
-		if (logger.isActivated()) {
-			logger.debug("Add an image sharing session in the list (size=" + imageSharingSessions.size() + ")");
-		}
-		imageSharingSessions.put(session.getSessionID(), session);
-	}
-
-    /**
-     * Remove an image sharing session from the list
-     * 
-     * @param sessionId Session ID
-     */
-	protected static void removeImageSharingSession(String sessionId) {
-		if (logger.isActivated()) {
-			logger.debug("Remove an image sharing session from the list (size=" + imageSharingSessions.size() + ")");
-		}
-		imageSharingSessions.remove(sessionId);
 	}
 
     /**
@@ -364,145 +332,6 @@ public class RichCallApiService extends IRichCallApi.Stub {
 			for(int i=0; i < list.size(); i++) {
 				ContentSharingSession session = list.elementAt(i);
 				IVideoSharingSession sessionApi = videoSharingSessions.get(session.getSessionID());
-				if (sessionApi != null) {
-					result.add(sessionApi.asBinder());
-				}
-			}
-			return result;
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}		
-	}		
-
-    /**
-     * Receive a new image sharing invitation
-     * 
-     * @param session Image sharing session
-     */
-    public void receiveImageSharingInvitation(ImageTransferSession session) {
-		if (logger.isActivated()) {
-			logger.info("Receive image sharing invitation from " + session.getRemoteContact());
-		}
-
-        // Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-
-		// Update rich call history
-		RichCall.getInstance().addCall(number, session.getSessionID(),
-				RichCallData.EVENT_INCOMING,
-				session.getContent(),
-				RichCallData.STATUS_STARTED);
-
-		// Add session in the list
-		ImageSharingSession sessionApi = new ImageSharingSession(session);
-		addImageSharingSession(sessionApi);
-
-		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(RichCallApiIntents.IMAGE_SHARING_INVITATION);
-		intent.putExtra("contact", number);
-		intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
-		intent.putExtra("sessionId", session.getSessionID());
-		intent.putExtra("filename", session.getContent().getName());
-		intent.putExtra("filesize", session.getContent().getSize());
-		intent.putExtra("filetype", session.getContent().getEncoding());
-    	intent.putExtra("thumbnail", session.getThumbnail());		
-        AndroidFactory.getApplicationContext().sendBroadcast(intent);
-    }
-
-    /**
-     * Initiate an image sharing session
-     * 
-     * @param contact Contact
-     * @param file Image file
-     * @param thumbnail Thumbnail option
-     * @throws ServerApiException
-     */
-	public IImageSharingSession initiateImageSharing(String contact, String file, boolean thumbnail) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Initiate an image sharing session with " + contact);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test IMS connection
-		ServerApiUtils.testIms();
-
-		try {
-			// Create an image content
-			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
-			MmContent content = ContentManager.createMmContentFromUrl(file, desc.getSize());
-			
-			// Initiate a sharing session
-			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, thumbnail);
-
-			// Update rich call history
-			RichCall.getInstance().addCall(contact, session.getSessionID(),
-                    RichCallData.EVENT_OUTGOING,
-	    			session.getContent(),
-	    			RichCallData.STATUS_STARTED);
-
-			// Add session in the list
-			ImageSharingSession sessionApi = new ImageSharingSession(session);
-			addImageSharingSession(sessionApi);
-			return sessionApi;
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-	}
-
-    /**
-     * Get current image sharing session from its session ID
-     * 
-     * @param id Session ID
-     * @return Session
-     * @throws ServerApiException
-     */
-	public IImageSharingSession getImageSharingSession(String id) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get image sharing session " + id);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test core availability
-		ServerApiUtils.testCore();
-
-		// Return a session instance
-		return imageSharingSessions.get(id);
-	}
-	
-	/**
-	 * Get list of current image sharing sessions with a contact
-	 * 
-	 * @param contact Contact
-	 * @return List of sessions
-	 * @throws ServerApiException
-	 */
-	public List<IBinder> getImageSharingSessionsWith(String contact) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get image sharing sessions with " + contact);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test core availability
-		ServerApiUtils.testCore();
-		
-		try {
-			Vector<ContentSharingSession> list = Core.getInstance().getRichcallService().getCShSessions(contact);
-			ArrayList<IBinder> result = new ArrayList<IBinder>(list.size());
-			for(int i=0; i < list.size(); i++) {
-				ContentSharingSession session = list.elementAt(i);
-				IImageSharingSession sessionApi = imageSharingSessions.get(session.getSessionID());
 				if (sessionApi != null) {
 					result.add(sessionApi.asBinder());
 				}

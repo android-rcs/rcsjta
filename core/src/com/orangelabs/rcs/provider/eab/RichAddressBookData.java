@@ -23,7 +23,7 @@ import android.net.Uri;
 /**
  * Rich address book data constants
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RichAddressBookData {
 	/**

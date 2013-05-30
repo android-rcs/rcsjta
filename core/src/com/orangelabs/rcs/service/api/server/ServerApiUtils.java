@@ -30,7 +30,7 @@ import com.orangelabs.rcs.service.api.client.SessionState;
 /**
  * Server API utils
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ServerApiUtils {
 	/**

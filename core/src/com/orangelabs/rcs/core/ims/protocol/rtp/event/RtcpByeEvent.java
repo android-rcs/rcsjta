@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpByePacket;
 /**
  * RTCP bye event
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RtcpByeEvent extends RtcpEvent {
 

@@ -9,7 +9,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Registration utility functions
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RegistrationUtils {
 	/**

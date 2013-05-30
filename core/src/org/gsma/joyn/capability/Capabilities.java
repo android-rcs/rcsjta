@@ -30,7 +30,7 @@ import android.os.Parcelable;
  * Capabilities. This class encapsulates the different capabilities
  * which may be supported by the local user or a remote contact.
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Capabilities implements Parcelable {
 	/**

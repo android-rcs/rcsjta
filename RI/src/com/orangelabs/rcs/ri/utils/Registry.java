@@ -24,7 +24,7 @@ import android.content.SharedPreferences;
 /**
  * Registry
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class Registry {
 	/**

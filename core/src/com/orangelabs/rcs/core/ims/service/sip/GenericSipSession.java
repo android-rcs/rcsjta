@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Generic SIP session 
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class GenericSipSession extends ImsServiceSession {
 	/**

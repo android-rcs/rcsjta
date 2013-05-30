@@ -28,7 +28,7 @@ import android.os.PowerManager;
 /**
  * CPU manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CpuManager {
 	/**

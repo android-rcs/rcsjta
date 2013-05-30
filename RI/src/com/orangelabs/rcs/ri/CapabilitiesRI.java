@@ -33,7 +33,7 @@ import com.orangelabs.rcs.ri.capabilities.RequestCapabilities;
 /**
  * Capabilities RI
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class CapabilitiesRI extends ListActivity {
     

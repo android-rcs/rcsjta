@@ -37,7 +37,7 @@ import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Capability API service
+ * Capability service API implementation
  */
 public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**

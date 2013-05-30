@@ -28,7 +28,7 @@ import com.orangelabs.rcs.platform.file.FileFactory;
 /**
  * Multimedia content
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public abstract class MmContent {
 	/**

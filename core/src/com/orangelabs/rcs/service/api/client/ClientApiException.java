@@ -21,7 +21,7 @@ package com.orangelabs.rcs.service.api.client;
 /**
  * Client API exception
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ClientApiException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;

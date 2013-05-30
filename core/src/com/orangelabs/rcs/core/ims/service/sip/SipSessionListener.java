@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 /**
  * SIP session listener
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public interface SipSessionListener extends ImsSessionListener  {
     /**

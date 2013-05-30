@@ -33,7 +33,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Session timer manager (see RFC 4028)
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SessionTimerManager extends PeriodicRefresher {
     /**

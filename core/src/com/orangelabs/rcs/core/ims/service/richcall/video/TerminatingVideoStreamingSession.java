@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating live video content sharing session (streaming)
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class TerminatingVideoStreamingSession extends VideoStreamingSession {
     /**

@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.MimeManager;
 /**
  * Multimedia content manager
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ContentManager{
     /**

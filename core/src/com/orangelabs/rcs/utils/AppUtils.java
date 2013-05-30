@@ -24,7 +24,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 /**
  * Application utils
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AppUtils {
 	/**

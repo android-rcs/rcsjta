@@ -20,7 +20,7 @@ package org.gsma.joyn;
 /**
  * Joyn service not available exception 
  *  
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class JoynServiceNotAvailableException extends JoynServiceException {
 	static final long serialVersionUID = 1L;

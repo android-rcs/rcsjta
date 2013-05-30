@@ -30,7 +30,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * About RI
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AboutRI extends Activity {
 

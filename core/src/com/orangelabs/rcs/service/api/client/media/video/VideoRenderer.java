@@ -50,7 +50,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Video RTP renderer based on H264 QCIF format
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class VideoRenderer extends IMediaRenderer.Stub implements RtpStreamListener {
 

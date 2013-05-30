@@ -48,7 +48,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Settings display
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
     // Dialog IDs

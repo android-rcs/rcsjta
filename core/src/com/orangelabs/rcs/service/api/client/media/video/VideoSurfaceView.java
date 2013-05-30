@@ -28,7 +28,7 @@ import android.view.SurfaceView;
 /**
  * Video surface view
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class VideoSurfaceView extends SurfaceView implements VideoSurface {
 	/**

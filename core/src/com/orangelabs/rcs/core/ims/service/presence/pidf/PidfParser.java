@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * PDIF parser
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PidfParser extends DefaultHandler {
 	

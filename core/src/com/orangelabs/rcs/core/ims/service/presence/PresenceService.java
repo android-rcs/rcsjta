@@ -47,7 +47,7 @@ import java.util.List;
 /**
  * Presence service
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class PresenceService extends ImsService implements AddressBookEventListener{
 	/**

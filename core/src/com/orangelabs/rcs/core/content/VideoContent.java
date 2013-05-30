@@ -22,7 +22,7 @@ package com.orangelabs.rcs.core.content;
 /**
  * Video content
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class VideoContent extends MmContent {
 	/**

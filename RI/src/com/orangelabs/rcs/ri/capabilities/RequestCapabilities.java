@@ -25,8 +25,8 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.capability.Capabilities;
+import org.gsma.joyn.capability.CapabilitiesListener;
 import org.gsma.joyn.capability.CapabilityService;
-import org.gsma.joyn.capability.ICapabilitiesListener;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
@@ -48,7 +48,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Refresh capabilities of a given contact
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class RequestCapabilities extends Activity implements JoynServiceListener {
 	/**
@@ -60,6 +60,11 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 	 * Capability API
 	 */
     private CapabilityService capabilityApi;
+    
+    /**
+     * Capabilities listener
+     */
+    private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener(); 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -153,6 +158,30 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     public void onServiceUnregistered() {
     	// Not used here
     }    
+    
+    /**
+     * Capabilities event listener
+     */
+    private class MyCapabilitiesListener extends CapabilitiesListener {
+	    /**
+	     * Callback called when new capabilities are received for a given contact
+	     * 
+	     * @param contact Contact
+	     * @param capabilities Capabilities
+	     */
+	    public void onCapabilitiesReceived(final String contact, final Capabilities capabilities) {
+			handler.post(new Runnable(){
+				public void run(){
+					// Check if this intent concerns the current selected contact					
+					if (Utils.comparePhoneNumbers(getSelectedContact(), contact)) {
+						// Update UI
+						displayCapabilities(capabilities);
+					}
+				}
+			});
+	    };    
+    }
+    
     
     /**
      * Spinner contact listener
@@ -275,27 +304,4 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             extensions.setText(result);    		
     	}
     }
-    
-    /**
-     * Capabilities listener
-     */
-    private ICapabilitiesListener capabilitiesListener = new ICapabilitiesListener.Stub() {
-	    /**
-	     * Callback called when new capabilities are received for a given contact
-	     * 
-	     * @param contact Contact
-	     * @param capabilities Capabilities
-	     */
-	    public void onCapabilitiesReceived(final String contact, final Capabilities capabilities) {
-			handler.post(new Runnable(){
-				public void run(){
-					// Check if this intent concerns the current selected contact					
-					if (Utils.comparePhoneNumbers(getSelectedContact(), contact)) {
-						// Update UI
-						displayCapabilities(capabilities);
-					}
-				}
-			});
-	    };    
-    };
 }
