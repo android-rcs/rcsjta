@@ -16,37 +16,37 @@ public class FileTransfer {
     	/**
     	 * Unknown state
     	 */
-    	public final static int UNKNOWN = -1;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * File transfer invitation received
     	 */
-    	public final static int INVITED = 0;
+    	public final static int INVITED = 1;
     	
     	/**
     	 * File transfer invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATED = 2;
     	
     	/**
     	 * File transfer is started
     	 */
-    	public final static int STARTED = 2;
+    	public final static int STARTED = 3;
     	
     	/**
     	 * File transfer has been transfered with success 
     	 */
-    	public final static int TRANSFERED = 3;
+    	public final static int TRANSFERED = 4;
     	
     	/**
     	 * File transfer has been aborted 
     	 */
-    	public final static int ABORTED = 4;
+    	public final static int ABORTED = 5;
     	
     	/**
     	 * File transfer has failed 
     	 */
-    	public final static int FAILED = 5;
+    	public final static int FAILED = 6;
     	
         private State() {
         }    	
@@ -234,7 +234,7 @@ public class FileTransfer {
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public synchronized void addEventListener(FileTransferListener listener) throws JoynServiceException {
+	public void addEventListener(FileTransferListener listener) throws JoynServiceException {
 		try {
 			transferInf.addEventListener(listener);
 		} catch(Exception e) {
@@ -248,7 +248,7 @@ public class FileTransfer {
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public synchronized void removeEventListener(FileTransferListener listener) throws JoynServiceException {
+	public void removeEventListener(FileTransferListener listener) throws JoynServiceException {
 		try {
 			transferInf.removeEventListener(listener);
 		} catch(Exception e) {

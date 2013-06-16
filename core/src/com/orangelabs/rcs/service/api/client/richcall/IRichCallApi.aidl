@@ -1,9 +1,7 @@
 package com.orangelabs.rcs.service.api.client.richcall;
 
 import com.orangelabs.rcs.service.api.client.richcall.IVideoSharingSession;
-import com.orangelabs.rcs.service.api.client.richcall.IGeolocSharingSession;
 import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 
 /**
  * Rich call API
@@ -24,18 +22,6 @@ interface IRichCallApi {
 
 	// Get list of current video sharing sessions with a contact
 	List<IBinder> getVideoSharingSessionsWith(in String contact);	
-
-	// Set multiparty call
-	void setMultiPartyCall(in boolean flag);
-
-	// Set call hold
-	void setCallHold(in boolean flag);
-
-	// Initiate a geoloc sharing session
-	IGeolocSharingSession initiateGeolocSharing(in String contact, in GeolocPush geoloc);
-
-	// Get current geoloc sharing session from its session ID
-	IGeolocSharingSession getGeolocSharingSession(in String id);
 }
 
 

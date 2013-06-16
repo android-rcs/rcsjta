@@ -29,6 +29,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gsma.joyn.capability.CapabilitiesLog;
+import org.gsma.joyn.contacts.ContactsProvider;
+
 import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -93,7 +96,7 @@ public final class ContactsManager {
     /** 
      * MIME type for contact number
      */
-    private static final String MIMETYPE_NUMBER = "vnd.android.cursor.item/com.orangelabs.rcs.number";
+    private static final String MIMETYPE_NUMBER = ContactsProvider.MIME_TYPE_PHONE_NUMBER;
 
     /** 
      * MIME type for RCS status 
@@ -153,22 +156,22 @@ public final class ContactsManager {
     /** 
      * MIME type for GSMA_CS_IMAGE (image sharing) capability 
      */
-    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = "vnd.android.cursor.item/com.orangelabs.rcs.capability.image-sharing";
+    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactsProvider.MIME_TYPE_IMAGE_SHARING;
     
     /** 
      * MIME type for 3GPP_CS_VOICE (video sharing) capability 
      */
-    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = "vnd.android.cursor.item/com.orangelabs.rcs.capability.video-sharing";
+    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = ContactsProvider.MIME_TYPE_VIDEO_SHARING;
 
     /** 
      * MIME type for RCS_IM (IM session) capability 
      */
-    private static final String MIMETYPE_CAPABILITY_IM_SESSION = "vnd.android.cursor.item/com.orangelabs.rcs.capability.im-session";
+    private static final String MIMETYPE_CAPABILITY_IM_SESSION = ContactsProvider.MIME_TYPE_IM_SESSION;
 
     /** 
      * MIME type for RCS_FT (file transfer) capability 
      */
-    private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER = "vnd.android.cursor.item/com.orangelabs.rcs.capability.file-transfer";
+    private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER = ContactsProvider.MIME_TYPE_FILE_TRANSFER;
 
     /** 
      * MIME type for presence discovery capability 
@@ -198,7 +201,7 @@ public final class ContactsManager {
     /** 
      * MIME type for RCS extensions 
      */
-    private static final String MIMETYPE_CAPABILITY_EXTENSIONS = "vnd.android.cursor.item/com.orangelabs.rcs.capability.extensions";
+    private static final String MIMETYPE_CAPABILITY_EXTENSIONS = ContactsProvider.MIME_TYPE_EXTENSIONS;
 
     /** 
      * MIME type when RCS extensions that I also support are present 
@@ -500,16 +503,16 @@ public final class ContactsManager {
 		// Save capabilities, if the contact is not registered, do not set the capability to true
 		boolean isRegistered = (newInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 		Capabilities newCapabilities = newInfo.getCapabilities();
-		values.put(RichAddressBookData.KEY_CAPABILITY_CS_VIDEO, Boolean.toString(newCapabilities.isCsVideoSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER, Boolean.toString(newCapabilities.isFileTransferSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING, Boolean.toString(newCapabilities.isImageSharingSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_IM_SESSION, Boolean.toString((newCapabilities.isImSessionSupported() && isRegistered)||(RcsSettings.getInstance().isImAlwaysOn() && newInfo.isRcsContact())));
-		values.put(RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY, Boolean.toString(newCapabilities.isPresenceDiscoverySupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE, Boolean.toString(newCapabilities.isSocialPresenceSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING, Boolean.toString(newCapabilities.isVideoSharingSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH, Boolean.toString(newCapabilities.isGeolocationPushSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP, Boolean.toString(newCapabilities.isFileTransferHttpSupported() && isRegistered));
-		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, Boolean.toString(newCapabilities.isFileTransferThumbnailSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_CS_VIDEO, setCapabilityToColumn(newCapabilities.isCsVideoSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER, setCapabilityToColumn(newCapabilities.isFileTransferSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING, setCapabilityToColumn(newCapabilities.isImageSharingSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_IM_SESSION, setCapabilityToColumn((newCapabilities.isImSessionSupported() && isRegistered)||(RcsSettings.getInstance().isImAlwaysOn() && newInfo.isRcsContact())));
+		values.put(RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY, setCapabilityToColumn(newCapabilities.isPresenceDiscoverySupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE, setCapabilityToColumn(newCapabilities.isSocialPresenceSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING, setCapabilityToColumn(newCapabilities.isVideoSharingSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH, setCapabilityToColumn(newCapabilities.isGeolocationPushSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP, setCapabilityToColumn(newCapabilities.isFileTransferHttpSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, setCapabilityToColumn(newCapabilities.isFileTransferThumbnailSupported() && isRegistered));
 
 		// Save the capabilities extensions
 		ArrayList<String> newExtensions = newCapabilities.getSupportedExtensions();
@@ -892,16 +895,16 @@ public final class ContactsManager {
                 presenceInfo.setPhotoIcon(photoIcon);
 
                 // Get the capabilities infos
-                capabilities.setCsVideoSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_CS_VIDEO))));
-                capabilities.setFileTransferSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER))));
-                capabilities.setImageSharingSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING))));
-                capabilities.setImSessionSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_IM_SESSION))));
-                capabilities.setPresenceDiscoverySupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY))));
-                capabilities.setSocialPresenceSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE))));
-                capabilities.setGeolocationPushSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH))));
-                capabilities.setVideoSharingSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING))));
-                capabilities.setFileTransferThumbnailSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL))));
-                capabilities.setFileTransferHttpSupport(Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP))));
+                capabilities.setCsVideoSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_CS_VIDEO));
+                capabilities.setFileTransferSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER));
+                capabilities.setImageSharingSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING));
+                capabilities.setImSessionSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_IM_SESSION));
+                capabilities.setPresenceDiscoverySupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY));
+                capabilities.setSocialPresenceSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE));
+                capabilities.setGeolocationPushSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH));
+                capabilities.setVideoSharingSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING));
+                capabilities.setFileTransferThumbnailSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL));
+                capabilities.setFileTransferHttpSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP));
 
                 // Set RCS extensions capability
 				String extensions = cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS));
@@ -4113,5 +4116,34 @@ public final class ContactsManager {
     	}
     	cursor.close();
     	return fileName;
+    }
+    
+    /**
+     * Get boolean capability from database column
+     * 
+     * @param cursor Cursor
+     * @param column Column name
+     * @return Boolean capability
+     */
+    private boolean getCapabilityFronColumn(Cursor cursor, String column) {
+    	if (cursor.getInt(cursor.getColumnIndex(column)) == CapabilitiesLog.SUPPORTED) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+
+    /**
+     * Set boolean capability to database column
+     * 
+     * @param capability Boolean capability
+     * @return Integer
+     */
+    private int setCapabilityToColumn(boolean capability) {
+    	if (capability) {
+    		return CapabilitiesLog.SUPPORTED;
+    	} else {
+    		return CapabilitiesLog.NOT_SUPPORTED;
+    	}
     }
 }

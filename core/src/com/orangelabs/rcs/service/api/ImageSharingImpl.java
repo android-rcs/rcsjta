@@ -199,6 +199,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     	}
 	}
 	
+    /*------------------------------- SESSION EVENTS ----------------------------------*/
+	
 	/**
 	 * Session is started
 	 */

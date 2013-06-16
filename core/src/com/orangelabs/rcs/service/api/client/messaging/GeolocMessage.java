@@ -19,15 +19,12 @@ package com.orangelabs.rcs.service.api.client.messaging;
 
 import java.util.Date;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Geoloc message
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
-public class GeolocMessage extends InstantMessage implements Parcelable {
+public class GeolocMessage extends InstantMessage {
 	/**
 	 * MIME type
 	 */
@@ -66,53 +63,6 @@ public class GeolocMessage extends InstantMessage implements Parcelable {
 		
 		this.geoloc = geoloc;
 	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-	 */
-	public GeolocMessage(Parcel source) {
-		super(source);
-		
-		this.geoloc = new GeolocPush(source);
-    }
-	
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	super.writeToParcel(dest, flags);
-    	
-    	geoloc.writeToParcel(dest, flags);
-    }
-
-    /**
-     * Parcelable creator
-     */
-    public static final Parcelable.Creator<GeolocMessage> CREATOR
-            = new Parcelable.Creator<GeolocMessage>() {
-        public GeolocMessage createFromParcel(Parcel source) {
-            return new GeolocMessage(source);
-        }
-
-        public GeolocMessage[] newArray(int size) {
-            return new GeolocMessage[size];
-        }
-    };	
 
     /**
 	 * Get geoloc info

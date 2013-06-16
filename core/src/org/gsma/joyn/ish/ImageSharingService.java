@@ -34,8 +34,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 /**
- * This class offers the main entry point to transfer files and to
- * receive files. Several applications may connect/disconnect to the API.
+ * This class offers the main entry point to transfer image during
+ * a CS call. Several applications may connect/disconnect to the API.
  * 
  * The parameter contact in the API supports the following formats:
  * MSISDN in national or international format, SIP address, SIP-URI
@@ -48,7 +48,7 @@ public class ImageSharingService extends JoynService {
 	private IImageSharingService api = null;
 	
 	/**
-	 * Image sharing configuration
+	 * Image sharing service configuration
 	 */
 	private static ImageSharingServiceConfiguration config = new ImageSharingServiceConfiguration(); 
 	
@@ -109,7 +109,7 @@ public class ImageSharingService extends JoynService {
     };
     
     /**
-     * Returns the configuration for image share service
+     * Returns the configuration of image sharing service
      * 
      * @return Configuration
      */
@@ -216,7 +216,7 @@ public class ImageSharingService extends JoynService {
 	 * @param listener New image sharing listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewImageSharingListener(INewImageSharingListener listener) throws JoynServiceException {
+	public void addNewImageSharingListener(NewImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.addNewImageSharingListener(listener);
@@ -234,7 +234,7 @@ public class ImageSharingService extends JoynService {
 	 * @param listener New image sharing listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewImageSharingListener(INewImageSharingListener listener) throws JoynServiceException {
+	public void removeNewImageSharingListener(NewImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.removeNewImageSharingListener(listener);

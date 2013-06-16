@@ -34,7 +34,7 @@ import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * File transfer implemnentation
+ * File transfer implementation
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -215,6 +215,8 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     		listeners.unregister(listener);
     	}
 	}
+	
+    /*------------------------------- SESSION EVENTS ----------------------------------*/
 	
 	/**
 	 * Session is started

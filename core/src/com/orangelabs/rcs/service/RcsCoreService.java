@@ -20,7 +20,9 @@ package com.orangelabs.rcs.service;
 
 import java.util.Vector;
 
+import org.gsma.joyn.Intents;
 import org.gsma.joyn.capability.ICapabilityService;
+import org.gsma.joyn.chat.IChatService;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.ft.IFileTransferService;
 import org.gsma.joyn.ish.IImageSharingService;
@@ -65,15 +67,14 @@ import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
+import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
 import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
-import com.orangelabs.rcs.service.api.client.ClientApiIntents;
 import com.orangelabs.rcs.service.api.client.IImsApi;
 import com.orangelabs.rcs.service.api.client.ImsApiIntents;
 import com.orangelabs.rcs.service.api.client.ImsDisconnectionReason;
 import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.client.messaging.IMessagingApi;
 import com.orangelabs.rcs.service.api.client.presence.FavoriteLink;
 import com.orangelabs.rcs.service.api.client.presence.Geoloc;
 import com.orangelabs.rcs.service.api.client.presence.IPresenceApi;
@@ -82,13 +83,10 @@ import com.orangelabs.rcs.service.api.client.presence.PresenceApiIntents;
 import com.orangelabs.rcs.service.api.client.presence.PresenceInfo;
 import com.orangelabs.rcs.service.api.client.richcall.IRichCallApi;
 import com.orangelabs.rcs.service.api.client.sip.ISipApi;
-import com.orangelabs.rcs.service.api.client.terms.ITermsApi;
 import com.orangelabs.rcs.service.api.server.ImsApiService;
-import com.orangelabs.rcs.service.api.server.messaging.MessagingApiService;
 import com.orangelabs.rcs.service.api.server.presence.PresenceApiService;
 import com.orangelabs.rcs.service.api.server.richcall.RichCallApiService;
 import com.orangelabs.rcs.service.api.server.sip.SipApiService;
-import com.orangelabs.rcs.service.api.server.terms.TermsApiService;
 import com.orangelabs.rcs.utils.AppUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -128,6 +126,11 @@ public class RcsCoreService extends Service implements CoreListener {
     private FileTransferServiceImpl ftApi = new FileTransferServiceImpl(); 
 
 	/**
+	 * Chat API
+	 */
+    private ChatServiceImpl chatApi = new ChatServiceImpl(); 
+
+    /**
 	 * Image sharing API
 	 */
     private ImageSharingServiceImpl ishApi = new ImageSharingServiceImpl(); 
@@ -139,21 +142,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
 	private ImsApiService imsApi = new ImsApiService(); 
 	
-	/**
-	 * Terms API
-	 */
-    private TermsApiService termsApi = new TermsApiService(); 
-
     /**
 	 * Presence API
 	 */
     private PresenceApiService presenceApi = new PresenceApiService(); 
     
-	/**
-	 * Messaging API
-	 */
-	private MessagingApiService messagingApi = new MessagingApiService(); 
-
 	/**
 	 * Rich call API
 	 */
@@ -201,12 +194,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	    contactsApi.close();
 		capabilityApi.close();
 		ftApi.close();
+		chatApi.close();
 		ishApi.close();
     	imsApi.close();
-    	termsApi.close();
 		presenceApi.close();
 		richcallApi.close();
-		messagingApi.close();
 		sipApi.close();
 
         // Stop the core
@@ -235,11 +227,6 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Start RCS core service");
     		}
     		
-    		// Send service intent 
-			Intent intent = new Intent(ClientApiIntents.SERVICE_STATUS);
-			intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STARTING);
-			getApplicationContext().sendBroadcast(intent);
-            
 			// Instantiate the settings manager
             RcsSettings.createInstance(getApplicationContext());
             
@@ -306,11 +293,6 @@ public class RcsCoreService extends Service implements CoreListener {
 	        // Show a first notification
 	    	addRcsServiceNotification(false, getString(R.string.rcs_core_loaded));
 
-			// Send service intent 
-			intent = new Intent(ClientApiIntents.SERVICE_STATUS);
-			intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STARTED);
-			getApplicationContext().sendBroadcast(intent);
-
 			if (logger.isActivated()) {
 				logger.info("RCS core service started with success");
 			}
@@ -320,11 +302,6 @@ public class RcsCoreService extends Service implements CoreListener {
 				logger.error("Can't instanciate the RCS core service", e);
 			}
 			
-			// Send service intent 
-			Intent intent = new Intent(ClientApiIntents.SERVICE_STATUS);
-			intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_FAILED);
-			getApplicationContext().sendBroadcast(intent);
-
 			// Show error in notification bar
 	    	addRcsServiceNotification(false, getString(R.string.rcs_core_failed));
 	    	
@@ -346,21 +323,11 @@ public class RcsCoreService extends Service implements CoreListener {
 			logger.debug("Stop RCS core service");
 		}
 
-		// Send service intent 
-		Intent intent = new Intent(ClientApiIntents.SERVICE_STATUS);
-		intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STOPPING);
-		getApplicationContext().sendBroadcast(intent);
-		
 		// Terminate the core in background
 		Core.terminateCore();
 
 		// Close CPU manager
 		cpuManager.close();
-
-		// Send service intent 
-		intent = new Intent(ClientApiIntents.SERVICE_STATUS);
-		intent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STOPPED);
-		getApplicationContext().sendBroadcast(intent);
 
 		if (logger.isActivated()) {
 			logger.info("RCS core service stopped with success");
@@ -387,6 +354,12 @@ public class RcsCoreService extends Service implements CoreListener {
     		}
             return ftApi;
         } else
+        if (IChatService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("Chat service API binding");
+    		}
+            return chatApi;
+        } else
         if (IImageSharingService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("Image sharing service API binding");
@@ -399,23 +372,11 @@ public class RcsCoreService extends Service implements CoreListener {
     		}
             return imsApi;
         } else
-        if (ITermsApi.class.getName().equals(intent.getAction())) {
-    		if (logger.isActivated()) {
-    			logger.debug("Terms API binding");
-    		}
-            return termsApi;
-        } else
         if (IPresenceApi.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("Presence API binding");
     		}
             return presenceApi;
-        } else
-        if (IMessagingApi.class.getName().equals(intent.getAction())) {
-    		if (logger.isActivated()) {
-    			logger.debug("Messaging API binding");
-    		}
-            return messagingApi;
         } else
         if (IRichCallApi.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
@@ -441,7 +402,7 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     public static void addRcsServiceNotification(boolean state, String label) {
     	// Create notification
-    	Intent intent = new Intent(ClientApiIntents.RCS_SETTINGS);
+    	Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
     	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(AndroidFactory.getApplicationContext(), 0, intent, 0);
 		int iconId; 
@@ -1006,7 +967,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
 		// Broadcast the invitation
-		richcallApi.receiveGeolocSharingInvitation(session);
+		// TODO richcallApi.receiveGeolocSharingInvitation(session);
     }
     
     /**
@@ -1048,7 +1009,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		
     	// Broadcast the invitation
-		messagingApi.receiveOneOneChatInvitation(session);
+		chatApi.receiveOneOneChatInvitation(session);
     }
 
     /**
@@ -1062,7 +1023,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
     	// Broadcast the invitation
-		messagingApi.receiveGroupChatInvitation(session);
+		chatApi.receiveGroupChatInvitation(session);
 	}
     
     /**
@@ -1077,7 +1038,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
     	// Broadcast the event
-		messagingApi.extendOneOneChatSession(groupSession, oneoneSession);
+		chatApi.extendOneOneChatSession(groupSession, oneoneSession);
     }
 	
     /**
@@ -1091,7 +1052,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		
     	// Broadcast the invitation
-		messagingApi.receiveOneOneChatInvitation(session);
+		chatApi.receiveOneOneChatInvitation(session);
     }
     
     /**
@@ -1107,7 +1068,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
     	
 		// Notify listeners
-		messagingApi.handleMessageDeliveryStatus(contact, msgId, status);
+		chatApi.receiveMessageDeliveryStatus(contact, msgId, status);
     }
     
     /**
@@ -1160,7 +1121,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
 		// Notify listeners
-        termsApi.receiveTermsRequest(remote, id, type, pin, subject, text, acceptButtonLabel, rejectButtonLabel, timeout);
+        // TODO termsApi.receiveTermsRequest(remote, id, type, pin, subject, text, acceptButtonLabel, rejectButtonLabel, timeout);
     }
 
     /**
@@ -1178,7 +1139,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
 		// Notify listeners
-		termsApi.receiveTermsAck(remote, id, status, subject, text);
+		// TODO termsApi.receiveTermsAck(remote, id, status, subject, text);
     }
 
     /**
@@ -1196,7 +1157,7 @@ public class RcsCoreService extends Service implements CoreListener {
         }
 
         // Notify listeners
-        termsApi.receiveUserNotification(remote, id, subject, text, okButtonLabel);
+        // TODO termsApi.receiveUserNotification(remote, id, subject, text, okButtonLabel);
     }
 
     /**

@@ -21,15 +21,12 @@ package com.orangelabs.rcs.service.api.client.messaging;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Geolocation push info
  * 
  * @author Orange
  */
-public class GeolocPush implements Parcelable {
+public class GeolocPush {
     
     /**
      * Label associated to the location
@@ -93,58 +90,6 @@ public class GeolocPush implements Parcelable {
     	
         this.accuracy = accuracy;
     }
-    
-    /**
-     * Constructor
-     *
-     * @param source Parcelable source
-     */
-    public GeolocPush(Parcel source) {
-    	this.label = source.readString();
-    	this.latitude = source.readDouble(); 
-    	this.longitude = source.readDouble();     	    	                                              
-    	this.altitude = source.readDouble(); 
-    	this.expiration = source.readLong(); 
-    	this.accuracy = source.readFloat(); 
-    }
-
-    /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation
-     *
-     * @return Integer
-     */
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * Write parcelable object
-     *
-     * @param dest The Parcel in which the object should be written
-     * @param flags Additional flags about how the object should be written
-     */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(label);
-        dest.writeDouble(latitude);
-        dest.writeDouble(longitude);
-    	dest.writeDouble(altitude);
-    	dest.writeLong(expiration);
-    	dest.writeFloat(accuracy);
-    }
-
-    /**
-     * Parcelable creator
-     */
-    public static final Parcelable.Creator<GeolocPush> CREATOR = new Parcelable.Creator<GeolocPush>() {
-        public GeolocPush createFromParcel(Parcel source) {
-            return new GeolocPush(source);
-        }
-
-        public GeolocPush[] newArray(int size) {
-            return new GeolocPush[size];
-        }
-    };
 
     /**
      * Returns the label

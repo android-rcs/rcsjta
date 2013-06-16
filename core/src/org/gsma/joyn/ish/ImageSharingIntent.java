@@ -1,7 +1,7 @@
 package org.gsma.joyn.ish;
 
 /**
- * Intent broadcasted when a new image sharing invitation is received
+ * Intent for image sharing invitations
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -20,7 +20,7 @@ public class ImageSharingIntent {
      * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the image to be shared.
      * </ul>
      */
-	public final static String ACTION_NEW_IMAGE_SHARING = "org.gsma.joyn.ish.action.NEW_IMAGE_SHARING";
+	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.ish.action.NEW_IMAGE_SHARING";
 
 	/**
 	 * MSISDN of the contact sending the invitation

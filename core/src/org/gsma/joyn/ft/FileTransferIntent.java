@@ -1,7 +1,7 @@
 package org.gsma.joyn.ft;
 
 /**
- * Intent broadcasted when a new file transfer invitation is received
+ * Intent for file transfer invitation
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -14,13 +14,13 @@ public class FileTransferIntent {
      *  sending the invitation.
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
-     * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the file transfer.
+     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
      * <li> {@link #EXTRA_FILENAME} containing the name of file to be transfered.
      * <li> {@link #EXTRA_FILESIZE} containing the size of the file to be transfered.
      * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the file to be transfered.
      * </ul>
      */
-	public final static String ACTION_NEW_FILE_TRANSFER = "org.gsma.joyn.ft.action.NEW_FILE_TRANSFER";
+	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.ft.action.NEW_FILE_TRANSFER";
 
 	/**
 	 * MSISDN of the contact sending the invitation

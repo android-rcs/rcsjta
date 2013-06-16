@@ -42,7 +42,7 @@ public class JoynUtils {
 	 * @return List of application info
 	 */
 	public static List<ResolveInfo> getJoynClients(Context context) {
-		Intent intent = new Intent(Intents.Client.ACTION_CLIENT_SETTINGS);
+		Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
 		List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent,
 				PackageManager.MATCH_DEFAULT_ONLY);
 		return list;

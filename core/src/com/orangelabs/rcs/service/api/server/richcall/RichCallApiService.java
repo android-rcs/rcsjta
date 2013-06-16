@@ -28,24 +28,15 @@ import android.os.IBinder;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
-import com.orangelabs.rcs.core.content.GeolocContent;
-import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
-import com.orangelabs.rcs.core.ims.ImsModule;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
-import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.provider.sharing.RichCallData;
 import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.richcall.IGeolocSharingSession;
 import com.orangelabs.rcs.service.api.client.richcall.IRichCallApi;
 import com.orangelabs.rcs.service.api.client.richcall.IVideoSharingSession;
 import com.orangelabs.rcs.service.api.client.richcall.RichCallApiIntents;
@@ -64,11 +55,6 @@ public class RichCallApiService extends IRichCallApi.Stub {
 	 * List of video sharing sessions
 	 */
     private static Hashtable<String, IVideoSharingSession> videoSharingSessions = new Hashtable<String, IVideoSharingSession>();
-
-	/**
-	 * List of geoloc sharing sessions
-	 */
-    private static Hashtable<String, IGeolocSharingSession> geolocSharingSessions = new Hashtable<String, IGeolocSharingSession>();
 
     /**
 	 * The logger
@@ -116,30 +102,6 @@ public class RichCallApiService extends IRichCallApi.Stub {
 		videoSharingSessions.remove(sessionId);
 	}
 
-	/**
-     * Add a geoloc sharing session in the list
-     * 
-     * @param session Geoloc sharing session
-     */
-	protected static void addGeolocSharingSession(GeolocSharingSession session) {
-		if (logger.isActivated()) {
-			logger.debug("Add a geoloc sharing session in the list (size=" + geolocSharingSessions.size() + ")");
-		}
-		geolocSharingSessions.put(session.getSessionID(), session);
-	}
-
-    /**
-     * Remove a geoloc sharing session from the list
-     * 
-     * @param sessionId Session ID
-     */
-	protected static void removeGeolocSharingSession(String sessionId) {
-		if (logger.isActivated()) {
-			logger.debug("Remove a geoloc sharing session from the list (size=" + geolocSharingSessions.size() + ")");
-		}
-		geolocSharingSessions.remove(sessionId);
-	}
-	
     /**
      * Get the remote phone number involved in the current call
      * 
@@ -344,149 +306,4 @@ public class RichCallApiService extends IRichCallApi.Stub {
 			throw new ServerApiException(e.getMessage());
 		}		
 	}		
-	
-	/**
-	 * Initiate a geoloc sharing session
-	 * 
-	 * @param contact Contact
-	 * @param geoloc Geoloc info
-	 * @return Geoloc sharing session
-     * @throws ServerApiException
-	 */
-	public IGeolocSharingSession initiateGeolocSharing(String contact, GeolocPush geoloc) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Initiate a geoloc sharing session with " + contact);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test IMS connection
-		ServerApiUtils.testIms();
-
-		try {
-			// Create a geoloc content
-			String msgId = ChatUtils.generateMessageId();
-			String geolocDoc = ChatUtils.buildGeolocDocument(geoloc, ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-			MmContent content = new GeolocContent("geoloc.xml", geolocDoc.getBytes().length, geolocDoc.getBytes());
-
-			// Initiate a sharing session
-			GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geoloc);
-
-			// Update rich call
-			RichCall.getInstance().addCall(contact, session.getSessionID(),
-                    RichCallData.EVENT_OUTGOING,
-	    			session.getContent(),
-	    			RichCallData.STATUS_STARTED);
-
-			// Update rich messaging history
-			GeolocMessage geolocMsg = new GeolocMessage(null, contact, geoloc, false);
-			RichMessaging.getInstance().addOutgoingGeoloc(geolocMsg);
-
-			// Add session in the list
-			GeolocSharingSession sessionApi = new GeolocSharingSession(session);
-			addGeolocSharingSession(sessionApi);
-			return sessionApi;
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-	}
-	
-    /**
-     * Receive a new geoloc sharing invitation
-     * 
-     * @param session Geoloc sharing session
-     */
-    public void receiveGeolocSharingInvitation(GeolocTransferSession session) {
-		if (logger.isActivated()) {
-			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact());
-		}
-
-        // Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-
-		// Update rich call history
-		RichCall.getInstance().addCall(number, session.getSessionID(),
-				RichCallData.EVENT_INCOMING,
-				session.getContent(),
-				RichCallData.STATUS_STARTED);
-		
-		// Add session in the list
-		GeolocSharingSession sessionApi = new GeolocSharingSession(session);
-		addGeolocSharingSession(sessionApi);
-
-		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(RichCallApiIntents.GEOLOC_SHARING_INVITATION);
-		intent.putExtra("contact", number);
-		intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
-		intent.putExtra("sessionId", session.getSessionID());
-        AndroidFactory.getApplicationContext().sendBroadcast(intent);
-    }	
-	
-    /**
-     * Get current geoloc sharing session from its session ID
-     * 
-     * @param id Session ID
-     * @return Session
-     * @throws ServerApiException
-     */
-	public IGeolocSharingSession getGeolocSharingSession(String id) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get geoloc sharing session " + id);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test core availability
-		ServerApiUtils.testCore();
-
-		// Return a session instance
-		return geolocSharingSessions.get(id);
-	}	
-
-    /**
-     * Set multiparty call
-     * 
-     * @param state State
-     * @throws ServerApiException
-     */
-	public void setMultiPartyCall(boolean state) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Set multiparty call to " + state);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test core availability
-		ServerApiUtils.testCore();
-
-		// Update call manager
-    	Core.getInstance().getImsModule().getCallManager().setMultiPartyCall(state);
-	}
-
-    /**
-     * Set call hold
-     * 
-     * @param state State
-     * @throws ServerApiException
-     */
-	public void setCallHold(boolean state) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Set call hold to " + state);
-		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
-
-		// Test core availability
-		ServerApiUtils.testCore();
-
-		// Update call manager
-    	Core.getInstance().getImsModule().getCallManager().setCallHold(state);
-	}
 }

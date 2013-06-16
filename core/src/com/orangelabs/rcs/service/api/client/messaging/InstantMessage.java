@@ -19,15 +19,13 @@
 package com.orangelabs.rcs.service.api.client.messaging;
 
 import java.util.Date;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * Instant message
  * 
  * @author Jean-Marc AUFFRET
  */
-public class InstantMessage implements Parcelable {
+public class InstantMessage {
 	/**
 	 * MIME type
 	 */
@@ -99,59 +97,6 @@ public class InstantMessage implements Parcelable {
 		this.serverReceiptAt = serverReceiptAt;
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-	 */
-	public InstantMessage(Parcel source) {
-		this.remote = source.readString();
-		this.message = source.readString();
-		this.msgId = source.readString();
-		this.imdnDisplayedRequested = source.readInt() != 0;
-		this.receiptAt = new Date(source.readLong());
-		this.serverReceiptAt = new Date(source.readLong());
-    }
-	
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(remote);
-    	dest.writeString(message);
-    	dest.writeString(msgId);
-    	dest.writeInt(imdnDisplayedRequested ? 1 : 0);
-    	dest.writeLong(receiptAt.getTime());
-    	dest.writeLong(serverReceiptAt.getTime());
-    }
-
-    /**
-     * Parcelable creator
-     */
-    public static final Parcelable.Creator<InstantMessage> CREATOR
-            = new Parcelable.Creator<InstantMessage>() {
-        public InstantMessage createFromParcel(Parcel source) {
-            return new InstantMessage(source);
-        }
-
-        public InstantMessage[] newArray(int size) {
-            return new InstantMessage[size];
-        }
-    };	
-	
 	/**
 	 * Returns the text message
 	 * 

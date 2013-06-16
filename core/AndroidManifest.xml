@@ -30,30 +30,16 @@
 	 
 	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
 		
-		<!-- the following meta-data is used to identify the application as a joyn client -->
-		<meta-data android:name="gsma.joyn.client"
-			android:value="true" />
-		
-		<!-- the following meta-data is used to provide the value of the intent action that
-		 can be used by other applications to start the joyn client settings screen -->
-		<meta-data android:name="gsma.joyn.settings.activity"
-			android:value="com.orangelabs.rcs.SETTINGS" />
-
 		<!-- RCS service -->	
 
 		<service android:name="com.orangelabs.rcs.service.RcsCoreService">  
 	        <intent-filter>
+	            <action android:name="com.orangelabs.rcs.SERVICE"/>
+
 	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
 	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
 	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
-	            	            	            
-	            <action android:name="com.orangelabs.rcs.SERVICE"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.IImsApi"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.terms.ITermsApi"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.presence.IPresenceApi"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.messaging.IMessagingApi"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.richcall.IRichCallApi"/>
-	            <action android:name="com.orangelabs.rcs.service.api.client.sip.ISipApi"/>	            
+	            <action android:name="org.gsma.joyn.chat.IChatService"/>
 	        </intent-filter>
 	    </service>
 	
@@ -64,23 +50,18 @@
 			android:label="@string/rcs_settings_title_settings"
 			android:launchMode="singleInstance"
 			android:name="com.orangelabs.rcs.settings.SettingsDisplay"
-		  	android:process=":settings" 
-			>
+		  	android:process=":settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>            
+            </intent-filter>
+                        
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="com.orangelabs.rcs.SETTINGS"/>                
+                <action android:name="org.gsma.joyn.action.VIEW_SETTINGS"/>                
             </intent-filter>
-            <intent-filter>
-        		<category android:name="android.intent.category.LAUNCHER" />
-        		<category android:name="android.intent.category.DEFAULT" />
-   	            <action android:name="org.gsma.joyn.client.SETTINGS"/>
-            </intent-filter>   	            
  		</activity>
 
 		<activity android:name="com.orangelabs.rcs.settings.AboutDisplay"
@@ -130,7 +111,7 @@
 		<provider android:authorities="com.orangelabs.rcs.settings"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab"
+		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.capabilities"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
 		<provider android:authorities="com.orangelabs.rcs.messaging"
@@ -203,9 +184,11 @@
             </intent-filter>
         </activity>
 
-		<receiver android:name="com.orangelabs.rcs.service.GetStatusReceiver">
+        <!-- RCS API -->
+        
+   		<receiver android:name="com.orangelabs.rcs.service.GetStatusReceiver">
 	        <intent-filter>
-	     		<action android:name="com.orangelabs.rcs.client.GET_STATUS"/>
+	     		<action android:name="com.orangelabs.rcs.client.action.GET_STATUS"/>
 	        </intent-filter>
 	    </receiver>
         

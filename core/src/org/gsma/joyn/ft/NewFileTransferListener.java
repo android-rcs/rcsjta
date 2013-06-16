@@ -22,7 +22,7 @@ package org.gsma.joyn.ft;
  *  
  * @author Jean-Marc AUFFRET
  */
-public abstract class NewFileTransferListener {
+public abstract class NewFileTransferListener extends INewFileTransferListener.Stub {
 	/**
 	 * Callback method for new file transfer invitations
 	 * 

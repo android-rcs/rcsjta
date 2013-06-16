@@ -16,37 +16,37 @@ public class ImageSharing {
     	/**
     	 * Unknown state
     	 */
-    	public final static int UNKNOWN = -1;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Sharing invitation received
     	 */
-    	public final static int INVITED = 0;
+    	public final static int INVITED = 1;
     	
     	/**
     	 * Sharing invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATED = 2;
     	
     	/**
     	 * Sharing is started
     	 */
-    	public final static int STARTED = 2;
+    	public final static int STARTED = 3;
     	
     	/**
     	 * Image has been transfered with success 
     	 */
-    	public final static int TRANSFERED = 3;
+    	public final static int TRANSFERED = 4;
     	
     	/**
     	 * Sharing has been aborted 
     	 */
-    	public final static int ABORTED = 4;
+    	public final static int ABORTED = 5;
     	
     	/**
     	 * Sharing has failed 
     	 */
-    	public final static int FAILED = 5;
+    	public final static int FAILED = 6;
     	
         private State() {
         }    	
@@ -234,7 +234,7 @@ public class ImageSharing {
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public synchronized void addEventListener(ImageSharingListener listener) throws JoynServiceException {
+	public void addEventListener(ImageSharingListener listener) throws JoynServiceException {
 		try {
 			sharingInf.addEventListener(listener);
 		} catch(Exception e) {
@@ -248,7 +248,7 @@ public class ImageSharing {
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public synchronized void removeEventListener(ImageSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(ImageSharingListener listener) throws JoynServiceException {
 		try {
 			sharingInf.removeEventListener(listener);
 		} catch(Exception e) {

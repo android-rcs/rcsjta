@@ -30,7 +30,6 @@ import com.orangelabs.rcs.service.api.client.ClientApi;
 import com.orangelabs.rcs.service.api.client.ClientApiException;
 import com.orangelabs.rcs.service.api.client.CoreServiceNotAvailableException;
 import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 
 /**
  * Rich call API
@@ -182,81 +181,6 @@ public class RichCallApi extends ClientApi {
     	if (coreApi != null) {
 			try {
 		    	return coreApi.getVideoSharingSessionsWith(contact);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}	
-	
-	/**
-	 * Set multiparty call
-	 * 
-	 * @param state State
-	 * @throws ClientApiException
-	 */
-	public void setMultiPartyCall(boolean state) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	coreApi.setMultiPartyCall(state);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
-
-	/**
-	 * Set call hold
-	 * 
-	 * @param state State
-	 * @throws ClientApiException
-	 */
-	public void setCallHold(boolean state) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	coreApi.setCallHold(state);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}
-		
-	/**
-	 * Initiate a geoloc sharing session
-	 * 
-	 * @param contact Contact
-	 * @param geoloc Geoloc info
-	 * @return Geoloc sharing session
-	 * @throws ClientApiException
-	 */
-	public IGeolocSharingSession initiateGeolocSharing(String contact, GeolocPush geoloc) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	return coreApi.initiateGeolocSharing(contact, geoloc);
-			} catch(Exception e) {
-				throw new ClientApiException(e.getMessage());
-			}
-		} else {
-			throw new CoreServiceNotAvailableException();
-		}
-	}	
-	
-	/**
-	 * Get a geoloc sharing session from its session ID
-	 * 
-	 * @param id Session ID
-	 * @return Session
-	 * @throws ClientApiException
-	 */
-	public IGeolocSharingSession getGeolocSharingSession(String id) throws ClientApiException {
-    	if (coreApi != null) {
-			try {
-		    	return coreApi.getGeolocSharingSession(id);
 			} catch(Exception e) {
 				throw new ClientApiException(e.getMessage());
 			}

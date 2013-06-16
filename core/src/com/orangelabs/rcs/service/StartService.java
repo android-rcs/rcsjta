@@ -46,7 +46,6 @@ import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provisioning.https.HttpsProvisioningService;
-import com.orangelabs.rcs.service.api.client.ClientApiIntents;
 import com.orangelabs.rcs.service.api.client.ClientApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -159,11 +158,6 @@ public class StartService extends Service {
             if (logger.isActivated()) {
                 logger.error("Can't create the user account");
             }
-
-            // Send service intent 
-            Intent stopIntent = new Intent(ClientApiIntents.SERVICE_STATUS);
-            stopIntent.putExtra("status", ClientApiIntents.SERVICE_STATUS_STOPPED);
-            sendBroadcast(stopIntent);
 
             // Exit service
             stopSelf();

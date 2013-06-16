@@ -50,7 +50,7 @@ public class FileTransferService extends JoynService {
 	private IFileTransferService api = null;
 	
 	/**
-	 * File transfer configuration
+	 * File transfer service configuration
 	 */
 	private static FileTransferServiceConfiguration config = new FileTransferServiceConfiguration(); 
 	
@@ -111,7 +111,7 @@ public class FileTransferService extends JoynService {
     };
     
     /**
-     * Returns the configuration for file transfer service
+     * Returns the configuration of the file transfer service
      * 
      * @return Configuration
      */
@@ -217,7 +217,7 @@ public class FileTransferService extends JoynService {
 	 * @param listener New file transfer listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewFileTransferListener(INewFileTransferListener listener) throws JoynServiceException {
+	public void addNewFileTransferListener(NewFileTransferListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.addNewFileTransferListener(listener);
@@ -235,7 +235,7 @@ public class FileTransferService extends JoynService {
 	 * @param listener New file transfer listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewFileTransferListener(INewFileTransferListener listener) throws JoynServiceException {
+	public void removeNewFileTransferListener(NewFileTransferListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.removeNewFileTransferListener(listener);

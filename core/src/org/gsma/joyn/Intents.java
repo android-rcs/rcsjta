@@ -13,7 +13,7 @@ public class Intents {
     	/**
     	 * Intent to load the settings activity to enable or disable the client
     	 */
-    	public static final String ACTION_CLIENT_SETTINGS = "org.gsma.joyn.client.SETTINGS";
+    	public static final String ACTION_VIEW_SETTINGS = "org.gsma.joyn.action.VIEW_SETTINGS";
 
     	/**
     	 * Intent to request the client status. The result is received via an Intent
@@ -23,7 +23,7 @@ public class Intents {
     	 * <li> {@link #EXTRA_STATUS} containing the boolean status of the client. True
     	 *  means that the client is activated, else the client is not activated.
     	 */
-    	public static final String ACTION_CLIENT_GET_STATUS = ".client.GET_STATUS";
+    	public static final String ACTION_CLIENT_GET_STATUS = ".client.action.GET_STATUS";
 
     	/**
     	 * Client package name
@@ -49,7 +49,7 @@ public class Intents {
     	 * (i.e. content://chats/chat_ID). If no parameter found the main
     	 * entry of the chat application is displayed.
     	 */
-		public static final String ACTION_VIEW_CHAT = "org.gsma.joyn.VIEW_CHAT";
+		public static final String ACTION_VIEW_CHAT = "org.gsma.joyn.action.VIEW_CHAT";
 
 		/**
 		 * Load the chat application to start a new conversation with a
@@ -57,21 +57,21 @@ public class Intents {
 		 * (i.e. content://contacts/people/contact_ID). If no parameter the
 		 * main entry of the chat application is displayed.
 		 */
-		public static final String ACTION_INITIATE_CHAT = "org.gsma.joyn.INITIATE_CHAT";
+		public static final String ACTION_INITIATE_CHAT = "org.gsma.joyn.action.INITIATE_CHAT";
 
 		/**
 		 * Load the group chat application. This Intent takes into parameter an
 		 * URI on the group chat conversation (i.e. content://chats/chat_ID). If
 		 * no parameter found the main entry of the group chat application is displayed.
 		 */
-		public static final String ACTION_VIEW_CHAT_GROUP = "org.gsma.joyn.VIEW_GROUP_CHAT";
+		public static final String ACTION_VIEW_GROUP_CHAT = "org.gsma.joyn.action.VIEW_GROUP_CHAT";
 
 		/**
 		 * Load the group chat application to start a new conversation with a
 		 * group of contacts. This Intent takes into parameter a list of contact
 		 * URIs. If no parameter the main entry of the group chat application is displayed.
 		 */
-		public static final String ACTION_INITIATE_CHAT_GROUP = "org.gsma.joyn.INITIATE_CHAT_GROUP";
+		public static final String ACTION_INITIATE_GROUP_CHAT = "org.gsma.joyn.action.INITIATE_GROUP_CHAT";
 
 		private Chat() {
         }    	
@@ -86,14 +86,14 @@ public class Intents {
     	 * takes into parameter an URI on the file transfer (i.e. content://filetransfers/ft_ID).
     	 * If no parameter found the main entry of the file transfer application is displayed.
     	 */
-    	public static final String ACTION_VIEW_FT = "org.gsma.joyn.VIEW_FT";
+    	public static final String ACTION_VIEW_FT = "org.gsma.joyn.action.VIEW_FT";
 
     	/**
     	 * Load the file transfer application to start a new file transfer to a given
     	 * contact. This Intent takes into parameter a contact URI (i.e. content://contacts/people/contact_ID).
     	 * If no parameter the main entry of the file transfer application is displayed.
     	 */
-    	public static final String ACTION_INITIATE_FT = "org.gsma.joyn.INITIATE_FT";
+    	public static final String ACTION_INITIATE_FT = "org.gsma.joyn.action.INITIATE_FT";
 
     	private FileTransfer() {
         }    	

@@ -162,7 +162,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * @param resp 404 response
      */
     public void handle404SessionNotFound(SipResponse resp) {
-		// Rejoin session has failed, we update the database with sttaus terminted by remote
+		// Rejoin session has failed, we update the database with status terminated by remote
         RichMessaging.getInstance().addChatSessionTerminationByRemote(this);
 
 		// Notify listener

@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.provider.eab;
 
+import org.gsma.joyn.capability.CapabilitiesLog;
+
 import android.net.Uri;
 
 /**
@@ -39,7 +41,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTACT_NUMBER = "contact_number";
+	static final String KEY_CONTACT_NUMBER = CapabilitiesLog.CONTACT_NUMBER;
 	
 	/**
 	 * Column name
@@ -134,22 +136,22 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_IMAGE_SHARING = "capability_image_sharing";
+	static final String KEY_CAPABILITY_IMAGE_SHARING = CapabilitiesLog.CAPABILITY_IMAGE_SHARE;
 	
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_VIDEO_SHARING = "capability_video_sharing";
+	static final String KEY_CAPABILITY_VIDEO_SHARING = CapabilitiesLog.CAPABILITY_VIDEO_SHARE;
 	
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_IM_SESSION = "capability_im_session";
+	static final String KEY_CAPABILITY_IM_SESSION = CapabilitiesLog.CAPABILITY_IM_SESSION;
 	
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_FILE_TRANSFER = "capability_file_transfer";
+	static final String KEY_CAPABILITY_FILE_TRANSFER = CapabilitiesLog.CAPABILITY_FILE_TRANSFER;
 	
 	/**
 	 * Column name
@@ -179,7 +181,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_EXTENSIONS = "capability_extensions";
+	static final String KEY_CAPABILITY_EXTENSIONS = CapabilitiesLog.CAPABILITY_EXTENSIONS;
 	
 	/**
 	 * Column name
@@ -194,7 +196,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP = "im_blocked_timestamp";
+	static final String KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP = "im_blocked_timestamp";   
 
     /** 
      * TRUE value
@@ -205,5 +207,4 @@ public class RichAddressBookData {
      * FALSE value
      */
     public static final String FALSE_VALUE = Boolean.toString(false);
-    
 }

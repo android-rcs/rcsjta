@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
+import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -54,6 +55,7 @@ public class RichAddressBookProvider extends ContentProvider {
 	private static final int CONTACT_ID = 2;
 	private static final int AGGREGATIONS = 3;
 	private static final int AGGREGATION_ID = 4;
+	private static final int RCSAPI = 5;
 	
 	// Allocate the UriMatcher object, where a URI ending in 'contacts'
 	// will correspond to a request for all contacts, and 'contacts'
@@ -65,6 +67,7 @@ public class RichAddressBookProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "eab/#", CONTACT_ID);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation", AGGREGATIONS);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation/#", AGGREGATION_ID);
+		uriMatcher.addURI("org.gsma.joyn.provider", "capabilities", RCSAPI);
 	}
 
     /**
@@ -82,7 +85,7 @@ public class RichAddressBookProvider extends ContentProvider {
      */
 	private static class DatabaseHelper extends SQLiteOpenHelper{
 		private static final String DATABASE_NAME = "eab.db";
-		private static final int DATABASE_VERSION = 15;
+		private static final int DATABASE_VERSION = 20;
 		
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -121,16 +124,16 @@ public class RichAddressBookProvider extends ContentProvider {
                     + RichAddressBookData.KEY_PRESENCE_GEOLOC_ALTITUDE + " double, "
                     + RichAddressBookData.KEY_PRESENCE_TIMESTAMP + " long, "
 					+ RichAddressBookData.KEY_CAPABILITY_TIMESTAMP + " long, "
-					+ RichAddressBookData.KEY_CAPABILITY_CS_VIDEO + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_IM_SESSION + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP + " TEXT, "
-					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL + " TEXT, "
+					+ RichAddressBookData.KEY_CAPABILITY_CS_VIDEO + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_IM_SESSION + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_EXTENSIONS + " TEXT, "
 					+ RichAddressBookData.KEY_IM_BLOCKED + " TEXT, "
 					+ RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP + " long, "
@@ -198,6 +201,8 @@ public class RichAddressBookProvider extends ContentProvider {
 				return "vnd.android.cursor.dir/com.orangelabs.rcs.aggregation";
 			case AGGREGATION_ID:
 				return "vnd.android.cursor.item/com.orangelabs.rcs.aggregation";
+			case RCSAPI:
+				return "vnd.android.cursor.dir/com.orangelabs.rcs.eab";
 			default:
 				throw new IllegalArgumentException("Unsupported URI " + uri);
 		}
@@ -288,6 +293,11 @@ public class RichAddressBookProvider extends ContentProvider {
         			orderBy = AggregationData.KEY_RCS_NUMBER;
         		}
 	            break;
+        	case RCSAPI:
+        		qb.setTables(EAB_TABLE);
+				qb.appendWhere("(" + RichAddressBookData.KEY_RCS_STATUS + "<>" + ContactInfo.NO_INFO +
+						") AND (" + RichAddressBookData.KEY_RCS_STATUS + "<>" + ContactInfo.NOT_RCS + ")");
+        		break;
 	        default:
 	            throw new IllegalArgumentException("Unknown URI " + uri);
 		}

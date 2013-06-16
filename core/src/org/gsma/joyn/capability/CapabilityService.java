@@ -34,10 +34,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 /**
- * Capability service offers the main entry point to the Capability
- * service which permits to read capabilities of remote contacts, to
- * initiate capability discovery and to receive capabilities updates.
- * Several applications may connect/disconnect to the API.
+ * Capability service offers the main entry point to read capabilities
+ * of remote contacts, to initiate capability discovery and to receive
+ * capabilities updates. Several applications may connect/disconnect
+ * to the API.
  * 
  * The parameter contact in the API supports the following formats:
  * MSISDN in national or international format, SIP address, SIP-URI
