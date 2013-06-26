@@ -30,11 +30,6 @@ public class VideoSharingService extends JoynService {
 	 */
 	private IVideoSharingService api = null;
 	
-	/**
-	 * Video sharing service configuration
-	 */
-	private static VideoSharingServiceConfiguration config = new VideoSharingServiceConfiguration(); 
-	
     /**
      * Constructor
      * 
@@ -95,10 +90,19 @@ public class VideoSharingService extends JoynService {
      * Returns the configuration of video sharing service
      * 
      * @return Configuration
+     * @throws JoynServiceException
      */
-    public static VideoSharingServiceConfiguration getConfiguration() {
-    	return config;
-    }
+    public VideoSharingServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 
     /**
      * Shares a live video with a contact. The parameter renderer contains the video player
@@ -108,7 +112,7 @@ public class VideoSharingService extends JoynService {
      * an exception is thrown.
      * 
      * @param contact Contact
-     * @param 
+     * @param player Video player
      * @param listener Video sharing event listener
      * @return Video sharing
      * @throws JoynServiceException
@@ -117,7 +121,7 @@ public class VideoSharingService extends JoynService {
     public VideoSharing shareVideo(String contact, VideoPlayer player, VideoSharingListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.shareVideo(contact, player, listener);
+				IVideoSharing sharingIntf = api.shareVideo(contact, player.playerInf, listener);
 				return new VideoSharing(sharingIntf);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
@@ -133,7 +137,7 @@ public class VideoSharingService extends JoynService {
      * @return List of video sharings
      * @throws JoynServiceException
      */
-    public Set<VideoSharing> getVideoShares() throws JoynServiceException {
+    public Set<VideoSharing> getVideoSharings() throws JoynServiceException {
 		if (api != null) {
 			try {
 	    		Set<VideoSharing> result = new HashSet<VideoSharing>();

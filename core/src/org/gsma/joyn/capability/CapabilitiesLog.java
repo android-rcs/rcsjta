@@ -41,6 +41,12 @@ public class CapabilitiesLog {
     public static final int SUPPORTED = 1;
     
     /**
+     * The name of the column containing the unique ID for a row.
+     * <P>Type: primary key</P>
+     */
+    public static final String ID = "_id";
+
+    /**
      * The name of the column containing the MSISDN of the contact associated to the capabilities.
      * <P>Type: TEXT</P>
      */

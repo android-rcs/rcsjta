@@ -21,35 +21,34 @@ package com.orangelabs.rcs.core.ims.service.richcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.gsma.joyn.vsh.IVideoPlayer;
+
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.TerminatingImageTransferSession;
-import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingLiveVideoStreamingSession;
-import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingPreRecordedVideoStreamingSession;
+import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.TerminatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -312,74 +311,6 @@ public class RichcallService extends ImsService {
 		// Notify listener
 		getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 	}
-	
-    /**
-     * Initiate a pre-recorded video sharing session
-     *
-     * @param contact Remote contact
-     * @param content Video content to share
-     * @param player Media player
-     * @return CSh session
-     * @throws CoreException
-     */
-	public VideoStreamingSession initiatePreRecordedVideoSharingSession(String contact, VideoContent content, IMediaPlayer player) throws CoreException {
-		if (logger.isActivated()) {
-			logger.info("Initiate a pre-recorded video sharing session with contact " + contact + ", file " + content.toString());
-		}
-
-		// Test if call is established
-		if (!getImsModule().getCallManager().isCallConnected()) {
-			if (logger.isActivated()) {
-				logger.debug("Rich call not established: cancel the initiation");
-			}
-            throw new CoreException("Call not established");
-        }
-
-        // Reject if there are already 2 bidirectional sessions with a given contact
-		boolean rejectInvitation = false;
-        Vector<ContentSharingSession> currentSessions = getCShSessions();
-        if (currentSessions.size() >= 2) {
-        	// Already a bidirectional session
-            if (logger.isActivated()) {
-                logger.debug("Max sessions reached");
-            }
-        	rejectInvitation = true;
-        } else
-        if (currentSessions.size() == 1) {
-        	ContentSharingSession currentSession = currentSessions.elementAt(0);
-        	if (!(currentSession instanceof TerminatingVideoStreamingSession)) {
-        		// Originating session already used
-				if (logger.isActivated()) {
-				    logger.debug("Max originating sessions reached");
-				}
-            	rejectInvitation = true;
-        	} else
-        	if (!PhoneUtils.compareNumbers(contact, currentSession.getRemoteContact())) {
-        		// Not the same contact
-				if (logger.isActivated()) {
-				    logger.debug("Only bidirectional session with same contact authorized");
-				}
-            	rejectInvitation = true;
-        	}
-        }
-        if (rejectInvitation) {
-            if (logger.isActivated()) {
-                logger.debug("The max number of sharing sessions is achieved: cancel the initiation");
-            }
-            throw new CoreException("Max content sharing sessions achieved");
-        }
-
-		// Create a new session
-		OriginatingPreRecordedVideoStreamingSession session = new OriginatingPreRecordedVideoStreamingSession(
-				this,
-				player,
-				content,
-				PhoneUtils.formatNumberToSipUri(contact));
-
-		// Start the session
-		session.startSession();
-		return session;
-	}
 
     /**
      * Initiate a live video sharing session
@@ -390,7 +321,7 @@ public class RichcallService extends ImsService {
      * @return CSh session
      * @throws CoreException
      */
-    public VideoStreamingSession initiateLiveVideoSharingSession(String contact, IMediaPlayer player) throws CoreException {
+    public VideoStreamingSession initiateLiveVideoSharingSession(String contact, IVideoPlayer player) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a live video sharing session");
 		}
@@ -438,7 +369,7 @@ public class RichcallService extends ImsService {
         }
 
 		// Create a new session
-		OriginatingLiveVideoStreamingSession session = new OriginatingLiveVideoStreamingSession(
+        OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(
 				this,
 				player,
                 ContentManager.createGenericLiveVideoContent(),

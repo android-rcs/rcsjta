@@ -6,11 +6,6 @@
 		android:summaryOn="@string/rcs_settings_summary_rcs_service_on"
 		android:summaryOff="@string/rcs_settings_summary_rcs_service_off"/>
 		
-	<CheckBoxPreference
-		android:key="rcs_roaming"
-		android:title="@string/rcs_settings_label_rcs_roaming"
-		android:summary="@string/rcs_settings_summary_rcs_roaming"/>
-
     <ListPreference
         android:key="min_battery_level"
         android:title="@string/rcs_settings_label_min_battery_level"

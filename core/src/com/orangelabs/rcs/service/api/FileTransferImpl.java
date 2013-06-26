@@ -28,9 +28,8 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.SessionState;
 import com.orangelabs.rcs.service.api.client.eventslog.EventsLogApi;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -86,7 +85,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 	
 	/**

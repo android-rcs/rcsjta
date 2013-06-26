@@ -27,9 +27,8 @@ import org.gsma.joyn.capability.Capabilities;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.contacts.JoynContact;
 
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

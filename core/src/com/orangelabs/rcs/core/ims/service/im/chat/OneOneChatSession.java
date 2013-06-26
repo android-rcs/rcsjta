@@ -35,9 +35,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 import com.orangelabs.rcs.utils.StringUtils;
 
 /**

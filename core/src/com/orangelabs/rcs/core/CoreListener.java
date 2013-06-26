@@ -172,13 +172,6 @@ public interface CoreListener {
      * @param session SIP session
      */
     public void handleSipSessionInvitation(Intent intent, GenericSipSession session);
-    
-	/**
-	 * New SIP instant message received
-	 * 
-	 * @param intent Resolved intent
-	 */
-    public void handleSipInstantMessageReceived(Intent intent);
 
 	/**
      * User terms confirmation request

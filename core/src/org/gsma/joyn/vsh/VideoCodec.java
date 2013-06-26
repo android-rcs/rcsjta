@@ -10,13 +10,83 @@ import android.os.Parcelable;
  */
 public class VideoCodec implements Parcelable {
 	/**
+	 * Video encoding
+	 */
+	private String encoding;
+	
+	/**
+	 * Payload
+	 */
+	private int payload;
+	
+	/**
+	 * Clock rate
+	 */
+	private float clockRate;
+	
+	/**
+	 * Frame rate
+	 */
+	private float frameRate;
+	
+	/**
+	 * Bit rate
+	 */
+	private int bitRate;
+
+	/**
+	 * Screen width
+	 */
+	private int width;
+	
+	/**
+	 * Screen height
+	 */
+	private int height;
+
+	/**
+	 * Video parameters
+	 */
+	private String parameters;
+	
+    /**
+     * Constructor
+     *
+     * @param encoding Video encoding
+     * @param payload Payload
+     * @param clockRate Clock rate
+     * @param framerate Frame rate
+     * @param bitRate Bit rate
+     * @param width Video width
+     * @param height Video height
+     * @param parameters Codec parameters
+     */
+    public VideoCodec(String encoding, int payload, float clockRate, float frameRate, int bitRate, int width, int height, String parameters) {
+    	this.encoding = encoding;
+    	this.payload = payload;
+    	this.clockRate = clockRate;
+    	this.frameRate = frameRate;
+    	this.bitRate = bitRate;
+    	this.width = width;
+    	this.height = height;
+    	this.parameters = parameters;
+    }
+    
+    /**
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
 	 */
 	public VideoCodec(Parcel source) {
-		// TODO
-    }
+		this.encoding = source.readString();
+    	this.payload = source.readInt();
+    	this.clockRate = source.readFloat();
+    	this.frameRate = source.readFloat();
+    	this.bitRate = source.readInt();
+    	this.width = source.readInt();
+    	this.height = source.readInt();
+		this.parameters = source.readString();
+	}
 
 	/**
 	 * Describe the kinds of special objects contained in this Parcelable's
@@ -35,9 +105,16 @@ public class VideoCodec implements Parcelable {
 	 * @param flags Additional flags about how the object should be written
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	// TODO
+    	dest.writeString(encoding);
+    	dest.writeInt(payload);
+    	dest.writeFloat(clockRate);
+    	dest.writeFloat(frameRate);
+    	dest.writeInt(bitRate);
+    	dest.writeInt(width);
+    	dest.writeInt(height);
+    	dest.writeString(parameters);
     }
-
+    
     /**
      * Parcelable creator
      */
@@ -58,8 +135,7 @@ public class VideoCodec implements Parcelable {
     * @return Encoding name
     */
     public String getEncoding() {
-    	// TODO
-    	return null;
+    	return encoding;
     }
     
     /**
@@ -68,7 +144,7 @@ public class VideoCodec implements Parcelable {
      * @return Payload number
      */
     public int getPayload() {
-    	return -1; // TODO
+    	return payload;
     }
     
     /**
@@ -76,8 +152,8 @@ public class VideoCodec implements Parcelable {
      * 
      * @return Clock rate
      */
-    public int getClockRate() {
-    	return -1; // TODO
+    public float getClockRate() {
+    	return clockRate;
     }
     
     /**
@@ -85,8 +161,8 @@ public class VideoCodec implements Parcelable {
      * 
      * @return Frame rate
      */
-    public int getFrameRate() {
-    	return -1; // TODO
+    public float getFrameRate() {
+    	return frameRate;
     }
     
     /**
@@ -95,7 +171,7 @@ public class VideoCodec implements Parcelable {
      * @return Bit rate
      */
     public int getBitRate() {
-    	return -1; // TODO
+    	return bitRate;
     }
     
     /**
@@ -104,7 +180,7 @@ public class VideoCodec implements Parcelable {
      * @return Video width
      */
     public int getVideoWidth() {
-    	return -1; // TODO: replace by a format WxH
+    	return width;
     }
     
     /**
@@ -113,16 +189,16 @@ public class VideoCodec implements Parcelable {
      * @return Video height
      */
     public int getVideoHeight() {
-    	return -1; // TODO
+    	return height;
     }
     
     /**
-     * Returns a codec parameter from its key name (e.g. profile-level-id, packetization-mode).
+     * Returns the list of codec parameters (e.g. profile-level-id, packetization-mode).
+     * Parameters are are semicolon separated.
      * 
-     * @param key Key name of the parameter
-     * @return Parameter value
+     * @return Parameters
      */
-    public String getParameter(String key) {
-    	return null; // TODO    	
+    public String getParameters() {
+    	return parameters;    	
     }
 }

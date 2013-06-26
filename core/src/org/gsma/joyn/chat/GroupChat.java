@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.gsma.joyn.JoynServiceException;
+import org.gsma.joyn.ft.FileTransfer;
 
 /**
  * Group chat
@@ -77,9 +78,19 @@ public class GroupChat {
      */
     public static class Error {
     	/**
+    	 * Group chat has failed
+    	 */
+    	public final static int CHAT_FAILED = 0;
+    	
+    	/**
+    	 * Group chat has been declined by remote
+    	 */
+    	public final static int INVITATION_DECLINED = 1;
+
+    	/**
     	 * Chat conversation not found
     	 */
-    	public final static int CHAT_NOT_FOUND = 0;
+    	public final static int CHAT_NOT_FOUND = 2;
     	    	
         private Error() {
         }    	
@@ -113,6 +124,35 @@ public class GroupChat {
 		}
 	}
 
+	/**
+	 * Returns the state of the file transfer
+	 * 
+	 * @return State
+	 * @see FileTransfer.State
+	 * @throws JoynServiceException
+	 */
+	public int getState() throws JoynServiceException {
+		try {
+			return chatInf.getState();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}		
+	
+	/**
+	 * Returns the remote contact
+	 * 
+	 * @return Contact
+	 * @throws JoynServiceException
+	 */
+	public String getRemoteContact() throws JoynServiceException {
+		try {
+			return chatInf.getRemoteContact();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Returns the subject of the group chat
 	 * 
@@ -184,7 +224,7 @@ public class GroupChat {
 	}
 	
 	/**
-	 * Sends a “is-composing” event. The status is set to true when typing
+	 * Sends an Is-composing event. The status is set to true when typing
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
@@ -213,8 +253,9 @@ public class GroupChat {
 	}
 	
 	/**
-	 * Returns the max number of participants for a group chat from the group
-	 * chat info subscription (this value overrides the provisioning parameter)
+	 * Returns the max number of participants in the group chat. This limit is
+	 * read during the conference event subscription and overrides the provisioning
+	 * parameter.
 	 * 
 	 * @return Number
 	 * @throws JoynServiceException

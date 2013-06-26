@@ -5,12 +5,15 @@ import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IGroupChatListener;
 import org.gsma.joyn.chat.IGroupChat;
 import org.gsma.joyn.chat.INewChatListener;
+import org.gsma.joyn.chat.ChatServiceConfiguration;
 
 /**
  * Chat service API
  */
 interface IChatService {
-	IChat initiateSingleChat(in String contact, in String firstMessage, in IChatListener listener);
+    ChatServiceConfiguration getConfiguration();
+    
+    IChat initiateSingleChat(in String contact, in String firstMessage, in IChatListener listener);
     
     IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
     

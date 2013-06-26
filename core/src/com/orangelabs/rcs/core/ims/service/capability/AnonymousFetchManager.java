@@ -26,12 +26,12 @@ import org.xml.sax.InputSource;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceUtils;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.Tuple;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 

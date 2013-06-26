@@ -380,16 +380,6 @@ public class ImsConnectionManager implements Runnable {
 				return;
 			}
 
-			// Test roaming flag if mobile network
-			if ((networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) && networkInfo.isRoaming()) {
-				if (!RcsSettings.getInstance().isRoamingAuthorized()) {
-					if (logger.isActivated()) {
-						logger.warn("RCS not authorized in roaming");
-					}
-					return;
-				}
-			}
-			
 			// Test the operator id
 			TelephonyManager tm = (TelephonyManager)AndroidFactory.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
 			String currentOpe = tm.getSimOperatorName();

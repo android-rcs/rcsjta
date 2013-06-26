@@ -37,8 +37,8 @@ public interface VideoStreamingSessionListener extends ImsSessionListener  {
     /**
      * The size of media has changed
      *
-     * @param width
-     * @param height
+     * @param width Video width
+     * @param height Video height
      */
     public void handleMediaResized(int width, int height);
 }

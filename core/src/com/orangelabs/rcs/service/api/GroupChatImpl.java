@@ -3,6 +3,7 @@ package com.orangelabs.rcs.service.api;
 import java.util.List;
 
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.GroupChat;
 import org.gsma.joyn.chat.IGroupChat;
 import org.gsma.joyn.chat.IGroupChatListener;
 
@@ -12,13 +13,13 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -58,7 +59,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		
 		session.addListener(this);
 	}
-
+	
 	/**
 	 * Get session ID
 	 * 
@@ -83,17 +84,34 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 	
 	/**
-	 * Get session state
+	 * Returns the state of the file transfer
 	 * 
-	 * @return State (see class SessionState) 
+	 * @return State 
 	 */
-	public int getSessionState() {
-		return ServerApiUtils.getSessionState(session);
-	}
+	public int getState() {
+		// TODO
+		int state = ServerApiUtils.getSessionState(session);
+		switch(state) {
+			case SessionState.PENDING:
+				return GroupChat.State.INITIATED;
+			
+			case SessionState.ESTABLISHED:
+				return GroupChat.State.STARTED;
+			
+			case SessionState.CANCELLED:
+				return GroupChat.State.INITIATED;
+			
+			case SessionState.TERMINATED:
+				return GroupChat.State.TERMINATED;
+
+			default:
+				return GroupChat.State.UNKNOWN;
+		}
+	}		
 	
 	/**
 	 * Is Store & Forward
@@ -370,7 +388,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	        for (int i=0; i < N; i++) {
 	            try {
 	            	ChatMessage msg = new ChatMessage(message.getMessageId(),
-	            			message.getRemote(), message.getTextMessage(),
+	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
+	            			message.getTextMessage(),
 	            			message.getServerDate(), message.isImdnDisplayedRequested());
 	            	listeners.getBroadcastItem(i).onNewMessage(msg);
 	            } catch(Exception e) {
@@ -439,7 +458,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 */
 	public void handleIsComposingEvent(String contact, boolean status) {
     	synchronized(lock) {
-			if (logger.isActivated()) {
+        	contact = PhoneUtils.extractNumberFromUri(contact);
+
+        	if (logger.isActivated()) {
 				logger.info(contact + " is composing status set to " + status);
 			}
 	
@@ -467,7 +488,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
     public void handleConferenceEvent(String contact, String contactDisplayname, String state) {
     	synchronized(lock) {
-			if (logger.isActivated()) {
+        	contact = PhoneUtils.extractNumberFromUri(contact);
+
+        	if (logger.isActivated()) {
 				logger.info("New conference event " + state + " for " + contact);
 			}
 			

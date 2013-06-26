@@ -19,8 +19,6 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 
 /**
  * Chat session listener

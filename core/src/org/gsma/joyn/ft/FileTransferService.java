@@ -49,11 +49,6 @@ public class FileTransferService extends JoynService {
 	 */
 	private IFileTransferService api = null;
 	
-	/**
-	 * File transfer service configuration
-	 */
-	private static FileTransferServiceConfiguration config = new FileTransferServiceConfiguration(); 
-	
     /**
      * Constructor
      * 
@@ -114,10 +109,19 @@ public class FileTransferService extends JoynService {
      * Returns the configuration of the file transfer service
      * 
      * @return Configuration
+     * @throws JoynServiceException
      */
-    public static FileTransferServiceConfiguration getConfiguration() {
-    	return config;
-    }
+    public FileTransferServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 
     /**
      * Transfers a file to a contact. The parameter file contains the complete filename

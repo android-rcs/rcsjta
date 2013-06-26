@@ -24,7 +24,7 @@ import android.net.Uri;
 /**
  * RCS settings data constants
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RcsSettingsData {
 	/**
@@ -106,6 +106,16 @@ public class RcsSettingsData {
 	 */
     public static final int HTTPS_AUTO_CONFIG = 1;
 
+    /**
+     * File transfer over MSRP
+     */
+    public static final String FT_PROTOCOL_MSRP = "MSRP";
+
+    /**
+     * File transfer over HTTP
+     */
+    public static final String FT_PROTOCOL_HTTP = "HTTP";
+
     // ---------------------------------------------------------------------------
 	// UI settings
 	// ---------------------------------------------------------------------------
@@ -114,11 +124,6 @@ public class RcsSettingsData {
      * Activate or not the RCS service
      */
 	public static final String SERVICE_ACTIVATED = "ServiceActivated";
-
-	/**
-     * Roaming authorization parameter which indicates if the RCS service may be used or not in roaming
-     */
-	public static final String ROAMING_AUTHORIZED = "RoamingAuthorized";
 
 	/**
      * Ringtone which is played when a social presence sharing invitation is received
@@ -164,6 +169,11 @@ public class RcsSettingsData {
      * Vibrate or not when a chat invitation is received
      */
 	public static final String CHAT_INVITATION_VIBRATE = "ChatInvitationVibrate";
+
+    /**
+     * Send or not the displayed notification
+     */
+    public static final String CHAT_DISPLAYED_NOTIFICATION = "ChatDisplayedNotification";
 
 	/**
      * Predefined freetext
@@ -270,7 +280,7 @@ public class RcsSettingsData {
 	public static final String AUTO_ACCEPT_CHAT = "AutoAcceptChat";	
 
     /**
-     * Auto accept chat invitation
+     * Auto accept group chat invitation
      */
     public static final String AUTO_ACCEPT_GROUP_CHAT = "AutoAcceptGroupChat"; 
 
@@ -293,6 +303,11 @@ public class RcsSettingsData {
 	 * Max entries for richcall log
 	 */
 	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";	
+	
+	/**
+	 * Max entries for ipcall log
+	 */
+	public static final String MAX_IPCALL_LOG_ENTRIES = "MaxIpcallLogEntries";	
 	
 	/**
 	 * Max length of a geolocation label
@@ -377,6 +392,26 @@ public class RcsSettingsData {
 	 * XDM server password (for HTTP Digest only)
 	 */
 	public static final String XDM_PASSWORD = "XdmServerPassword";
+
+	/**
+	 * File transfer HTTP server address & port
+	 */
+	public static final String FT_HTTP_SERVER = "FtHttpServerAddr";
+
+	/**
+	 * File transfer HTTP server login
+	 */
+	public static final String FT_HTTP_LOGIN= "FtHttpServerLogin";
+
+	/**
+	 * File transfer HTTP server password
+	 */
+	public static final String FT_HTTP_PASSWORD = "FtHttpServerPassword";
+
+    /**
+     * File transfer default protocol
+     */
+    public static final String FT_PROTOCOL = "FtProtocol";
 
 	/**
 	 * IM conference URI for group chat session
@@ -573,6 +608,16 @@ public class RcsSettingsData {
 	public static final String CAPABILITY_VIDEO_SHARING = "CapabilityVideoShare";
 
 	/**
+	 * IP call Audio capability
+	 */
+	public static final String CAPABILITY_IP_VOICE_CALL = "CapabilityIPVoiceCall";
+	
+	/**
+	 * IP call Video capability
+	 */
+	public static final String CAPABILITY_IP_VIDEO_CALL = "CapabilityIPVideoCall";
+	
+	/**
 	 * Instant Messaging session capability
 	 */
 	public static final String CAPABILITY_IM_SESSION = "CapabilityImSession";
@@ -607,7 +652,17 @@ public class RcsSettingsData {
 	 */
 	public static final String CAPABILITY_FILE_TRANSFER_THUMBNAIL = "CapabilityFileTransferThumbnail";
 	
-    /**
+	/**
+	 * File transfer Store & Forward
+	 */
+	public static final String CAPABILITY_FILE_TRANSFER_SF = "CapabilityFileTransferSF";
+
+	/**
+	 * Group chat Store & Forward
+	 */
+	public static final String CAPABILITY_GROUP_CHAT_SF = "CapabilityGroupChatSF";
+
+	/**
      * RCS extensions capability
      */
 	public static final String CAPABILITY_RCS_EXTENSIONS = "CapabilityRcsExtensions";
@@ -693,8 +748,7 @@ public class RcsSettingsData {
     public static final String PROVISIONING_VERSION = "ProvisioningVersion";
 
     /**
-     * Provisioning address.
-     * The provisioning address can be set in settings for test purpose.
+     * Provisioning address (for test purpose)
      */
     public static final String PROVISIONING_ADDRESS = "ProvisioningAddress";
 

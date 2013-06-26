@@ -17,6 +17,9 @@
  ******************************************************************************/
 package org.gsma.joyn.ish;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Image sharing service configuration
  * 
@@ -24,22 +27,89 @@ package org.gsma.joyn.ish;
  */
 public class ImageSharingServiceConfiguration {
 	/**
-	 * Returns the Image Size Warning configuration. It returns 0 if this
-	 * value was not set by the autoconfiguration server (no need to warn).
+	 * Image size threshold
+	 */
+	private long warnSize;
+		
+	/**
+	 * Image size limit
+	 */
+	private long maxSize;
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param warnSize Image size threshold
+	 * @param maxSize Image size limit
+	 */
+	public ImageSharingServiceConfiguration(long warnSize, long maxSize) {
+		this.warnSize = warnSize;
+		this.maxSize = maxSize;
+    }	
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param source Parcelable source
+	 */
+	public ImageSharingServiceConfiguration(Parcel source) {
+		this.warnSize = source.readLong();
+		this.maxSize = source.readLong();
+    }
+
+	/**
+	 * Describe the kinds of special objects contained in this Parcelable's
+	 * marshalled representation
+	 * 
+	 * @return Integer
+	 */
+	public int describeContents() {
+        return 0;
+    }
+
+	/**
+	 * Write parcelable object
+	 * 
+	 * @param dest The Parcel in which the object should be written
+	 * @param flags Additional flags about how the object should be written
+	 */
+    public void writeToParcel(Parcel dest, int flags) {
+    	dest.writeLong(warnSize);
+    	dest.writeLong(maxSize);
+    }
+
+    /**
+     * Parcelable creator
+     */
+    public static final Parcelable.Creator<ImageSharingServiceConfiguration> CREATOR
+            = new Parcelable.Creator<ImageSharingServiceConfiguration>() {
+        public ImageSharingServiceConfiguration createFromParcel(Parcel source) {
+            return new ImageSharingServiceConfiguration(source);
+        }
+
+        public ImageSharingServiceConfiguration[] newArray(int size) {
+            return new ImageSharingServiceConfiguration[size];
+        }
+    };	
+
+    /**
+	 * Returns the image size threshold when the user should be warned about the
+	 * potential charges associated to the transfer of a large file. It returns 0
+	 * if there no need to warn.
 	 * 
 	 * @return Size in kilobytes 
 	 */
 	public long getWarnSize() {
-		return 2048; // TODO RcsSettings.getInstance().getWarningMaxImageSharingSize();
+		return warnSize;
 	}
 			
 	/**
-	 * Returns the Max Image Size configuration. It returns 0 if this
-	 * value was not set by the autoconfiguration server.
+	 * Returns the maximum authorized size of the image that can be sent. It
+	 * returns 0 if there is no limitation.
 	 * 
 	 * @return Size in kilobytes
 	 */
 	public long getMaxSize() {
-		return 4096; // TODO RcsSettings.getInstance().getMaxImageSharingSize();
+		return maxSize;
 	}
 }

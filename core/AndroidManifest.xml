@@ -4,7 +4,7 @@
  android:versionName="3.0.0"
  package="com.orangelabs.rcs">
       
-	<uses-sdk android:minSdkVersion="5"
+	<uses-sdk android:minSdkVersion="9"
 		android:targetSdkVersion="15"/>
 
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -37,10 +37,12 @@
 	            <action android:name="com.orangelabs.rcs.SERVICE"/>
 
 	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
-	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
-	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
 	            <action android:name="org.gsma.joyn.chat.IChatService"/>
-	        </intent-filter>
+	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
+	            <action android:name="org.gsma.joyn.vsh.IVideoSharingService"/>
+	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
+	            <action android:name="org.gsma.joyn.session.IMultimediaSessionService"/>
+	            	        </intent-filter>
 	    </service>
 	
 		<!-- RCS settings application -->
@@ -68,9 +70,6 @@
 		  	android:process=":settings" />
 
 		<activity android:name="com.orangelabs.rcs.settings.UserprofileSettingsDisplay"
-		  	android:process=":settings" />
-
-		<activity android:name="com.orangelabs.rcs.settings.PresenceSettingsDisplay"
 		  	android:process=":settings" />
 
 		<activity android:name="com.orangelabs.rcs.settings.CShSettingsDisplay"
@@ -109,9 +108,10 @@
 		<!-- RCS data providers -->	
 
 		<provider android:authorities="com.orangelabs.rcs.settings"
+		    android:exported="false"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.capabilities"
+		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.provider"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
 		<provider android:authorities="com.orangelabs.rcs.messaging"
@@ -192,6 +192,21 @@
 	        </intent-filter>
 	    </receiver>
         
+        <!-- Local provisioning (only for debug) -->
+   		
+   		<activity android:name=".provisioning.local.Provisioning"
+   		    android:icon="@drawable/rcs_icon" android:label="@string/provisioning_app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".provisioning.local.ProfileProvisioning"/>
+        <activity android:name=".provisioning.local.StackProvisioning"/>
+        <activity android:name=".provisioning.local.ServiceProvisioning"/>
+		<activity android:name=".provisioning.local.LoggerProvisioning"/>
+   		
 	</application> 
 
 </manifest>

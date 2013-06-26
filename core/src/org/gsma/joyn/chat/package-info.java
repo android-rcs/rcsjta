@@ -1,5 +1,5 @@
 /**
- * This API exposes all functionality for the Instant messaging/chat service.
+ * This API exposes all functionality for single chat and group chat services.
  * <p>
  */
 package org.gsma.joyn.chat;

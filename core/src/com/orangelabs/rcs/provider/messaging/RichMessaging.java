@@ -32,14 +32,14 @@ import android.net.Uri;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
+import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.api.client.eventslog.EventsLogApi;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.messaging.GroupChatInfo;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 

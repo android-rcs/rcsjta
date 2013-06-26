@@ -100,24 +100,29 @@ public class ChatLog {
 	        public static final int ACTIVE = 1;
 
 	        /**
-	         * Chat has been closed by the end user
+	         * Chat has been terminated
 	         */
-	        public static final int CLOSED_BY_USER = 2;
+	        public static final int TERMINATED = 2;
+
+	        /**
+	         * Chat has been terminated by the end user
+	         */
+	        public static final int TERMINATED_BY_USER = 3;
 
 	        /**
 	         * Chat has failed
 	         */
-	        public static final int FAILED = 3;
+	        public static final int FAILED = 4;
 
 	        /**
 	         * Chat invitation is pending
 	         */
-	        public static final int PENDING = 4;
+	        public static final int PENDING = 5;
 
 	        /**
 	         * Chat invitation has been declined by the remote
 	         */
-	        public static final int DECLINED = 5;
+	        public static final int DECLINED = 6;
         }        
     }
 

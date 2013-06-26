@@ -163,7 +163,7 @@ public class VideoSharing {
 	 */
 	public void acceptInvitation(VideoRenderer renderer) throws JoynServiceException {
 		try {
-			sharingInf.acceptInvitation(renderer);
+			sharingInf.acceptInvitation(renderer.rendererInf);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}

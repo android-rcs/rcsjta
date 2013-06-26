@@ -8,7 +8,11 @@ import org.gsma.joyn.chat.IGroupChatListener;
 interface IGroupChat {
 	String getChatId();
 
-	String getSubject();
+	int getState();	
+
+	String getRemoteContact();
+
+	String getSubject();	
 
 	List<String> getParticipants();
 	

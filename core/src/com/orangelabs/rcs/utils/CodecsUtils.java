@@ -21,6 +21,8 @@ package com.orangelabs.rcs.utils;
 import java.util.List;
 import java.util.Vector;
 
+import org.gsma.joyn.vsh.VideoCodec;
+
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Build;
@@ -31,8 +33,6 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Pr
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1_3;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
-import com.orangelabs.rcs.service.api.client.media.MediaCodec;
-import com.orangelabs.rcs.service.api.client.media.video.VideoCodec;
 
 /**
  * Codecs utility functions
@@ -46,7 +46,7 @@ public class CodecsUtils {
      *
      * @return Codecs list
      */
-    public static MediaCodec[] getRendererCodecList() {
+    public static VideoCodec[] getRendererCodecList() {
         return getSupportedCodecList(true, true);
     }
 
@@ -55,7 +55,7 @@ public class CodecsUtils {
      *
      * @return Codecs list
      */
-    public static MediaCodec[] getPlayerCodecList() {
+    public static VideoCodec[] getPlayerCodecList() {
         // Get supported sizes of camera 
         boolean cif_available = true;
         boolean qvga_available = true;
@@ -106,6 +106,14 @@ public class CodecsUtils {
         return false;
     }
 
+    // Codec parameters
+	static String param_1_3 = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_3.BASELINE_PROFILE_ID + ";" +
+		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
+	static String param_1_2 = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";" +
+		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
+	static String param_1_b = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" +
+		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
+    
     /**
      * Get list of supported video codecs according to current network
      *
@@ -113,10 +121,10 @@ public class CodecsUtils {
      * @param qvga true if available
      * @return Codecs list
      */
-    private static MediaCodec[] getSupportedCodecList(boolean cif, boolean qvga) {
+    private static VideoCodec[] getSupportedCodecList(boolean cif, boolean qvga) {
         int networkLevel = NetworkUtils.getNetworkAccessType();
         int payload_count = H264VideoFormat.PAYLOAD - 1;
-        Vector<MediaCodec> list = new Vector<MediaCodec>();
+        Vector<VideoCodec> list = new Vector<VideoCodec>();
 
         // Add codecs settings (ordered list)
         /*
@@ -127,45 +135,46 @@ public class CodecsUtils {
          * WIFI   -> level 1.3: profile-level-id=42800d, frame_rate=15, frame_size=CIF, bit_rate=384k
          */
 
-        if (networkLevel == NetworkUtils.NETWORK_ACCESS_WIFI || networkLevel == NetworkUtils.NETWORK_ACCESS_4G) {
+    	if (networkLevel == NetworkUtils.NETWORK_ACCESS_WIFI || networkLevel == NetworkUtils.NETWORK_ACCESS_4G) {
             if (cif) {
                 list.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
-                        H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_3.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE,
                         15,
                         256000,
                         H264Config.CIF_WIDTH, 
-                        H264Config.CIF_HEIGHT).getMediaCodec());
+                        H264Config.CIF_HEIGHT,
+                        param_1_3));
+                
                 list.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
-                        H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE,
                         15,
                         176000,
                         H264Config.CIF_WIDTH, 
-                        H264Config.CIF_HEIGHT).getMediaCodec());
+                        H264Config.CIF_HEIGHT,
+                        param_1_2));
             }
             if (qvga) {
                 list.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
-                        H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE,
                         15,
                         176000,
                         H264Config.QVGA_WIDTH, 
-                        H264Config.QVGA_HEIGHT).getMediaCodec());
+                        H264Config.QVGA_HEIGHT,
+                        param_1_2));
             }
         }
         list.add(new VideoCodec(H264Config.CODEC_NAME,
                 ++payload_count,
                 H264Config.CLOCK_RATE,
-                H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE,
                 15,
                 96000,
                 H264Config.QCIF_WIDTH, 
-                H264Config.QCIF_HEIGHT).getMediaCodec());
+                H264Config.QCIF_HEIGHT,
+                param_1_b));
 
-        return (MediaCodec[]) list.toArray(new MediaCodec[list.size()]);
+        return (VideoCodec[]) list.toArray(new VideoCodec[list.size()]);
     }
 }

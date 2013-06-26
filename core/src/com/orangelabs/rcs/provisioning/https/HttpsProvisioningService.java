@@ -350,7 +350,18 @@ public class HttpsProvisioningService extends Service {
                     if (logger.isActivated()) {
                         logger.debug("Can't parse provisioning document");
                     }
-                    retry();
+                    if (first){
+                    	if (logger.isActivated()){
+                    		logger.debug("As this is first launch and we do not have a valid configuration yet, retry later");
+                    	}
+                    	retry();
+                    }else{
+                    	if (logger.isActivated()){
+                    		logger.debug("This is not first launch, use old configuration to register");
+                    	}
+                        // Start the RCS service
+                    	LauncherUtils.launchRcsCoreService(getApplicationContext());
+                    }
                 }
             } else if (result.code == 503) {
                 // Retry after
@@ -360,7 +371,6 @@ public class HttpsProvisioningService extends Service {
 
                 // Start retry alarm
                 if (result.retryAfter > 0) {
-                	retryCount = 0;
                     startRetryAlarm(result.retryAfter * 1000);
                 }
 
@@ -489,6 +499,7 @@ public class HttpsProvisioningService extends Service {
 	    	TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
             // Build provisioning address if empty in settings 
             String requestUri = RcsSettings.getInstance().getProvisioningAddress();
+            String oldRequestUri = "";
             if (requestUri.length() == 0) {
     	    	String ope = tm.getSimOperator();
                 // Cancel operation if no valid SIM operator
@@ -500,6 +511,7 @@ public class HttpsProvisioningService extends Service {
                 }
                 String mnc = ope.substring(3);
                 String mcc = ope.substring(0, 3);
+                oldRequestUri = "config." + mcc + mnc + ".rcse";
                 while (mnc.length() < 3) { // Set mnc on 3 digits
                     mnc = "0" + mnc;
                 }
@@ -544,7 +556,17 @@ public class HttpsProvisioningService extends Service {
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 
 			// Execute first HTTP request
-            HttpResponse response = executeRequest("http", requestUri, client, localContext);
+            HttpResponse response = null;
+            try {
+                response = executeRequest("http", requestUri, client, localContext);
+            } catch (UnknownHostException e) {
+                // If the new URI is not reachable, try the old
+                if (logger.isActivated()) {
+                    logger.debug("The server " + requestUri + " can't be reachable, try with the old URI");
+                }
+                requestUri = oldRequestUri;
+                response = executeRequest("http",requestUri, client, localContext);
+            }
             result.code = response.getStatusLine().getStatusCode(); 
 			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
 			if (result.code != 200) {
@@ -556,6 +578,8 @@ public class HttpsProvisioningService extends Service {
 
 			// Format second HTTPS request
 			String args = "?vers=" + RcsSettings.getInstance().getProvisioningVersion()
+                    + "&rcs_version=" + getRcsVersion()
+                    + "&rcs_profile=" + getRcsProfile()
                     + "&client_vendor=" + getClientVendor()
                     + "&client_version=" + getClientVersion()
                     + "&terminal_vendor=" + HttpUtils.encodeURL(getTerminalVendor())
@@ -746,4 +770,22 @@ public class HttpsProvisioningService extends Service {
     private String getUserLanguage() {
         return Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
     }
+    
+	/**
+     * Returns the RCS version
+     * 
+     * @return String(4)
+     */
+	private String getRcsVersion() {
+		return "5.1B";
+	}
+
+	/**
+     * Returns the RCS profile
+     * 
+     * @return String(15)
+     */
+	private String getRcsProfile() {
+		return "joyn_blackbird";
+	}    
 }

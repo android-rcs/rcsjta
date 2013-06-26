@@ -33,11 +33,12 @@ import android.os.Environment;
 import android.text.TextUtils;
 
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * RCS settings
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RcsSettings {
 	/**
@@ -165,30 +166,6 @@ public class RcsSettings {
 			writeParameter(RcsSettingsData.SERVICE_ACTIVATED, Boolean.toString(state));
 		}
     }
-
-	/**
-     * Is RCS service authorized in roaming
-     *
-     * @return Boolean
-     */
-	public boolean isRoamingAuthorized() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.ROAMING_AUTHORIZED));
-		}
-		return result;
-    }
-
-	/**
-     * Set the roaming authorization state
-     *
-     * @param state State
-     */
-	public void setRoamingAuthorizationState(boolean state) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.ROAMING_AUTHORIZED, Boolean.toString(state));
-		}
-	}
 
 	/**
      * Get the ringtone for presence invitation
@@ -405,6 +382,30 @@ public class RcsSettings {
 			writeParameter(RcsSettingsData.CHAT_INVITATION_VIBRATE, Boolean.toString(vibrate));
 		}
 	}
+
+	/**
+	 * Is send displayed notification activated
+	 *
+	 * @return Boolean
+	 */
+    public boolean isImDisplayedNotificationActivated() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CHAT_DISPLAYED_NOTIFICATION));
+        }
+        return result;
+    }
+
+    /**
+     * Set send displayed notification
+     *
+     * @param state
+     */
+    public void setImDisplayedNotificationActivated(boolean state) {
+        if (instance != null) {
+            writeParameter(RcsSettingsData.CHAT_DISPLAYED_NOTIFICATION, Boolean.toString(state));
+        }
+    }
 
     /**
      * Get the pre-defined freetext 1
@@ -870,6 +871,102 @@ public class RcsSettings {
 		}
 	}
 
+	/**
+     * Get file transfer HTTP server address
+     *
+     * @return Address
+     */
+	public String getFtHttpServer() {
+		String result = null;
+		if (instance != null) {
+			result = readParameter(RcsSettingsData.FT_HTTP_SERVER);
+		}
+		return result;
+    }
+
+	/**
+     * Set file transfer HTTP server address
+     *
+     * @param addr Address 
+     */
+	public void setFtHttpServer(String addr) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.FT_HTTP_SERVER, addr);
+		}
+	}
+
+    /**
+     * Get file transfer HTTP server login
+     *
+     * @return String value
+     */
+	public String getFtHttpLogin() {
+		String result = null;
+		if (instance != null) {
+			result = readParameter(RcsSettingsData.FT_HTTP_LOGIN);
+		}
+		return result;
+    }
+
+	/**
+     * Set file transfer HTTP server login
+     *
+     * @param value Value
+     */
+	public void setFtHttpLogin(String value) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.FT_HTTP_LOGIN, value);
+		}
+	}
+
+    /**
+     * Get file transfer HTTP server password
+     *
+     * @return String value
+     */
+	public String getFtHttpPassword() {
+		String result = null;
+		if (instance != null) {
+			result = readParameter(RcsSettingsData.FT_HTTP_PASSWORD);
+		}
+		return result;
+    }
+
+	/**
+     * Set file transfer HTTP server password
+     *
+     * @param value Value
+     */
+	public void setFtHttpPassword(String value) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, value);
+		}
+	}
+
+    /**
+     * Get file transfer protocol
+     *
+     * @return String value
+     */
+    public String getFtProtocol() {
+        String result = null;
+        if (instance != null) {
+            result = readParameter(RcsSettingsData.FT_PROTOCOL);
+        }
+        return result;
+    }
+
+    /**
+     * Set file transfer protocol
+     *
+     * @param value Value
+     */
+    public void setFtProtocol(String value) {
+        if (instance != null) {
+            writeParameter(RcsSettingsData.FT_PROTOCOL, value);
+        }
+    }
+
     /**
      * Get IM conference URI
      *
@@ -1290,6 +1387,22 @@ public class RcsSettings {
 		return result;
 	}
 	
+	/**
+	 * Get max number of entries per contact in the ipcall log
+	 * 
+	 * @return Number
+	 */
+	public int getMaxIPCallLogEntriesPerContact() {
+		int result = 200;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+	
+	
     /**
      * Get polling period used before each IMS service check (e.g. test subscription state for presence service)
      *
@@ -1637,10 +1750,12 @@ public class RcsSettings {
      *
      * @return trace level
      */
-	public String getTraceLevel() {
-		String result = null;
+	public int getTraceLevel() {
+		int result = Logger.ERROR_LEVEL;
 		if (instance != null) {
-			result = readParameter(RcsSettingsData.TRACE_LEVEL);
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.TRACE_LEVEL));
+			} catch(Exception e) {}
 		}
 		return result;
 	}
@@ -1765,7 +1880,9 @@ public class RcsSettings {
 	public boolean isFileTransferHttpSupported() {
 		boolean result = false;
 		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP));
+            if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0) && (getFtHttpPassword().length() > 0)) {
+                result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP));
+            }
 		}
 		return result;
 	}
@@ -1817,7 +1934,9 @@ public class RcsSettings {
 	public boolean isPresenceDiscoverySupported() {
 		boolean result = false;
 		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY));
+            if (getXdmServer().length() > 0) {
+            	result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY));
+            }
 		}
 		return result;
 	}
@@ -1830,7 +1949,9 @@ public class RcsSettings {
 	public boolean isSocialPresenceSupported() {
 		boolean result = false;
 		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE));
+            if (getXdmServer().length() > 0) {
+            	result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE));
+            }
 		}
 		return result;
 	}
@@ -1862,6 +1983,59 @@ public class RcsSettings {
 		return result;
 	}
 	
+    /**
+     * Is file transfer Store & Forward supported
+     *
+     * @return Boolean
+     */
+	public boolean isFileTransferStoreForwardSupported() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF));
+		}
+		return result;
+	}
+
+	 /**
+     * Is IPCall (Audio) supported
+     *
+     * @return Boolean
+     */
+	public boolean isIPVoiceCallSupported() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IP_VOICE_CALL));
+		}
+		return result;
+	}
+	
+	/**
+     * Is IPCall (Video) supported
+     *
+     * @return Boolean
+     */
+	public boolean isIPVideoCallSupported() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL));
+		}
+		return result;
+	}
+	
+	
+    /**
+     * Is group chat Store & Forward supported
+     *
+     * @return Boolean
+     */
+	public boolean isGroupChatStoreForwardSupported() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF));
+		}
+		return result;
+	}
+
 	/**
      * Get supported RCS extensions
      *

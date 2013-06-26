@@ -109,7 +109,7 @@ public class Chat {
     }
 	
     /**
-     * Sends an “is-composing” event. The status is set to true when
+     * Sends an Is-composing event. The status is set to true when
      * typing a message, else it is set to false.
      * 
      * @param status Is-composing status

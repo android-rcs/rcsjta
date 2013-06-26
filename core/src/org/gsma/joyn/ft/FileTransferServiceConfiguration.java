@@ -17,39 +17,117 @@
  ******************************************************************************/
 package org.gsma.joyn.ft;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 
 /**
  * File transfer service configuration
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FileTransferServiceConfiguration {
+public class FileTransferServiceConfiguration implements Parcelable {
 	/**
-	 * Returns the File Size Warning configuration. It returns 0 if this
-	 * value was not set by the autoconfiguration server (no need to warn).
+	 * File transfer size threshold
+	 */
+	private long warnSize;
+		
+	/**
+	 * File transfer size limit
+	 */
+	private long maxSize;
+	
+	/**
+	 * File transfer auto accept mode
+	 */
+	private boolean autoAcceptMode;
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param warnSize File transfer size threshold
+	 * @param maxSize File transfer size limit
+	 * @param autoAcceptMode File transfer auto accept mode
+	 */
+	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode) {
+		this.warnSize = warnSize;
+		this.maxSize = maxSize;
+		this.autoAcceptMode = autoAcceptMode;
+    }	
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param source Parcelable source
+	 */
+	public FileTransferServiceConfiguration(Parcel source) {
+		this.warnSize = source.readLong();
+		this.maxSize = source.readLong();
+		this.autoAcceptMode = source.readInt() != 0;
+    }
+
+	/**
+	 * Describe the kinds of special objects contained in this Parcelable's
+	 * marshalled representation
+	 * 
+	 * @return Integer
+	 */
+	public int describeContents() {
+        return 0;
+    }
+
+	/**
+	 * Write parcelable object
+	 * 
+	 * @param dest The Parcel in which the object should be written
+	 * @param flags Additional flags about how the object should be written
+	 */
+    public void writeToParcel(Parcel dest, int flags) {
+    	dest.writeLong(warnSize);
+    	dest.writeLong(maxSize);
+    	dest.writeInt(autoAcceptMode ? 1 : 0);    	
+    }
+
+    /**
+     * Parcelable creator
+     */
+    public static final Parcelable.Creator<FileTransferServiceConfiguration> CREATOR
+            = new Parcelable.Creator<FileTransferServiceConfiguration>() {
+        public FileTransferServiceConfiguration createFromParcel(Parcel source) {
+            return new FileTransferServiceConfiguration(source);
+        }
+
+        public FileTransferServiceConfiguration[] newArray(int size) {
+            return new FileTransferServiceConfiguration[size];
+        }
+    };	
+	
+	/**
+	 * Returns the file transfer size threshold when the user should be warned about
+	 * the potential charges associated to the transfer of a large file. It returns
+	 * 0 if there no need to warn.
 	 * 
 	 * @return Size in kilobytes 
 	 */
 	public long getWarnSize() {
-		return 2048; // TODO RcsSettings.getInstance().getWarningMaxFileTransferSize();
+		return warnSize;
 	}
 			
 	/**
-	 * Returns the Max File Size configuration. It returns 0 if this
-	 * value was not set by the autoconfiguration server.
+	 * Returns the file transfer size limit. It returns 0 if there is no limitation.
 	 * 
 	 * @return Size in kilobytes
 	 */
 	public long getMaxSize() {
-		return 4096; // TODO RcsSettings.getInstance().getMaxFileTransferSize();
+		return maxSize;
 	}
 	
 	/**
-	 * Returns the Auto Accept Mode configuration.
+	 * Is file transfer invitation automatically accepted 
 	 * 
-	 * @return Returns true is auto accept mode else returns false
+	 * @return Returns true if automatically accepted else returns false
 	 */
-	public boolean getAutoAcceptMode() {
-		return false; // TODO RcsSettings.getInstance().isFileTransferAutoAccepted();
+	public boolean isAutoAcceptMode() {
+		return autoAcceptMode;
 	}
 }

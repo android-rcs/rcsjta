@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.ChatServiceConfiguration;
 import org.gsma.joyn.chat.GroupChatIntent;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IChatListener;
@@ -22,12 +23,11 @@ import android.os.RemoteCallbackList;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -104,13 +104,28 @@ public class ChatServiceImpl extends IChatService.Stub {
     	Intent intent = new Intent(ChatIntent.ACTION_NEW_INVITATION);
     	intent.putExtra(ChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(ChatIntent.EXTRA_CHAT_ID, session.getContributionID()); // TODO: which id ?
+    	intent.putExtra(ChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
     	InstantMessage msg = session.getFirstMessage();
     	ChatMessage msgApi = new ChatMessage(msg.getMessageId(),
     			msg.getRemote(), msg.getTextMessage(), msg.getServerDate(),
     			msg.isImdnDisplayedRequested());
     	intent.putExtra(ChatIntent.EXTRA_FIRST_MESSAGE, msgApi);
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+    	
+    	// Notify chat invitation listeners
+    	synchronized(lock) {
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onNewSingleChat(sessionApi.getChatId(), msgApi);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();
+	    }    	    	
     }
     
 	/**
@@ -167,7 +182,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
     public void receiveGroupChatInvitation(GroupChatSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive chat invitation from " + session.getRemoteContact());
+			logger.info("Receive group chat invitation from " + session.getRemoteContact());
 		}
 
 		// Extract number from contact 
@@ -184,9 +199,24 @@ public class ChatServiceImpl extends IChatService.Stub {
     	Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
     	intent.putExtra(GroupChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(GroupChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, session.getContributionID()); // TODO: which id ?
-    	intent.putExtra(GroupChatIntent.EXTRA_SUBJECT, session.getSubject());
+    	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
+    	intent.putExtra(GroupChatIntent.EXTRA_SUBJECT, sessionApi.getSubject());
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+    	
+    	// Notify chat invitation listeners
+    	synchronized(lock) {
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onNewGroupChat(sessionApi.getChatId());
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();
+	    }    	
     }
 
 	/**
@@ -237,7 +267,27 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChatSessions.remove(sessionId);
 	}
 
-	/**
+    /**
+     * Returns the configuration of the chat service
+     * 
+     * @return Configuration
+     */
+    public ChatServiceConfiguration getConfiguration() {
+    	return new ChatServiceConfiguration(
+    			RcsSettings.getInstance().isStoreForwardWarningActivated(),
+    			RcsSettings.getInstance().getChatIdleDuration(),
+    			RcsSettings.getInstance().getIsComposingTimeout(),
+    			RcsSettings.getInstance().getMaxChatParticipants(),
+    			RcsSettings.getInstance().getMaxChatMessageLength(),
+    			RcsSettings.getInstance().getMaxGroupChatMessageLength(),
+    			RcsSettings.getInstance().getMaxChatSessions(),
+    			RcsSettings.getInstance().isSmsFallbackServiceActivated(),
+    			RcsSettings.getInstance().isChatAutoAccepted(),
+    			RcsSettings.getInstance().isGroupChatAutoAccepted(),
+    			RcsSettings.getInstance().isImReportsActivated());
+	}    
+    
+    /**
      * Creates a single chat with a given contact and returns a Chat instance.
      * The parameter contact supports the following formats: MSISDN in national
      * or international format, SIP address, SIP-URI or Tel-URI.
@@ -252,9 +302,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Initiate a 1-1 chat session with " + contact);
 		}
-
-    	// Check permission
-		ServerApiUtils.testPermission();
 
 		// Test IMS connection
 		ServerApiUtils.testIms();
@@ -292,9 +339,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.info("Initiate an ad-hoc group chat session");
 		}
 		
-    	// Check permission
-		ServerApiUtils.testPermission();
-
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
@@ -302,11 +346,17 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Initiate the session
 			ChatSession session = Core.getInstance().getImService().initiateAdhocGroupChatSession(contacts, subject);
 
+			// Add session in the list
+			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
+			sessionApi.addEventListener(listener);
+
+			// Start the session
+			session.startSession();
+			
 			// Update rich messaging history
 			RichMessaging.getInstance().addOutgoingChatSession(session);
 			
 			// Add session in the list
-			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
@@ -328,9 +378,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Rejoin group chat session related to the conversation " + chatId);
 		}
-		
-    	// Check permission
-		ServerApiUtils.testPermission();
 
 		// Test IMS connection
 		ServerApiUtils.testIms();
@@ -362,9 +409,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Restart group chat session related to the conversation " + chatId);
 		}
-		
-    	// Check permission
-		ServerApiUtils.testPermission();
 
 		// Test IMS connection
 		ServerApiUtils.testIms();
@@ -426,9 +470,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.info("Get chat sessions");
 		}
 
-		// Check permission
-		ServerApiUtils.testPermission();
-
 		// Test core availability
 		ServerApiUtils.testCore();
 		
@@ -459,9 +500,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.info("Get chat session " + chatId);
 		}
 
-		// Check permission
-		ServerApiUtils.testPermission();
-
 		// Test core availability
 		ServerApiUtils.testCore();
 
@@ -479,9 +517,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get group chat sessions");
 		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
 
 		// Test core availability
 		ServerApiUtils.testCore();
@@ -512,9 +547,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get group chat session " + chatId);
 		}
-
-		// Check permission
-		ServerApiUtils.testPermission();
 
 		// Test core availability
 		ServerApiUtils.testCore();

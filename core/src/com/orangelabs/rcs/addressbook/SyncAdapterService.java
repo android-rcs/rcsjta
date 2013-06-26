@@ -32,8 +32,8 @@ import android.os.IBinder;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.service.api.ServerApiException;
+import com.orangelabs.rcs.service.api.ServerApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

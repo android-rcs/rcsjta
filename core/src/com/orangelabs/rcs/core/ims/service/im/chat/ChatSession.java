@@ -49,9 +49,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingManage
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;

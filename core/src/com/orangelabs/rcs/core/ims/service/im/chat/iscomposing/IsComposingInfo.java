@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.iscomposing;
 
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.utils.DateUtils;
 
 

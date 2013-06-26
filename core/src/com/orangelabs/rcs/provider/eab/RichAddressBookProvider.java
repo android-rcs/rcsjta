@@ -34,7 +34,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

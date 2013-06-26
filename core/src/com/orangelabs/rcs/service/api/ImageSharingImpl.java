@@ -12,8 +12,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSessionListener;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.provider.sharing.RichCallData;
-import com.orangelabs.rcs.service.api.client.SessionState;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -69,7 +68,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 	
 	/**

@@ -23,8 +23,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import org.gsma.joyn.ft.IFileTransfer;
 import org.gsma.joyn.ft.FileTransferIntent;
+import org.gsma.joyn.ft.FileTransferServiceConfiguration;
+import org.gsma.joyn.ft.IFileTransfer;
 import org.gsma.joyn.ft.IFileTransferListener;
 import org.gsma.joyn.ft.IFileTransferService;
 import org.gsma.joyn.ft.INewFileTransferListener;
@@ -42,8 +43,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -168,6 +168,18 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	        listeners.finishBroadcast();
 	    }
     }
+    
+    /**
+     * Returns the configuration of the file transfer service
+     * 
+     * @return Configuration
+     */
+    public FileTransferServiceConfiguration getConfiguration() {
+    	return new FileTransferServiceConfiguration(
+    			RcsSettings.getInstance().getWarningMaxFileTransferSize(),
+    			RcsSettings.getInstance().getMaxFileTransferSize(),
+    			RcsSettings.getInstance().isFileTransferAutoAccepted());
+	}    
     
     /**
      * Transfers a file to a contact. The parameter file contains the complete filename

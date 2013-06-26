@@ -13,11 +13,12 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -74,7 +75,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	 * @throws JoynServiceException
      */
     public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     }
     
     /**
@@ -165,7 +166,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-	/**
+    /**
 	 * Session is started
 	 */
     public void handleSessionStarted() {
@@ -305,7 +306,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onComposingEvent(contact, status);
+	            	listeners.getBroadcastItem(i).onComposingEvent(status);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);

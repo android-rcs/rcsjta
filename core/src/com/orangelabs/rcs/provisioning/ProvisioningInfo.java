@@ -20,7 +20,7 @@ package com.orangelabs.rcs.provisioning;
 /**
  * Provisioning info
  *  
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ProvisioningInfo {
 	/**
@@ -63,7 +63,7 @@ public class ProvisioningInfo {
     }
 
     /**
-     * Set valaidity
+     * Set validity
      *
      * @param validity
      */

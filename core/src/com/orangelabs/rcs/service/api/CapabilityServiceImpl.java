@@ -32,8 +32,6 @@ import android.os.RemoteCallbackList;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

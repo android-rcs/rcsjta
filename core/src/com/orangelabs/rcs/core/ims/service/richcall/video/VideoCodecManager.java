@@ -20,11 +20,11 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
+import org.gsma.joyn.vsh.VideoCodec;
+
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.orangelabs.rcs.service.api.client.media.MediaCodec;
-import com.orangelabs.rcs.service.api.client.media.video.VideoCodec;
 
 /**
  * Video codec management
@@ -40,26 +40,26 @@ public class VideoCodecManager {
      * @param proposedCodecs List of proposed video codecs
      * @return Selected codec or null if no codec supported
      */
-    public static VideoCodec negociateVideoCodec(MediaCodec[] supportedCodecs, Vector<VideoCodec> proposedCodecs) {
+    public static VideoCodec negociateVideoCodec(VideoCodec[] supportedCodecs, Vector<VideoCodec> proposedCodecs) {
         VideoCodec selectedCodec = null;
         int pref = -1;
         for (int i = 0; i < proposedCodecs.size(); i++) {
             VideoCodec proposedCodec = proposedCodecs.get(i);
             for (int j = 0; j < supportedCodecs.length; j++) {
-                VideoCodec videoCodec = new VideoCodec(supportedCodecs[j]);
+                VideoCodec videoCodec = supportedCodecs[j];
                 int videoCodecPref = supportedCodecs.length - 1 - j;
-                // Compare Codec
-                if (proposedCodec.compare(videoCodec)) {
+                // Compare codecs
+                if (compareCodec(proposedCodec, videoCodec)) {
                     if (videoCodecPref > pref) {
                         pref = videoCodecPref;
-                        selectedCodec = new VideoCodec(proposedCodec.getCodecName(),
+                        selectedCodec = new VideoCodec(proposedCodec.getEncoding(),
                                 (proposedCodec.getPayload() == 0) ? videoCodec.getPayload() : proposedCodec.getPayload(),
                                 (proposedCodec.getClockRate() == 0) ? videoCodec.getClockRate() : proposedCodec.getClockRate(),
-                                (proposedCodec.getCodecParams().length() == 0) ? videoCodec.getCodecParams() : proposedCodec.getCodecParams(),
-                                (proposedCodec.getFramerate() == 0) ? videoCodec.getFramerate() : proposedCodec.getFramerate(),
-                                (proposedCodec.getBitrate() == 0) ? videoCodec.getBitrate() : proposedCodec.getBitrate(),
-                                (proposedCodec.getWidth() == 0) ? videoCodec.getWidth() : proposedCodec.getWidth(),
-                                (proposedCodec.getHeight() == 0) ? videoCodec.getHeight() : proposedCodec.getHeight());
+                                (proposedCodec.getFrameRate() == 0) ? videoCodec.getFrameRate() : proposedCodec.getFrameRate(),
+                                (proposedCodec.getBitRate() == 0) ? videoCodec.getBitRate() : proposedCodec.getBitRate(),
+                                (proposedCodec.getVideoWidth() == 0) ? videoCodec.getVideoWidth() : proposedCodec.getVideoWidth(),
+                                (proposedCodec.getVideoHeight() == 0) ? videoCodec.getVideoHeight() : proposedCodec.getVideoHeight(),
+                                (proposedCodec.getParameters().length() == 0) ? videoCodec.getParameters() : proposedCodec.getParameters());
                     }
                 }
             }
@@ -68,6 +68,30 @@ public class VideoCodecManager {
     }
 
     
+    /**
+     * Compare codec encodings and resolutions
+     *
+     * @param codec1 Codec to compare
+     * @param codec2 Codec to compare
+     * @return True if codecs are equals
+     */
+    public static boolean compareCodec(VideoCodec codec1, VideoCodec codec2) {
+        boolean ret = false;
+        if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding()) 
+                && (codec1.getVideoWidth() == codec2.getVideoWidth() || codec1.getVideoWidth() == 0 || codec2.getVideoWidth() == 0)
+                && (codec1.getVideoHeight() == codec2.getVideoHeight() || codec1.getVideoHeight() == 0 || codec2.getVideoHeight() == 0)) {
+            if (codec1.getParameters().equalsIgnoreCase(H264Config.CODEC_NAME)) {
+                if (H264Config.getCodecProfileLevelId(codec1.getParameters()).compareToIgnoreCase(H264Config.getCodecProfileLevelId(codec2.getParameters())) == 0) {
+                    ret =  true;
+                }
+            } else {
+                if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding())) {
+                    ret = true;
+                }
+            }
+        }
+        return ret;
+    }    
 
     /**
      * Create a video codec from its SDP description
@@ -143,8 +167,9 @@ public class VideoCodecManager {
 	        // Create a video codec
 	        VideoCodec videoCodec = new VideoCodec(codecName,
 	        		Integer.parseInt(media.payload), clockRate,
-	        		codecParameters, frameRate, 0,
-	                videoWidth, videoHeight);
+	        		frameRate, 0,
+	                videoWidth, videoHeight,
+	                codecParameters);
 
             return videoCodec;
     	} catch(NullPointerException e) {

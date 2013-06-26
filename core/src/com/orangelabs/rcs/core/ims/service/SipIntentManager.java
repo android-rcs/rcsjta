@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service;
 
 import java.util.List;
 
-import javax2.sip.message.Request;
+import org.gsma.joyn.session.MultimediaSessionIntent;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,7 +28,6 @@ import android.content.pm.ResolveInfo;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.service.api.client.sip.SipApiIntents;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -80,7 +79,7 @@ public class SipIntentManager {
 	 */
 	public static Intent generateSipIntent(SipRequest request, String featureTag) {
 		String mime = formatIntentMimeType(featureTag);
-		String action = formatIntentAction(request.getMethod());
+		String action = MultimediaSessionIntent.ACTION_NEW_INVITATION;
 		Intent intent = new Intent(action);
 		intent.addCategory(Intent.CATEGORY_DEFAULT);
 		intent.setType(mime.toLowerCase());
@@ -98,22 +97,6 @@ public class SipIntentManager {
 		List<ResolveInfo> list = packageManager.queryBroadcastReceivers(intent,
 				PackageManager.MATCH_DEFAULT_ONLY);
 		return (list.size() > 0);
-	}
-	
-	/**
-	 * Format intent action
-	 * 
-	 * @param request Request method name
-	 * @return Intent action
-	 */
-	public static String formatIntentAction(String request) { 
-		String action;
-		if (request.equals(Request.MESSAGE)) {
-			action = SipApiIntents.INSTANT_MESSAGE;
-		} else {
-			action = SipApiIntents.SESSION_INVITATION;
-		}
-		return action;
 	}
 	
 	/**

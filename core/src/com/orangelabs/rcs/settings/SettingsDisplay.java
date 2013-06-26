@@ -39,7 +39,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.orangelabs.rcs.R;
-import com.orangelabs.rcs.core.ims.network.ImsConnectionManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.LauncherUtils;
 import com.orangelabs.rcs.service.api.client.ClientApiUtils;
@@ -53,18 +52,12 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class SettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
     // Dialog IDs
     private final static int SERVICE_DEACTIVATION_CONFIRMATION_DIALOG = 1;
-    private final static int ROAMING_DEACTIVATION_CONFIRMATION_DIALOG = 2;
     
     /**
      * Service flag
      */
     private CheckBoxPreference rcsCheckbox;
     
-    /**
-     * Roaming flag
-     */
-    private CheckBoxPreference roamingCheckbox;
-
     /**
      * Battery level
      */
@@ -140,8 +133,6 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
         // Set default value
     	rcsCheckbox = (CheckBoxPreference)getPreferenceScreen().findPreference("rcs_activation");
 		rcsCheckbox.setChecked(RcsSettings.getInstance().isServiceActivated());
-		roamingCheckbox = (CheckBoxPreference)getPreferenceScreen().findPreference("rcs_roaming");
-		roamingCheckbox.setChecked(RcsSettings.getInstance().isRoamingAuthorized());
 		
 		// Update dynamic menu
     	if (RcsSettings.getInstance().isSocialPresenceSupported()) {
@@ -268,41 +259,6 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
 				}
         	}
         	return true;
-        } else
-        if (preference == roamingCheckbox) {
-			if (roamingCheckbox.isChecked()) {
-				// Authorize roaming
-        		if (logger.isActivated()) {
-        			logger.debug("Authorize roaming");
-        		}
-				RcsSettings.getInstance().setRoamingAuthorizationState(true);
-				
-				if (rcsCheckbox.isChecked() && !ClientApiUtils.isServiceStarted(getApplicationContext())) {
-					// Start the service 
-	        		if (logger.isActivated()) {
-	        			logger.debug("Start the service");
-	        		}
-	        		startRcsService();
-				} else {
-					// Service already started, force a connection retry 
-	        		if (logger.isActivated()) {
-	        			logger.debug("Retry connection");
-	        		}
-					sendBroadcast(new Intent(ImsConnectionManager.ROAMING_OPTION_INTENT));
-				}
-			} else {
-                // Unauthorize roaming. If the service is started and we are in
-                // roaming, ask a confirmation.
-                if (ClientApiUtils.isServiceStarted(getApplicationContext()) && isMobileRoaming()) {
-                    showDialog(ROAMING_DEACTIVATION_CONFIRMATION_DIALOG);
-                } else {
-                    if (logger.isActivated()) {
-                        logger.debug("Unauthorize roaming");
-                    }
-                    RcsSettings.getInstance().setRoamingAuthorizationState(false);
-                }
-			}
-        	return true;
         } else {
         	return super.onPreferenceTreeClick(preferenceScreen, preference);
     	}
@@ -338,34 +294,6 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
 						    }
 						})
                         .setCancelable(true)
-                        .create();
-                
-            case ROAMING_DEACTIVATION_CONFIRMATION_DIALOG:
-                return new AlertDialog.Builder(this)
-                		.setIcon(android.R.drawable.ic_dialog_info)
-                		.setTitle(R.string.rcs_settings_label_confirm)
-                        .setMessage(R.string.rcs_settings_label_rcs_service_roaming_shutdown)
-                        .setNegativeButton(R.string.rcs_settings_label_cancel, new DialogInterface.OnClickListener() {
-						    public void onClick(DialogInterface dialog, int button) {
-						    	roamingCheckbox.setChecked(!roamingCheckbox.isChecked());
-						    }
-					    })
-                        .setCancelable(true)
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-							public void onCancel(DialogInterface dialog) {
-								roamingCheckbox.setChecked(!roamingCheckbox.isChecked());
-							}
-						})
-                        .setPositiveButton(R.string.rcs_settings_label_ok, new DialogInterface.OnClickListener() {
-						    public void onClick(DialogInterface dialog, int button) {
-						    	// Stop running service
-				        		if (logger.isActivated()) {
-				        			logger.debug("Stop the service in roaming");
-				        		}
-								stopRcsService();
-								RcsSettings.getInstance().setRoamingAuthorizationState(false);
-						    }
-						})                        
                         .create();
         }
         return super.onCreateDialog(id);

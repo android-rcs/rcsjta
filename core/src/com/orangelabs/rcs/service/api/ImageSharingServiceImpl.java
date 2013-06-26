@@ -10,6 +10,7 @@ import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.IImageSharingService;
 import org.gsma.joyn.ish.INewImageSharingListener;
 import org.gsma.joyn.ish.ImageSharingIntent;
+import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
 
 import android.content.Intent;
 import android.os.IBinder;
@@ -22,10 +23,9 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
 import com.orangelabs.rcs.provider.sharing.RichCallData;
-import com.orangelabs.rcs.service.api.server.ServerApiException;
-import com.orangelabs.rcs.service.api.server.ServerApiUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -145,6 +145,17 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	    }
     }
 
+    /**
+     * Returns the configuration of image sharing service
+     * 
+     * @return Configuration
+     */
+    public ImageSharingServiceConfiguration getConfiguration() {
+    	return new ImageSharingServiceConfiguration(
+    			0, // RcsSettings.getInstance().getWarningMaxImageSharingSize(),
+    			RcsSettings.getInstance().getMaxImageSharingSize());
+	}    
+    
     /**
      * Shares an image with a contact. The parameter file contains the complete filename
      * including the path of the image to be shared. An exception if thrown if there is

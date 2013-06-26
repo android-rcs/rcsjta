@@ -19,8 +19,8 @@
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
 
 /**
  * Geoloc sharing transfer session listener

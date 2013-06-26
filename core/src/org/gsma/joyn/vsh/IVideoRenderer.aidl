@@ -1,6 +1,7 @@
 package org.gsma.joyn.vsh;
 
 import org.gsma.joyn.vsh.VideoCodec;
+import org.gsma.joyn.vsh.IVideoRendererListener;
 
 /**
  * Video renderer interface
@@ -17,4 +18,8 @@ interface IVideoRenderer {
 	int getLocalRtpPort();
 
 	VideoCodec[] getSupportedCodecs();
+	
+	void addEventListener(in IVideoRendererListener listener);
+
+	void removeEventListener(in IVideoRendererListener listener);
 }

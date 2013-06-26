@@ -3,12 +3,15 @@ package org.gsma.joyn.ish;
 import org.gsma.joyn.ish.IImageSharing;
 import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.INewImageSharingListener;
+import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
 
 /**
  * Image sharing service API
  */
 interface IImageSharingService {
-	List<IBinder> getImageSharings();
+    ImageSharingServiceConfiguration getConfiguration();
+    
+    List<IBinder> getImageSharings();
 	
 	IImageSharing getImageSharing(in String sharingId);
 

@@ -60,18 +60,7 @@ public class LauncherUtils {
 
         // Set the logger properties
 		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
-		String traceLevel = RcsSettings.getInstance().getTraceLevel();
-		if (traceLevel.equalsIgnoreCase("DEBUG")) {
-    		Logger.traceLevel = Logger.DEBUG_LEVEL;    			
-		} else if (traceLevel.equalsIgnoreCase("INFO")) {
-    		Logger.traceLevel = Logger.INFO_LEVEL;
-		} else if (traceLevel.equalsIgnoreCase("WARN")) {
-    		Logger.traceLevel = Logger.WARN_LEVEL;
-		} else if (traceLevel.equalsIgnoreCase("ERROR")) {
-    		Logger.traceLevel = Logger.ERROR_LEVEL;
-		} else if (traceLevel.equalsIgnoreCase("FATAL")) {
-    		Logger.traceLevel = Logger.FATAL_LEVEL;
-		}    		
+		Logger.traceLevel = RcsSettings.getInstance().getTraceLevel();
 
 		if (logger.isActivated()) {
             logger.debug("Launch RCS service");

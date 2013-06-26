@@ -26,15 +26,12 @@ import android.content.Intent;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
-import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
-import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -276,39 +273,5 @@ public class SipService extends ImsService {
         	}
         }
         return result;
-	}
-
-    /**
-     * Receive an instant message
-     * 
-     * @param intent Resolved intent
-     * @param message Instant message request
-     */
-	public void receiveInstantMessage(Intent intent, SipRequest message) {
-		// Send a 200 OK response
-		try {
-			if (logger.isActivated()) {
-				logger.info("Send 200 OK");
-			}
-	        SipResponse response = SipMessageFactory.createResponse(message,
-	        		IdGenerator.getIdentifier(), 200);
-			getImsModule().getSipManager().sendSipResponse(response);
-		} catch(Exception e) {
-	       	if (logger.isActivated()) {
-	    		logger.error("Can't send 200 OK response", e);
-	    	}
-	       	return;
-		}
-
-		// Update intent
-		String contact = SipUtils.getAssertedIdentity(message);
-		String number = PhoneUtils.extractNumberFromUri(contact);
-		intent.putExtra("contact", number);
-		intent.putExtra("contactDisplayname", SipUtils.getDisplayNameFromUri(message.getFrom()));
-		intent.putExtra("content", message.getContent());
-		intent.putExtra("contentType", message.getContentType());
-		
-		// Notify listener
-		getImsModule().getCore().getListener().handleSipInstantMessageReceived(intent);
 	}
 }

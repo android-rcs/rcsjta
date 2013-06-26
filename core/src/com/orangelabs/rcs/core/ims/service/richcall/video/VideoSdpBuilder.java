@@ -20,10 +20,10 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
+import org.gsma.joyn.vsh.VideoCodec;
+
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.orangelabs.rcs.service.api.client.media.MediaCodec;
-import com.orangelabs.rcs.service.api.client.media.video.VideoCodec;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -57,13 +57,13 @@ public class VideoSdpBuilder {
      * @param localRtpPort Local RTP port
      * @return The SDP for all the codecs
      */
-    public static String buildSdpWithoutOrientation(MediaCodec[] supportedCodecs, int localRtpPort) {
+    public static String buildSdpWithoutOrientation(VideoCodec[] supportedCodecs, int localRtpPort) {
         StringBuilder result = new StringBuilder();
 
         // Create video codec list
         Vector<VideoCodec> codecs = new Vector<VideoCodec>();
         for (int i = 0; i < supportedCodecs.length; i++) {
-            codecs.add(new VideoCodec(supportedCodecs[i]));
+            codecs.add(supportedCodecs[i]);
         }
 
         result.append("m=video " + localRtpPort + " RTP/AVP");
@@ -72,32 +72,17 @@ public class VideoSdpBuilder {
         }
         result.append(SipUtils.CRLF);
         for (VideoCodec codec : codecs) {
-            result.append("a=rtpmap:" + codec.getPayload() + " " + codec.getCodecName() + "/" + codec.getClockRate() + SipUtils.CRLF);
-            if (codec.getWidth() != 0 && codec.getHeight() != 0) {
-                result.append("a=framesize:" + codec.getPayload() + " " + codec.getWidth() + "-" + codec.getHeight() + SipUtils.CRLF);
+            result.append("a=rtpmap:" + codec.getPayload() + " " + codec.getEncoding() + "/" + codec.getClockRate() + SipUtils.CRLF);
+            if (codec.getVideoWidth() != 0 && codec.getVideoHeight() != 0) {
+                result.append("a=framesize:" + codec.getPayload() + " " + codec.getVideoWidth() + "-" + codec.getVideoHeight() + SipUtils.CRLF);
             }
-            if (codec.getFramerate() != 0) {
-                result.append("a=framerate:" + codec.getPayload() + " " + codec.getFramerate() + SipUtils.CRLF);
+            if (codec.getFrameRate() != 0) {
+                result.append("a=framerate:" + codec.getPayload() + " " + codec.getFrameRate() + SipUtils.CRLF);
             }
-            result.append("a=fmtp:" + codec.getPayload() + " " + codec.getCodecParams() + SipUtils.CRLF);
+            result.append("a=fmtp:" + codec.getPayload() + " " + codec.getParameters() + SipUtils.CRLF);
         }
 
         return result.toString();
-    }
-
-    /**
-     * Creates the SIP INVITE {@link MediaCodec} SDP with the orientation
-     * extension, ordered by the preferred codec
-     * 
-     * @param supportedCodecs Codecs to create SDP
-     * @param localRtpPort Local RTP port
-     * @return The SDP for all the codecs
-     */
-    public static String buildSdpWithOrientationExtension(MediaCodec[] supportedCodecs, int localRtpPort) {
-        StringBuilder sdp = new StringBuilder(buildSdpWithoutOrientation(supportedCodecs, localRtpPort))
-                .append("a=").append(ATTRIBUTE_EXTENSION).append(':').append(DEFAULT_EXTENSION_ID)
-                .append(" urn:gsma:video-orientation").append(SipUtils.CRLF);
-        return sdp.toString();
     }
 
     /**
@@ -107,48 +92,30 @@ public class VideoSdpBuilder {
      * @param localRtpPort Local RTP port
      * @return SDP
      */
-    private static String buildSdpWithoutOrientation(MediaCodec codec, int localRtpPort) {
+    private static String buildSdpWithoutOrientation(VideoCodec codec, int localRtpPort) {
         if (codec == null) {
             logger.info("Invalid codec");
             return "";
         }
 
-        VideoCodec videoCodec = new VideoCodec(codec);
         StringBuilder sdp = new StringBuilder()
                 .append("m=video ").append(localRtpPort).append(" RTP/AVP ")
-                .append(videoCodec.getPayload()).append(SipUtils.CRLF)
-                .append("a=rtpmap:").append(videoCodec.getPayload()).append(" ")
-                .append(videoCodec.getCodecName()).append("/")
-                .append(videoCodec.getClockRate()).append(SipUtils.CRLF);
-        if (videoCodec.getWidth() != 0 && videoCodec.getHeight() != 0) {
-            sdp.append("a=framesize:").append(videoCodec.getPayload()).append(" ")
-                    .append(videoCodec.getWidth()).append("-").append(videoCodec.getHeight())
+                .append(codec.getPayload()).append(SipUtils.CRLF)
+                .append("a=rtpmap:").append(codec.getPayload()).append(" ")
+                .append(codec.getEncoding()).append("/")
+                .append(codec.getClockRate()).append(SipUtils.CRLF);
+        if (codec.getVideoWidth() != 0 && codec.getVideoHeight() != 0) {
+            sdp.append("a=framesize:").append(codec.getPayload()).append(" ")
+                    .append(codec.getVideoWidth()).append("-").append(codec.getVideoHeight())
                     .append(SipUtils.CRLF);
         }
-        if (videoCodec.getFramerate() != 0) {
-            sdp.append("a=framerate:").append(videoCodec.getFramerate()).append(SipUtils.CRLF);
+        if (codec.getFrameRate() != 0) {
+            sdp.append("a=framerate:").append(codec.getFrameRate()).append(SipUtils.CRLF);
         }
-        sdp.append("a=fmtp:").append(videoCodec.getPayload()).append(" ")
-                .append(videoCodec.getCodecParams()).append(SipUtils.CRLF);
+        sdp.append("a=fmtp:").append(codec.getPayload()).append(" ")
+                .append(codec.getParameters()).append(SipUtils.CRLF);
         return sdp.toString();
     }
-
-    /**
-     * Create the SDP part with orientation extension for a given codec
-     *
-     * @param codec
-     * @param localRtpPort
-     * @param extensionId
-     * @return
-     */
-    private static String buildSdpWithOrientationExtension(MediaCodec codec, int localRtpPort,
-            int extensionId) {
-        StringBuilder sdp = new StringBuilder(buildSdpWithoutOrientation(codec, localRtpPort))
-                .append("a=").append(ATTRIBUTE_EXTENSION).append(':').append(extensionId)
-                .append(" urn:gsma:video-orientation").append(SipUtils.CRLF);
-        return sdp.toString();
-    }
-
 
     /**
      * Builds the {@link MediaCodec} SDP for a SIP INVITE response. If the SIP
@@ -160,16 +127,7 @@ public class VideoSdpBuilder {
      * @param videoMedia Invite video media
      * @return Response SDP
      */
-    public static String buildResponseSdp(MediaCodec codec, int localRtpPort,
-            MediaDescription inviteVideoMedia) {
-        if (inviteVideoMedia != null) {
-            SdpOrientationExtension extension = SdpOrientationExtension.create(inviteVideoMedia);
-            if (extension != null) {
-                return buildSdpWithOrientationExtension(codec, localRtpPort,
-                        extension.getExtensionId());
-            }
-        }
-
+    public static String buildResponseSdp(VideoCodec codec, int localRtpPort, MediaDescription inviteVideoMedia) {
         return buildSdpWithoutOrientation(codec, localRtpPort);
     }
 }

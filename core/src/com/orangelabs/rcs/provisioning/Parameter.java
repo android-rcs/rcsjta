@@ -20,7 +20,7 @@ package com.orangelabs.rcs.provisioning;
 /**
  * Provisioning parameter
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class Parameter {
 	/**

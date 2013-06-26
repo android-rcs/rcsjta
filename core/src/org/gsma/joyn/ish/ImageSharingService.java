@@ -47,11 +47,6 @@ public class ImageSharingService extends JoynService {
 	 */
 	private IImageSharingService api = null;
 	
-	/**
-	 * Image sharing service configuration
-	 */
-	private static ImageSharingServiceConfiguration config = new ImageSharingServiceConfiguration(); 
-	
     /**
      * Constructor
      * 
@@ -112,10 +107,19 @@ public class ImageSharingService extends JoynService {
      * Returns the configuration of image sharing service
      * 
      * @return Configuration
+     * @throws JoynServiceException
      */
-    public static ImageSharingServiceConfiguration getConfiguration() {
-    	return config;
-    }
+    public ImageSharingServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 
     /**
      * Shares an image with a contact. The parameter file contains the complete filename

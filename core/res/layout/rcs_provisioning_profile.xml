@@ -1,0 +1,340 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+	<TableLayout android:layout_width="fill_parent"
+	  android:layout_height="wrap_content"
+	  android:layout_margin="5dip"
+	  android:stretchColumns="0,1">
+	    <TableRow android:layout_width="fill_parent"
+	      android:layout_height="wrap_content">
+		<Button android:text="@string/label_save"
+		 android:layout_width="fill_parent"
+		 android:layout_height="wrap_content"
+		 android:id="@+id/save_btn"/>    
+		<Button android:text="@string/label_generate_profile"
+		 android:layout_width="fill_parent"
+		 android:layout_height="wrap_content"
+		 android:id="@+id/gen_btn"/>    
+	    </TableRow>
+	</TableLayout> 	    
+	
+	<ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<LinearLayout
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent">
+
+       	<TextView android:text="IMS authentication procedure for Mobile access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<Spinner android:id="@+id/ImsAuhtenticationProcedureForMobile"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+		android:drawSelectorOnTop="true"/>
+
+       	<TextView android:text="IMS authentication procedure for Wi-Fi access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<Spinner android:id="@+id/ImsAuhtenticationProcedureForWifi"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+		android:drawSelectorOnTop="true"/>
+
+		<TextView android:text="IMS username:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsUsername"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="IMS display name:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsDisplayName"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="IMS home domain:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsHomeDomain"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="IMS private URI for HTTP Digest:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsPrivateId"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="IMS password for HTTP Digest:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsPassword"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="IMS realm for HTTP Digest:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsRealm"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="P-CSCF address for Mobile access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsOutboundProxyAddrForMobile"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="P-CSCF port for Mobile access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsOutboundProxyPortForMobile"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+
+	 	<TextView android:text="P-CSCF address for Wi-Fi access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsOutboundProxyAddrForWifi"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+	 	<TextView android:text="P-CSCF port for Wi-Fi access:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImsOutboundProxyPortForWifi"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+
+	 	<TextView android:text="XDM server address:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/XdmServerAddr"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="XDM server login:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/XdmServerLogin"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="XDM server password:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/XdmServerPassword"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+		<TextView android:text="FT HTTP server address:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/FtHttpServerAddr"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="FT HTTP server login:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/FtHttpServerLogin"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="FT HTTP server password:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/FtHttpServerPassword"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+		
+       	<TextView android:text="IM conference URI:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/ImConferenceUri"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="End user confirmation URI:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/EndUserConfReqUri"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="100" android:lines="1"/>
+
+       	<TextView android:text="APN:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/RcsApn"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:lines="1"/>
+
+       	<TextView android:text="Country code:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/CountryCode"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="4"
+	 	android:lines="1"/>
+
+       	<TextView android:text="Country area code:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/CountryAreaCode"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="4"
+	 	android:lines="1"/>
+
+	 	<TextView android:text="Capabilities:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+
+		<CheckBox android:id="@+id/image_sharing"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+		android:text="Image sharing" />
+
+        <CheckBox android:id="@+id/video_sharing"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="Video sharing" />
+
+        <CheckBox android:id="@+id/file_transfer"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="File transfer" />
+
+        <CheckBox android:id="@+id/im"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="IM session" />
+        
+        <CheckBox android:id="@+id/cs_video"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="CS video" />
+
+        <CheckBox android:id="@+id/presence_discovery"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="Presence discovery" />
+
+		<CheckBox android:id="@+id/social_presence"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:textStyle="bold"
+		android:enabled="true"
+        android:text="Social presence" />
+	</LinearLayout>
+	</ScrollView>
+	
+</LinearLayout>
+    

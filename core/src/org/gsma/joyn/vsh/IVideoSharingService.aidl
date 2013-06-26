@@ -4,11 +4,14 @@ import org.gsma.joyn.vsh.IVideoSharing;
 import org.gsma.joyn.vsh.IVideoSharingListener;
 import org.gsma.joyn.vsh.INewVideoSharingListener;
 import org.gsma.joyn.vsh.IVideoPlayer;
+import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
 
 /**
  * Video sharing service API
  */
 interface IVideoSharingService {
+	VideoSharingServiceConfiguration getConfiguration();
+
 	List<IBinder> getVideoSharings();
 	
 	IVideoSharing getVideoSharing(in String sharingId);

@@ -349,20 +349,11 @@ public class ImsServiceDispatcher extends Thread {
 	    		// Terms & conditions service
 	    		imsModule.getTermsConditionsService().receiveMessage(request);
 	    	} else {
-	    		Intent intent = intentMgr.isSipRequestResolved(request); 
-	    		if (intent != null) {
-	    			// Generic SIP instant message
-		    		if (logger.isActivated()) {
-		    			logger.debug("Generic instant message");
-		    		}
-	    			imsModule.getSipService().receiveInstantMessage(intent, request);
-		    	} else {
-					// Unknown service: reject the message with a 606 Not Acceptable
-					if (logger.isActivated()) {
-						logger.debug("Unknown IMS service: automatically reject");
-					}
-					sendFinalResponse(request, 606);
-		    	}
+				// Unknown service: reject the message with a 606 Not Acceptable
+				if (logger.isActivated()) {
+					logger.debug("Unknown IMS service: automatically reject");
+				}
+				sendFinalResponse(request, 606);
 	    	}
 		} else
 	    if (request.getMethod().equals(Request.NOTIFY)) {

@@ -18,6 +18,8 @@
 package org.gsma.joyn.chat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.gsma.joyn.JoynContactFormatException;
@@ -48,11 +50,6 @@ public class ChatService extends JoynService {
 	 * API
 	 */
 	private IChatService api = null;
-
-	/**
-	 * Chat service configuration
-	 */
-	private static ChatServiceConfiguration config = new ChatServiceConfiguration(); 
 
 	/**
      * Constructor
@@ -114,10 +111,19 @@ public class ChatService extends JoynService {
      * Returns the configuration of the chat service
      * 
      * @return Configuration
+     * @throws JoynServiceException
      */
-    public static ChatServiceConfiguration getConfiguration() {
-    	return config;
-    }
+    public ChatServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}    
     
     /**
      * Creates a single chat with a given contact and returns a Chat instance.
@@ -268,6 +274,7 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Set<Chat> getChats() throws JoynServiceException {
+    	// TODO
     	return null;
     }
     
@@ -279,6 +286,7 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Chat getChat(String chatId) throws JoynServiceException {
+    	// TODO
     	return null;
     }
     
@@ -290,6 +298,7 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Chat getChatFor(Intent intent) throws JoynServiceException {
+    	// TODO
     	return null;
     }
     
@@ -300,7 +309,21 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Set<GroupChat> getGroupChats() throws JoynServiceException {
-    	return null;
+		if (api != null) {
+			try {
+	    		Set<GroupChat> result = new HashSet<GroupChat>();
+				List<IBinder> chatList = api.getGroupChats();
+				for (IBinder binder : chatList) {
+					GroupChat chat = new GroupChat(IGroupChat.Stub.asInterface(binder));
+					result.add(chat);
+				}
+				return result;
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
     
     /**
@@ -311,7 +334,15 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public GroupChat getGroupChat(String chatId) throws JoynServiceException {
-    	return null;
+		if (api != null) {
+			try {
+				return new GroupChat(api.getGroupChat(chatId));
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
     
     /**
@@ -322,6 +353,19 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public GroupChat getGroupChatFor(Intent intent) throws JoynServiceException {
-    	return null;
+		if (api != null) {
+			try {
+				String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
+				if (chatId != null) {
+					return getGroupChat(chatId);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
 }

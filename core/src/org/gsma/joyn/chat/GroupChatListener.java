@@ -74,7 +74,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	public abstract void onReportMessageFailed(String msgId);
 	
 	/**
-	 * Callback called when a is-composing event has been received. If the
+	 * Callback called when an Is-composing event has been received. If the
 	 * remote is typing a message the status is set to true, else it is false.
 	 * 
 	 * @param contact Contact

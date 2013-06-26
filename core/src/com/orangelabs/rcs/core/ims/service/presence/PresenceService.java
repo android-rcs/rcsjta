@@ -18,10 +18,13 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
+import java.util.List;
+
 import com.orangelabs.rcs.addressbook.AddressBookEventListener;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.presence.xdm.HttpResponse;
@@ -31,18 +34,11 @@ import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.eab.ContactsManagerException;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.StartService;
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.client.presence.FavoriteLink;
-import com.orangelabs.rcs.service.api.client.presence.Geoloc;
-import com.orangelabs.rcs.service.api.client.presence.PhotoIcon;
-import com.orangelabs.rcs.service.api.client.presence.PresenceInfo;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import java.util.List;
 
 /**
  * Presence service

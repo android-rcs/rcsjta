@@ -61,13 +61,13 @@ import android.provider.ContactsContract.StatusUpdates;
 
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
+import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
+import com.orangelabs.rcs.core.ims.service.presence.FavoriteLink;
+import com.orangelabs.rcs.core.ims.service.presence.Geoloc;
+import com.orangelabs.rcs.core.ims.service.presence.PhotoIcon;
+import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.service.api.client.contacts.ContactInfo;
-import com.orangelabs.rcs.service.api.client.presence.FavoriteLink;
-import com.orangelabs.rcs.service.api.client.presence.Geoloc;
-import com.orangelabs.rcs.service.api.client.presence.PhotoIcon;
-import com.orangelabs.rcs.service.api.client.presence.PresenceInfo;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 

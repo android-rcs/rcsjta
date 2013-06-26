@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView android:text="@string/label_edit_msisdn"
+    	android:padding="5dip"
+    	android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    	android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+    <EditText
+        android:id="@+id/msisdn"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+    	android:padding="5dip"
+    	android:scrollbars="vertical"
+    	android:fadingEdge="vertical"
+    	android:gravity="top"
+	    android:lines="1"
+	    android:phoneNumber="true"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView android:text="@string/label_select_ims"
+    	android:padding="5dip"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+ 	<Spinner android:id="@+id/ims"
+    	android:padding="5dip"
+		android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="true"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</LinearLayout>

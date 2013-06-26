@@ -20,6 +20,10 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
+import org.gsma.joyn.vsh.IVideoPlayerListener;
+import org.gsma.joyn.vsh.IVideoPlayer;
+import org.gsma.joyn.vsh.VideoCodec;
+
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -31,8 +35,6 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
-import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.media.video.VideoCodec;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -54,7 +56,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * @param content Content to be shared
      * @param contact Remote contact
      */
-    public OriginatingVideoStreamingSession(ImsService parent, IMediaPlayer player,
+    public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
             MmContent content, String contact) {
         super(parent, content, contact);
 
@@ -75,7 +77,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             }
 
             // Check player 
-            if ((getMediaPlayer() == null) || (getMediaPlayer().getMediaCodec() == null)) {
+            if (getMediaPlayer() == null) {
                 handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE,
                         "Video codec not selected"));
                 return;
@@ -84,7 +86,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            String videoSdp = VideoSdpBuilder.buildSdpWithOrientationExtension(getMediaPlayer().getSupportedMediaCodecs(), getMediaPlayer().getLocalRtpPort());
+            String videoSdp = VideoSdpBuilder.buildSdpWithoutOrientation(getMediaPlayer().getSupportedCodecs(), getMediaPlayer().getLocalRtpPort());
 	    	String sdp =
             	"v=0" + SipUtils.CRLF +
             	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
@@ -141,7 +143,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 
         // Codec negotiation
         VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-                getMediaPlayer().getSupportedMediaCodecs(), proposedCodecs);
+                getMediaPlayer().getSupportedCodecs(), proposedCodecs);
         if (selectedVideoCodec == null) {
             if (logger.isActivated()) {
                 logger.debug("Proposed codecs are not supported");
@@ -154,22 +156,20 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
             return;
         }
-        getContent().setEncoding("video/" + selectedVideoCodec.getCodecName());
-
-        // Set the selected media codec
-        getMediaPlayer().setMediaCodec(selectedVideoCodec.getMediaCodec());
+        getContent().setEncoding("video/" + selectedVideoCodec.getEncoding());
 
         // Set the OrientationHeaderID
-        SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
+        /*SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
         if (extensionHeader != null) {
             getMediaPlayer().setOrientationHeaderId(extensionHeader.getExtensionId());
-        }
+        }*/
+        // TODO
 
         // Set media player event listener
-        getMediaPlayer().addListener(new MediaPlayerEventListener(this));
+        getMediaPlayer().addEventListener(new MyPlayerEventListener(this));
 
         // Open the media player
-        getMediaPlayer().open(remoteHost, remotePort);
+        getMediaPlayer().open(selectedVideoCodec, remoteHost, remotePort);
     }
 
     /**
@@ -199,4 +199,89 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             }
         }
     }
+    
+    /**
+     * My player event listener
+     */
+    private class MyPlayerEventListener extends IVideoPlayerListener.Stub {
+        /**
+         * Streaming session
+         */
+        private VideoStreamingSession session;
+
+        /**
+         * Constructor
+         *
+         * @param session Streaming session
+         */
+        public MyPlayerEventListener(VideoStreamingSession session) {
+            this.session = session;
+        }
+
+    	/**
+    	 * Callback called when the player is opened
+    	 */
+    	public void onPlayerOpened() {
+            if (logger.isActivated()) {
+                logger.debug("Media player is opened");
+            }
+    	}
+
+    	/**
+    	 * Callback called when the player is started
+    	 */
+    	public void onPlayerStarted() {
+            if (logger.isActivated()) {
+                logger.debug("Media player is started");
+            }
+    	}
+
+    	/**
+    	 * Callback called when the player is stopped
+    	 */
+    	public void onPlayerStopped() {
+            if (logger.isActivated()) {
+                logger.debug("Media player is stopped");
+            }
+    	}
+
+    	/**
+    	 * Callback called when the player is closed
+    	 */
+    	public void onPlayerClosed() {
+            if (logger.isActivated()) {
+                logger.debug("Media player is closed");
+            }
+    	}
+
+    	/**
+    	 * Callback called when the player has failed
+    	 * 
+    	 * @param error Error
+    	 */
+    	public void onPlayerError(int error) {
+            if (logger.isActivated()) {
+                logger.error("Media player has failed: " + error);
+            }
+
+            // Close the media session
+            closeMediaSession();
+
+            // Terminate session
+            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+
+            // Remove the current session
+            getImsService().removeSession(session);
+
+            // Notify listeners
+            if (!isInterrupted()) {
+                for(int i=0; i < getListeners().size(); i++) {
+                    ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
+                }
+            }
+
+            // Request capabilities to the remote
+            getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+    	}
+    }        
 }

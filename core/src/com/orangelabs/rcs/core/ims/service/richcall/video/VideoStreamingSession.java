@@ -18,19 +18,18 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import org.gsma.joyn.vsh.IVideoPlayer;
+import org.gsma.joyn.vsh.IVideoRenderer;
+
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
-import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
-import com.orangelabs.rcs.service.api.client.media.IMediaEventListener;
-import com.orangelabs.rcs.service.api.client.media.IMediaPlayer;
-import com.orangelabs.rcs.service.api.client.media.IMediaRenderer;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -42,12 +41,12 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
     /**
 	 * Media renderer
 	 */
-	private IMediaRenderer renderer = null;
+	private IVideoRenderer renderer = null;
 
     /**
      * Media renderer
      */
-    private IMediaPlayer player = null;
+    private IVideoPlayer player = null;
 
     /**
      * The logger
@@ -70,7 +69,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @return Renderer
 	 */
-	public IMediaRenderer getMediaRenderer() {
+	public IVideoRenderer getMediaRenderer() {
 		return renderer;
 	}
 	
@@ -79,7 +78,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @param renderer Renderer
 	 */
-	public void setMediaRenderer(IMediaRenderer renderer) {
+	public void setMediaRenderer(IVideoRenderer renderer) {
 		this.renderer = renderer;
 	}
 
@@ -88,7 +87,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * 
      * @return Player
      */
-    public IMediaPlayer getMediaPlayer() {
+    public IVideoPlayer getMediaPlayer() {
         return player;
     }
 
@@ -97,7 +96,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      *
      * @param IMediaPlayer
      */
-    public void setMediaPlayer(IMediaPlayer player) {
+    public void setMediaPlayer(IVideoPlayer player) {
         this.player = player;
     }
 
@@ -151,110 +150,6 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
                 ((VideoStreamingSessionListener) getListeners().get(i))
                         .handleSharingError(new ContentSharingError(error));
             }
-        }
-    }
-
-    /**
-     * Media player event listener
-     */
-    protected class MediaPlayerEventListener extends IMediaEventListener.Stub {
-        /**
-         * Streaming session
-         */
-        private VideoStreamingSession session;
-
-        /**
-         * Constructor
-         *
-         * @param session Streaming session
-         */
-        public MediaPlayerEventListener(VideoStreamingSession session) {
-            this.session = session;
-        }
-
-        /**
-         * Media player is opened
-         */
-        public void mediaOpened() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is opened");
-            }
-        }
-
-        /**
-         * The size of media has changed
-         *
-         * @param width
-         * @param height
-         */
-        public void mediaResized(int width, int height) {
-            if (logger.isActivated()) {
-                logger.debug("The size of media has changed " + width + "x" + height);
-            }
-            // Notify listeners
-            if (!isInterrupted()) {
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((VideoStreamingSessionListener) getListeners().get(i))
-                            .handleMediaResized(width, height);
-                }
-            }
-        }
-
-        /**
-         * Media player is closed
-         */
-        public void mediaClosed() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is closed");
-            }
-        }
-
-        /**
-         * Media player is started
-         */
-        public void mediaStarted() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is started");
-            }
-        }
-
-        /**
-         * Media player is stopped
-         */
-        public void mediaStopped() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is stopped");
-            }
-        }
-
-        /**
-         * Media player has failed
-         *
-         * @param error Error
-         */
-        public void mediaError(String error) {
-            if (logger.isActivated()) {
-                logger.error("Media renderer has failed: " + error);
-            }
-
-            // Close the media session
-            closeMediaSession();
-
-            // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-
-            // Remove the current session
-            getImsService().removeSession(session);
-
-            // Notify listeners
-            if (!isInterrupted()) {
-                for(int i=0; i < getListeners().size(); i++) {
-                    ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED, error));
-                }
-            }
-
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
         }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * This API exposes all functionality related to transferring files via the File Transfer service.
+ * This API exposes all functionality to transfer files in real time.
  * <p>
  */
 package org.gsma.joyn.ft;

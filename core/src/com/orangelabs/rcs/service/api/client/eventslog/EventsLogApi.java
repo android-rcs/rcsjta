@@ -25,20 +25,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
+import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.provider.eventlogs.EventLogData;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.messaging.RichMessagingData;
 import com.orangelabs.rcs.provider.sharing.RichCall;
-import com.orangelabs.rcs.service.api.client.ClientApi;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocMessage;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 import com.orangelabs.rcs.utils.PhoneUtils;
 
 /**
  * Events log API
  */
-public class EventsLogApi extends ClientApi {
+public class EventsLogApi {
 
 	/**
 	 * Row id in provider
@@ -238,13 +237,18 @@ public class EventsLogApi extends ClientApi {
 	public static final int MODE_SMS = 1;
 	public static final int MODE_NONE = 0;
 
-    /**
+	/**
+	 * Application context
+	 */
+	private Context ctx;
+
+	/**
      * Constructor
      * 
      * @param ctx Application context
      */
     public EventsLogApi(Context ctx) {
-    	super(ctx);
+    	this.ctx = ctx;
 
     	RichCall.createInstance(ctx);
     	RichMessaging.createInstance(ctx);

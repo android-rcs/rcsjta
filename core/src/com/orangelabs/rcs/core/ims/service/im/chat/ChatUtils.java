@@ -46,8 +46,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
-import com.orangelabs.rcs.service.api.client.messaging.GeolocPush;
-import com.orangelabs.rcs.service.api.client.messaging.InstantMessage;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
