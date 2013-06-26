@@ -25,7 +25,7 @@
         <uses-library android:name="com.google.android.maps"/>
         
 		<!-- Main -->
-        <activity android:name=".RcsRI">
+        <activity android:name=".RI">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -34,17 +34,21 @@
 
         <activity android:name=".AboutRI"/>
 
-		<!-- Intents RI -->
+		<!-- Intents API -->
         
-        <activity android:name="com.orangelabs.rcs.ri.IntentsRI"/>
+        <activity android:name=".TestIntentsApi"/>
 
-        <activity android:name=".intents.Clients"/>
+        <activity android:name=".intents.IntentClients"/>
 
-        <activity android:name=".intents.Intents"/>
+        <activity android:name=".intents.IntentApps"/>
         
-        <!-- Capabilities RI -->
+		<!-- Contacts API -->
+        
+        <activity android:name=".TestContactsApi"/>
+        
+        <!-- Capabilities API -->
 
-        <activity android:name=".CapabilitiesRI"/>
+        <activity android:name=".TestCapabilitiesApi"/>
 
         <activity android:name=".capabilities.RequestCapabilities"/>
 
@@ -52,17 +56,25 @@
 
 		<activity android:name=".capabilities.RequestAllCapabilities"/>
 		
+		<activity android:name=".capabilities.ListCapabilities"/>
 
-		<!-- Messaging RI -->
-        <activity android:name=".MessagingRI"/>
+		<!-- Messaging API -->
+        <activity android:name=".TestMessagingApi"/>
 
-        <activity android:icon="@drawable/ri_quick_ft_icon" android:label="@string/label_quick_ft"
-        	 android:name=".messaging.InitiateFileTransfer">
+        <activity android:icon="@drawable/ri_quick_ft_icon"
+            android:label="@string/label_quick_ft"
+        	android:name=".messaging.InitiateFileTransfer">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.file-transfer"/>
             </intent-filter>
+            
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.gsma.joyn.action.INITIATE_FT"/>                
+            </intent-filter>					
 		</activity>
         
 		<receiver android:name=".messaging.FileTransferInvitationReceiver">
@@ -72,9 +84,51 @@
         </receiver>
 
         <activity android:name=".messaging.ReceiveFileTransfer"/>
+
+        <activity android:name=".messaging.ChatList"/>
         
-        <!-- Rich call RI -->
-        <activity android:name=".RichCallRI"/>
+        <activity android:name=".messaging.InitiateSingleChat">
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+			<intent-filter>
+                <action android:name="org.gsma.joyn.action.INITIATE_CHAT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+		</activity>        
+        
+		<receiver android:name=".messaging.SingleChatInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.chat.action.NEW_CHAT"/>
+            </intent-filter>
+        </receiver>
+        
+		<receiver android:name=".messaging.SingleChatReplacedReceiver"/>
+
+        <activity android:name=".messaging.SingleChatView"/>
+				
+        <activity android:name=".messaging.InitiateGroupChat">
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+			<intent-filter>
+                <action android:name="org.gsma.joyn.action.INITIATE_GROUP_CHAT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+		</activity>        
+
+		<receiver android:name=".messaging.GroupChatInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.chat.action.NEW_GROUP_CHAT"/>
+            </intent-filter>
+        </receiver>
+		
+        <activity android:name=".messaging.GroupChatView"/>
+                
+        <!-- Rich call API -->
+        <activity android:name=".TestRichCallApi"/>
 
         <activity android:name=".richcall.InitiateImageSharing"/>
         

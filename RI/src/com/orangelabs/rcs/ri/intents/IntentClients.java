@@ -24,7 +24,7 @@ import com.orangelabs.rcs.ri.R;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class Clients extends ListActivity {
+public class IntentClients extends ListActivity {
 	/**
 	 * List of clients detected
 	 */
@@ -78,7 +78,7 @@ public class Clients extends ListActivity {
 			
 			for(int i=0; i < clients.size(); i++) {
 				if (clients.get(i).activityInfo.packageName.equals(client)) {
-					View v = Clients.this.getListView().getChildAt(i);
+					View v = IntentClients.this.getListView().getChildAt(i);
 					if (status) {
 						v.setBackgroundColor(Color.GREEN);
 					} else {

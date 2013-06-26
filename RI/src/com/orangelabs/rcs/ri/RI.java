@@ -31,11 +31,11 @@ import android.widget.ListView;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * RCS RI application
+ * RI application
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RcsRI extends ListActivity {
+public class RI extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,19 +74,19 @@ public class RcsRI extends ListActivity {
         		break;
         		
         	case 1:
-        		startActivity(new Intent(this, CapabilitiesRI.class));
+        		startActivity(new Intent(this, TestCapabilitiesApi.class));
         		break;
         		
         	case 2:
-        		startActivity(new Intent(this, MessagingRI.class));
+        		startActivity(new Intent(this, TestMessagingApi.class));
         		break;
         		
         	case 3:
-        		startActivity(new Intent(this, RichCallRI.class));
+        		startActivity(new Intent(this, TestRichCallApi.class));
         		break;
         		
         	case 4:
-        		startActivity(new Intent(this, IntentsRI.class));
+        		startActivity(new Intent(this, TestIntentsApi.class));
         		break;
 
         	case 5:

@@ -116,7 +116,7 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_disconnected));
+		Utils.showMessageAndExit(MyCapabilities.this, getString(R.string.label_api_disabled));
     }
     
     /**

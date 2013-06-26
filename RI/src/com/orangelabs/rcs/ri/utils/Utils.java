@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.utils;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Set;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -46,24 +47,29 @@ import com.orangelabs.rcs.ri.R;
  */
 public class Utils {
 	/**
+	 * Notification ID for single chat
+	 */
+	public static int NOTIF_ID_SINGLE_CHAT = 1000; 
+	
+	/**
 	 * Notification ID for chat
 	 */
-	public static int NOTIF_ID_CHAT = 1000; 
-	
+	public static int NOTIF_ID_GROUP_CHAT = 1001; 
+
 	/**
 	 * Notification ID for file transfer
 	 */
-	public static int NOTIF_ID_FT = 1001; 
+	public static int NOTIF_ID_FT = 1002; 
 
 	/**
 	 * Notification ID for image share
 	 */
-	public static int NOTIF_ID_IMAGE_SHARE = 1002; 
+	public static int NOTIF_ID_IMAGE_SHARE = 1003; 
 
 	/**
 	 * Notification ID for video share
 	 */
-	public static int NOTIF_ID_VIDEO_SHARE = 1003; 
+	public static int NOTIF_ID_VIDEO_SHARE = 1004; 
 
 	/**
 	 * Returns the application version from manifest file 
@@ -79,34 +85,6 @@ public class Utils {
 		} catch(NameNotFoundException e) {
 		}
 		return version;
-	}
-	
-	/**
-	 * Compare two phone numbers
-	 * 
-	 * @param number1 Phone number 1
-	 * @param number2 Phone number 2
-	 * @return Boolean
-	 */
-	public static boolean comparePhoneNumbers(String number1, String number2) {
-		// TODO
-		return true;
-	}
-	
-	/**
-	 * Format caller id
-	 * 
-	 * @param intent Intent invitation
-	 * @return Id
-	 */
-	public static String formatCallerId(Intent invitation) {
-		String number = invitation.getStringExtra("contact");
-		String displayName = invitation.getStringExtra("contactDisplayname"); 
-		if ((displayName != null) && (displayName.length() > 0)) { 
-			return displayName + " (" + number + ")";
-		} else {
-			return number;
-		}
 	}
 	
 	/**
@@ -179,8 +157,9 @@ public class Utils {
 		// List of unique number
 		Vector<String> treatedNumbers = new Vector<String>();
 		while (cursor.moveToNext()){
-			// Keep a trace of already treated row. Key is (phone number in international, phone contact id)
+			// Keep a trace of already treated row
 			String phoneNumber = cursor.getString(1);
+
 			// If this number is RCS and not already in the list, take it 
 // TODO			if (rcsContacts.contains(phoneNumber) && !treatedNumbers.contains(phoneNumber)){
 				matrix.addRow(new Object[]{cursor.getLong(0), 
@@ -196,6 +175,50 @@ public class Utils {
 		return new ContactListAdapter(activity, matrix);
 	}
 
+	/**
+	 * Create a multi contacts selector with RCS capable contacts
+	 * 
+	 * @param activity Activity
+	 * @return List adapter
+	 */
+	public static MultiContactListAdapter createMultiContactImCapableListAdapter(Activity activity) {
+	    String[] PROJECTION = new String[] {
+	    		Phone._ID,
+	    		Phone.NUMBER,
+	    		Phone.LABEL,
+	    		Phone.TYPE,
+	    		Phone.CONTACT_ID
+		    };
+
+		MatrixCursor matrix = new MatrixCursor(PROJECTION);
+
+	    // Get the list of RCS contacts 
+	    // List<String> rcsContacts = contactsApi.getRcsContacts();
+	    ContentResolver content = activity.getContentResolver();
+
+	    // Query all phone numbers
+        Cursor cursor = content.query(Phone.CONTENT_URI, PROJECTION, null, null, null);
+
+		// List of unique number
+		Vector<String> treatedNumbers = new Vector<String>();
+		while (cursor.moveToNext()){
+			// Keep a trace of already treated row
+			String phoneNumber = cursor.getString(1);
+			
+			// If this number is RCS and not already in the list, take it 
+// TODO			if (rcsContacts.contains(phoneNumber) && !treatedNumbers.contains(phoneNumber)){
+				matrix.addRow(new Object[]{cursor.getLong(0), 
+						phoneNumber,
+						cursor.getString(2),
+						cursor.getInt(3),
+						cursor.getLong(4)});
+				treatedNumbers.add(phoneNumber);
+//			}
+		}
+		cursor.close();
+		return new MultiContactListAdapter(activity, matrix);
+	}
+	
 	/**
 	 * Display a toast
 	 * 
@@ -303,18 +326,19 @@ public class Utils {
 	 * 
 	 * @param activity Activity
 	 * @param title Title of the dialog
-	 * @param items Items
+	 * @param items List of items
 	 */
-    public static void showList(Activity activity, String title, CharSequence[] items) {
+    public static void showList(Activity activity, String title, Set<String> items) {
         if (activity.isFinishing()) {
         	return;
         }
-
+        
+        CharSequence[] chars = items.toArray(new CharSequence[items.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
     	builder.setTitle(title);
     	builder.setCancelable(false);
     	builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-        builder.setItems(items, null);
+        builder.setItems(chars, null);
         AlertDialog alert = builder.create();
     	alert.show();
     }

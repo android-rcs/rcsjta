@@ -88,7 +88,7 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disconnected));
+		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disabled));
 	}    
 
     /**

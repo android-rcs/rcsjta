@@ -973,8 +973,6 @@ public abstract class AbstractMessageParser {
   /** Represents a link to a Picasa photo or album. */
   public static class Photo extends Token {
     /** Pattern for an album or photo URL. */
-    // TODO (katyarogers) searchbrowse includes search lists and tags,
-    // it follows a different pattern than albums - would be nice to add later
     private static final Pattern URL_PATTERN = Pattern.compile(
         "http://picasaweb.google.com/([^/?#&]+)/+((?!searchbrowse)[^/?#&]+)(?:/|/photo)?(?:\\?[^#]*)?(?:#(.*))?");
 
@@ -1157,8 +1155,6 @@ public abstract class AbstractMessageParser {
 
   /** Represents a smiley that was found in the input. */
   public static class Smiley extends Token {
-    // TODO: Pass the SWF URL down to the client.
-
     public Smiley(String text) {
       super(Type.SMILEY, text);
     }
@@ -1175,7 +1171,6 @@ public abstract class AbstractMessageParser {
   /** Represents an acronym that was found in the input. */
   public static class Acronym extends Token {
     private String value;
-    // TODO: SWF
 
     public Acronym(String text, String value) {
       super(Type.ACRONYM, text);
@@ -1235,7 +1230,7 @@ public abstract class AbstractMessageParser {
       switch (ch) {
         case '*': return "<b>";
         case '_': return "<i>";
-        case '^': return "<b><font color=\"#005FFF\">"; // TODO: all caps
+        case '^': return "<b><font color=\"#005FFF\">";
         case '"': return "<font color=\"#999999\">\u201c";
         default: throw new AssertionError("unknown format '" + ch + "'");
       }
@@ -1245,7 +1240,7 @@ public abstract class AbstractMessageParser {
       switch (ch) {
         case '*': return "</b>";
         case '_': return "</i>";
-        case '^': return "</font></b>"; // TODO: all caps
+        case '^': return "</font></b>";
         case '"': return "\u201d</font>";
         default: throw new AssertionError("unknown format '" + ch + "'");
       }

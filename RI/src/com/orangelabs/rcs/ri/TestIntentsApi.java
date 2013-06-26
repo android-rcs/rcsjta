@@ -8,15 +8,15 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.intents.Clients;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.intents.IntentApps;
+import com.orangelabs.rcs.ri.intents.IntentClients;
 
 /**
- * Intents RI
+ * Intents API
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IntentsRI extends ListActivity {
+public class TestIntentsApi extends ListActivity {
     
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,12 +37,11 @@ public class IntentsRI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	startActivity(new Intent(this, Clients.class));
+            	startActivity(new Intent(this, IntentClients.class));
                 break;
                 
 	        case 1:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, Intents.class));
+	        	startActivity(new Intent(this, IntentApps.class));
                 break;
         }
     }

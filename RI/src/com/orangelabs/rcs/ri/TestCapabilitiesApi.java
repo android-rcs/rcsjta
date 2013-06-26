@@ -26,26 +26,31 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.richcall.InitiateImageSharing;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.capabilities.ListCapabilities;
+import com.orangelabs.rcs.ri.capabilities.MyCapabilities;
+import com.orangelabs.rcs.ri.capabilities.RequestAllCapabilities;
+import com.orangelabs.rcs.ri.capabilities.RequestCapabilities;
 
 /**
- * Rich call RI
- *
+ * Capabilities API
+ * 
  * @author Jean-Marc AUFFRET
  */
-public class RichCallRI extends ListActivity {
+public class TestCapabilitiesApi extends ListActivity {
+    
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_image_sharing),
-    		getString(R.string.menu_initiate_video_sharing)
+    		getString(R.string.menu_my_capabilities),
+    		getString(R.string.menu_capabilities_request),        		
+    		getString(R.string.menu_refresh_capabilities),
+    		getString(R.string.menu_capabilities_log)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -54,13 +59,20 @@ public class RichCallRI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-	        	startActivity(new Intent(this, InitiateImageSharing.class));
+            	startActivity(new Intent(this, MyCapabilities.class));
                 break;
                 
 	        case 1:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO startActivity(new Intent(this, InitiateOutgoingVisioSharing.class));
-                break;            
+            	startActivity(new Intent(this, RequestCapabilities.class));
+                break;
+                
+	        case 2:
+               	startActivity(new Intent(this, RequestAllCapabilities.class));
+                break;
+                
+	        case 3:
+               	startActivity(new Intent(this, ListCapabilities.class));
+                break;
         }
     }
 }

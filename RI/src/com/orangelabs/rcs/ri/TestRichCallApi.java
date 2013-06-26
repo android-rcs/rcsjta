@@ -26,29 +26,28 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.capabilities.MyCapabilities;
-import com.orangelabs.rcs.ri.capabilities.RequestAllCapabilities;
-import com.orangelabs.rcs.ri.capabilities.RequestCapabilities;
+import com.orangelabs.rcs.ri.richcall.InitiateImageSharing;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Capabilities RI
- * 
+ * Rich call API
+ *
  * @author Jean-Marc AUFFRET
  */
-public class CapabilitiesRI extends ListActivity {
-    
+public class TestRichCallApi extends ListActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_my_capabilities),
-    		getString(R.string.menu_capabilities_request),        		
-    		getString(R.string.menu_refresh_capabilities)
+    		getString(R.string.menu_initiate_image_sharing),
+    		getString(R.string.menu_image_sharing_log),
+    		getString(R.string.menu_initiate_video_sharing),
+    		getString(R.string.menu_video_sharing_log)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -57,16 +56,21 @@ public class CapabilitiesRI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	startActivity(new Intent(this, MyCapabilities.class));
+	        	startActivity(new Intent(this, InitiateImageSharing.class));
                 break;
                 
 	        case 1:
-            	startActivity(new Intent(this, RequestCapabilities.class));
+            	Utils.showMessage(this, getString(R.string.label_not_implemented));
+                break;            
+
+	        case 2:
+            	Utils.showMessage(this, getString(R.string.label_not_implemented));
+	        	// TODO startActivity(new Intent(this, InitiateOutgoingVisioSharing.class));
                 break;
                 
-	        case 2:
-               	startActivity(new Intent(this, RequestAllCapabilities.class));
-                break;
+	        case 3:
+            	Utils.showMessage(this, getString(R.string.label_not_implemented));
+                break;            
         }
     }
 }

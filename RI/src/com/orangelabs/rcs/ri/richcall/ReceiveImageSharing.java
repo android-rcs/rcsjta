@@ -132,12 +132,9 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     		try{
     			// Get the image sharing
     			imageSharing = ishApi.getImageSharing(sharingId);
-System.out.println(">>>>>>>>>>>>>>>>>>> " + sharingId);    			
-System.out.println(">>>>>>>>>>>>>>>>>>> " + remoteContact);    			
-System.out.println(">>>>>>>>>>>>>>>>>>> " + imageSharing);    			
     			if (imageSharing == null) {
     				// Session not found or expired
-    				Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_session_has_expired));
+    				Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_session_not_found));
     				return;
     			}
     			imageSharing.addEventListener(ishListener);
@@ -349,6 +346,9 @@ System.out.println(">>>>>>>>>>>>>>>>>>> " + imageSharing);
      * @param intent Intent invitation
      */
 	public static void addImageSharingInvitationNotification(Context context, Intent invitation) {
+    	// Get remote contact
+		String contact = invitation.getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
+
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, ReceiveImageSharing.class);
@@ -361,7 +361,7 @@ System.out.println(">>>>>>>>>>>>>>>>>>> " + imageSharing);
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context,
         		notifTitle,
-        		context.getString(R.string.label_from) + " " + Utils.formatCallerId(invitation),
+        		context.getString(R.string.label_from) + " " + contact,
         		contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;

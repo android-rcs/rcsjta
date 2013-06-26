@@ -33,6 +33,7 @@ import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -142,7 +143,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disconnected));
+		Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
     }    
     
     /**
@@ -173,7 +174,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 			handler.post(new Runnable(){
 				public void run(){
 					// Check if this intent concerns the current selected contact					
-					if (Utils.comparePhoneNumbers(getSelectedContact(), contact)) {
+					if (PhoneNumberUtils.compare(getSelectedContact(), contact)) {
 						// Update UI
 						displayCapabilities(capabilities);
 					}
@@ -181,7 +182,6 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 			});
 	    };    
     }
-    
     
     /**
      * Spinner contact listener
@@ -299,7 +299,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             String result = "";
             Set<String> extensionList = capabilities.getSupportedExtensions();
 	        for(String value : extensionList) {
-            	result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
+	        	if (value.length() > 0) {
+	        		result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
+	        	}
             }
             extensions.setText(result);    		
     	}

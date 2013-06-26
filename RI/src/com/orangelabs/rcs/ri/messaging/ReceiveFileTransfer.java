@@ -186,7 +186,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     		fileTransfer = ftApi.getFileTransfer(transferId);
 			if (fileTransfer == null) {
 				// Session not found or expired
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_session_has_expired));
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_session_not_found));
 				return;
 			}
 			fileTransfer.addEventListener(ftListener);
@@ -205,9 +205,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	TextView sizeTxt = (TextView)findViewById(R.id.image_size);
 	    	sizeTxt.setText(size);
 
-	    	if (FileTransferService.getConfiguration().getAutoAcceptMode()) {
-	    		// Auto accept
-	    	} else {
+	    	if (!ftApi.getConfiguration().isAutoAcceptMode()) {
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_recv_file_transfer);
@@ -401,6 +399,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      * @param invitation Intent invitation
      */
     public static void addFileTransferInvitationNotification(Context context, Intent invitation) {
+    	// Get remote contact
+		String contact = invitation.getStringExtra(FileTransferIntent.EXTRA_CONTACT);
+    	
     	// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, ReceiveFileTransfer.class);
@@ -412,7 +413,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context,
         		context.getString(R.string.title_recv_file_transfer),
-        		context.getString(R.string.label_from) + " " + Utils.formatCallerId(invitation),
+        		context.getString(R.string.label_from) + " " + contact,
         		contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
@@ -433,7 +434,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.cancel(transferId, Utils.NOTIF_ID_FT);
     }
-
+    
     /**
      * Quit the session
      */

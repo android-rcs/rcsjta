@@ -30,8 +30,6 @@ import android.content.Intent;
 public class FileTransferInvitationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		// TODO: auto accept management
-		
 		// Display invitation notification
 		ReceiveFileTransfer.addFileTransferInvitationNotification(context, intent);
     }

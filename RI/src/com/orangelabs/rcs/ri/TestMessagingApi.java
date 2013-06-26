@@ -27,15 +27,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.messaging.InitiateFileTransfer;
+import com.orangelabs.rcs.ri.messaging.InitiateGroupChat;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 
 /**
- * Messaging RI
+ * Messaging API
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MessagingRI extends ListActivity {
+public class TestMessagingApi extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +47,10 @@ public class MessagingRI extends ListActivity {
         // Set items
         String[] items = {
     		getString(R.string.menu_transfer_file),
+    		getString(R.string.menu_file_transfer_log),
     		getString(R.string.menu_one_to_one_chat),
     		getString(R.string.menu_adhoc_group_chat),
-    		getString(R.string.menu_chat_list),
+    		getString(R.string.menu_chat_log),
     		getString(R.string.menu_block_contact),
     		getString(R.string.menu_spambox)
     	};
@@ -64,25 +66,28 @@ public class MessagingRI extends ListActivity {
 	            
 	        case 1:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, InitiateChat.class));
 	            break;
-	            
+
 	        case 2:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, InitiateGroupChat.class));
+            	// TODO startActivity(new Intent(this, InitiateSingleChat.class));
 	            break;
 	            
-	        case 3: 
+	        case 3:
+	        	startActivity(new Intent(this, InitiateGroupChat.class));
+	            break;
+	            
+	        case 4: 
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
             	// TODO startActivity(new Intent(this, ChatList.class));
 	            break;
 	            
-	        case 4:
+	        case 5:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
             	// TODO startActivity(new Intent(this, BlockContact.class));
 	        	break;
 
-	        case 5:
+	        case 6:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
 	        	// TODO startActivity(new Intent(this, SpamBox.class));
 	        	break;

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1"
+    android:paddingTop="10dip">
+    
+	<Button android:text="@string/label_invite"
+	 android:layout_marginLeft="5dip"
+	 android:layout_marginRight="5dip"
+	 android:id="@+id/invite_btn"/>
+
+	<TableRow android:paddingTop="10dip">
+        <TextView android:text="@string/label_subject"
+			android:layout_marginLeft="5dip"
+	       	android:gravity="right"/>
+		<EditText android:id="@+id/subject"
+			android:singleLine="true"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			android:maxLength="50"/>
+	</TableRow>
+
+    <TableRow android:paddingTop="5dip">
+	    <TextView android:text="@string/label_contacts"
+			android:layout_marginLeft="5dip"
+	 		android:gravity="left"/>
+    </TableRow>
+
+    <ListView android:paddingTop="5dip"
+    	android:id="@+id/contacts"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:layout_width="fill_parent"/>
+	
+</TableLayout>

@@ -14,12 +14,11 @@
 <string name="label_file_size">Size: %1$s%2$s</string>
 <string name="label_file_size_unknown">Size: unknown</string>
 <string name="label_command_in_progress">Command in progress...</string>
-<string name="label_session_has_expired">Session has expired (timeout or any other error)</string>
+<string name="label_session_not_found">Session not found</string>
 <string name="label_session_not_yet_started">Session not yet started</string>
 <string name="label_not_implemented">Not yet implemented</string>
 <string name="label_ims_disconnected">Service has been disconnected from the IMS</string>
 <string name="label_api_failed">Call API method has failed</string>
-<string name="label_api_disconnected">joyn service has been stopped</string>
 <string name="label_api_disabled">joyn service is not available</string>
 <string name="label_ok">OK</string>
 <string name="label_cancel">Cancel</string>
@@ -37,17 +36,31 @@
 <string name="label_send">Send</string>
 <string name="label_select">Select</string>
 <string name="label_receive_image">Received image %s</string>
+<string name="label_load_log_failed">Database access has failed</string>
 
 <!-- About menu -->
 <string name="label_about_title">Reference Implementation</string>
 <string name="label_about_release">Release %s</string>
 <string name="label_about_api">API %s</string>
 
+<!-- Contacts API -->
+<string name="menu_list_rcs_contacts">All joyn contacts</string>
+<string name="menu_list_online_rcs_contacts">Online joyn contacts</string>        		
+<string name="menu_list_rcs_contacts_per_service">Contact per joyn service</string>
+
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>
 <string name="menu_clients">Clients</string>
 <string name="menu_apps">Applications</string>
 <string name="label_no_clients">No other client detected on the device</string>
+<string name="label_load_settings">Load settings</string>
+<string name="label_load_chat">Load a chat</string>
+<string name="label_initiate_chat">Start a chat</string>
+<string name="label_load_group_chat">Load a group chat</string>
+<string name="label_initiate_group_chat">Start a group chat</string>
+<string name="label_load_ft">Load a file transfer</string>
+<string name="label_initiate_ft">Start a file transfer</string>
+<string name="label_intent_failed">Intent not found</string>
 
 <!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>
@@ -55,8 +68,7 @@
 <string name="menu_capabilities_request">Request capabilities</string>
 <string name="menu_refresh_capabilities">Refresh all capabilities</string>
 <string name="menu_request_capabilities">Request capabilities</string>
-<string name="menu_block_capabilities">Block/unblock capabilities</string>
-<string name="menu_spambox">Spambox</string>
+<string name="menu_capabilities_log">Capabilities log</string>
 <string name="label_refresh_failed">Could not refresh contacts</string>
 <string name="label_refresh_success">Contacts has been refreshed</string>
 <string name="label_capabilities">Capabilities:</string>
@@ -70,15 +82,21 @@
 <string name="label_capabilities_im">IM session</string>
 <string name="label_capabilities_extensions">Extensions:</string>
 <string name="label_request_in_background">Request has been sent in background for %s</string>
+<string name="label_capabilities_empty">No capabilities</string>
+<string name="label_contact">Contact %s</string>
+<string name="label_extensions">Extensions:\n%s</string>
 
 <!--  Messaging menu -->
 <string name="menu_messaging">Messaging</string>
 <string name="menu_sms_mms">Send SMS/MMS</string>
 <string name="menu_transfer_file">Transfer a file</string>
-<string name="menu_one_to_one_chat">One-to-one chat</string>
-<string name="menu_adhoc_group_chat">Ad-hoc group chat</string>
-<string name="menu_chat_list">Chat history</string>
+<string name="menu_file_transfer_log">File transfer log</string>
+<string name="menu_one_to_one_chat">Chat</string>
+<string name="menu_adhoc_group_chat">Group chat</string>
+<string name="menu_chat_log">Chat log</string>
 <string name="menu_block_contact">Block/unblock contact</string>
+<string name="menu_spambox">Spambox</string>
+<string name="label_invite">Invite</string>
 <string name="label_contact_blocked">%s has been blocked</string>
 <string name="label_contact_unblocked">%s has been unblocked</string>
 <string name="title_recv_file_transfer">New file transfer invitation</string>
@@ -87,6 +105,7 @@
 <string name="label_msg">Message:</string>
 <string name="label_hint_first_message">Enter first message</string>
 <string name="title_chat_view">Chat</string>
+<string name="title_recv_group_chat">New group chat invitation</string>
 <string name="title_chat_view_group">Group chat</string>
 <string name="title_chat_view_oneone">Chat with</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
@@ -115,6 +134,7 @@
 <string name="label_receive_delivery_status_delivered">Message has been delivered</string>
 <string name="label_chat_terminated">Chat session terminated</string>
 <string name="label_chat_terminated_by_remote">Chat session terminated by remote</string>
+<string name="label_chat">Chat</string>
 <string name="label_group_chat">Group chat</string>
 <string name="menu_delete_spam">Delete message</string>
 <string name="menu_unspam">Move to my messages</string>
@@ -130,16 +150,22 @@
 <string name="label_restart_chat_failed">Can\'t restart the conversation (error code %d)</string>
 <string name="label_restart_chat_exception">Can\'t restart the conversation (unexpected exception)</string>
 <string name="label_chat_restart_canceled">Restart chat conversation has been canceled</string>
-<string name="label_restart_chat_terminated_by_remote">Restart session terminated by remote</string>
+<string name="label_restart_chat_terminated">Restart session terminated</string>
 <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
 <string name="label_rejoin_unauthorized">You can\'t rejoin or restart the session because you have left the session voluntary</string>
 <string name="label_me">Me</string>
+<string name="label_chat_empty">No chat</string>
+<string name="label_contact_joined">%s has joined</string>
+<string name="label_contact_left">%s has left</string>
+<string name="label_contact_disconnected">%s is diconnected</string>
 
 <!--  Rich call menu -->
 <string name="menu_richcall">Sharing</string>
 <string name="menu_initiate_image_sharing">Initiate image sharing</string>
 <string name="menu_initiate_video_sharing">Initiate video sharing</string>
 <string name="menu_video_settings">Video settings</string>
+<string name="menu_image_sharing_log">Image sharing log</string>
+<string name="menu_video_sharing_log">Video sharing log</string>
 <string name="label_image_sharing_canceled">Image sharing session has been canceled</string>
 <string name="label_video_sharing_canceled">Video sharing session has been canceled</string>
 <string name="label_progress_status">Status:</string>

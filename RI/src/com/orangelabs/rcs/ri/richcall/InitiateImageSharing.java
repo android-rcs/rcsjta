@@ -172,7 +172,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_disconnected));
+		Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_disabled));
     }    
     
     /**

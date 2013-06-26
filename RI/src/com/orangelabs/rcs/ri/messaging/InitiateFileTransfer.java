@@ -194,7 +194,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_disconnected));
+		Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_disabled));
     }    
     
     /**
@@ -216,7 +216,12 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-        	long warnSize = FileTransferService.getConfiguration().getWarnSize();
+        	long warnSize = 0;
+        	try {
+        		warnSize = ftApi.getConfiguration().getWarnSize();
+        	} catch(Exception e) {
+        	}
+        	
             if ((warnSize > 0) && (filesize >= warnSize)) {
 				// Display a warning message
             	AlertDialog.Builder builder = new AlertDialog.Builder(InitiateFileTransfer.this);

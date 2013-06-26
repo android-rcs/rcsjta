@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * About RI
+ * About the RI
  * 
  * @author Jean-Marc AUFFRET
  */

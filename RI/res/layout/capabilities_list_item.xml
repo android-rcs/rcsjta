@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="0dip"
+    android:paddingRight="12dip">
+    
+    <View android:id="@+id/divider"
+        android:layout_width="1dip"
+        android:layout_height="fill_parent"
+        android:layout_marginRight="11dip" />
+    
+    <TextView android:id="@+id/number"
+		android:paddingTop="5dip"
+        android:text="+33XXXXXXX"
+	    android:textStyle="bold"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"/>
+
+	<CheckBox android:id="@+id/im"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/number"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_im" />
+    
+	<CheckBox android:id="@+id/file_transfer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/im"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_ft" />
+	
+	<CheckBox android:id="@+id/image_sharing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/file_transfer"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_image" />
+	
+	<CheckBox android:id="@+id/video_sharing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/image_sharing"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_video" />
+	
+    <TextView android:id="@+id/extensions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/video_sharing"
+        android:text="Xxxxxxxx"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:paddingBottom="5dip"/>
+</RelativeLayout>
