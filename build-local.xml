@@ -20,7 +20,7 @@
 
     <!-- Generate RCS API DOCS -->
 
-    <target name="docs" description="GSMA RCS Terminal API Documentation">
+    <target name="docs" description="Generate RCS API javadoc">
     <echo>Generate Javadoc</echo>
     <javadoc doctitle="GSMA RCS Terminal API"
         verbose="on"
@@ -31,6 +31,13 @@
         sourcepath="${src.path}"
         packagenames="org.gsma.joyn.*">
     </javadoc>
+
+
+    <!-- Generate RCS API SDK -->
+
+    <target name="sdk" description="Generate RCS API SDK">
+    <echo>Generate SDK</echo>
+
 
   </target>
 
