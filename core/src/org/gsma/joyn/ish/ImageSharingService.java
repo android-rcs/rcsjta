@@ -78,7 +78,7 @@ public class ImageSharingService extends JoynService {
     /**
      * Returns true if connected to the service, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public boolean isServiceConnected() {
     	return (api != null);

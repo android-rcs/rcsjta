@@ -17,6 +17,8 @@ interface IVideoSharing {
 	String getVideoFormat();
 	
 	int getState();
+
+	int getDirection();
 	
 	void acceptInvitation(IVideoRenderer renderer);
 

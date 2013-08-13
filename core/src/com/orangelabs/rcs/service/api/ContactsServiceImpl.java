@@ -67,17 +67,21 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get joyn contacts");
 		}
+		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
 
 		// Read capabilities in the local database
 		List<String> contacts = ContactsManager.getInstance().getRcsContacts();
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>(contacts.size());
 		for(int i =0; i < contacts.size(); i++) {
 			String contact = contacts.get(i);
 			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
 			Capabilities capaApi = null;
 			if (capabilities != null) {
-	    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
+	    		Set<String> exts = new HashSet<String>();
+	    		List<String> listExts = capabilities.getSupportedExtensions();
+	    		for(int j=0; j < listExts.size(); j++) {
+	    			exts.add(listExts.get(j));
+	    		}
 				capaApi = new Capabilities(
 	    				capabilities.isImageSharingSupported(),
 	    				capabilities.isVideoSharingSupported(),
@@ -102,10 +106,10 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get registered joyn contacts");
 		}
+		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
 
 		// Read capabilities in the local database
 		List<String> contacts = ContactsManager.getInstance().getRcsContacts();
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>(contacts.size());
 		for(int i =0; i < contacts.size(); i++) {
 			String contact = contacts.get(i);
 			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
@@ -121,7 +125,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		    				capabilities.isFileTransferSupported(),
 		    				exts); 
 				}
-				result.add(new JoynContact(contact, true, capaApi));
+				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+				result.add(new JoynContact(contact, registered, capaApi));
 			}
 		}
 		
@@ -131,32 +136,37 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     /**
      * Returns the list of contacts supporting a given extension (i.e. feature tag)
      * 
+     * @param tag Supported extension tag
      * @return List of contacts
      * @throws ServerApiException
      */
     public List<JoynContact> getJoynContactsSupporting(String tag) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get registered joyn contacts");
+			logger.info("Get joyn contacts supporting " + tag);
 		}
+		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
 
 		// Read capabilities in the local database
 		List<String> contacts = ContactsManager.getInstance().getRcsContacts();
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>(contacts.size());
 		for(int i =0; i < contacts.size(); i++) {
 			String contact = contacts.get(i);
 			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
 			Capabilities capaApi = null;
 			if (capabilities != null) {
-				if (capabilities.getSupportedExtensions().contains(tag)) {
-		    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
-					capaApi = new Capabilities(
-		    				capabilities.isImageSharingSupported(),
-		    				capabilities.isVideoSharingSupported(),
-		    				capabilities.isImSessionSupported(),
-		    				capabilities.isFileTransferSupported(),
-		    				exts); 
-					result.add(new JoynContact(contact, true, capaApi));
+				ArrayList<String> exts = capabilities.getSupportedExtensions();
+				for (int j=0; j < exts.size(); j++) {
+					String ext = exts.get(j);
+					if (tag.contains(ext)) { // TODO: extract the right side of the tag and use an equals 
+						capaApi = new Capabilities(
+			    				capabilities.isImageSharingSupported(),
+			    				capabilities.isVideoSharingSupported(),
+			    				capabilities.isImSessionSupported(),
+			    				capabilities.isFileTransferSupported(),
+			    				new HashSet<String>(capabilities.getSupportedExtensions())); 
+						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+						result.add(new JoynContact(contact, registered, capaApi));
+					}
 				}
 			}
 		}

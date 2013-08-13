@@ -28,12 +28,18 @@ public class ChatLog {
     /**
      * Content provider URI for chat conversations
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider/chat");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/chat");
 
     /**
      * Chat
      */
     public static class Chat {
+        /**
+         * The name of the column containing the unique ID for a row.
+         * <P>Type: primary key</P>
+         */
+        public static final String ID = "_id";
+
         /**
          * The name of the column containing the unique ID of the chat.
          * <P>Type: TEXT</P>
@@ -118,11 +124,6 @@ public class ChatLog {
 	         * Chat invitation is pending
 	         */
 	        public static final int PENDING = 5;
-
-	        /**
-	         * Chat invitation has been declined by the remote
-	         */
-	        public static final int DECLINED = 6;
         }        
     }
 
@@ -130,6 +131,12 @@ public class ChatLog {
      * Chat message
      */
     public static class Message {
+        /**
+         * The name of the column containing the unique ID for a row.
+         * <P>Type: primary key</P>
+         */
+        public static final String ID = "_id";
+
         /**
          * The name of the column containing the message ID.
          * <P>Type: TEXT</P>
@@ -298,34 +305,44 @@ public class ChatLog {
 		        public static final int INVITED = 0;
 		        
 		        /**
+		         * Invitation is pending
+		         */
+		        public static final int PENDING = 1;
+
+		        /**
 		         * Invitation accepted by a participant
 		         */
-		        public static final int ACCEPTED = 1;
+		        public static final int ACCEPTED = 2;
 	        
 		        /**
 		         * Invitation declined by a participant
 		         */
-		        public static final int DECLINED = 2;
+		        public static final int DECLINED = 3;
 	        
 		        /**
 		         * Invitation of a participant has failed
 		         */
-		        public static final int FAILED = 3;
+		        public static final int FAILED = 4;
 	        
 		        /**
 		         * Participant has joined the group chat
 		         */
-		        public static final int JOINED = 4;
+		        public static final int JOINED = 5;
 	        
 		        /**
 		         * Participant has left the group chat (i.e. departed)
 		         */
-		        public static final int GONE = 4;
+		        public static final int GONE = 6;
 
 		        /**
 		         * Participant has been disconnected from the group chat (i.e. booted)
 		         */
-		        public static final int DISCONNECT = 5;
+		        public static final int DISCONNECT = 7;
+		        
+		        /**
+		         * Participant is busy
+		         */
+		        public static final int BUSY = 8;
             }
         }
     }

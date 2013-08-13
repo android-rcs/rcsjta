@@ -59,6 +59,15 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		session.addListener(this);
 	}
 	
+	/**
+	 * Get session ID
+	 * 
+	 * @return Session ID
+	 */
+	public String getSessionID() {
+		return session.getSessionID();
+	}
+	
     /**
      * Returns the chat ID
      * 

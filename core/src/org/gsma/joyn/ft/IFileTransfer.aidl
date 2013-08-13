@@ -19,6 +19,8 @@ interface IFileTransfer {
 
 	int getState();
 	
+	int getDirection();
+		
 	void acceptInvitation();
 
 	void rejectInvitation();

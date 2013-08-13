@@ -41,7 +41,7 @@ import android.view.MenuItem;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.LauncherUtils;
-import com.orangelabs.rcs.service.api.client.ClientApiUtils;
+import com.orangelabs.rcs.service.ServiceUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -254,7 +254,7 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
 	        	startRcsService();
         	} else {
         		// Activate service. If service is running, ask a confirmation 
-        		if (ClientApiUtils.isServiceStarted(getApplicationContext())) {
+        		if (ServiceUtils.isServiceStarted(getApplicationContext())) {
         			showDialog(SERVICE_DEACTIVATION_CONFIRMATION_DIALOG);
 				}
         	}

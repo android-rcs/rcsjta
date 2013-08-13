@@ -14,7 +14,7 @@ interface IChatService {
     ChatServiceConfiguration getConfiguration();
     
     IChat initiateSingleChat(in String contact, in String firstMessage, in IChatListener listener);
-    
+
     IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
     
     IGroupChat rejoinGroupChat(in String chatId);

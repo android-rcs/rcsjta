@@ -61,7 +61,7 @@ public class VideoSharingService extends JoynService {
     /**
      * Returns true if connected to the service, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public boolean isServiceConnected() {
     	return (api != null);
@@ -121,7 +121,7 @@ public class VideoSharingService extends JoynService {
     public VideoSharing shareVideo(String contact, VideoPlayer player, VideoSharingListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.shareVideo(contact, player.playerInf, listener);
+				IVideoSharing sharingIntf = api.shareVideo(contact, player, listener);
 				return new VideoSharing(sharingIntf);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());

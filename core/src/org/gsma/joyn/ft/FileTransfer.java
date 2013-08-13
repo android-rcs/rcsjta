@@ -53,6 +53,21 @@ public class FileTransfer {
     }
     
     /**
+     * Direction of the transfer
+     */
+    public static class Direction {
+        /**
+         * Incoming transfer
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing transfer
+         */
+        public static final int OUTGOING = 1;
+    }     
+    
+    /**
      * File transfer error
      */
     public static class Error {
@@ -62,12 +77,12 @@ public class FileTransfer {
     	public final static int TRANSFER_FAILED = 0;
     	
     	/**
-    	 * Transfer has been declined by remote
+    	 * Transfer invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Initiation has been cancelled
+    	 * Transfer has been cancelled
     	 */
     	public final static int TRANSFER_CANCELLED = 2;
     	
@@ -189,6 +204,21 @@ public class FileTransfer {
 		}
 	}		
 		
+	/**
+	 * Returns the direction of the transfer (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see FileTransfer.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return transferInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
 	/**
 	 * Accepts file transfer invitation
 	 * 

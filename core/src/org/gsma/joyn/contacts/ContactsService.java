@@ -19,6 +19,7 @@
 package org.gsma.joyn.contacts;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.gsma.joyn.JoynService;
@@ -79,7 +80,7 @@ public class ContactsService extends JoynService {
     /**
      * Returns true if connected to the service, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public boolean isServiceConnected() {
     	return (api != null);
@@ -114,7 +115,11 @@ public class ContactsService extends JoynService {
 		if (api != null) {
 			try {
 	    		Set<JoynContact> result = new HashSet<JoynContact>();
-	    		result.addAll(api.getJoynContacts());
+	    		List<JoynContact> contacts = api.getJoynContacts();
+	    		for(int i=0; i < contacts.size(); i++) {
+	    			JoynContact contact = contacts.get(i);
+	    			result.add(contact);
+	    		}
 				return result;
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
@@ -147,6 +152,7 @@ public class ContactsService extends JoynService {
     /**
      * Returns the list of contacts supporting a given extension (i.e. feature tag)
      * 
+     * @param tag Supported extension tag
      * @return List of contacts
      * @throws JoynServiceException
      */

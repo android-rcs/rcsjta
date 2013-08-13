@@ -1602,11 +1602,11 @@ public final class ContactsManager {
 	 * <li>well formatted (not digits only or '+')
 	 * <li>minimum length
 	 * 
-	 * @param phoneNumber
-	 * @return true if it is a RCS valid number
+	 * @param number Phone number
+	 * @return Returns true if it is a RCS valid number
 	 */
-    public boolean isRcsValidNumber(String phoneNumber){
-        return android.telephony.PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber) && (phoneNumber.length()>3);
+    public boolean isRcsValidNumber(String number){
+        return android.telephony.PhoneNumberUtils.isGlobalPhoneNumber(number) && (number.length()>3);
     }
 	
 	/**

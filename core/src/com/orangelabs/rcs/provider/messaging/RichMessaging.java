@@ -23,6 +23,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.gsma.joyn.chat.ChatLog;
+import org.gsma.joyn.ft.FileTransfer;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -30,24 +33,19 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
-import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.service.api.client.eventslog.EventsLogApi;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Rich messaging history. This content provider removes old messages if there is no enough space.
+ * Rich messaging history for chats and file transfers.
  * 
- * @author mhsm6403
- * @author Deutsche Telekom AG
+ * @author Jean-Marc AUFFRET
  */
 public class RichMessaging {
 	/**
@@ -61,9 +59,14 @@ public class RichMessaging {
 	private ContentResolver cr;
 	
 	/**
-	 * Database URI
+	 * Chat database URI
 	 */
-	private Uri databaseUri = RichMessagingData.CONTENT_URI;
+	private Uri chatDatabaseUri = ChatData.CONTENT_URI;
+
+	/**
+	 * File transfer database URI
+	 */
+	private Uri ftDatabaseUri = FileTransferData.CONTENT_URI;
 
 	/**
 	 * Max log entries
@@ -107,6 +110,8 @@ public class RichMessaging {
         this.maxLogEntries = RcsSettings.getInstance().getMaxChatLogEntriesPerContact();
 	}
 	
+	/*--------------------- Chat methods -----------------------*/
+
 	/**
 	 * Get list of participants into a string
 	 * 
@@ -135,9 +140,9 @@ public class RichMessaging {
 	 */
 	private int getChatSystemEventType(ChatSession session) {
 		if (session.isGroupChat()) {
-			return EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE;
+			return ChatLog.Chat.Type.GROUP_CHAT;
 		} else {
-			return EventsLogApi.TYPE_CHAT_SYSTEM_MESSAGE;
+			return ChatLog.Chat.Type.SINGLE_CHAT;
 		}
 	}
 	
@@ -152,39 +157,39 @@ public class RichMessaging {
 		int event = -1;
 		if (state.equals(User.STATE_BOOTED)) {
 			// Contact has lost the session and may rejoin the session after
-			event = EventsLogApi.EVENT_DISCONNECT_CHAT;
+			event = ChatLog.Message.Status.System.DISCONNECT;
 		} else
 		if (state.equals(User.STATE_DEPARTED)) {
 			// Contact has left voluntary the session
-			event = EventsLogApi.EVENT_LEFT_CHAT;
+			event = ChatLog.Message.Status.System.GONE;
 		} else
 		if (state.equals(User.STATE_DISCONNECTED)) {
 			// Contact has left voluntary the session
-			event = EventsLogApi.EVENT_LEFT_CHAT;
+			event = ChatLog.Message.Status.System.GONE;
 		} else
 		if (state.equals(User.STATE_CONNECTED)) {
 			// Contact has joined the session
-			event = EventsLogApi.EVENT_JOINED_CHAT;
+			event = ChatLog.Message.Status.System.JOINED;
 		} else
 		if (state.equals(User.STATE_BUSY)) {
 			// Contact is busy
-			event = EventsLogApi.EVENT_BUSY;
+			event = ChatLog.Message.Status.System.BUSY;
 		} else
 		if (state.equals(User.STATE_PENDING)) {
 			// Contact is busy
-			event = EventsLogApi.EVENT_PENDING;
+			event = ChatLog.Message.Status.System.PENDING;
 		} else
 		if (state.equals(User.STATE_DECLINED)) {
 			// Contact has declined the invitation
-			event = EventsLogApi.EVENT_DECLINED;
+			event = ChatLog.Message.Status.System.DECLINED;
 		} else
 		if (state.equals(User.STATE_FAILED)) {
 			// Contact has declined the invitation or any SIP error related to the contact invitation 
-			event = EventsLogApi.EVENT_FAILED;
+			event = ChatLog.Message.Status.System.FAILED;
 		}
 		
 		if (event != -1) {
-			addEntry(EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE,
+			addEntry(ChatLog.Chat.Type.GROUP_CHAT,
 					session.getSessionID(), session.getContributionID(),
 					null, contact, null, null, null, 0, null, event);
 		}
@@ -202,7 +207,7 @@ public class RichMessaging {
 		String participants = getParticipants(session);
 		String subject = session.getSubject();
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, EventsLogApi.EVENT_INVITED);
+		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, ChatLog.Chat.State.PENDING);
 
 		// Add first message entry
 		InstantMessage firstMsg = session.getFirstMessage();
@@ -210,20 +215,7 @@ public class RichMessaging {
 			addIncomingChatMessage(firstMsg, session);
 		}
 	}
-	
-	/**
-	 * Add an incoming file transfer
-	 * 
-	 * @param contact Contact
-	 * @param chatSessionId Chat session ID which may be null if file transfer is outside of a chat session
-	 * @param ftSessionId File transfer session ID
-	 * @param content File content
-	 */
-	public void addIncomingFileTransfer(String contact, String chatSessionId, String ftSessionId, MmContent content) {
-		// Add session entry
-		addEntry(EventsLogApi.TYPE_INCOMING_FILE_TRANSFER, chatSessionId, null, ftSessionId, contact, null, content.getEncoding(), content.getName(), content.getSize(), null, EventsLogApi.STATUS_STARTED);	
-	}
-	
+		
 	/**
 	 * Add outgoing chat session
 	 * 
@@ -236,7 +228,7 @@ public class RichMessaging {
 		String participants = getParticipants(session);
 		String subject = session.getSubject();
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, EventsLogApi.EVENT_INITIATED);
+		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, ChatLog.Chat.State.PENDING);
 
 		// Add first message entry
 		InstantMessage firstMsg = session.getFirstMessage();
@@ -244,21 +236,7 @@ public class RichMessaging {
 			addOutgoingChatMessage(firstMsg, session);
 		}
 	}
-	
-	/**
-	 * Add outgoing file transfer
-	 * 
-	 * @param contact Contact
-	 * @param chatSessionId Chat session ID which may be null if file transfer took place outside of a chat session
-	 * @param sessionId Session ID
-	 * @param filename Filename
-	 * @param content File content 
-	 */
-	public void addOutgoingFileTransfer(String contact, String chatSessionId, String ftSessionId, String fileName, MmContent content){
-		// Add session entry
-		addEntry(EventsLogApi.TYPE_OUTGOING_FILE_TRANSFER, chatSessionId, null, ftSessionId, contact, fileName, content.getEncoding(), content.getName(), content.getSize(), null, EventsLogApi.EVENT_INITIATED);	
-	}
-	
+		
 	/**
 	 * Add incoming chat message
 	 * 
@@ -266,7 +244,7 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addIncomingChatMessage(InstantMessage msg, ChatSession session) {
-		// Add message entry
+/*		// Add message entry
 		int type;
 		if (session.isGroupChat()) {
 			type = EventsLogApi.TYPE_INCOMING_GROUP_CHAT_MESSAGE;
@@ -279,7 +257,7 @@ public class RichMessaging {
 		}
 		addEntry(type, session.getSessionID(), session.getContributionID(), msg.getMessageId(),
 				msg.getRemote(), msg.getTextMessage(), InstantMessage.MIME_TYPE, msg.getRemote(),
-				msg.getTextMessage().getBytes().length, msg.getDate(), status);
+				msg.getTextMessage().getBytes().length, msg.getDate(), status);*/
 	}
 	
 	/**
@@ -289,7 +267,7 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addOutgoingChatMessage(InstantMessage msg, ChatSession session){
-		// Add session entry
+/*		// Add session entry
 		int type;
 		if (session.isGroupChat()){
 			type = EventsLogApi.TYPE_OUTGOING_GROUP_CHAT_MESSAGE;
@@ -299,7 +277,7 @@ public class RichMessaging {
 		addEntry(type, session.getSessionID(), session.getContributionID(),
 				msg.getMessageId(), msg.getRemote(), msg.getTextMessage(),
 				InstantMessage.MIME_TYPE, msg.getRemote(),
-				msg.getTextMessage().getBytes().length, msg.getDate(), EventsLogApi.STATUS_SENT);			
+				msg.getTextMessage().getBytes().length, msg.getDate(), EventsLogApi.STATUS_SENT);*/			
 	}
 	
 	/**
@@ -309,7 +287,7 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addIncomingGeoloc(GeolocMessage geoloc, ChatSession session) {
-		// Add message entry
+/*		// Add message entry
 		int type;
 		if (session.isGroupChat()) {
 			type = EventsLogApi.TYPE_INCOMING_GROUP_GEOLOC;
@@ -323,7 +301,7 @@ public class RichMessaging {
 		String geolocData = GeolocPush.formatGeolocToStr(geoloc.getGeoloc());
 		addEntry(type, session.getSessionID(), session.getContributionID(), geoloc.getMessageId(),
 				geoloc.getRemote(), geolocData, GeolocMessage.MIME_TYPE, geoloc.getRemote(),
-				geolocData.length(), geoloc.getDate(), status);
+				geolocData.length(), geoloc.getDate(), status);*/
 	}
 	
 	/**
@@ -332,13 +310,13 @@ public class RichMessaging {
 	 * @param geoloc Geoloc message
 	 */
 	public void addIncomingGeoloc(GeolocMessage geoloc) {
-		// Add message entry
+/*		// Add message entry
 		int type = EventsLogApi.TYPE_INCOMING_GEOLOC;
 		int status = EventsLogApi.STATUS_RECEIVED;
 		String geolocData = GeolocPush.formatGeolocToStr(geoloc.getGeoloc());
 		addEntry(type, null, null, geoloc.getMessageId(),
 				geoloc.getRemote(), geolocData, GeolocMessage.MIME_TYPE, geoloc.getRemote(),
-				geolocData.length(), geoloc.getDate(), status);
+				geolocData.length(), geoloc.getDate(), status);*/
 	}
 
 	/**
@@ -348,7 +326,7 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addOutgoingGeoloc(GeolocMessage geoloc, ChatSession session) {
-		// Add session entry
+/*		// Add session entry
 		int type;
 		if (session.isGroupChat()){
 			type = EventsLogApi.TYPE_OUTGOING_GROUP_GEOLOC;
@@ -359,7 +337,7 @@ public class RichMessaging {
 		addEntry(type, session.getSessionID(), session.getContributionID(),
 				geoloc.getMessageId(), geoloc.getRemote(), geolocData,
 				GeolocMessage.MIME_TYPE, geoloc.getRemote(),
-				geolocData.length(), geoloc.getDate(), EventsLogApi.STATUS_SENT);			
+				geolocData.length(), geoloc.getDate(), EventsLogApi.STATUS_SENT);*/			
 	}
 	
 	/**
@@ -368,13 +346,13 @@ public class RichMessaging {
 	 * @param geoloc Geoloc message
 	 */
 	public void addOutgoingGeoloc(GeolocMessage geoloc) {
-		// Add session entry
+/*		// Add session entry
 		int type = EventsLogApi.TYPE_OUTGOING_GEOLOC;
 		String geolocData = GeolocPush.formatGeolocToStr(geoloc.getGeoloc());
 		addEntry(type, null, null,
 				geoloc.getMessageId(), geoloc.getRemote(), geolocData,
 				GeolocMessage.MIME_TYPE, geoloc.getRemote(),
-				geolocData.length(), geoloc.getDate(), EventsLogApi.STATUS_SENT);			
+				geolocData.length(), geoloc.getDate(), EventsLogApi.STATUS_SENT);*/			
 	}
 
 	/**
@@ -384,7 +362,7 @@ public class RichMessaging {
 	 * @param status Status
 	 */
 	public void setChatMessageDeliveryStatus(String msgId, String status) {
-		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+/*		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 			setChatMessageDeliveryStatus(msgId, EventsLogApi.STATUS_DISPLAYED);
 		} else
 		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
@@ -394,7 +372,7 @@ public class RichMessaging {
 				(status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_FAILED)) ||
 					(status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_FORBIDDEN))) {
 			setChatMessageDeliveryStatus(msgId, EventsLogApi.STATUS_FAILED);
-		}
+		}*/
 	}
 
 	/**
@@ -403,7 +381,7 @@ public class RichMessaging {
 	 * @param msgId Message ID
 	 */
 	public void setChatMessageDeliveryRequested(String msgId) {
-		setChatMessageDeliveryStatus(msgId, EventsLogApi.STATUS_REPORT_REQUESTED);
+//		setChatMessageDeliveryStatus(msgId, EventsLogApi.STATUS_REPORT_REQUESTED);
 	}
 		
 	/**
@@ -413,13 +391,13 @@ public class RichMessaging {
 	 * @param status Status
 	 */
 	private void setChatMessageDeliveryStatus(String msgId, int status) {
-		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_STATUS, status);
+/*		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_STATUS, status);
 		cr.update(databaseUri, 
 				values, 
-				RichMessagingData.KEY_MESSAGE_ID + " = \'" + msgId + "\' and "
-			       + RichMessagingData.KEY_STATUS + " !=  " + EventsLogApi.STATUS_DISPLAYED, 
-				null);
+				ChatData.KEY_MESSAGE_ID + " = \'" + msgId + "\' and "
+			       + ChatData.KEY_STATUS + " !=  " + EventsLogApi.STATUS_DISPLAYED, 
+				null);*/
 	}
 	
 	/**
@@ -428,11 +406,11 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addChatSessionTermination(ChatSession session) {
-		String sessionId = session.getSessionID();
+/*		String sessionId = session.getSessionID();
 		String chatId = session.getContributionID();
 		String participants = getParticipants(session);
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED);
+		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED);*/
 	}
 	
 	/**
@@ -441,11 +419,11 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addChatSessionTerminationByUser(ChatSession session) {
-		String sessionId = session.getSessionID();
+/*		String sessionId = session.getSessionID();
 		String chatId = session.getContributionID();
 		String participants = getParticipants(session);
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED_BY_USER);
+		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED_BY_USER);*/
 	}
 
 	/**
@@ -454,11 +432,11 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addChatSessionTerminationByRemote(ChatSession session) {
-		String sessionId = session.getSessionID();
+/*		String sessionId = session.getSessionID();
 		String chatId = session.getContributionID();
 		String participants = getParticipants(session);
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED_BY_REMOTE);
+		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_TERMINATED_BY_REMOTE);*/
 	}
 
 	/**
@@ -467,11 +445,11 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void addChatSessionError(ChatSession session) {
-		String sessionId = session.getSessionID();
+/*		String sessionId = session.getSessionID();
 		String chatId = session.getContributionID();
 		String participants = getParticipants(session);
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_FAILED);
+		addEntry(type, sessionId, chatId, null, participants, null, null, null, 0, new Date(), EventsLogApi.STATUS_FAILED);*/
 	}
 	
 	/**
@@ -480,17 +458,16 @@ public class RichMessaging {
 	 * @param session Chat session
 	 */
 	public void markChatSessionStarted(ChatSession session) {
-		int type = getChatSystemEventType(session);
+/*		int type = getChatSystemEventType(session);
 		String participants = getParticipants(session);
 		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_CHAT_REJOIN_ID, session.getImSessionIdentity());
-		values.put(RichMessagingData.KEY_CONTACT, participants);
+		values.put(ChatData.KEY_CHAT_REJOIN_ID, session.getImSessionIdentity());
+		values.put(ChatData.KEY_CONTACT, participants);
 		cr.update(databaseUri, 
 				values, 
-				"(" + RichMessagingData.KEY_CHAT_SESSION_ID +" = \"" + session.getSessionID() +
-				"\") AND (" + RichMessagingData.KEY_TYPE + " =" + type + ")", 
-				null);
-		
+				"(" + ChatData.KEY_CHAT_SESSION_ID +" = \"" + session.getSessionID() +
+				"\") AND (" + ChatData.KEY_TYPE + " =" + type + ")", 
+				null);*/		
 	}	
 	
 	/**
@@ -499,13 +476,13 @@ public class RichMessaging {
 	 * @param sessionId Session ID
 	 */
 	public void markFirstMessageFailed(String sessionId) {
-		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_FAILED);
+/*		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_STATUS, EventsLogApi.STATUS_FAILED);
 		cr.update(databaseUri, 
 				values, 
-				RichMessagingData.KEY_CHAT_SESSION_ID +" = \""+sessionId+"\"" + " AND " +
-				RichMessagingData.KEY_TYPE + " = " + EventsLogApi.TYPE_OUTGOING_CHAT_MESSAGE, 
-				null);
+				ChatData.KEY_CHAT_SESSION_ID +" = \""+sessionId+"\"" + " AND " +
+				ChatData.KEY_TYPE + " = " + EventsLogApi.TYPE_OUTGOING_CHAT_MESSAGE, 
+				null);*/
 	}
 	
 	/**
@@ -514,12 +491,12 @@ public class RichMessaging {
 	 * @param msgId Message ID
 	 */
 	public void markChatMessageFailed(String msgId) {
-		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_FAILED);
+/*		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_STATUS, EventsLogApi.STATUS_FAILED);
 		cr.update(databaseUri, 
 				values, 
-				RichMessagingData.KEY_MESSAGE_ID +" = \""+msgId+"\"", 
-				null);
+				ChatData.KEY_MESSAGE_ID +" = \""+msgId+"\"", 
+				null);*/
 	}	
 	
 	/**
@@ -529,16 +506,16 @@ public class RichMessaging {
 	 * @param isRead Read flag
 	 */
 	public void markChatMessageAsRead(String msgId, boolean isRead) {
-		ContentValues values = new ContentValues();
+/*		ContentValues values = new ContentValues();
 		if (isRead){
-			values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_DISPLAYED);
+			values.put(ChatData.KEY_STATUS, EventsLogApi.STATUS_DISPLAYED);
 		}else{
-			values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_RECEIVED);
+			values.put(ChatData.KEY_STATUS, EventsLogApi.STATUS_RECEIVED);
 		}
 		cr.update(databaseUri, 
 				values, 
-				RichMessagingData.KEY_MESSAGE_ID +" = \""+msgId+"\"", 
-				null);
+				ChatData.KEY_MESSAGE_ID +" = \""+msgId+"\"", 
+				null);*/
 	}
 	
 	/**
@@ -547,10 +524,10 @@ public class RichMessaging {
 	 * @param msg Chat message
 	 */
 	public void addSpamMessage(InstantMessage msg) {
-		// TODO: 2 queries may be avoided
+/*		// TODO: 2 queries may be avoided
 		String id = SessionIdGenerator.getNewId();
 		addEntry(EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE, id, id, msg.getMessageId(), msg.getRemote(), msg.getTextMessage(), InstantMessage.MIME_TYPE, msg.getRemote(), msg.getTextMessage().getBytes().length, msg.getDate(), EventsLogApi.STATUS_RECEIVED);
-		markChatMessageAsSpam(msg.getMessageId(), true);
+		markChatMessageAsSpam(msg.getMessageId(), true);*/
 	}
 	
 	/**
@@ -560,11 +537,11 @@ public class RichMessaging {
 	 * @param chatId Chat ID
 	 */
 	public void addIncomingChatMessage(InstantMessage msg, String chatId) {
-		int status = EventsLogApi.STATUS_RECEIVED;
+/*		int status = EventsLogApi.STATUS_RECEIVED;
 		if (msg.isImdnDisplayedRequested()){
 			status = EventsLogApi.STATUS_REPORT_REQUESTED;
 		}
-		addEntry(EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE, SessionIdGenerator.getNewId(), chatId, msg.getMessageId(), msg.getRemote(), msg.getTextMessage(), InstantMessage.MIME_TYPE, msg.getRemote(), msg.getTextMessage().getBytes().length, msg.getDate(), status);
+		addEntry(EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE, SessionIdGenerator.getNewId(), chatId, msg.getMessageId(), msg.getRemote(), msg.getTextMessage(), InstantMessage.MIME_TYPE, msg.getRemote(), msg.getTextMessage().getBytes().length, msg.getDate(), status);*/
 	}
 	
 	/**
@@ -574,32 +551,32 @@ public class RichMessaging {
 	 * @param isSpam Spam flag
 	 */
 	public void markChatMessageAsSpam(String msgId, boolean isSpam) {
-		ContentValues values = new ContentValues();
+/*		ContentValues values = new ContentValues();
 		if (isSpam){
-			values.put(RichMessagingData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_SPAM);
+			values.put(ChatData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_SPAM);
 		}else{
-			values.put(RichMessagingData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_NOT_SPAM);
+			values.put(ChatData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_NOT_SPAM);
 		}
 		cr.update(databaseUri, 
 				values, 
-				RichMessagingData.KEY_MESSAGE_ID +" = \""+msgId+"\"" +" AND " + RichMessagingData.KEY_TYPE + " = " + EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE, 
-				null);
+				ChatData.KEY_MESSAGE_ID +" = \""+msgId+"\"" +" AND " + ChatData.KEY_TYPE + " = " + EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE, 
+				null);*/
 	}
 	
 	/**
 	 * Delete all spam messages
 	 */
 	public void deleteAllSpams(){
-		Cursor c = cr.query(databaseUri,
-				new String[]{RichMessagingData.KEY_ID},
-				RichMessagingData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"",
+/*		Cursor c = cr.query(databaseUri,
+				new String[]{ChatData.KEY_ID},
+				ChatData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"",
 				null,
 				null);
 		while (c.moveToNext()){
 			long rowId = c.getLong(0);
 			deleteEntry(rowId);
 		}
-		c.close();
+		c.close();*/
 	}
 
     /**
@@ -608,9 +585,9 @@ public class RichMessaging {
      * @param Message ID
      */
     public void deleteSpamMessage(String msgId) {
-        Cursor c = cr.query(databaseUri,
-                new String[]{RichMessagingData.KEY_ID},
-                RichMessagingData.KEY_MESSAGE_ID +" = \""+msgId+"\"" +" AND " + RichMessagingData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"",
+/*        Cursor c = cr.query(databaseUri,
+                new String[]{ChatData.KEY_ID},
+                ChatData.KEY_MESSAGE_ID +" = \""+msgId+"\"" +" AND " + ChatData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"",
                 null,
                 null);
         if (c != null) {
@@ -622,7 +599,7 @@ public class RichMessaging {
                 deleteEntry(rowId);
             }
             c.close();
-        }
+        }*/
     }
 
     /**
@@ -631,10 +608,10 @@ public class RichMessaging {
      * @param contact Contact
      */
     public void clearSpamMessages(String contact) {
-        int deletedRows = cr.delete(databaseUri, RichMessagingData.KEY_CONTACT+"= \""+contact+"\"" + " AND " + RichMessagingData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"", null);
+/*        int deletedRows = cr.delete(databaseUri, ChatData.KEY_CONTACT+"= \""+contact+"\"" + " AND " + ChatData.KEY_IS_SPAM + " = \"" + EventsLogApi.MESSAGE_IS_SPAM +"\"", null);
         if (logger.isActivated()) {
             logger.debug("Clear spam messages of contact " + contact + ": deleted rows =" + deletedRows);
-        }
+        }*/
     }
 
 	/**
@@ -653,8 +630,7 @@ public class RichMessaging {
 	 * @return URI of the new entry
 	 */
 	private Uri addEntry(int type, String sessionId, String chatId, String messageId, String contact, String data, String mimeType, String name, long size, Date date, int status) {
-		
-		contact = PhoneUtils.extractNumberFromUri(contact);
+/*		contact = PhoneUtils.extractNumberFromUri(contact);
 		
 		if (logger.isActivated()){
 			logger.debug("Add new entry: type=" + type + ", sessionID=" + sessionId +
@@ -662,266 +638,45 @@ public class RichMessaging {
 					", MIME=" + mimeType + ", status=" + status);
 		}
 		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_TYPE, type);
-		values.put(RichMessagingData.KEY_CHAT_SESSION_ID, sessionId);
-		values.put(RichMessagingData.KEY_CHAT_ID, chatId);
-		values.put(RichMessagingData.KEY_MESSAGE_ID, messageId);
-		values.put(RichMessagingData.KEY_CONTACT, contact);
-		values.put(RichMessagingData.KEY_MIME_TYPE, mimeType);
-		values.put(RichMessagingData.KEY_TOTAL_SIZE, size);
-		values.put(RichMessagingData.KEY_NAME, name);
-		values.put(RichMessagingData.KEY_DATA, data);
-		values.put(RichMessagingData.KEY_STATUS, status);
-		values.put(RichMessagingData.KEY_NUMBER_MESSAGES, recycler(contact)+1);
-		values.put(RichMessagingData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_NOT_SPAM);
+		values.put(ChatData.KEY_TYPE, type);
+		values.put(ChatData.KEY_CHAT_SESSION_ID, sessionId);
+		values.put(ChatData.KEY_CHAT_ID, chatId);
+		values.put(ChatData.KEY_MESSAGE_ID, messageId);
+		values.put(ChatData.KEY_CONTACT, contact);
+		values.put(ChatData.KEY_MIME_TYPE, mimeType);
+		values.put(ChatData.KEY_TOTAL_SIZE, size);
+		values.put(ChatData.KEY_NAME, name);
+		values.put(ChatData.KEY_DATA, data);
+		values.put(ChatData.KEY_STATUS, status);
+		values.put(ChatData.KEY_NUMBER_MESSAGES, recycler(contact)+1);
+		values.put(ChatData.KEY_IS_SPAM, EventsLogApi.MESSAGE_IS_NOT_SPAM);
 		if(date == null) {
-			values.put(RichMessagingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+			values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		} else {
-			values.put(RichMessagingData.KEY_TIMESTAMP, date.getTime());
+			values.put(ChatData.KEY_TIMESTAMP, date.getTime());
 		}
-		return cr.insert(databaseUri, values);
+		return cr.insert(databaseUri, values);*/
+		return null;
 	}
-	
-	/**
-	 * Manage the max size of the history for a given contact
-	 * 
-	 * @param contact Contact
-	 * @return History size
-	 */
-	private int recycler(String contact) {
-		// Get first and last message dates for the contact
-		Cursor extrem = cr.query(databaseUri, 
-				new String[]{"min("+RichMessagingData.KEY_TIMESTAMP+")", "max("+RichMessagingData.KEY_TIMESTAMP+")"}, 
-				RichMessagingData.KEY_CONTACT +" = \'"+contact+"\'", 
-				null, 
-				null);
-		long minDate = -1 ,maxDate = -1;
-		if(extrem.moveToFirst()){
-			minDate = extrem.getLong(0);
-			maxDate = extrem.getLong(1);
-		}
-		extrem.close();
-		if(logger.isActivated()){
-			logger.debug("Recycler : minDate = "+minDate+" maxDate "+ maxDate);
-		}
 		
-		// If no entry for this contact return 0
-		if(minDate == -1 && maxDate == -1){
-			return 0;
-		}
-		
-		Cursor c = cr.query(databaseUri, 
-				new String[] { RichMessagingData.KEY_NUMBER_MESSAGES, RichMessagingData.KEY_CHAT_SESSION_ID, RichMessagingData.KEY_TIMESTAMP },
-				RichMessagingData.KEY_CONTACT + " = \'" + contact + "\'"+
-						" AND (" + RichMessagingData.KEY_TIMESTAMP+ " = " + minDate + 
-						" OR "+ RichMessagingData.KEY_TIMESTAMP + " = " + maxDate+ ")",
-				null, 
-				RichMessagingData.KEY_TIMESTAMP + " ASC");
-		int numberOfMessagesForContact = 0;
-		long dateForLastMessage = 0;
-		if(c.moveToLast()){
-			numberOfMessagesForContact = c.getInt(0);
-			if(logger.isActivated()){
-				logger.debug("Recycler : number of messages for this contact = "+numberOfMessagesForContact);
-			}
-			if(numberOfMessagesForContact < maxLogEntries) {
-				// Enough place for another message... do nothing return
-				if(logger.isActivated()){
-					logger.debug("Recycler : Enough place for another message, do nothing return");
-				}
-				c.close();
-				return numberOfMessagesForContact;
-			}
-			if(logger.isActivated()){
-				logger.debug("Recycler : Not enough place for another message, we will have to remove something");
-			}
-			// Not enough place for another message... we will have to remove something
-			dateForLastMessage = c.getLong(2);
-			if(logger.isActivated()){
-				logger.debug("Recycler : dateForLastMessage ="+new Date(dateForLastMessage).toString()+" ["+dateForLastMessage+"]");
-			}
-		}
-		int removedMessages = 0;
-		if(c.moveToFirst()){
-			// Remove the first message and all the associated messages from its session
-			String sessionId = c.getString(1);
-			long firstDate = c.getLong(2);
-			if(logger.isActivated()){
-				logger.debug("Recycler : deleting entries for (the first) sessionID : "+sessionId + " for the date : "+new Date(firstDate).toString()+" ["+firstDate+"]");
-			}
-			removedMessages = cr.delete(databaseUri, 
-					RichMessagingData.KEY_CHAT_SESSION_ID + " = \'" + sessionId+ "\'", 
-					null);
-			if(logger.isActivated()){
-				logger.debug("Recycler : messages removed : "+removedMessages);
-			}
-			
-			// We also will have to set the new number of message after removing, for the last entry
-			if(logger.isActivated()){
-				logger.debug("Recycler : set the new number of messages after removing...");
-			}
-			ContentValues values = new ContentValues();
-			numberOfMessagesForContact -= removedMessages;
-			if(logger.isActivated()){
-				logger.debug("Recycler : new number of message after deletion : "+numberOfMessagesForContact);
-			}
-			values.put(RichMessagingData.KEY_NUMBER_MESSAGES, numberOfMessagesForContact);
-			int updatedRows = cr.update(databaseUri, 
-					values, 
-					RichMessagingData.KEY_CONTACT +" = \'"+contact+"\' AND "+RichMessagingData.KEY_TIMESTAMP+ " = "+dateForLastMessage, 
-					null);
-			if(logger.isActivated()){
-				logger.debug("Recycler : updated rows for the contact (must be 1) : "+updatedRows);
-			}
-		}
-		c.close();
-		return numberOfMessagesForContact;
-	}
-	
-	/**
-	 * Update file transfer status
-	 * 
-	 * @param sessionId Session Id
-	 * @param status New status
-	 */
-	public void updateFileTransferStatus(String sessionId, int status) {
-		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_STATUS, status);
-		cr.update(databaseUri, 
-				values, 
-				RichMessagingData.KEY_MESSAGE_ID + " = " + sessionId, 
-				null);
-	}
-	
-	/**
-	 * Update file transfer download progress
-	 * 
-	 * @param sessionId Session Id
-	 * @param size Downloaded size
-	 * @param totalSize Total size to download 
-	 */
-	public void updateFileTransferProgress(String sessionId, long size, long totalSize) {
-		ContentValues values = new ContentValues();
-		
-		Cursor cursor = cr.query(RichMessagingData.CONTENT_URI, 
-				new String[]{RichMessagingData.KEY_SIZE}, 
-				RichMessagingData.KEY_MESSAGE_ID + "='" + sessionId + "'",
-				null, 
-				null);
-		if (cursor.moveToFirst()) {
-			long downloadedSize = cursor.getLong(cursor.getColumnIndexOrThrow(RichMessagingData.KEY_SIZE));
-			if ((size >= downloadedSize + totalSize / 10) || size == totalSize)  {
-				// Update size if we have done at least 10 more percent from total size since last update
-				// Or if we are at the end of the download (ensure we update when transfer is finished)
-				// This is to avoid too much updates, as the ui refreshes each time
-				values.put(RichMessagingData.KEY_SIZE, size);
-				values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_IN_PROGRESS);
-				cr.update(
-						databaseUri,
-						values,
-						RichMessagingData.KEY_MESSAGE_ID + " = " + sessionId,
-						null);
-			}
-		}
-		cursor.close();
-	}
-
-	/**
-	 * Update file transfer URL
-	 * 
-	 * @param sessionId Session Id
-	 * @param url File URL
-	 */
-	public void updateFileTransferUrl(String sessionId, String url) {
-		ContentValues values = new ContentValues();
-		values.put(RichMessagingData.KEY_DATA, url);
-		values.put(RichMessagingData.KEY_STATUS, EventsLogApi.STATUS_TERMINATED);
-		cr.update(databaseUri, 
-				values, 
-				RichMessagingData.KEY_MESSAGE_ID + " = " + sessionId, 
-				null);
-	}
-	
-	/**
-	 * Delete a file transfer session
-	 * 
-	 * @param sessionId Session ID
-	 * @param contact Contact
-	 */
-	public void deleteFileTransferSession(String sessionId, String contact) {
-		// Count entries to be deleted
-		Cursor count = cr.query(databaseUri, null, RichMessagingData.KEY_MESSAGE_ID + " = " + sessionId, null, null);
-		int toBeDeletedRows = count.getCount();
-		if (logger.isActivated()) {
-			logger.debug("Delete " + toBeDeletedRows + " rows");
-		}	
-		count.close();
-		if (toBeDeletedRows==0) {
-			return;
-		}
-		
-		// Manage recycling
-		Cursor c  = cr.query(databaseUri, 
-				new String[]{RichMessagingData.KEY_TIMESTAMP, RichMessagingData.KEY_NUMBER_MESSAGES, RichMessagingData.KEY_MESSAGE_ID}, 
-				RichMessagingData.KEY_CONTACT+" = \'"+contact+"\'", 
-				null, 
-				RichMessagingData.KEY_TIMESTAMP + " DESC");
-		if (c.moveToFirst()) {
-			long maxDate = c.getLong(0);
-			int numberForLast = c.getInt(1);
-			String lastSessionId = c.getString(2);
-
-			ContentValues values = new ContentValues();
-			values.put(RichMessagingData.KEY_NUMBER_MESSAGES, numberForLast-toBeDeletedRows);
-			// If last entry for this contact equals to this file transfer message
-			if (sessionId.equals(lastSessionId)){
-				// Update the previous one
-				if(c.moveToNext()){
-					maxDate = c.getLong(0);
-				}
-			}
-			/*
-			 * TODO : 
-			 * If no more message exists after deleting this one for this contact,
-			 * the update is useless because it will be made on the message to be deleted.
-			 */
-			int updatedRows = cr.update(databaseUri, 
-					values, 
-					RichMessagingData.KEY_TIMESTAMP+ " = "+maxDate+" AND "+RichMessagingData.KEY_CONTACT+" = \'"+contact+"\'", 
-					null);
-			if (logger.isActivated()) {
-				logger.debug("DeleteFileTransfer : recycling updated rows (should be 1) : "+updatedRows);
-			}
-		}
-		c.close();
-		
-		/* Delete entry */
-		int deletedRows = cr.delete(databaseUri, 
-				RichMessagingData.KEY_MESSAGE_ID + " = " + sessionId, 
-				null);
-		if(logger.isActivated()){
-			logger.debug("DeleteFileTransfer : deleted rows (should be 1) : "+deletedRows);
-		}
-	}
-	
 	/**
 	 * Delete history associated to a contact
 	 * 
 	 * @param contact Contact
 	 */
 	public void deleteContactHistory(String contact) {
-		String excludeGroupChat = RichMessagingData.KEY_TYPE + "<>" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + " AND " +
-			RichMessagingData.KEY_TYPE + "<>" + EventsLogApi.TYPE_INCOMING_GROUP_CHAT_MESSAGE + " AND " +
-			RichMessagingData.KEY_TYPE + "<>" + EventsLogApi.TYPE_OUTGOING_GROUP_CHAT_MESSAGE;
+/*		String excludeGroupChat = ChatData.KEY_TYPE + "<>" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + " AND " +
+			ChatData.KEY_TYPE + "<>" + EventsLogApi.TYPE_INCOMING_GROUP_CHAT_MESSAGE + " AND " +
+			ChatData.KEY_TYPE + "<>" + EventsLogApi.TYPE_OUTGOING_GROUP_CHAT_MESSAGE;
 		
 		
 		// Delete entries
 		int deletedRows = cr.delete(databaseUri, 
-				RichMessagingData.KEY_CONTACT + " = \'" + contact + "\' AND " + excludeGroupChat, 
+				ChatData.KEY_CONTACT + " = \'" + contact + "\' AND " + excludeGroupChat, 
 				null);
 		if(logger.isActivated()){
 			logger.debug("DeleteSession: deleted rows : "+deletedRows);
-		}	
+		}*/	
 	}
 
     /**
@@ -931,8 +686,8 @@ public class RichMessaging {
      */
     public void deleteGroupChatConversation(String chatId) {
         // Delete entry
-        int deletedRows = cr.delete(databaseUri,
-                RichMessagingData.KEY_CHAT_ID + "=\"" + chatId + "\"",
+        int deletedRows = cr.delete(chatDatabaseUri,
+                ChatData.KEY_CHAT_ID + "=\"" + chatId + "\"",
                 null);
         if (logger.isActivated()) {
             logger.debug("Delete group chat conversation: " + deletedRows + " rows deleted");
@@ -945,10 +700,10 @@ public class RichMessaging {
 	 * @param sessionId Session ID
 	 */
 	public void deleteChatSession(String sessionId) {
-		// Count entries to be deleted
+/*		// Count entries to be deleted
 		Cursor count = cr.query(databaseUri, 
 				null, 
-				RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
+				ChatData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
 				null, 
 				null);
 		int toBeDeletedRows = count.getCount();
@@ -957,8 +712,8 @@ public class RichMessaging {
 		
 		boolean isGroupChat = false;
 		if (count.moveToFirst()){
-			contact = count.getString(count.getColumnIndex(RichMessagingData.KEY_CONTACT));
-			int type = count.getInt(count.getColumnIndex(RichMessagingData.KEY_TYPE));
+			contact = count.getString(count.getColumnIndex(ChatData.KEY_CONTACT));
+			int type = count.getInt(count.getColumnIndex(ChatData.KEY_TYPE));
 			if (type>=EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE && type <=EventsLogApi.TYPE_OUTGOING_GROUP_CHAT_MESSAGE){
 				isGroupChat = true;
 			}
@@ -974,18 +729,18 @@ public class RichMessaging {
 		if (!isGroupChat){
 			// Manage recycling
 			Cursor c  = cr.query(databaseUri, new String[]{
-					RichMessagingData.KEY_TIMESTAMP,
-					RichMessagingData.KEY_NUMBER_MESSAGES, 
-					RichMessagingData.KEY_CHAT_SESSION_ID}, 
-					RichMessagingData.KEY_CONTACT+" = \'"+contact+"\'", 
+					ChatData.KEY_TIMESTAMP,
+					ChatData.KEY_NUMBER_MESSAGES, 
+					ChatData.KEY_CHAT_SESSION_ID}, 
+					ChatData.KEY_CONTACT+" = \'"+contact+"\'", 
 					null, 
-					RichMessagingData.KEY_TIMESTAMP + " DESC");
+					ChatData.KEY_TIMESTAMP + " DESC");
 			if(c.moveToFirst()){
 				long maxDate = c.getLong(0);
 				int numberForLast = c.getInt(1);
 				String lastSessionId = c.getString(2);
 				ContentValues values = new ContentValues();
-				values.put(RichMessagingData.KEY_NUMBER_MESSAGES, numberForLast-toBeDeletedRows);
+				values.put(ChatData.KEY_NUMBER_MESSAGES, numberForLast-toBeDeletedRows);
 
 				if(sessionId.equals(lastSessionId)){
 					// Find the last message from another session for the same contact
@@ -1005,14 +760,11 @@ public class RichMessaging {
 				if(logger.isActivated()){
 					logger.debug("DeleteSession : updating the row of date "+maxDate);
 				}
-				/*
-				 * TODO : 
-				 * If no more session exists after deleting this one for this contact,
-				 * the update is useless because it will be made on the session to be deleted.
-				 */
+				// If no more session exists after deleting this one for this contact,
+				// the update is useless because it will be made on the session to be deleted.
 				int updatedRows = cr.update(databaseUri, 
 						values, 
-						RichMessagingData.KEY_TIMESTAMP+ " = "+maxDate +" AND "+RichMessagingData.KEY_CONTACT+" = \'"+contact+"\'", 
+						ChatData.KEY_TIMESTAMP+ " = "+maxDate +" AND "+ChatData.KEY_CONTACT+" = \'"+contact+"\'", 
 						null);
 				if(logger.isActivated()){
 					logger.debug("DeleteSession : recycling updated rows (should be 1) : "+updatedRows);
@@ -1023,11 +775,11 @@ public class RichMessaging {
 		
 		// Delete entry
 		int deletedRows = cr.delete(databaseUri, 
-				RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
+				ChatData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
 				null);
 		if(logger.isActivated()){
 			logger.debug("DeleteSession: deleted rows : "+deletedRows);
-		}	
+		}*/	
 	}
 	
 	/**
@@ -1036,7 +788,7 @@ public class RichMessaging {
 	 * @param contact Contact
 	 */
 	public void clearHistory(String contact) {
-		int deletedRows = cr.delete(databaseUri, RichMessagingData.KEY_CONTACT+"='"+contact+"'", null);
+		int deletedRows = cr.delete(chatDatabaseUri, ChatData.KEY_CONTACT+"='"+contact+"'", null);
 		if (logger.isActivated()) {
 			logger.debug("Clear history of contact " + contact + ": deleted rows =" + deletedRows);
 		}
@@ -1048,7 +800,7 @@ public class RichMessaging {
 	 * @param rowId Row ID
 	 */
 	public void deleteEntry(long rowId) {
-		Cursor count = cr.query(Uri.withAppendedPath(databaseUri, ""+rowId),
+		Cursor count = cr.query(Uri.withAppendedPath(chatDatabaseUri, ""+rowId),
 				null,
 				null,
 				null,
@@ -1058,17 +810,17 @@ public class RichMessaging {
 			return;
 		}
 		count.moveToFirst();
-		String contactNumber = count.getString(count.getColumnIndexOrThrow((RichMessagingData.KEY_CONTACT)));
+		String contactNumber = count.getString(count.getColumnIndexOrThrow((ChatData.KEY_CONTACT)));
 
 		// Manage recycling
-		Cursor c  = cr.query(databaseUri, new String[]{
-				RichMessagingData.KEY_TIMESTAMP,
-				RichMessagingData.KEY_NUMBER_MESSAGES, 
-				RichMessagingData.KEY_CHAT_SESSION_ID, 
-				RichMessagingData.KEY_DATA}, 
-				RichMessagingData.KEY_CONTACT + " = \'"+contactNumber + "\'", 
+		Cursor c  = cr.query(chatDatabaseUri, new String[]{
+				ChatData.KEY_TIMESTAMP,
+				ChatData.KEY_NUMBER_MESSAGES, 
+				ChatData.KEY_CHAT_SESSION_ID, 
+				ChatData.KEY_DATA}, 
+				ChatData.KEY_CONTACT + " = \'"+contactNumber + "\'", 
 				null, 
-				RichMessagingData.KEY_TIMESTAMP + " DESC");
+				ChatData.KEY_TIMESTAMP + " DESC");
 		
 		// Get the first last entry for this contact
 		if(c.moveToFirst()){
@@ -1078,12 +830,12 @@ public class RichMessaging {
 			
 			// We are going to delete one message
 			ContentValues values = new ContentValues();
-			values.put(RichMessagingData.KEY_NUMBER_MESSAGES, numberForLast-1);
+			values.put(ChatData.KEY_NUMBER_MESSAGES, numberForLast-1);
 			
 			// Check if this message has the same sessionID, timestamp and content as the one to be deleted
-			String sessionId = count.getString(count.getColumnIndexOrThrow(RichMessagingData.KEY_CHAT_SESSION_ID));
-			long date = count.getLong(count.getColumnIndexOrThrow(RichMessagingData.KEY_TIMESTAMP));
-			String message = "" + count.getString(count.getColumnIndexOrThrow(RichMessagingData.KEY_DATA));
+			String sessionId = count.getString(count.getColumnIndexOrThrow(ChatData.KEY_CHAT_SESSION_ID));
+			long date = count.getLong(count.getColumnIndexOrThrow(ChatData.KEY_TIMESTAMP));
+			String message = "" + count.getString(count.getColumnIndexOrThrow(ChatData.KEY_DATA));
 			if(sessionId.equals(lastSessionId) && (date == maxDate) && message.equals("" + c.getString(3))){
 				/* It's the lastest message for this contact, 
 				 * find the previous message for the same contact */
@@ -1107,9 +859,9 @@ public class RichMessaging {
 			 * If the first message is the message to be deleted and no more messages are available for the same contact, 
 			 * then the update is useless because it will be made on the message to be deleted.
 			 */
-			int updatedRows = cr.update(databaseUri, values, 
-					RichMessagingData.KEY_TIMESTAMP+ " = "+maxDate
-					+" AND "+RichMessagingData.KEY_CONTACT+" = \'"
+			int updatedRows = cr.update(chatDatabaseUri, values, 
+					ChatData.KEY_TIMESTAMP+ " = "+maxDate
+					+" AND "+ChatData.KEY_CONTACT+" = \'"
 					+contactNumber
 					+"\'", 
 					null);
@@ -1122,7 +874,7 @@ public class RichMessaging {
 		
 		// Delete entry
 		int deletedRows = cr.delete(Uri.withAppendedPath(
-				databaseUri, ""+rowId), 
+				chatDatabaseUri, ""+rowId), 
 				null, 
 				null);
 		if(logger.isActivated()){
@@ -1137,11 +889,11 @@ public class RichMessaging {
 	 * @return Boolean
 	 */
 	public boolean isSessionTerminated(String sessionId) {
-		Cursor cursor = cr.query(databaseUri, 
-				new String[]{RichMessagingData.KEY_STATUS}, 
-				RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
+/*		Cursor cursor = cr.query(databaseUri, 
+				new String[]{ChatData.KEY_STATUS}, 
+				ChatData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
 				null, 
-				RichMessagingData.KEY_TIMESTAMP + " DESC");
+				ChatData.KEY_TIMESTAMP + " DESC");
 		if(cursor.moveToFirst()){
 			int status = cursor.getInt(0);
 			if ((status==EventsLogApi.STATUS_TERMINATED) || (status==EventsLogApi.STATUS_TERMINATED_BY_REMOTE) || (status==EventsLogApi.STATUS_TERMINATED_BY_USER)) {
@@ -1149,7 +901,7 @@ public class RichMessaging {
 				return true;
 			}
 		}
-		cursor.close();
+		cursor.close();*/
 		return false;
 	}
 	
@@ -1161,15 +913,15 @@ public class RichMessaging {
 	 */
 	public List<String> getAllOutgoingUndisplayedMessages(String contact){
 		List<String> msgIds = new ArrayList<String>();
-		Cursor cursor = cr.query(databaseUri, 
-				new String[]{RichMessagingData.KEY_MESSAGE_ID}, 
-				RichMessagingData.KEY_CONTACT + "=?" + " AND " + RichMessagingData.KEY_TYPE + "=?" + " AND (" + RichMessagingData.KEY_STATUS + "=?" + " OR " + RichMessagingData.KEY_STATUS + "=?)", 
+/*		Cursor cursor = cr.query(databaseUri, 
+				new String[]{ChatData.KEY_MESSAGE_ID}, 
+				ChatData.KEY_CONTACT + "=?" + " AND " + ChatData.KEY_TYPE + "=?" + " AND (" + ChatData.KEY_STATUS + "=?" + " OR " + ChatData.KEY_STATUS + "=?)", 
 				new String[]{contact, String.valueOf(EventsLogApi.TYPE_OUTGOING_CHAT_MESSAGE), String.valueOf(EventsLogApi.STATUS_SENT), String.valueOf(EventsLogApi.STATUS_DELIVERED)}, 
 				null);
 		while (cursor.moveToNext()){
 			msgIds.add(cursor.getString(0));
 		}
-		cursor.close();
+		cursor.close();*/
 		return msgIds;
 	}
 
@@ -1181,19 +933,19 @@ public class RichMessaging {
 	 */
 	public String getGroupChatId(String sessionId) {
 		String result = null;
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_CHAT_ID
+    				ChatData.KEY_CHAT_ID
     			},
-    			"(" + RichMessagingData.KEY_CHAT_SESSION_ID + "='" + sessionId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
-    				RichMessagingData.KEY_CHAT_ID + " NOT NULL)", 
+    			"(" + ChatData.KEY_CHAT_SESSION_ID + "='" + sessionId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
+    				ChatData.KEY_CHAT_ID + " NOT NULL)", 
     			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	if (cursor.moveToFirst()) {
     		result = cursor.getString(0);
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
 	}	
 
@@ -1205,19 +957,19 @@ public class RichMessaging {
 	 */
 	public String getGroupChatRejoinId(String chatId) {
 		String result = null;
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_CHAT_REJOIN_ID
+    				ChatData.KEY_CHAT_REJOIN_ID
     			},
-    			"(" + RichMessagingData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
-    				RichMessagingData.KEY_CHAT_REJOIN_ID + " NOT NULL)", 
+    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
+    				ChatData.KEY_CHAT_REJOIN_ID + " NOT NULL)", 
     			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	if (cursor.moveToFirst()) {
     		result = cursor.getString(0);
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
 	}	
 
@@ -1229,19 +981,19 @@ public class RichMessaging {
 	 */
 	public GroupChatInfo getGroupChatInfo(String chatId) {
 		GroupChatInfo result = null;
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_CHAT_SESSION_ID,
-    				RichMessagingData.KEY_CHAT_REJOIN_ID,
-    				RichMessagingData.KEY_CONTACT,
-    				RichMessagingData.KEY_DATA
+    				ChatData.KEY_CHAT_SESSION_ID,
+    				ChatData.KEY_CHAT_REJOIN_ID,
+    				ChatData.KEY_CONTACT,
+    				ChatData.KEY_DATA
     			},
-    			"(" + RichMessagingData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND ((" +
-    				RichMessagingData.KEY_STATUS + "=" + EventsLogApi.EVENT_INITIATED + ") OR (" +
-    				RichMessagingData.KEY_STATUS + "=" + EventsLogApi.EVENT_INVITED + "))", 
+    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND ((" +
+    				ChatData.KEY_STATUS + "=" + EventsLogApi.EVENT_INITIATED + ") OR (" +
+    				ChatData.KEY_STATUS + "=" + EventsLogApi.EVENT_INVITED + "))", 
     				null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	
     	if (cursor.moveToFirst()) {
     		String participants = cursor.getString(2); 
@@ -1259,7 +1011,7 @@ public class RichMessaging {
     				list,
     				cursor.getString(3));
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
 	}
 
@@ -1271,18 +1023,18 @@ public class RichMessaging {
 	 */
 	public int getGroupChatStatus(String chatId) {
 		int result = -1;
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_STATUS
+    				ChatData.KEY_STATUS
     			},
-    			"(" + RichMessagingData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ")", 
+    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ")", 
     			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	if (cursor.moveToFirst()) {
     		result = cursor.getInt(0);
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
 	}	
 
@@ -1294,22 +1046,22 @@ public class RichMessaging {
 	 */
 	public List<String> getGroupChatConnectedParticipants(String chatId) {
     	List<String> result = new ArrayList<String>();
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_CONTACT
+    				ChatData.KEY_CONTACT
     			},
-    			"(" + RichMessagingData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
-    				RichMessagingData.KEY_STATUS + "=" + EventsLogApi.EVENT_JOINED_CHAT + ")", 
+    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
+    				ChatData.KEY_STATUS + "=" + EventsLogApi.EVENT_JOINED_CHAT + ")", 
     			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	while(cursor.moveToNext()) {
     		String participant = cursor.getString(0);
     		if (!result.contains(participant)) {
     			result.add(participant);
     		}
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
 	}
 	
@@ -1321,20 +1073,125 @@ public class RichMessaging {
 	 */
 	public String getGroupChatSubject(String chatId) {
 		String result = null;
-    	Cursor cursor = cr.query(databaseUri, 
+/*    	Cursor cursor = cr.query(databaseUri, 
     			new String[] {
-    				RichMessagingData.KEY_DATA
+    				ChatData.KEY_DATA
     			},
-    			"(" + RichMessagingData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				RichMessagingData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
-                    RichMessagingData.KEY_STATUS + "=" + EventsLogApi.EVENT_INITIATED + " OR " +
-                    RichMessagingData.KEY_STATUS + "=" + EventsLogApi.EVENT_INVITED + ")",
+    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
+    				ChatData.KEY_TYPE + "=" + EventsLogApi.TYPE_GROUP_CHAT_SYSTEM_MESSAGE + ") AND (" +
+                    ChatData.KEY_STATUS + "=" + EventsLogApi.EVENT_INITIATED + " OR " +
+                    ChatData.KEY_STATUS + "=" + EventsLogApi.EVENT_INVITED + ")",
     			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
+    			ChatData.KEY_TIMESTAMP + " DESC");
     	if (cursor.moveToFirst()) {
     		result = cursor.getString(0);
     	}
-    	cursor.close();
+    	cursor.close();*/
     	return result;
+	}
+	
+	/*--------------------- File transfer methods ----------------------*/
+
+	/**
+	 * Add outgoing file transfer
+	 * 
+	 * @param contact Contact
+	 * @param sessionId Session ID
+	 * @param direction Direction
+	 * @param content File content 
+	 * @param status Status
+	 */
+	public void addFileTransfer(String contact, String sessionId, int direction, MmContent content, int status) {
+		contact = PhoneUtils.extractNumberFromUri(contact);
+		if (logger.isActivated()){
+			logger.debug("Add file transfer entry: sessionID=" + sessionId +
+					", contact=" + contact +
+					", filename=" + content.getName() +
+					", size=" + content.getSize() +
+					", MIME=" + content.getEncoding());
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_SESSION_ID, sessionId);
+		values.put(FileTransferData.KEY_CONTACT, contact);
+		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
+		values.put(FileTransferData.KEY_STATUS, status);
+		values.put(FileTransferData.KEY_DIRECTION, direction);
+		values.put(FileTransferData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+		values.put(FileTransferData.KEY_SIZE, 0);
+		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
+		cr.insert(ftDatabaseUri, values);
+	}
+
+	/**
+	 * Update file transfer status
+	 * 
+	 * @param sessionId Session ID
+	 * @param status New status
+	 */
+	public void updateFileTransferStatus(String sessionId, int status) {
+		if (logger.isActivated()) {
+			logger.debug("Update file transfer status to " + status);
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_STATUS, status);
+		cr.update(ftDatabaseUri, 
+				values, 
+				FileTransferData.KEY_SESSION_ID + " = " + sessionId, 
+				null);
+	}
+	
+	/**
+	 * Update file transfer download progress
+	 * 
+	 * @param sessionId Session ID
+	 * @param size Downloaded size
+	 * @param totalSize Total size to download 
+	 */
+	public void updateFileTransferProgress(String sessionId, long size, long totalSize) {
+		if (logger.isActivated()) {
+			logger.debug("Update file transfer progress");
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_SIZE, size);
+		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
+		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.STARTED);
+		cr.update(ftDatabaseUri, 
+				values, 
+				FileTransferData.KEY_SESSION_ID + " = " + sessionId, 
+				null);
+	}
+
+	/**
+	 * Update file transfer URL
+	 * 
+	 * @param sessionId Session ID
+	 * @param url File URL
+	 */
+	public void updateFileTransferUrl(String sessionId, String url) {
+		if (logger.isActivated()) {
+			logger.debug("Update file transfer URL to " + url);
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_NAME, url);
+		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERED);
+		cr.update(ftDatabaseUri, 
+				values, 
+				FileTransferData.KEY_SESSION_ID + " = " + sessionId, 
+				null);
+	}
+	
+	/**
+	 * Delete a file transfer session
+	 * 
+	 * @param sessionId Session ID
+	 */
+	public void deleteFileTransferSession(String sessionId, String contact) {
+		if (logger.isActivated()) {
+			logger.debug("Delete a file transfer session " + sessionId);
+		}
+		Cursor count = cr.query(ftDatabaseUri, null, FileTransferData.KEY_SESSION_ID + " = " + sessionId, null, null);
+		count.getCount();
+		count.close();
 	}
 }

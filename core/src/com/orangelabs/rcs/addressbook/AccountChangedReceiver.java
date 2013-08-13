@@ -30,7 +30,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.registry.RegistryFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.LauncherUtils;
-import com.orangelabs.rcs.service.api.client.ClientApiUtils;
+import com.orangelabs.rcs.service.ServiceUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -67,7 +67,7 @@ public class AccountChangedReceiver extends BroadcastReceiver {
             	setAccountResetByEndUser(true);
             }
 
-			if (ClientApiUtils.isServiceStarted(context)){
+			if (ServiceUtils.isServiceStarted(context)){
 				
 				if (logger.isActivated()){
 					logger.debug("RCS service is running, we stop it");

@@ -23,12 +23,13 @@ import org.gsma.joyn.ft.IFileTransferListener;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
-import com.orangelabs.rcs.service.api.client.eventslog.EventsLogApi;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -121,25 +122,49 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 * @return State 
 	 */
 	public int getState() {
-		// TODO
-		int state = ServerApiUtils.getSessionState(session);
-		switch(state) {
-			case SessionState.PENDING:
-				return FileTransfer.State.INITIATED;
-			
-			case SessionState.ESTABLISHED:
-				return FileTransfer.State.STARTED;
-			
-			case SessionState.CANCELLED:
-				return FileTransfer.State.INITIATED;
-			
-			case SessionState.TERMINATED:
-				return FileTransfer.State.TRANSFERED;
-
-			default:
-				return FileTransfer.State.UNKNOWN;
+		int result = FileTransfer.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = FileTransfer.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = FileTransfer.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				if (session.isFileTransfered()) {
+					result = FileTransfer.State.TRANSFERED;
+				} else {
+					result = FileTransfer.State.ABORTED;
+				}
+			} else {
+				// Session pending
+				if (session instanceof OriginatingFileSharingSession) {
+					result = FileTransfer.State.INITIATED;
+				} else {
+					result = FileTransfer.State.INVITED;
+				}
+			}
 		}
-	}		
+		return result;
+	}
+	
+	/**
+	 * Returns the direction of the transfer (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see FileTransfer.Direction
+	 */
+	public int getDirection() {
+		if (session instanceof OriginatingFileSharingSession) {
+			return FileTransfer.Direction.OUTGOING;
+		} else {
+			return FileTransfer.Direction.INCOMING;
+		}
+	}	
 		
 	/**
 	 * Accepts file transfer invitation
@@ -162,7 +187,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		}
 		
 		// Update rich messaging history
-  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), EventsLogApi.STATUS_CANCELED);
+  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 
   		// Reject invitation
 		session.rejectSession(603);
@@ -253,7 +278,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), EventsLogApi.STATUS_CANCELED);
+			RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -289,7 +314,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	  		}
 	  		
 			// Update rich messaging history
-	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), EventsLogApi.STATUS_FAILED);
+	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 	
 	        // Remove session from the list
 	        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
@@ -308,7 +333,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), EventsLogApi.STATUS_FAILED);
+	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

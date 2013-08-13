@@ -288,8 +288,8 @@ public class ProfileProvisioning extends Activity {
         textEdit.setText(RcsSettings.getInstance().getCountryCode());
 
         final String[] platforms = {
-                "NSN Brune", "NSN Lannion", "Margaux", "VCOM1", "VCOM2",
-                "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini"
+                "NSN Brune", "NSN Lannion", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
+                "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini", "JibeNet"
         };
         Spinner spinner = (Spinner)view.findViewById(R.id.ims);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -350,19 +350,37 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5080;
 	            			confUri = "sip:Conference-Factory@" + homeDomain;
 	            			break;
-                        case 2: // Margaux
+                        case 2: // Margaux (albatros)
                             homeDomain = "sip.mobistar.com";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
                             imsPwd = "imt30imt30";
 	            			imsRealm = "sip.mobistar.com";
-	            			imsAddrForMobile = "172.20.84.114";
-	            			imsPortForMobile = 5080;
-	            			imsAddrForWifi = "172.20.84.114";
-	            			imsPortForWifi = 5080;
+	            			imsAddrForMobile = "sip.mobistar.com";
+	            			imsPortForMobile = 5060;
+	            			imsAddrForWifi = "sip.mobistar.com";
+	            			imsPortForWifi = 5060;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
+	            			ftHttpServerAddr = "";
+	            			ftHttpServerLogin = "";
+	            			ftHttpServerPwd = "";
                             break;
-                        case 3: // VCO1
+                        case 3: // Margaux (blackbird)
+                            homeDomain = "rcs.lannion-e.com";
+                            sipUri = number + "@" + homeDomain;
+                            privateSipUri = sipUri;
+                            imsPwd = "imt30imt30";
+                            imsRealm = "sip.mobistar.com";
+                            imsAddrForMobile = "172.20.84.114";
+                            imsPortForMobile = 5080;
+                            imsAddrForWifi = "172.20.84.114";
+                            imsPortForWifi = 5080;
+                            confUri  = "sip:Conference-Factory@" + homeDomain;
+                            ftHttpServerAddr = "https://172.20.65.52/rcse-hcs/upload";
+                            ftHttpServerLogin = sipUri;
+                            ftHttpServerPwd = "imt30imt30";
+                            break;
+                        case 4: // VCO1
                             homeDomain = "sip.france.fr";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -374,7 +392,7 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5080;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 4: // VCO2
+                        case 5: // VCO2
                             homeDomain = "sip.france.fr";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -386,7 +404,7 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5060;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 5: // RCS
+                        case 6: // RCS
                             homeDomain = "sip.france.fr";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -398,7 +416,7 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5060;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 6: // Kamailio1
+                        case 7: // Kamailio1
                             homeDomain = "rcs.kamailio1.com";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -410,7 +428,7 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5060;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 7: // Margaux IPv6
+                        case 8: // Margaux IPv6
                             homeDomain = "sip.mobistar.com";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -422,7 +440,7 @@ public class ProfileProvisioning extends Activity {
                             imsPortForWifi = 5060;
                             confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 8: // Huawei
+                        case 9: // Huawei
                             homeDomain = "sip.osk.com";
                             sipUri = number + "@" + homeDomain;
                             if (sipUri.startsWith("+")) {
@@ -438,7 +456,7 @@ public class ProfileProvisioning extends Activity {
                             imsPortForWifi = 5060;
                             confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
-                        case 9: // Capgemini
+                        case 10: // Capgemini
                             homeDomain = "sims2.net";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -449,6 +467,18 @@ public class ProfileProvisioning extends Activity {
                             imsAddrForWifi = "10.67.102.151";
                             imsPortForWifi = 5060;
                             confUri  = "sip:Conference-Factory@" + homeDomain;
+                            break;
+                        case 11: // JibeNet
+                            homeDomain = "jibemobile.com";
+                            sipUri = number + "@" + homeDomain;
+            				privateSipUri = sipUri;
+                            imsPwd = "5555";
+	            			imsRealm = "jibemobile.com";
+                            imsAddrForMobile = "goose.jibemobile.com";
+                            imsPortForMobile = 5671;
+                            imsAddrForWifi = "goose.jibemobile.com";
+                            imsPortForWifi = 5671;
+                            confUri  = "sip:conference@" + homeDomain;
                             break;
                     }
 

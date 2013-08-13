@@ -43,6 +43,7 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreListener;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.ImsError;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
@@ -624,7 +625,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
      * New SIP session invitation
      * 
-	 * @param intent Resolved intent
+     * @param intent Resolved intent
      * @param session SIP session
      */
     public void handleSipSessionInvitation(Intent intent, GenericSipSession session) {
@@ -634,6 +635,21 @@ public class RcsCoreService extends Service implements CoreListener {
 		
 		// Broadcast the invitation
 		sessionApi.receiveSipSessionInvitation(intent, session);
+    }    
+    
+	/**
+	 * New SIP instant message received
+	 * 
+     * @param intent Resolved intent
+     * @param message Instant message request
+	 */
+    public void handleSipInstantMessageReceived(Intent intent, SipRequest message) {  
+    	if (logger.isActivated()) {
+			logger.debug("Handle event receive SIP instant message");
+		}
+		
+		// Broadcast the message
+		sessionApi.receiveSipInstantMessage(intent, message);
     }    
 
 	/**

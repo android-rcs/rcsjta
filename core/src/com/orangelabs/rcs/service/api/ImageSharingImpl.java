@@ -1,17 +1,18 @@
 package com.orangelabs.rcs.service.api;
 
+import org.gsma.joyn.ish.IImageSharing;
 import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.ImageSharing;
-import org.gsma.joyn.ish.IImageSharing;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSessionListener;
+import com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession;
 import com.orangelabs.rcs.provider.sharing.RichCall;
-import com.orangelabs.rcs.provider.sharing.RichCallData;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -104,23 +105,47 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	 * @return State 
 	 */
 	public int getState() {
-		// TODO
-		int state = ServerApiUtils.getSessionState(session);
-		switch(state) {
-			case SessionState.PENDING:
-				return ImageSharing.State.INITIATED;
-			
-			case SessionState.ESTABLISHED:
-				return ImageSharing.State.STARTED;
-			
-			case SessionState.CANCELLED:
-				return ImageSharing.State.INITIATED;
-			
-			case SessionState.TERMINATED:
-				return ImageSharing.State.TRANSFERED;
-
-			default:
-				return ImageSharing.State.UNKNOWN;
+		int result = ImageSharing.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = ImageSharing.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = ImageSharing.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				if (session.isImageTransfered()) {
+					result = ImageSharing.State.TRANSFERED;
+				} else {
+					result = ImageSharing.State.ABORTED;
+				}
+			} else {
+				// Session pending
+				if (session instanceof OriginatingImageTransferSession) {
+					result = ImageSharing.State.INITIATED;
+				} else {
+					result = ImageSharing.State.INVITED;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the direction of the sharing (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see ImageSharing.Direction
+	 */
+	public int getDirection() {
+		if (session instanceof OriginatingImageTransferSession) {
+			return ImageSharing.Direction.OUTGOING;
+		} else {
+			return ImageSharing.Direction.INCOMING;
 		}
 	}		
 		
@@ -145,7 +170,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 
 		// Update rich call history
-		RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_CANCELED);
+		RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
 
 		// Reject invitation
 		session.rejectSession(603);
@@ -209,7 +234,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 				logger.info("Session started");
 			}
 	
-	  		// Notify event listeners
+			// Update rich call history
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.STARTED);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -236,7 +264,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_CANCELED);
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -272,7 +300,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	  		}
 			
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_FAILED);
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
 	
 	        // Remove session from the list
 			ImageSharingServiceImpl.removeImageSharingSession(session.getSessionID());
@@ -291,7 +319,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_FAILED);
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.FAILED);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -346,7 +374,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 				logger.debug("Sharing progress");
 			}
 	
-	  		// Notify event listeners
+			// Update rich call history
+			RichCall.getInstance().setImageSharingProgress(session.getSessionID(), currentSize, totalSize);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -373,7 +404,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_TERMINATED);
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.TRANSFERED);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

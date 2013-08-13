@@ -244,7 +244,7 @@ public class ImsServiceDispatcher extends Thread {
 	    		}
 	    		
 		    	if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
-		    			(!request.getContentType().contains("multipart"))) { // TODO: to be removed when corrected by ALU
+		    			(!request.getContentType().contains("multipart"))) {
 	    			// Store & Forward push notifs session
 		    		if (logger.isActivated()) {
 		    			logger.debug("Store & Forward push notifications");
@@ -349,11 +349,20 @@ public class ImsServiceDispatcher extends Thread {
 	    		// Terms & conditions service
 	    		imsModule.getTermsConditionsService().receiveMessage(request);
 	    	} else {
-				// Unknown service: reject the message with a 606 Not Acceptable
-				if (logger.isActivated()) {
-					logger.debug("Unknown IMS service: automatically reject");
-				}
-				sendFinalResponse(request, 606);
+	    		Intent intent = intentMgr.isSipRequestResolved(request); 
+	    		if (intent != null) {
+	    			// Generic SIP instant message
+		    		if (logger.isActivated()) {
+		    			logger.debug("Generic instant message");
+		    		}
+	    			imsModule.getSipService().receiveInstantMessage(intent, request);
+		    	} else {
+					// Unknown service: reject the message with a 606 Not Acceptable
+					if (logger.isActivated()) {
+						logger.debug("Unknown IMS service: automatically reject");
+					}
+					sendFinalResponse(request, 606);
+		    	}
 	    	}
 		} else
 	    if (request.getMethod().equals(Request.NOTIFY)) {

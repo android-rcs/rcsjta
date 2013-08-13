@@ -18,9 +18,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import com.orangelabs.rcs.provider.RichProviderHelper;
-import com.orangelabs.rcs.provider.eventlogs.EventLogData;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -38,7 +35,7 @@ import android.text.TextUtils;
  * 
  * @author mhsm6403
  */
-public class RichMessagingProvider extends ContentProvider {
+public class ChatProvider extends ContentProvider {
 	// Database table
 	public static final String TABLE = "messaging";
 	
@@ -49,12 +46,8 @@ public class RichMessagingProvider extends ContentProvider {
 	private static final int MESSAGING_SESSION = 3;
 	private static final int MESSAGING_TYPE_DISCRIMINATOR = 4;
 	
-	// Allocate the UriMatcher object, where a URI ending in 'contacts'
-	// will correspond to a request for all contacts, and 'contacts'
-	// with a trailing '/[rowID]' will represent a single contact row.
+	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
-
-
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("com.orangelabs.rcs.messaging", "messaging", MESSAGING);
@@ -70,10 +63,7 @@ public class RichMessagingProvider extends ContentProvider {
 
 	@Override 
 	public boolean onCreate() {
-		if(RichProviderHelper.getInstance()==null){
-        	RichProviderHelper.createInstance(this.getContext());
-        }
-        this.openHelper = RichProviderHelper.getInstance();
+		// TODO
         return true;
 	}
 
@@ -101,14 +91,14 @@ public class RichMessagingProvider extends ContentProvider {
             case MESSAGING:
                 break;
             case MESSAGING_ID:
-                qb.appendWhere(RichMessagingData.KEY_ID + "=" + uri.getPathSegments().get(1));
+                qb.appendWhere(ChatData.KEY_ID + "=" + uri.getPathSegments().get(1));
                 break;
             case MESSAGING_SESSION:
-            	groupBy=RichMessagingData.KEY_CHAT_SESSION_ID;
-            	sort=RichMessagingData.KEY_TIMESTAMP+ " ASC";
+            	groupBy=ChatData.KEY_CHAT_SESSION_ID;
+            	sort=ChatData.KEY_TIMESTAMP+ " ASC";
             	break;
             case MESSAGING_TYPE_DISCRIMINATOR:
-            	qb.appendWhere(RichMessagingData.KEY_TYPE+"=");
+            	qb.appendWhere(ChatData.KEY_TYPE+"=");
             	qb.appendWhere(uri.getPathSegments().get(2));
             	break;
             default:
@@ -122,7 +112,7 @@ public class RichMessagingProvider extends ContentProvider {
 		// the cursor result set changes.
         c.setNotificationUri(getContext().getContentResolver(), uri);
         // Also notify changes to the Event log provider
-        getContext().getContentResolver().notifyChange(EventLogData.CONTENT_URI, null);
+        getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
         return c;
     }
     
@@ -139,14 +129,14 @@ public class RichMessagingProvider extends ContentProvider {
             case MESSAGING_ID:
                 String segment = uri.getPathSegments().get(1);
                 int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, RichMessagingData.KEY_ID + "=" + id, null);
+                count = db.update(TABLE, values, ChatData.KEY_ID + "=" + id, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         // Also notify changes to the Event log provider
-        getContext().getContentResolver().notifyChange(EventLogData.CONTENT_URI, null);
+        getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
         return count;
     }
     
@@ -164,17 +154,16 @@ public class RichMessagingProvider extends ContentProvider {
 	        		// If generated id is <0, it is problematic for uris
 	        		id = -id;
 	        	}
-	        	initialValues.put(RichMessagingData.KEY_ID, id);
-	        	initialValues.put(RichMessagingData.KEY_SIZE,0);
+	        	initialValues.put(ChatData.KEY_ID, id);
 	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(RichMessagingData.CONTENT_URI, rowId);
+	    		uri = ContentUris.withAppendedId(ChatData.CONTENT_URI, rowId);
 	        	break;
 	        default:
 	    		throw new SQLException("Failed to insert row into " + uri);
         }
 		getContext().getContentResolver().notifyChange(uri, null);
         // Also notify changes to the Event log provider
-		getContext().getContentResolver().notifyChange(EventLogData.CONTENT_URI, null);
+		getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
 		return uri;
     }
     
@@ -194,7 +183,7 @@ public class RichMessagingProvider extends ContentProvider {
 	        	break;
 	        case MESSAGING_ID:
 	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, RichMessagingData.KEY_ID + "="
+				count = db.delete(TABLE, ChatData.KEY_ID + "="
 						+ segment
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);
@@ -205,8 +194,6 @@ public class RichMessagingProvider extends ContentProvider {
 	    		throw new SQLException("Failed to delete row " + uri);
         }
 		getContext().getContentResolver().notifyChange(uri, null);
-        // Also notify changes to the Event log provider
-        getContext().getContentResolver().notifyChange(EventLogData.CONTENT_URI, null);
         return count;    
    }	
     

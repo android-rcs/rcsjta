@@ -22,12 +22,12 @@ public class VideoCodec implements Parcelable {
 	/**
 	 * Clock rate
 	 */
-	private float clockRate;
+	private int clockRate;
 	
 	/**
 	 * Frame rate
 	 */
-	private float frameRate;
+	private int frameRate;
 	
 	/**
 	 * Bit rate
@@ -61,7 +61,7 @@ public class VideoCodec implements Parcelable {
      * @param height Video height
      * @param parameters Codec parameters
      */
-    public VideoCodec(String encoding, int payload, float clockRate, float frameRate, int bitRate, int width, int height, String parameters) {
+    public VideoCodec(String encoding, int payload, int clockRate, int frameRate, int bitRate, int width, int height, String parameters) {
     	this.encoding = encoding;
     	this.payload = payload;
     	this.clockRate = clockRate;
@@ -80,8 +80,8 @@ public class VideoCodec implements Parcelable {
 	public VideoCodec(Parcel source) {
 		this.encoding = source.readString();
     	this.payload = source.readInt();
-    	this.clockRate = source.readFloat();
-    	this.frameRate = source.readFloat();
+    	this.clockRate = source.readInt();
+    	this.frameRate = source.readInt();
     	this.bitRate = source.readInt();
     	this.width = source.readInt();
     	this.height = source.readInt();
@@ -107,8 +107,8 @@ public class VideoCodec implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(encoding);
     	dest.writeInt(payload);
-    	dest.writeFloat(clockRate);
-    	dest.writeFloat(frameRate);
+    	dest.writeInt(clockRate);
+    	dest.writeInt(frameRate);
     	dest.writeInt(bitRate);
     	dest.writeInt(width);
     	dest.writeInt(height);
@@ -152,7 +152,7 @@ public class VideoCodec implements Parcelable {
      * 
      * @return Clock rate
      */
-    public float getClockRate() {
+    public int getClockRate() {
     	return clockRate;
     }
     
@@ -161,7 +161,7 @@ public class VideoCodec implements Parcelable {
      * 
      * @return Frame rate
      */
-    public float getFrameRate() {
+    public int getFrameRate() {
     	return frameRate;
     }
     

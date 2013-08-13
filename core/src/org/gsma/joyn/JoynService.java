@@ -64,7 +64,7 @@ public abstract class JoynService {
     	/**
     	 * API release implementor name
     	 */
-    	public static final String API_CODENAME = "OrangeLabs";
+    	public static final String API_CODENAME = "GSMA";
 
     	/**
     	 * API version number
@@ -144,14 +144,14 @@ public abstract class JoynService {
     /**
      * Returns true if the service is connected, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public abstract boolean isServiceConnected();
 
     /**
      * Returns true if the service is registered to the platform, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
     	return registered;

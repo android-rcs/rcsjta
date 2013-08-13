@@ -250,7 +250,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
 	protected static void addGroupChatSession(GroupChatImpl session) {
 		if (logger.isActivated()) {
-			logger.debug("Add a chat session in the list (size=" + chatSessions.size() + ")");
+			logger.debug("Add a group chat session in the list (size=" + groupChatSessions.size() + ")");
 		}
 		groupChatSessions.put(session.getChatId(), session);
 	}
@@ -262,7 +262,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
 	protected static void removeGroupChatSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a chat session from the list (size=" + chatSessions.size() + ")");
+			logger.debug("Remove a group chat session from the list (size=" + groupChatSessions.size() + ")");
 		}
 		groupChatSessions.remove(sessionId);
 	}
@@ -346,16 +346,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Initiate the session
 			ChatSession session = Core.getInstance().getImService().initiateAdhocGroupChatSession(contacts, subject);
 
-			// Add session in the list
+			// Add session listener
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
 			sessionApi.addEventListener(listener);
 
-			// Start the session
-			session.startSession();
-			
 			// Update rich messaging history
 			RichMessaging.getInstance().addOutgoingChatSession(session);
-			
+
+			// Start the session
+			session.startSession();
+						
 			// Add session in the list
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 			return sessionApi;
@@ -446,7 +446,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws ServerApiException
      */
     public void addEventListener(INewChatListener listener) throws ServerApiException {
-    	// TODO
+		if (logger.isActivated()) {
+			logger.info("Add a chat invitation listener");
+		}
+
+		listeners.register(listener);
     }
     
     /**
@@ -456,7 +460,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws ServerApiException
      */
     public void removeEventListener(INewChatListener listener) throws ServerApiException {
-    	// TODO
+		if (logger.isActivated()) {
+			logger.info("Remove a chat invitation listener");
+		}
+
+		listeners.unregister(listener);
     }
     
     /**
@@ -522,7 +530,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ServerApiUtils.testCore();
 		
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(chatSessions.size());
+			ArrayList<IBinder> result = new ArrayList<IBinder>(groupChatSessions.size());
 			for (Enumeration<IGroupChat> e = groupChatSessions.elements() ; e.hasMoreElements() ;) {
 				IGroupChat sessionApi = (IGroupChat)e.nextElement() ;
 				result.add(sessionApi.asBinder());

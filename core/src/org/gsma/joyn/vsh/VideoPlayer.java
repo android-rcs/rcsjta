@@ -1,5 +1,8 @@
 package org.gsma.joyn.vsh;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.gsma.joyn.JoynServiceException;
 
 
@@ -12,19 +15,34 @@ import org.gsma.joyn.JoynServiceException;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class VideoPlayer {
+public abstract class VideoPlayer extends IVideoPlayer.Stub {
     /**
-     * Video player interface
+     * Video player error
      */
-    protected IVideoPlayer playerInf;
+    public static class Error {
+    	/**
+    	 * Internal error
+    	 */
+    	public final static int INTERNAL_ERROR = 0;
+    	
+    	/**
+    	 * Network connection failed
+    	 */
+    	public final static int NETWORK_FAILURE = 1;
+    	
+        private Error() {
+        }    	
+    }
+
+    /**
+     * Video player event listeners
+     */
+    private Set<IVideoPlayerListener> listeners = new HashSet<IVideoPlayerListener>();
     
     /**
      * Constructor
-     * 
-     * @param playerInf Video player interface
      */
-    VideoPlayer(IVideoPlayer playerInf) {
-    	this.playerInf = playerInf;
+    public VideoPlayer() {
     }
 
     /**
@@ -33,109 +51,71 @@ public class VideoPlayer {
 	 * @param codec Video codec
 	 * @param remoteHost Remote RTP host
 	 * @param remotePort Remote RTP port
-	 * @throws JoynServiceException
 	 */
-	public void open(VideoCodec codec, String remoteHost, int remotePort) throws JoynServiceException {
-		try {
-			playerInf.open(codec, remoteHost, remotePort);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void open(VideoCodec codec, String remoteHost, int remotePort);
 	
 	/**
 	 * Closes the player and deallocates resources
 	 * 
 	 * @throws JoynServiceException
 	 */
-	public void close() throws JoynServiceException {
-		try {
-			playerInf.close();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void close();
 	
 	/**
 	 * Starts the player
-	 * 
-	 * @throws JoynServiceException
 	 */
-	public void start() throws JoynServiceException {
-		try {
-			playerInf.start();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void start();
 	
 	/**
 	 * Stops the player
-	 * 
-	 * @throws JoynServiceException
 	 */
-	public void stop() throws JoynServiceException {
-		try {
-			playerInf.stop();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void stop();
 	
 	/**
 	 * Returns the local RTP port used to stream video
 	 * 
 	 * @return Port number
-	 * @throws JoynServiceException
 	 */
-	public int getLocalRtpPort() throws JoynServiceException {
-		try {
-			return playerInf.getLocalRtpPort();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
+	public abstract int getLocalRtpPort();
 	
 	/**
 	 * Returns the list of codecs supported by the player
 	 * 
 	 * @return List of codecs
-	 * @throws JoynServiceException
 	 */
-	public VideoCodec[] getSupportedCodecs() throws JoynServiceException {
-		try {
-			return playerInf.getSupportedCodecs();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract VideoCodec[] getSupportedCodecs();
 	
+	/**
+	 * Returns the list of event listeners
+	 * 
+	 * @return Listeners
+	 */
+	public Set<IVideoPlayerListener> getEventListeners() {
+		return listeners;
+	}
+
 	/**
 	 * Adds a listener on video player events
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
 	 */
-	public void addEventListener(VideoPlayerListener listener) throws JoynServiceException {
-		try {
-			playerInf.addEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	public void addEventListener(IVideoPlayerListener listener) {
+		listeners.add(listener);
 	}
-	
+
 	/**
 	 * Removes a listener from video player
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
 	 */
-	public void removeEventListener(VideoPlayerListener listener) throws JoynServiceException {
-		try {
-			playerInf.removeEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	public void removeEventListener(IVideoPlayerListener listener) {
+		listeners.remove(listener);
+	}
+
+	/**
+	 * Removes all listeners from video player
+	 */
+	public void removeAllEventListeners() {
+		listeners.clear();
 	}
 }

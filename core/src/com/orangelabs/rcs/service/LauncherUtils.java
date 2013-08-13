@@ -29,7 +29,6 @@ import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.service.api.client.ClientApiUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -65,7 +64,7 @@ public class LauncherUtils {
 		if (logger.isActivated()) {
             logger.debug("Launch RCS service");
         }
-        Intent intent = new Intent(ClientApiUtils.STARTUP_SERVICE_NAME);
+        Intent intent = new Intent(ServiceUtils.STARTUP_SERVICE_NAME);
         intent.putExtra("boot", boot);
         context.startService(intent);
     }    
@@ -81,7 +80,7 @@ public class LauncherUtils {
         }
         if (RcsSettings.getInstance().isServiceActivated()) {
         	if (RcsSettings.getInstance().isUserProfileConfigured()) {
-	        	context.startService(new Intent(ClientApiUtils.RCS_SERVICE_NAME));
+	        	context.startService(new Intent(ServiceUtils.RCS_SERVICE_NAME));
 	        } else {
 		        if (logger.isActivated()) {
 		            logger.debug("RCS service not configured");
@@ -105,7 +104,7 @@ public class LauncherUtils {
         }
     	if (RcsSettings.getInstance().isUserProfileConfigured()) {
             RcsSettings.getInstance().setServiceActivationState(true);
-            context.startService(new Intent(ClientApiUtils.RCS_SERVICE_NAME));
+            context.startService(new Intent(ServiceUtils.RCS_SERVICE_NAME));
         } else {
             if (logger.isActivated()) {
                 logger.debug("RCS service not configured");
@@ -122,9 +121,9 @@ public class LauncherUtils {
         if (logger.isActivated()) {
             logger.debug("Stop RCS service");
         }
-        context.stopService(new Intent(ClientApiUtils.STARTUP_SERVICE_NAME));
-        context.stopService(new Intent(ClientApiUtils.PROVISIONING_SERVICE_NAME));
-        context.stopService(new Intent(ClientApiUtils.RCS_SERVICE_NAME));
+        context.stopService(new Intent(ServiceUtils.STARTUP_SERVICE_NAME));
+        context.stopService(new Intent(ServiceUtils.PROVISIONING_SERVICE_NAME));
+        context.stopService(new Intent(ServiceUtils.RCS_SERVICE_NAME));
     }
 
     /**
@@ -138,7 +137,7 @@ public class LauncherUtils {
         }
 
         // Stop the Core service
-        context.stopService(new Intent(ClientApiUtils.RCS_SERVICE_NAME));
+        context.stopService(new Intent(ServiceUtils.RCS_SERVICE_NAME));
 
         // Reset user profile
         RcsSettings.createInstance(context);

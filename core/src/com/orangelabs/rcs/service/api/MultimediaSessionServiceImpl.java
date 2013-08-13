@@ -26,14 +26,19 @@ import java.util.Vector;
 import org.gsma.joyn.session.IMultimediaSession;
 import org.gsma.joyn.session.IMultimediaSessionListener;
 import org.gsma.joyn.session.IMultimediaSessionService;
+import org.gsma.joyn.session.MultimediaMessageIntent;
+import org.gsma.joyn.session.MultimediaSessionIntent;
 
 import android.content.Intent;
 import android.os.IBinder;
 
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -96,13 +101,19 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	/**
 	 * Receive a new SIP session invitation
 	 * 
-	 * @param intent Resolved intent
+     * @param intent Resolved intent
      * @param session SIP session
 	 */
 	public void receiveSipSessionInvitation(Intent intent, GenericSipSession session) {
 		// Add session in the list
 		MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
 		MultimediaSessionServiceImpl.addSipSession(sessionApi);
+		
+		// Broadcast intent related to the received invitation
+		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+		intent.putExtra(MultimediaSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(MultimediaSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
@@ -134,8 +145,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			// Initiate a new session
 			GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	serviceId, sdp);
 			
-			// Add session in the list
+			// Add session listener
 			MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
+			sessionApi.addEventListener(listener);
+
+			// Start the session
+			session.startSession();
+			
+			// Add session in the list
 			MultimediaSessionServiceImpl.addSipSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
@@ -202,4 +219,56 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			throw new ServerApiException(e.getMessage());
 		}
 	}
+    
+    /**
+     * Sends an instant message to a contact and for a given service. The message may be any
+     * type of content. The parameter contact supports the following formats: MSISDN in
+     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
+     * contact is not supported an exception is thrown.
+     * 
+     * @param serviceId Service ID
+     * @param contact Contact
+     * @param content Message content
+     * @param contentType Content type of the message
+	 * @return Returns true if sent successfully else returns false
+	 * @throws ServerApiException
+     */
+    public boolean sendMessage(String serviceId, String contact, String content, String contentType) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Send instant message to " + contact);
+		}
+
+		// Test IMS connection
+		ServerApiUtils.testIms();
+
+		try {
+			// Send instant message
+			return Core.getInstance().getSipService().sendInstantMessage(contact, serviceId, content, contentType);
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e.getMessage());
+		}
+	}
+    
+	/**
+	 * Receive an instant message (SIP MESSAGE)
+	 *  
+     * @param intent Resolved intent
+     * @param message Instant message request
+   	 */
+	public void receiveSipInstantMessage(Intent intent, SipRequest message) {
+		// Broadcast intent related to the received invitation
+		String contact = SipUtils.getAssertedIdentity(message);
+		String number = PhoneUtils.extractNumberFromUri(contact);
+		String displayName = SipUtils.getDisplayNameFromUri(message.getFrom());
+		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaMessageIntent.EXTRA_DISPLAY_NAME, displayName);
+		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT, message.getContent());
+		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT_TYPE, message.getContentType());
+		
+		// Broadcast intent related to the received invitation
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
+	}    
 }

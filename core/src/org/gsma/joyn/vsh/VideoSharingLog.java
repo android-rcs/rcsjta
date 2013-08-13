@@ -28,8 +28,14 @@ public class VideoSharingLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider/vsh");
-	
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.vsh/vsh");
+
+    /**
+     * The name of the column containing the unique ID for a row.
+     * <P>Type: primary key</P>
+     */
+    public static final String ID = "_id";
+    
     /**
      * The name of the column containing the unique ID of the video sharing.
      * <P>Type: TEXT</P>
@@ -45,11 +51,12 @@ public class VideoSharingLog {
     /**
      * The name of the column containing the direction of the sharing
      * <P>Type: INTEGER</P>
+	 * @see VideoSharing.Direction
      */
     public static final String DIRECTION = "direction";
 
     /**
-     * The name of the column containing the date of the sharing
+     * The name of the column containing the date of the sharing (in milliseconds)
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
@@ -57,57 +64,13 @@ public class VideoSharingLog {
     /**
      * The name of the column containing the state of the sharing.
      * <P>Type: INTEGER</P>
+	 * @see VideoSharing.State
      */
     public static final String STATE = "state";    
     
     /**
-     * The name of the column containing the duration of the sharing.
+     * The name of the column containing the duration of the sharing (in seconds).
      * <P>Type: LONG</P>
      */
     public static final String DURATION = "duration";    
-
-    /**
-     * State of the sharing
-     */
-    public static class State {
-        /**
-         * Outgoing invitation is pending
-         */
-        public static final int INVITED = 0;
-    
-        /**
-         * Incoming invitation is pending
-         */
-        public static final int INITIATED = 1;
-
-        /**
-         * Invitation has been accepted and sharing is started
-         */
-        public static final int STARTED = 2;
-
-        /**
-         * Sharing has been aborted
-         */
-        public static final int ABORTED = 4;
-
-        /**
-         * Sharing has failed
-         */
-        public static final int FAILED = 5;
-    }
-
-    /**
-     * Direction of the sharing
-     */
-    public static class Direction {
-        /**
-         * Incoming sharing
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing sharing
-         */
-        public static final int OUTGOING = 1;
-    }    
 }

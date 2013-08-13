@@ -38,26 +38,46 @@ public class MultimediaSession {
     	 */
     	public final static int ABORTED = 5;
     	
-    	/**
+        /**
+         * Session has been terminated
+         */
+        public static final int TERMINATED = 6;
+
+        /**
     	 * Session has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 7;
     	
         private State() {
         }    	
     }
     
     /**
+     * Direction of the session
+     */
+    public static class Direction {
+        /**
+         * Incoming session
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing session
+         */
+        public static final int OUTGOING = 1;
+    }     
+    
+    /**
      * Image sharing error
      */
     public static class Error {
     	/**
-    	 * Session has been declined by remote
+    	 * Session invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Initiation has been cancelled
+    	 * Session has been cancelled
     	 */
     	public final static int SESSION_CANCELLED = 2;
     	
@@ -140,6 +160,21 @@ public class MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * Returns the direction of the session (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see MultimediaSession.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return sessionInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}	
 	
 	/**
 	 * Returns the local SDP

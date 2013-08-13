@@ -25,12 +25,14 @@ import org.gsma.joyn.vsh.VideoSharing;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
+import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
 import com.orangelabs.rcs.provider.sharing.RichCall;
-import com.orangelabs.rcs.provider.sharing.RichCallData;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,6 +57,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 */
 	private Object lock = new Object();
 
+	/**
+	 * Started at
+	 */
+	private long startedAt;
+	
 	/**
 	 * The logger
 	 */
@@ -86,7 +93,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 	
 	/**
@@ -116,25 +123,45 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * @see VideoSharing.State
 	 */
 	public int getState() {
-		// TODO
-		int state = ServerApiUtils.getSessionState(session);
-		switch(state) {
-			case SessionState.PENDING:
-				return VideoSharing.State.INITIATED;
-			
-			case SessionState.ESTABLISHED:
-				return VideoSharing.State.STARTED;
-			
-			case SessionState.CANCELLED:
-				return VideoSharing.State.INITIATED;
-			
-			case SessionState.TERMINATED:
-				return VideoSharing.State.ABORTED;
-
-			default:
-				return VideoSharing.State.UNKNOWN;
+		int result = VideoSharing.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = VideoSharing.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = VideoSharing.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				result = VideoSharing.State.ABORTED;
+			} else {
+				// Session pending
+				if (session instanceof OriginatingVideoStreamingSession) {
+					result = VideoSharing.State.INITIATED;
+				} else {
+					result = VideoSharing.State.INVITED;
+				}
+			}
 		}
+		return result;		
 	}
+	
+	/**
+	 * Returns the direction of the sharing (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see VideoSharing.Direction
+	 */
+	public int getDirection() {
+		if (session instanceof OriginatingVideoStreamingSession) {
+			return VideoSharing.Direction.OUTGOING;
+		} else {
+			return VideoSharing.Direction.INCOMING;
+		}
+	}	
 	
 	/**
 	 * Accepts video sharing invitation
@@ -162,7 +189,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		
 		// Update rich call history
-		RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_CANCELED);
+		RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
 
 		// Reject invitation
 		session.rejectSession(603);
@@ -221,7 +248,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 				logger.info("Session started");
 			}
 	
-	  		// Notify event listeners
+			// Update rich call history
+			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.STARTED);
+			startedAt = System.currentTimeMillis();
+			
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -248,7 +279,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_CANCELED);
+			if (session.getDialogPath().isSessionCancelled()) {
+				RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
+			} else {
+				RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+				RichCall.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+			}
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -278,9 +314,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_TERMINATED);
-			
-	  		// Notify event listeners
+			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+			RichCall.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -310,7 +347,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setStatus(session.getSessionID(), RichCallData.STATUS_FAILED);
+			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.FAILED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

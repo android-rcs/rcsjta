@@ -65,9 +65,14 @@ public class GroupChat {
     	public final static int TERMINATED_BY_USER = 5;
 
     	/**
+    	 * Chat has been aborted 
+    	 */
+    	public final static int ABORTED = 6;
+    	
+    	/**
     	 * Chat has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 7;
     	
         private State() {
         }    	
@@ -83,7 +88,7 @@ public class GroupChat {
     	public final static int CHAT_FAILED = 0;
     	
     	/**
-    	 * Group chat has been declined by remote
+    	 * Group chat invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
 

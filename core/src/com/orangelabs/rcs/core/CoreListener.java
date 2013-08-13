@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core;
 import android.content.Intent;
 
 import com.orangelabs.rcs.core.ims.ImsError;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
@@ -173,6 +174,14 @@ public interface CoreListener {
      */
     public void handleSipSessionInvitation(Intent intent, GenericSipSession session);
 
+	/**
+	 * New SIP instant message received
+	 * 
+     * @param intent Resolved intent
+     * @param message Instant message request
+	 */
+    public void handleSipInstantMessageReceived(Intent intent, SipRequest message);    
+    
 	/**
      * User terms confirmation request
      *

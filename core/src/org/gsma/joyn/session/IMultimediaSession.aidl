@@ -14,6 +14,8 @@ interface IMultimediaSession {
 	
 	int getState();
 	
+	int getDirection();
+	
 	String getLocalSdp();
 	
 	String getRemoteSdp();

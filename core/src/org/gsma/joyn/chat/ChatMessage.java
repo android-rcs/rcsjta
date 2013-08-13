@@ -160,7 +160,7 @@ public class ChatMessage implements Parcelable {
 	/**
 	 * Is displayed delivery report requested
 	 * 
-	 * @return Boolean
+	 * @return Returns true if requested else returns false
 	 */
 	public boolean isDisplayedReportRequested() {
 		return displayedReportRequested;

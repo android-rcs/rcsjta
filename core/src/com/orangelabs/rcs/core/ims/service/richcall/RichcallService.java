@@ -375,8 +375,6 @@ public class RichcallService extends ImsService {
                 ContentManager.createGenericLiveVideoContent(),
 				PhoneUtils.formatNumberToSipUri(contact));
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 

@@ -78,7 +78,7 @@ public class MultimediaSessionService extends JoynService {
     /**
      * Returns true if connected to the service, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public boolean isServiceConnected() {
     	return (api != null);
@@ -104,7 +104,7 @@ public class MultimediaSessionService extends JoynService {
     };
 
     /**
-     * Initiate a new multimedia session with a remote contact and for a given service.
+     * Initiates a new multimedia session with a remote contact and for a given service.
      * The SDP (Session Description Protocol) parameter is used to describe the supported
      * media. The parameter contact supports the following formats: MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact
@@ -198,4 +198,30 @@ public class MultimediaSessionService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
+
+    /**
+     * Sends an instant message to a contact and for a given service. The message may be any
+     * type of content. The parameter contact supports the following formats: MSISDN in
+     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
+     * contact is not supported an exception is thrown.
+     * 
+     * @param serviceId Service ID
+     * @param contact Contact
+     * @param content Message content
+     * @param contentType Content type of the message
+	 * @return Returns true if sent successfully else returns false
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+     */
+    public boolean sendMessage(String serviceId, String contact, String content, String contentType) throws JoynServiceException, JoynContactFormatException {
+		if (api != null) {
+			try {
+				return api.sendMessage(serviceId, contact, content, contentType);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
 }

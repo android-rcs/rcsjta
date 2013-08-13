@@ -9,6 +9,7 @@ import org.gsma.joyn.ish.IImageSharing;
 import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.IImageSharingService;
 import org.gsma.joyn.ish.INewImageSharingListener;
+import org.gsma.joyn.ish.ImageSharing;
 import org.gsma.joyn.ish.ImageSharingIntent;
 import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
 
@@ -25,7 +26,6 @@ import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
-import com.orangelabs.rcs.provider.sharing.RichCallData;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -110,10 +110,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich call history
-		RichCall.getInstance().addCall(number, session.getSessionID(),
-				RichCallData.EVENT_INCOMING,
+		RichCall.getInstance().addImageSharing(number, session.getSessionID(),
+				ImageSharing.Direction.INCOMING,
 				session.getContent(),
-				RichCallData.STATUS_STARTED);
+				ImageSharing.State.INVITED);
 
 		// Add session in the list
 		ImageSharingImpl sessionApi = new ImageSharingImpl(session);
@@ -185,19 +185,19 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			// Initiate a sharing session
 			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, false);
 
-			// Add session in the list
+			// Update rich call history
+			RichCall.getInstance().addImageSharing(contact, session.getSessionID(),
+					ImageSharing.Direction.OUTGOING,
+	    			session.getContent(),
+	    			ImageSharing.State.INITIATED);
+
+			// Add session listener
 			ImageSharingImpl sessionApi = new ImageSharingImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
 			session.startSession();
 			
-			// Update rich call history
-			RichCall.getInstance().addCall(contact, session.getSessionID(),
-                    RichCallData.EVENT_OUTGOING,
-	    			session.getContent(),
-	    			RichCallData.STATUS_STARTED);
-
 			// Add session in the list
 			addImageSharingSession(sessionApi);
 			return sessionApi;

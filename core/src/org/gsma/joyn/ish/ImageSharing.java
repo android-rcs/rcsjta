@@ -53,6 +53,21 @@ public class ImageSharing {
     }
     
     /**
+     * Direction of the sharing
+     */
+    public static class Direction {
+        /**
+         * Incoming sharing
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing sharing
+         */
+        public static final int OUTGOING = 1;
+    }      
+    
+    /**
      * Image sharing error
      */
     public static class Error {
@@ -62,12 +77,12 @@ public class ImageSharing {
     	public final static int SHARING_FAILED = 0;
     	
     	/**
-    	 * Sharing has been declined by remote
+    	 * Sharing invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Initiation has been cancelled
+    	 * Sharing has been cancelled
     	 */
     	public final static int SHARING_CANCELLED = 2;
     	
@@ -189,6 +204,21 @@ public class ImageSharing {
 		}
 	}		
 		
+	/**
+	 * Returns the direction of the sharing (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see ImageSharing.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return sharingInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}	
+	
 	/**
 	 * Accepts image sharing invitation
 	 * 

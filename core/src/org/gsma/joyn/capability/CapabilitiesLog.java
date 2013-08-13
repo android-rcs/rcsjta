@@ -28,7 +28,7 @@ public class CapabilitiesLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider/capabilities");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.capabilities/capabilities");
 
     /**
      * Capability is not supported

@@ -82,7 +82,7 @@ public class ChatService extends JoynService {
     /**
      * Returns true if connected to the service, else returns false
      * 
-     * @return Boolean
+	 * @return Returns true if connected else returns false
      */
     public boolean isServiceConnected() {
     	return (api != null);
@@ -274,8 +274,21 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Set<Chat> getChats() throws JoynServiceException {
-    	// TODO
-    	return null;
+		if (api != null) {
+			try {
+	    		Set<Chat> result = new HashSet<Chat>();
+				List<IBinder> chatList = api.getChats();
+				for (IBinder binder : chatList) {
+					Chat chat = new Chat(IChat.Stub.asInterface(binder));
+					result.add(chat);
+				}
+				return result;
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
     
     /**
@@ -286,8 +299,15 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Chat getChat(String chatId) throws JoynServiceException {
-    	// TODO
-    	return null;
+		if (api != null) {
+			try {
+				return new Chat(api.getChat(chatId));
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
     
     /**
@@ -298,8 +318,20 @@ public class ChatService extends JoynService {
      * @throws JoynServiceException
      */
     public Chat getChatFor(Intent intent) throws JoynServiceException {
-    	// TODO
-    	return null;
+		if (api != null) {
+			try {
+				String chatId = intent.getStringExtra(ChatIntent.EXTRA_CHAT_ID);
+				if (chatId != null) {
+					return getChat(chatId);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
     }
     
     /**

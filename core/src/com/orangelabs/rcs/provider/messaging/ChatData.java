@@ -25,7 +25,7 @@ import android.net.Uri;
  * 
  * @author mhsm6403
  */
-public class RichMessagingData {
+public class ChatData {
 	// Database URI
 	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.messaging/messaging");
 	
@@ -41,12 +41,6 @@ public class RichMessagingData {
 	public static final String KEY_IS_SPAM = "is_spam";
 	public static final String KEY_CHAT_ID = "chat_id";
 	public static final String KEY_CHAT_REJOIN_ID = "chat_rejoin_id";
-	
-	// Fields for file transfer
-	public static final String KEY_MIME_TYPE = "mime_type";
-	public static final String KEY_NAME = "name";
-	public static final String KEY_SIZE = "size";
-	public static final String KEY_TOTAL_SIZE = "total_size";	
 	
 	public static final String KEY_NUMBER_MESSAGES ="number_of_messages";
 }

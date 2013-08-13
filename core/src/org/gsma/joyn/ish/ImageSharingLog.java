@@ -28,8 +28,14 @@ public class ImageSharingLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider/ish");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.ish/ish");
 	
+    /**
+     * The name of the column containing the unique ID for a row.
+     * <P>Type: primary key</P>
+     */
+    public static final String ID = "_id";
+
     /**
      * The name of the column containing the unique ID of the image sharing.
      * <P>Type: TEXT</P>
@@ -43,7 +49,7 @@ public class ImageSharingLog {
     public static final String CONTACT_NUMBER = "contact_number";
 	
     /**
-     * The name of the column containing the filename.
+     * The name of the column containing the filename (absolute path).
      * <P>Type: TEXT</P>
      */
     public static final String FILENAME = "filename";
@@ -57,6 +63,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the direction of the sharing
      * <P>Type: INTEGER</P>
+	 * @see ImageSharing.Direction
      */
     public static final String DIRECTION = "direction";
 
@@ -73,7 +80,7 @@ public class ImageSharingLog {
     public static final String TRANSFERED_SIZE = "size_transfered";
 
     /**
-     * The name of the column containing the date of the sharing
+     * The name of the column containing the date of the sharing (in milliseconds)
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
@@ -81,56 +88,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the state of the sharing.
      * <P>Type: INTEGER</P>
+	 * @see ImageSharing.State
      */
     public static final String STATE = "state";    
-    
-    /**
-     * State of the sharing
-     */
-    public static class State {
-        /**
-         * Outgoing invitation is pending
-         */
-        public static final int INVITED = 0;
-    
-        /**
-         * Incoming invitation is pending
-         */
-        public static final int INITIATED = 1;
-
-        /**
-         * Invitation has been accepted and sharing is started
-         */
-        public static final int STARTED = 2;
-
-        /**
-         * Image has been transfered with success
-         */
-        public static final int TRANSFERED = 3;
-
-        /**
-         * Sharing has been aborted
-         */
-        public static final int ABORTED = 4;
-
-        /**
-         * Sharing has failed
-         */
-        public static final int FAILED = 5;
-    }
-
-    /**
-     * Direction of the sharing
-     */
-    public static class Direction {
-        /**
-         * Incoming sharing
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing sharing
-         */
-        public static final int OUTGOING = 1;
-    }    
 }

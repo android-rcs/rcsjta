@@ -1,6 +1,7 @@
 package org.gsma.joyn.vsh;
 
-import org.gsma.joyn.JoynServiceException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Video renderer offers an interface to manage the video renderer instance
@@ -11,19 +12,34 @@ import org.gsma.joyn.JoynServiceException;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class VideoRenderer {
+public abstract class VideoRenderer extends IVideoRenderer.Stub {
     /**
-     * Video renderer interface
+     * Video player error
      */
-	protected IVideoRenderer rendererInf;
+    public static class Error {
+    	/**
+    	 * Internal error
+    	 */
+    	public final static int INTERNAL_ERROR = 0;
+    	
+    	/**
+    	 * Network connection failed
+    	 */
+    	public final static int NETWORK_FAILURE = 1;
+    	
+        private Error() {
+        }    	
+    }
+
+    /**
+     * Video renderer event listeners
+     */
+    private Set<IVideoRendererListener> listeners = new HashSet<IVideoRendererListener>();    
     
     /**
      * Constructor
-     * 
-     * @param rendererInf Video renderer interface
      */
-    VideoRenderer(IVideoRenderer rendererInf) {
-    	this.rendererInf = rendererInf;
+    public VideoRenderer() {
     }
 
     /**
@@ -32,109 +48,70 @@ public class VideoRenderer {
 	 * @param codec Video codec
 	 * @param remoteHost Remote RTP host
 	 * @param remotePort Remote RTP port
-	 * @throws JoynServiceException
 	 */
-	public void open(VideoCodec codec, String remoteHost, int remotePort) throws JoynServiceException {
-		try {
-			rendererInf.open(codec, remoteHost, remotePort);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void open(VideoCodec codec, String remoteHost, int remotePort);
 	
 	/**
 	 * Closes the renderer and deallocates resources
-	 * 
-	 * @throws JoynServiceException
 	 */
-	public void close() throws JoynServiceException {
-		try {
-			rendererInf.close();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void close();
 	
 	/**
 	 * Starts the renderer
-	 * 
-	 * @throws JoynServiceException
 	 */
-	public void start() throws JoynServiceException {
-		try {
-			rendererInf.start();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void start();
 	
 	/**
 	 * Stops the renderer
-	 * 
-	 * @throws JoynServiceException
 	 */
-	public void stop() throws JoynServiceException {
-		try {
-			rendererInf.stop();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract void stop();
 	
 	/**
 	 * Returns the local RTP port used to stream video
 	 * 
 	 * @return Port number
-	 * @throws JoynServiceException
 	 */
-	public int getLocalRtpPort() throws JoynServiceException {
-		try {
-			return rendererInf.getLocalRtpPort();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
+	public abstract int getLocalRtpPort();
 	
 	
 	/**
 	 * Returns the list of codecs supported by the renderer
 	 * 
 	 * @return List of codecs
-	 * @throws JoynServiceException
 	 */
-	public VideoCodec[] getSupportedCodecs() throws JoynServiceException {
-		try {
-			return rendererInf.getSupportedCodecs();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	public abstract VideoCodec[] getSupportedCodecs();
+	
+	/**
+	 * Returns the list of event listeners
+	 * 
+	 * @return Listeners
+	 */
+	public Set<IVideoRendererListener> getEventListeners() {
+		return listeners;
 	}
 	
 	/**
 	 * Adds a listener on video renderer events
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
 	 */
-	public void addEventListener(VideoRendererListener listener) throws JoynServiceException {
-		try {
-			rendererInf.addEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	public void addEventListener(IVideoRendererListener listener) {
+		listeners.add(listener);
 	}
-	
+
 	/**
 	 * Removes a listener from video renderer
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
 	 */
-	public void removeEventListener(VideoRendererListener listener) throws JoynServiceException {
-		try {
-			rendererInf.removeEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	public void removeEventListener(IVideoRendererListener listener) {
+		listeners.remove(listener);
+	}	
+
+	/**
+	 * Removes all listeners from video renderer
+	 */
+	public void removeAllEventListeners() {
+		listeners.clear();
 	}	
 }

@@ -33,9 +33,11 @@ public class MultimediaSessionIntent {
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_SESSION_ID} containing the unique ID of the multimedia session.
+     * <li> Service ID is read from the method Intent.getType() which returns the MIME type included
+     *  in the intent and corresponding to the invoked service.
      * </ul>
      */
-	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.ish.action.NEW_SESSION";
+	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.session.action.NEW_SESSION";
 
 	/**
 	 * MSISDN of the contact sending the invitation
@@ -50,5 +52,5 @@ public class MultimediaSessionIntent {
 	/**
 	 * Unique ID of the multimedia session
 	 */
-	public final static String EXTRA_SESSION_ID = "sessionId";
+	public final static String EXTRA_SESSION_ID = "sessionId";	
 }

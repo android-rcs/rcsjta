@@ -9,6 +9,7 @@ import org.gsma.joyn.chat.IGroupChatListener;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -16,6 +17,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
@@ -93,24 +95,32 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return State 
 	 */
 	public int getState() {
-		// TODO
-		int state = ServerApiUtils.getSessionState(session);
-		switch(state) {
-			case SessionState.PENDING:
-				return GroupChat.State.INITIATED;
-			
-			case SessionState.ESTABLISHED:
-				return GroupChat.State.STARTED;
-			
-			case SessionState.CANCELLED:
-				return GroupChat.State.INITIATED;
-			
-			case SessionState.TERMINATED:
-				return GroupChat.State.TERMINATED;
-
-			default:
-				return GroupChat.State.UNKNOWN;
+		int result = GroupChat.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = GroupChat.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = GroupChat.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				// TODO: TERMINATED_BY_USER not taken into account
+				result = GroupChat.State.TERMINATED;
+			} else {
+				// Session pending
+				// TODO: which state in case of rejoin/restart ?
+				if (session instanceof OriginatingAdhocGroupChatSession) {
+					result = GroupChat.State.INITIATED;
+				} else {
+					result = GroupChat.State.INVITED;
+				}
+			}
 		}
+		return result;			
 	}		
 	
 	/**

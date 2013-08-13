@@ -35,6 +35,7 @@
 		<service android:name="com.orangelabs.rcs.service.RcsCoreService">  
 	        <intent-filter>
 	            <action android:name="com.orangelabs.rcs.SERVICE"/>
+	            <action android:name="org.gsma.joyn.contacts.IContactsService"/>
 	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
 	            <action android:name="org.gsma.joyn.chat.IChatService"/>
 	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
@@ -109,18 +110,21 @@
 		<provider android:authorities="com.orangelabs.rcs.settings"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.provider"
+		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.provider.capabilities"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.messaging"
-			android:name="com.orangelabs.rcs.provider.messaging.RichMessagingProvider"/>
-			
-		<provider android:authorities="com.orangelabs.rcs.csh"
-			android:name="com.orangelabs.rcs.provider.sharing.RichCallProvider"/>
-			
-		<provider android:authorities="com.orangelabs.rcs.eventlogs"
-			android:name="com.orangelabs.rcs.provider.eventlogs.EventLogProvider"/>
+		<provider android:authorities="com.orangelabs.rcs.ft;org.gsma.joyn.provider.ft"
+			android:name="com.orangelabs.rcs.provider.messaging.FileTransferProvider"/>
+		
+		<provider android:authorities="com.orangelabs.rcs.ish;org.gsma.joyn.provider.ish"
+			android:name="com.orangelabs.rcs.provider.sharing.ImageSharingProvider"/>
 	
+		<provider android:authorities="com.orangelabs.rcs.vsh;org.gsma.joyn.provider.vsh"
+			android:name="com.orangelabs.rcs.provider.sharing.VideoSharingProvider"/>
+		
+		<provider android:authorities="com.orangelabs.rcs.chat;org.gsma.joyn.provider.chat"
+			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
+			
 		<!-- Device events receiver -->	
 
 		<receiver android:name="com.orangelabs.rcs.service.DeviceBoot">

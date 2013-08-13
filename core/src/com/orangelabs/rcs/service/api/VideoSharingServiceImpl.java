@@ -28,6 +28,7 @@ import org.gsma.joyn.vsh.IVideoPlayer;
 import org.gsma.joyn.vsh.IVideoSharing;
 import org.gsma.joyn.vsh.IVideoSharingListener;
 import org.gsma.joyn.vsh.IVideoSharingService;
+import org.gsma.joyn.vsh.VideoSharing;
 import org.gsma.joyn.vsh.VideoSharingIntent;
 import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
 
@@ -41,7 +42,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCall;
-import com.orangelabs.rcs.provider.sharing.RichCallData;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -60,6 +60,11 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * List of video sharing invitation listeners
 	 */
 	private RemoteCallbackList<INewVideoSharingListener> listeners = new RemoteCallbackList<INewVideoSharingListener>();
+
+	/**
+	 * Lock used for synchronization
+	 */
+	private Object lock = new Object();
 
 	/**
 	 * The logger
@@ -143,17 +148,17 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
         // Extract number from contact
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-        VideoContent content = (VideoContent) session.getContent();
-
+		
 		// Update rich call history
-		RichCall.getInstance().addCall(number, session.getSessionID(),
-				RichCallData.EVENT_INCOMING,
+        VideoContent content = (VideoContent)session.getContent();
+		RichCall.getInstance().addVideoSharing(number, session.getSessionID(),
+				VideoSharing.Direction.INCOMING,
 				content,
-    			RichCallData.STATUS_STARTED);
+    			VideoSharing.State.INVITED);
 
 		// Add session in the list
 		VideoSharingImpl sessionApi = new VideoSharingImpl(session);
-		addVideoSharingSession(sessionApi);
+		VideoSharingServiceImpl.addVideoSharingSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
@@ -163,6 +168,21 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
         intent.putExtra(VideoSharingIntent.EXTRA_FORMAT, ""); // TODO
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
+        
+    	// Notify video sharing invitation listeners
+    	synchronized(lock) {
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onNewVideoSharing(session.getSessionID());
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();
+	    }        
     }
     
     /**
@@ -202,13 +222,19 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     .initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
-			RichCall.getInstance().addCall(contact, session.getSessionID(),
-                    RichCallData.EVENT_OUTGOING,
+			RichCall.getInstance().addVideoSharing(contact, session.getSessionID(),
+					VideoSharing.Direction.OUTGOING,
 	    			session.getContent(),
-	    			RichCallData.STATUS_STARTED);
+	    			VideoSharing.State.INITIATED);
 
-			// Add session in the list
+			// Add session listener
 			VideoSharingImpl sessionApi = new VideoSharingImpl(session);
+			sessionApi.addEventListener(listener);
+			
+			// Start the session
+			session.startSession();
+			
+			// Add session in the list
 			addVideoSharingSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {

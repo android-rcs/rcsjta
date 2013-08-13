@@ -24,10 +24,13 @@ import org.gsma.joyn.session.MultimediaSession;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.OriginatingSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -83,7 +86,7 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 	
 	/**
@@ -92,26 +95,46 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	 * @return State
 	 */
 	public int getState() {
-		// TODO
-		int state = ServerApiUtils.getSessionState(session);
-		switch(state) {
-			case SessionState.PENDING:
-				return MultimediaSession.State.INITIATED;
-			
-			case SessionState.ESTABLISHED:
-				return MultimediaSession.State.STARTED;
-			
-			case SessionState.CANCELLED:
-				return MultimediaSession.State.INITIATED;
-			
-			case SessionState.TERMINATED:
-				return MultimediaSession.State.ABORTED;
-
-			default:
-				return MultimediaSession.State.UNKNOWN;
+		int result = MultimediaSession.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = MultimediaSession.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = MultimediaSession.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				result = MultimediaSession.State.TERMINATED;
+			} else {
+				// Session pending
+				if (session instanceof OriginatingSipSession) {
+					result = MultimediaSession.State.INITIATED;
+				} else {
+					result = MultimediaSession.State.INVITED;
+				}
+			}
 		}
+		return result;	
 	}	
 
+	/**
+	 * Returns the direction of the session (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see MultimediaSession.Direction
+	 */
+	public int getDirection() {
+		if (session instanceof OriginatingSipSession) {
+			return MultimediaSession.Direction.OUTGOING;
+		} else {
+			return MultimediaSession.Direction.INCOMING;
+		}
+	}		
+	
 	/**
 	 * Returns the service ID
 	 * 

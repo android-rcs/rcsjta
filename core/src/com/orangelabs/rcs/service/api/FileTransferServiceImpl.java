@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
+import org.gsma.joyn.ft.FileTransfer;
 import org.gsma.joyn.ft.FileTransferIntent;
 import org.gsma.joyn.ft.FileTransferServiceConfiguration;
 import org.gsma.joyn.ft.IFileTransfer;
@@ -37,7 +37,6 @@ import android.os.RemoteCallbackList;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -127,17 +126,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		// Extract number from contact 
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
-		// Set the file transfer session ID from the chat session if a chat already exist
-		String ftSessionId = session.getSessionID();
-		String chatSessionId = ftSessionId;
-		Vector<ChatSession> chatSessions = Core.getInstance().getImService().getImSessionsWith(number);
-		if (chatSessions.size() > 0) {
-			ChatSession chatSession = chatSessions.lastElement();
-			chatSessionId = chatSession.getSessionID();
-		}
-		
 		// Update rich messaging history
-    	RichMessaging.getInstance().addIncomingFileTransfer(number, chatSessionId, ftSessionId, session.getContent());
+    	RichMessaging.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent(), FileTransfer.State.INVITED);
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -207,25 +197,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
 			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, false);
 
-			// Add session in the list
+			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
 			sessionApi.addEventListener(listener);
+
+			// Update rich messaging history
+			RichMessaging.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent(), FileTransfer.State.INITIATED);
 
 			// Start the session
 			session.startSession();
 						
-			// Set the file transfer session ID from the chat session if a chat already exist
-			String ftSessionId = session.getSessionID();
-			String chatSessionId = ftSessionId;
-			Vector<ChatSession> chatSessions = Core.getInstance().getImService().getImSessionsWith(contact);
-			if (chatSessions.size() > 0) {
-				ChatSession chatSession = chatSessions.lastElement();
-				chatSessionId = chatSession.getSessionID();
-			}
-			
-			// Update rich messaging history
-			RichMessaging.getInstance().addOutgoingFileTransfer(contact, chatSessionId, ftSessionId, filename, session.getContent());
-
 			// Add session in the list
 			addFileTransferSession(sessionApi);
 			return sessionApi;

@@ -19,6 +19,8 @@ interface IImageSharing {
 
 	int getState();
 	
+	int getDirection();
+		
 	void acceptInvitation();
 
 	void rejectInvitation();

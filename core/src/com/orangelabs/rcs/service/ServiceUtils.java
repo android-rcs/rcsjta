@@ -1,4 +1,4 @@
-package com.orangelabs.rcs.service.api.client;
+package com.orangelabs.rcs.service;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import android.content.Intent;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ClientApiUtils {
+public class ServiceUtils {
 	/**
 	 * RCS service name
 	 */

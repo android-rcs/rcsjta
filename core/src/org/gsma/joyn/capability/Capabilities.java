@@ -136,7 +136,7 @@ public class Capabilities implements Parcelable {
     /**
 	 * Is image sharing supported
 	 * 
-	 * @return Boolean
+	 * @return Returns true if supported else returns false
 	 */
 	public boolean isImageSharingSupported() {
 		return imageSharing;
@@ -145,7 +145,7 @@ public class Capabilities implements Parcelable {
 	/**
 	 * Is video sharing supported
 	 * 
-	 * @return Boolean
+	 * @return Returns true if supported else returns false
 	 */
 	public boolean isVideoSharingSupported() {
 		return videoSharing;
@@ -154,7 +154,7 @@ public class Capabilities implements Parcelable {
 	/**
 	 * Is IM session supported
 	 * 
-	 * @return Boolean
+	 * @return Returns true if supported else returns false
 	 */
 	public boolean isImSessionSupported() {
 		return imSession;
@@ -163,7 +163,7 @@ public class Capabilities implements Parcelable {
 	/**
 	 * Is file transfer supported
 	 * 
-	 * @return Boolean
+	 * @return Returns true if supported else returns false
 	 */
 	public boolean isFileTransferSupported() {
 		return fileTransfer;
@@ -173,7 +173,7 @@ public class Capabilities implements Parcelable {
 	 * Is extension supported
 	 * 
 	 * @param tag Feature tag
-	 * @return Boolean
+	 * @return Returns true if supported else returns false
 	 */
 	public boolean isExtensionSupported(String tag) {
 		return extensions.contains(tag);

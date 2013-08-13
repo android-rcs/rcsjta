@@ -61,7 +61,13 @@ public class TerminatingSipSession extends GenericSipSession {
 	    		logger.info("Initiate a new session as terminating");
 	    	}
 	
-	    	// Send a 180 Ringing response
+			// Set the local SDP part in the dialog path
+			getDialogPath().setLocalContent(getLocalSdp());
+
+			// Set the SDP offer 
+			setRemoteSdp(getDialogPath().getInvite().getContent());
+
+			// Send a 180 Ringing response
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
         
 			// Wait invitation answer
@@ -110,12 +116,6 @@ public class TerminatingSipSession extends GenericSipSession {
                 return;
             }			
 			
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(getLocalSdp());
-
-			// Set the SDP offer 
-			setRemoteSdp(getDialogPath().getInvite().getContent());
-
 			// Create a 200 OK response
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");

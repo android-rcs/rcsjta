@@ -38,14 +38,34 @@ public class VideoSharing {
     	 */
     	public final static int ABORTED = 5;
     	
-    	/**
+        /**
+         * Sharing has been terminated
+         */
+        public static final int TERMINATED = 6;
+
+        /**
     	 * Sharing has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 7;
     	
-        private State() {
+    	private State() {
         }    	
     }
+    
+    /**
+     * Direction of the sharing
+     */
+    public static class Direction {
+        /**
+         * Incoming sharing
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing sharing
+         */
+        public static final int OUTGOING = 1;
+    }    
     
     /**
      * Video sharing error
@@ -57,12 +77,12 @@ public class VideoSharing {
     	public final static int SHARING_FAILED = 0;
     	
     	/**
-    	 * Sharing has been declined by remote
+    	 * Sharing invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Initiation has been cancelled
+    	 * Sharing has been cancelled
     	 */
     	public final static int SHARING_CANCELLED = 2;
     	
@@ -156,6 +176,21 @@ public class VideoSharing {
 	}		
 		
 	/**
+	 * Returns the direction of the sharing (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see VideoSharing.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return sharingInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}	
+	
+	/**
 	 * Accepts video sharing invitation
 	 * 
 	 * @param renderer Video renderer
@@ -163,7 +198,7 @@ public class VideoSharing {
 	 */
 	public void acceptInvitation(VideoRenderer renderer) throws JoynServiceException {
 		try {
-			sharingInf.acceptInvitation(renderer.rendererInf);
+			sharingInf.acceptInvitation(renderer);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}

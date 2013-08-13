@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.orangelabs.rcs.provider.sharing;
-
-import com.orangelabs.rcs.provider.RichProviderHelper;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -33,50 +31,83 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 /**
- * Rich call history provider
+ * Video sharing provider
  * 
- * @author mhsm6403
+ * @author Jean-Marc AUFFRET
  */
-public class RichCallProvider extends ContentProvider {
+public class VideoSharingProvider extends ContentProvider {
 	// Database table
-	public static final String TABLE = "csh";
+	public static final String TABLE = "vsh";
 	
 	// Create the constants used to differentiate between the different
 	// URI requests
-	private static final int CSH = 1;
-	private static final int CSH_ID = 2;
+	private static final int VIDEOSHARES = 1;
+	private static final int VIDEOSHARE_ID = 2;
+    private static final int RCSAPI = 3;
 	
-	// Allocate the UriMatcher object, where a URI ending in 'contacts'
-	// will correspond to a request for all contacts, and 'contacts'
-	// with a trailing '/[rowID]' will represent a single contact row.
+	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI("com.orangelabs.rcs.csh", "csh", CSH);
-		uriMatcher.addURI("com.orangelabs.rcs.csh", "csh/#", CSH_ID);
+		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh", VIDEOSHARES);
+		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh/#", VIDEOSHARE_ID);
+		uriMatcher.addURI("org.gsma.joyn.provider.vsh", "vsh", RCSAPI);
 	}
 
     /**
      * Database helper class
      */
     private SQLiteOpenHelper openHelper;
+    
+    /**
+     * Database name
+     */
+    public static final String DATABASE_NAME = "vsh.db";
 
-	@Override 
-	public boolean onCreate() {
-		if(RichProviderHelper.getInstance()==null){
-        	RichProviderHelper.createInstance(this.getContext());
+    /**
+     * Helper class for opening, creating and managing database version control
+     */
+    private static class DatabaseHelper extends SQLiteOpenHelper {
+        private static final int DATABASE_VERSION = 1;
+
+        public DatabaseHelper(Context ctx) {
+            super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
         }
-        this.openHelper = RichProviderHelper.getInstance();
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+        	db.execSQL("CREATE TABLE " + TABLE + " ("
+        			+ VideoSharingData.KEY_ID + " integer primary key autoincrement,"
+        			+ VideoSharingData.KEY_SESSION_ID + " TEXT,"
+        			+ VideoSharingData.KEY_CONTACT + " TEXT,"
+        			+ VideoSharingData.KEY_STATUS + " integer,"
+        			+ VideoSharingData.KEY_DIRECTION + " integer,"
+        			+ VideoSharingData.KEY_TIMESTAMP + " long,"
+        			+ VideoSharingData.KEY_DURATION + " long);");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+            onCreate(db);
+        }
+    }
+
+    @Override
+    public boolean onCreate() {
+        openHelper = new DatabaseHelper(getContext());
         return true;
-	}
+    }
 
 	@Override
 	public String getType(Uri uri) {
 		switch(uriMatcher.match(uri)){
-			case CSH:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.csh";
-			case CSH_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.csh";
+			case VIDEOSHARES:
+				return "vnd.android.cursor.dir/com.orangelabs.rcs.vsh";
+			case VIDEOSHARE_ID:
+				return "vnd.android.cursor.item/com.orangelabs.rcs.vsh";
+			case RCSAPI:
+				return "vnd.android.cursor.item/com.orangelabs.rcs.vsh";
 			default:
 				throw new IllegalArgumentException("Unsupported URI " + uri);
 		}
@@ -90,11 +121,13 @@ public class RichCallProvider extends ContentProvider {
         // Generate the body of the query
         int match = uriMatcher.match(uri);
         switch(match) {
-            case CSH:
+            case VIDEOSHARES:
                 break;
-            case CSH_ID:
-                qb.appendWhere(RichCallData.KEY_ID + "=" + uri.getPathSegments().get(1));
+            case VIDEOSHARE_ID:
+                qb.appendWhere(VideoSharingData.KEY_ID + "=" + uri.getPathSegments().get(1));
                 break;
+        	case RCSAPI:
+        		break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -103,7 +136,7 @@ public class RichCallProvider extends ContentProvider {
         Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
 
 		// Register the contexts ContentResolver to be notified if the cursor result set changes.
-        c.setNotificationUri(getContext().getContentResolver(), RichCallData.CONTENT_URI);
+        c.setNotificationUri(getContext().getContentResolver(), VideoSharingData.CONTENT_URI);
 
         return c;
     }
@@ -115,13 +148,13 @@ public class RichCallProvider extends ContentProvider {
 
         int match = uriMatcher.match(uri);
         switch (match) {
-	        case CSH:
+	        case VIDEOSHARES:
 	            count = db.update(TABLE, values, where, null);
 	            break;
-            case CSH_ID:
+            case VIDEOSHARE_ID:
                 String segment = uri.getPathSegments().get(1);
                 int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, RichCallData.KEY_ID + "=" + id, null);
+                count = db.update(TABLE, values, VideoSharingData.KEY_ID + "=" + id, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
@@ -134,8 +167,8 @@ public class RichCallProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues initialValues) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         switch(uriMatcher.match(uri)){
-	        case CSH:
-	        case CSH_ID:
+	        case VIDEOSHARES:
+	        case VIDEOSHARE_ID:
 	            // Insert the new row, will return the row number if successful
 	        	// Use system clock to generate id : it should not be a common int otherwise it could be the 
 	        	// same as an id present in MmsSms table (and that will create uniqueness problem when doing the tables merge) 
@@ -144,9 +177,9 @@ public class RichCallProvider extends ContentProvider {
 	        		// If generated id is <0, it is problematic for uris
 	        		id = -id;
 	        	}
-	        	initialValues.put(RichCallData.KEY_ID, id);
+	        	initialValues.put(VideoSharingData.KEY_ID, id);
 	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(RichCallData.CONTENT_URI, rowId);
+	    		uri = ContentUris.withAppendedId(VideoSharingData.CONTENT_URI, rowId);
 	        	break;
 	        default:
 	    		throw new SQLException("Failed to insert row into " + uri);
@@ -155,23 +188,17 @@ public class RichCallProvider extends ContentProvider {
         return uri;
     }
     
-    /**
-     * This method should not be used if deletion isn't made on the whole messages of a contact.
-     * Prefer methods from RichCall class, otherwise Recycler wont work.
-     *  
-     * If all messages of a contact, or all rich messages are to be deleted, this method could be used.
-     */
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         int count = 0;
         switch(uriMatcher.match(uri)){
-	        case CSH:
+	        case VIDEOSHARES:
 	        	count = db.delete(TABLE, where, whereArgs);
 	        	break;
-	        case CSH_ID:
+	        case VIDEOSHARE_ID:
 	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, RichCallData.KEY_ID + "="
+				count = db.delete(TABLE, VideoSharingData.KEY_ID + "="
 						+ segment
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);

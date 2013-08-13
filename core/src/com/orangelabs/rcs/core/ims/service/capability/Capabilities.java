@@ -394,6 +394,7 @@ public class Capabilities {
             ", FToHttp=" + fileTransferHttp +
             ", GeolocationPush=" + geolocationPush +
             ", FT_Thumbnail=" + fileTransferThumbnail +
+            ", Extensions=" + extensions.size() +
 			", Timestamp=" + timestamp;
 	}
 }

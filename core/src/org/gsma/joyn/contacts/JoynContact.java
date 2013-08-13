@@ -65,9 +65,9 @@ public class JoynContact implements Parcelable {
 	public JoynContact(Parcel source) {
 		contact = source.readString();
 		registered = source.readInt() != 0;
-		byte flag = source.readByte();
-		if (flag > 0) {
-			this.capabilities = Capabilities.CREATOR.createFromParcel(source);
+		boolean flag = source.readInt() != 0;
+		if (flag) {
+			this.capabilities = source.readParcelable(getClass().getClassLoader());
 		} else {
 			this.capabilities = null;
 		}
@@ -92,7 +92,12 @@ public class JoynContact implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(contact);
     	dest.writeInt(registered ? 1 : 0);
-    	dest.writeParcelable(capabilities, flags);
+    	if (capabilities != null) {
+        	dest.writeInt(1);
+        	dest.writeParcelable(capabilities, flags);
+    	} else {
+        	dest.writeInt(0);
+    	}
     }
 
     /**
@@ -121,7 +126,7 @@ public class JoynContact implements Parcelable {
 	/**
 	 * Is contact online (i.e. registered to the service platform)
 	 * 
-	 * @return Boolean
+	 * @return Returns true if registered else returns false
 	 */
 	public boolean isRegistered(){
 		return registered;

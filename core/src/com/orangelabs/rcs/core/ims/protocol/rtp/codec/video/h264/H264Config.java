@@ -51,7 +51,7 @@ public class H264Config {
     /**
      * Default clock rate
      */
-    public final static float CLOCK_RATE = 90000;
+    public final static int CLOCK_RATE = 90000;
 
     /**
      * H264 OPTIONAL payload format parameter "profile-level-id" - RFC 3984

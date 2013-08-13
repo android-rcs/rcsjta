@@ -57,9 +57,7 @@ public class RichAddressBookProvider extends ContentProvider {
 	private static final int AGGREGATION_ID = 4;
 	private static final int RCSAPI = 5;
 	
-	// Allocate the UriMatcher object, where a URI ending in 'contacts'
-	// will correspond to a request for all contacts, and 'contacts'
-	// with a trailing '/[rowID]' will represent a single contact row.
+	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -67,7 +65,7 @@ public class RichAddressBookProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "eab/#", CONTACT_ID);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation", AGGREGATIONS);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation/#", AGGREGATION_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider", "capabilities", RCSAPI);
+		uriMatcher.addURI("org.gsma.joyn.provider.capabilities", "capabilities", RCSAPI);
 	}
 
     /**

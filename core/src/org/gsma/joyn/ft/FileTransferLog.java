@@ -28,8 +28,14 @@ public class FileTransferLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider/ft");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.ft/ft");
 	
+    /**
+     * The name of the column containing the unique ID for a row.
+     * <P>Type: primary key</P>
+     */
+    public static final String ID = "_id";
+
     /**
      * The name of the column containing the unique ID of the file transfer.
      * <P>Type: TEXT</P>
@@ -43,7 +49,7 @@ public class FileTransferLog {
     public static final String CONTACT_NUMBER = "contact_number";
 	
     /**
-     * The name of the column containing the filename.
+     * The name of the column containing the filename (absolute path).
      * <P>Type: TEXT</P>
      */
     public static final String FILENAME = "filename";
@@ -57,6 +63,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the direction of the transfer
      * <P>Type: INTEGER</P>
+	 * @see FileTransfer.Direction
      */
     public static final String DIRECTION = "direction";
 
@@ -76,61 +83,12 @@ public class FileTransferLog {
      * The name of the column containing the date of the transfer
      * <P>Type: LONG</P>
      */
-    public static final String TIMESTAMP = "size";
+    public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the state of the transfer.
+     * The name of the column containing the state of the transfer (in milliseconds)
      * <P>Type: INTEGER</P>
+	 * @see FileTransfer.State
      */
     public static final String STATE = "state";    
-    
-    /**
-     * State of the transfer
-     */
-    public static class State {
-        /**
-         * Outgoing invitation is pending
-         */
-        public static final int INVITED = 0;
-    
-        /**
-         * Incoming invitation is pending
-         */
-        public static final int INITIATED = 1;
-
-        /**
-         * Transfer is started
-         */
-        public static final int STARTED = 2;
-
-        /**
-         * File has been transfered with success
-         */
-        public static final int TRANSFERED = 3;
-
-        /**
-         * Transfer has been aborted
-         */
-        public static final int ABORTED = 4;
-
-        /**
-         * Transfer has failed
-         */
-        public static final int FAILED = 5;
-    }
-    
-    /**
-     * Direction of the transfer
-     */
-    public static class Direction {
-        /**
-         * Incoming transfer
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing transfer
-         */
-        public static final int OUTGOING = 1;
-    }    
 }
