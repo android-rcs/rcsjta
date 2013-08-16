@@ -136,7 +136,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     /**
      * Returns the list of contacts supporting a given extension (i.e. feature tag)
      * 
-     * @param tag Supported extension tag
+     * @param tag Supported extension tag. The format of the tag may be the complete
+     *  IARI tag (i.e. +g.3gpp.iari-ref="xxxxxx") or just the right part of the tag
+     *   without quotes (xxxxxx).
      * @return List of contacts
      * @throws ServerApiException
      */
@@ -157,7 +159,17 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 				ArrayList<String> exts = capabilities.getSupportedExtensions();
 				for (int j=0; j < exts.size(); j++) {
 					String ext = exts.get(j);
-					if (tag.contains(ext)) { // TODO: extract the right side of the tag and use an equals 
+
+					// Extract the right side of the tag to be compared to the extension
+					String formattedTag;
+					String[] tagParts = tag.split("=");
+					if (tagParts.length > 1) {
+						formattedTag = tagParts[1].replace("\"", ""); 
+					} else {
+						formattedTag = tag;
+					}
+					
+					if (ext.equals(formattedTag)) { 
 						capaApi = new Capabilities(
 			    				capabilities.isImageSharingSupported(),
 			    				capabilities.isVideoSharingSupported(),

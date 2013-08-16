@@ -19,16 +19,19 @@
 package com.orangelabs.rcs.ri;
 
 import android.app.ListActivity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
+import com.orangelabs.rcs.ri.contacts.TestContactsApi;
+import com.orangelabs.rcs.ri.intents.TestIntentsApi;
+import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.session.TestMultimediaSessionApi;
+import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 
 /**
  * RI application
@@ -48,10 +51,11 @@ public class RI extends ListActivity {
        
 		// Set items
         String[] items = {
-    		getString(R.string.menu_address_book),
+    		getString(R.string.menu_contacts),
     		getString(R.string.menu_capabilities),
     		getString(R.string.menu_messaging),
-    		getString(R.string.menu_richcall),
+    		getString(R.string.menu_sharing),
+    		getString(R.string.menu_mm_sessions),
     		getString(R.string.menu_intents),
     		getString(R.string.menu_about)
         };
@@ -62,15 +66,7 @@ public class RI extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
     	switch(position) {
         	case 0:
-        		try {
-        			startActivity(new Intent(Intent.ACTION_VIEW).setType(ContactsContract.Contacts.CONTENT_TYPE));
-        		} catch(ActivityNotFoundException e1) {
-        			try {
-        				startActivity(new Intent("com.android.contacts.action.LIST_DEFAULT"));
-        			} catch(ActivityNotFoundException e2) {
-        				Utils.showMessage(this, getString(R.string.label_ab_not_found));
-        			}
-        		}
+        		startActivity(new Intent(this, TestContactsApi.class));
         		break;
         		
         	case 1:
@@ -82,14 +78,18 @@ public class RI extends ListActivity {
         		break;
         		
         	case 3:
-        		startActivity(new Intent(this, TestRichCallApi.class));
+        		startActivity(new Intent(this, TestSharingApi.class));
         		break;
         		
         	case 4:
-        		startActivity(new Intent(this, TestIntentsApi.class));
+        		startActivity(new Intent(this, TestMultimediaSessionApi.class));
         		break;
 
         	case 5:
+        		startActivity(new Intent(this, TestIntentsApi.class));
+        		break;
+
+        	case 6:
         		startActivity(new Intent(this, AboutRI.class));
         		break;
     	}

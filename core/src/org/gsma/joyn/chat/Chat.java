@@ -29,10 +29,58 @@ import org.gsma.joyn.JoynServiceException;
  */
 public class Chat {
     /**
+     * Chat state
+     */
+    public static class State {
+    	/**
+    	 * Unknown state
+    	 */
+    	public final static int UNKNOWN = 0;
+
+    	/**
+    	 * Chat invitation received
+    	 */
+    	public final static int INVITED = 1;
+    	
+    	/**
+    	 * Chat invitation sent
+    	 */
+    	public final static int INITIATED = 2;
+    	
+    	/**
+    	 * Chat is started
+    	 */
+    	public final static int STARTED = 3;
+    	
+    	/**
+    	 * Chat has been terminated
+    	 */
+    	public final static int TERMINATED = 4;
+    	
+    	/**
+    	 * Chat has been terminated by user 
+    	 */
+    	public final static int TERMINATED_BY_USER = 5;
+
+    	/**
+    	 * Chat has been aborted 
+    	 */
+    	public final static int ABORTED = 6;
+    	
+    	/**
+    	 * Chat has failed 
+    	 */
+    	public final static int FAILED = 7;
+    	
+        private State() {
+        }    	
+    }
+    
+    /**
      * Chat error
      */
     public static class Error {
-   	
+    	// TODO
         private Error() {
         }    	
     }
@@ -78,8 +126,23 @@ public class Chat {
 			throw new JoynServiceException(e.getMessage());
 		}
     }
+    
+	/**
+	 * Returns the state of the chat
+	 * 
+	 * @return State
+	 * @see Chat.State
+	 * @throws JoynServiceException
+	 */
+	public int getState() throws JoynServiceException {
+		try {
+			return chatInf.getState();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 	
-    /**
+	/**
      * Sends a chat message
      * 
      * @param message Message

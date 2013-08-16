@@ -19,7 +19,11 @@
 package com.orangelabs.rcs.ri.utils;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Set;
 import java.util.Vector;
 
@@ -71,6 +75,11 @@ public class Utils {
 	 */
 	public static int NOTIF_ID_VIDEO_SHARE = 1004; 
 
+	/**
+	 * Notification ID for MM session
+	 */
+	public static int NOTIF_ID_MM_SESSION = 1005; 
+	
 	/**
 	 * Returns the application version from manifest file 
 	 * 
@@ -222,21 +231,21 @@ public class Utils {
 	/**
 	 * Display a toast
 	 * 
-	 * @param activity Activity
+	 * @param ctx Context
 	 * @param message Message to be displayed
 	 */
-    public static void displayToast(Activity activity, String message) {
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+    public static void displayToast(Context ctx, String message) {
+        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show();
     }
 
 	/**
 	 * Display a long toast
 	 * 
-	 * @param activity Activity
+	 * @param ctx Context
 	 * @param message Message to be displayed
 	 */
-    public static void displayLongToast(Activity activity, String message) {
-        Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+    public static void displayLongToast(Context ctx, String message) {
+        Toast.makeText(ctx, message, Toast.LENGTH_LONG).show();
     }
     
     /**
@@ -282,7 +291,7 @@ public class Utils {
 		return alert;
     }
 
-	/**
+    /**
 	 * Show a message with a specific title
 	 * 
 	 * @param activity Activity
@@ -369,9 +378,43 @@ public class Utils {
     public static String formatDateToString(long d) {
     	if (d > 0L) {
 	    	Date df = new Date(d);
-	    	return df.toLocaleString();
+	    	return DateFormat.getDateInstance().format(df);
     	} else {
     		return "";
     	}
     }
+    
+	/**
+	 * Construct an NTP time from a date in milliseconds
+	 *
+	 * @param date Date in milliseconds
+	 * @return NTP time in string format
+	 */
+	public static String constructNTPtime(long date) {
+		long ntpTime = 2208988800L;
+		long startTime = (date / 1000) + ntpTime;
+		return String.valueOf(startTime);
+	}
+
+	/**
+	 * Returns the local IP address
+	 *
+	 * @return IP address
+	 */
+	public static String getLocalIpAddress() {
+		try {
+	        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+	            NetworkInterface intf = (NetworkInterface)en.nextElement();
+	            for (Enumeration<InetAddress> addr = intf.getInetAddresses(); addr.hasMoreElements();) {
+	                InetAddress inetAddress = (InetAddress)addr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {
+                        return inetAddress.getHostAddress().toString();
+                    }
+	            }
+	        }
+	        return null;
+		} catch(Exception e) {
+			return null;
+		}
+	}
 }

@@ -60,17 +60,17 @@ public class VideoSharingLog {
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
-
-    /**
-     * The name of the column containing the state of the sharing.
-     * <P>Type: INTEGER</P>
-	 * @see VideoSharing.State
-     */
-    public static final String STATE = "state";    
     
     /**
      * The name of the column containing the duration of the sharing (in seconds).
      * <P>Type: LONG</P>
      */
     public static final String DURATION = "duration";    
+
+    /**
+     * The name of the column containing the state of the sharing
+     * <P>Type: INTEGER</P>
+	 * @see VideoSharing.State
+     */
+    public static final String STATE = "state";    
 }

@@ -50,7 +50,7 @@ public class AboutRI extends Activity {
         TextView releaseView = (TextView)findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
-        String apiRelease = getBuildNumber() + ", " + getGsmaVersion();
+        String apiRelease = getBuildNumber() + "/" + getGsmaVersion();
         TextView apiView = (TextView)findViewById(R.id.api);
         apiView.setText(getString(R.string.label_about_api, apiRelease));
     }

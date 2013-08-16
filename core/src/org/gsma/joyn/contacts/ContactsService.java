@@ -152,7 +152,9 @@ public class ContactsService extends JoynService {
     /**
      * Returns the list of contacts supporting a given extension (i.e. feature tag)
      * 
-     * @param tag Supported extension tag
+     * @param tag Supported extension tag. The format of the tag may be the complete
+     *  IARI tag (i.e. +g.3gpp.iari-ref="xxxxxx") or just the right part of the tag
+     *   without quotes (xxxxxx).
      * @return List of contacts
      * @throws JoynServiceException
      */

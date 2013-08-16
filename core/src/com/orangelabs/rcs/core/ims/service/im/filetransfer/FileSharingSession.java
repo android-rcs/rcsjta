@@ -216,7 +216,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
             ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(error));
         }
     }
-
+    
     /**
      * Returns the thumbnail
      * 

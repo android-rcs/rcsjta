@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1"
+    android:paddingTop="10dip">
+    
+    <TextView android:text="@string/label_ext_tag"
+		android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+		android:layout_marginLeft="5dip"/>
+  	<EditText android:id="@+id/tag"
+		android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"/>
+
+	<Button android:text="@string/label_refresh"
+	 android:layout_marginLeft="5dip"
+	 android:layout_marginRight="5dip"
+	 android:id="@+id/refresh_btn"/>
+	
+	<ListView android:paddingTop="5dip"
+    	android:id="@+id/contacts"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:layout_width="fill_parent"/>
+	
+</TableLayout>

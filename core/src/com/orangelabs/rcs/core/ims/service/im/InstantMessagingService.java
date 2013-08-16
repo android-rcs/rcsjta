@@ -467,7 +467,7 @@ public class InstantMessagingService extends ImsService {
      */
     public ChatSession initiateAdhocGroupChatSession(List<String> contacts, String subject) throws CoreException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an ad-hoc group chat session");
+			logger.info("Initiate an ad-hoc group chat session with " + contacts.size() + " contacts");
 		}
 
 		// Test number of sessions

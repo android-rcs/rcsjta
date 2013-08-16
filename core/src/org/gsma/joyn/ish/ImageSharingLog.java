@@ -86,7 +86,7 @@ public class ImageSharingLog {
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the state of the sharing.
+     * The name of the column containing the state of the sharing
      * <P>Type: INTEGER</P>
 	 * @see ImageSharing.State
      */

@@ -3,20 +3,19 @@
 
 <!-- Application -->
 <string name="app_name">joyn RI</string>
-<string name="menu_address_book">Address book</string>
-<string name="menu_ux">UX</string>
 <string name="menu_about">About</string>
 <string name="label_ab_not_found">The address book is not found, launch it manually from your device home screen.</string>
 <string name="label_battery_running_low">Battery running low (less than %d%%)\nStopping joyn services</string>
 
 <!-- Commons -->
+<string name="label_not_implemented">Not yet implemented</string>
+<string name="label_confirm_close">Do you want to close the session on quit?</string>
 <string name="menu_close_session">Quit</string>
 <string name="label_file_size">Size: %1$s%2$s</string>
 <string name="label_file_size_unknown">Size: unknown</string>
 <string name="label_command_in_progress">Command in progress...</string>
 <string name="label_session_not_found">Session not found</string>
 <string name="label_session_not_yet_started">Session not yet started</string>
-<string name="label_not_implemented">Not yet implemented</string>
 <string name="label_ims_disconnected">Service has been disconnected from the IMS</string>
 <string name="label_api_failed">Call API method has failed</string>
 <string name="label_api_disabled">joyn service is not available</string>
@@ -35,23 +34,43 @@
 <string name="label_no">No</string>
 <string name="label_send">Send</string>
 <string name="label_select">Select</string>
-<string name="label_receive_image">Received image %s</string>
 <string name="label_load_log_failed">Database access has failed</string>
+<string name="label_log_empty">No entry</string>
+<string name="label_incoming">incoming</string>
+<string name="label_outgoing">outgoing</string>
+<string name="label_state_unknown">unknown</string>
+<string name="label_state_aborted">aborted</string>
+<string name="label_state_failed">failed</string>
+<string name="label_state_initiated">initiated</string>
+<string name="label_state_invited">invited</string>
+<string name="label_state_started">started</string>
+<string name="label_state_transferred">transferred</string>
+<string name="label_state_terminated">terminated</string>
+<string name="label_session_state">State: %s</string>
+<string name="label_session_date">Date: %s</string>
+<string name="label_direction">Direction: %s</string>
+<string name="label_filename">File: %s</string>
+<string name="label_filesize">Size: %s bytes</string>
+<string name="label_progress_status">Status:</string>
+<string name="label_progress_bar">Progress:</string>
+<string name="label_file">Selected file:</string>
+<string name="label_receive_image">Received image %s</string>
+<string name="label_remote">Remote contact:</string>
 
 <!-- About menu -->
 <string name="label_about_title">Reference Implementation</string>
 <string name="label_about_release">Release %s</string>
 <string name="label_about_api">API %s</string>
 
-<!-- Contacts API -->
-<string name="menu_list_rcs_contacts">All joyn contacts</string>
-<string name="menu_list_online_rcs_contacts">Online joyn contacts</string>        		
-<string name="menu_list_rcs_contacts_per_service">Contact per joyn service</string>
+<!--  Quick contact badge -->
+<string name="label_quick_chat">Chat</string>
+<string name="label_quick_ft">File transfer</string>
+<string name="label_quick_extensions">Extensions</string>
 
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>
-<string name="menu_clients">Clients</string>
-<string name="menu_apps">Applications</string>
+<string name="menu_clients">Client intents</string>
+<string name="menu_apps">Application intents</string>
 <string name="label_no_clients">No other client detected on the device</string>
 <string name="label_load_settings">Load settings</string>
 <string name="label_load_chat">Load a chat</string>
@@ -61,6 +80,14 @@
 <string name="label_load_ft">Load a file transfer</string>
 <string name="label_initiate_ft">Start a file transfer</string>
 <string name="label_intent_failed">Intent not found</string>
+
+<!-- Contacts API -->
+<string name="menu_contacts">Contacts</string>
+<string name="menu_address_book">Address book</string>
+<string name="menu_list_rcs_contacts">All joyn contacts</string>
+<string name="menu_list_online_contacts">Online joyn contacts</string>        		
+<string name="menu_list_supported_contacts">Contacts supporting a service</string>
+<string name="label_ext_tag">Extension tag:</string>
 
 <!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>
@@ -86,21 +113,29 @@
 <string name="label_contact">Contact %s</string>
 <string name="label_extensions">Extensions:\n%s</string>
 
-<!--  Messaging menu -->
+<!-- Messaging menu -->
 <string name="menu_messaging">Messaging</string>
-<string name="menu_sms_mms">Send SMS/MMS</string>
+<string name="menu_file_transfer">File transfer</string>
+<string name="menu_chat">Chat</string>
+
+<!-- File transfer menu -->
 <string name="menu_transfer_file">Transfer a file</string>
 <string name="menu_file_transfer_log">File transfer log</string>
-<string name="menu_one_to_one_chat">Chat</string>
+<string name="title_recv_file_transfer">New file transfer invitation</string>
+<string name="title_file_transfer">File transfer</string>
+<string name="label_transfer_failed">Transfer has failed (error code %d)</string>
+<string name="label_transfer_too_big">Transfer is aborted because file is too big</string>
+<string name="label_transfer_cancelled">File transfer session has been cancelled</string>
+<string name="label_transfer_declined">Transfer invitation has been declined</string>
+
+<!-- Chat menu -->
+<string name="menu_one_to_one_chat">Single chat</string>
 <string name="menu_adhoc_group_chat">Group chat</string>
 <string name="menu_chat_log">Chat log</string>
-<string name="menu_block_contact">Block/unblock contact</string>
 <string name="menu_spambox">Spambox</string>
 <string name="label_invite">Invite</string>
 <string name="label_contact_blocked">%s has been blocked</string>
 <string name="label_contact_unblocked">%s has been unblocked</string>
-<string name="title_recv_file_transfer">New file transfer invitation</string>
-<string name="label_file">Selected file:</string>
 <string name="title_recv_chat">New chat invitation</string>
 <string name="label_msg">Message:</string>
 <string name="label_hint_first_message">Enter first message</string>
@@ -119,12 +154,9 @@
 <string name="label_chat_failed">Chat session has failed</string>
 <string name="label_contacts">Contacts:</string>
 <string name="label_contact_is_composing">is typing...</string>
-<string name="label_transfer_failed">Transfer has failed or is aborted (error code %d)</string>
-<string name="label_transfer_failed_too_big">Transfer is aborted because file is too big</string>
 <string name="label_select_contacts">Select contacts</string>
 <string name="label_chat_wizz">Wizz</string>
 <string name="label_chat_initiation_canceled">Chat session has been canceled</string>
-<string name="label_ft_initiation_canceled">File transfer session has been canceled</string>
 <string name="label_select_quicktext">Quick text</string>
 <string name="menu_quicktext">Quick text</string>
 <string name="label_add_participant_success">Request to add participant(s) is successful</string>
@@ -158,34 +190,38 @@
 <string name="label_contact_joined">%s has joined</string>
 <string name="label_contact_left">%s has left</string>
 <string name="label_contact_disconnected">%s is diconnected</string>
+<string name="label_chat_declined">Group chat invitation has been declined</string>
+<string name="label_no_participant_found">No participant found or available</string>
 
-<!--  Rich call menu -->
-<string name="menu_richcall">Sharing</string>
-<string name="menu_initiate_image_sharing">Initiate image sharing</string>
-<string name="menu_initiate_video_sharing">Initiate video sharing</string>
-<string name="menu_video_settings">Video settings</string>
-<string name="menu_image_sharing_log">Image sharing log</string>
-<string name="menu_video_sharing_log">Video sharing log</string>
-<string name="label_image_sharing_canceled">Image sharing session has been canceled</string>
-<string name="label_video_sharing_canceled">Video sharing session has been canceled</string>
-<string name="label_progress_status">Status:</string>
-<string name="label_progress_bar">Progress:</string>
-<string name="label_sharing_aborted">Sharing aborted</string>
-<string name="label_invitation_declined">Sharing invitation has been declined</string>
-<string name="label_sharing_terminated_by_remote">Sharing terminated by remote</string>
+<!-- Sharing menu -->
+<string name="menu_sharing">Sharing</string>
+<string name="menu_image_sharing">Image sharing</string>
+<string name="menu_video_sharing">Video sharing</string>
 <string name="label_dial">Dial</string>
+<string name="label_sharing_aborted">Sharing aborted</string>
+<string name="label_sharing_declined">Sharing invitation has been declined</string>
+<string name="label_sharing_cancelled">Sharing has been cancelled</string>
+
+<!-- Image sharing menu -->
+<string name="menu_initiate_image_sharing">Initiate image sharing</string>
+<string name="menu_image_sharing_log">Image sharing log</string>
 <string name="label_select_picture">Select picture</string>
 <string name="label_selected_img">Selected picture:</string>
-<string name="label_select_location">Select location</string>
-<string name="label_selected_location">Selected location:</string>
+<string name="label_select_file">Select file</string>
+<string name="title_recv_image_sharing">New image sharing invitation</string>
+<string name="title_image_sharing">Image sharing</string>
+<string name="label_out_of_memory">No enough memory to display the image</string>
+
+<!-- Video sharing menu -->
+<string name="menu_initiate_video_sharing">Initiate video sharing</string>
+<string name="menu_video_settings">Video settings</string>
+<string name="menu_video_sharing_log">Video sharing log</string>
+<string name="label_video_sharing_canceled">Video sharing session has been canceled</string>
 <string name="label_select_video">Select video</string>
 <string name="label_selected_video">File:</string>
 <string name="label_initiate_sharing">Invite</string>
 <string name="label_display">Display:</string>
-<string name="label_select_file">Select file</string>
-<string name="title_recv_image_sharing">New image sharing invitation</string>
 <string name="title_recv_video_sharing">New video sharing invitation</string>
-<string name="label_out_of_memory">No enough memory to display the image</string>
 <string name="label_csh_failed">Sharing has failed or is aborted (error code %d)</string>
 <string name="label_end_of_media">End of media</string>
 <string name="label_video_format_not_supported">Only H.263 QCIF format supported!\nPlease select another file.</string>
@@ -201,85 +237,40 @@
 <string name="label_outgoing_sharing_aborted">Outgoing sharing aborted</string>
 <string name="label_outgoing_sharing_terminated_by_remote">Outgoing sharing terminated by remote</string>
 <string name="label_switch_camera">Switch camera</string>
+<string name="label_video_duration">Duration: %s s</string>
 
-<string name="title_codecs_managed_by_stack">Codecs managed by stack</string>
-<string name="summary_codecs_managed_by_stack">If enable, the stack will offer codecs thanks to the network type. If disable, you must select your codecs and the highest level will be preferred.</string>
-<string name="title_codecs_selection">H264 Codecs (level, size, framerate, bitrate)</string>
-<string name="label_codec0">1.B, QCIF, 12, 96k</string>
-<string name ="summary_codec0">Default codec always enabled</string>
-<string name="label_codec1">1.2, QVGA, 10, 176k</string>
-<string name="label_codec2">1.2, CIF, 10, 176k</string>
-<string name="label_codec3">1.3, CIF, 15, 384k</string>
-<string name="label_codec4">Custom codec</string>
-<string name="label_custom_level">Custom level</string>
-<string name="label_custom_size">Custom size</string>
-<string name="label_custom_framerate">Custom framerate</string>
-<string name="label_custom_bitrate">Custom bitrate</string>
-<string-array name="list_level_label">
-    <item>H264 1B</item>
-    <item>H264 1.2</item>
-    <item>H264 1.3</item>
-</string-array>
-<string-array name="list_level_value">
-    <item>1</item>
-    <item>2</item>
-    <item>3</item>
-</string-array>
-<string-array name="list_size_label">
-    <item>QCIF</item>
-    <item>QVGA</item>
-    <item>CIF</item>
-    <item>0</item>
-</string-array>
-<string-array name="list_size_value">
-    <item>0</item>
-    <item>1</item>
-    <item>2</item>
-    <item>3</item>
-</string-array>
-<string-array name="list_framerate_label">
-    <item>10</item>
-    <item>12</item>
-    <item>15</item>
-    <item>20</item>
-</string-array>
-<string-array name="list_framerate_value">
-    <item>10</item>
-    <item>12</item>
-    <item>15</item>
-    <item>20</item>
-</string-array>
-<string-array name="list_bitrate_label">
-    <item>96</item>
-    <item>128</item>
-    <item>176</item>
-    <item>256</item>
-    <item>320</item>
-    <item>384</item>
-</string-array>
-<string-array name="list_bitrate_value">
-    <item>96</item>
-    <item>128</item>
-    <item>176</item>
-    <item>256</item>
-    <item>320</item>
-    <item>384</item>
-</string-array>
-
-<!--  Quick contact badge -->
-<string name="label_quick_chat">Chat</string>
-<string name="label_quick_ft">File transfer</string>
-<string name="label_quick_evtlog">Event log</string>
-<string name="label_quick_rcs_contact">Details</string>
-<string name="label_quick_normal_contact">joyn</string>
-<string name="label_quick_invite">Invite</string>
-<string name="label_quick_me">Details</string>
-<string name="label_quick_extensions">Extensions</string>
-
-<!-- Terms and conditions -->
-
-<string name="label_accept_terms_failed">Accept terms has failed, retry later</string>
-<string name="label_reject_terms_failed">Reject terms has failed, retry later</string>
+<!--  MM session menu -->
+<string name="menu_mm_sessions">Multimedia session</string>
+<string name="menu_initiate_mm_session">Initiate session</string>
+<string name="menu_mm_session_settings">Session settings</string>
+<string name="menu_mm_sessions_list">Current sessions</string>
+<string name="menu_send_mm_message">Send message</string>
+<string name="label_initiate_mm_session">Initiate session</string>
+<string name="label_close_mm_session">Close session</string>
+<string name="label_no_mm_session">No session</string>
+<string name="label_recv_mm_msg">Receive message from %s:</string>
+<string name="label_mm_msg_content">Message content:</string>
+<string name="label_mm_msg_type">Message content type:</string>
+<string name="label_send_mm_msg">Send message</string>
+<string name="label_service_id">Service ID:</string>
+<string name="label_local_sdp">Local SDP:</string>
+<string name="label_remote_sdp">Remote SDP:</string>
+<string name="label_mm_msg_sent">Message sent in background...</string>
+<string name="label_mm_msg_success">Message sent with success</string>
+<string name="label_mm_msg_failed">Message has failed</string>
+<string name="label_save_settings">Save</string>
+<string name="label_restore_settings">Restore</string>
+<string name="label_settings_saved">Settings have been saved</string>
+<string name="label_settings_restored">Default settings have been restored</string>
+<string name="label_mm_session_in_progress">Session in progress...</string>
+<string name="label_mm_session_canceled">Session initiation has been canceled</string>
+<string name="label_mm_session_aborted">Session aborted</string>
+<string name="label_mm_session_declined">Session invitation has been declined</string>
+<string name="label_mm_session_failed">Session has failed (error code %d)</string>
+<string name="title_mm_session">Multimedia session</string>
+<string name="label_mm_session_has_expired">Session has expired</string>
+<string name="title_recv_mm_session">Multimedia session invitation</string>
+<string name="label_session">Session %s</string>
 
 </resources>
 

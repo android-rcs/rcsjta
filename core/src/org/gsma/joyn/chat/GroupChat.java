@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.ft.FileTransfer;
 
 /**
  * Group chat
@@ -93,9 +92,14 @@ public class GroupChat {
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
+    	 * Group chat has been cancelled
+    	 */
+    	public final static int CHAT_CANCELLED = 2;
+
+    	/**
     	 * Chat conversation not found
     	 */
-    	public final static int CHAT_NOT_FOUND = 2;
+    	public final static int CHAT_NOT_FOUND = 3;
     	    	
         private Error() {
         }    	
@@ -130,10 +134,10 @@ public class GroupChat {
 	}
 
 	/**
-	 * Returns the state of the file transfer
+	 * Returns the state of the group chat
 	 * 
 	 * @return State
-	 * @see FileTransfer.State
+	 * @see GroupChat.State
 	 * @throws JoynServiceException
 	 */
 	public int getState() throws JoynServiceException {

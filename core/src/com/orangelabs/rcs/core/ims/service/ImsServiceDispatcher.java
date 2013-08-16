@@ -215,6 +215,24 @@ public class ImsServiceDispatcher extends Thread {
 
 			// New incoming session invitation
 	    	if (isTagPresent(sdp, "msrp") &&
+	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE) &&
+	    				(SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE) ||
+	    						SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE_RCS2))) {
+	    		// Image sharing
+	    		if (RcsSettings.getInstance().isImageSharingSupported()) {
+		    		if (logger.isActivated()) {
+		    			logger.debug("Image content sharing transfer invitation");
+		    		}
+	    			imsModule.getRichcallService().receiveImageSharingInvitation(request);
+	    		} else {
+					// Service not supported: reject the invitation with a 603 Decline
+					if (logger.isActivated()) {
+						logger.debug("Image share service not supported: automatically reject");
+					}
+					sendFinalResponse(request, 603);
+	    		}
+	    	} else
+	    	if (isTagPresent(sdp, "msrp") &&
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_OMA_IM) &&
 	    				isTagPresent(sdp, "file-selector")) {
 		        // File transfer
@@ -284,24 +302,6 @@ public class ImsServiceDispatcher extends Thread {
 					// Service not supported: reject the invitation with a 603 Decline
 					if (logger.isActivated()) {
 						logger.debug("Video share service not supported: automatically reject");
-					}
-					sendFinalResponse(request, 603);
-	    		}
-	    	} else
-	    	if (isTagPresent(sdp, "msrp") &&
-	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE) &&
-	    				(SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE) ||
-	    						SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE_RCS2))) {
-	    		// Image sharing
-	    		if (RcsSettings.getInstance().isImageSharingSupported()) {
-		    		if (logger.isActivated()) {
-		    			logger.debug("Image content sharing transfer invitation");
-		    		}
-	    			imsModule.getRichcallService().receiveImageSharingInvitation(request);
-	    		} else {
-					// Service not supported: reject the invitation with a 603 Decline
-					if (logger.isActivated()) {
-						logger.debug("Image share service not supported: automatically reject");
 					}
 					sendFinalResponse(request, 603);
 	    		}

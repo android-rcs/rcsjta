@@ -90,7 +90,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 	
 	/**
-	 * Returns the state of the file transfer
+	 * Returns the state of the group chat
 	 * 
 	 * @return State 
 	 */
@@ -446,7 +446,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onSessionError(error.getErrorCode()); // TODO: error code
+	            	int code;
+	            	switch(error.getErrorCode()) {
+            			case ChatError.SESSION_INITIATION_CANCELLED:
+	            			code = GroupChat.Error.CHAT_CANCELLED;
+	            			break;
+            			case ChatError.SESSION_INITIATION_DECLINED:
+	            			code = GroupChat.Error.INVITATION_DECLINED;
+	            			break;
+	            		default:
+	            			code = GroupChat.Error.CHAT_FAILED;
+	            	}
+	            	listeners.getBroadcastItem(i).onSessionError(code);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -454,7 +465,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            }
 	        }
 	        listeners.finishBroadcast();
-	        
+	    	
 	        // Remove session from the list
 	        ChatServiceImpl.removeGroupChatSession(session.getSessionID());
 	    }
@@ -577,18 +588,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				logger.info("Add participant request is successful");
 			}
 	
-	  		// Notify event listeners
-/*			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).handleAddParticipantSuccessful();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();*/ // TODO
+			// TODO: nothing send over API
 	    }
     }
     
@@ -603,18 +603,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				logger.info("Add participant request has failed " + reason);
 			}
 	
-	  		// Notify event listeners
-/*			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).handleAddParticipantFailed(reason);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();*/ // TODO
+			// TODO: nothing send over API
 	    }  
     }
 

@@ -293,17 +293,30 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 				logger.info("Session terminated by remote");
 			}
 			
+			// Check if the file has been transferred or not
 	  		if (session.isImageTransfered()) {
-				// The image has been received, so only remove session from the list
+		        // Remove session from the list
 	  			ImageSharingServiceImpl.removeImageSharingSession(session.getSessionID());
-	  			return;
+	  		} else {
+				// Update rich call history
+				RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
+		
+		  		// Notify event listeners
+				final int N = listeners.beginBroadcast();
+		        for (int i=0; i < N; i++) {
+		            try {
+		            	listeners.getBroadcastItem(i).onSharingAborted();
+		            } catch(Exception e) {
+		            	if (logger.isActivated()) {
+		            		logger.error("Can't notify listener", e);
+		            	}
+		            }
+		        }
+		        listeners.finishBroadcast();
+
+		        // Remove session from the list
+				ImageSharingServiceImpl.removeImageSharingSession(session.getSessionID());
 	  		}
-			
-			// Update rich call history
-			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
-	
-	        // Remove session from the list
-			ImageSharingServiceImpl.removeImageSharingSession(session.getSessionID());
 	    }
     }
     

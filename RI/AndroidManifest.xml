@@ -4,7 +4,7 @@
  android:versionName="3.0.0"
  package="com.orangelabs.rcs.ri">
 
-	<uses-sdk android:minSdkVersion="5"
+	<uses-sdk android:minSdkVersion="8"
 		android:targetSdkVersion="15"/>
 	
 	<uses-permission android:name="android.permission.GET_TASKS"/>
@@ -36,7 +36,7 @@
 
 		<!-- Intents API -->
         
-        <activity android:name=".TestIntentsApi"/>
+        <activity android:name=".intents.TestIntentsApi"/>
 
         <activity android:name=".intents.IntentClients"/>
 
@@ -44,11 +44,17 @@
         
 		<!-- Contacts API -->
         
-        <activity android:name=".TestContactsApi"/>
+        <activity android:name=".contacts.TestContactsApi"/>
+        
+        <activity android:name=".contacts.JoynContactsList"/>
+        
+        <activity android:name=".contacts.OnlineContactsList"/>
+        
+        <activity android:name=".contacts.SupportedContactsList"/>
         
         <!-- Capabilities API -->
 
-        <activity android:name=".TestCapabilitiesApi"/>
+        <activity android:name=".capabilities.TestCapabilitiesApi"/>
 
         <activity android:name=".capabilities.RequestCapabilities"/>
 
@@ -56,14 +62,25 @@
 
 		<activity android:name=".capabilities.RequestAllCapabilities"/>
 		
-		<activity android:name=".capabilities.ListCapabilities"/>
+		<activity android:name=".capabilities.CapabilitiesList"/>
 
 		<!-- Messaging API -->
-        <activity android:name=".TestMessagingApi"/>
+		
+        <activity android:name=".messaging.TestMessagingApi"/>
+
+		<!-- File transfer API -->
+        
+        <activity android:name=".messaging.ft.TestFileTransferApi">
+			<intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+			    <action android:name="org.gsma.joyn.action.VIEW_FT"/>
+            </intent-filter>
+        </activity>
 
         <activity android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/label_quick_ft"
-        	android:name=".messaging.InitiateFileTransfer">
+        	android:name=".messaging.ft.InitiateFileTransfer">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -77,17 +94,34 @@
             </intent-filter>					
 		</activity>
         
-		<receiver android:name=".messaging.FileTransferInvitationReceiver">
+		<receiver android:name=".messaging.ft.FileTransferInvitationReceiver">
             <intent-filter>
 		    	<action android:name="org.gsma.joyn.ft.action.NEW_FILE_TRANSFER"/>
             </intent-filter>
         </receiver>
 
-        <activity android:name=".messaging.ReceiveFileTransfer"/>
+        <activity android:name=".messaging.ft.ReceiveFileTransfer"/>
 
-        <activity android:name=".messaging.ChatList"/>
+        <activity android:name=".messaging.ft.FileTransferList"/>
         
-        <activity android:name=".messaging.InitiateSingleChat">
+        <!-- Chat API -->
+        
+        <activity android:name=".messaging.chat.TestChatApi">
+			<intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+			    <action android:name="org.gsma.joyn.action.VIEW_CHAT"/>
+            </intent-filter>            
+			<intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+			    <action android:name="org.gsma.joyn.action.VIEW_GROUP_CHAT"/>
+            </intent-filter>            
+		</activity>
+
+        <activity android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/label_quick_chat"
+            android:name=".messaging.chat.InitiateSingleChat">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -98,17 +132,17 @@
             </intent-filter>
 		</activity>        
         
-		<receiver android:name=".messaging.SingleChatInvitationReceiver">
+		<receiver android:name=".messaging.chat.SingleChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="org.gsma.joyn.chat.action.NEW_CHAT"/>
             </intent-filter>
         </receiver>
         
-		<receiver android:name=".messaging.SingleChatReplacedReceiver"/>
+		<receiver android:name=".messaging.chat.SingleChatReplacedReceiver"/>
 
-        <activity android:name=".messaging.SingleChatView"/>
+        <activity android:name=".messaging.chat.SingleChatView"/>
 				
-        <activity android:name=".messaging.InitiateGroupChat">
+        <activity android:name=".messaging.chat.InitiateGroupChat">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -119,27 +153,84 @@
             </intent-filter>
 		</activity>        
 
-		<receiver android:name=".messaging.GroupChatInvitationReceiver">
+		<receiver android:name=".messaging.chat.GroupChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="org.gsma.joyn.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 		
-        <activity android:name=".messaging.GroupChatView"/>
+        <activity android:name=".messaging.chat.GroupChatView"/>
                 
-        <!-- Rich call API -->
-        <activity android:name=".TestRichCallApi"/>
-
-        <activity android:name=".richcall.InitiateImageSharing"/>
+        <activity android:name=".messaging.chat.ChatList"/>
         
-		<receiver android:name=".richcall.ImageSharingInvitationReceiver">
+        <!-- Sharing API -->
+        
+        <activity android:name=".sharing.TestSharingApi"/>
+
+        <!-- Image sharing API -->
+        
+        <activity android:name=".sharing.image.TestImageSharingApi"/>
+
+        <activity android:name=".sharing.image.InitiateImageSharing"/>
+        
+		<receiver android:name=".sharing.image.ImageSharingInvitationReceiver">
             <intent-filter>
 		    	<action android:name="org.gsma.joyn.ish.action.NEW_IMAGE_SHARING"/>
             </intent-filter>
         </receiver>
 
-        <activity android:name=".richcall.ReceiveImageSharing"/>
+        <activity android:name=".sharing.image.ReceiveImageSharing"/>
         
+        <activity android:name=".sharing.image.ImageSharingList"/>
+        
+        <!-- Video sharing API -->
+        
+        <activity android:name=".sharing.video.TestVideoSharingApi"/>
+
+        <activity android:name=".sharing.video.InitiateVisioSharing"/>
+        
+		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.vsh.action.NEW_VIDEO_SHARING"/>
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".sharing.video.VisioSharing"/>
+        
+        <activity android:name=".sharing.video.VideoSharingList"/>
+        
+        <!-- MM session API -->
+
+        <activity android:name=".session.TestMultimediaSessionApi"/>
+
+        <activity android:name=".session.InitiateMultimediaSession"/>
+        
+		<receiver android:name=".session.MultimediaSessionInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.session.action.NEW_SESSION"/>
+                <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
+        		<category android:name="android.intent.category.LAUNCHER" />
+        		<category android:name="android.intent.category.DEFAULT" />
+		    	</intent-filter>
+        </receiver>
+
+        <activity android:name=".session.MultimediaSessionList"/>
+		
+        <activity android:name=".session.MultimediaSessionSettings"/>
+        
+        <activity android:name=".session.SendMultimediaMessage"/>
+        
+        <activity android:name=".session.MultimediaSessionView"/>
+        
+   		<receiver android:name=".session.MultimediaMessageReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.session.action.NEW_MESSAGE"/>
+                <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
+        		<category android:name="android.intent.category.LAUNCHER" />
+        		<category android:name="android.intent.category.DEFAULT" />
+		    	</intent-filter>
+        </receiver>
+		
 </application>
 
 </manifest>

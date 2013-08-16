@@ -3,12 +3,14 @@ package com.orangelabs.rcs.service.api;
 import java.util.List;
 
 import org.gsma.joyn.JoynServiceException;
+import org.gsma.joyn.chat.Chat;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IChatListener;
 
 import android.os.RemoteCallbackList;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -16,6 +18,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -60,6 +63,17 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 	
 	/**
+	 * replace core session
+	 * 
+	 * @param newSession New session
+	 */
+	public void replaceCoreSession(OneOneChatSession newSession) {
+		this.session = newSession;
+		
+		session.addListener(this);
+	}
+
+	/**
 	 * Get session ID
 	 * 
 	 * @return Session ID
@@ -87,7 +101,41 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     }
     
-    /**
+	/**
+	 * Returns the state of the chat
+	 * 
+	 * @return State 
+	 */
+	public int getState() {
+		int result = Chat.State.UNKNOWN;
+		SipDialogPath dialogPath = session.getDialogPath();
+		if (dialogPath != null) {
+			if (dialogPath.isSessionCancelled()) {
+				// Session canceled
+				result = Chat.State.ABORTED;
+			} else
+			if (dialogPath.isSessionEstablished()) {
+				// Session started
+				result = Chat.State.STARTED;
+			} else
+			if (dialogPath.isSessionTerminated()) {
+				// Session terminated
+				// TODO: TERMINATED_BY_USER not taken into account
+				result = Chat.State.TERMINATED;
+			} else {
+				// Session pending
+				// TODO: which state in case of S&F ?
+				if (session instanceof OriginatingOne2OneChatSession) {
+					result = Chat.State.INITIATED;
+				} else {
+					result = Chat.State.INVITED;
+				}
+			}
+		}
+		return result;			
+	}
+	
+	/**
      * Sends a chat message
      * 
      * @param message Message
@@ -131,7 +179,9 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @param status Is-composing status
      */
     public void sendIsComposingEvent(boolean status) {
-		session.sendIsComposingStatus(status);
+    	if (session != null) {
+    		session.sendIsComposingStatus(status);
+    	}
     }
 	
     /**

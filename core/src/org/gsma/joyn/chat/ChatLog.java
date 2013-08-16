@@ -55,6 +55,8 @@ public class ChatLog {
         /**
          * The name of the column containing the state of the chat.
          * <P>Type: INTEGER</P>
+         * @see Chat.State
+         * @see GroupChat.State
          */
         public static final String STATE = "state";
 
@@ -90,43 +92,8 @@ public class ChatLog {
 	         */
 	        public static final int GROUP_CHAT = 1;
         }
-        
-        /**
-         * State of the chat
-         */
-        public static class State {
-	        /**
-	         * Chat is inactive (e.g. not yet started)
-	         */
-	        public static final int INACTIVE = 0;
-        
-	        /**
-	         * Chat is active (e.g. started) 
-	         */
-	        public static final int ACTIVE = 1;
-
-	        /**
-	         * Chat has been terminated
-	         */
-	        public static final int TERMINATED = 2;
-
-	        /**
-	         * Chat has been terminated by the end user
-	         */
-	        public static final int TERMINATED_BY_USER = 3;
-
-	        /**
-	         * Chat has failed
-	         */
-	        public static final int FAILED = 4;
-
-	        /**
-	         * Chat invitation is pending
-	         */
-	        public static final int PENDING = 5;
-        }        
     }
-
+    
     /**
      * Chat message
      */

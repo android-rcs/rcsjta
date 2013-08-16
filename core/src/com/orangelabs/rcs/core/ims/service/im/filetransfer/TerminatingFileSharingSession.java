@@ -319,33 +319,6 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	}	
 	
 	/**
-	 * Handle error 
-	 * 
-	 * @param error Error
-	 */
-	public void handleError(FileSharingError error) {
-		if (isInterrupted()) {
-			return;
-		}
-
-		// Error	
-    	if (logger.isActivated()) {
-    		logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-    	}
-
-    	// Close media session
-    	closeMediaSession();
-
-    	// Remove the current session
-    	getImsService().removeSession(this);
-
-		// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(error);
-        }
-	}
-
-	/**
 	 * Data has been transfered
 	 * 
 	 * @param msgId Message ID

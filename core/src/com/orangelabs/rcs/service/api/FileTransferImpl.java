@@ -307,17 +307,30 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 				logger.info("Session terminated by remote");
 			}
 	
+			// Check if the file has been transferred or not
 	  		if (session.isFileTransfered()) {
-				// The file has been received, so only remove session from the list
+		        // Remove session from the list
 	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
-	  			return;
+	  		} else {
+				// Update rich messaging history
+		  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+		
+		  		// Notify event listeners
+				final int N = listeners.beginBroadcast();
+		        for (int i=0; i < N; i++) {
+		            try {
+		            	listeners.getBroadcastItem(i).onTransferAborted();
+		            } catch(Exception e) {
+		            	if (logger.isActivated()) {
+		            		logger.error("Can't notify listener", e);
+		            	}
+		            }
+		        }
+		        listeners.finishBroadcast();
+
+		        // Remove session from the list
+		        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	  		}
-	  		
-			// Update rich messaging history
-	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
-	
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	    }
     }
     

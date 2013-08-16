@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:paddingTop="10dip" 
+		android:shrinkColumns="1" 
+		android:stretchColumns="1">
+	    
+		<TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_local_sdp"
+ 			 android:layout_marginLeft="5dip"
+	         android:gravity="right"/>
+			<EditText android:id="@+id/local_sdp"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+			 android:maxLength="512" />
+	    </TableRow>
+
+	    <TableRow android:padding="5dip"></TableRow>
+		
+		<Button android:text="@string/label_save_settings"
+		 android:paddingTop="10dip"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/save_btn"/>
+
+		<Button android:text="@string/label_restore_settings"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/restore_btn" />
+	</TableLayout>
+	
+</ScrollView>	

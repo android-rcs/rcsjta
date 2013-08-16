@@ -157,24 +157,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 				logger.info("Receive message delivery status for message " + msgId + ", status " + status);
 			}
 	
-			// Update rich messaging history
-			RichMessaging.getInstance().setChatMessageDeliveryStatus(msgId, status);
-			
 	  		// Notify message delivery listeners
-/*			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).receiveMessageDeliveryStatus(contact, msgId, status);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();*/ // TODO
+			ChatImpl chat = (ChatImpl)ChatServiceImpl.getChatSession(contact);
+			if (chat != null) {
+            	chat.handleMessageDeliveryStatus(msgId, status);
+	    	}
     	}
     }
-
+    
     /**
 	 * Receive a new group chat invitation
 	 * 
@@ -229,6 +219,19 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.debug("Add a chat session in the list (size=" + chatSessions.size() + ")");
 		}
 		chatSessions.put(session.getChatId(), session);
+	}
+
+	/**
+	 * Get a chat session from the list for a given contact
+	 * 
+	 * @param contact Contact
+	 * @param Chat session
+	 */
+	protected static IChat getChatSession(String contact) {
+		if (logger.isActivated()) {
+			logger.debug("Get a chat session for " + contact);
+		}
+		return chatSessions.get(contact);
 	}
 
 	/**
@@ -310,13 +313,20 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Initiate the session
 			ChatSession session = Core.getInstance().getImService().initiateOne2OneChatSession(contact, firstMessage);
 			
+			// Add session listener
+			ChatImpl sessionApi = new ChatImpl((OneOneChatSession)session);
+			sessionApi.addEventListener(listener);
+
 			// Update rich messaging history
 			RichMessaging.getInstance().addOutgoingChatSession(session);
-			
+
+			// Start the session
+			session.startSession();
+						
 			// Add session in the list
-			ChatImpl sessionApi = new ChatImpl((OneOneChatSession)session);
 			ChatServiceImpl.addChatSession(sessionApi);
 			return sessionApi;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);

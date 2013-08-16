@@ -86,7 +86,7 @@ public class FileTransferLog {
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the state of the transfer (in milliseconds)
+     * The name of the column containing the state of the transfer
      * <P>Type: INTEGER</P>
 	 * @see FileTransfer.State
      */

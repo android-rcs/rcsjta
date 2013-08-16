@@ -161,7 +161,9 @@ public class ChatService extends JoynService {
 	 * @throws JoynContactFormatException
      */
     public GroupChat initiateGroupChat(Set<String> contacts, String subject, GroupChatListener listener) throws JoynServiceException, JoynContactFormatException {
-		if (api != null) {
+System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
+    	
+    	if (api != null) {
 			try {
 				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<String>(contacts), subject, listener);
 				return new GroupChat(chatIntf);

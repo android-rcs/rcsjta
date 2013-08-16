@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.gsma.joyn.chat.Chat;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.ft.FileTransfer;
 
@@ -207,7 +208,7 @@ public class RichMessaging {
 		String participants = getParticipants(session);
 		String subject = session.getSubject();
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, ChatLog.Chat.State.PENDING);
+		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, Chat.State.INVITED);
 
 		// Add first message entry
 		InstantMessage firstMsg = session.getFirstMessage();
@@ -228,7 +229,7 @@ public class RichMessaging {
 		String participants = getParticipants(session);
 		String subject = session.getSubject();
 		int type = getChatSystemEventType(session);
-		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, ChatLog.Chat.State.PENDING);
+		addEntry(type, sessionId, chatId, null, participants, subject, null, null, 0, null, Chat.State.INITIATED);
 
 		// Add first message entry
 		InstantMessage firstMsg = session.getFirstMessage();
