@@ -139,7 +139,11 @@ public class ImageSharingService extends JoynService {
 		if (api != null) {
 			try {
 				IImageSharing sharingIntf = api.shareImage(contact, filename, listener);
-				return new ImageSharing(sharingIntf);
+				if (sharingIntf != null) {
+					return new ImageSharing(sharingIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -181,7 +185,12 @@ public class ImageSharingService extends JoynService {
     public ImageSharing getImageSharing(String sharingId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new ImageSharing(api.getImageSharing(sharingId));
+				IImageSharing sharingIntf = api.getImageSharing(sharingId);
+				if (sharingIntf != null) {
+					return new ImageSharing(sharingIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

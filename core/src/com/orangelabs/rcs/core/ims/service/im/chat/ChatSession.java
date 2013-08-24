@@ -47,7 +47,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.StringUtils;
@@ -470,7 +469,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		} else
 		if (ChatUtils.isTextPlainType(mimeType)) {
 	    	// Text message
-			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date());
+			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), msgId, false, new Date());
 		} else
 		if (ChatUtils.isMessageCpimType(mimeType)) {
 	    	// Receive a CPIM message
@@ -480,6 +479,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 				if (cpimMsg != null) {
 			    	Date date = cpimMsg.getMessageDate();
 			    	String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
+			    	if (cpimMsgId == null) {
+			    		cpimMsgId = msgId;
+			    	}
 			    	String contentType = cpimMsg.getContentType();
 			    	
 			    	String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
@@ -504,11 +506,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	if (ChatUtils.isTextPlainType(contentType)) {
 				    	// Text message
 		    			receiveText(from, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, imdnDisplayedRequested, date);
-		    			
-		    			// Mark the message as waiting a displayed report if needed 
-		    			if (imdnDisplayedRequested) {
-		    				RichMessaging.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
-		    			}
 			    	} else
 		    		if (ChatUtils.isApplicationIsComposingType(contentType)) {
 					    // Is composing event
@@ -674,9 +671,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 */
 	public boolean sendDataChunks(String msgId, String data, String mime) {
 		try {
-			ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
-			msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
-			return true;
+	    	if (msrpMgr != null) {
+				ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
+				msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
+				return true;
+	    	} else {
+	    		return false;	    				
+	    	}
 		} catch(Exception e) {
 			// Error
 	   		if (logger.isActivated()) {

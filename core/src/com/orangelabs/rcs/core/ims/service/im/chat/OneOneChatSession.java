@@ -21,6 +21,8 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gsma.joyn.chat.ChatLog;
+
 import javax2.sip.header.SubjectHeader;
 
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -113,17 +115,16 @@ public abstract class OneOneChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		}
 
-		// Send content
-		boolean result = sendDataChunks(msgId, content, mime);
-
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
-		RichMessaging.getInstance().addOutgoingChatMessage(msg, this);
+		RichMessaging.getInstance().addChatMessage(getContributionID(),
+				msg, ChatLog.Message.Direction.OUTGOING);
 
-		// Check if message has been sent with success or not
+		// Send content
+		boolean result = sendDataChunks(msgId, content, mime);
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().markChatMessageFailed(msgId);
+			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -154,17 +155,16 @@ public abstract class OneOneChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, geoDoc, GeolocInfoDocument.MIME_TYPE);
 		}
 
-		// Send content
-		boolean result = sendDataChunks(msgId, content, mime);
-
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessaging.getInstance().addOutgoingGeoloc(geolocMsg, this);
+		RichMessaging.getInstance().addChatMessage(getContributionID(), geolocMsg,
+				ChatLog.Message.Direction.OUTGOING);
 
-		// Check if message has been sent with success or not
+		// Send content
+		boolean result = sendDataChunks(msgId, content, mime);
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().markChatMessageFailed(msgId);
+			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -234,7 +234,7 @@ public abstract class OneOneChatSession extends ChatSession {
 		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
 		if (result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().setChatMessageDeliveryStatus(msgId, status);
+			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
 		}
 	}	
 

@@ -8,6 +8,10 @@ import org.gsma.joyn.chat.ChatMessage;
 interface IGroupChatListener {
 	void onSessionStarted();
 	
+	void onSessionAborted();
+
+	void onSessionError(in int reason);
+		
 	void onNewMessage(in ChatMessage message);
 	
 	void onReportMessageDelivered(in String msgId);
@@ -17,10 +21,6 @@ interface IGroupChatListener {
 	void onReportMessageFailed(in String msgId);
 	
 	void onComposingEvent(in String contact, in boolean status);
-	
-	void onSessionTerminated(in int reason);
-
-	void onSessionError(in int reason);
 	
 	void onParticipantJoined(in String contact, in String contactDisplayname);
 	

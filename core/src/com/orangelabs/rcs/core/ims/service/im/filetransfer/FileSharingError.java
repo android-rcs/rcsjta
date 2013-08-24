@@ -34,29 +34,24 @@ public class FileSharingError extends ImsSessionBasedServiceError {
 	public final static int MEDIA_TRANSFER_FAILED = FT_ERROR_CODES + 1;
 	
 	/**
-	 * Unsupported media type (e.g. codec not supported)
-	 */
-	public final static int UNSUPPORTED_MEDIA_TYPE = FT_ERROR_CODES + 2;
-
-	/**
 	 * Media saving has failed (e.g. sdcard is not correctly mounted)
 	 */
-	public final static int MEDIA_SAVING_FAILED = FT_ERROR_CODES + 3;
+	public final static int MEDIA_SAVING_FAILED = FT_ERROR_CODES + 2;
 
     /**
      * Media file is too big
      */
-    public final static int MEDIA_SIZE_TOO_BIG = FT_ERROR_CODES + 4;
+    public final static int MEDIA_SIZE_TOO_BIG = FT_ERROR_CODES + 3;
     
     /**
      * Media upload has failed
      */
-    public final static int MEDIA_UPLOAD_FAILED = FT_ERROR_CODES + 5;
+    public final static int MEDIA_UPLOAD_FAILED = FT_ERROR_CODES + 4;
 
     /**
      * Media download has failed
      */
-    public final static int MEDIA_DOWNLOAD_FAILED = FT_ERROR_CODES + 6;
+    public final static int MEDIA_DOWNLOAD_FAILED = FT_ERROR_CODES + 5;
 
     /**
      * Constructor

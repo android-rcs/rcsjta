@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.PhotoContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -84,9 +85,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 	    	// Check if the MIME type is supported
-	    	if (getContent() == null) {
+	    	if ((getContent() == null) || !(getContent() instanceof PhotoContent)) {
 	    		if (logger.isActivated()){
-    				logger.debug("MIME type is not supported");
+    				logger.debug("MIME type is not an image");
     			}
 
     			// Send a 415 Unsupported media type response

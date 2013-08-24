@@ -18,29 +18,58 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import org.gsma.joyn.chat.ChatLog;
+
 import android.net.Uri;
 
 /**
- * Rich messaging history data constants
+ * Chat data constants
  * 
- * @author mhsm6403
+ * @author Jean-Marc AUFFRET
  */
 public class ChatData {
-	// Database URI
-	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.messaging/messaging");
+	/**
+	 * Database URIs
+	 */
+	static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/chat");
 	
-	// Fields for chat
-	public static final String KEY_ID = "_id";
-	public static final String KEY_TYPE = "type";
-	public static final String KEY_CHAT_SESSION_ID = "chat_session_id";
-	public static final String KEY_TIMESTAMP = "_date";
-	public static final String KEY_CONTACT = "contact";
-	public static final String KEY_STATUS = "status";
-	public static final String KEY_DATA = "_data";
-	public static final String KEY_MESSAGE_ID = "message_id";
-	public static final String KEY_IS_SPAM = "is_spam";
-	public static final String KEY_CHAT_ID = "chat_id";
-	public static final String KEY_CHAT_REJOIN_ID = "chat_rejoin_id";
+	/**
+	 * Column name
+	 */
+	static final String KEY_ID = ChatLog.GroupChat.ID;
 	
-	public static final String KEY_NUMBER_MESSAGES ="number_of_messages";
+	/**
+	 * Column name
+	 */
+	static final String KEY_CHAT_ID = ChatLog.GroupChat.CHAT_ID;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_REJOIN_ID = "rejoin_id";
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_STATUS = ChatLog.GroupChat.STATE;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_SUBJECT = ChatLog.GroupChat.SUBJECT;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_PARTICIPANTS = "participants";
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;	
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
 }

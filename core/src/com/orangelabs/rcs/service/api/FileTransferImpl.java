@@ -136,7 +136,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			if (dialogPath.isSessionTerminated()) {
 				// Session terminated
 				if (session.isFileTransfered()) {
-					result = FileTransfer.State.TRANSFERED;
+					result = FileTransfer.State.TRANSFERRED;
 				} else {
 					result = FileTransfer.State.ABORTED;
 				}
@@ -251,7 +251,10 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 				logger.info("Session started");
 			}
 	
-	  		// Notify event listeners
+			// Update rich messaging history
+			RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -341,10 +344,15 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
      */
     public void handleTransferError(FileSharingError error) {
     	synchronized(lock) {
+			if (error.getErrorCode() == FileSharingError.SESSION_INITIATION_CANCELLED) {
+				// Do nothing here, this is an aborted event
+				return;
+			}
+
 			if (logger.isActivated()) {
 				logger.info("Sharing error " + error.getErrorCode());
 			}
-	
+
 			// Update rich messaging history
 	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
 			
@@ -354,9 +362,6 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	            try {
 	            	int code;
 	            	switch(error.getErrorCode()) {
-            			case FileSharingError.SESSION_INITIATION_CANCELLED:
-	            			code = FileTransfer.Error.TRANSFER_CANCELLED;
-	            			break;
             			case FileSharingError.SESSION_INITIATION_DECLINED:
 	            			code = FileTransfer.Error.INVITATION_DECLINED;
 	            			break;
@@ -364,13 +369,8 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	            			code = FileTransfer.Error.SAVING_FAILED;
 	            			break;
 	            		case FileSharingError.MEDIA_SIZE_TOO_BIG:
-	            			code = FileTransfer.Error.SIZE_TOO_BIG;
-	            			break;
 	            		case FileSharingError.MEDIA_TRANSFER_FAILED:
 	            			code = FileTransfer.Error.TRANSFER_FAILED;
-	            			break;
-	            		case FileSharingError.UNSUPPORTED_MEDIA_TYPE:
-	            			code = FileTransfer.Error.UNSUPPORTED_TYPE;
 	            			break;
 	            		default:
 	            			code = FileTransfer.Error.TRANSFER_FAILED;
@@ -437,7 +437,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onFileTransfered(filename);
+	            	listeners.getBroadcastItem(i).onFileTransferred(filename);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);

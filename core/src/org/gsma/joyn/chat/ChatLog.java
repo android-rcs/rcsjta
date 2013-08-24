@@ -26,14 +26,14 @@ import android.net.Uri;
  */
 public class ChatLog {
     /**
-     * Content provider URI for chat conversations
+     * Group chat
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/chat");
+    public static class GroupChat {
+        /**
+         * Content provider URI for chat conversations
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/chat");
 
-    /**
-     * Chat
-     */
-    public static class Chat {
         /**
          * The name of the column containing the unique ID for a row.
          * <P>Type: primary key</P>
@@ -41,68 +41,58 @@ public class ChatLog {
         public static final String ID = "_id";
 
         /**
-         * The name of the column containing the unique ID of the chat.
+         * The name of the column containing the unique ID of the group chat.
          * <P>Type: TEXT</P>
          */
         public static final String CHAT_ID = "chat_id";
         
         /**
-         * The name of the column containing the type of chat.
+         * The name of the column containing the state of the group chat.
          * <P>Type: INTEGER</P>
-         */
-        public static final String IS_GROUP_CHAT = "is_group";
-
-        /**
-         * The name of the column containing the state of the chat.
-         * <P>Type: INTEGER</P>
-         * @see Chat.State
          * @see GroupChat.State
          */
         public static final String STATE = "state";
 
         /**
-         * The name of the column containing the identity of the remote party.
-         * <P>Type: TEXT</P>
-         */
-        public static final String REMOTE = "remote";
-
-        /**
-         * The name of the column containing the subject in case of group chat.
+         * The name of the column containing the subject of the group chat.
          * <P>Type: TEXT</P>
          */
         public static final String SUBJECT = "subject";
         
         /**
-         * The name of the column containing the time when chat is created.
+         * The name of the column containing the direction of the group chat.
+         * <P>Type: INTEGER</P>
+    	 * @see GroupChat.Direction
+         */
+        public static final String DIRECTION = "direction";
+
+        /**
+         * The name of the column containing the time when group chat is created.
          * <P>Type: LONG</P>
          */
         public static final String TIMESTAMP = "timestamp";
-        
-        /**
-         * Type of chat
-         */
-        public static class Type {
-	        /**
-	         * Single chat
-	         */
-	        public static final int SINGLE_CHAT = 0;
-	        
-	        /**
-	         * Group chat
-	         */
-	        public static final int GROUP_CHAT = 1;
-        }
     }
     
     /**
-     * Chat message
+     * Chat message from a single chat or group chat
      */
     public static class Message {
+        /**
+         * Content provider URI for chat messages
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/message");
+
         /**
          * The name of the column containing the unique ID for a row.
          * <P>Type: primary key</P>
          */
         public static final String ID = "_id";
+
+        /**
+         * The name of the column containing the chat ID.
+         * <P>Type: TEXT</P>
+         */
+        public static final String CHAT_ID = "chat_id";
 
         /**
          * The name of the column containing the message ID.
@@ -111,28 +101,23 @@ public class ChatLog {
         public static final String MESSAGE_ID = "msg_id";
         
         /**
-         * The name of the column containing the message status
+         * The name of the column containing the message status.
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_STATUS = "status";
         	
         /**
-         * The name of the column containing the message direction
+         * The name of the column containing the message direction.
          * <P>Type: INTEGER</P>
          */
         public static final String DIRECTION = "direction";
 
         /**
-         * The name of the column containing the type of message
+         * The name of the column containing the type of message.
          * <P>Type: INTEGER</P>
+         * @see ChatLog.Message.Type
          */
         public static final String MESSAGE_TYPE = "msg_type";
-
-        /**
-         * The name of the column containing the chat ID
-         * <P>Type: TEXT</P>
-         */
-        public static final String CHAT_ID = "chat_id";
 
         /**
          * The name of the column containing the identity of the sender of the message.
@@ -304,7 +289,7 @@ public class ChatLog {
 		        /**
 		         * Participant has been disconnected from the group chat (i.e. booted)
 		         */
-		        public static final int DISCONNECT = 7;
+		        public static final int DISCONNECTED = 7;
 		        
 		        /**
 		         * Participant is busy

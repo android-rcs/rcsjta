@@ -184,8 +184,8 @@ public class RejoinChat {
 						// Display chat view
                 		Intent intent = new Intent(activity, GroupChatView.class);
 			        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		            	intent.putExtra("subject", groupChat.getSubject());
-			    		intent.putExtra("sessionId", groupChat.getChatId());
+		            	intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OPEN);
+			    		intent.putExtra(GroupChatView.EXTRA_CHAT_ID, groupChat.getChatId());
 			    		activity.startActivity(intent);
 				    } catch(JoynServiceNotAvailableException e) {
 				    	e.printStackTrace();
@@ -198,19 +198,19 @@ public class RejoinChat {
 			});
     	}
     	
-    	// Session terminated
-    	public void onSessionTerminated(final int reason) {
+    	// Session aborted
+    	public void onSessionAborted() {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
-
-					// Display error
-					Utils.showMessage(activity, activity.getString(R.string.label_restart_chat_terminated));
+					
+					// Session aborted
+					Utils.showMessageAndExit(activity, activity.getString(R.string.label_chat_aborted));
 				}
 			});
-    	}
-
+    	}    	
+    	
     	// Session error
     	public void onSessionError(final int error) {
 			handler.post(new Runnable() { 

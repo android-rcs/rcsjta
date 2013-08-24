@@ -26,11 +26,11 @@ public abstract class NewChatListener extends INewChatListener.Stub {
 	/**
 	 * Callback called when a new chat invitation has been received
 	 * 
-	 * @param chatId Chat ID
+	 * @param contact Remote contact
 	 * @param message Chat message
 	 * @see ChatMessage
 	 */
-	public abstract void onNewSingleChat(String chatId, ChatMessage message);
+	public abstract void onNewSingleChat(String contact, ChatMessage message);
 	
 	/**
 	 * Callback called when a new group chat invitation has been received

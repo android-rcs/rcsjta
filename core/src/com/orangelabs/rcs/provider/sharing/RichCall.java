@@ -20,7 +20,7 @@ package com.orangelabs.rcs.provider.sharing;
 
 import java.util.Calendar;
 
-import org.gsma.joyn.ft.FileTransfer;
+import org.gsma.joyn.ish.ImageSharing;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -28,7 +28,6 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.provider.messaging.FileTransferData;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -117,8 +116,6 @@ public class RichCall {
 			logger.debug("Add new video sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
 
-		// TODO: manage recycling
-
 		contact = PhoneUtils.extractNumberFromUri(contact);
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SESSION_ID, sessionId);
@@ -142,7 +139,7 @@ public class RichCall {
 		}
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_STATUS, status);
-		cr.update(vshDatabaseUri, values, VideoSharingData.KEY_SESSION_ID + " = " + sessionId, null);
+		cr.update(vshDatabaseUri, values, VideoSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 
 	/**
@@ -157,7 +154,7 @@ public class RichCall {
 		}
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_DURATION, duration);
-		cr.update(vshDatabaseUri, values, VideoSharingData.KEY_SESSION_ID + " = " + sessionId, null);
+		cr.update(vshDatabaseUri, values, VideoSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 	
 	/*--------------------- Image sharing methods ----------------------*/
@@ -175,8 +172,6 @@ public class RichCall {
 		if(logger.isActivated()){
 			logger.debug("Add new image sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
-
-		// TODO: manage recycling
 
 		contact = PhoneUtils.extractNumberFromUri(contact);
 		ContentValues values = new ContentValues();
@@ -205,7 +200,7 @@ public class RichCall {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_STATUS, status);
-		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = " + sessionId, null);
+		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 
 	/**
@@ -222,7 +217,7 @@ public class RichCall {
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SIZE, current);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);
-		values.put(ImageSharingData.KEY_STATUS, FileTransfer.State.STARTED);
-		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = " + sessionId, null);
-	}
+		values.put(ImageSharingData.KEY_STATUS, ImageSharing.State.STARTED);
+		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
+	}	
 }

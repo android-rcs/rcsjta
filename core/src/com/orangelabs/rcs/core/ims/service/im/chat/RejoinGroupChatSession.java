@@ -20,6 +20,8 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.List;
 
+import org.gsma.joyn.chat.GroupChat;
+
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
@@ -163,7 +165,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
      */
     public void handle404SessionNotFound(SipResponse resp) {
 		// Rejoin session has failed, we update the database with status terminated by remote
-        RichMessaging.getInstance().addChatSessionTerminationByRemote(this);
+        RichMessaging.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
 
 		// Notify listener
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));

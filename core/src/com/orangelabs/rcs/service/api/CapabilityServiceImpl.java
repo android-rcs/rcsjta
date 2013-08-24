@@ -71,6 +71,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * Close API
 	 */
 	public void close() {
+		if (logger.isActivated()) {
+			logger.info("Capability service API is closed");
+		}
 	}
     
     /**
@@ -123,7 +126,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * Requests capabilities to a remote contact. This method initiates in background
 	 * a new capability request to the remote contact by sending a SIP OPTIONS. The
 	 * result of the capability request is sent asynchronously via callback method of
-	 * the capabilities listener. A capability resfresh is only sent if the timestamp
+	 * the capabilities listener. A capability refresh is only sent if the timestamp
 	 * associated to the capability has expired (the expiration value is fixed via MNO
 	 * provisioning). The parameter contact supports the following formats: MSISDN in
 	 * national or international format, SIP address, SIP-URI or Tel-URI. If the format

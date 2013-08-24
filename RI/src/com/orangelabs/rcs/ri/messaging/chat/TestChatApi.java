@@ -55,8 +55,7 @@ public class TestChatApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, InitiateSingleChat.class));
+            	startActivity(new Intent(this, InitiateSingleChat.class));
 	            break;
 	            
 	        case 1:
@@ -64,8 +63,7 @@ public class TestChatApi extends ListActivity {
 	            break;
 	            
 	        case 2: 
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-            	// TODO startActivity(new Intent(this, ChatList.class));
+            	startActivity(new Intent(this, ChatList.class));
 	            break;
 
 	        case 3:

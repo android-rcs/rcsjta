@@ -53,19 +53,18 @@ public class FileTransferInvitationReceiver extends BroadcastReceiver {
     	// Get remote contact
 		String contact = invitation.getStringExtra(FileTransferIntent.EXTRA_CONTACT);
     	
-    	// Create notification
+    	// Get filename
+		String filename = invitation.getStringExtra(FileTransferIntent.EXTRA_FILENAME);
+
+		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, ReceiveFileTransfer.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notif = new Notification(R.drawable.ri_notif_file_transfer_icon,
-        		context.getString(R.string.title_recv_file_transfer),
-        		System.currentTimeMillis());
+        String notifTitle = context.getString(R.string.title_recv_file_transfer, contact);
+		Notification notif = new Notification(R.drawable.ri_notif_file_transfer_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context,
-        		context.getString(R.string.title_recv_file_transfer),
-        		context.getString(R.string.label_from) + " " + contact,
-        		contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, filename, contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

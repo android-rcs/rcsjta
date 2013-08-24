@@ -34,7 +34,7 @@ public class MultimediaSession {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * Session has been aborted 
+    	 * Session has been aborted or 
     	 */
     	public final static int ABORTED = 5;
     	
@@ -74,17 +74,12 @@ public class MultimediaSession {
     	/**
     	 * Session invitation has been declined by remote
     	 */
-    	public final static int INVITATION_DECLINED = 1;
+    	public final static int INVITATION_DECLINED = 0;
 
-    	/**
-    	 * Session has been cancelled
-    	 */
-    	public final static int SESSION_CANCELLED = 2;
-    	
     	/**
     	 * Session has failed
     	 */
-    	public final static int SESSION_FAILED = 3;
+    	public final static int SESSION_FAILED = 1;
 
     	private Error() {
         }    	

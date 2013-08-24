@@ -28,6 +28,7 @@ public class FileTransferProvider extends ContentProvider {
 	private static final int FILETRANSFERS = 1;
     private static final int FILETRANSFER_ID = 2;
     private static final int RCSAPI = 3;
+    private static final int RCSAPI_ID = 4;
 
 	// Allocate the UriMatcher object
     private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -35,6 +36,7 @@ public class FileTransferProvider extends ContentProvider {
         uriMatcher.addURI("com.orangelabs.rcs.ft", "ft", FILETRANSFERS);
         uriMatcher.addURI("com.orangelabs.rcs.ft", "ft/#", FILETRANSFER_ID);
 		uriMatcher.addURI("org.gsma.joyn.provider.ft", "ft", RCSAPI);
+		uriMatcher.addURI("org.gsma.joyn.provider.ft", "ft/#", RCSAPI_ID);
     }
 
     /**
@@ -51,7 +53,7 @@ public class FileTransferProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -90,11 +92,11 @@ public class FileTransferProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch(match) {
             case FILETRANSFERS:
-                return "vnd.android.cursor.dir/com.orangelabs.rcs.ft";
-            case FILETRANSFER_ID:
-                return "vnd.android.cursor.item/com.orangelabs.rcs.ft";
 			case RCSAPI:
-                return "vnd.android.cursor.dir/com.orangelabs.rcs.ft";
+                return "vnd.android.cursor.dir/ft";
+            case FILETRANSFER_ID:
+			case RCSAPI_ID:
+                return "vnd.android.cursor.item/ft";
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -109,12 +111,12 @@ public class FileTransferProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch(match) {
             case FILETRANSFERS:
+        	case RCSAPI:
                 break;
             case FILETRANSFER_ID:
+        	case RCSAPI_ID:
                 qb.appendWhere(FileTransferData.KEY_ID + "=");
                 qb.appendWhere(uri.getPathSegments().get(1));
-                break;
-        	case RCSAPI:
         		break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -123,8 +125,7 @@ public class FileTransferProvider extends ContentProvider {
         SQLiteDatabase db = openHelper.getReadableDatabase();
         Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
 
-		// Register the contexts ContentResolver to be notified if
-		// the cursor result set changes.
+		// Register the contexts ContentResolver to be notified if the cursor result set changes
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
         }
@@ -160,15 +161,6 @@ public class FileTransferProvider extends ContentProvider {
         switch(uriMatcher.match(uri)){
 	        case FILETRANSFERS:
 	        case FILETRANSFER_ID:
-	            // Insert the new row, will return the row number if successful
-	        	// Use system clock to generate id : it should not be a common int otherwise it could be the 
-	        	// same as an id present in MmsSms table (and that will create uniqueness problem when doing the tables merge) 
-	        	int id = (int)System.currentTimeMillis();
-	        	if (Integer.signum(id) == -1){
-	        		// If generated id is <0, it is problematic for uris
-	        		id = -id;
-	        	}
-	        	initialValues.put(FileTransferData.KEY_ID, id);
 	    		long rowId = db.insert(TABLE, null, initialValues);
 	    		uri = ContentUris.withAppendedId(FileTransferData.CONTENT_URI, rowId);
 	        	break;
@@ -185,9 +177,11 @@ public class FileTransferProvider extends ContentProvider {
         int count = 0;
         switch(uriMatcher.match(uri)){
 	        case FILETRANSFERS:
+	        case RCSAPI:
 	        	count = db.delete(TABLE, where, whereArgs);
 	        	break;
 	        case FILETRANSFER_ID:
+	        case RCSAPI_ID:
 	        	String segment = uri.getPathSegments().get(1);
 				count = db.delete(TABLE, FileTransferData.KEY_ID + "="
 						+ segment

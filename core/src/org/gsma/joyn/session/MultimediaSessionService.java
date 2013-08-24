@@ -123,7 +123,11 @@ public class MultimediaSessionService extends JoynService {
 		if (api != null) {
 			try {
 				IMultimediaSession sessionIntf = api.initiateSession(serviceId, contact, sdp, listener);
-				return new MultimediaSession(sessionIntf);
+				if (sessionIntf != null) {
+					return new MultimediaSession(sessionIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -166,7 +170,12 @@ public class MultimediaSessionService extends JoynService {
     public MultimediaSession getSession(String sessionId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new MultimediaSession(api.getSession(sessionId));
+				IMultimediaSession sessionIntf = api.getSession(sessionId);
+				if (sessionIntf != null) {
+					return new MultimediaSession(sessionIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

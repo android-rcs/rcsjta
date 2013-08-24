@@ -71,12 +71,12 @@ public class ImageSharingData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_SIZE = ImageSharingLog.TRANSFERED_SIZE;
+	static final String KEY_SIZE = ImageSharingLog.TRANSFERRED;
 	
 	/**
 	 * Column name
 	 */
-	static final String KEY_TOTAL_SIZE = ImageSharingLog.FILE_SIZE;	
+	static final String KEY_TOTAL_SIZE = ImageSharingLog.FILESIZE;	
 
 	/**
 	 * Column name

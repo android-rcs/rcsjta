@@ -126,22 +126,25 @@ public class ChatService extends JoynService {
 	}    
     
     /**
-     * Creates a single chat with a given contact and returns a Chat instance.
+     * Open a single chat with a given contact and returns a Chat instance.
      * The parameter contact supports the following formats: MSISDN in national
      * or international format, SIP address, SIP-URI or Tel-URI.
      * 
      * @param contact Contact
-     * @param firstMessage First message
      * @param listener Chat event listener
-     * @return Chat
+     * @return Chat or null 
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public Chat initiateSingleChat(String contact, String firstMessage, ChatListener listener) throws JoynServiceException, JoynContactFormatException {
+    public Chat openSingleChat(String contact, ChatListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IChat chatIntf = api.initiateSingleChat(contact, firstMessage, listener);
-				return new Chat(chatIntf);
+				IChat chatIntf = api.openSingleChat(contact, listener);
+				if (chatIntf != null) {
+					return new Chat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -161,12 +164,14 @@ public class ChatService extends JoynService {
 	 * @throws JoynContactFormatException
      */
     public GroupChat initiateGroupChat(Set<String> contacts, String subject, GroupChatListener listener) throws JoynServiceException, JoynContactFormatException {
-System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
-    	
     	if (api != null) {
 			try {
 				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<String>(contacts), subject, listener);
-				return new GroupChat(chatIntf);
+				if (chatIntf != null) {
+					return new GroupChat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -186,7 +191,11 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
 		if (api != null) {
 			try {
 				IGroupChat chatIntf = api.rejoinGroupChat(chatId);
-				return new GroupChat(chatIntf);
+				if (chatIntf != null) {
+					return new GroupChat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -206,67 +215,17 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
 		if (api != null) {
 			try {
 				IGroupChat chatIntf = api.restartGroupChat(chatId);
-				return new GroupChat(chatIntf);
+				if (chatIntf != null) {
+					return new GroupChat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-    }
-    
-    /**
-     * Deletes a particular chat conversation (single/group)
-     * 
-     * @param chatId Chat ID
-     * @throws JoynServiceException
-     */
-    public void deleteChat(String chatId) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.deleteChat(chatId);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}    	
-    }
-    
-    /**
-     * Adds a listener on new chat invitation event
-     * 
-     * @param listener Chat invitation listener
-     * @throws JoynServiceException
-     */
-    public void addEventListener(NewChatListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.addEventListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}    	
-    }
-    
-    /**
-     * Removes a listener on new chat invitation event.
-     * 
-     * @param listener Chat invitation listener
-     * @throws JoynServiceException
-     */
-    public void removeEventListener(NewChatListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.removeEventListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}    	
     }
     
     /**
@@ -294,16 +253,21 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
     }
     
     /**
-     * Returns a chat in progress from its unique ID
+     * Returns a chat in progress with a given contact
      * 
-     * @param chatId Chat ID
+     * @param contact Contact
      * @return Chat or null if not found
      * @throws JoynServiceException
      */
-    public Chat getChat(String chatId) throws JoynServiceException {
+    public Chat getChat(String contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new Chat(api.getChat(chatId));
+				IChat chatIntf = api.getChat(contact);
+				if (chatIntf != null) {
+					return new Chat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -322,9 +286,9 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
     public Chat getChatFor(Intent intent) throws JoynServiceException {
 		if (api != null) {
 			try {
-				String chatId = intent.getStringExtra(ChatIntent.EXTRA_CHAT_ID);
-				if (chatId != null) {
-					return getChat(chatId);
+				String contact = intent.getStringExtra(ChatIntent.EXTRA_CONTACT);
+				if (contact != null) {
+					return getChat(contact);
 				} else {
 					return null;
 				}
@@ -370,7 +334,12 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
     public GroupChat getGroupChat(String chatId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new GroupChat(api.getGroupChat(chatId));
+				IGroupChat chatIntf = api.getGroupChat(chatId);
+				if (chatIntf != null) {
+					return new GroupChat(chatIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -402,4 +371,40 @@ System.out.println(">>>>>>>>>>>>>>>>>>>>>> CALL initiateGroupChat");
 			throw new JoynServiceNotAvailableException();
 		}
     }
+    
+    /**
+	 * Registers a chat invitation listener
+	 * 
+	 * @param listener New chat listener
+	 * @throws JoynServiceException
+	 */
+	public void addNewChatListener(NewChatListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addNewChatListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Unregisters a chat invitation listener
+	 * 
+	 * @param listener New chat listener
+	 * @throws JoynServiceException
+	 */
+	public void removeNewChatListener(NewChatListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeNewChatListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}    
 }

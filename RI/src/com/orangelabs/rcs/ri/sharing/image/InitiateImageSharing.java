@@ -392,7 +392,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 
 					// Display transfer progress
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transfered");
+					statusView.setText("transferred");
 				}
 			});
     	}
@@ -401,8 +401,8 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     /**
      * Show the transfer progress
      * 
-     * @param currentSize Current size transfered
-     * @param totalSize Total size to be transfered
+     * @param currentSize Current size transferred
+     * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
     	TextView statusView = (TextView)findViewById(R.id.progress_status);

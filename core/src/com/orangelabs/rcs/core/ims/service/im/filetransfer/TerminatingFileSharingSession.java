@@ -80,20 +80,6 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new file transfer session as terminating");
 	    	}
-	
-	        // Create a content object
-    		if (getContent() == null) {
-    			if (logger.isActivated()){
-    				logger.debug("MIME type is not supported");
-    			}
-
-    			// Send a 415 Unsupported media type response
-				send415Error(getDialogPath().getInvite());
-
-				// Unsupported media type
-				handleError(new FileSharingError(FileSharingError.UNSUPPORTED_MEDIA_TYPE));
-        		return;
-        	}
 
     		if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
     	    	if (logger.isActivated()) {

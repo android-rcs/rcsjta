@@ -12,7 +12,7 @@ public abstract class VideoSharingListener extends IVideoSharingListener.Stub {
 	public abstract void onSharingStarted();
 	
 	/**
-	 * Callback called when the sharing has been aborted
+	 * Callback called when the sharing has been aborted or terminated
 	 */
 	public abstract void onSharingAborted();
 

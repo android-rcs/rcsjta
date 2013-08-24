@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import org.gsma.joyn.JoynServiceListener;
+import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.ChatService;
 import org.gsma.joyn.contacts.ContactsService;
@@ -32,7 +33,6 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -51,16 +51,12 @@ import android.widget.TextView;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Chat view
  */
 public abstract class ChatView extends ListActivity implements OnClickListener, OnKeyListener, JoynServiceListener {	
-	/**
-	 * Wizz message
-	 */
-	protected final static String WIZZ_MSG = "((-))";
-	
     /**
      * UI handler
      */
@@ -189,7 +185,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * @param contact Contact
      * @param text Text message
      */
-    private void addMessageHistory(int direction, String contact, String text) {
+    protected void addMessageHistory(int direction, String contact, String text) {
 		TextMessageItem item = new TextMessageItem(direction, contact, text);
 		msgListAdapter.add(item);
     }
@@ -214,22 +210,14 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         }
 
         // Send text message
-    	sendMessage(text);
-    	
-    	// Add text to the message history
-        addMessageHistory(MessageItem.OUT, getString(R.string.label_me), text);
-        composeText.setText(null);
-    }
-
-    /**
-     * Send a wizz and display it
-     */
-    protected void sendWizz() {
-		// Send text message
-    	sendMessage(WIZZ_MSG);
-    	
-		// Add text to the message history
-        addMessageHistory(MessageItem.OUT, getString(R.string.label_me), getString(R.string.label_chat_wizz));
+        String msgId = sendMessage(text);
+    	if (msgId != null) {
+	    	// Add text to the message history
+	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text);
+	        composeText.setText(null);
+    	} else {
+	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
+    	}
     }
     
 	/**
@@ -240,14 +228,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected void displayReceivedMessage(ChatMessage msg) {
 		String contact = msg.getContact();
 		String txt = msg.getMessage();
-		if (txt.equals(WIZZ_MSG)) {
-	    	txt = getString(R.string.label_chat_wizz);
-	        
-	        // Vibrate
-	        Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-	        vibrator.vibrate(600);
-		}
-        addMessageHistory(MessageItem.IN, contact, txt);
+        addMessageHistory(ChatLog.Message.Direction.INCOMING, contact, txt);
     }
 
     /**
@@ -425,11 +406,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	/**
 	 * Message item
 	 */
-	private abstract class MessageItem {
-		public final static int IN = 0;
-		public final static int OUT = 1;
-		public final static int NA = 2;
-		
+	protected abstract class MessageItem {
 		private int direction;
 		
 	    private String contact;
@@ -472,7 +449,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    private String text;
 	    
 	    public NotifMessageItem(String text) {
-	    	super(NA, null);
+	    	super(ChatLog.Message.Direction.IRRELEVANT, null);
 	    	
 	    	this.text = text;
 	    }
@@ -510,7 +487,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	        
         	MessageItem item = (MessageItem)getItem(position);
         	String line;
-        	if (item.getDirection() == MessageItem.OUT) {
+        	if (item.getDirection() == ChatLog.Message.Direction.OUTGOING) {
         		line = "[" + getString(R.string.label_me) + "] ";
         	} else {
         		line = "[" + item.getContact() + "] ";
@@ -557,8 +534,9 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * Send message
      * 
      * @param msg Message
+     * @return Message ID
      */
-    protected abstract void sendMessage(String msg);
+    protected abstract String sendMessage(String msg);
     
     /**
      * Quit the session

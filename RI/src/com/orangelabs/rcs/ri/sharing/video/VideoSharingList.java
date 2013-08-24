@@ -2,7 +2,6 @@ package com.orangelabs.rcs.ri.sharing.video;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Vector;
 
 import org.gsma.joyn.vsh.VideoSharing;
 import org.gsma.joyn.vsh.VideoSharingLog;
@@ -11,10 +10,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -30,6 +31,11 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingList extends Activity {
+	/**
+	 * List view
+	 */
+    private ListView listView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,11 +48,10 @@ public class VideoSharingList extends Activity {
         setTitle(R.string.menu_video_sharing_log);
 
         // Set list adapter
-        ListView view = (ListView)findViewById(android.R.id.list);
+        listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
-        view.setEmptyView(emptyView);
-        VideoSharingListAdapter adapter = createListAdapter();
-        view.setAdapter(adapter);		
+        listView.setEmptyView(emptyView);
+        listView.setAdapter(createListAdapter());
     }
     
 	/**
@@ -68,25 +73,7 @@ public class VideoSharingList extends Activity {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
 		}
-			
-		Vector<String> items = new Vector<String>();
-		MatrixCursor matrix = new MatrixCursor(projection);
-		while (cursor.moveToNext()) {
-    		String id = cursor.getString(0);
-			if (!items.contains(id)) {
-				matrix.addRow(new Object[]{
-						cursor.getInt(0), 
-						cursor.getString(1), 
-						cursor.getLong(2), 
-						cursor.getInt(3),
-						cursor.getInt(4),
-						cursor.getLong(5)});
-				items.add(id);
-			}
-		}
-		cursor.close();
-
-		return new VideoSharingListAdapter(this, matrix);
+		return new VideoSharingListAdapter(this, cursor);
 	}
 	
     /**
@@ -197,5 +184,27 @@ public class VideoSharingList extends Activity {
 	 */
 	private String decodeDate(long date) {
 		return DateFormat.getInstance().format(new Date(date));
+	}
+
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater=new MenuInflater(getApplicationContext());
+		inflater.inflate(R.menu.menu_log, menu);
+
+		return true;
+	}
+    
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_clear_log:
+				// Delete all
+				getContentResolver().delete(VideoSharingLog.CONTENT_URI, null, null);
+				
+				// Refresh view
+		        listView.setAdapter(createListAdapter());		
+				break;
+		}
+		return true;
 	}
 }

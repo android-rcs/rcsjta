@@ -101,9 +101,6 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 		remoteContact = getIntent().getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
 		imageSize = getIntent().getLongExtra(ImageSharingIntent.EXTRA_FILESIZE, -1);
 
-		// Remove the notification
-		ImageSharingInvitationReceiver.removeImageSharingNotification(this, sharingId);
-
         // Instanciate API
 		ishApi = new ImageSharingService(getApplicationContext(), this);
 		
@@ -145,7 +142,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 			
 			String size;
 	    	if (imageSize != -1) {
-	    		size = getString(R.string.label_file_size, " "+ (imageSize/1024), " Kb");
+	    		size = getString(R.string.label_file_size, " " + (imageSize/1024), " Kb");
 	    	} else {
 	    		size = getString(R.string.label_file_size_unknown);
 	    	}
@@ -158,8 +155,8 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 	    	
 			// Display accept/reject dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.title_recv_image_sharing);
-			builder.setMessage(getString(R.string.label_from) +	remoteContact +	"\n" + size);
+			builder.setTitle(R.string.title_image_sharing);
+			builder.setMessage(getString(R.string.label_from) +	" " + remoteContact + "\n" + size);
 			builder.setCancelable(false);
 			builder.setIcon(R.drawable.ri_notif_csh_icon);
 			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
@@ -306,7 +303,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 			handler.post(new Runnable() { 
 				public void run() {
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transfered");
+					statusView.setText("transferred");
 					
 					// Make sure progress bar is at the end
 			        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
@@ -322,8 +319,8 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     /**
      * Show the transfer progress
      * 
-     * @param currentSize Current size transfered
-     * @param totalSize Total size to be transfered
+     * @param currentSize Current size transferred
+     * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
     	TextView statusView = (TextView)findViewById(R.id.progress_status);

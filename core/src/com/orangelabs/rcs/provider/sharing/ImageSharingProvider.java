@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.provider.sharing;
 
+import org.gsma.joyn.ish.ImageSharingLog;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -45,6 +47,7 @@ public class ImageSharingProvider extends ContentProvider {
 	private static final int IMAGESHARES = 1;
 	private static final int IMAGESHARE_ID = 2;
     private static final int RCSAPI = 3;
+    private static final int RCSAPI_ID = 4;
 	
 	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
@@ -53,6 +56,7 @@ public class ImageSharingProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.ish", "ish", IMAGESHARES);
 		uriMatcher.addURI("com.orangelabs.rcs.ish", "ish/#", IMAGESHARE_ID);
 		uriMatcher.addURI("org.gsma.joyn.provider.ish", "ish", RCSAPI);
+		uriMatcher.addURI("org.gsma.joyn.provider.ish", "ish/#", RCSAPI_ID);
 	}
 
     /**
@@ -69,7 +73,7 @@ public class ImageSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -78,16 +82,16 @@ public class ImageSharingProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
         	db.execSQL("CREATE TABLE " + TABLE + " ("
-        			+ ImageSharingData.KEY_ID + " integer primary key autoincrement,"
-        			+ ImageSharingData.KEY_SESSION_ID + " TEXT,"
-        			+ ImageSharingData.KEY_CONTACT + " TEXT,"
-        			+ ImageSharingData.KEY_NAME + " TEXT,"
-        			+ ImageSharingData.KEY_MIME_TYPE + " TEXT,"
-        			+ ImageSharingData.KEY_STATUS + " integer,"
-        			+ ImageSharingData.KEY_DIRECTION + " integer,"
-        			+ ImageSharingData.KEY_TIMESTAMP + " long,"
-        			+ ImageSharingData.KEY_SIZE + " long,"
-        			+ ImageSharingData.KEY_TOTAL_SIZE + " long);");
+        			+ ImageSharingLog.ID + " integer primary key autoincrement,"
+        			+ ImageSharingLog.SHARING_ID + " TEXT,"
+        			+ ImageSharingLog.CONTACT_NUMBER + " TEXT,"
+        			+ ImageSharingLog.FILENAME + " TEXT,"
+        			+ ImageSharingLog.MIME_TYPE + " TEXT,"
+        			+ ImageSharingLog.STATE + " integer,"
+        			+ ImageSharingLog.DIRECTION + " integer,"
+        			+ ImageSharingLog.TIMESTAMP + " long,"
+        			+ ImageSharingLog.TRANSFERRED + " long,"
+        			+ ImageSharingLog.FILESIZE + " long);");
         }
 
         @Override
@@ -107,11 +111,11 @@ public class ImageSharingProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch(uriMatcher.match(uri)){
 			case IMAGESHARES:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.ish";
-			case IMAGESHARE_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.ish";
 			case RCSAPI:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.ish";
+				return "vnd.android.cursor.dir/ish";
+			case IMAGESHARE_ID:
+			case RCSAPI_ID:
+				return "vnd.android.cursor.item/ish";
 			default:
 				throw new IllegalArgumentException("Unsupported URI " + uri);
 		}
@@ -126,12 +130,12 @@ public class ImageSharingProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch(match) {
             case IMAGESHARES:
+        	case RCSAPI:
                 break;
             case IMAGESHARE_ID:
-                qb.appendWhere(ImageSharingData.KEY_ID + "=" + uri.getPathSegments().get(1));
+            case RCSAPI_ID:
+                qb.appendWhere(ImageSharingLog.ID + "=" + uri.getPathSegments().get(1));
                 break;
-        	case RCSAPI:
-        		break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -140,14 +144,15 @@ public class ImageSharingProvider extends ContentProvider {
         Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
 
 		// Register the contexts ContentResolver to be notified if the cursor result set changes.
-        c.setNotificationUri(getContext().getContentResolver(), ImageSharingData.CONTENT_URI);
-
+        if (c != null) {
+        	c.setNotificationUri(getContext().getContentResolver(), ImageSharingLog.CONTENT_URI);
+        }
         return c;
     }
     
     @Override
     public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count;
+        int count = 0;
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int match = uriMatcher.match(uri);
@@ -158,7 +163,7 @@ public class ImageSharingProvider extends ContentProvider {
             case IMAGESHARE_ID:
                 String segment = uri.getPathSegments().get(1);
                 int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, ImageSharingData.KEY_ID + "=" + id, null);
+                count = db.update(TABLE, values, ImageSharingLog.ID + "=" + id, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
@@ -173,17 +178,8 @@ public class ImageSharingProvider extends ContentProvider {
         switch(uriMatcher.match(uri)){
 	        case IMAGESHARES:
 	        case IMAGESHARE_ID:
-	            // Insert the new row, will return the row number if successful
-	        	// Use system clock to generate id : it should not be a common int otherwise it could be the 
-	        	// same as an id present in MmsSms table (and that will create uniqueness problem when doing the tables merge) 
-	        	int id = (int)System.currentTimeMillis();
-	        	if (Integer.signum(id) == -1){
-	        		// If generated id is <0, it is problematic for uris
-	        		id = -id;
-	        	}
-	        	initialValues.put(ImageSharingData.KEY_ID, id);
 	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(ImageSharingData.CONTENT_URI, rowId);
+	    		uri = ContentUris.withAppendedId(ImageSharingLog.CONTENT_URI, rowId);
 	        	break;
 	        default:
 	    		throw new SQLException("Failed to insert row into " + uri);
@@ -198,11 +194,13 @@ public class ImageSharingProvider extends ContentProvider {
         int count = 0;
         switch(uriMatcher.match(uri)){
 	        case IMAGESHARES:
+	        case RCSAPI:
 	        	count = db.delete(TABLE, where, whereArgs);
 	        	break;
 	        case IMAGESHARE_ID:
+	        case RCSAPI_ID:
 	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, ImageSharingData.KEY_ID + "="
+				count = db.delete(TABLE, ImageSharingLog.ID + "="
 						+ segment
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);

@@ -27,15 +27,15 @@ public abstract class FileTransferListener extends IFileTransferListener.Stub {
 	/**
 	 * Callback called during the transfer progress
 	 * 
-	 * @param currentSize Current transfered size in bytes
+	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
 	public abstract void onTransferProgress(long currentSize, long totalSize);
 
 	/**
-	 * Callback called when the file has been transfered
+	 * Callback called when the file has been transferred
 	 * 
-	 * @param filename Filename including the path of the transfered file
+	 * @param filename Filename including the path of the transferred file
 	 */
-	public abstract void onFileTransfered(String filename);
+	public abstract void onFileTransferred(String filename);
 }

@@ -29,63 +29,6 @@ import org.gsma.joyn.JoynServiceException;
  */
 public class Chat {
     /**
-     * Chat state
-     */
-    public static class State {
-    	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
-    	 * Chat invitation received
-    	 */
-    	public final static int INVITED = 1;
-    	
-    	/**
-    	 * Chat invitation sent
-    	 */
-    	public final static int INITIATED = 2;
-    	
-    	/**
-    	 * Chat is started
-    	 */
-    	public final static int STARTED = 3;
-    	
-    	/**
-    	 * Chat has been terminated
-    	 */
-    	public final static int TERMINATED = 4;
-    	
-    	/**
-    	 * Chat has been terminated by user 
-    	 */
-    	public final static int TERMINATED_BY_USER = 5;
-
-    	/**
-    	 * Chat has been aborted 
-    	 */
-    	public final static int ABORTED = 6;
-    	
-    	/**
-    	 * Chat has failed 
-    	 */
-    	public final static int FAILED = 7;
-    	
-        private State() {
-        }    	
-    }
-    
-    /**
-     * Chat error
-     */
-    public static class Error {
-    	// TODO
-        private Error() {
-        }    	
-    }
-   
-    /**
      * Chat interface
      */
     private IChat chatInf;
@@ -128,30 +71,19 @@ public class Chat {
     }
     
 	/**
-	 * Returns the state of the chat
-	 * 
-	 * @return State
-	 * @see Chat.State
-	 * @throws JoynServiceException
-	 */
-	public int getState() throws JoynServiceException {
-		try {
-			return chatInf.getState();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
      * Sends a chat message
      * 
      * @param message Message
      * @return Unique message ID
-	 * @throws JoynServiceException
+   	 * @throws JoynServiceException
      */
     public String sendMessage(String message) throws JoynServiceException {
 		try {
-			return chatInf.sendMessage(message);
+			String msgId = chatInf.sendMessage(message);
+			if (msgId == null) {
+				throw new JoynServiceException("Send message has failed");
+			}
+			return msgId;
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}    	
@@ -198,16 +130,6 @@ public class Chat {
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}    	
-    }
-	
-    /**
-     * Deletes particular chat messages
-     * 
-     * @param messageIds List of message IDs
-	 * @throws JoynServiceException
-     */
-    public void deleteMessages(Set<String> messageIds) throws JoynServiceException {
-    	// TODO
     }
 	
     /**

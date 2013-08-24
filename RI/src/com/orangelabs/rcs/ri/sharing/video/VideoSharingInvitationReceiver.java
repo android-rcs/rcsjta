@@ -54,22 +54,20 @@ public class VideoSharingInvitationReceiver extends BroadcastReceiver {
     	// Get remote contact
 		String contact = invitation.getStringExtra(VideoSharingIntent.EXTRA_CONTACT);
 
+    	// Get video format
+		String format = invitation.getStringExtra(VideoSharingIntent.EXTRA_ENCODING) + " " +
+				invitation.getStringExtra(VideoSharingIntent.EXTRA_FORMAT);
+
 		// Create notification
         Intent intent = new Intent(invitation);
         intent.setClass(context, VisioSharing.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("incoming", true);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        String notifTitle = context.getString(R.string.title_recv_video_sharing);
-        Notification notif = new Notification(R.drawable.ri_notif_csh_icon,
-        		notifTitle,
-                System.currentTimeMillis());
+        String notifTitle = context.getString(R.string.title_recv_video_sharing, contact);
+        Notification notif = new Notification(R.drawable.ri_notif_csh_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context,
-                notifTitle,
-                context.getString(R.string.label_from) + " " + contact,
-                contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, contact, contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
 

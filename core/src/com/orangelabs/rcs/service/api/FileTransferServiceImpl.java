@@ -85,8 +85,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * Close API
 	 */
 	public void close() {
-		// Clear lists of sessions
+		// Clear list of sessions
 		ftSessions.clear();
+		
+		if (logger.isActivated()) {
+			logger.info("File transfer service API is closed");
+		}
 	}
 
 	/**
@@ -98,6 +102,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Add a file transfer session in the list (size=" + ftSessions.size() + ")");
 		}
+		
 		ftSessions.put(session.getTransferId(), session);
 	}
 
@@ -110,6 +115,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Remove a file transfer session from the list (size=" + ftSessions.size() + ")");
 		}
+		
 		ftSessions.remove(sessionId);
 	}
 	
@@ -229,9 +235,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			logger.info("Get file transfer sessions");
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
 		try {
 			ArrayList<IBinder> result = new ArrayList<IBinder>(ftSessions.size());
 			for (Enumeration<IFileTransfer> e = ftSessions.elements() ; e.hasMoreElements() ;) {
@@ -258,10 +261,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			logger.info("Get file transfer session " + transferId);
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
-		// Return a session instance
 		return ftSessions.get(transferId);
     }    
     
@@ -275,7 +274,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Add a file transfer invitation listener");
 		}
-
+		
 		listeners.register(listener);
 	}
 
@@ -289,7 +288,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Remove a file transfer invitation listener");
 		}
-
+		
 		listeners.unregister(listener);
 	}
 }

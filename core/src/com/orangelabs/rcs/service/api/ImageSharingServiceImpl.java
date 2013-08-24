@@ -68,8 +68,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * Close API
 	 */
 	public void close() {
-		// Clear lists of sessions
+		// Clear list of sessions
 		ishSessions.clear();
+		
+		if (logger.isActivated()) {
+			logger.info("Image sharing service API is closed");
+		}
 	}
 
 	/**
@@ -81,6 +85,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Add an image sharing session in the list (size=" + ishSessions.size() + ")");
 		}
+		
 		ishSessions.put(session.getSharingId(), session);
 	}
 
@@ -93,6 +98,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Remove an image sharing session from the list (size=" + ishSessions.size() + ")");
 		}
+		
 		ishSessions.remove(sessionId);
 	}
     
@@ -152,7 +158,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     public ImageSharingServiceConfiguration getConfiguration() {
     	return new ImageSharingServiceConfiguration(
-    			0, // RcsSettings.getInstance().getWarningMaxImageSharingSize(),
+    			0, // TODO RcsSettings.getInstance().getWarningMaxImageSharingSize(),
     			RcsSettings.getInstance().getMaxImageSharingSize());
 	}    
     
@@ -220,9 +226,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			logger.info("Get image sharing sessions");
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
 		try {
 			ArrayList<IBinder> result = new ArrayList<IBinder>(ishSessions.size());
 			for (Enumeration<IImageSharing> e = ishSessions.elements() ; e.hasMoreElements() ;) {
@@ -249,10 +252,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			logger.info("Get image sharing session " + sharingId);
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
-		// Return a session instance
 		return ishSessions.get(sharingId);
     }    
     
@@ -266,7 +265,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Add an image sharing invitation listener");
 		}
-
+		
 		listeners.register(listener);
 	}
 
@@ -280,7 +279,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Remove an image sharing invitation listener");
 		}
-
+		
 		listeners.unregister(listener);
 	}
 }

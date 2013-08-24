@@ -84,8 +84,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Close API
 	 */
 	public void close() {
-		// Clear lists of sessions
+		// Clear list of sessions
 		videoSharingSessions.clear();
+		
+		if (logger.isActivated()) {
+			logger.info("Video sharing service API is closed");
+		}
 	}
 
     /**
@@ -97,6 +101,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Add a video sharing session in the list (size=" + videoSharingSessions.size() + ")");
 		}
+		
 		videoSharingSessions.put(session.getSharingId(), session);
 	}
 
@@ -109,6 +114,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.debug("Remove a video sharing session from the list (size=" + videoSharingSessions.size() + ")");
 		}
+		
 		videoSharingSessions.remove(sessionId);
 	}
 
@@ -256,10 +262,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			logger.info("Get video sharing session " + sharingId);
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-
-		// Return a session instance
 		return videoSharingSessions.get(sharingId);
 	}
 
@@ -274,9 +276,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			logger.info("Get video sharing sessions");
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
 		try {
 			ArrayList<IBinder> result = new ArrayList<IBinder>(videoSharingSessions.size());
 			for (Enumeration<IVideoSharing> e = videoSharingSessions.elements() ; e.hasMoreElements() ;) {
@@ -302,7 +301,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Add an video sharing invitation listener");
 		}
-
+		
 		listeners.register(listener);
 	}
 
@@ -316,7 +315,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Remove an video sharing invitation listener");
 		}
-
+		
 		listeners.unregister(listener);
 	}
 }

@@ -44,6 +44,7 @@ public class VideoSharingProvider extends ContentProvider {
 	private static final int VIDEOSHARES = 1;
 	private static final int VIDEOSHARE_ID = 2;
     private static final int RCSAPI = 3;
+    private static final int RCSAPI_ID = 4;
 	
 	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
@@ -52,6 +53,7 @@ public class VideoSharingProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh", VIDEOSHARES);
 		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh/#", VIDEOSHARE_ID);
 		uriMatcher.addURI("org.gsma.joyn.provider.vsh", "vsh", RCSAPI);
+		uriMatcher.addURI("org.gsma.joyn.provider.vsh", "vsh/#", RCSAPI_ID);
 	}
 
     /**
@@ -68,7 +70,7 @@ public class VideoSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -103,11 +105,11 @@ public class VideoSharingProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch(uriMatcher.match(uri)){
 			case VIDEOSHARES:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.vsh";
-			case VIDEOSHARE_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.vsh";
 			case RCSAPI:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.vsh";
+				return "vnd.android.cursor.dir/vsh";
+			case VIDEOSHARE_ID:
+			case RCSAPI_ID:
+				return "vnd.android.cursor.item/vsh";
 			default:
 				throw new IllegalArgumentException("Unsupported URI " + uri);
 		}
@@ -122,12 +124,12 @@ public class VideoSharingProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch(match) {
             case VIDEOSHARES:
+        	case RCSAPI:
                 break;
             case VIDEOSHARE_ID:
+        	case RCSAPI_ID:
                 qb.appendWhere(VideoSharingData.KEY_ID + "=" + uri.getPathSegments().get(1));
                 break;
-        	case RCSAPI:
-        		break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -136,14 +138,15 @@ public class VideoSharingProvider extends ContentProvider {
         Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
 
 		// Register the contexts ContentResolver to be notified if the cursor result set changes.
-        c.setNotificationUri(getContext().getContentResolver(), VideoSharingData.CONTENT_URI);
-
+        if (c != null) {
+        	c.setNotificationUri(getContext().getContentResolver(), VideoSharingData.CONTENT_URI);
+        }
         return c;
     }
     
     @Override
     public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count;
+        int count = 0;
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int match = uriMatcher.match(uri);
@@ -169,15 +172,6 @@ public class VideoSharingProvider extends ContentProvider {
         switch(uriMatcher.match(uri)){
 	        case VIDEOSHARES:
 	        case VIDEOSHARE_ID:
-	            // Insert the new row, will return the row number if successful
-	        	// Use system clock to generate id : it should not be a common int otherwise it could be the 
-	        	// same as an id present in MmsSms table (and that will create uniqueness problem when doing the tables merge) 
-	        	int id = (int)System.currentTimeMillis();
-	        	if (Integer.signum(id) == -1){
-	        		// If generated id is <0, it is problematic for uris
-	        		id = -id;
-	        	}
-	        	initialValues.put(VideoSharingData.KEY_ID, id);
 	    		long rowId = db.insert(TABLE, null, initialValues);
 	    		uri = ContentUris.withAppendedId(VideoSharingData.CONTENT_URI, rowId);
 	        	break;
@@ -194,9 +188,11 @@ public class VideoSharingProvider extends ContentProvider {
         int count = 0;
         switch(uriMatcher.match(uri)){
 	        case VIDEOSHARES:
+	        case RCSAPI:
 	        	count = db.delete(TABLE, where, whereArgs);
 	        	break;
 	        case VIDEOSHARE_ID:
+	        case RCSAPI_ID:
 	        	String segment = uri.getPathSegments().get(1);
 				count = db.delete(TABLE, VideoSharingData.KEY_ID + "="
 						+ segment

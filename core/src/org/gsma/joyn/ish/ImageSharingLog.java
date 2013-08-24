@@ -55,38 +55,38 @@ public class ImageSharingLog {
     public static final String FILENAME = "filename";
 
     /**
+     * The name of the column containing the image size to be transferred (in bytes).
+     * <P>Type: LONG</P>
+     */
+    public static final String FILESIZE = "filesize";
+
+    /**
      * The name of the column containing the MIME-type of the file.
      * <P>Type: TEXT</P>
      */
     public static final String MIME_TYPE = "mime_type";
     
     /**
-     * The name of the column containing the direction of the sharing
+     * The name of the column containing the direction of the sharing.
      * <P>Type: INTEGER</P>
 	 * @see ImageSharing.Direction
      */
     public static final String DIRECTION = "direction";
-
-    /**
-     * The name of the column containing the image size to be transfered (in bytes)
-     * <P>Type: LONG</P>
-     */
-    public static final String FILE_SIZE = "size";
     
     /**
-     * The name of the column containing the current transfered size (in bytes)
+     * The name of the column containing the amount of data transferred (in bytes).
      * <P>Type: LONG</P>
      */
-    public static final String TRANSFERED_SIZE = "size_transfered";
+    public static final String TRANSFERRED = "transferred";
 
     /**
-     * The name of the column containing the date of the sharing (in milliseconds)
+     * The name of the column containing the date of the sharing (in milliseconds).
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the state of the sharing
+     * The name of the column containing the state of the sharing.
      * <P>Type: INTEGER</P>
 	 * @see ImageSharing.State
      */

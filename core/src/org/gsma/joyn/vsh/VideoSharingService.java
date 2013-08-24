@@ -122,7 +122,11 @@ public class VideoSharingService extends JoynService {
 		if (api != null) {
 			try {
 				IVideoSharing sharingIntf = api.shareVideo(contact, player, listener);
-				return new VideoSharing(sharingIntf);
+				if (sharingIntf != null) {
+					return new VideoSharing(sharingIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -164,7 +168,12 @@ public class VideoSharingService extends JoynService {
     public VideoSharing getVideoSharing(String sharingId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new VideoSharing(api.getVideoSharing(sharingId));
+				IVideoSharing sharingIntf = api.getVideoSharing(sharingId);
+				if (sharingIntf != null) {
+					return new VideoSharing(sharingIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

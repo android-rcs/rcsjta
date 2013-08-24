@@ -12,5 +12,5 @@ interface IFileTransferListener {
 	
 	void onTransferProgress(in long currentSize, in long totalSize);
 
-	void onFileTransfered(in String filename);
+	void onFileTransferred(in String filename);
 }

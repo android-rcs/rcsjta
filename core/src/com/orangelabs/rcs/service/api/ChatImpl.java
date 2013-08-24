@@ -2,23 +2,20 @@ package com.orangelabs.rcs.service.api;
 
 import java.util.List;
 
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.chat.Chat;
+import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IChatListener;
 
 import android.os.RemoteCallbackList;
 
-import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -30,6 +27,10 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class ChatImpl extends IChat.Stub implements ChatSessionListener {
+	/**
+	 * Remote contact
+	 */
+	private String contact;
 	
 	/**
 	 * Core session
@@ -54,32 +55,44 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	/**
 	 * Constructor
 	 * 
+	 * @param contact Remote contact
+	 */
+	public ChatImpl(String contact) {
+		this.contact = contact;
+		this.session = null;
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param contact Remote contact
 	 * @param session Session
 	 */
-	public ChatImpl(OneOneChatSession session) {
+	public ChatImpl(String contact, OneOneChatSession session) {
+		this.contact = contact;
 		this.session = session;
 		
 		session.addListener(this);
 	}
 	
 	/**
-	 * replace core session
+	 * Set core session
 	 * 
-	 * @param newSession New session
+	 * @param session Core session
 	 */
-	public void replaceCoreSession(OneOneChatSession newSession) {
-		this.session = newSession;
+	public void setCoreSession(OneOneChatSession session) {
+		this.session = session;
 		
 		session.addListener(this);
-	}
-
+	}	
+	
 	/**
-	 * Get session ID
+	 * Get core session
 	 * 
-	 * @return Session ID
+	 * @return Core session
 	 */
-	public String getSessionID() {
-		return session.getSessionID();
+	public OneOneChatSession getCoreSession() {
+		return session;
 	}
 	
     /**
@@ -95,61 +108,60 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * Returns the remote contact
      * 
      * @return Contact
-	 * @throws JoynServiceException
      */
     public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+		return PhoneUtils.extractNumberFromUri(contact);
     }
-    
-	/**
-	 * Returns the state of the chat
-	 * 
-	 * @return State 
-	 */
-	public int getState() {
-		int result = Chat.State.UNKNOWN;
-		SipDialogPath dialogPath = session.getDialogPath();
-		if (dialogPath != null) {
-			if (dialogPath.isSessionCancelled()) {
-				// Session canceled
-				result = Chat.State.ABORTED;
-			} else
-			if (dialogPath.isSessionEstablished()) {
-				// Session started
-				result = Chat.State.STARTED;
-			} else
-			if (dialogPath.isSessionTerminated()) {
-				// Session terminated
-				// TODO: TERMINATED_BY_USER not taken into account
-				result = Chat.State.TERMINATED;
-			} else {
-				// Session pending
-				// TODO: which state in case of S&F ?
-				if (session instanceof OriginatingOne2OneChatSession) {
-					result = Chat.State.INITIATED;
-				} else {
-					result = Chat.State.INVITED;
-				}
-			}
-		}
-		return result;			
-	}
 	
 	/**
      * Sends a chat message
      * 
      * @param message Message
-     * @return Unique message ID
-	 * @throws JoynServiceException
+     * @return Unique message ID or null in case of error
      */
     public String sendMessage(String message) {
-		// Generate a message Id
-		String msgId = ChatUtils.generateMessageId();
+		if (logger.isActivated()) {
+			logger.debug("Send message");
+		}
+		
+		// Check if a session should be initiated or not
+    	if ((session == null) || session.getDialogPath().isSessionTerminated()) {
+    		try {
+    			if (logger.isActivated()) {
+    				logger.debug("Core session is not yet established: initiate a new session to send the message");
+    			}
 
-		// Send text message
-		session.sendTextMessage(msgId, message);
+    			// Initiate a new session
+				session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, message);
+				
+				// Update with new session
+				setCoreSession(session);
+		
+				// Update rich messaging history
+				RichMessaging.getInstance().addChatMessage(session.getContributionID(),
+						session.getFirstMessage(), ChatLog.Message.Direction.OUTGOING);
 
-		return msgId;
+				// Start the session
+				session.startSession();
+				return session.getFirstMessage().getMessageId();
+			} catch(Exception e) {
+				if (logger.isActivated()) {
+					logger.error("Can't send a new chat message", e);
+				}
+				return null;
+			}			
+    	} else {
+			if (logger.isActivated()) {
+				logger.debug("Core session is established: use exeistong one to send the message");
+			}
+
+			// Generate a message Id
+			String msgId = ChatUtils.generateMessageId();
+	
+			// Send text message
+			session.sendTextMessage(msgId, message);
+			return msgId;
+    	}
 	}
 	
     /**
@@ -235,7 +247,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 
 			// Update rich messaging history
-			RichMessaging.getInstance().markChatSessionStarted(session);
+	    	// TODO
 	    }
     }
     
@@ -251,14 +263,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			if (reason == ImsServiceSession.TERMINATION_BY_USER) {
-				RichMessaging.getInstance().addChatSessionTerminationByUser(session);
-			} else {
-				RichMessaging.getInstance().addChatSessionTermination(session);
-			}
+	    	// TODO
 	        
 	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getSessionID());
+	        ChatServiceImpl.removeChatSession(getChatId());
 	    }
     }
     
@@ -272,10 +280,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().addChatSessionTerminationByRemote(session);
+	    	// TODO
 			
 	        // Remove session from the list
-			ChatServiceImpl.removeChatSession(session.getSessionID());
+			ChatServiceImpl.removeChatSession(getChatId());
 	    }
     }
     
@@ -291,14 +299,16 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 			
 			// Update rich messaging history
-			RichMessaging.getInstance().addIncomingChatMessage(message, session);
+			RichMessaging.getInstance().addChatMessage(session.getContributionID(),
+					message, ChatLog.Message.Direction.INCOMING);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
 	            	ChatMessage msg = new ChatMessage(message.getMessageId(),
-	            			message.getRemote(), message.getTextMessage(),
+	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
+	            			message.getTextMessage(),
 	            			message.getServerDate(), message.isImdnDisplayedRequested());
 	            	listeners.getBroadcastItem(i).onNewMessage(msg);
 	            } catch(Exception e) {
@@ -324,28 +334,18 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			
 			// Update rich messaging history
 	    	switch(error.getErrorCode()){
-	    		case ChatError.SESSION_NOT_FOUND:
-	    		case ChatError.SESSION_RESTART_FAILED:
-	    			// These errors are not logged
-	    			break;
-		    	case ChatError.SESSION_INITIATION_DECLINED:
-					RichMessaging.getInstance().addChatSessionTermination(session);
-		    		break;
 		    	case ChatError.SESSION_INITIATION_FAILED:
 		    	case ChatError.SESSION_INITIATION_CANCELLED:
-					RichMessaging.getInstance().addChatSessionTermination(session);
-					RichMessaging.getInstance().markFirstMessageFailed(session.getSessionID());
+					RichMessaging.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
+							ChatLog.Message.Status.Content.FAILED);
+					// TODO: notify listener
 		    		break;
 		    	default:
-					RichMessaging.getInstance().addChatSessionError(session);
 		    		break;
 	    	}
 	    	
-	  		// Notify event listeners
-	    	// TODO
-	    	
 	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getSessionID());
+	        ChatServiceImpl.removeChatSession(getChatId());
 	    }
     }
     
@@ -389,7 +389,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().setChatMessageDeliveryStatus(msgId, status);
+			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

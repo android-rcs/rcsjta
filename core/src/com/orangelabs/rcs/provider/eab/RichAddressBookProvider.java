@@ -56,6 +56,7 @@ public class RichAddressBookProvider extends ContentProvider {
 	private static final int AGGREGATIONS = 3;
 	private static final int AGGREGATION_ID = 4;
 	private static final int RCSAPI = 5;
+	private static final int RCSAPI_ID = 6;
 	
 	// Allocate the UriMatcher object
 	private static final UriMatcher uriMatcher;
@@ -66,6 +67,7 @@ public class RichAddressBookProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation", AGGREGATIONS);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation/#", AGGREGATION_ID);
 		uriMatcher.addURI("org.gsma.joyn.provider.capabilities", "capabilities", RCSAPI);
+		uriMatcher.addURI("org.gsma.joyn.provider.capabilities", "capabilities/#", RCSAPI_ID);
 	}
 
     /**
@@ -192,15 +194,15 @@ public class RichAddressBookProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch(uriMatcher.match(uri)){
 			case CONTACTS:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.eab";
-			case CONTACT_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.eab";
-			case AGGREGATIONS:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.aggregation";
-			case AGGREGATION_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.aggregation";
 			case RCSAPI:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.eab";
+				return "vnd.android.cursor.dir/eab";
+			case CONTACT_ID:
+			case RCSAPI_ID:
+				return "vnd.android.cursor.item/eab";
+			case AGGREGATIONS:
+				return "vnd.android.cursor.dir/aggregation";
+			case AGGREGATION_ID:
+				return "vnd.android.cursor.item/aggregation";
 			default:
 				throw new IllegalArgumentException("Unsupported URI " + uri);
 		}
@@ -295,6 +297,13 @@ public class RichAddressBookProvider extends ContentProvider {
         		qb.setTables(EAB_TABLE);
 				qb.appendWhere("(" + RichAddressBookData.KEY_RCS_STATUS + "<>" + ContactInfo.NO_INFO +
 						") AND (" + RichAddressBookData.KEY_RCS_STATUS + "<>" + ContactInfo.NOT_RCS + ")");
+        		break;
+        	case RCSAPI_ID:
+	        	qb.setTables(EAB_TABLE);
+				qb.appendWhere(RichAddressBookData.KEY_ID + "=" + uri.getPathSegments().get(1));
+        		if (TextUtils.isEmpty(sort)){
+        			orderBy = RichAddressBookData.KEY_CONTACT_NUMBER;
+        		}
         		break;
 	        default:
 	            throw new IllegalArgumentException("Unknown URI " + uri);

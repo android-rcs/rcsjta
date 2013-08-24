@@ -34,6 +34,7 @@ public class SingleChatReplacedReceiver extends BroadcastReceiver {
 		Intent replacedView = new Intent(intent);
 		replacedView.setClass(context, GroupChatView.class);
 		replacedView.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		replacedView.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OPEN);
         context.startActivity(replacedView);
     }
 }

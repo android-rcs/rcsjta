@@ -16,7 +16,7 @@ public class ChatIntent {
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_FIRST_MESSAGE} containing the first message in the new
      *  conversation (parcelable object).
-     * <li> {@link #EXTRA_CHAT_ID} containing the MIME type of the file to be transfered.
+     * <li> {@link #EXTRA_CHAT_ID} containing the MIME type of the file to be transferred.
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.chat.action.NEW_CHAT";
@@ -30,11 +30,6 @@ public class ChatIntent {
 	 * Display name of the contact sending the invitation (extracted from the SIP address)
 	 */
 	public final static String EXTRA_DISPLAY_NAME = "contactDisplayname";
-
-	/**
-	 * Unique ID of the chat conversation
-	 */
-	public final static String EXTRA_CHAT_ID = "chatId";
 
 	/**
 	 * First message

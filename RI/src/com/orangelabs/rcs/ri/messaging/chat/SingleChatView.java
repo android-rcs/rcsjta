@@ -24,12 +24,9 @@ import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.chat.Chat;
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatListener;
+import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.Menu;
@@ -37,7 +34,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Smileys;
@@ -89,65 +85,26 @@ public class SingleChatView extends ChatView {
      */
     public void onServiceConnected() {
     	try {
-	        chatId = getIntent().getStringExtra(ChatIntent.EXTRA_CHAT_ID);
-	        if (chatId != null) {
+    		String firstMsg = getIntent().getStringExtra(ChatIntent.EXTRA_FIRST_MESSAGE);
+			if (firstMsg == null) {
 				// Incoming session
-				
-				// Remove the notification
-		    	SingleChatInvitationReceiver.removeSingleChatNotification(this, chatId);
-		    			
-		    	// Get chat session
-				Chat chat = chatApi.getChat(chatId);
-				if (chat == null) {
-	    			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_session_not_found));
-	    			return;
-				}
-
-				// Get contact
-				contact = chat.getRemoteContact();
-
-		    	// Get first message
-				ChatMessage firstMessage = getIntent().getParcelableExtra(ChatIntent.EXTRA_FIRST_MESSAGE);
-
-				// Display accept/reject dialog
-	            if (!chatApi.getConfiguration().isChatAutoAcceptMode()) {
-	                // Manual accept
-	    			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	    			builder.setTitle(R.string.title_recv_chat);
-	    			String msg = getString(R.string.label_from) + " " + contact;
-	    			if ((firstMessage != null) && (firstMessage.getMessage().length() > 0)) {
-	    				msg = msg + "\n" + getString(R.string.label_msg) + " " + firstMessage.getMessage();
-	    			}
-	    			builder.setMessage(msg);
-	    			builder.setCancelable(false);
-	    			builder.setIcon(R.drawable.ri_notif_chat_icon);
-	    			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-	    			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-	    			builder.show();
-	            }				
-
-	            // Load history
-    			loadHistory(chatId);
-    			
-    			// Add chat event listener
-				chat.addEventListener(chatListener);						
-
-				// Send delivery report on the first message
-		        if ((firstMessage != null) && (chatApi.getConfiguration().isDisplayedDeliveryReport())) {
-					chat.sendDisplayedDeliveryReport(firstMessage.getId());
-				}
+				contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
 			} else {
 				// Outgoing session
-    	        
-		    	// Get remote contact
-				contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);
+				contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);				
 			}
 			
 			// Set title
-			setTitle(getString(R.string.title_chat_view_oneone) + " " +	contact);	
+			setTitle(getString(R.string.title_chat) + " " +	contact);	
 
 			// Set chat settings
 	        isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
+
+	        // Open chat
+    		chat = chatApi.openSingleChat(contact, chatListener);
+				
+            // Load history
+			loadHistory(chatId);
 
 	        // Set the message composer max length
 			InputFilter[] filterArray = new InputFilter[1];
@@ -193,104 +150,25 @@ public class SingleChatView extends ChatView {
 			}
 		});
     }      
-	
-    /**
-     * Accept button listener
-     */
-    private OnClickListener acceptBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                		// Accept the invitation
-// TODO            			chat.acceptInvitation();
-	            	} catch(Exception e) {
-	        			handler.post(new Runnable() { 
-	        				public void run() {
-	        					Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_invitation_failed));
-	        				}
-	        			});
-	            	}
-            	}
-            };
-            thread.start();
-        }
-    };
 
     /**
-     * Reject button listener
-     */
-    private OnClickListener declineBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                		// Reject the invitation
-// TODO            			chat.rejectInvitation();
-	            	} catch(Exception e) {
-	            	}
-            	}
-            };
-            thread.start();
-
-            // Exit activity
-			finish();
-        }
-    };
-
-    /**
-     * Start chat
-     * 
-     * @param msg First message
-     */
-    private void startChat(final String msg) {
-		// Initiate the chat session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		chat = chatApi.initiateSingleChat(contact, msg, chatListener);
-            	} catch(Exception e) {
-            		e.printStackTrace();
-            		handler.post(new Runnable(){
-            			public void run(){
-            				Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_invitation_failed));		
-            			}
-            		});
-            	}
-        	}
-        };
-        thread.start();
-
-        // Display a progress dialog
-        progressDialog = Utils.showProgressDialog(SingleChatView.this, getString(R.string.label_command_in_progress));
-        progressDialog.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-				Toast.makeText(SingleChatView.this, getString(R.string.label_chat_initiation_canceled), Toast.LENGTH_SHORT).show();
-				quitSession();
-			}
-		});
-    }
-    
-    /**
-     * Send message
+     * Send a message
      * 
      * @param msg Message
+     * @return Message ID
      */
-    protected void sendMessage(String msg) {
-        try {
-        	if (chat == null) {
-				// Initiate chat
-    			startChat(msg);				
-        	} else {
-				// Send the text to remote
-		    	chat.sendMessage(msg);
-		    	
-		        // Warn the composing manager that the message was sent
-				composingManager.messageWasSent();
-        	}
+    protected String sendMessage(String msg) {
+    	try {
+			// Send the text to remote
+			String msgId = chat.sendMessage(msg);
+			
+	        // Warn the composing manager that the message was sent
+			composingManager.messageWasSent();
+
+			return msgId;
 	    } catch(Exception e) {
 	    	e.printStackTrace();
-	    	Utils.showMessage(this, getString(R.string.label_send_im_failed));
+	    	return null;
 	    }
     }
     
@@ -331,47 +209,17 @@ public class SingleChatView extends ChatView {
 	}
 
     /**
-     * Mark a message as "displayed"
-     * 
-     * @param msg Message
-     */
-    protected void markMessageAsDisplayed(ChatMessage msg) {
-        if (isDeliveryDisplayed) {
-            try {
-                chat.sendDisplayedDeliveryReport(msg.getId());
-            } catch(Exception e) {
-                // Nothing to do
-            }
-        }
-    }
-
-    /**
-     * Mark a message as "read"
-     */
-    protected void markMessageAsRead(ChatMessage msg){
-    	// TODO
-    	/*
-    	EventsLogApi events = new EventsLogApi(getApplicationContext());
-    	events.markChatMessageAsRead(msg.getId(), true);*/
-    }
-        
-    /**
      * Quit the session
      */
     protected void quitSession() {
-		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (chat != null) {
-                		chat.removeEventListener(chatListener);
-                    }
-            	} catch(Exception e) {
-            	}
-            	chat = null;
-        	}
-        };
-        thread.start();
+		// Remove listener
+    	try {
+            if (chat != null) {
+        		chat.removeEventListener(chatListener);
+            }
+    	} catch(Exception e) {
+    	}
+    	chat = null;
         
         // Exit activity
 		finish();        
@@ -392,6 +240,21 @@ public class SingleChatView extends ChatView {
 		}
 	}    
     
+    /**
+     * Send a displayed report
+     * 
+     * @param msg Message
+     */
+    private void sendDisplayedReport(ChatMessage msg) {
+        if ((isDeliveryDisplayed) && msg.isDisplayedReportRequested()) {
+            try {
+                chat.sendDisplayedDeliveryReport(msg.getId());
+            } catch(Exception e) {
+                // Nothing to do
+            }
+        }
+    }
+
     /**
 	 * Add participants to be invited in the session
 	 */
@@ -417,40 +280,28 @@ public class SingleChatView extends ChatView {
 						getResources(), 
 						getString(R.string.menu_insert_smiley));
 				break;
-				
-			case R.id.menu_wizz:
-		        sendWizz();
-				break;
 	
 			case R.id.menu_add_participant:
-				if (chat != null) {
-					addParticipants();
-				} else {
-					Utils.showMessage(SingleChatView.this, getString(R.string.label_session_not_yet_started));
-				}
+				addParticipants();
 				break;
 	
-			case R.id.menu_close_session:
-				if (chat != null) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setTitle(getString(R.string.title_chat_exit));
-					builder.setPositiveButton(getString(R.string.label_ok), new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-			            	// Quit the session
-			            	quitSession();
-						}
-					});
-					builder.setNegativeButton(getString(R.string.label_cancel), null);
-					builder.setCancelable(true);
-					builder.show();
-				} else {
-	            	// Exit activity
-					finish();
-				}
-				break;
-				
 			case R.id.menu_quicktext:
 				addQuickText();
+				break;
+
+			case R.id.menu_clear_log:
+				// Delete conversation
+				String where = ChatLog.Message.CHAT_ID + " = '" + contact + "'"; 
+				getContentResolver().delete(ChatLog.Message.CONTENT_URI, where, null);
+				
+				// Refresh view
+		        msgListAdapter = new MessageListAdapter(this);
+		        setListAdapter(msgListAdapter);
+				break;
+				
+			case R.id.menu_close_session:
+            	// Exit activity
+				finish();
 				break;
 		}
 		return true;
@@ -462,13 +313,12 @@ public class SingleChatView extends ChatView {
     private class MyChatListener extends ChatListener {
     	// Callback called when a new message has been received
     	public void onNewMessage(final ChatMessage message) {
-			if (message.isDisplayedReportRequested()) {
-				// We received the message, mark it as displayed if the view is not in background
-				markMessageAsDisplayed(message);
-			}
-			
 			handler.post(new Runnable() { 
 				public void run() {
+					// Send a delivery report
+					sendDisplayedReport(message);
+					
+					// Display the received message
 					displayReceivedMessage(message);
 				}
 			});
@@ -478,6 +328,7 @@ public class SingleChatView extends ChatView {
     	public void onReportMessageDelivered(String msgId) {
 			handler.post(new Runnable(){
 				public void run(){
+					// Display a notification
 					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered));
 				}
 			});
@@ -487,6 +338,7 @@ public class SingleChatView extends ChatView {
     	public void onReportMessageDisplayed(String msgId) {
 			handler.post(new Runnable(){
 				public void run(){
+					// Display a notification
 					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed));
 				}
 			});
@@ -496,6 +348,7 @@ public class SingleChatView extends ChatView {
     	public void onReportMessageFailed(String msgId) {
 			handler.post(new Runnable(){
 				public void run(){
+					// Display a notification
 					addNotifHistory(getString(R.string.label_receive_delivery_status_failed));
 				}
 			});
@@ -507,9 +360,11 @@ public class SingleChatView extends ChatView {
 				public void run(){
 					TextView view = (TextView)findViewById(R.id.isComposingText);
 					if (status) {
+						// Display is-composing notification
 						view.setText(contact + " " + getString(R.string.label_contact_is_composing));
 						view.setVisibility(View.VISIBLE);
 					} else {
+						// Hide is-composing notification
 						view.setVisibility(View.GONE);
 					}
 				}

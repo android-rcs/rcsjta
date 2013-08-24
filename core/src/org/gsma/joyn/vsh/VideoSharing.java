@@ -80,11 +80,6 @@ public class VideoSharing {
     	 * Sharing invitation has been declined by remote
     	 */
     	public final static int INVITATION_DECLINED = 1;
-
-    	/**
-    	 * Sharing has been cancelled
-    	 */
-    	public final static int SHARING_CANCELLED = 2;
     	
         private Error() {
         }    	

@@ -119,7 +119,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			if (dialogPath.isSessionTerminated()) {
 				// Session terminated
 				if (session.isImageTransfered()) {
-					result = ImageSharing.State.TRANSFERED;
+					result = ImageSharing.State.TRANSFERRED;
 				} else {
 					result = ImageSharing.State.ABORTED;
 				}
@@ -327,6 +327,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void handleSharingError(ContentSharingError error) {
     	synchronized(lock) {
+			if (error.getErrorCode() == ContentSharingError.SESSION_INITIATION_CANCELLED) {
+				// Do nothing here, this is an aborted event
+				return;
+			}
+
 			if (logger.isActivated()) {
 				logger.info("Sharing error " + error.getErrorCode());
 			}
@@ -340,23 +345,14 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	            try {
 	            	int code;
 	            	switch(error.getErrorCode()) {
-            			case ContentSharingError.SESSION_INITIATION_CANCELLED:
-	            			code = ImageSharing.Error.SHARING_CANCELLED;
-	            			break;
             			case ContentSharingError.SESSION_INITIATION_DECLINED:
 	            			code = ImageSharing.Error.INVITATION_DECLINED;
 	            			break;
 	            		case ContentSharingError.MEDIA_SAVING_FAILED:
 	            			code = ImageSharing.Error.SAVING_FAILED;
 	            			break;
-	            		case ContentSharingError.MEDIA_SIZE_TOO_BIG:
-	            			code = ImageSharing.Error.SIZE_TOO_BIG;
-	            			break;
 	            		case ContentSharingError.MEDIA_TRANSFER_FAILED:
 	            			code = ImageSharing.Error.SHARING_FAILED;
-	            			break;
-	            		case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
-	            			code = ImageSharing.Error.UNSUPPORTED_TYPE;
 	            			break;
 	            		default:
 	            			code = ImageSharing.Error.SHARING_FAILED;
@@ -417,7 +413,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.TRANSFERED);
+			RichCall.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.TRANSFERRED);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

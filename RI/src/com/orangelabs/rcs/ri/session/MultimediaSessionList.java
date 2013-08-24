@@ -25,7 +25,6 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.session.MultimediaSession;
-import org.gsma.joyn.session.MultimediaSessionIntent;
 import org.gsma.joyn.session.MultimediaSessionService;
 
 import android.app.ListActivity;
@@ -125,7 +124,8 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 		try {
 			Intent intent = new Intent(this, MultimediaSessionView.class);
 			String sessionId = sessions.get(position).getSessionId();
-			intent.putExtra(MultimediaSessionIntent.EXTRA_SESSION_ID, sessionId);
+			intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OPEN);
+			intent.putExtra(MultimediaSessionView.EXTRA_SESSION_ID, sessionId);
 			startActivity(intent);
 		} catch(JoynServiceException e) {
 			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));

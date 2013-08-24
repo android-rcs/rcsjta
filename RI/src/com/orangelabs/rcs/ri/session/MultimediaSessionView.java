@@ -34,9 +34,18 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class MultimediaSessionView extends Activity implements JoynServiceListener {
 	/**
+	 * View modes
+	 */
+	public final static int MODE_INCOMING = 0;
+	public final static int MODE_OUTGOING = 1;
+	public final static int MODE_OPEN = 2;
+
+	/**
 	 * Intent parameters
 	 */
-	public static String EXTRA_CONTACT = "contact";
+	public final static String EXTRA_MODE = "mode";
+	public final static String EXTRA_SESSION_ID = "session_id";
+	public final static String EXTRA_CONTACT = "contact";
 
 	/**
      * UI handler
@@ -166,12 +175,21 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
      */
     public void onServiceConnected() {
 		try {
-	        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
-			if (sessionId != null) {
+	        int mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
+			if (mode == MultimediaSessionView.MODE_OUTGOING) {
+				// Outgoing session
+    	        
+		    	// Get remote contact
+				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
+		        
+		        // Initiate session
+    			startSession();
+			} else
+			if (mode == MultimediaSessionView.MODE_OPEN) {
+				// Open an existing session
+				
 				// Incoming session
-
-				// Remove the notification
-		    	MultimediaSessionInvitationReceiver.removeSessionInvitationNotification(this, sessionId);
+		        sessionId = getIntent().getStringExtra(MultimediaSessionView.EXTRA_SESSION_ID);
 
 		    	// Get the session
 	    		session = sessionApi.getSession(sessionId);
@@ -180,6 +198,29 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_has_expired));
 					return;
 				}
+				
+    			// Add session event listener
+				session.addEventListener(sessionListener);
+				
+		    	// Get remote contact
+				contact = session.getRemoteContact();
+		
+				// Display session info
+				TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
+				remoteSdpEdit.setText(session.getRemoteSdp());
+			} else {
+				// Incoming session from its Intent
+		        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+
+		    	// Get the session
+	    		session = sessionApi.getSession(sessionId);
+				if (session == null) {
+					// Session not found or expired
+					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_has_expired));
+					return;
+				}
+				
+    			// Add session event listener
 				session.addEventListener(sessionListener);
 				
 		    	// Get remote contact
@@ -189,26 +230,16 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 				TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
 				remoteSdpEdit.setText(session.getRemoteSdp());
 
-				// Display accept/reject dialog
-				if (session.getState() == MultimediaSession.State.INVITED) {
-					// Manual accept
-					AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setTitle(R.string.title_recv_mm_session);
-					builder.setMessage(getString(R.string.label_from) +	contact);
-					builder.setCancelable(false);
-					builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-					builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-					builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-					builder.show();
-				}
-			} else {
-				// Outgoing session
-    	        
-		    	// Get remote contact
-				contact = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_CONTACT);
-		        
-		        // Initiate session
-    			startSession();
+				// Manual accept
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.title_mm_session);
+				builder.setMessage(getString(R.string.label_from) +	" " + contact + "\n" +
+						getString(R.string.label_service_id) + " " + serviceId);
+				builder.setCancelable(false);
+				builder.setIcon(R.drawable.ri_notif_mm_session_icon);
+				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+				builder.show();
 			}
 			
 			// Display session info
@@ -218,7 +249,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	    	contactEdit.setText(contact);
 	    	TextView localSdpEdit = (TextView)findViewById(R.id.local_sdp);
 	    	localSdpEdit.setText(localSdp);
-			
 		} catch(JoynServiceException e) {
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
 		}

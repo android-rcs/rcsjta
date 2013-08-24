@@ -30,11 +30,9 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	public abstract void onSessionStarted();
 	
 	/**
-	 * Callback called when the session is terminated
-	 * 
-	 * @param reason Termination reason
+	 * Callback called when the session has been aborted or terminated
 	 */
-	public abstract void onSessionTerminated(int reason);
+	public abstract void onSessionAborted();
 
 	/**
 	 * Callback called when the session has failed

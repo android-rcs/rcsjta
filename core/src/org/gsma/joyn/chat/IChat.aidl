@@ -10,8 +10,6 @@ interface IChat {
 	
 	String getRemoteContact();
 	
-	int getState();
-	
 	String sendMessage(in String message);
 	
 	void sendDisplayedDeliveryReport(in String msgId);

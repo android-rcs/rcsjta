@@ -79,6 +79,7 @@ public class InitiateMultimediaSession extends Activity {
 			// Display session view
 			Intent intent = new Intent(InitiateMultimediaSession.this, MultimediaSessionView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        	intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OUTGOING);
         	intent.putExtra(MultimediaSessionView.EXTRA_CONTACT, remoteContact);
 			startActivity(intent);
 			

@@ -55,6 +55,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	 * Close API
 	 */
 	public void close() {
+		if (logger.isActivated()) {
+			logger.info("Contacts service API is closed");
+		}
 	}
     
     /**

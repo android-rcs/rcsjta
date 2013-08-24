@@ -87,6 +87,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         	Intent intent = new Intent(InitiateGroupChat.this, GroupChatView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	intent.putStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS, participants);
+        	intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OUTGOING);
         	intent.putExtra(GroupChatView.EXTRA_SUBJECT, subject);
         	startActivity(intent);
         	

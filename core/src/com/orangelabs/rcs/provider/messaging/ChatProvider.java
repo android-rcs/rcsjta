@@ -21,6 +21,7 @@ package com.orangelabs.rcs.provider.messaging;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -31,170 +32,242 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 /**
- * Rich messaging history provider
+ * Chat provider
  * 
- * @author mhsm6403
+ * @author Jean-Marc AUFFRET
  */
 public class ChatProvider extends ContentProvider {
-	// Database table
-	public static final String TABLE = "messaging";
-	
-	// Create the constants used to differentiate between the different
-	// URI requests
-	private static final int MESSAGING = 1;
-	private static final int MESSAGING_ID = 2;
-	private static final int MESSAGING_SESSION = 3;
-	private static final int MESSAGING_TYPE_DISCRIMINATOR = 4;
-	
+	/**
+	 * Database tables
+	 */
+    private static final String TABLE_CHAT = "chat";
+    private static final String TABLE_MESSAGE = "message";
+
+	// Create the constants used to differentiate between the different URI requests
+	private static final int CHATS = 1;
+    private static final int CHAT_ID = 2;
+    private static final int RCSAPI_CHATS = 3;
+    private static final int RCSAPI_CHAT_ID = 4;
+    
+	private static final int MESSAGES = 5;
+    private static final int MESSAGE_ID = 6;
+    private static final int RCSAPI_MESSAGES = 7;
+    private static final int RCSAPI_MESSAGE_ID = 8;
+
 	// Allocate the UriMatcher object
-	private static final UriMatcher uriMatcher;
-	static {
-		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI("com.orangelabs.rcs.messaging", "messaging", MESSAGING);
-		uriMatcher.addURI("com.orangelabs.rcs.messaging", "messaging/#", MESSAGING_ID);
-		uriMatcher.addURI("com.orangelabs.rcs.messaging", "messaging/session", MESSAGING_SESSION);
-		uriMatcher.addURI("com.orangelabs.rcs.messaging", "messaging/type_discriminator/#", MESSAGING_TYPE_DISCRIMINATOR);
-	}
+    private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    static {
+        uriMatcher.addURI("com.orangelabs.rcs.chat", "chat", CHATS);
+        uriMatcher.addURI("com.orangelabs.rcs.chat", "chat/#", CHAT_ID);
+		uriMatcher.addURI("org.gsma.joyn.provider.chat", "chat", RCSAPI_CHATS);
+		uriMatcher.addURI("org.gsma.joyn.provider.chat", "chat/#", RCSAPI_CHAT_ID);	
+        uriMatcher.addURI("com.orangelabs.rcs.chat", "message", MESSAGES);
+        uriMatcher.addURI("com.orangelabs.rcs.chat", "message/#", MESSAGE_ID);
+		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message", RCSAPI_MESSAGES);
+		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message/#", RCSAPI_MESSAGE_ID);
+    }
 
     /**
      * Database helper class
      */
     private SQLiteOpenHelper openHelper;
+    
+    /**
+     * Database name
+     */
+    public static final String DATABASE_NAME = "chat.db";
 
-	@Override 
-	public boolean onCreate() {
-		// TODO
+    /**
+     * Helper class for opening, creating and managing database version control
+     */
+    private static class DatabaseHelper extends SQLiteOpenHelper {
+        private static final int DATABASE_VERSION = 2;
+
+        public DatabaseHelper(Context ctx) {
+            super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+        	db.execSQL("CREATE TABLE " + TABLE_CHAT + " ("
+        			+ ChatData.KEY_ID + " integer primary key autoincrement,"
+        			+ ChatData.KEY_CHAT_ID + " TEXT,"
+        			+ ChatData.KEY_REJOIN_ID + " TEXT,"
+        			+ ChatData.KEY_SUBJECT + " TEXT,"
+        			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
+        			+ ChatData.KEY_STATUS + " integer,"
+        			+ ChatData.KEY_DIRECTION + " integer,"
+        			+ ChatData.KEY_TIMESTAMP + " long);");
+        	db.execSQL("CREATE TABLE " + TABLE_MESSAGE + " ("
+        			+ MessageData.KEY_ID + " integer primary key autoincrement,"
+        			+ MessageData.KEY_CHAT_ID + " TEXT,"
+        			+ MessageData.KEY_CONTACT + " TEXT,"
+        			+ MessageData.KEY_MSG_ID + " TEXT,"
+        			+ MessageData.KEY_TYPE + " integer,"
+        			+ MessageData.KEY_CONTENT + " TEXT,"
+        			+ MessageData.KEY_CONTENT_TYPE + " TEXT,"
+        			+ MessageData.KEY_DIRECTION + " integer,"
+        			+ MessageData.KEY_STATUS + " integer,"
+        			+ MessageData.KEY_TIMESTAMP + " long);");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAT);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+            onCreate(db);
+        }
+    }
+
+    @Override
+    public boolean onCreate() {
+        openHelper = new DatabaseHelper(getContext());
         return true;
-	}
+    }
 
-	@Override
-	public String getType(Uri uri) {
-		switch(uriMatcher.match(uri)){
-			case MESSAGING:
-				return "vnd.android.cursor.dir/com.orangelabs.rcs.messaging";
-			case MESSAGING_ID:
-				return "vnd.android.cursor.item/com.orangelabs.rcs.messaging";
-			default:
-				throw new IllegalArgumentException("Unsupported URI " + uri);
-		}
-	}
-	
+    @Override
+    public String getType(Uri uri) {
+        int match = uriMatcher.match(uri);
+        switch(match) {
+            case CHATS:
+			case RCSAPI_CHATS:
+                return "vnd.android.cursor.dir/chat";
+            case CHAT_ID:
+			case RCSAPI_CHAT_ID:
+                return "vnd.android.cursor.item/chat";
+            case MESSAGES:
+			case RCSAPI_MESSAGES:
+                return "vnd.android.cursor.dir/message";
+            case MESSAGE_ID:
+			case RCSAPI_MESSAGE_ID:
+                return "vnd.android.cursor.item/message";
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+    }
+
     @Override
     public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(TABLE);
 
         // Generate the body of the query
-        String groupBy=null;
         int match = uriMatcher.match(uri);
         switch(match) {
-            case MESSAGING:
+            case CHATS:
+			case RCSAPI_CHATS:
+		        qb.setTables(TABLE_CHAT);
+		        break;
+			case MESSAGES:
+			case RCSAPI_MESSAGES:
+		        qb.setTables(TABLE_MESSAGE);
                 break;
-            case MESSAGING_ID:
-                qb.appendWhere(ChatData.KEY_ID + "=" + uri.getPathSegments().get(1));
+			case CHAT_ID:
+			case RCSAPI_CHAT_ID:
+		        qb.setTables(TABLE_CHAT);
+                qb.appendWhere(ChatData.KEY_ID + "=");
+                qb.appendWhere(uri.getPathSegments().get(1));
                 break;
-            case MESSAGING_SESSION:
-            	groupBy=ChatData.KEY_CHAT_SESSION_ID;
-            	sort=ChatData.KEY_TIMESTAMP+ " ASC";
-            	break;
-            case MESSAGING_TYPE_DISCRIMINATOR:
-            	qb.appendWhere(ChatData.KEY_TYPE+"=");
-            	qb.appendWhere(uri.getPathSegments().get(2));
-            	break;
+			case MESSAGE_ID:
+			case RCSAPI_MESSAGE_ID:
+		        qb.setTables(TABLE_MESSAGE);
+                qb.appendWhere(MessageData.KEY_ID + "=");
+                qb.appendWhere(uri.getPathSegments().get(1));
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         SQLiteDatabase db = openHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projectionIn, selection, selectionArgs, groupBy, null, sort);
+        Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
 
-		// Register the contexts ContentResolver to be notified if
-		// the cursor result set changes.
-        c.setNotificationUri(getContext().getContentResolver(), uri);
-        // Also notify changes to the Event log provider
-        getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
+		// Register the contexts ContentResolver to be notified if the cursor result set changes
+        if (c != null) {
+            c.setNotificationUri(getContext().getContentResolver(), uri);
+        }
+
         return c;
     }
-    
+
     @Override
     public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count;
+        int count = 0;
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int match = uriMatcher.match(uri);
-        switch (match) {
-	        case MESSAGING:
-	            count = db.update(TABLE, values, where, whereArgs);
+        switch(match) {
+	        case CHATS:
+	            count = db.update(TABLE_CHAT, values, where, null);
+		        break;
+			case MESSAGES:
+	            count = db.update(TABLE_MESSAGE, values, where, null);
 	            break;
-            case MESSAGING_ID:
-                String segment = uri.getPathSegments().get(1);
-                int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, ChatData.KEY_ID + "=" + id, null);
-                break;
+			case CHAT_ID:
+                count = db.update(TABLE_CHAT, values,
+                		ChatData.KEY_ID + "=" + Integer.parseInt(uri.getPathSegments().get(1)), null);
+	            break;
+			case MESSAGE_ID:
+                count = db.update(TABLE_MESSAGE, values,
+                		MessageData.KEY_ID + "=" + Integer.parseInt(uri.getPathSegments().get(1)), null);
+	            break;
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
-        // Also notify changes to the Event log provider
-        getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
         return count;
     }
-    
+
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
-        switch(uriMatcher.match(uri)){
-	        case MESSAGING:
-	        case MESSAGING_ID:
-	            // Insert the new row, will return the row number if successful
-	        	// Use system clock to generate id : it should not be a common int otherwise it could be the 
-	        	// same as an id present in MmsSms table (and that will create uniqueness problem when doing the tables merge) 
-	        	int id = (int)System.currentTimeMillis();
-	        	if (Integer.signum(id) == -1){
-	        		// If generated id is <0, it is problematic for uris
-	        		id = -id;
-	        	}
-	        	initialValues.put(ChatData.KEY_ID, id);
-	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(ChatData.CONTENT_URI, rowId);
+        switch(uriMatcher.match(uri)) {
+	        case CHATS:
+	        case CHAT_ID:
+	    		long chatRowId = db.insert(TABLE_CHAT, null, initialValues);
+	    		uri = ContentUris.withAppendedId(ChatData.CONTENT_URI, chatRowId);
+	        	break;
+	        case MESSAGES:
+	        case MESSAGE_ID:
+	    		long msgRowId = db.insert(TABLE_MESSAGE, null, initialValues);
+	    		uri = ContentUris.withAppendedId(MessageData.CONTENT_URI, msgRowId);
 	        	break;
 	        default:
 	    		throw new SQLException("Failed to insert row into " + uri);
         }
 		getContext().getContentResolver().notifyChange(uri, null);
-        // Also notify changes to the Event log provider
-		getContext().getContentResolver().notifyChange(ChatData.CONTENT_URI, null);
-		return uri;
+        return uri;
     }
-    
-    /**
-     * This method should not be used if deletion isn't made on the whole messages of a contact.
-     * Prefer methods from RichMessaging class, otherwise Recycler wont work.
-     *  
-     * If all messages of a contact, or all rich messages are to be deleted, this method could be used.
-     */
+
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         int count = 0;
-        switch(uriMatcher.match(uri)){
-	        case MESSAGING:
-	        	count = db.delete(TABLE, where, whereArgs);
+        switch(uriMatcher.match(uri)) {
+	        case CHATS:
+	        case RCSAPI_CHATS:
+	        	count = db.delete(TABLE_CHAT, where, whereArgs);
 	        	break;
-	        case MESSAGING_ID:
-	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, ChatData.KEY_ID + "="
-						+ segment
+	        case CHAT_ID:
+	        case RCSAPI_CHAT_ID:
+				count = db.delete(TABLE_CHAT, ChatData.KEY_ID + "="
+						+ uri.getPathSegments().get(1)
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);
-				
 				break;
-	        	
+	        case MESSAGES:
+	        case RCSAPI_MESSAGES:
+	        	count = db.delete(TABLE_MESSAGE, where, whereArgs);
+	        	break;
+	        case MESSAGE_ID:
+	        case RCSAPI_MESSAGE_ID:
+				count = db.delete(TABLE_MESSAGE, MessageData.KEY_ID + "="
+						+ uri.getPathSegments().get(1)
+						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
+						whereArgs);
+				break;
 	        default:
 	    		throw new SQLException("Failed to delete row " + uri);
         }
 		getContext().getContentResolver().notifyChange(uri, null);
         return count;    
-   }	
-    
+    }
 }

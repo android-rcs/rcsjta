@@ -34,9 +34,9 @@ public class FileTransfer {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * File transfer has been transfered with success 
+    	 * File transfer has been transferred with success 
     	 */
-    	public final static int TRANSFERED = 4;
+    	public final static int TRANSFERRED = 4;
     	
     	/**
     	 * File transfer has been aborted 
@@ -82,24 +82,9 @@ public class FileTransfer {
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Transfer has been cancelled
-    	 */
-    	public final static int TRANSFER_CANCELLED = 2;
-    	
-    	/**
-    	 * Unsupported file type
-    	 */
-    	public final static int UNSUPPORTED_TYPE = 3;
-
-    	/**
     	 * File saving has failed 
        	 */
-    	public final static int SAVING_FAILED = 4;
-
-        /**
-         * File is too big
-         */
-        public final static int SIZE_TOO_BIG = 5;
+    	public final static int SAVING_FAILED = 2;
     	
         private Error() {
         }    	
@@ -148,7 +133,7 @@ public class FileTransfer {
 	}
 	
 	/**
-     * Returns the complete filename including the path of the file to be transfered
+     * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
 	 * @throws JoynServiceException

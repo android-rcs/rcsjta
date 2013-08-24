@@ -342,6 +342,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
     public void handleSharingError(ContentSharingError error) {
     	synchronized(lock) {
+			if (error.getErrorCode() == ContentSharingError.SESSION_INITIATION_CANCELLED) {
+				// Do nothing here, this is an aborted event
+				return;
+			}
+
 			if (logger.isActivated()) {
 				logger.info("Sharing error " + error.getErrorCode());
 			}
@@ -355,9 +360,6 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	            try {
 	            	int code;
 	            	switch(error.getErrorCode()) {
-            			case ContentSharingError.SESSION_INITIATION_CANCELLED:
-	            			code = VideoSharing.Error.SHARING_CANCELLED;
-	            			break;
             			case ContentSharingError.SESSION_INITIATION_DECLINED:
 	            			code = VideoSharing.Error.INVITATION_DECLINED;
 	            			break;

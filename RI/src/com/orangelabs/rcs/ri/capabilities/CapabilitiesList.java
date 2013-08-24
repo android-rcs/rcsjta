@@ -1,7 +1,5 @@
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.Vector;
-
 import org.gsma.joyn.capability.CapabilitiesLog;
 import org.gsma.joyn.capability.CapabilityService;
 
@@ -9,7 +7,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -68,26 +65,7 @@ public class CapabilitiesList extends Activity {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
 		}
-			
-		Vector<String> items = new Vector<String>();
-		MatrixCursor matrix = new MatrixCursor(projection);
-		while (cursor.moveToNext()) {
-    		String id = cursor.getString(0);
-			if (!items.contains(id)) {
-				matrix.addRow(new Object[]{
-						cursor.getInt(0), 
-						cursor.getString(1), 
-						cursor.getInt(2), 
-						cursor.getInt(3),
-						cursor.getInt(4),
-						cursor.getInt(5),
-						cursor.getString(6)});
-				items.add(id);
-			}
-		}
-		cursor.close();
-
-		return new CapabilitiesListAdapter(this, matrix);
+		return new CapabilitiesListAdapter(this, cursor);
 	}
 	
     /**

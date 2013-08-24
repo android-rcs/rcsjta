@@ -125,7 +125,7 @@ public class FileTransferService extends JoynService {
 
     /**
      * Transfers a file to a contact. The parameter file contains the complete filename
-     * including the path to be transfered. The parameter contact supports the following
+     * including the path to be transferred. The parameter contact supports the following
      * formats: MSISDN in national or international format, SIP address, SIP-URI or
      * Tel-URI. If the format of the contact is not supported an exception is thrown.
      * 
@@ -140,7 +140,11 @@ public class FileTransferService extends JoynService {
 		if (api != null) {
 			try {
 				IFileTransfer ftIntf = api.transferFile(contact, filename, listener);
-				return new FileTransfer(ftIntf);
+				if (ftIntf != null) {
+					return new FileTransfer(ftIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -182,7 +186,12 @@ public class FileTransferService extends JoynService {
     public FileTransfer getFileTransfer(String transferId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return new FileTransfer(api.getFileTransfer(transferId));
+				IFileTransfer ftIntf = api.getFileTransfer(transferId);
+				if (ftIntf != null) {
+					return new FileTransfer(ftIntf);
+				} else {
+					return null;
+				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

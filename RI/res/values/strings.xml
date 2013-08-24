@@ -11,6 +11,7 @@
 <string name="label_not_implemented">Not yet implemented</string>
 <string name="label_confirm_close">Do you want to close the session on quit?</string>
 <string name="menu_close_session">Quit</string>
+<string name="menu_clear_log">Clear log</string>
 <string name="label_file_size">Size: %1$s%2$s</string>
 <string name="label_file_size_unknown">Size: unknown</string>
 <string name="label_command_in_progress">Command in progress...</string>
@@ -83,7 +84,7 @@
 
 <!-- Contacts API -->
 <string name="menu_contacts">Contacts</string>
-<string name="menu_address_book">Address book</string>
+<string name="menu_address_book">Native address book</string>
 <string name="menu_list_rcs_contacts">All joyn contacts</string>
 <string name="menu_list_online_contacts">Online joyn contacts</string>        		
 <string name="menu_list_supported_contacts">Contacts supporting a service</string>
@@ -111,7 +112,7 @@
 <string name="label_request_in_background">Request has been sent in background for %s</string>
 <string name="label_capabilities_empty">No capabilities</string>
 <string name="label_contact">Contact %s</string>
-<string name="label_extensions">Extensions:\n%s</string>
+<string name="label_extensions">Extensions: %s</string>
 
 <!-- Messaging menu -->
 <string name="menu_messaging">Messaging</string>
@@ -121,7 +122,7 @@
 <!-- File transfer menu -->
 <string name="menu_transfer_file">Transfer a file</string>
 <string name="menu_file_transfer_log">File transfer log</string>
-<string name="title_recv_file_transfer">New file transfer invitation</string>
+<string name="title_recv_file_transfer">File transfer from %s</string>
 <string name="title_file_transfer">File transfer</string>
 <string name="label_transfer_failed">Transfer has failed (error code %d)</string>
 <string name="label_transfer_too_big">Transfer is aborted because file is too big</string>
@@ -136,55 +137,47 @@
 <string name="label_invite">Invite</string>
 <string name="label_contact_blocked">%s has been blocked</string>
 <string name="label_contact_unblocked">%s has been unblocked</string>
-<string name="title_recv_chat">New chat invitation</string>
+<string name="title_recv_chat">Chat with %s</string>
 <string name="label_msg">Message:</string>
 <string name="label_hint_first_message">Enter first message</string>
 <string name="title_chat_view">Chat</string>
-<string name="title_recv_group_chat">New group chat invitation</string>
-<string name="title_chat_view_group">Group chat</string>
-<string name="title_chat_view_oneone">Chat with</string>
+<string name="title_recv_group_chat">Group chat with %s</string>
+<string name="title_group_chat">Group chat</string>
+<string name="title_chat">Chat with</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
 <string name="title_chat_rejoin">Do you want to rejoin the group chat session?</string>
 <string name="label_chat_aborted">Chat session aborted</string>
 <string name="menu_insert_smiley">Smiley</string>
 <string name="menu_participants">Participants</string>
 <string name="menu_add_participant">Add participant</string>
-<string name="menu_wizz">Wizz</string>
 <string name="label_send_im_failed">Send IM has failed</string>
 <string name="label_chat_failed">Chat session has failed</string>
 <string name="label_contacts">Contacts:</string>
 <string name="label_contact_is_composing">is typing...</string>
 <string name="label_select_contacts">Select contacts</string>
-<string name="label_chat_wizz">Wizz</string>
 <string name="label_chat_initiation_canceled">Chat session has been canceled</string>
 <string name="label_select_quicktext">Quick text</string>
 <string name="menu_quicktext">Quick text</string>
-<string name="label_add_participant_success">Request to add participant(s) is successful</string>
 <string name="label_add_participant_failed">Request to add participant(s) has failed</string>
 <string name="label_receive_delivery_status_displayed">Message has been displayed</string>
 <string name="label_receive_delivery_status_failed">Message has failed</string>
 <string name="label_receive_delivery_status_delivered">Message has been delivered</string>
-<string name="label_chat_terminated">Chat session terminated</string>
-<string name="label_chat_terminated_by_remote">Chat session terminated by remote</string>
 <string name="label_chat">Chat</string>
 <string name="label_group_chat">Group chat</string>
 <string name="menu_delete_spam">Delete message</string>
 <string name="menu_unspam">Move to my messages</string>
 <string name="menu_clear_all_spams">Clear all spams</string>
 <string name="label_spam_empty">No spam</string>
-<string name="label_continue_chat_failed">Can\'t continue the conversation (service not available)</string>
+<string name="label_continue_chat_failed">Can\'t continue the conversation: joyn service is not available</string>
 <string name="label_subject">Subject:</string>
 <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
 <string name="label_rejoin_chat_failed">Can\'t rejoin the conversation (error code %d)</string>
 <string name="label_rejoin_chat_exception">Can\'t rejoin the conversation (unexpected exception)</string>
 <string name="label_chat_rejoin_canceled">Rejoin chat conversation has been canceled</string>
-<string name="label_rejoin_chat_terminated_by_remote">Rejoin session terminated by remote</string>
 <string name="label_restart_chat_failed">Can\'t restart the conversation (error code %d)</string>
 <string name="label_restart_chat_exception">Can\'t restart the conversation (unexpected exception)</string>
 <string name="label_chat_restart_canceled">Restart chat conversation has been canceled</string>
-<string name="label_restart_chat_terminated">Restart session terminated</string>
 <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
-<string name="label_rejoin_unauthorized">You can\'t rejoin or restart the session because you have left the session voluntary</string>
 <string name="label_me">Me</string>
 <string name="label_chat_empty">No chat</string>
 <string name="label_contact_joined">%s has joined</string>
@@ -192,6 +185,7 @@
 <string name="label_contact_disconnected">%s is diconnected</string>
 <string name="label_chat_declined">Group chat invitation has been declined</string>
 <string name="label_no_participant_found">No participant found or available</string>
+<string name="label_no_subject">no subject</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
@@ -208,7 +202,7 @@
 <string name="label_select_picture">Select picture</string>
 <string name="label_selected_img">Selected picture:</string>
 <string name="label_select_file">Select file</string>
-<string name="title_recv_image_sharing">New image sharing invitation</string>
+<string name="title_recv_image_sharing">Image sharing from %s</string>
 <string name="title_image_sharing">Image sharing</string>
 <string name="label_out_of_memory">No enough memory to display the image</string>
 
@@ -221,7 +215,7 @@
 <string name="label_selected_video">File:</string>
 <string name="label_initiate_sharing">Invite</string>
 <string name="label_display">Display:</string>
-<string name="title_recv_video_sharing">New video sharing invitation</string>
+<string name="title_recv_video_sharing">Video sharing from %s</string>
 <string name="label_csh_failed">Sharing has failed or is aborted (error code %d)</string>
 <string name="label_end_of_media">End of media</string>
 <string name="label_video_format_not_supported">Only H.263 QCIF format supported!\nPlease select another file.</string>
@@ -233,9 +227,7 @@
 <string name="label_start_outgoing_btn">Send</string>
 <string name="label_stop_outgoing_btn">Stop</string>
 <string name="label_incoming_sharing_aborted">Incoming sharing aborted</string>
-<string name="label_incoming_sharing_terminated_by_remote">Incoming sharing terminated by remote</string>
 <string name="label_outgoing_sharing_aborted">Outgoing sharing aborted</string>
-<string name="label_outgoing_sharing_terminated_by_remote">Outgoing sharing terminated by remote</string>
 <string name="label_switch_camera">Switch camera</string>
 <string name="label_video_duration">Duration: %s s</string>
 
@@ -269,7 +261,7 @@
 <string name="label_mm_session_failed">Session has failed (error code %d)</string>
 <string name="title_mm_session">Multimedia session</string>
 <string name="label_mm_session_has_expired">Session has expired</string>
-<string name="title_recv_mm_session">Multimedia session invitation</string>
+<string name="title_recv_mm_session">Session invitation from %s</string>
 <string name="label_session">Session %s</string>
 
 </resources>

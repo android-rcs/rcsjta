@@ -34,9 +34,9 @@ public class ImageSharing {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * Image has been transfered with success 
+    	 * Image has been transferred with success 
     	 */
-    	public final static int TRANSFERED = 4;
+    	public final static int TRANSFERRED = 4;
     	
     	/**
     	 * Sharing has been aborted 
@@ -82,24 +82,9 @@ public class ImageSharing {
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Sharing has been cancelled
-    	 */
-    	public final static int SHARING_CANCELLED = 2;
-    	
-    	/**
-    	 * Unsupported file type
-    	 */
-    	public final static int UNSUPPORTED_TYPE = 3;
-
-    	/**
     	 * Image saving has failed 
        	 */
-    	public final static int SAVING_FAILED = 4;
-
-        /**
-         * Image is too big
-         */
-        public final static int SIZE_TOO_BIG = 5;
+    	public final static int SAVING_FAILED = 2;
     	
         private Error() {
         }    	
@@ -148,7 +133,7 @@ public class ImageSharing {
 	}
 	
 	/**
-     * Returns the complete filename including the path of the file to be transfered
+     * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
 	 * @throws JoynServiceException

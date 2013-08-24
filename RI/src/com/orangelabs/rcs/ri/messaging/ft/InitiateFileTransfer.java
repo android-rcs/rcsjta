@@ -412,7 +412,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	}
 
     	// File transferred
-    	public void onFileTransfered(String filename) {
+    	public void onFileTransferred(String filename) {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -420,7 +420,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 
 					// Display transfer progress
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transfered");
+					statusView.setText("transferred");
 				}
 			});
     	}
@@ -429,8 +429,8 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     /**
      * Show the transfer progress
      * 
-     * @param currentSize Current size transfered
-     * @param totalSize Total size to be transfered
+     * @param currentSize Current size transferred
+     * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
     	TextView statusView = (TextView)findViewById(R.id.progress_status);

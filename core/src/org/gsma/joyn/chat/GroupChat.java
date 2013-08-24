@@ -59,22 +59,32 @@ public class GroupChat {
     	public final static int TERMINATED = 4;
     	
     	/**
-    	 * Chat has been terminated by user 
-    	 */
-    	public final static int TERMINATED_BY_USER = 5;
-
-    	/**
     	 * Chat has been aborted 
     	 */
-    	public final static int ABORTED = 6;
+    	public final static int ABORTED = 5;
     	
     	/**
     	 * Chat has failed 
     	 */
-    	public final static int FAILED = 7;
+    	public final static int FAILED = 6;
     	
         private State() {
         }    	
+    }
+    
+    /**
+     * Direction of the group chat
+     */
+    public static class Direction {
+        /**
+         * Incoming chat
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing chat
+         */
+        public static final int OUTGOING = 1;
     }
     
     /**
@@ -92,14 +102,9 @@ public class GroupChat {
     	public final static int INVITATION_DECLINED = 1;
 
     	/**
-    	 * Group chat has been cancelled
-    	 */
-    	public final static int CHAT_CANCELLED = 2;
-
-    	/**
     	 * Chat conversation not found
     	 */
-    	public final static int CHAT_NOT_FOUND = 3;
+    	public final static int CHAT_NOT_FOUND = 2;
     	    	
         private Error() {
         }    	
@@ -289,16 +294,6 @@ public class GroupChat {
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
-	}
-	
-	/**
-	 * Deletes particular chat messages
-	 * 
-	 * @param messageIds List of message IDs
-	 * @throws JoynServiceException
-	 */
-	public void deleteMessages(Set<String> messageIds) throws JoynServiceException {
-		// TODO
 	}
 	
 	/**

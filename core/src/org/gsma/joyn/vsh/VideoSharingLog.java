@@ -49,14 +49,14 @@ public class VideoSharingLog {
     public static final String CONTACT_NUMBER = "contact_number";
 
     /**
-     * The name of the column containing the direction of the sharing
+     * The name of the column containing the direction of the sharing.
      * <P>Type: INTEGER</P>
 	 * @see VideoSharing.Direction
      */
     public static final String DIRECTION = "direction";
 
     /**
-     * The name of the column containing the date of the sharing (in milliseconds)
+     * The name of the column containing the date of the sharing (in milliseconds).
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
@@ -68,7 +68,7 @@ public class VideoSharingLog {
     public static final String DURATION = "duration";    
 
     /**
-     * The name of the column containing the state of the sharing
+     * The name of the column containing the state of the sharing.
      * <P>Type: INTEGER</P>
 	 * @see VideoSharing.State
      */

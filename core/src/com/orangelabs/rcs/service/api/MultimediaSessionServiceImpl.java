@@ -21,7 +21,6 @@ package com.orangelabs.rcs.service.api;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import org.gsma.joyn.session.IMultimediaSession;
 import org.gsma.joyn.session.IMultimediaSessionListener;
@@ -34,7 +33,6 @@ import android.os.IBinder;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -72,6 +70,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	public void close() {
 		// Clear list of sessions
 		sipSessions.clear();
+		
+		if (logger.isActivated()) {
+			logger.info("Multimedia session service API is closed");
+		}
 	}
 	
 	/**
@@ -83,6 +85,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		if (logger.isActivated()) {
 			logger.debug("Add a multimedia session in the list (size=" + sipSessions.size() + ")");
 		}
+		
 		sipSessions.put(session.getSessionId(), session);
 	}
 
@@ -95,6 +98,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		if (logger.isActivated()) {
 			logger.debug("Remove a multimedia session from the list (size=" + sipSessions.size() + ")");
 		}
+		
 		sipSessions.remove(sessionId);
 	}	
 	
@@ -174,10 +178,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			logger.info("Get multimedia session " + sessionId);
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
-		// Return a session instance
 		return sipSessions.get(sessionId);
 	}
 
@@ -194,21 +194,12 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			logger.info("Get multimedia sessions for service " + serviceId);
 		}
 
-		// Test core availability
-		ServerApiUtils.testCore();
-		
 		try {
-			Vector<GenericSipSession> list = Core.getInstance().getSipService().getSipSessions();
-			ArrayList<IBinder> result = new ArrayList<IBinder>(list.size());
-			for(int i=0; i < list.size(); i++) {
-				GenericSipSession session = list.elementAt(i);
-				SipDialogPath dialog = session.getDialogPath();
-				if ((dialog != null) && (dialog.isSigEstablished()) && session.getFeatureTag().equals(serviceId)) {
-					// Returns only sessions which are established
-					IMultimediaSession sessionApi = sipSessions.get(session.getSessionID());
-					if (sessionApi != null) {
-						result.add(sessionApi.asBinder());
-					}
+			ArrayList<IBinder> result = new ArrayList<IBinder>();
+			for (IMultimediaSession sessionApi : sipSessions.values()) {
+				// Filter on the service ID
+				if (sessionApi.getServiceId().equals(serviceId)) {
+					result.add(sessionApi.asBinder());
 				}
 			}
 			return result;

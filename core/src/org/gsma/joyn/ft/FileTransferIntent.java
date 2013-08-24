@@ -15,9 +15,9 @@ public class FileTransferIntent {
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
-     * <li> {@link #EXTRA_FILENAME} containing the name of file to be transfered.
-     * <li> {@link #EXTRA_FILESIZE} containing the size of the file to be transfered.
-     * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the file to be transfered.
+     * <li> {@link #EXTRA_FILENAME} containing the name of file to be transferred.
+     * <li> {@link #EXTRA_FILESIZE} containing the size of the file to be transferred.
+     * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the file to be transferred.
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.ft.action.NEW_FILE_TRANSFER";

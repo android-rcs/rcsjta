@@ -19,7 +19,6 @@ package com.orangelabs.rcs.ri.messaging.ft;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Vector;
 
 import org.gsma.joyn.ft.FileTransfer;
 import org.gsma.joyn.ft.FileTransferLog;
@@ -28,10 +27,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -47,6 +48,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferList extends Activity {
+	
+	/**
+	 * List view
+	 */
+    private ListView listView;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,11 +66,10 @@ public class FileTransferList extends Activity {
         setTitle(R.string.menu_file_transfer_log);
 
         // Set list adapter
-        ListView view = (ListView)findViewById(android.R.id.list);
+        listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
-        view.setEmptyView(emptyView);
-        FtListAdapter adapter = createListAdapter();
-        view.setAdapter(adapter);		
+        listView.setEmptyView(emptyView);
+        listView.setAdapter(createListAdapter());
     }
     
 	/**
@@ -75,7 +81,7 @@ public class FileTransferList extends Activity {
     		FileTransferLog.ID,
     		FileTransferLog.CONTACT_NUMBER,
     		FileTransferLog.FILENAME,
-    		FileTransferLog.FILE_SIZE,
+    		FileTransferLog.FILESIZE,
     		FileTransferLog.STATE,
     		FileTransferLog.DIRECTION,
     		FileTransferLog.TIMESTAMP
@@ -86,26 +92,7 @@ public class FileTransferList extends Activity {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
 		}
-			
-		Vector<String> items = new Vector<String>();
-		MatrixCursor matrix = new MatrixCursor(projection);
-		while (cursor.moveToNext()) {
-    		String id = cursor.getString(0);
-			if (!items.contains(id)) {
-				matrix.addRow(new Object[]{
-						cursor.getInt(0), 
-						cursor.getString(1), 
-						cursor.getString(2), 
-						cursor.getLong(3),
-						cursor.getInt(4),
-						cursor.getInt(5),
-						cursor.getLong(6)});
-				items.add(id);
-			}
-		}
-		cursor.close();
-
-		return new FtListAdapter(this, matrix);
+		return new FtListAdapter(this, cursor);
 	}
 	
     /**
@@ -191,7 +178,7 @@ public class FileTransferList extends Activity {
 		if (state == FileTransfer.State.STARTED) {
 			return getString(R.string.label_state_started);
 		} else
-		if (state == FileTransfer.State.TRANSFERED) {
+		if (state == FileTransfer.State.TRANSFERRED) {
 			return getString(R.string.label_state_transferred);
 		} else {
 			return getString(R.string.label_state_unknown);
@@ -221,4 +208,26 @@ public class FileTransferList extends Activity {
 	private String decodeDate(long date) {
 		return DateFormat.getInstance().format(new Date(date));
 	}
+	
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater=new MenuInflater(getApplicationContext());
+		inflater.inflate(R.menu.menu_log, menu);
+
+		return true;
+	}
+    
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_clear_log:
+				// Delete all
+				getContentResolver().delete(FileTransferLog.CONTENT_URI, null, null);
+				
+				// Refresh view
+		        listView.setAdapter(createListAdapter());		
+				break;
+		}
+		return true;
+	}	
 }

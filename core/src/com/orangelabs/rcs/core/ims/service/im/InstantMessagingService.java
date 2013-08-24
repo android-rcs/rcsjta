@@ -22,6 +22,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.gsma.joyn.chat.ChatLog;
+
 import javax2.sip.header.ContactHeader;
 
 import com.orangelabs.rcs.core.Core;
@@ -381,8 +383,6 @@ public class InstantMessagingService extends ImsService {
 	        	PhoneUtils.formatNumberToSipUri(contact),
 	        	firstMsg);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 
@@ -439,7 +439,8 @@ public class InstantMessagingService extends ImsService {
 			// Save the message
 			InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 			if (firstMsg != null) {
-				RichMessaging.getInstance().addIncomingChatMessage(firstMsg, ChatUtils.getContributionId(invite));
+				RichMessaging.getInstance().addChatMessage(ChatUtils.getContributionId(invite),
+						firstMsg, ChatLog.Message.Direction.INCOMING);
 			}
 			
 			// Send a 486 Busy response
@@ -565,7 +566,7 @@ public class InstantMessagingService extends ImsService {
 			}
 			throw new CoreException("Rejoin ID not found in database");
 		}
-		List<String> participants = groupChat.getParticipants(); // Added by Deutsche Telekom AG
+		List<String> participants = groupChat.getParticipants();
 		if (participants.size() == 0) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be rejoined: participants not found");
@@ -635,10 +636,10 @@ public class InstantMessagingService extends ImsService {
 			}
 			throw new CoreException("Group chat participants not found in database");
 		}
-
+		
 		// Create a new session
 		if (logger.isActivated()) {
-			logger.debug("Restart group chat: " + groupChat.toString());
+			logger.debug("Restart group chat " + groupChat.getContributionId());
 		}
 		RestartGroupChatSession session = new RestartGroupChatSession(
 				this,

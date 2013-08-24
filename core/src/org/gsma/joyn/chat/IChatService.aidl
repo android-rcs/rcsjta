@@ -13,7 +13,7 @@ import org.gsma.joyn.chat.ChatServiceConfiguration;
 interface IChatService {
     ChatServiceConfiguration getConfiguration();
     
-    IChat initiateSingleChat(in String contact, in String firstMessage, in IChatListener listener);
+    IChat openSingleChat(in String contact, in IChatListener listener);
 
     IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
     
@@ -21,15 +21,13 @@ interface IChatService {
     
     IGroupChat restartGroupChat(in String chatId);
     
-    void deleteChat(in String chatId);
+    void addNewChatListener(in INewChatListener listener);
     
-    void addEventListener(in INewChatListener listener);
-    
-    void removeEventListener(in INewChatListener listener);
+    void removeNewChatListener(in INewChatListener listener);
     
     List<IBinder> getChats();
     
-    IChat getChat(in String chatId);
+    IChat getChat(in String contact);
 
     List<IBinder> getGroupChats();
     

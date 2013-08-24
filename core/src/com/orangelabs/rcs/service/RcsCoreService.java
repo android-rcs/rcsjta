@@ -100,37 +100,37 @@ public class RcsCoreService extends Service implements CoreListener {
 	/**
 	 * Contacts API
 	 */
-    private ContactsServiceImpl contactsApi = new ContactsServiceImpl(); 
+    private ContactsServiceImpl contactsApi = null; 
 
     /**
 	 * Capability API
 	 */
-    private CapabilityServiceImpl capabilityApi = new CapabilityServiceImpl(); 
+    private CapabilityServiceImpl capabilityApi = null; 
 
 	/**
 	 * Chat API
 	 */
-    private ChatServiceImpl chatApi = new ChatServiceImpl(); 
+    private ChatServiceImpl chatApi = null; 
 
 	/**
 	 * File transfer API
 	 */
-    private FileTransferServiceImpl ftApi = new FileTransferServiceImpl(); 
+    private FileTransferServiceImpl ftApi = null; 
 
     /**
 	 * Video sharing API
 	 */
-    private VideoSharingServiceImpl vshApi = new VideoSharingServiceImpl(); 
+    private VideoSharingServiceImpl vshApi = null; 
 
     /**
 	 * Image sharing API
 	 */
-    private ImageSharingServiceImpl ishApi = new ImageSharingServiceImpl(); 
+    private ImageSharingServiceImpl ishApi = null; 
 
 	/**
 	 * Multimedia session API
 	 */
-	private MultimediaSessionServiceImpl sessionApi = new MultimediaSessionServiceImpl(); 
+	private MultimediaSessionServiceImpl sessionApi = null; 
 		
 	/**
 	 * The logger
@@ -160,14 +160,6 @@ public class RcsCoreService extends Service implements CoreListener {
 	        }
 	    }
 
-    	// Close APIs
-	    contactsApi.close();
-		capabilityApi.close();
-		ftApi.close();
-		chatApi.close();
-		ishApi.close();
-    	vshApi.close();
-
         // Stop the core
         Thread t = new Thread() {
             /**
@@ -196,6 +188,15 @@ public class RcsCoreService extends Service implements CoreListener {
     		
 			// Instantiate the settings manager
             RcsSettings.createInstance(getApplicationContext());
+            
+        	// Instanciate API
+            contactsApi = new ContactsServiceImpl(); 
+            capabilityApi = new CapabilityServiceImpl(); 
+            chatApi = new ChatServiceImpl(); 
+            ftApi = new FileTransferServiceImpl(); 
+            vshApi = new VideoSharingServiceImpl(); 
+            ishApi = new ImageSharingServiceImpl(); 
+        	sessionApi = new MultimediaSessionServiceImpl();             
             
             // Set the logger properties
     		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
@@ -279,7 +280,15 @@ public class RcsCoreService extends Service implements CoreListener {
 			logger.debug("Stop RCS core service");
 		}
 
-		// Terminate the core in background
+    	// Close APIs
+	    contactsApi.close();
+		capabilityApi.close();
+		ftApi.close();
+		chatApi.close();
+		ishApi.close();
+    	vshApi.close();
+
+    	// Terminate the core in background
 		Core.terminateCore();
 
 		// Close CPU manager
@@ -672,8 +681,7 @@ public class RcsCoreService extends Service implements CoreListener {
 			logger.debug("Handle event user terms confirmation request");
 		}
 
-		// Notify listeners
-        // TODO termsApi.receiveTermsRequest(remote, id, type, pin, subject, text, acceptButtonLabel, rejectButtonLabel, timeout);
+		// Nothing to do here
     }
 
     /**
@@ -690,8 +698,7 @@ public class RcsCoreService extends Service implements CoreListener {
 			logger.debug("Handle event user terms confirmation ack");
 		}
 
-		// Notify listeners
-		// TODO termsApi.receiveTermsAck(remote, id, status, subject, text);
+		// Nothing to do here
     }
 
     /**
@@ -708,8 +715,7 @@ public class RcsCoreService extends Service implements CoreListener {
             logger.debug("Handle event user terms notification");
         }
 
-        // Notify listeners
-        // TODO termsApi.receiveUserNotification(remote, id, subject, text, okButtonLabel);
+		// Nothing to do here
     }
 
     /**

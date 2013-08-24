@@ -323,6 +323,11 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
      */
     public void handleSessionError(SipSessionError error) {
     	synchronized(lock) {
+			if (error.getErrorCode() == SipSessionError.SESSION_INITIATION_CANCELLED) {
+				// Do nothing here, this is an aborted event
+				return;
+			}
+
 			if (logger.isActivated()) {
 				logger.info("Session error " + error.getErrorCode());
 			}
@@ -333,9 +338,6 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	            try {
 	            	int code;
 	            	switch(error.getErrorCode()) {
-            			case SipSessionError.SESSION_INITIATION_CANCELLED:
-	            			code = MultimediaSession.Error.SESSION_CANCELLED;
-	            			break;
             			case SipSessionError.SESSION_INITIATION_DECLINED:
 	            			code = MultimediaSession.Error.INVITATION_DECLINED;
 	            			break;

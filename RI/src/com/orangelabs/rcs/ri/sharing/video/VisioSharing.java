@@ -501,7 +501,6 @@ if (getIntent().getBooleanExtra("incoming", false)) {
     private OnClickListener acceptBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
             pendingIncomingNotification = false;
-            VideoSharingInvitationReceiver.removeVideoSharingNotification(getApplicationContext(), incomingSessionId);
             acceptIncomingSession();
         }
     };
@@ -512,7 +511,6 @@ if (getIntent().getBooleanExtra("incoming", false)) {
     private OnClickListener declineBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
             pendingIncomingNotification = false;
-            VideoSharingInvitationReceiver.removeVideoSharingNotification(getApplicationContext(), incomingSessionId);
             declineIncomingSession();
         }
     };
@@ -913,8 +911,6 @@ if (getIntent().getBooleanExtra("incoming", false)) {
         if (lastIncomingSessionId != incomingSessionId) {
             handler.post(receiveIncomingSessionRunnable);
         }
-        // Remove notification
-        VideoSharingInvitationReceiver.removeVideoSharingNotification(getApplicationContext(), incomingSessionId);
     }
 
     /**
@@ -959,7 +955,7 @@ if (getIntent().getBooleanExtra("incoming", false)) {
         // User alert
         pendingIncomingNotification = true;
         incomingAlert = new AlertDialog.Builder(this)
-                .setTitle(R.string.title_recv_video_sharing)
+                .setTitle(R.string.title_video_sharing)
                 .setMessage(getString(R.string.label_from) + " " + remoteContact)
                 .setCancelable(false)
                 .setIcon(R.drawable.ri_notif_csh_icon)
@@ -1300,7 +1296,7 @@ if (getIntent().getBooleanExtra("incoming", false)) {
                 }
             });
         }
-
+    	
         // Sharing error
         public void onSharingError(final int error) {
             handler.post(new Runnable() {

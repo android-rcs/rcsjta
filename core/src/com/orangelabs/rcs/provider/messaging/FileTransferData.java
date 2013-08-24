@@ -53,12 +53,12 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_SIZE = FileTransferLog.TRANSFERED_SIZE;
+	static final String KEY_SIZE = FileTransferLog.TRANSFERRED;
 	
 	/**
 	 * Column name
 	 */
-	static final String KEY_TOTAL_SIZE = FileTransferLog.FILE_SIZE;	
+	static final String KEY_TOTAL_SIZE = FileTransferLog.FILESIZE;	
 
 	/**
 	 * Column name

@@ -55,38 +55,38 @@ public class FileTransferLog {
     public static final String FILENAME = "filename";
 
     /**
+     * The name of the column containing the file size to be transferred (in bytes).
+     * <P>Type: LONG</P>
+     */
+    public static final String FILESIZE = "filesize";
+
+    /**
      * The name of the column containing the MIME-type of the file.
      * <P>Type: TEXT</P>
      */
     public static final String MIME_TYPE = "mime_type";
     
     /**
-     * The name of the column containing the direction of the transfer
+     * The name of the column containing the direction of the transfer.
      * <P>Type: INTEGER</P>
 	 * @see FileTransfer.Direction
      */
     public static final String DIRECTION = "direction";
 
     /**
-     * The name of the column containing the file size to be transfered (in bytes)
+     * The name of the column containing the amount of data transferred (in bytes).
      * <P>Type: LONG</P>
      */
-    public static final String FILE_SIZE = "size";
-    
-    /**
-     * The name of the column containing the current transfered size (in bytes)
-     * <P>Type: LONG</P>
-     */
-    public static final String TRANSFERED_SIZE = "size_transfered";
+    public static final String TRANSFERRED = "transferred";
 
     /**
-     * The name of the column containing the date of the transfer
+     * The name of the column containing the date of the transfer.
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the state of the transfer
+     * The name of the column containing the state of the transfer.
      * <P>Type: INTEGER</P>
 	 * @see FileTransfer.State
      */

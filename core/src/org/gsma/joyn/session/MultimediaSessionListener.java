@@ -17,7 +17,7 @@ public abstract class MultimediaSessionListener extends IMultimediaSessionListen
 	public abstract void onSessionStarted();
 	
 	/**
-	 * Callback called when the session has been aborted
+	 * Callback called when the session has been aborted or terminated
 	 */
 	public abstract void onSessionAborted();
 	
