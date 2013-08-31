@@ -99,7 +99,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-		// TODO
+		// Nothing done in database
 
 		// Add session in the list
 		ChatImpl sessionApi = new ChatImpl(number, session);
@@ -174,11 +174,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 					if (coreSession.getDialogPath().isSessionTerminated() || coreSession.getDialogPath().isSessionCancelled()) {
 						if (logger.isActivated()) {
-							logger.debug("Core chat session is termianted: reset it");
+							logger.debug("Core chat session is terminated: reset it");
 						}
 						
 						// Session has expired, remove it
-						sessionApi.setCoreSession(null);
+						sessionApi.resetCoreSession();
 					} else
 					if (!coreSession.getDialogPath().isSessionEstablished()) {
 						if (logger.isActivated()) {

@@ -90,7 +90,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	}
 	
 	/**
-     * Returns the complete filename including the path of the file to be transfered
+     * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
      */
@@ -202,7 +202,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		}
 		
 		if (session.isFileTransfered()) {
-			// File already transfered and session automatically closed after transfer
+			// File already transferred and session automatically closed after transfer
 			return;
 		}
 
@@ -392,8 +392,8 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     /**
 	 * File transfer progress
 	 * 
-	 * @param currentSize Data size transfered 
-	 * @param totalSize Total size to be transfered
+	 * @param currentSize Data size transferred 
+	 * @param totalSize Total size to be transferred
 	 */
     public void handleTransferProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
@@ -427,7 +427,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     public void handleFileTransfered(String filename) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("Content transfered");
+				logger.info("Content transferred");
 			}
 	
 			// Update rich messaging history

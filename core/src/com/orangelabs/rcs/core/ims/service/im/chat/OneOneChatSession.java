@@ -117,8 +117,7 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
-		RichMessaging.getInstance().addChatMessage(getContributionID(),
-				msg, ChatLog.Message.Direction.OUTGOING);
+		RichMessaging.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 
 		// Send content
 		boolean result = sendDataChunks(msgId, content, mime);
@@ -157,8 +156,7 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessaging.getInstance().addChatMessage(getContributionID(), geolocMsg,
-				ChatLog.Message.Direction.OUTGOING);
+		RichMessaging.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Send content
 		boolean result = sendDataChunks(msgId, content, mime);

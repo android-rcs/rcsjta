@@ -17,9 +17,6 @@
  ******************************************************************************/
 package org.gsma.joyn.chat;
 
-import java.util.ArrayList;
-import java.util.Set;
-
 import org.gsma.joyn.JoynServiceException;
 
 /**
@@ -42,20 +39,6 @@ public class Chat {
     	this.chatInf = chatIntf;
     }
 
-    /**
-     * Returns the chat ID
-     * 
-     * @return Chat ID
-	 * @throws JoynServiceException
-     */
-    public String getChatId() throws JoynServiceException {
-		try {
-			return chatInf.getChatId();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-    }
-	
     /**
      * Returns the remote contact
      * 
@@ -113,20 +96,6 @@ public class Chat {
     public void sendIsComposingEvent(boolean status) throws JoynServiceException {
 		try {
 			chatInf.sendIsComposingEvent(status);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}    	
-    }
-	
-    /**
-     * Extends to group by adding new participants to the current chat
-     * 
-     * @param participants List of participants
-	 * @throws JoynServiceException
-     */
-    public void extendToGroup(Set<String> participants) throws JoynServiceException {
-		try {
-			chatInf.extendToGroup(new ArrayList<String>(participants));
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}    	

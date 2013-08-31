@@ -15,6 +15,4 @@ interface IChatListener {
 	void onReportMessageFailed(in String msgId);
 
 	void onComposingEvent(in boolean status);
-
-	void onChatExtendedToGroup(in String contact, in String groupChatId);
 }

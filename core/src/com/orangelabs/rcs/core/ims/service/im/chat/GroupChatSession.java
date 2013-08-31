@@ -191,7 +191,7 @@ public abstract class GroupChatSession extends ChatSession {
 		
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, false);
-		RichMessaging.getInstance().addChatMessage(getContributionID(), msg,
+		RichMessaging.getInstance().addGroupChatMessage(getContributionID(), msg,
 				ChatLog.Message.Direction.OUTGOING);
 
 		// Send data
@@ -222,7 +222,7 @@ public abstract class GroupChatSession extends ChatSession {
 		
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, false);
-		RichMessaging.getInstance().addChatMessage(getContributionID(),
+		RichMessaging.getInstance().addGroupChatMessage(getContributionID(),
 				geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Send data

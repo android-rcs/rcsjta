@@ -14,7 +14,7 @@ public class GroupChatIntent {
      *  sending the invitation.
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
-     * <li> {@link #EXTRA_CHAT_ID} containing the MIME type of the file to be transferred.
+     * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
      * <li> {@link #EXTRA_SUBJECT} containing the subject associated to the conversation.
      * </ul>
      */

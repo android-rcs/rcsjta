@@ -111,9 +111,32 @@ public class RichMessaging {
         this.cr = ctx.getContentResolver();
         this.maxLogEntries = RcsSettings.getInstance().getMaxChatLogEntriesPerContact();
 	}
-	
-	/*--------------------- Chat methods -----------------------*/
-	
+
+	/*--------------------- Group chat methods -----------------------*/
+
+	/**
+	 * Add group chat session
+	 * 
+	 * @param chatId Chat ID
+	 * @param subject Subject
+	 * @param participants List of participants
+	 * @param status Status
+	 * @param direction Direction
+	 */
+	public void addGroupChat(String chatId, String subject, List<String> participants, int status, int direction) {
+		if (logger.isActivated()){
+			logger.debug("Add group chat entry: chatID=" + chatId);
+		}
+		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_CHAT_ID, chatId);
+		values.put(ChatData.KEY_STATUS, status);
+		values.put(ChatData.KEY_SUBJECT, subject);
+		values.put(ChatData.KEY_PARTICIPANTS, RichMessaging.getParticipants(participants));
+		values.put(ChatData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+		cr.insert(chatDatabaseUri, values);
+	}
+
 	/**
 	 * Get list of participants into a string
 	 * 
@@ -149,131 +172,6 @@ public class RichMessaging {
 		return result;
 	}
 
-	/**
-	 * Add a spam message
-	 * 
-	 * @param msg Chat message
-	 */
-	public void addSpamMessage(InstantMessage msg) {
-		// TODO
-	}
-	
-	/**
-	 * Add a chat message
-	 * 
-	 * @param chatId Chat ID
-	 * @param msg Chat message
-	 * @param type Chat type
-	 * @param direction Direction
-	 */
-	public void addChatMessage(String chatId, InstantMessage msg, int direction) {
-		if (logger.isActivated()){
-			logger.debug("Add chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
-		}
-		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_CHAT_ID, chatId);
-		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
-		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
-		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
-		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
-		
-		if (direction == ChatLog.Message.Direction.INCOMING) {
-			if (msg.isImdnDisplayedRequested()) {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
-			} else {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
-			}
-		} else {
-			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
-		}
-		cr.insert(msgDatabaseUri, values);
-	}
-	
-	/**
-	 * Add chat system message
-	 * 
-	 * @param chatId Chat ID
-	 * @param contact Contact
-	 * @param status Status
-	 */
-	public void addChatSystemMessage(String chatId, String contact, int status) {
-		if (logger.isActivated()){
-			logger.debug("Add chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
-		}
-		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_CHAT_ID, chatId);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
-		values.put(MessageData.KEY_STATUS, status);
-		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.IRRELEVANT);
-		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		cr.insert(msgDatabaseUri, values);
-	}
-
-	/**
-	 * Update chat message status
-	 * 
-	 * @param msgId Message ID
-	 * @param status Message status
-	 */
-	public void updateChatMessageStatus(String msgId, int status) {
-		if (logger.isActivated()) {
-			logger.debug("Update chat message: msgID=" + msgId + ", status=" + status);
-		}
-		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_STATUS, status);
-		cr.update(msgDatabaseUri, 
-				values, 
-				MessageData.KEY_MSG_ID + " = '" + msgId + "'", 
-				null);
-	}
-	
-	/**
-	 * Update chat message delivery status
-	 * 
-	 * @param msgId Message ID
-	 * @param status Delivery status
-	 */
-	public void updateChatMessageDeliveryStatus(String msgId, String status) {
-		if (logger.isActivated()) {
-			logger.debug("Update chat delivery status: msgID=" + msgId + ", status=" + status);
-		}
-    	if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.UNREAD);
-    	} else
-    	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.READ);
-    	} else 
-    	if (status.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
-    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
-    	}
-	}
-
-	/**
-	 * Add chat session
-	 * 
-	 * @param chatId Chat ID
-	 * @param subject Subject
-	 * @param participants List of participants
-	 * @param status Status
-	 * @param direction Direction
-	 */
-	public void addGroupChat(String chatId, String subject, List<String> participants, int status, int direction) {
-		if (logger.isActivated()){
-			logger.debug("Add group chat entry: chatID=" + chatId);
-		}
-		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_CHAT_ID, chatId);
-		values.put(ChatData.KEY_STATUS, status);
-		values.put(ChatData.KEY_SUBJECT, subject);
-		values.put(ChatData.KEY_PARTICIPANTS, RichMessaging.getParticipants(participants));
-		values.put(ChatData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		cr.insert(chatDatabaseUri, values);
-	}
-	
 	/**
 	 * Update group chat status
 	 * 
@@ -374,6 +272,142 @@ public class RichMessaging {
     	}
     	cursor.close();
     	return result;
+	}
+
+	/*--------------------- Chat messages methods -----------------------*/
+
+	/**
+	 * Add a spam message
+	 * 
+	 * @param msg Chat message
+	 */
+	public void addSpamMessage(InstantMessage msg) {
+		// TODO
+	}
+	
+	/**
+	 * Add a chat message
+	 * 
+	 * @param msg Chat message
+	 * @param direction Direction
+	 */
+	public void addChatMessage(InstantMessage msg, int direction) {
+		String contact = PhoneUtils.extractNumberFromUri(msg.getRemote());
+		if (logger.isActivated()){
+			logger.debug("Add chat message: contact=" + contact + ", msg=" + msg.getMessageId());
+		}
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, contact);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
+		values.put(MessageData.KEY_CONTACT, contact);
+		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
+		values.put(MessageData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		
+		if (direction == ChatLog.Message.Direction.INCOMING) {
+			if (msg.isImdnDisplayedRequested()) {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
+			} else {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
+			}
+		} else {
+			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		}
+		cr.insert(msgDatabaseUri, values);
+	}
+	
+	/**
+	 * Add a group chat message
+	 * 
+	 * @param chatId Chat ID
+	 * @param msg Chat message
+	 * @param direction Direction
+	 */
+	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction) {
+		if (logger.isActivated()){
+			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
+		}
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
+		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
+		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
+		values.put(MessageData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		
+		if (direction == ChatLog.Message.Direction.INCOMING) {
+			if (msg.isImdnDisplayedRequested()) {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
+			} else {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
+			}
+		} else {
+			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		}
+		cr.insert(msgDatabaseUri, values);
+	}
+
+	/**
+	 * Add group chat system message
+	 * 
+	 * @param chatId Chat ID
+	 * @param contact Contact
+	 * @param status Status
+	 */
+	public void addGroupChatSystemMessage(String chatId, String contact, int status) {
+		if (logger.isActivated()){
+			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
+		}
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
+		values.put(MessageData.KEY_STATUS, status);
+		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.IRRELEVANT);
+		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+		cr.insert(msgDatabaseUri, values);
+	}
+
+	/**
+	 * Update chat message status
+	 * 
+	 * @param msgId Message ID
+	 * @param status Message status
+	 */
+	public void updateChatMessageStatus(String msgId, int status) {
+		if (logger.isActivated()) {
+			logger.debug("Update chat message: msgID=" + msgId + ", status=" + status);
+		}
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_STATUS, status);
+		cr.update(msgDatabaseUri, 
+				values, 
+				MessageData.KEY_MSG_ID + " = '" + msgId + "'", 
+				null);
+	}
+	
+	/**
+	 * Update chat message delivery status
+	 * 
+	 * @param msgId Message ID
+	 * @param status Delivery status
+	 */
+	public void updateChatMessageDeliveryStatus(String msgId, String status) {
+		if (logger.isActivated()) {
+			logger.debug("Update chat delivery status: msgID=" + msgId + ", status=" + status);
+		}
+    	if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.UNREAD);
+    	} else
+    	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.READ);
+    	} else 
+    	if (status.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
+    		RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+    	}
 	}
     
     /*--------------------- File transfer methods ----------------------*/

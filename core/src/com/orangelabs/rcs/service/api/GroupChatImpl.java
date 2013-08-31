@@ -382,7 +382,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			
 			// Update rich messaging history
-			RichMessaging.getInstance().addChatMessage(session.getContributionID(),
+			RichMessaging.getInstance().addGroupChatMessage(session.getContributionID(),
 					message, ChatLog.Message.Direction.INCOMING);
 			
 	  		// Notify event listeners
@@ -510,21 +510,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            try {
 	            	if (state.equals(User.STATE_CONNECTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
+	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantJoined(contact, contactDisplayname);
 	            	} else
 	            	if (state.equals(User.STATE_DISCONNECTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
+	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contact);
 	            	} else
 	            	if (state.equals(User.STATE_DEPARTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
+	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantLeft(contact);

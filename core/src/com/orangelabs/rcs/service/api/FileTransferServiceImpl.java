@@ -179,7 +179,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     
     /**
      * Transfers a file to a contact. The parameter file contains the complete filename
-     * including the path to be transfered. The parameter contact supports the following
+     * including the path to be transferred. The parameter contact supports the following
      * formats: MSISDN in national or international format, SIP address, SIP-URI or
      * Tel-URI. If the format of the contact is not supported an exception is thrown.
      * 

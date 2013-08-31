@@ -58,13 +58,4 @@ public abstract class ChatListener extends IChatListener.Stub {
 	 * @param status Is-composing status
 	 */
 	public abstract void onComposingEvent(boolean status);
-
-	/**
-	 * Callback called when a 1-1 conversation with a given contact has been
-	 * extended to a group chat identified by its chat ID.
-	 * 
-	 * @param contact Contact
-	 * @param groupChatId Group chat ID
-	 */
-	public abstract void onChatExtendedToGroup(String contact, String groupChatId);
 }

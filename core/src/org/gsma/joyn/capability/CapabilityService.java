@@ -43,6 +43,8 @@ import android.os.IBinder;
  * MSISDN in national or international format, SIP address, SIP-URI
  * or Tel-URI.
  * 
+ * Note: only IARI tags are supported for capabilities extensions.
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class CapabilityService extends JoynService {

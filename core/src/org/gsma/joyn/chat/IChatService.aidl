@@ -25,9 +25,9 @@ interface IChatService {
     
     void removeNewChatListener(in INewChatListener listener);
     
-    List<IBinder> getChats();
-    
     IChat getChat(in String contact);
+
+    List<IBinder> getChats();
 
     List<IBinder> getGroupChats();
     

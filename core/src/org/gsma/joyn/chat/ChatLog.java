@@ -254,47 +254,42 @@ public class ChatLog {
 		        /**
 		         * Invitation of a participant is pending
 		         */
-		        public static final int INVITED = 0;
-		        
-		        /**
-		         * Invitation is pending
-		         */
-		        public static final int PENDING = 1;
+		        public static final int PENDING = 0;
 
 		        /**
 		         * Invitation accepted by a participant
 		         */
-		        public static final int ACCEPTED = 2;
+		        public static final int ACCEPTED = 1;
 	        
 		        /**
 		         * Invitation declined by a participant
 		         */
-		        public static final int DECLINED = 3;
+		        public static final int DECLINED = 2;
 	        
 		        /**
 		         * Invitation of a participant has failed
 		         */
-		        public static final int FAILED = 4;
+		        public static final int FAILED = 3;
 	        
 		        /**
 		         * Participant has joined the group chat
 		         */
-		        public static final int JOINED = 5;
+		        public static final int JOINED = 4;
 	        
 		        /**
 		         * Participant has left the group chat (i.e. departed)
 		         */
-		        public static final int GONE = 6;
+		        public static final int GONE = 5;
 
 		        /**
 		         * Participant has been disconnected from the group chat (i.e. booted)
 		         */
-		        public static final int DISCONNECTED = 7;
+		        public static final int DISCONNECTED = 6;
 		        
 		        /**
 		         * Participant is busy
 		         */
-		        public static final int BUSY = 8;
+		        public static final int BUSY = 7;
             }
         }
     }

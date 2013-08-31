@@ -1,7 +1,5 @@
 package com.orangelabs.rcs.service.api;
 
-import java.util.List;
-
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.IChat;
@@ -87,6 +85,13 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}	
 	
 	/**
+	 * Reset core session
+	 */
+	public void resetCoreSession() {
+		this.session = null;
+	}	
+
+	/**
 	 * Get core session
 	 * 
 	 * @return Core session
@@ -94,15 +99,6 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	public OneOneChatSession getCoreSession() {
 		return session;
 	}
-	
-    /**
-     * Returns the chat ID
-     * 
-     * @return Chat ID
-     */
-    public String getChatId() {
-		return session.getContributionID();
-    }
 	
     /**
      * Returns the remote contact
@@ -138,8 +134,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				setCoreSession(session);
 		
 				// Update rich messaging history
-				RichMessaging.getInstance().addChatMessage(session.getContributionID(),
-						session.getFirstMessage(), ChatLog.Message.Direction.OUTGOING);
+				RichMessaging.getInstance().addChatMessage(session.getFirstMessage(),
+						ChatLog.Message.Direction.OUTGOING);
 
 				// Start the session
 				session.startSession();
@@ -225,15 +221,6 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     		listeners.unregister(listener);
     	}
     }
-	
-    /**
-     * Extends to group by adding new participants to the current chat
-     * 
-     * @param participants List of participants
-     */
-    public void extendToGroup(List<String> participants) {
-    	// TODO
-    }
     
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
@@ -247,7 +234,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 
 			// Update rich messaging history
-	    	// TODO
+	    	// Nothing done in database
 	    }
     }
     
@@ -263,10 +250,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-	    	// TODO
+	    	// Nothing done in database
 	        
 	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(getChatId());
+	        ChatServiceImpl.removeChatSession(session.getContributionID());
 	    }
     }
     
@@ -280,10 +267,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-	    	// TODO
+	    	// Nothing done in database
 			
 	        // Remove session from the list
-			ChatServiceImpl.removeChatSession(getChatId());
+			ChatServiceImpl.removeChatSession(session.getContributionID());
 	    }
     }
     
@@ -299,8 +286,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 			
 			// Update rich messaging history
-			RichMessaging.getInstance().addChatMessage(session.getContributionID(),
-					message, ChatLog.Message.Direction.INCOMING);
+			RichMessaging.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -345,7 +331,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    	}
 	    	
 	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(getChatId());
+	        ChatServiceImpl.removeChatSession(session.getContributionID());
 	    }
     }
     
@@ -429,24 +415,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * Request to add participant is successful
      */
     public void handleAddParticipantSuccessful() {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add participant request is successful");
-			}
-	
-	  		// Notify event listeners
-/*			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).handleAddParticipantSuccessful();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();*/ // TODO
-	    }
+    	// Not used in single chat
     }
     
     /**
@@ -455,24 +424,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @param reason Error reason
      */
     public void handleAddParticipantFailed(String reason) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add participant request has failed " + reason);
-			}
-	
-	  		// Notify event listeners
-/*			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).handleAddParticipantFailed(reason);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();*/ // TODO
-	    }  
+    	// Not used in single chat
     }
 
     /**

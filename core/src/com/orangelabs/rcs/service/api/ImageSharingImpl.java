@@ -73,7 +73,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	}
 	
 	/**
-     * Returns the complete filename including the path of the file to be transfered
+     * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
      */
@@ -374,8 +374,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     /**
      * Content sharing progress
      *
-     * @param currentSize Data size transfered
-     * @param totalSize Total size to be transfered
+     * @param currentSize Data size transferred
+     * @param totalSize Total size to be transferred
      */
     public void handleSharingProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
@@ -402,14 +402,14 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
     
     /**
-     * Content has been transfered
+     * Content has been transferred
      *
      * @param filename Filename associated to the received content
      */
     public void handleContentTransfered(String filename) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("Image transfered");
+				logger.info("Image transferred");
 			}
 	
 			// Update rich call history

@@ -439,8 +439,7 @@ public class InstantMessagingService extends ImsService {
 			// Save the message
 			InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 			if (firstMsg != null) {
-				RichMessaging.getInstance().addChatMessage(ChatUtils.getContributionId(invite),
-						firstMsg, ChatLog.Message.Direction.INCOMING);
+				RichMessaging.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
 			}
 			
 			// Send a 486 Busy response

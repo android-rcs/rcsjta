@@ -37,7 +37,7 @@ public class JoynContact implements Parcelable {
 	/**
 	 * Contact ID
 	 */
-	private String contact = null;
+	private String contactId = null;
 	
 	/**
 	 * Registration state
@@ -52,7 +52,7 @@ public class JoynContact implements Parcelable {
 	 * @param capabilities Capabilities 
 	 */
 	public JoynContact(String contact, boolean registered, Capabilities capabilities) {
-		this.contact = contact;
+		this.contactId = contact;
 		this.registered = registered;
 		this.capabilities = capabilities;
 	}
@@ -63,7 +63,7 @@ public class JoynContact implements Parcelable {
 	 * @param source Parcelable source
 	 */
 	public JoynContact(Parcel source) {
-		contact = source.readString();
+		contactId = source.readString();
 		registered = source.readInt() != 0;
 		boolean flag = source.readInt() != 0;
 		if (flag) {
@@ -90,7 +90,7 @@ public class JoynContact implements Parcelable {
 	 * @param flags Additional flags about how the object should be written
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(contact);
+    	dest.writeString(contactId);
     	dest.writeInt(registered ? 1 : 0);
     	if (capabilities != null) {
         	dest.writeInt(1);
@@ -117,10 +117,10 @@ public class JoynContact implements Parcelable {
 	/**
 	 * Returns the canonical contact ID (i.e. MSISDN)
 	 * 
-	 * @return contact
+	 * @return Contact ID
 	 */
-	public String getContact(){
-		return contact;
+	public String getContactId() {
+		return contactId;
 	}
 	
 	/**
