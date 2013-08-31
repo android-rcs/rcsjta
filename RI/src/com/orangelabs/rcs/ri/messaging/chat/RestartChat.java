@@ -208,7 +208,11 @@ public class RestartChat {
 					hideProgressDialog();
 
 					// Display error
-					Utils.showMessage(activity, activity.getString(R.string.label_restart_chat_failed, error));
+					if (error == GroupChat.Error.INVITATION_DECLINED) {
+						Utils.showMessageAndExit(activity, activity.getString(R.string.label_chat_declined));
+					} else {
+						Utils.showMessage(activity, activity.getString(R.string.label_restart_chat_failed, error));
+					}					
 				}
 			});
     	}

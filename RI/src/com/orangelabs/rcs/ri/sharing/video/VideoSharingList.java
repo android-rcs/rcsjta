@@ -51,8 +51,15 @@ public class VideoSharingList extends Activity {
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
-        listView.setAdapter(createListAdapter());
     }
+    
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// Refresh view
+		listView.setAdapter(createListAdapter());
+	}    
     
 	/**
 	 * Create list adapter
@@ -97,10 +104,10 @@ public class VideoSharingList extends Activity {
             
             VideoSharingItemCache cache = new VideoSharingItemCache();
     		cache.number = cursor.getString(1);
-    		cache.duration = cursor.getLong(3);
-    		cache.state = cursor.getInt(4);
-    		cache.direction = cursor.getInt(5);
-    		cache.date = cursor.getLong(6);
+    		cache.duration = cursor.getLong(2);
+    		cache.state = cursor.getInt(3);
+    		cache.direction = cursor.getInt(4);
+    		cache.date = cursor.getLong(5);
             view.setTag(cache);
             
             return view;

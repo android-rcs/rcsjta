@@ -204,7 +204,7 @@ public class GroupChatView extends ChatView {
 	        }
 
 			// Load history
-			loadHistory(chatId);
+			loadHistory();
 
 			// Set the message composer max length
 			InputFilter[] filterArray = new InputFilter[1];
@@ -328,10 +328,8 @@ public class GroupChatView extends ChatView {
     
     /**
      * Load history
-     * 
-     * @param chatId Chat ID
      */
-    protected void loadHistory(String chatId) {
+    private void loadHistory() {
 		if (chatId == null) {
 			return;
 		}
@@ -434,7 +432,7 @@ public class GroupChatView extends ChatView {
 			Set<String> currentContacts = groupChat.getParticipants();
 			Set<JoynContact> contacts = contactsApi.getJoynContacts();
 			for (JoynContact c1 : contacts) {
-				String contact = c1.getContact();
+				String contact = c1.getContactId();
 				boolean found = false;
 				for(String c2 : currentContacts) {
 					if (c2.equals(contact)) {

@@ -54,15 +54,10 @@ public class VideoSharingInvitationReceiver extends BroadcastReceiver {
     	// Get remote contact
 		String contact = invitation.getStringExtra(VideoSharingIntent.EXTRA_CONTACT);
 
-    	// Get video format
-		String format = invitation.getStringExtra(VideoSharingIntent.EXTRA_ENCODING) + " " +
-				invitation.getStringExtra(VideoSharingIntent.EXTRA_FORMAT);
-
 		// Create notification
         Intent intent = new Intent(invitation);
-        intent.setClass(context, VisioSharing.class);
+        intent.setClass(context, ReceiveVideoSharing.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("incoming", true);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String notifTitle = context.getString(R.string.title_recv_video_sharing, contact);
         Notification notif = new Notification(R.drawable.ri_notif_csh_icon, notifTitle, System.currentTimeMillis());

@@ -53,7 +53,7 @@ public class TestVideoSharingApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-	        	startActivity(new Intent(this, InitiateVisioSharing.class));
+	        	startActivity(new Intent(this, InitiateVideoSharing.class));
                 break;
                 
 	        case 1:

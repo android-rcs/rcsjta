@@ -60,7 +60,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         setContentView(R.layout.chat_initiate_group);
         
         // Set title
-        setTitle(R.string.menu_adhoc_group_chat);
+        setTitle(R.string.menu_initiate_group_chat);
         
         // Set contact selector
         ListView contactList = (ListView)findViewById(R.id.contacts);

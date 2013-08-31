@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.sharing.video.player;
+package com.orangelabs.rcs.ri.sharing.video.media;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -24,9 +24,9 @@ import java.util.Iterator;
 import org.gsma.joyn.vsh.IVideoRendererListener;
 import org.gsma.joyn.vsh.VideoCodec;
 import org.gsma.joyn.vsh.VideoRenderer;
-import org.gsma.joyn.vsh.VideoRendererListener;
 
 import android.graphics.Bitmap;
+import android.os.RemoteException;
 import android.os.SystemClock;
 
 import com.orangelabs.rcs.core.ims.protocol.rtp.DummyPacketGenerator;
@@ -160,11 +160,11 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             // Init the video decoder
             int result = NativeH264Decoder.InitDecoder();
             if (result != 0) {
-                notifyPlayerEventError(VideoRenderer.Error.INTERNAL_ERROR);
+                notifyRendererEventError(VideoRenderer.Error.INTERNAL_ERROR);
                 return;
             }
         } catch (UnsatisfiedLinkError e) {
-            notifyPlayerEventError(VideoRenderer.Error.INTERNAL_ERROR);
+            notifyRendererEventError(VideoRenderer.Error.INTERNAL_ERROR);
             return;
         }
 
@@ -179,13 +179,13 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             rtpDummySender.prepareSession(remoteHost, remotePort, rtpReceiver.getInputStream());
             rtpDummySender.startSession();
         } catch (Exception e) {
-            notifyPlayerEventError(VideoRenderer.Error.INTERNAL_ERROR);
+            notifyRendererEventError(VideoRenderer.Error.INTERNAL_ERROR);
             return;
         }
 
         // Player is opened
         opened = true;
-        notifyPlayerEventOpened();
+        notifyRendererEventOpened();
     }
 
 	/**
@@ -211,7 +211,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 
         // Player is closed
         opened = false;
-        notifyPlayerEventClosed();
+        notifyRendererEventClosed();
     }
 
 	/**
@@ -234,7 +234,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
         // Renderer is started
         videoStartTime = SystemClock.uptimeMillis();
         started = true;
-        notifyPlayerEventStarted();
+        notifyRendererEventStarted();
     }
 
 	/**
@@ -262,7 +262,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
         // Renderer is stopped
         started = false;
         videoStartTime = 0L;
-        notifyPlayerEventStopped();
+        notifyRendererEventStopped();
     }
     
     /*---------------------------------------------------------------------*/
@@ -336,7 +336,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
      * Notify RTP aborted
      */
     public void rtpStreamAborted() {
-        notifyPlayerEventError(VideoRenderer.Error.NETWORK_FAILURE);
+        notifyRendererEventError(VideoRenderer.Error.NETWORK_FAILURE);
     }
 
     /**
@@ -349,53 +349,68 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
     }
 
     /**
-     * Notify player event started
+     * Notify renderer event started
      */
-    private void notifyPlayerEventStarted() {
-        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-            ((VideoRendererListener)ite.next()).onRendererStarted();
-        }
+    private void notifyRendererEventStarted() {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererStarted();
+	        }
+		} catch(RemoteException e) {
+		}
     }
 
     /**
-     * Notify player event stopped
+     * Notify renderer event stopped
      */
-    private void notifyPlayerEventStopped() {
-        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-            ((VideoRendererListener)ite.next()).onRendererStopped();
-        }
+    private void notifyRendererEventStopped() {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererStopped();
+	        }
+		} catch(RemoteException e) {
+		}
+	}
+
+    /**
+     * Notify renderer event opened
+     */
+    private void notifyRendererEventOpened() {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererOpened();
+	        }
+		} catch(RemoteException e) {
+		}
     }
 
     /**
-     * Notify player event opened
+     * Notify renderer event closed
      */
-    private void notifyPlayerEventOpened() {
-        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-            ((VideoRendererListener)ite.next()).onRendererOpened();
-        }
+    private void notifyRendererEventClosed() {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererClosed();
+	        }
+		} catch(RemoteException e) {
+		}
     }
 
     /**
-     * Notify player event closed
+     * Notify renderer event error
      */
-    private void notifyPlayerEventClosed() {
-        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-            ((VideoRendererListener)ite.next()).onRendererClosed();
-        }
-    }
-
-    /**
-     * Notify player event error
-     */
-    private void notifyPlayerEventError(int error) {
-        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-            ((VideoRendererListener)ite.next()).onRendererError(error);
-        }
+    private void notifyRendererEventError(int error) {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererError(error);
+	        }
+		} catch(RemoteException e) {
+		}
     }
 
     /**

@@ -61,6 +61,16 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     private String sharingId;
     
     /**
+     * Remote Contact
+     */
+    private String remoteContact;
+    
+    /**
+     * Image size
+     */
+    private long imageSize;
+    
+    /**
 	 * Image sharing API
 	 */
     private ImageSharingService ishApi;
@@ -74,16 +84,6 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
      * Image sharing listener
      */
     private MyImageSharingListener ishListener = new MyImageSharingListener();    
-    
-    /**
-     * Remote Contact
-     */
-    private String remoteContact;
-    
-    /**
-     * Image size
-     */
-    private long imageSize;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {

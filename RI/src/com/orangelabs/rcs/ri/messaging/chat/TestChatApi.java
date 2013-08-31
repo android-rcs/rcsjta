@@ -43,9 +43,10 @@ public class TestChatApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_one_to_one_chat),
-    		getString(R.string.menu_adhoc_group_chat),
+    		getString(R.string.menu_initiate_chat),
     		getString(R.string.menu_chat_log),
+    		getString(R.string.menu_initiate_group_chat),
+    		getString(R.string.menu_group_chat_log),
     		getString(R.string.menu_spambox)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -58,15 +59,19 @@ public class TestChatApi extends ListActivity {
             	startActivity(new Intent(this, InitiateSingleChat.class));
 	            break;
 	            
-	        case 1:
-	        	startActivity(new Intent(this, InitiateGroupChat.class));
-	            break;
-	            
-	        case 2: 
+	        case 1: 
             	startActivity(new Intent(this, ChatList.class));
 	            break;
 
-	        case 3:
+	        case 2:
+	        	startActivity(new Intent(this, InitiateGroupChat.class));
+	            break;
+	            
+	        case 3: 
+            	startActivity(new Intent(this, GroupChatList.class));
+	            break;
+
+	        case 4:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
 	        	// TODO startActivity(new Intent(this, SpamBox.class));
 	        	break;

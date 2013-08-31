@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.sharing.video.player;
+package com.orangelabs.rcs.ri.sharing.video.media;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -108,7 +108,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
      * Current time stamp
      */
     private long timeStamp = 0;
-
+    
     /**
 	 * NAL initialization
 	 */
@@ -130,12 +130,12 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private float scaleFactor = 1;
 
     /**
-     * Source Width - used for resizing
+     * Source width used for resizing
      */
     private int srcWidth = 0;
 
     /**
-     * Source Height - used for resizing
+     * Source height used for resizing
      */
     private int srcHeight = 0;
     
@@ -157,7 +157,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     /**
      * Camera ID
      */
-    private int cameraId = CameraOptions.FRONT.getValue();
+    private int cameraId = CameraOptions.BACK.getValue();
 
     /**
      * Frame process
@@ -545,7 +545,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private void notifyPlayerEventStarted() {
         Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
         while (ite.hasNext()) {
-            ((VideoPlayerListener)ite.next()).onPlayerStarted();
+        	((VideoPlayerListener)ite.next()).onPlayerStarted();
         }
     }
 
@@ -555,7 +555,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private void notifyPlayerEventStopped() {
         Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
         while (ite.hasNext()) {
-            ((VideoPlayerListener)ite.next()).onPlayerStopped();
+        	((VideoPlayerListener)ite.next()).onPlayerStopped();
         }
     }
 
@@ -565,7 +565,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private void notifyPlayerEventOpened() {
         Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
         while (ite.hasNext()) {
-            ((VideoPlayerListener)ite.next()).onPlayerOpened();
+        	((VideoPlayerListener)ite.next()).onPlayerOpened();
         }
     }
 
@@ -575,7 +575,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private void notifyPlayerEventClosed() {
         Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
         while (ite.hasNext()) {
-            ((VideoPlayerListener)ite.next()).onPlayerClosed();
+        	((VideoPlayerListener)ite.next()).onPlayerClosed();
         }
     }
 
@@ -585,7 +585,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     private void notifyPlayerEventError(int error) {
         Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
         while (ite.hasNext()) {
-            ((VideoPlayerListener)ite.next()).onPlayerError(error);
+        	((VideoPlayerListener)ite.next()).onPlayerError(error);
         }
     }
 

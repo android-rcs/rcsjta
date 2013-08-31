@@ -54,6 +54,11 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 	 */
 	private List<MultimediaSession> sessions = new ArrayList<MultimediaSession>();
 
+    /**
+	 * API connection state
+	 */
+	private boolean apiEnabled = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -73,6 +78,14 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 	}
 	
 	@Override
+	protected void onResume() {
+		super.onResume();
+
+    	// Update the list of sessions
+		updateList();
+	}
+	
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 
@@ -86,7 +99,9 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
-    	// Display the list of sessions
+		apiEnabled = true;
+
+		// Display the list of sessions
 		updateList();
     }
     
@@ -98,7 +113,9 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-    	Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
+		apiEnabled = false;
+
+		Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
     }    
     
     /**
@@ -137,20 +154,22 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
      */
     private void updateList() {
 		try {
-	    	// Reset the list
+			// Reset the list
 			sessions.clear();
-	    	
-	    	// Get list of pending sessions
-	    	Set<MultimediaSession> currentSessions = sessionApi.getSessions(TestMultimediaSessionApi.SERVICE_ID);
-	    	sessions = new ArrayList<MultimediaSession>(currentSessions);
-			if (sessions.size() > 0){
-		        String[] items = new String[sessions.size()];    
-		        for (int i = 0; i < items.length; i++) {
-					items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
-		        }
-				setListAdapter(new ArrayAdapter<String>(MultimediaSessionList.this, android.R.layout.simple_list_item_1, items));
-			} else {
-				setListAdapter(null);
+
+			if (apiEnabled) {
+		    	// Get list of pending sessions
+		    	Set<MultimediaSession> currentSessions = sessionApi.getSessions(TestMultimediaSessionApi.SERVICE_ID);
+		    	sessions = new ArrayList<MultimediaSession>(currentSessions);
+				if (sessions.size() > 0){
+			        String[] items = new String[sessions.size()];    
+			        for (int i = 0; i < items.length; i++) {
+						items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
+			        }
+					setListAdapter(new ArrayAdapter<String>(MultimediaSessionList.this, android.R.layout.simple_list_item_1, items));
+				} else {
+					setListAdapter(null);
+				}
 			}
 		} catch(Exception e) {
 			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));

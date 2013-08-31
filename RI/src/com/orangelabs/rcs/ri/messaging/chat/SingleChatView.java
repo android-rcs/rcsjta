@@ -27,6 +27,7 @@ import org.gsma.joyn.chat.ChatListener;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.Menu;
@@ -44,8 +45,16 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SingleChatView extends ChatView {
 	/**
+	 * View modes
+	 */
+	public final static int MODE_INCOMING = 0;
+	public final static int MODE_OUTGOING = 1;
+	public final static int MODE_OPEN = 2;
+
+	/**
 	 * Intent parameters
 	 */
+	public final static String EXTRA_MODE = "mode";
 	public static String EXTRA_CONTACT = "contact";
 
 	/**
@@ -53,11 +62,6 @@ public class SingleChatView extends ChatView {
 	 */
 	private String contact = null;
 	
-    /**
-     * Chat ID 
-     */
-	private String chatId = null;
-
     /**
      * Chat 
      */
@@ -85,15 +89,15 @@ public class SingleChatView extends ChatView {
      */
     public void onServiceConnected() {
     	try {
-    		String firstMsg = getIntent().getStringExtra(ChatIntent.EXTRA_FIRST_MESSAGE);
-			if (firstMsg == null) {
-				// Incoming session
-				contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
-			} else {
-				// Outgoing session
+	        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
+			if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
+				// Open chat
 				contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);				
+			} else {
+				// Incoming chat from its Intent
+				contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
 			}
-			
+    		
 			// Set title
 			setTitle(getString(R.string.title_chat) + " " +	contact);	
 
@@ -104,7 +108,7 @@ public class SingleChatView extends ChatView {
     		chat = chatApi.openSingleChat(contact, chatListener);
 				
             // Load history
-			loadHistory(chatId);
+			loadHistory();
 
 	        // Set the message composer max length
 			InputFilter[] filterArray = new InputFilter[1];
@@ -174,38 +178,35 @@ public class SingleChatView extends ChatView {
     
     /**
      * Load history
-     * 
-     * @param chatId Chat ID
      */
-    protected void loadHistory(String chatId) {
-    	// TODO
-    	/*    	try {
-    	EventsLogApi log = new EventsLogApi(this);
-    	Uri uri = log.getOneToOneChatLogContentProviderUri();
-    	Cursor cursor = getContentResolver().query(uri, 
-    			new String[] {
-    				RichMessagingData.KEY_CONTACT,
-    				RichMessagingData.KEY_DATA,
-    				RichMessagingData.KEY_TIMESTAMP,
-    				RichMessagingData.KEY_STATUS,
-    				RichMessagingData.KEY_TYPE
-    				},
-    			RichMessagingData.KEY_CHAT_SESSION_ID + "='" + session.getSessionID() + "'", 
-    			null, 
-    			RichMessagingData.KEY_TIMESTAMP + " DESC");
-    	
-    	// The system message are not loaded
-    	while(cursor.moveToNext()) {
-			int messageMessageType = cursor.getInt(EventsLogApi.TYPE_COLUMN);
-			switch (messageMessageType) {
-				case EventsLogApi.TYPE_OUTGOING_CHAT_MESSAGE:
-				case EventsLogApi.TYPE_INCOMING_CHAT_MESSAGE:
-				case EventsLogApi.TYPE_OUTGOING_GEOLOC:
-				case EventsLogApi.TYPE_INCOMING_GEOLOC:
-					updateView(cursor);
-					break;
-			}
-    	}*/
+    private void loadHistory() {
+		try {
+	    	Cursor cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, 
+	    			new String[] {
+	    				ChatLog.Message.DIRECTION,
+	    				ChatLog.Message.CONTACT_NUMBER,
+	    				ChatLog.Message.BODY,
+	    				ChatLog.Message.TIMESTAMP,
+	    				ChatLog.Message.MESSAGE_STATUS,
+	    				ChatLog.Message.MESSAGE_TYPE
+	    				},
+	    			ChatLog.Message.CHAT_ID + "='" + contact + "'", 
+	    			null, 
+	    			ChatLog.Message.TIMESTAMP + " ASC");
+	    	while(cursor.moveToNext()) {
+	    		int direction = cursor.getInt(0);
+	    		String contact = cursor.getString(1);
+	    		String text = cursor.getString(2);
+	    		int type = cursor.getInt(5);
+
+	    		// Add only message to the history
+	    		if (type == ChatLog.Message.Type.CONTENT) {
+					addMessageHistory(direction, contact, text);
+	    		}
+	    	}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}
 
     /**
@@ -255,13 +256,6 @@ public class SingleChatView extends ChatView {
         }
     }
 
-    /**
-	 * Add participants to be invited in the session
-	 */
-    private void addParticipants() {
-    	// TODO
-    }
-    	
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater=new MenuInflater(getApplicationContext());
@@ -281,10 +275,6 @@ public class SingleChatView extends ChatView {
 						getString(R.string.menu_insert_smiley));
 				break;
 	
-			case R.id.menu_add_participant:
-				addParticipants();
-				break;
-	
 			case R.id.menu_quicktext:
 				addQuickText();
 				break;
@@ -297,11 +287,6 @@ public class SingleChatView extends ChatView {
 				// Refresh view
 		        msgListAdapter = new MessageListAdapter(this);
 		        setListAdapter(msgListAdapter);
-				break;
-				
-			case R.id.menu_close_session:
-            	// Exit activity
-				finish();
 				break;
 		}
 		return true;
@@ -369,11 +354,6 @@ public class SingleChatView extends ChatView {
 					}
 				}
 			});
-    	}
-
-    	// Callback called when a 1-1 conversation with a given contact has been
-    	public void onChatExtendedToGroup(String contact, String groupChatId) {
-    		// TODO
     	}
     }
 }

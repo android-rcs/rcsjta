@@ -524,13 +524,6 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     }
     
     /**
-     * Load history
-     * 
-     * @param chatId Chat ID
-     */
-    protected abstract void loadHistory(String chatId);	
-
-    /**
      * Send message
      * 
      * @param msg Message

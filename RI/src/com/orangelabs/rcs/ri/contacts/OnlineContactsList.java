@@ -124,7 +124,7 @@ public class OnlineContactsList extends ListActivity implements JoynServiceListe
 		        	} else {
 						status = "offline";
 		        	}
-					items[i] = contact.getContact() + " (" + status + ")";
+					items[i] = contact.getContactId() + " (" + status + ")";
 		        }
 				setListAdapter(new ArrayAdapter<String>(OnlineContactsList.this, android.R.layout.simple_list_item_1, items));
 			} else {

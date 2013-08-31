@@ -149,7 +149,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 		        	} else {
 						status = "offline";
 		        	}
-					items.add(contact.getContact() + " (" + status + ")");
+					items.add(contact.getContactId() + " (" + status + ")");
 		        }
 			    ContactListAdapter adapter = new ContactListAdapter(this, android.R.layout.simple_list_item_1, items);
 			    listView.setAdapter(adapter);

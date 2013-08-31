@@ -49,7 +49,7 @@ public class InitiateSingleChat extends Activity {
         setContentView(R.layout.chat_initiate_single);
         
         // Set title
-        setTitle(R.string.menu_one_to_one_chat);
+        setTitle(R.string.menu_initiate_chat);
         
         // Set contact selector
         Spinner spinner = (Spinner)findViewById(R.id.contact);
@@ -100,6 +100,7 @@ public class InitiateSingleChat extends Activity {
             // Display chat view
         	Intent intent = new Intent(InitiateSingleChat.this, SingleChatView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        	intent.putExtra(SingleChatView.EXTRA_MODE, SingleChatView.MODE_OUTGOING);
         	intent.putExtra(SingleChatView.EXTRA_CONTACT, remoteContact);
         	startActivity(intent);
         	

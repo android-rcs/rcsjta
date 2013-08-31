@@ -51,8 +51,15 @@ public class ImageSharingList extends Activity {
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
-        listView.setAdapter(createListAdapter());
     }
+    
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// Refresh view
+		listView.setAdapter(createListAdapter());
+	}    
     
 	/**
 	 * Create list adapter

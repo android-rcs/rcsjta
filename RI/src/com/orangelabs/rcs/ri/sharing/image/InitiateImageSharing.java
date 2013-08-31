@@ -22,7 +22,6 @@ import java.io.File;
 
 import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.ft.FileTransfer;
 import org.gsma.joyn.ish.ImageSharing;
 import org.gsma.joyn.ish.ImageSharingListener;
 import org.gsma.joyn.ish.ImageSharingService;
@@ -362,12 +361,12 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 					hideProgressDialog();
 					
 					// Display error
-                    if (error == FileTransfer.Error.INVITATION_DECLINED) {
+                    if (error == ImageSharing.Error.INVITATION_DECLINED) {
                         Utils.showMessageAndExit(InitiateImageSharing.this,
-                                getString(R.string.label_transfer_declined));
+                                getString(R.string.label_sharing_declined));
                     } else {
                         Utils.showMessageAndExit(InitiateImageSharing.this,
-                                getString(R.string.label_transfer_failed, error));
+                                getString(R.string.label_sharing_failed, error));
                     }
 				}
 			});
@@ -377,7 +376,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     	public void onSharingProgress(final long currentSize, final long totalSize) {
 			handler.post(new Runnable() { 
     			public void run() {
-					// Display transfer progress
+					// Display sharing progress
     				updateProgressBar(currentSize, totalSize);
     			}
     		});
@@ -390,7 +389,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 					// Hide progress dialog
 					hideProgressDialog();
 
-					// Display transfer progress
+					// Display sharing progress
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
 					statusView.setText("transferred");
 				}
@@ -399,7 +398,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     };
     
     /**
-     * Show the transfer progress
+     * Show the sharing progress
      * 
      * @param currentSize Current size transferred
      * @param totalSize Total size to be transferred

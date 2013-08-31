@@ -138,10 +138,10 @@
             </intent-filter>
         </receiver>
         
-		<receiver android:name=".messaging.chat.SingleChatReplacedReceiver"/>
-
         <activity android:name=".messaging.chat.SingleChatView"/>
 				
+        <activity android:name=".messaging.chat.ChatList"/>
+        
         <activity android:name=".messaging.chat.InitiateGroupChat">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -161,7 +161,7 @@
 		
         <activity android:name=".messaging.chat.GroupChatView"/>
                 
-        <activity android:name=".messaging.chat.ChatList"/>
+        <activity android:name=".messaging.chat.GroupChatList"/>
         
         <!-- Sharing API -->
         
@@ -187,7 +187,7 @@
         
         <activity android:name=".sharing.video.TestVideoSharingApi"/>
 
-        <activity android:name=".sharing.video.InitiateVisioSharing"/>
+        <activity android:name=".sharing.video.InitiateVideoSharing"/>
         
 		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
             <intent-filter>
@@ -195,7 +195,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".sharing.video.VisioSharing"/>
+        <activity android:name=".sharing.video.ReceiveVideoSharing"/>
         
         <activity android:name=".sharing.video.VideoSharingList"/>
         

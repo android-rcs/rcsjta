@@ -124,7 +124,7 @@ public class JoynContactsList extends ListActivity implements JoynServiceListene
 		        	} else {
 						status = "offline";
 		        	}
-					items[i] = contact.getContact() + " (" + status + ")";
+					items[i] = contact.getContactId() + " (" + status + ")";
 		        }
 				setListAdapter(new ArrayAdapter<String>(JoynContactsList.this, android.R.layout.simple_list_item_1, items));
 			} else {

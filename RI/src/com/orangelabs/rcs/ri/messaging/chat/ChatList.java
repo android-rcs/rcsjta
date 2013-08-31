@@ -19,13 +19,9 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.Chat;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatService;
-import org.gsma.joyn.chat.GroupChat;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,7 +30,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,7 +46,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List of current chat sessions and blocked contacts
+ * List chats from the content provider 
  */
 public class ChatList extends Activity implements JoynServiceListener {
 	/**
@@ -63,16 +58,6 @@ public class ChatList extends Activity implements JoynServiceListener {
 	 * Chat API
 	 */
     private ChatService chatApi;
-    
-	/**
-	 * Rejoin chat manager
-	 */
-	private RejoinChat rejoinChat = null;
-
-	/**
-	 * Restart chat manager
-	 */
-	private RestartChat restartChat = null;
 
     /**
 	 * API connection state
@@ -94,7 +79,6 @@ public class ChatList extends Activity implements JoynServiceListener {
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
-        listView.setAdapter(createListAdapter());
         
         // Instanciate API
         chatApi = new ChatService(getApplicationContext(), this);
@@ -104,36 +88,36 @@ public class ChatList extends Activity implements JoynServiceListener {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// Refresh view
+		listView.setAdapter(createListAdapter());
+	}
+	
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		
-		if (rejoinChat != null) {
-			rejoinChat.stop();
-		}
-		
-		if (restartChat != null) {
-			restartChat.stop();
-		}
-
         // Disconnect API
         chatApi.disconnect();
 	}
 		
 	/**
-	 * Create chat list adapter with unique chat ID entries
+	 * Create chat list adapter with unique contact entries
 	 */
 	private ChatListAdapter createListAdapter() {
-		// TODO: add single chat also
-		Uri uri = ChatLog.GroupChat.CONTENT_URI;
+		Uri uri = ChatLog.Message.CONTENT_URI;
 	    String[] PROJECTION = new String[] {
-	    		ChatLog.GroupChat.ID,
-	    		ChatLog.GroupChat.CHAT_ID,
-	    		ChatLog.GroupChat.SUBJECT,
-	    		ChatLog.GroupChat.STATE,
-	    		ChatLog.GroupChat.TIMESTAMP
+	    		ChatLog.Message.ID,
+	    		ChatLog.Message.CHAT_ID,
+	    		ChatLog.Message.CONTACT_NUMBER,
+	    		ChatLog.Message.BODY,
+	    		ChatLog.Message.TIMESTAMP
 	    };
-        String sortOrder = ChatLog.GroupChat.TIMESTAMP + " DESC";
-		Cursor cursor = getContentResolver().query(uri, PROJECTION, null, null, sortOrder);
+        String sortOrder = ChatLog.Message.TIMESTAMP + " DESC";
+        String selection = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT_NUMBER + ") GROUP BY (" + ChatLog.Message.CONTACT_NUMBER;        
+		Cursor cursor = getContentResolver().query(uri, PROJECTION, selection, null, sortOrder);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
@@ -162,11 +146,8 @@ public class ChatList extends Activity implements JoynServiceListener {
             view.setOnClickListener(clickItemListener);
             
     		ChatListItemCache cache = new ChatListItemCache();
-    		cache.chatId = cursor.getString(1);
-    		cache.isGroup = true; //TODO: single chat
-    		cache.contact = null; //TODO: single chat
-    		cache.subject = cursor.getString(2);
-    		cache.state = cursor.getInt(3);
+    		cache.contact = cursor.getString(2);
+    		cache.msg = cursor.getString(3);
     		cache.date = cursor.getLong(4);
             view.setTag(cache);
             return view;
@@ -184,20 +165,10 @@ public class ChatList extends Activity implements JoynServiceListener {
     		
 			// Set the label
     		TextView line1View = (TextView)view.findViewById(R.id.line1); 
-    		TextView numberView = (TextView)view.findViewById(R.id.number);
-    		if (cache.isGroup) {
-    			line1View.setText(R.string.label_group_chat);
-    			if (TextUtils.isEmpty(cache.subject)) {
-    				numberView.setText("<" + context.getString(R.string.label_no_subject) + ">");
-    			} else {
-        			numberView.setText(cache.subject);
-    			}
-        		numberView.setVisibility(View.VISIBLE);
-    		} else {
-    			line1View.setText(R.string.label_chat);
-        		numberView.setText(cache.contact);
-        		numberView.setVisibility(View.VISIBLE);
-    		}
+			line1View.setText(getString(R.string.label_chat) + " " + cache.contact);
+    		TextView msgView = (TextView)view.findViewById(R.id.line2);
+    		msgView.setText(cache.msg);
+    		msgView.setVisibility(View.VISIBLE);
     	}
     }
 
@@ -205,11 +176,8 @@ public class ChatList extends Activity implements JoynServiceListener {
      * Chat list item in cache
      */
 	private class ChatListItemCache {
-		private String chatId;
-		private boolean isGroup;
 		private String contact;
-		private String subject;
-		private int state;
+		private String msg;
 		private long date;
 	}    
     
@@ -237,14 +205,12 @@ public class ChatList extends Activity implements JoynServiceListener {
      * Callback called when service is registered to the RCS/IMS platform
      */
     public void onServiceRegistered() {
-		apiEnabled = true;
     }
     
     /**
      * Callback called when service is unregistered from the RCS/IMS platform
      */
     public void onServiceUnregistered() {
-		apiEnabled = false;
     }      
     
     /**
@@ -252,62 +218,21 @@ public class ChatList extends Activity implements JoynServiceListener {
      */
     private OnClickListener clickItemListener = new OnClickListener() {
 		public void onClick(View v) {
+			// TODO: if not connected offers possibility to show history
 			if (!apiEnabled) {
 				Utils.showMessage(ChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}
 
-			try {
-				// Get selected item
-				ChatListItemCache cache = (ChatListItemCache)v.getTag();
-				if (cache.isGroup) {
-					// Group chat
-					GroupChat groupChat = chatApi.getGroupChat(cache.chatId);
-					if (groupChat != null) {
-						// Session already active on the device: just reload it in the UI
-						Intent intent = new Intent(ChatList.this, GroupChatView.class);
-			        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		            	intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OPEN);
-			    		intent.putExtra(GroupChatView.EXTRA_CHAT_ID, groupChat.getChatId());
-			    		startActivity(intent);				
-					} else {
-						// Rejoin or restart the session
-						int state = cache.state;
-						if (state == GroupChat.State.TERMINATED) {
-							// The session was terminated: only a restart may be done
-							restartChat = new RestartChat(ChatList.this, chatApi, cache.chatId);
-							restartChat.start();
-						} else {					
-							// Session terminated on the device: try to rejoin the session
-							rejoinChat = new RejoinChat(ChatList.this, chatApi, cache.chatId);
-							rejoinChat.start();
-						}
-					}
-				} else {
-					// 1-1 chat
-					Chat chat = chatApi.getChat(cache.chatId);					
-					if (chat != null) {
-						// Session already active on the device: just reload it in the UI
-			    		Intent intent = new Intent(ChatList.this, SingleChatView.class);
-			        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		            	intent.putExtra("contact", chat.getRemoteContact());
-			    		intent.putExtra("chatId", chat.getChatId());
-			    		startActivity(intent);
-					} else {
-						// Session terminated on the device: create a new one on the first message
-			    		Intent intent = new Intent(ChatList.this, SingleChatView.class);
-			        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		            	intent.putExtra("contact", cache.contact);
-			    		startActivity(intent);
-					}
-				}
-		    } catch(JoynServiceNotAvailableException e) {
-		    	e.printStackTrace();
-				Utils.showMessageAndExit(ChatList.this, getString(R.string.label_api_disabled));
-		    } catch(JoynServiceException e) {
-		    	e.printStackTrace();
-				Utils.showMessageAndExit(ChatList.this, getString(R.string.label_api_failed));
-			}
+			// Get selected item
+			ChatListItemCache cache = (ChatListItemCache)v.getTag();
+
+			// Open chat
+    		Intent intent = new Intent(ChatList.this, SingleChatView.class);
+        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        	intent.putExtra(SingleChatView.EXTRA_MODE, SingleChatView.MODE_OPEN);
+        	intent.putExtra(SingleChatView.EXTRA_CONTACT, cache.contact);
+    		startActivity(intent);
 		}
     };
 
@@ -324,7 +249,8 @@ public class ChatList extends Activity implements JoynServiceListener {
 		switch (item.getItemId()) {
 			case R.id.menu_clear_log:
 				// Delete all
-				getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
+		        String where = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT_NUMBER;        
+				getContentResolver().delete(ChatLog.Message.CONTENT_URI, where, null);
 				
 				// Refresh view
 		        listView.setAdapter(createListAdapter());

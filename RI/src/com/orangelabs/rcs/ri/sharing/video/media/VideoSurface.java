@@ -16,25 +16,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.messaging.chat;
+package com.orangelabs.rcs.ri.sharing.video.media;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+import android.graphics.Bitmap;
 
 /**
- * Chat session replaced receiver
- * 
- * @author jexa7410
+ * Video Surface interface
+ *
+ * @author Deutsche Telekom
  */
-public class SingleChatReplacedReceiver extends BroadcastReceiver {
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		// Load a new chat view for the new extended session
-		Intent replacedView = new Intent(intent);
-		replacedView.setClass(context, GroupChatView.class);
-		replacedView.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		replacedView.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OPEN);
-        context.startActivity(replacedView);
-    }
+public interface VideoSurface {
+    /**
+     * Set image from a bitmap
+     *
+     * @param bmp Bitmap
+     */
+    public void setImage(Bitmap bmp);
+
+    /**
+     * Clears the image
+     */
+    public void clearImage();
 }

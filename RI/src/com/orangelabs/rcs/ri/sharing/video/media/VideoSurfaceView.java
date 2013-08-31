@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.sharing.video.player;
+package com.orangelabs.rcs.ri.sharing.video.media;
 
 import android.content.Context;
 import android.graphics.Bitmap;
