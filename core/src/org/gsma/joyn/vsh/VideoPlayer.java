@@ -100,7 +100,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	 * @param listener Listener
 	 */
 	public void addEventListener(IVideoPlayerListener listener) {
-		addEventListener(listener);
+		listeners.add(listener);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	 * @param listener Listener
 	 */
 	public void removeEventListener(IVideoPlayerListener listener) {
-		removeEventListener(listener);
+		listeners.remove(listener);
 	}
 	
 	/**

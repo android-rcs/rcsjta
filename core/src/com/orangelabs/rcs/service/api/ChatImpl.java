@@ -1,10 +1,12 @@
 package com.orangelabs.rcs.service.api;
 
+import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IChatListener;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 import com.orangelabs.rcs.core.Core;
@@ -15,6 +17,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -288,14 +291,23 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			// Update rich messaging history
 			RichMessaging.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
 			
-	  		// Notify event listeners
+			// Create a chat message
+        	ChatMessage msg = new ChatMessage(message.getMessageId(),
+        			PhoneUtils.extractNumberFromUri(message.getRemote()),
+        			message.getTextMessage(),
+        			message.getServerDate(), message.isImdnDisplayedRequested());
+
+        	// Broadcast intent related to the received invitation
+	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msg.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msg);
+	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+
+	    	// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	ChatMessage msg = new ChatMessage(message.getMessageId(),
-	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
-	            			message.getTextMessage(),
-	            			message.getServerDate(), message.isImdnDisplayedRequested());
 	            	listeners.getBroadcastItem(i).onNewMessage(msg);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {

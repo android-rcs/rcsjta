@@ -37,12 +37,15 @@ import android.database.MatrixCursor;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,6 +56,7 @@ import android.widget.Toast;
 
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoPlayer;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
@@ -145,7 +149,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.video_sharing_initiate);
 
         // Set title
@@ -173,6 +177,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         // Create the live video view
         videoView = (VideoSurfaceView)findViewById(R.id.video_preview);
         videoView.setAspectRatio(videoWidth, videoHeight);
+        videoView.setVisibility(View.GONE);
         surface = videoView.getHolder();
         surface.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         surface.setKeepScreenOn(true);
@@ -303,11 +308,14 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
             // Disable UI
             spinner.setEnabled(false);
 
+            // Display video view
+            videoView.setVisibility(View.VISIBLE);
+            
             // Hide buttons
             Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-        	inviteBtn.setVisibility(View.INVISIBLE);
+        	inviteBtn.setVisibility(View.GONE);
             Button dialBtn = (Button)findViewById(R.id.dial_btn);
-            dialBtn.setVisibility(View.INVISIBLE);
+            dialBtn.setVisibility(View.GONE);
         }
     };
 
@@ -487,8 +495,59 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         if (camera != null) {
             // Camera settings
             Camera.Parameters p = camera.getParameters();
-            p.setPreviewFormat(PixelFormat.YCbCr_420_SP); //ImageFormat.NV21);
+            p.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 
+            // Orientation
+            p.setRotation(90);
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                Display display = ((WindowManager)getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+                switch (display.getRotation()) {
+                    case Surface.ROTATION_0:
+                        if (openedCameraId == CameraOptions.FRONT) {
+                            videoPlayer.setOrientation(Orientation.ROTATE_90_CCW);
+                        } else {
+                        	videoPlayer.setOrientation(Orientation.ROTATE_90_CW);
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                            camera.setDisplayOrientation(90);
+                        } else {
+                            p.setRotation(90);
+                        }
+                        break;
+                    case Surface.ROTATION_90:
+                    	videoPlayer.setOrientation(Orientation.NONE);
+                        break;
+                    case Surface.ROTATION_180:
+                        if (openedCameraId == CameraOptions.FRONT) {
+                        	videoPlayer.setOrientation(Orientation.ROTATE_90_CW);
+                        } else {
+                        	videoPlayer.setOrientation(Orientation.ROTATE_90_CCW);
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                            camera.setDisplayOrientation(270);
+                        } else {
+                            p.setRotation(270);
+                        }
+                        break;
+                    case Surface.ROTATION_270:
+                        if (openedCameraId == CameraOptions.FRONT) {
+                        	videoPlayer.setOrientation(Orientation.ROTATE_180);
+                        } else {
+                        	videoPlayer.setOrientation(Orientation.ROTATE_180);
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                            camera.setDisplayOrientation(180);
+                        } else {
+                            p.setRotation(180);
+                        }
+                        break;
+                }
+            } else {
+                // getRotation not managed under Froyo
+            	videoPlayer.setOrientation(Orientation.NONE);
+            }
+            
             // Use the existing size without resizing
             p.setPreviewSize(videoWidth, videoHeight);
             videoPlayer.activateResizing(videoWidth, videoHeight);
@@ -534,7 +593,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      */
     private void openCamera(CameraOptions cameraId) {
         Method method = getCameraOpenMethod();
- /*  TODO     if (numberOfCameras > 1 && method != null) {
+        if (numberOfCameras > 1 && method != null) {
             try {
                 camera = (Camera)method.invoke(camera, new Object[] {
                     cameraId.getValue()
@@ -544,9 +603,9 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
                 camera = Camera.open();
                 openedCameraId = CameraOptions.BACK;
             }
-        } else {*/
+        } else {
             camera = Camera.open();
- //       }
+        }
         if (videoPlayer != null) {
         	videoPlayer.setCameraId(openedCameraId.getValue());
         }

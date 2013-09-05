@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>ChatServiceConfiguration | joyn SDK</title>
+
+
+</script>
+
+
+
+<script src="../../../../../assets/android-developer-reference.js" type="text/javascript"></script>
+
+
+<link href="../../../../../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../assets/prettify.js" type="text/javascript"></script>
+<script src="../../../../../assets/joyn-sdk.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+
+<body class="1.0">
+
+
+  <div id="header">
+  
+      <div id="headerRight">
+         
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ '1.0' ];
+    
+    var SINCE_LABELS = [ '1.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						onsubmit="return submit_search()">
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../../../../')"
+							  onkeyup="return search_changed(event, false, '../../../../')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+		
+		
+          <a  href="../../../../../index.html" tabindex="-1"><img
+              src="../../../../../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="source">
+              <li id="home-link"><a href="../../../../../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../../../../../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../../../../../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../../../../../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../../../../../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <li id="faq-link"><a href="../../../../../faq/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <li id="download-link"><a href="../../../../../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  
+	
+
+  
+
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links">
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
+    <li class="selected api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links">
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+     
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        
+      
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+<div>
+<a href="ChatServiceConfiguration.html">View Documentation</a>
+</div>
+
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+     
+    
+    class
+<h1>ChatServiceConfiguration</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+<div id="jd-content">
+  <pre class="prettyprint">
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+package org.gsma.joyn.chat;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+/**
+ * Chat service configuration
+ * 
+ * @author Jean-Marc AUFFRET
+ */
+public class ChatServiceConfiguration {
+	/**
+	 * Store and Forward warning
+	 */
+	private boolean warnSF;
+	
+	/**
+	 * Chat timeout
+	 */
+	private int chatTimeout;
+	
+	/**
+	 * Is-composing timeout
+	 */
+	private int isComposingTimeout;
+
+	/**
+	 * Max participants in a group chat
+	 */
+	private int maxGroupChatParticipants;
+	
+	/**
+	 * Max length of a message in a single chat
+	 */
+	private int maxMsgLengthSingleChat;
+
+	/**
+	 * Max length of a message in a group chat
+	 */
+	private int maxMsgLengthGroupChat;
+
+	/**
+	 * Max chat sessions
+	 */
+	private int maxChat; 
+
+	/**
+	 * SMS fallback
+	 */
+	private boolean smsFallback;
+
+	/**
+	 * Auto accept mode for single chat
+	 */
+	private boolean autoAcceptSingleChat;
+
+	/**
+	 * Auto accept mode for group chat
+	 */
+	private boolean autoAcceptGroupChat;
+	
+	/**
+	 * Displayed delivery report
+	 */
+	private boolean displayedDeliveryReport;
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param warnSF Store and Forward warning
+	 * @param chatTimeout Chat timeout
+	 * @param isComposingTimeout Is-composing timeout
+	 * @param maxGroupChatParticipants Max participants in a group chat
+	 * @param maxMsgLengthSingleChat Max length of a message in a single chat
+	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
+	 * @param maxSingleChat Max single chats
+	 * @param maxGroupChat Max group chats
+	 * @param smsFallback SMS fallback
+	 * @param autoAcceptSingleChat Auto accept mode for single chat
+	 * @param autoAcceptGroupChat Auto accept mode for group chat
+	 * @param displayedDeliveryReport Displayed delivery report
+	 */
+	public ChatServiceConfiguration(boolean warnSF, int chatTimeout, int isComposingTimeout,
+			int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
+			int maxChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
+			boolean displayedDeliveryReport) {
+		this.warnSF = warnSF;
+		this.chatTimeout = chatTimeout;
+		this.isComposingTimeout = isComposingTimeout;
+		this.maxGroupChatParticipants = maxGroupChatParticipants;
+		this.maxMsgLengthSingleChat = maxMsgLengthSingleChat;
+		this.maxMsgLengthGroupChat = maxMsgLengthGroupChat;
+		this.maxChat = maxChat; 
+		this.smsFallback = smsFallback;
+		this.autoAcceptSingleChat = autoAcceptSingleChat;
+		this.autoAcceptGroupChat = autoAcceptGroupChat;
+		this.displayedDeliveryReport = displayedDeliveryReport;
+    }	
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param source Parcelable source
+	 */
+	public ChatServiceConfiguration(Parcel source) {
+		this.warnSF = source.readInt() != 0;
+		this.chatTimeout = source.readInt();
+		this.isComposingTimeout = source.readInt();
+		this.maxGroupChatParticipants = source.readInt();
+		this.maxMsgLengthSingleChat = source.readInt();
+		this.maxMsgLengthGroupChat = source.readInt();
+		this.maxChat = source.readInt(); 
+		this.smsFallback = source.readInt() != 0;
+		this.autoAcceptSingleChat = source.readInt() != 0;
+		this.autoAcceptGroupChat = source.readInt() != 0;
+		this.displayedDeliveryReport = source.readInt() != 0;
+    }
+
+	/**
+	 * Describe the kinds of special objects contained in this Parcelable's
+	 * marshalled representation
+	 * 
+	 * @return Integer
+	 */
+	public int describeContents() {
+        return 0;
+    }
+
+	/**
+	 * Write parcelable object
+	 * 
+	 * @param dest The Parcel in which the object should be written
+	 * @param flags Additional flags about how the object should be written
+	 */
+    public void writeToParcel(Parcel dest, int flags) {
+    	dest.writeInt(warnSF ? 1 : 0);
+    	dest.writeInt(chatTimeout);
+    	dest.writeInt(isComposingTimeout);
+    	dest.writeInt(maxGroupChatParticipants);
+    	dest.writeInt(maxMsgLengthSingleChat);
+    	dest.writeInt(maxMsgLengthGroupChat);
+    	dest.writeInt(maxChat);
+    	dest.writeInt(smsFallback ? 1 : 0);
+    	dest.writeInt(autoAcceptSingleChat ? 1 : 0);
+    	dest.writeInt(autoAcceptGroupChat ? 1 : 0);
+    	dest.writeInt(displayedDeliveryReport ? 1 : 0);
+    }
+
+    /**
+     * Parcelable creator
+     */
+    public static final Parcelable.Creator&lt;ChatServiceConfiguration&gt; CREATOR
+            = new Parcelable.Creator&lt;ChatServiceConfiguration&gt;() {
+        public ChatServiceConfiguration createFromParcel(Parcel source) {
+            return new ChatServiceConfiguration(source);
+        }
+
+        public ChatServiceConfiguration[] newArray(int size) {
+            return new ChatServiceConfiguration[size];
+        }
+    };	
+	
+	/**
+	 * Does the UX should alert the user that messages are handled differently when
+	 * the store and forward functionality is involved. It returns True if user should
+	 * be informed when sending message to offline user.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isImWarnSF() {
+		return warnSF;
+	}
+	
+	/**
+	 * Returns the time after inactive chat session could be closed
+	 * 
+	 * @return Timeout in seconds
+	 */
+	public int getChatTimeout() {
+		return chatTimeout;
+	}
+	
+	/**
+	 * Returns the Is-composing timeout value
+	 * 
+	 * @return Timeout in seconds
+	 */
+	public int getIsComposingTimeout() {
+		return isComposingTimeout;
+	}	
+	
+	/**
+	 * Returns maximum participants in group chat session
+	 * 
+	 * @return Number
+	 */
+	public int getGroupChatMaxParticipantsNumber() {
+		return maxGroupChatParticipants;
+	}
+	
+	/**
+	 * Return maximum single chat message’s length can have
+	 * 
+	 * @return Number of bytes
+	 */
+	public int getSingleChatMessageMaxLength() {
+		return maxMsgLengthSingleChat;
+	}
+	
+	/**
+	 * Returns the maximum single group chat message’s length can have
+	 * 
+	 * @return Number of bytes
+	 */
+	public int getGroupChatMessageMaxLength() {
+		return maxMsgLengthGroupChat;
+	}
+	
+	/**
+	 * Returns the max number of simultaneous chat sessions
+	 * 
+	 * @return Number
+	 */
+	public int getMaxChatSessions() {
+		return maxChat;
+	}
+	
+	/**
+	 * Does the UX proposes automatically a SMS fallback in case of chat initiation failure. It
+	 * returns True if SMS fallback procedure is activated, else returns False.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isSmsFallback() {
+		return smsFallback;
+	}
+	
+	/**
+	 * Returns True if auto accept mode activated for chat, else returns False
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isChatAutoAcceptMode() {
+		return autoAcceptSingleChat;
+	}
+	
+	/**
+	 * Returns True if auto accept mode activated for group chat, else returns False
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isGroupChatAutoAcceptMode() {
+		return autoAcceptGroupChat;
+	}
+	
+	/**
+	 * Is displayed delivery report on received chat messages activated
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isDisplayedDeliveryReport() {
+		return displayedDeliveryReport;
+	}
+	
+	/**
+	 * Activates or deactivates the displayed delivery report on received chat messages
+	 * 
+	 * @param state State
+	 */
+	public void setDisplayedDeliveryReport(boolean state) {
+		this.displayedDeliveryReport = state;
+	}
+}
+
+  </pre>
+</div>
+
+<div id="footer">
+Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>

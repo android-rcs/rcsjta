@@ -172,7 +172,7 @@ public class GroupChatList extends Activity implements JoynServiceListener {
     		cache.subject = cursor.getString(2);
     		cache.state = cursor.getInt(3);
     		cache.date = cursor.getLong(4);
-            view.setTag(cache);
+    		view.setTag(cache);
             return view;
         }
         
@@ -269,6 +269,9 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 				} else {
 					// Rejoin or restart the session
 					int state = cache.state;
+					if (state == GroupChat.State.CLOSED_BY_USER) {
+						Utils.showMessage(GroupChatList.this, getString(R.string.label_restart_not_authorized));
+					} else
 					if (state == GroupChat.State.TERMINATED) {
 						// The session was terminated: only a restart may be done
 						restartChat = new RestartChat(GroupChatList.this, chatApi, cache.chatId);

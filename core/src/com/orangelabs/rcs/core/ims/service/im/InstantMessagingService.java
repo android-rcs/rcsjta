@@ -430,16 +430,16 @@ public class InstantMessagingService extends ImsService {
 			return;
 	    }
 
+		// Save the message
+		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
+		if (firstMsg != null) {
+			RichMessaging.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
+		}
+
 		// Test number of sessions
 		if ((maxChatSessions != 0) && (getImSessions().size() >= maxChatSessions)) {
 			if (logger.isActivated()) {
 				logger.debug("The max number of chat sessions is achieved: reject the invitation");
-			}
-
-			// Save the message
-			InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
-			if (firstMsg != null) {
-				RichMessaging.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
 			}
 			
 			// Send a 486 Busy response

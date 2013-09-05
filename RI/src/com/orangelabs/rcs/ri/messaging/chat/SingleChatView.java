@@ -72,7 +72,12 @@ public class SingleChatView extends ChatView {
 	 */
 	private boolean isDeliveryDisplayed = true;
 	
-    /**
+	/**
+	 * Activity displayed status
+	 */
+	private static boolean activityDisplayed = false;
+	
+	/**
      * Chat listener
      */
     private MyChatListener chatListener = new MyChatListener();	
@@ -80,6 +85,29 @@ public class SingleChatView extends ChatView {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+    
+    @Override
+	protected void onResume() {
+        super.onResume();
+        
+        activityDisplayed = true;
+    }
+
+    @Override
+	protected void onPause() {
+        super.onStart();
+        
+        activityDisplayed = false;
+    }
+
+    /**
+     * Return true if the activity is currently displayed or not
+     *   
+     * @return Boolean
+     */
+    public static boolean isDisplayed() {
+    	return activityDisplayed;
     }
     
     /**
@@ -188,7 +216,8 @@ public class SingleChatView extends ChatView {
 	    				ChatLog.Message.BODY,
 	    				ChatLog.Message.TIMESTAMP,
 	    				ChatLog.Message.MESSAGE_STATUS,
-	    				ChatLog.Message.MESSAGE_TYPE
+	    				ChatLog.Message.MESSAGE_TYPE,
+	    				ChatLog.Message.MESSAGE_ID
 	    				},
 	    			ChatLog.Message.CHAT_ID + "='" + contact + "'", 
 	    			null, 
@@ -197,12 +226,19 @@ public class SingleChatView extends ChatView {
 	    		int direction = cursor.getInt(0);
 	    		String contact = cursor.getString(1);
 	    		String text = cursor.getString(2);
+	    		int status = cursor.getInt(4);
 	    		int type = cursor.getInt(5);
+	    		String msgId = cursor.getString(6);
 
 	    		// Add only message to the history
 	    		if (type == ChatLog.Message.Type.CONTENT) {
 					addMessageHistory(direction, contact, text);
 	    		}
+	    		
+	    		// Send displayed report for older messages
+		        if ((isDeliveryDisplayed) && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
+		        	sendDisplayedReport(msgId);
+		        }	    		
 	    	}
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -244,18 +280,16 @@ public class SingleChatView extends ChatView {
     /**
      * Send a displayed report
      * 
-     * @param msg Message
+     * @param msgId Message ID
      */
-    private void sendDisplayedReport(ChatMessage msg) {
-        if ((isDeliveryDisplayed) && msg.isDisplayedReportRequested()) {
-            try {
-                chat.sendDisplayedDeliveryReport(msg.getId());
-            } catch(Exception e) {
-                // Nothing to do
-            }
+    private void sendDisplayedReport(String msgId) {
+        try {
+            chat.sendDisplayedDeliveryReport(msgId);
+        } catch(Exception e) {
+            // Nothing to do
         }
     }
-
+    
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater=new MenuInflater(getApplicationContext());
@@ -300,8 +334,10 @@ public class SingleChatView extends ChatView {
     	public void onNewMessage(final ChatMessage message) {
 			handler.post(new Runnable() { 
 				public void run() {
-					// Send a delivery report
-					sendDisplayedReport(message);
+					// Send a displayed delivery report
+			        if ((isDeliveryDisplayed) && message.isDisplayedReportRequested()) {
+			        	sendDisplayedReport(message.getId());
+			        }
 					
 					// Display the received message
 					displayReceivedMessage(message);

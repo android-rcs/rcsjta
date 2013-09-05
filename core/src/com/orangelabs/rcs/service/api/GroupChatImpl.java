@@ -320,7 +320,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+			if (reason == ImsServiceSession.TERMINATION_BY_USER) {
+				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.CLOSED_BY_USER);
+			} else {
+				if (session.getDialogPath().isSessionCancelled()) {
+					RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+				} else {
+					RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+				}
+			}
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -350,7 +358,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+			if (session.getDialogPath().isSessionCancelled()) {
+				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+			} else {
+				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+			}
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

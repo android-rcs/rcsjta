@@ -1,11 +1,14 @@
 <project name="GSMA Terminal API" basedir=".">
 
 	<property environment="env"/>
-	<property name="android.root" 		value="${env.ANDROID_SDK}"/>
+	<property name="android.root" 		value="${env.ANDROID_HOME}"/>
 	<property name="terminal.root" 		value="."/>
 	<property name="terminal.api" 		value="${terminal.root}/core/rcs_api.jar"/>
-	<property name="terminal.build"		value="${terminal.root}/core/build"/>
+	<property name="terminal.ri" 		value="${terminal.root}/RI/bin/RCSJTA_ri.apk"/>
+	<property name="terminal.core" 		value="${terminal.root}/core/bin/RCSJTA_core.apk"/>
+	<property name="terminal.build"		value="${terminal.root}/core/bin"/>
 	<property name="src.path" 		value="${terminal.root}/core/src"/>
+	<property name="sdk.version" 		value="3.0.0"/>
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
@@ -15,7 +18,7 @@
 	<property name="j2se.classpath" refid="j2se.lib"/>
 
 	<path id="terminal.classpath">
-       	<pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
+       	<pathelement path="${j2se.classpath};${android.root}/platforms/android-14/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
 	</path>
 
     <!-- Generate RCS API DOCS -->
@@ -31,15 +34,70 @@
         sourcepath="${src.path}"
         packagenames="org.gsma.joyn.*">
     </javadoc>
-
+    </target>
 
     <!-- Generate RCS API SDK -->
 
-    <target name="sdk" description="Generate RCS API SDK">
-    <echo>Generate SDK</echo>
+    <target name="sdk" description="Generate RCS SDK" depends="">
+        
+	    <echo>Generate SDK ${terminal.build}/classes</echo>
+	    <mkdir dir="${terminal.root}/sdk-joyn"/>
+	    
+	    <echo>copy ${terminal.api} file</echo>
+		<copy file="${terminal.api}" tofile="${terminal.root}/sdk-joyn/lib/joyn-API.jar"/>
+		
+		<echo>copy ${terminal.core} file</echo>
+		<copy file="${terminal.core}" tofile="${terminal.root}/sdk-joyn/tools/joyn-core.apk"/>
+		
+		<echo>copy ${terminal.ri} application</echo>
+		<copy file="${terminal.ri}" tofile="${terminal.root}/sdk-joyn/tools/RI.apk"/>
+    
+		
+		<echo>Generate Javadoc</echo>
+	
+	    <javadoc
+	        verbose="on"
+	        access="public" 
+	        classpath=":${terminal.classpath}" 
+	        sourcepath="${src.path}"
+	        packagenames="org.gsma.joyn.*"
+	        bootclasspath="${android.root}\platforms\android-17\android.jar:${terminal.root}/core/bin/classes">
+			
+			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
+			    <param name="-d" value="${terminal.root}/sdk-joyn"/>			    
+		        <param name="-templatedir"/><param name="${terminal.root}/templates-sdk" />
+		        <param name="-hdf"/> <param name="project.name"/> <param name="RCS SDK"/>
+		        <param name="-htmldir"/> <param name="${terminal.root}/sdk" />
+		        <param name="-overview"/> <param name="${terminal.root}/sdk-joyn/overview.html" />
+		        <param name="-generatesources"/>
+		        <param name="-assetsdir"/> <param name="assets" />
+				<param name="-since"/><param name="${terminal.root}/SDK/releases/previous.xml"/><param name="1.0"/>
+				
+		        <param name="-federate" /><param name="android"/><param name="http://developer.android.com/reference/"/>
+				<param name="-federationxml" /><param name="android"/><param name="${terminal.root}/doclava-1.0.6/android-10.xml"/>
+				
+		    </doclet>
+	    </javadoc>
+	    <copy todir="${terminal.root}/sdk-joyn/javadoc">
+		    <fileset dir="${terminal.root}/sdk-joyn/reference"/>
+		</copy>
+		<delete dir="${terminal.root}/sdk-joyn/reference"/>
+		
+		<echo>zip sdk</echo>
+		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/rcs-api-sdk-${sdk.version}.zip"/>
+		
+		<echo>cleanup</echo>
+		<delete dir="${terminal.root}/sdk-joyn2"/>
+	</target>
 
+	<target name="generate-api">
+	    <ant dir="${terminal.root}/core" antfile="build-local.xml" target="api" inheritAll="false" />        
+	</target>
+	<target name="generate-ri-apk">
+	    <ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
+	</target>
 
-  </target>
-
+	 
+	
 </project>
 

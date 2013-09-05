@@ -102,7 +102,7 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.video_sharing_receive);
 
         // Set title

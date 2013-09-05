@@ -93,7 +93,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
             // Insert default values for parameters
 
-            addParameter(db, RcsSettingsData.SERVICE_ACTIVATED, 				RcsSettingsData.TRUE);
+            addParameter(db, RcsSettingsData.SERVICE_ACTIVATED, 				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.PRESENCE_INVITATION_RINGTONE, 		"");
             addParameter(db, RcsSettingsData.PRESENCE_INVITATION_VIBRATE, 		RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.CSH_INVITATION_RINGTONE, 			"");
@@ -222,6 +222,11 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,				Environment.getExternalStorageDirectory() + "/joyn/files/");
             addParameter(db, RcsSettingsData.SECURE_MSRP_OVER_WIFI,	     		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,				RcsSettingsData.FALSE);
+            
+            
+            // Add default parameters for Orange Hackathon
+            
+            // TODO: to be removed
         }
 
         /**

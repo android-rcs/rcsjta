@@ -54,26 +54,29 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
     	// Get remote contact
 		String contact = invitation.getStringExtra(ChatIntent.EXTRA_CONTACT);
 
-		// Get first message		
-		ChatMessage firstMessage = invitation.getParcelableExtra(ChatIntent.EXTRA_FIRST_MESSAGE);		
+		// Get message		
+		ChatMessage firstMessage = invitation.getParcelableExtra(ChatIntent.EXTRA_MESSAGE);		
 		
-        // Create notification
-		Intent intent = new Intent(invitation);
-		intent.setClass(context, SingleChatView.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setAction(contact);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_chat, contact);
-        Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
-        notif.flags = Notification.FLAG_AUTO_CANCEL;
-        String msg = firstMessage.getMessage();
-        notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    	notif.defaults |= Notification.DEFAULT_VIBRATE;
-        
-        // Send notification
-		NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
+		// Test if we are not already in the chat view
+		if (!SingleChatView.isDisplayed()) {
+	        // Create notification
+			Intent intent = new Intent(invitation);
+			intent.setClass(context, SingleChatView.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	        intent.setAction(contact);
+	        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+	        String notifTitle = context.getString(R.string.title_recv_chat, contact);
+	        Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
+	        notif.flags = Notification.FLAG_AUTO_CANCEL;
+	        String msg = firstMessage.getMessage();
+	        notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
+			notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+	    	notif.defaults |= Notification.DEFAULT_VIBRATE;
+	        
+	        // Send notification
+			NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+	        notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
+		}
     }
     
     /**

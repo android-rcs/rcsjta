@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>GroupChat.State | joyn SDK</title>
+
+
+</script>
+
+
+
+<script src="../../../../../assets/android-developer-reference.js" type="text/javascript"></script>
+
+
+<link href="../../../../../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../assets/prettify.js" type="text/javascript"></script>
+<script src="../../../../../assets/joyn-sdk.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+
+<body class="1.0">
+
+
+  <div id="header">
+  
+      <div id="headerRight">
+         
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ '1.0' ];
+    
+    var SINCE_LABELS = [ '1.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						onsubmit="return submit_search()">
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../../../../')"
+							  onkeyup="return search_changed(event, false, '../../../../')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+		
+		
+          <a  href="../../../../../index.html" tabindex="-1"><img
+              src="../../../../../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="source">
+              <li id="home-link"><a href="../../../../../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../../../../../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../../../../../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../../../../../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../../../../../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <li id="faq-link"><a href="../../../../../faq/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <li id="download-link"><a href="../../../../../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  
+	
+
+  
+
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links">
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
+    <li class="selected api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
+    <li class="api apilevel-1.0">
+  <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links">
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+     
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        
+      
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+<div>
+<a href="GroupChat.State.html">View Documentation</a>
+</div>
+
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+    static 
+     
+    
+    class
+<h1>GroupChat.State</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+<div id="jd-content">
+  <pre class="prettyprint">
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+package org.gsma.joyn.chat;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.gsma.joyn.JoynServiceException;
+
+/**
+ * Group chat
+ * 
+ * @author Jean-Marc AUFFRET
+ */
+public class GroupChat {
+    /**
+     * Group chat state
+     */
+    public static class State {
+    	/**
+    	 * Unknown state
+    	 */
+    	public final static int UNKNOWN = 0;
+
+    	/**
+    	 * Chat invitation received
+    	 */
+    	public final static int INVITED = 1;
+    	
+    	/**
+    	 * Chat invitation sent
+    	 */
+    	public final static int INITIATED = 2;
+    	
+    	/**
+    	 * Chat is started
+    	 */
+    	public final static int STARTED = 3;
+    	
+    	/**
+    	 * Chat has been terminated
+    	 */
+    	public final static int TERMINATED = 4;
+    	   	
+    	/**
+    	 * Chat has been aborted 
+    	 */
+    	public final static int ABORTED = 5;
+    	
+    	/**
+    	 * Chat has been closed by the user. A user which has closed a
+    	 * conversation voluntary can't rejoin it afterward.
+    	 */
+    	public final static int CLOSED_BY_USER = 6;
+
+    	/**
+    	 * Chat has failed 
+    	 */
+    	public final static int FAILED = 7;
+    	
+        private State() {
+        }    	
+    }
+    
+    /**
+     * Direction of the group chat
+     */
+    public static class Direction {
+        /**
+         * Incoming chat
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing chat
+         */
+        public static final int OUTGOING = 1;
+    }
+    
+    /**
+     * Group chat error
+     */
+    public static class Error {
+    	/**
+    	 * Group chat has failed
+    	 */
+    	public final static int CHAT_FAILED = 0;
+    	
+    	/**
+    	 * Group chat invitation has been declined by remote
+    	 */
+    	public final static int INVITATION_DECLINED = 1;
+
+    	/**
+    	 * Chat conversation not found
+    	 */
+    	public final static int CHAT_NOT_FOUND = 2;
+    	    	
+        private Error() {
+        }    	
+    }
+
+    /**
+     * Group chat interface
+     */
+    private IGroupChat chatInf;
+    
+    /**
+     * Constructor
+     * 
+     * @param chatIntf Group chat interface
+     */
+    GroupChat(IGroupChat chatIntf) {
+    	this.chatInf = chatIntf;
+    }
+
+    /**
+     * Returns the chat ID
+     * 
+     * @return Chat ID
+	 * @throws JoynServiceException
+     */
+	public String getChatId() throws JoynServiceException {
+		try {
+			return chatInf.getChatId();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the state of the group chat
+	 * 
+	 * @return State
+	 * @see GroupChat.State
+	 * @throws JoynServiceException
+	 */
+	public int getState() throws JoynServiceException {
+		try {
+			return chatInf.getState();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}		
+	
+	/**
+	 * Returns the remote contact
+	 * 
+	 * @return Contact
+	 * @throws JoynServiceException
+	 */
+	public String getRemoteContact() throws JoynServiceException {
+		try {
+			return chatInf.getRemoteContact();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns the subject of the group chat
+	 * 
+	 * @return Subject
+	 * @throws JoynServiceException
+	 */
+	public String getSubject() throws JoynServiceException {
+		try {
+			return chatInf.getSubject();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the list of connected participants. A participant is identified
+	 * by its MSISDN in national or international format, SIP address, SIP-URI or Tel-URI.
+	 * 
+	 * @return List of participants
+	 * @throws JoynServiceException
+	 */
+	public Set&lt;String&gt; getParticipants() throws JoynServiceException {
+		try {
+			return new HashSet&lt;String&gt;(chatInf.getParticipants());
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}		
+	}
+	
+	/**
+	 * Accepts chat invitation
+	 *  
+	 * @throws JoynServiceException
+	 */
+	public void acceptInvitation() throws JoynServiceException {
+		try {
+			chatInf.acceptInvitation();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Rejects chat invitation
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void rejectInvitation() throws JoynServiceException {
+		try {
+			chatInf.rejectInvitation();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sends a text message to the group
+	 * 
+	 * @param text Message
+	 * @return Message ID
+	 * @throws JoynServiceException
+	 */
+	public String sendMessage(String text) throws JoynServiceException {
+		try {
+			return chatInf.sendMessage(text);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}		
+	}
+	
+	/**
+	 * Sends an Is-composing event. The status is set to true when typing
+	 * a message, else it is set to false.
+	 * 
+	 * @param status Is-composing status
+	 * @throws JoynServiceException
+	 */
+	public void sendIsComposingEvent(boolean status) throws JoynServiceException {
+		try {
+			chatInf.sendIsComposingEvent(status);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}		
+	}
+	
+	/**
+	 * Adds participants to a group chat
+	 * 
+	 * @param participants List of participants
+	 * @throws JoynServiceException
+	 */
+	public void addParticipants(Set&lt;String&gt; participants) throws JoynServiceException {
+		try {
+			chatInf.addParticipants(new ArrayList&lt;String&gt;(participants));
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}		
+	}
+	
+	/**
+	 * Returns the max number of participants in the group chat. This limit is
+	 * read during the conference event subscription and overrides the provisioning
+	 * parameter.
+	 * 
+	 * @return Number
+	 * @throws JoynServiceException
+	 */
+	public int getMaxParticipants() throws JoynServiceException {
+		try {
+			return chatInf.getMaxParticipants();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}		
+	}
+	
+	/**
+	 * Quits a group chat conversation. The conversation will continue between
+	 * other participants if there are enough participants.
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void quitConversation() throws JoynServiceException {
+		try {
+			chatInf.quitConversation();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Adds a listener on chat events
+	 * 
+	 * @param listener Group chat event listener 
+	 * @throws JoynServiceException
+	 */
+	public void addEventListener(GroupChatListener listener) throws JoynServiceException {
+		try {
+			chatInf.addEventListener(listener);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	    			
+	}
+	
+	/**
+	 * Removes a listener on chat events
+	 * 
+	 * @param listener Group chat event listener 
+	 * @throws JoynServiceException
+	 */
+	public void removeEventListener(GroupChatListener listener) throws JoynServiceException {
+		try {
+			chatInf.removeEventListener(listener);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	    			
+	}
+}
+
+  </pre>
+</div>
+
+<div id="footer">
+Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>

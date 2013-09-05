@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+<title>Get Started | joyn SDK</title>
+
+
+</script>
+<link href="../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<script src="../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../assets/prettify.js" type="text/javascript"></script>
+<script src="../assets/joyn-sdk.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						onsubmit="return submit_search()">
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '..//javadoc/')"
+							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a  href="../index.html" tabindex="-1"><img
+              src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="tutorials">
+              <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <li id="faq-link"><a href="../faq/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <li id="download-link"><a href="../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  
+	
+
+		<div id="tutorial-nav" class="nav">
+			<p  style="margin-top: 15px;"><a  href="../tutorials/index.html"><b>Tutorials</b></a></p>
+			<ul>
+				<li>
+					<div >
+						<a href="../tutorials/multiService.html">Create new multimedia service</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../tutorials/ttsApp.html">Text to speech application</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../tutorials/multiMessage.html">Send multimedia message</a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Install and configure joyn services</h1></p>
+			<p><span>On some devices the joyn service stack may not be installed. If this is the case, we provide a joyn-service test application. Once these services are configured appropriately, your Rich Communication application will be able to communicate with them via joyn APIs.</span></p>
+		</div>
+		<div class="content-body ">
+			<div class="step_header">
+				<p><h2><span class="h_num">1</span>Install application</h2></p>
+				<p>Install joyn-core.apk on your device</p>
+				<p><a id="show1" onclick="showStep(this,'hide1','step1');">show</a></p>
+				<p><a id="hide1" style="display:none;" onClick="hideStep(this,'show1','step1');">hide</a></p>
+			</div>
+			<div id="step1" class="step_content center" style="display:none;">
+					<p>First copy <a href="../tools/joyn-core.apk">joyn-core</a> to the directory of your choice.</p>									
+					<p>To install the application, connect your device via USB. Make sure that USB debugging is active.</p>
+					<p>Locate Android SDK on your file system and run the following command from the platform-tools directory.</p>
+					<p><code style="background-color:#e1e1e1;">adb install PATH_TO\joyn-core.apk</code> - Replace <span style="font-style:italic">PATH_TO</span> with the location of the apk on your file system.</p>
+			</div>
+			
+			<div class="step_header">
+				<p><h2><span class="h_num">2</span>Automatic Configuration</h2></p>
+				<p>Use Provisioning and Settings to configure joyn services</p>
+				<p><a id="show2" onclick="showStep(this,'hide2','step2');">show</a></p>
+				<p><a id="hide2" style="display:none;" onClick="hideStep(this,'show2','step2');">hide</a></p>
+			</div>
+			<div id="step2" class="step_content center" style="display:none;">
+				<p>Once joyn-core.apk installed, there will be two new applications present on your device as well as the joyn services.</p>
+				<div style="width:100%;display:inline-block;margin-bottom:15px">
+					<div style="width:60%;float:right;margin:75px 5% 0 0">
+						<p>First open the application named <b>Provisioning</b> and go to the second tab named <b>Stack</b>.</p>
+						<p>Before trying a manual configuration it is possible that your configuration may be done automatically. To do so, select <b>HTTPS</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
+					</div>
+					<div class="img-ssh">
+						<img src="../assets-sdk/images/tuto_ss_prov.png" width="100%"  />
+					</div>
+				</div>
+				
+				<div style="width:100%;display:inline-block;">
+					<div class="img-ssh" style="float:right;">
+						<img src="../assets-sdk/images/tuto_ss_settings.png" width="100%"  />
+					</div>
+					<div style="width:60%;float:left;margin:75px 5% 0 0">
+						<p>The joyn services must now be restarted.</p>
+						<p>You can either restart your device or use the second application named <b>Settings</b>.</p>
+						<p>By toggling the first option <b>joyn service</b> you can turn joyn services on and off.</p>
+					</div>
+				</div>
+				<p>If the automatic configuration succeeded, the joyn icon in the notification bar should turn yellow(ish). If this is the case you can now use joyn APIs to communicate with these services.</p>
+				<p>Otherwise you must proceed with the manual configuration.</p>						
+			</div>
+			<div class="step_header">
+				<p><h2><span class="h_num">3</span>Manual Configuration</h2></p>
+				<p>Configure Provisioning application manually</p>
+				<p><a id="show3" onclick="showStep(this,'hide3','step3');">show</a></p>
+				<p><a id="hide3" style="display:none;" onClick="hideStep(this,'show3','step3');">hide</a></p>
+			</div>
+			<div id="step3" class="step_content center" style="display:none;">
+				<p>Return to <b>Provisioning</b> application and go to the second tab named <b>Stack</b>.</p>
+				<p>Select <b>none</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
+				<div style="width:100%;display:inline-block;margin-bottom:15px">
+					<div style="width:60%;float:right;margin:75px 5% 0 0">
+						<p>Now go to the first tab named <b>Profile</b>.</p>
+						<p>Press <b>Generate profile</b>.</p>
+						<p>Fill-in the form as asked by entering your phone number, then by selecting the platform you are <b>supposed</b> to connect to.</p>
+						<p>Press <b>OK</b>.</p>
+					</div>
+					<div class="img-ssh">
+						<img src="../assets-sdk/images/tuto_ss_prov2.png" width="100%"  />
+					</div>
+				</div>
+				<p>You must now restart joyn services as described in <b>Step 2</b>.</p>
+			</div>
+			<div class="step_header">
+				<p><h2><span class="h_num">4</span>Advanced Configuration</h2></p>
+				<p>Additional options</p>
+				<p><a id="show4" onclick="showStep(this,'hide4','step4');">show</a></p>
+				<p><a id="hide4" style="display:none;" onClick="hideStep(this,'show4','step4');">hide</a></p>
+			</div>
+			<div id="step4" class="step_content center" style="display:none;">
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+
+<div id="footer">
+Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+

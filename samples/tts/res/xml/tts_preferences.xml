@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+		android:key="activate"
+		android:title="@string/label_activate"
+		android:summaryOn="@string/label_summary_activate_on"
+		android:summaryOff="@string/label_summary_activate_off"/>
+    
+</PreferenceScreen>

@@ -57,16 +57,22 @@ public class GroupChat {
     	 * Chat has been terminated
     	 */
     	public final static int TERMINATED = 4;
-    	
+    	   	
     	/**
     	 * Chat has been aborted 
     	 */
     	public final static int ABORTED = 5;
     	
     	/**
+    	 * Chat has been closed by the user. A user which has closed a
+    	 * conversation voluntary can't rejoin it afterward.
+    	 */
+    	public final static int CLOSED_BY_USER = 6;
+
+    	/**
     	 * Chat has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 7;
     	
         private State() {
         }    	

@@ -25,9 +25,9 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.vsh.IVideoPlayerListener;
 import org.gsma.joyn.vsh.VideoCodec;
 import org.gsma.joyn.vsh.VideoPlayer;
-import org.gsma.joyn.vsh.VideoPlayerListener;
 
 import android.hardware.Camera;
+import android.os.RemoteException;
 import android.os.SystemClock;
 
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
@@ -326,7 +326,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
 
         // Start RTP layer
         rtpSender.startSession();
-
+        
         // Player is started
         videoStartTime = SystemClock.uptimeMillis();
         started = true;
@@ -543,50 +543,70 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
      * Notify player event started
      */
     private void notifyPlayerEventStarted() {
-        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-        	((VideoPlayerListener)ite.next()).onPlayerStarted();
-        }
+    	try {
+	        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	        	ite.next().onPlayerStarted();
+	        }
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		}
     }
 
     /**
      * Notify player event stopped
      */
     private void notifyPlayerEventStopped() {
-        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-        	((VideoPlayerListener)ite.next()).onPlayerStopped();
-        }
+    	try {
+	        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	        	ite.next().onPlayerStopped();
+	        }
+    	} catch(RemoteException e) {
+			e.printStackTrace();
+    	}
     }
 
     /**
      * Notify player event opened
      */
     private void notifyPlayerEventOpened() {
-        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-        	((VideoPlayerListener)ite.next()).onPlayerOpened();
-        }
+    	try {
+	        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	        	ite.next().onPlayerOpened();
+	        }
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		}
     }
 
     /**
      * Notify player event closed
      */
     private void notifyPlayerEventClosed() {
-        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-        	((VideoPlayerListener)ite.next()).onPlayerClosed();
-        }
+    	try {
+	        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	        	ite.next().onPlayerClosed();
+	        }
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		}
     }
 
     /**
      * Notify player event error
      */
     private void notifyPlayerEventError(int error) {
-        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
-        while (ite.hasNext()) {
-        	((VideoPlayerListener)ite.next()).onPlayerError(error);
-        }
+    	try {
+	        Iterator<IVideoPlayerListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	        	ite.next().onPlayerError(error);
+	        }
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		}
     }
 
     /**

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+<title>How to connect to a joyn service | joyn SDK</title>
+
+
+</script>
+<link href="../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<script src="../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../assets/prettify.js" type="text/javascript"></script>
+<script src="../assets/joyn-sdk.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						onsubmit="return submit_search()">
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '..//javadoc/')"
+							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a  href="../index.html" tabindex="-1"><img
+              src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="samples">
+              <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <li id="faq-link"><a href="../faq/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <li id="download-link"><a href="../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  
+	
+		<div id="guide-nav" class="nav">
+			<p  style="margin-top: 15px;"><a  href="../samples/index.html"><b>Samples/Guides</b></a></p>
+			<ul>
+				<li>
+					<div class="selected">
+						<a href="../samples/connectService.html" >How to connect to a joyn service</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../samples/initChat.html" >How to initialise a chat</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../samples/createExtension.html">How to create a new capacity extension</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../samples/listContacts.html">How to get list of online contacts</a>
+					</div>
+				</li>
+				<li>
+					<div >
+						<a href="../samples/detectServices.html">How to detect if joyn services our started</a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>How to connect to a joyn service</h1></p>
+			<p><span>Learn how to instantiate a joyn service, connect to it and register listeners</span></p>
+		</div>
+		
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>Get service instance, connect/disconnect</h2>
+				<p></p>
+				<p>First, create a new Android <code>Activity</code> implementing <a href="../javadoc/org/gsma/joyn/JoynServiceListener.html">JoynServiceListener.</a></p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					<tt class="java"><span class="java4">public class </span><span class="java10">MyActivity </span><span class="java4">extends </span><span class="java10">Activity </span><span class="java4">implements </span><span class="java10">JoynServiceListener </span><span class="java8">{<br />
+					&#xA0; <br />
+					&#xA0; </span><span class="java10">...<br />
+					<br />
+					</span><span class="java8">}&#xA0; </span></tt>
+				</div>
+				<p></p>
+				<p>When using joyn APIs, in order to get the instance of a specific service you must call its constructor. In this example we will create a new instance of <a href="../javadoc/org/gsma/joyn/capability/CapabilityService.html">CapabilityService</a>. All service constructors have <a href="../javadoc/org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a> as argument.
+				<p>We call the constructor on the <code>onCreate</code> event of the Android life-cycle.</p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					<tt class="java"><span class="java0">&#xA0;&#xA0;&#xA0; </span><span class="java14">/**<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; * Capability API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; */<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java4">private </span><span class="java10">CapabilityService capabilityApi;<br />
+						&#xA0; <br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java16">@Override<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onCreate</span><span class="java8">(</span><span class="java10">Bundle savedInstanceState</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java4">super</span><span class="java10">.onCreate</span><span class="java8">(</span><span class="java10">savedInstanceState</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">//Activity setters<br />
+						&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; ...<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">// Instanciate API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">capabilityApi = </span><span class="java4">new </span><span class="java10">CapabilityService</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">()</span><span class="java10">, </span><span class="java4">this</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; ...<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java8">}</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>Now that we have an instance of our desired service we can connect to it.</p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					
+					<tt class="java"><span class="java0">&#xA0;&#xA0;&#xA0; </span><span class="java16">@Override<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onCreate</span><span class="java8">(</span><span class="java10">Bundle savedInstanceState</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; ...<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">// Instanciate API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">capabilityApi = </span><span class="java4">new </span><span class="java10">CapabilityService</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">()</span><span class="java10">, </span><span class="java4">this</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">// Connect API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">capabilityApi.connect</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java8">}</span>
+					</tt>				
+				</div>
+				<p></p>
+				<p>Finally we overrride the <code>onDistroy</code> event of the Android life-cycle in order to disconnect from the service when the <code>Activity</code> is closed.</p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					
+					<tt class="java"><span class="java0">&#xA0;&#xA0;&#xA0; </span><span class="java16">@Override<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onDestroy</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java4">super</span><span class="java10">.onDestroy</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java3">// Disconnect API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">capabilityApi.disconnect</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java8">}</span>
+					</tt>
+				</div>
+				<p></p>
+				
+			</div>
+			</br>
+			</br>			
+			<div class="guide-block">
+				<h2>Implementing Listener methods and manage connections</h2>
+				<p></p>
+				<p><a href="../javadoc/org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a> contains four different methods that need to be implemented.</p>	
+				<p>
+					<ul>
+						<li>
+							<a href="../javadoc/org/gsma/joyn/JoynServiceListener.html#onServiceConnected()">onServiceConnected</a>
+						</li>
+						<li>
+							<a href="../javadoc/org/gsma/joyn/JoynServiceListener.html#onServiceDisconnected()">onServiceDisonnected</a>
+						</li>
+						<li>
+							<a href="../javadoc/org/gsma/joyn/JoynServiceListener.html#onServiceRegistered()">onServiceRegistered</a>
+						</li>
+						<li>
+							<a href="../javadoc/org/gsma/joyn/JoynServiceListener.html#onServiceUnregistered()">onServiceUnegistered</a>
+						</li>
+					</ul>
+				</p>
+				<p></p>
+				<p>As service connection is asynchronous, the <code>onServiceConnected</code> method is used to add specific operations for when the service is connected.</p> 
+				<p>Methods from the API cannot be used before the service is connected.</p>
+				<p>In this example we use the <a href="../javadoc/org/gsma/joyn/capability/CapabilityService.html">CapabilityService</a> API. We can use the <code>getMyCapabilities</code> method once we are connected.</p>				
+				<p></p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					<tt class="java"><span class="java0">&#xA0;&#xA0;&#xA0; </span><span class="java14">/**<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; * Callback called when service is connected. This method is called when the<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; * service is well connected to the RCS service (binding procedure successfull):<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; * this means the methods of the API may be used.<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; */<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onServiceConnected</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java4">try </span><span class="java8">{<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">// Get the current capabilities from the RCS contacts API<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">Capabilities capabilities = capabilityApi.getMyCapabilities</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java3">// Set ihm components to show capabilities<br />
+						<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">...<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; <br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java8">} </span><span class="java4">catch</span><span class="java8">(</span><span class="java10">JoynServiceNotAvailableException e</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">e.printStackTrace</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; ...<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java8">} </span><span class="java4">catch</span><span class="java8">(</span><span class="java10">JoynServiceException e</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">e.printStackTrace</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; ...<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java8">}<br />
+						&#xA0;&#xA0;&#xA0; }</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>The <code>onServiceDisconnected</code> method can be used to show user messages or to trace disconnection.</p>
+				<p></p>
+				<p>The <code>onServiceRegistered</code> and <code>onServiceUnregistered</code> are called when the service linked to the event successfully registers and unregisters with a remote IMS server. Use these methods to control calls to the remote servers.</p>
+				<p></p>
+				</br>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="footer">
+Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+

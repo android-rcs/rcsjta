@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS</string>
+    <string name="app_title">Text-To-Speech</string>
+    <string name="label_activate">Chat messages</string>
+	<string name="label_summary_activate_on">Select to turn off the speech synthesis</string>
+	<string name="label_summary_activate_off">Select to turn on the speech synthesis</string>
+	<string name="label_new_msg">New chat</string>
+</resources>

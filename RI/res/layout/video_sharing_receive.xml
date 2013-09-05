@@ -12,8 +12,8 @@
 		
    <com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView
     	android:id="@+id/video_view"
-    	android:layout_gravity="center_horizontal"
-      	android:layout_width="fill_parent"
-      	android:layout_height="fill_parent"/>
+        android:layout_width="176dp"
+        android:layout_height="144dp"
+       	android:layout_gravity="center_horizontal"/>
       	
 </LinearLayout>

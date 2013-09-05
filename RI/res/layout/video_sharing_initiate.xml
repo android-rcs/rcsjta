@@ -8,15 +8,6 @@
         android:layout_width="fill_parent"
         android:orientation="vertical">
 
-        <com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView
-            android:id="@+id/video_preview"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center"
-            android:layout_marginLeft="1dp"
-            android:layout_marginRight="1dp"
-            android:layout_weight="1" />
-        
         <Spinner
             android:id="@+id/contact"
             android:layout_width="fill_parent"
@@ -40,6 +31,12 @@
             android:layout_marginRight="5dip"
             android:text="@string/label_initiate_sharing" />
 
+        <com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView
+            android:id="@+id/video_preview"
+            android:layout_width="176dp"
+            android:layout_height="144dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp" />
     </LinearLayout>
 
 </ScrollView>

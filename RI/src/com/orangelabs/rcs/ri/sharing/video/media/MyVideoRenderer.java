@@ -163,12 +163,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
                 notifyRendererEventError(VideoRenderer.Error.INTERNAL_ERROR);
                 return;
             }
-        } catch (UnsatisfiedLinkError e) {
-            notifyRendererEventError(VideoRenderer.Error.INTERNAL_ERROR);
-            return;
-        }
 
-        try {
             // Init the RTP layer
             releasePort();
             rtpReceiver = new VideoRtpReceiver(localRtpPort);
@@ -227,7 +222,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             // Already started
             return;
         }
-
+        
         // Start RTP layer
         rtpReceiver.startSession();
 
@@ -358,6 +353,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 	            ite.next().onRendererStarted();
 	        }
 		} catch(RemoteException e) {
+			e.printStackTrace();
 		}
     }
 
@@ -371,6 +367,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 	            ite.next().onRendererStopped();
 	        }
 		} catch(RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -384,6 +381,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 	            ite.next().onRendererOpened();
 	        }
 		} catch(RemoteException e) {
+			e.printStackTrace();
 		}
     }
 
@@ -397,6 +395,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 	            ite.next().onRendererClosed();
 	        }
 		} catch(RemoteException e) {
+			e.printStackTrace();
 		}
     }
 
@@ -410,6 +409,7 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 	            ite.next().onRendererError(error);
 	        }
 		} catch(RemoteException e) {
+			e.printStackTrace();
 		}
     }
 
@@ -469,16 +469,15 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             }
 
             int[] decodedFrame = NativeH264Decoder.DecodeAndConvert(sample.getData(), videoOrientation.getOrientation().getValue(), decodedFrameDimensions);
-
             if (NativeH264Decoder.getLastDecodeStatus() == 0) {
                 if ((surface != null) && (decodedFrame.length > 0)) {
                     // Init rgbFrame with the decoder dimensions
-    /* TODO                if ((rgbFrame.getWidth() != decodedFrameDimensions[0]) || (rgbFrame.getHeight() != decodedFrameDimensions[1])) {
+                	if ((rgbFrame.getWidth() != decodedFrameDimensions[0]) || (rgbFrame.getHeight() != decodedFrameDimensions[1])) {
                         rgbFrame = Bitmap.createBitmap(decodedFrameDimensions[0], decodedFrameDimensions[1], Bitmap.Config.RGB_565);
-                        notifyPlayerEventResized(decodedFrameDimensions[0], decodedFrameDimensions[1]);
-                    }*/
+                        // TODO: notifyPlayerEventResized(decodedFrameDimensions[0], decodedFrameDimensions[1]);
+                    }
 
-                    // Set data in image
+                	// Set data in image
                     rgbFrame.setPixels(decodedFrame, 0, decodedFrameDimensions[0], 0, 0,
                             decodedFrameDimensions[0], decodedFrameDimensions[1]);
                     surface.setImage(rgbFrame);

@@ -178,6 +178,7 @@
 <string name="label_restart_chat_failed">Can\'t restart the conversation (error code %d)</string>
 <string name="label_restart_chat_exception">Can\'t restart the conversation (unexpected exception)</string>
 <string name="label_chat_restart_canceled">Restart chat conversation has been canceled</string>
+<string name="label_restart_not_authorized">You can\'t restart a conversation that you have quit voluntary</string>
 <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
 <string name="label_me">Me</string>
 <string name="label_chat_empty">No chat</string>

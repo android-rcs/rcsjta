@@ -106,7 +106,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ChatServiceImpl.addChatSession(number, sessionApi);
 
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(ChatIntent.ACTION_NEW_INVITATION);
+    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
     	intent.putExtra(ChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	InstantMessage msg = session.getFirstMessage();
@@ -114,7 +114,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     			PhoneUtils.extractNumberFromUri(msg.getRemote()),
     			msg.getTextMessage(), msg.getServerDate(),
     			msg.isImdnDisplayedRequested());
-    	intent.putExtra(ChatIntent.EXTRA_FIRST_MESSAGE, msgApi);
+    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
     	
     	// Notify chat invitation listeners
@@ -172,7 +172,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 						logger.debug("Core chat session already exist: " + coreSession.getSessionID());
 					}
 
-					if (coreSession.getDialogPath().isSessionTerminated() || coreSession.getDialogPath().isSessionCancelled()) {
+					if (coreSession.getDialogPath().isSessionTerminated() ||
+							coreSession.getDialogPath().isSessionCancelled()) {
 						if (logger.isActivated()) {
 							logger.debug("Core chat session is terminated: reset it");
 						}

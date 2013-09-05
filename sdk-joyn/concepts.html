@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
+<title>Concepts | joyn SDK</title>
+
+
+</script>
+<link href="./assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="./assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="./assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<script src="./assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="./assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="./assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="./assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="./assets/prettify.js" type="text/javascript"></script>
+<script src="./assets/joyn-sdk.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("./");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						onsubmit="return submit_search()">
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, './/javadoc/')"
+							  onkeyup="return search_changed(event, false, './/javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a  href="./index.html" tabindex="-1"><img
+              src="./assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="home">
+              <li id="home-link"><a href="./index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="./javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="./samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="./tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="./tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <li id="faq-link"><a href="./faq/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <li id="download-link"><a href="./download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="minheight:700px;">
+		<div class="intro center">
+			<p><h1>Concepts</h1></p>
+			<p><span>The aim of joyn APIs is to allow one to access joyn services easily and in a standard way.</span></p>
+			<p><span>The following paragraphs will present the different functionalities accessible via joyn APIs and the concepts behind them.</span></p>
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>Servers and Listeners</h2>
+				<p></p>
+				<p>joyn APIs are provided with a client/server model. At any time, for a service, there may be zero or more clients. At any time, a client may be connected to zero or more services. </p>
+				<p>	Prior to requesting a service, a client connects to that service. </p>
+				<p>	Servers provide joyn services to the clients and notify the registered clients with the events through listeners. Clients request joyn services from the servers by invoking the appropriate API(s). Servers notify clients of joyn events by invoking the appropriate listener (callback functions). For joyn events that a client is required to monitor, the client must supply the listener to the server.</p> 
+				<p></p>
+				<div >
+					<img src="./assets/images/archi-concept.png" width="100%"/>
+				</div>
+			</div>
+			</br>
+			<div class="guide-block" style="border-top: 1px solid #dadada;">
+				<h3>Service</h3>
+				<p></p>
+				<p>Prior to using a service, a joyn client invokes the appropriate API to create the service. At this time, the client can also register for events by supplying the appropriate listener functions.</p>
+				<p>Once the service is created, the service communicates/notifies its clients about the service availability and/or service-specific functionality changes through the listener supplied by the clients. </p>
+				<p>At any time, a service may have zero or more sessions associated with it.</p>
+				<p>When a service is no longer needed, the client can destroy the service by invoking the appropriate API for that service. When a service is destroyed, all the service sessions associated with that service are also terminated.</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block" style="border-top: 1px solid #dadada;">
+				
+				<h3>Service Session</h3>
+				<p></p>
+				<p>A service session is established based on external triggers, e.g. a user attempting to establish a call or upon receipt of an event from the joyn service about a request from a remote user. When a service session is to be established, the appropriate API is invoked. At the time of establishment of a service session, the client registers for events by supplying appropriate listener functions. Each service session is associated with a joyn service.</p> 
+				<p>After the service session is created, the joyn service communicates/notifies its clients about the session state through the listeners supplied by the clients. </p>
+				<p>At any time, the client can terminate a service session by invoking the appropriate API, for example, based on user action or based on events from the joyn server that indicate a change in the session state.</p>
+				<p></p>
+				
+			</div>
+			
+			</br>
+		</div>
+		</br>
+	</div>
+</div>
+
+
+<div id="footer">
+Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+
