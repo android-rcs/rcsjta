@@ -6,18 +6,11 @@
     android:paddingTop="5dp"
     android:paddingBottom="5dp" >
     
-    <ProgressBar android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-   		android:layout_marginLeft="10dip"
-		android:layout_alignParentLeft="true"/>
-
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
    		android:layout_marginTop="5dip"
    		android:layout_marginLeft="5dip"
-		android:layout_gravity="center"
-		android:layout_toRightOf="@+id/progress"
+		android:layout_gravity="right"
 		android:text="@string/title_popup"
 		android:layout_centerHorizontal="true"
 		android:textAppearance="?android:attr/textAppearanceLarge" />

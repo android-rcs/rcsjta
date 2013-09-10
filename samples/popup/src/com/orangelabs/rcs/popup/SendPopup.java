@@ -21,8 +21,9 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.Vector;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceListener;
+import org.gsma.joyn.capability.Capabilities;
+import org.gsma.joyn.capability.CapabilitiesListener;
 import org.gsma.joyn.capability.CapabilityService;
 import org.gsma.joyn.contacts.ContactsService;
 import org.gsma.joyn.contacts.JoynContact;
@@ -44,6 +45,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -53,7 +55,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.QuickContactBadge;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,7 +66,7 @@ import com.orangelabs.rcs.popup.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class SendPopup extends ListActivity implements OnItemClickListener, JoynServiceListener {
+public class SendPopup extends ListActivity implements OnItemClickListener {
 	private static final String TAG = "Popup";
 
 	/**
@@ -78,7 +79,12 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 	 */
 	private CapabilityService capabilityApi = null;
 
-	/**
+    /**
+     * Capabilities listener
+     */
+    private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener(); 
+    
+    /**
 	 * List of items
 	 */
 	private Vector<ListItem> items = new Vector<ListItem>();
@@ -88,11 +94,6 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 	 */
 	private MultipleListAdapter adapter;
 	
-	/**
-	 * Progress bar
-	 */
-	private ProgressBar progressBar;
-
 	/**
 	 * Session API
 	 */
@@ -123,6 +124,9 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
         // Set layout
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.send_popup);
+
+		// Hide keybord by default
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		
 		// Set list adapter
 		adapter = new MultipleListAdapter();
@@ -130,9 +134,6 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 		getListView().setOnItemClickListener(this);
 		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		
-		// Set progress bar
-		progressBar = (ProgressBar)findViewById(R.id.progress);
-
 		// Set animation selector
 		Spinner spinnerAnim = (Spinner)findViewById(R.id.animation);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -146,12 +147,12 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 		sendBtn.setEnabled(false);
 		
 		// Init APIs
-		contactsApi = new ContactsService(getApplicationContext(), this);
+		contactsApi = new ContactsService(getApplicationContext(), new MyContactsApiListener());
 		contactsApi.connect();
-		sessionApi = new MultimediaSessionService(getApplicationContext(), this);
-		sessionApi.connect();
-		capabilityApi = new CapabilityService(getApplicationContext(), this);
+		capabilityApi = new CapabilityService(getApplicationContext(), new MyCapabilityApiListener());
 		capabilityApi.connect();
+		sessionApi = new MultimediaSessionService(getApplicationContext(), new MySessionApiListener());
+		sessionApi.connect();
 	}
 	
 	@Override
@@ -165,35 +166,65 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 	}
 	
     /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
+     * Capability API listener
      */
-    public void onServiceConnected() {
-		// Load contacts in the list
-		loadDataSet();		
+    private class MyCapabilityApiListener implements JoynServiceListener {
+        // Service connected
+        public void onServiceConnected() {
+        	try {
+	        	// Register a capability listener
+	    		capabilityApi.addCapabilitiesListener(capabilitiesListener);
+
+	        	// Refresh capabilities in background
+	        	if (capabilityApi.isServiceRegistered()) { 
+	    			RefreshCapabilitiesAsyncTask task = new RefreshCapabilitiesAsyncTask();
+	    			task.execute((Void[])null);
+	    		}
+        	} catch(Exception e) {
+    			Log.e(TAG, "Can't resfresh capabilities", e);
+        	}
+    	}
+    
+        // Service disconnected
+        public void onServiceDisconnected(int error) {
+        }  
     }
     
     /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
+     * Contacts API listener
      */
-    public void onServiceDisconnected(int error) {
+    private class MyContactsApiListener implements JoynServiceListener {
+        // Service connected
+        public void onServiceConnected() {
+        	// Load contact info in the list 
+        	loadDataSet();
+        }
+        
+        // Service disconnected
+        public void onServiceDisconnected(int error) {
+        }  
     }    
     
+    /**
+     * MM session API listener
+     */
+    private class MySessionApiListener implements JoynServiceListener {
+        // Service connected
+        public void onServiceConnected() {
+			sendBtn.setEnabled((selectedContacts.size() > 0) && (sessionApi.isServiceConnected()));
+        }
+        
+        // Service disconnected
+        public void onServiceDisconnected(int error) {
+			sendBtn.setEnabled(false);
+        }  
+    }        
+	
     /**
      * Callback called when service is registered to the RCS/IMS platform
      */
     public void onServiceRegistered() {
-		try {
-			RefreshCapabilitiesAsyncTask task = new RefreshCapabilitiesAsyncTask();
-			task.execute((Void[])null);
-		} catch(Exception e) {
-			Log.e(TAG, "Can't resfresh capabilities", e);
-		}
+    	// Nothing done here
     }
     
     /**
@@ -219,7 +250,7 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 			}
 			
 			adapter.notifyDataSetChanged();
-			sendBtn.setEnabled(selectedContacts.size() > 0);
+			sendBtn.setEnabled((selectedContacts.size() > 0) && (sessionApi.isServiceConnected()));
 		}
 	}
 	
@@ -247,13 +278,71 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 	}
 	
 	/**
+	 * Update contact info in the list
+	 * 
+	 * @param contact Contact
+	 * @param capabilities Capabilities
+	 */
+	private synchronized void updateDataSet(String contact, Capabilities capabilities) {
+		Log.d(TAG, "Update list of contacts");
+		
+		// Update list item
+		int position = -1;
+		for(int i=0; i < items.size(); i++) {
+			ListItem item = items.get(i);
+			ContactItem contactItem = (ContactItem)item;
+			if (contactItem.number.equals(contact)) {
+				position = i;				
+			}
+		}
+		
+		// Get contact info
+		JoynContact joynContact = null;
+		try {
+			joynContact = contactsApi.getJoynContact(contact);
+		} catch(Exception e) {}
+		
+		// Check if Popup is supported by the contact
+		if ((joynContact == null) && (position != -1)) {
+			// Contact is no more joyn compliant, remove it from the list
+			Log.d(TAG, "Remove contact " + contact);
+			items.remove(position);
+		} else {
+			// Check if the joyn contact supports Popup and is online 
+			boolean supported = false;
+			boolean online = joynContact.isRegistered();
+			Set<String> exts = joynContact.getCapabilities().getSupportedExtensions();
+			for(String ext : exts) {
+				if (ext.contains(PopupManager.FEATURE_TAG)) {
+					supported = true;
+					break;
+				}
+			}
+
+			// Add a new contact if the contact not yet in the list and supports the feature
+			if ((position == -1) && supported && online) {
+				Log.d(TAG, "Add contact " + contact);
+				items.add(new ContactItem(contact));
+			}
+			
+			// Remove the contact if the contact in the list but offline or Popup no more supported
+			if ((position != -1) && (!supported || !online)) {
+				// Remove contact
+				Log.d(TAG, "Remove contact " + contact);
+				items.remove(position);
+			}
+		}
+		
+		adapter.notifyDataSetChanged();
+	}
+	
+	/**
 	 * Refresh capabilities task
 	 */
 	private class RefreshCapabilitiesAsyncTask extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			progressBar.setVisibility(View.VISIBLE);
 		}
 
 		@Override
@@ -261,7 +350,7 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 			try {
 				Set<JoynContact> rcsContacts = contactsApi.getJoynContacts();
 				for (JoynContact contact : rcsContacts) {
-					Log.d(TAG, "Refresh capabilities for contact " + contact);
+					Log.d(TAG, "Refresh capabilities for contact " + contact.getContactId());
 					capabilityApi.requestContactCapabilities(contact.getContactId());
 				}
 			} catch(Exception e) {
@@ -273,7 +362,6 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			progressBar.setVisibility(View.INVISIBLE);
 		}
 	}
 	
@@ -440,4 +528,24 @@ public class SendPopup extends ListActivity implements OnItemClickListener, Joyn
 
 		return super.onKeyDown(keyCode, event);
 	}
+
+    /**
+     * Capabilities event listener
+     */
+    private class MyCapabilitiesListener extends CapabilitiesListener {
+	    /**
+	     * Callback called when new capabilities are received for a given contact
+	     * 
+	     * @param contact Contact
+	     * @param capabilities Capabilities
+	     */
+	    public void onCapabilitiesReceived(final String contact, final Capabilities capabilities) {
+			handler.post(new Runnable(){
+				public void run(){
+					// Update list of displayed contacts
+					updateDataSet(contact, capabilities);
+				}
+			});
+	    };    
+    }  
 }

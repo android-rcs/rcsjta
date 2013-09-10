@@ -19,13 +19,14 @@ import android.content.SharedPreferences;
 public class ChatEvent extends BroadcastReceiver {
     @Override
 	public void onReceive(Context context, Intent intent) {
+    	// Check activation state before to continue
         SharedPreferences preferences = context.getSharedPreferences(Registry.REGISTRY, Activity.MODE_PRIVATE);
         boolean flag = Registry.readBoolean(preferences, Registry.ACTIVATE_TTS, false);
         if (flag) {
-        	// Capture the chat message
+        	// Get the chat message from the Intent
     		ChatMessage message = intent.getParcelableExtra(ChatIntent.EXTRA_MESSAGE);
     		
-			// Play TTS of the chat message
+			// Play TTS on the chat message
         	ArrayList<String> messages = new ArrayList<String>();
 			messages.add(context.getString(R.string.label_new_msg));        		
 			messages.add(message.getMessage());        		
