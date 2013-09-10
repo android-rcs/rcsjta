@@ -91,20 +91,6 @@ public class JoynContactsList extends ListActivity implements JoynServiceListene
     public void onServiceDisconnected(int error) {
     	// Nothing to do here
     }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Nothing to do here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Nothing to do here
-    }      
 
     /**
      * Update the list

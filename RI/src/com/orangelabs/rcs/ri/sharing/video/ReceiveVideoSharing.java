@@ -195,20 +195,6 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }      
-    
-    /**
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {

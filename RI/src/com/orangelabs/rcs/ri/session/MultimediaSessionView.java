@@ -178,7 +178,19 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	        int mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
 			if (mode == MultimediaSessionView.MODE_OUTGOING) {
 				// Outgoing session
-    	        
+
+	            // Check if the service is available
+	        	boolean registered = false;
+	        	try {
+	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
+	        			registered = true;
+	        		}
+	        	} catch(Exception e) {}
+	            if (!registered) {
+	    	    	Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_service_not_available));
+	    	    	return;
+	            } 
+	            
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
 		        
@@ -264,20 +276,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_disabled));
     }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }   	
 	
     /**
      * Accept button listener

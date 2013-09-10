@@ -113,20 +113,6 @@ public class SendMultimediaMessage extends Activity implements JoynServiceListen
     public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(SendMultimediaMessage.this, getString(R.string.label_api_disabled));
     }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }      
 
 	/**
 	 * Send button callback

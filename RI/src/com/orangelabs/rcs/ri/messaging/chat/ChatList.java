@@ -202,18 +202,6 @@ public class ChatList extends Activity implements JoynServiceListener {
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    }      
-    
-    /**
      * Onclick list listener
      */
     private OnClickListener clickItemListener = new OnClickListener() {

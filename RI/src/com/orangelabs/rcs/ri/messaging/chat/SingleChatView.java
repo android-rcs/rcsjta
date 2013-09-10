@@ -28,6 +28,7 @@ import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.Menu;
@@ -58,10 +59,15 @@ public class SingleChatView extends ChatView {
 	public static String EXTRA_CONTACT = "contact";
 
 	/**
+	 * Activity displayed status
+	 */
+	private static boolean activityDisplayed = false;
+	
+	/**
 	 * Remote contact
 	 */
 	private String contact = null;
-	
+    
     /**
      * Chat 
      */
@@ -72,12 +78,7 @@ public class SingleChatView extends ChatView {
 	 */
 	private boolean isDeliveryDisplayed = true;
 	
-	/**
-	 * Activity displayed status
-	 */
-	private static boolean activityDisplayed = false;
-	
-	/**
+    /**
      * Chat listener
      */
     private MyChatListener chatListener = new MyChatListener();	
@@ -85,6 +86,21 @@ public class SingleChatView extends ChatView {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
+		if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
+			// Open chat
+			contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);				
+		} else {
+			// Incoming chat from its Intent
+			contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
+		}
+		
+		// Set title
+		setTitle(getString(R.string.title_chat) + " " +	contact);	
+		
+		// Load history
+		loadHistory();
     }
     
     @Override
@@ -117,34 +133,22 @@ public class SingleChatView extends ChatView {
      */
     public void onServiceConnected() {
     	try {
-	        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
-			if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
-				// Open chat
-				contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);				
-			} else {
-				// Incoming chat from its Intent
-				contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
-			}
-    		
-			// Set title
-			setTitle(getString(R.string.title_chat) + " " +	contact);	
-
-			// Set chat settings
-	        isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
-
-	        // Open chat
-    		chat = chatApi.openSingleChat(contact, chatListener);
-				
-            // Load history
-			loadHistory();
+    		// Set chat settings
+            isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
 
 	        // Set the message composer max length
 			InputFilter[] filterArray = new InputFilter[1];
 			filterArray[0] = new InputFilter.LengthFilter(chatApi.getConfiguration().getSingleChatMessageMaxLength());
 			composeText.setFilters(filterArray);
-			
+
+			// Open chat
+    		chat = chatApi.openSingleChat(contact, chatListener);
+							
 			// Instanciate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
+			
+			// Update displayed report
+			updateDisplayedReport();
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled));
@@ -166,50 +170,12 @@ public class SingleChatView extends ChatView {
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Nothing to do 
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-		handler.post(new Runnable(){
-			public void run(){
-				Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_ims_disconnected));
-			}
-		});
-    }      
-
-    /**
-     * Send a message
-     * 
-     * @param msg Message
-     * @return Message ID
-     */
-    protected String sendMessage(String msg) {
-    	try {
-			// Send the text to remote
-			String msgId = chat.sendMessage(msg);
-			
-	        // Warn the composing manager that the message was sent
-			composingManager.messageWasSent();
-
-			return msgId;
-	    } catch(Exception e) {
-	    	e.printStackTrace();
-	    	return null;
-	    }
-    }
-    
-    /**
      * Load history
      */
     private void loadHistory() {
 		try {
-	    	Cursor cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, 
+			Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact);		
+	    	Cursor cursor = getContentResolver().query(uri, 
 	    			new String[] {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
@@ -219,7 +185,7 @@ public class SingleChatView extends ChatView {
 	    				ChatLog.Message.MESSAGE_TYPE,
 	    				ChatLog.Message.MESSAGE_ID
 	    				},
-	    			ChatLog.Message.CHAT_ID + "='" + contact + "'", 
+	    			null, 
 	    			null, 
 	    			ChatLog.Message.TIMESTAMP + " ASC");
 	    	while(cursor.moveToNext()) {
@@ -245,6 +211,59 @@ public class SingleChatView extends ChatView {
     	}
 	}
 
+    /**
+     * Send a message
+     * 
+     * @param msg Message
+     * @return Message ID
+     */
+    protected String sendMessage(String msg) {
+    	try {
+			// Send the text to remote
+			String msgId = chat.sendMessage(msg);
+			
+	        // Warn the composing manager that the message was sent
+			composingManager.messageWasSent();
+
+			return msgId;
+	    } catch(Exception e) {
+	    	e.printStackTrace();
+	    	return null;
+	    }
+    }
+    
+    /**
+     * Update displayed report
+     */
+    private void updateDisplayedReport() {
+    	Thread t = new Thread() {
+    		public void run() {
+				try {
+			    	Cursor cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, 
+			    			new String[] {
+			    				ChatLog.Message.MESSAGE_STATUS,
+			    				ChatLog.Message.MESSAGE_ID
+			    				},
+			    			ChatLog.Message.CHAT_ID + "='" + contact + "'", 
+			    			null, 
+			    			ChatLog.Message.TIMESTAMP + " ASC");
+			    	while(cursor.moveToNext()) {
+			    		int status = cursor.getInt(0);
+			    		String msgId = cursor.getString(1);
+		
+			    		// Send displayed report for older messages
+				        if ((isDeliveryDisplayed) && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
+				        	sendDisplayedReport(msgId);
+				        }	    		
+			    	}
+		    	} catch(Exception e) {
+		    		e.printStackTrace();
+		    	}
+    		}
+    	};
+    	t.start();
+    }
+    
     /**
      * Quit the session
      */
@@ -292,9 +311,8 @@ public class SingleChatView extends ChatView {
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater=new MenuInflater(getApplicationContext());
+		MenuInflater inflater = new MenuInflater(getApplicationContext());
 		inflater.inflate(R.menu.menu_chat, menu);
-
 		return true;
 	}
     

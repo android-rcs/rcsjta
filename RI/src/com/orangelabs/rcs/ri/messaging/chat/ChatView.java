@@ -70,12 +70,17 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     /**
 	 * Chat API
 	 */
-	protected ChatService chatApi;
+	protected ChatService chatApi = null;
     
 	/**
 	 * Message composer
 	 */
     protected EditText composeText;
+    
+    /**
+     * Send button
+     */
+    protected Button sendBtn;
     
     /**
      * Message list adapter
@@ -119,8 +124,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         composeText.addTextChangedListener(mUserTextWatcher);
                 
 		// Set send button listener
-        Button btn = (Button)findViewById(R.id.send_button);
-        btn.setOnClickListener(this);
+        sendBtn = (Button)findViewById(R.id.send_button);
+        sendBtn.setOnClickListener(this);
                
         // Instanciate API
         chatApi = new ChatService(getApplicationContext(), this);
@@ -207,6 +212,18 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         String text = composeText.getText().toString();
         if ((text == null) || (text.length() == 0)) {
         	return;
+        }
+        
+        // Check if the service is available
+    	boolean registered = false;
+    	try {
+    		if ((chatApi != null) && chatApi.isServiceRegistered()) {
+    			registered = true;
+    		}
+    	} catch(Exception e) {}
+        if (!registered) {
+	    	Utils.showMessage(ChatView.this, getString(R.string.label_service_not_available));
+	    	return;
         }
 
         // Send text message

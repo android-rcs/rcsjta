@@ -194,20 +194,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled));
     }    
-
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }      
     
 	/**
 	 * Accept invitation

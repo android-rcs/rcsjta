@@ -27,7 +27,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.R.string;
 
 /**
  * Capabilities API

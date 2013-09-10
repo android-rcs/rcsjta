@@ -192,21 +192,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     public void onServiceDisconnected(int error) {
 		Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_disabled));
-    }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }      
+    }   
     
     /**
      * Invite button listener
@@ -242,6 +228,18 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	 * Initiate transfer
 	 */
     private void initiateTransfer() {
+        // Check if the service is available
+    	boolean registered = false;
+    	try {
+    		if ((ftApi != null) && ftApi.isServiceRegistered()) {
+    			registered = true;
+    		}
+    	} catch(Exception e) {}
+        if (!registered) {
+	    	Utils.showMessage(InitiateFileTransfer.this, getString(R.string.label_service_not_available));
+	    	return;
+        }     	    	
+    	
     	// Get remote contact
         Spinner spinner = (Spinner)findViewById(R.id.contact);
         MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();

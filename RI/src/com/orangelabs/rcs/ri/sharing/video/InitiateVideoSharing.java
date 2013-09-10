@@ -232,20 +232,6 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }      
-    
-    /**
      * Dial button listener
      */
     private OnClickListener btnDialListener = new OnClickListener() {
@@ -267,7 +253,19 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      */
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Get the remote contact
+            // Check if the service is available
+        	boolean registered = false;
+        	try {
+        		if ((vshApi != null) && vshApi.isServiceRegistered()) {
+        			registered = true;
+        		}
+        	} catch(Exception e) {}
+            if (!registered) {
+    	    	Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_service_not_available));
+    	    	return;
+            } 
+            
+            // Get the remote contact
             Spinner spinner = (Spinner)findViewById(R.id.contact);
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
             final String remote = cursor.getString(1);

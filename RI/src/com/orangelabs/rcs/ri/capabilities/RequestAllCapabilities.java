@@ -92,24 +92,22 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
 	}    
 
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }
-
-    /**
      * Publish button listener
      */
     private OnClickListener btnSyncListener = new OnClickListener() {
         public void onClick(View v) {
+            // Check if the service is available
+        	boolean registered = false;
+        	try {
+        		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
+        			registered = true;
+        		}
+        	} catch(Exception e) {}
+            if (!registered) {
+    	    	Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_service_not_available));
+    	    	return;
+            }        	
+        	
         	// Execute in background
         	final SyncTask tsk = new SyncTask(capabilityApi);
         	tsk.execute();

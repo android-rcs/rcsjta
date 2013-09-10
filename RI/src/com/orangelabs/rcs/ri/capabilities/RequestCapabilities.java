@@ -147,20 +147,6 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Not used here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Not used here
-    }    
-    
-    /**
      * Capabilities event listener
      */
     private class MyCapabilitiesListener extends CapabilitiesListener {
@@ -189,7 +175,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-			try {
+            try {
 		        // Get selected contact
 				String contact = getContactAtPosition(position);
 				
@@ -199,7 +185,18 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 				// Display default capabilities
 		        displayCapabilities(currentCapabilities);
 
-		        // Update capabilities
+		        // Check if the service is available
+		    	boolean registered = false;
+		    	try {
+		    		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
+		    			registered = true;
+		    		}
+		    	} catch(Exception e) {}
+		    	if (!registered) {
+			    	return;
+		        }      	
+		    	
+		    	// Update capabilities
 				updateCapabilities(contact);
 		    } catch(JoynServiceNotAvailableException e) {
 		    	e.printStackTrace();
@@ -244,7 +241,19 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
      */
     private OnClickListener btnRefreshListener = new OnClickListener() {
         public void onClick(View v) {
-    		// Update capabilities
+            // Check if the service is available
+        	boolean registered = false;
+        	try {
+        		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
+        			registered = true;
+        		}
+        	} catch(Exception e) {}
+            if (!registered) {
+    	    	Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
+    	    	return;
+            }  
+            
+            // Update capabilities
     		updateCapabilities(getSelectedContact());
         }
     };

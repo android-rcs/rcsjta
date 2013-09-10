@@ -230,20 +230,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
     }    
     
     /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-		apiEnabled = true;
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-		apiEnabled = false;
-    }      
-    
-    /**
      * Onclick list listener
      */
     private OnClickListener clickItemListener = new OnClickListener() {

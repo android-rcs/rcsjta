@@ -119,6 +119,18 @@ public class GroupChatView extends ChatView {
 	        int mode = getIntent().getIntExtra(GroupChatView.EXTRA_MODE, -1);
 			if (mode == GroupChatView.MODE_OUTGOING) {
 				// Outgoing session
+				
+	            // Check if the service is available
+	        	boolean registered = false;
+	        	try {
+	        		if ((chatApi != null) && chatApi.isServiceRegistered()) {
+	        			registered = true;
+	        		}
+	        	} catch(Exception e) {}
+	            if (!registered) {
+	    	    	Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_service_not_available));
+	    	    	return;
+	            }     				
 
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(GroupChatView.EXTRA_CONTACT);
@@ -233,24 +245,6 @@ public class GroupChatView extends ChatView {
 		Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_api_disabled));
     }    
     
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Nothing to do 
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-		handler.post(new Runnable(){
-			public void run(){
-				Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_ims_disconnected));
-			}
-		});
-    }      
-	
     /**
      * Accept button listener
      */
