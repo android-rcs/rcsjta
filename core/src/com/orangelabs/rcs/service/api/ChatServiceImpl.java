@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.gsma.joyn.IJoynServiceRegistrationListener;
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.ChatServiceConfiguration;
@@ -38,6 +39,11 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class ChatServiceImpl extends IChatService.Stub {
+	/**
+	 * List of service event listeners
+	 */
+	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
+
 	/**
 	 * List of chat sessions
 	 */
@@ -85,7 +91,72 @@ public class ChatServiceImpl extends IChatService.Stub {
 		}
 	}
 	
+    /**
+     * Returns true if the service is registered to the platform, else returns false
+     * 
+	 * @return Returns true if registered else returns false
+     */
+    public boolean isServiceRegistered() {
+    	return ServerApiUtils.isImsConnected();
+    }
+
 	/**
+	 * Registers a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+	 */
+	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("Add a service listener");
+			}
+
+			serviceListeners.register(listener);
+		}
+	}
+	
+	/**
+	 * Unregisters a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+	 */
+	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("Remove a service listener");
+			}
+			
+			serviceListeners.unregister(listener);
+    	}	
+	}    
+    
+    /**
+     * Receive registration event
+     * 
+     * @param state Registration state
+     */
+    public void notifyRegistrationEvent(boolean state) {
+    	// Notify listeners
+    	synchronized(lock) {
+			final int N = serviceListeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	if (state) {
+	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
+	            	} else {
+	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
+	            	}
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        serviceListeners.finishBroadcast();
+	    }    	    	
+    }
+    
+    /**
 	 * Receive a new chat invitation
 	 * 
 	 * @param session Chat session

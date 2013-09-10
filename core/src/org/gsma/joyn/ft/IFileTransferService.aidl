@@ -1,5 +1,6 @@
 package org.gsma.joyn.ft;
 
+import org.gsma.joyn.IJoynServiceRegistrationListener;
 import org.gsma.joyn.ft.IFileTransfer;
 import org.gsma.joyn.ft.IFileTransferListener;
 import org.gsma.joyn.ft.INewFileTransferListener;
@@ -9,6 +10,11 @@ import org.gsma.joyn.ft.FileTransferServiceConfiguration;
  * File transfer service API
  */
 interface IFileTransferService {
+    boolean isServiceRegistered();
+
+	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+
+	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
 
     FileTransferServiceConfiguration getConfiguration();
 

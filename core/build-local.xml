@@ -29,6 +29,9 @@
 		includesfile="${terminal.root}/jarfiles.txt">
 	</jar>
 	<copy file="${terminal.api}" todir="${terminal.root}/../ri/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/popup/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
     </target>
 
 </project>

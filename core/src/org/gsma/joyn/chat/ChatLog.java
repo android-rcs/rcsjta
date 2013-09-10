@@ -81,6 +81,13 @@ public class ChatLog {
          * Content provider URI for chat messages
          */
         public static final Uri CONTENT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/message");
+        
+        /**
+         * Content provider URI for chat messages of a given conversation. In case of single chat
+         * the conversation is identified by the contact phone number. In case of group chat the
+         * the conversation is identified by the unique chat ID. 
+         */
+        public static final Uri CONTENT_CHAT_URI = Uri.parse("content://org.gsma.joyn.provider.chat/message/#");
 
         /**
          * The name of the column containing the unique ID for a row.

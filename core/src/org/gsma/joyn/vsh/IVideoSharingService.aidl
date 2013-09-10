@@ -1,5 +1,6 @@
 package org.gsma.joyn.vsh;
 
+import org.gsma.joyn.IJoynServiceRegistrationListener;
 import org.gsma.joyn.vsh.IVideoSharing;
 import org.gsma.joyn.vsh.IVideoSharingListener;
 import org.gsma.joyn.vsh.INewVideoSharingListener;
@@ -10,6 +11,12 @@ import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
  * Video sharing service API
  */
 interface IVideoSharingService {
+    boolean isServiceRegistered();
+
+	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+
+	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+
 	VideoSharingServiceConfiguration getConfiguration();
 
 	List<IBinder> getVideoSharings();

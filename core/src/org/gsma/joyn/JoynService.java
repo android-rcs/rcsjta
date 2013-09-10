@@ -116,11 +116,6 @@ public abstract class JoynService {
 	protected JoynServiceListener serviceListener;
 	
 	/**
-	 * Registration state
-	 */
-	private boolean registered = false;
-	
-	/**
 	 * Constructor
 	 * 
      * @param ctx Application context
@@ -147,13 +142,4 @@ public abstract class JoynService {
 	 * @return Returns true if connected else returns false
      */
     public abstract boolean isServiceConnected();
-
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
-	 * @return Returns true if registered else returns false
-     */
-    public boolean isServiceRegistered() {
-    	return registered;
-    }
 }

@@ -6,6 +6,8 @@ import org.gsma.joyn.contacts.JoynContact;
  * Contacts service API
  */
 interface IContactsService {
+	JoynContact getJoynContact(String contactId);
+
 	List<JoynContact> getJoynContacts();
 
 	List<JoynContact> getJoynContactsOnline();

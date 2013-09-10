@@ -38,14 +38,4 @@ public interface JoynServiceListener {
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error);
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered();
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered();
 }

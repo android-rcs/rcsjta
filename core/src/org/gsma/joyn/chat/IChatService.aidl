@@ -1,5 +1,6 @@
 package org.gsma.joyn.chat;
 
+import org.gsma.joyn.IJoynServiceRegistrationListener;
 import org.gsma.joyn.chat.IChatListener;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IGroupChatListener;
@@ -11,6 +12,12 @@ import org.gsma.joyn.chat.ChatServiceConfiguration;
  * Chat service API
  */
 interface IChatService {
+    boolean isServiceRegistered();
+    
+	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+
+	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+
     ChatServiceConfiguration getConfiguration();
     
     IChat openSingleChat(in String contact, in IChatListener listener);

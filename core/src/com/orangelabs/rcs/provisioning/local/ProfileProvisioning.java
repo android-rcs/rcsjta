@@ -288,7 +288,7 @@ public class ProfileProvisioning extends Activity {
         textEdit.setText(RcsSettings.getInstance().getCountryCode());
 
         final String[] platforms = {
-                "NSN Brune", "NSN Lannion", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
+        		"NSN Lannion", "NSN Brune", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
                 "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini", "JibeNet"
         };
         Spinner spinner = (Spinner)view.findViewById(R.id.ims);
@@ -326,7 +326,19 @@ public class ProfileProvisioning extends Activity {
         			String confUri = "";
         			String enduserConfirmUri = "";
                     switch(index) {
-                    	case 0: // NSN Brune
+	                	case 0: // NSN Lannion
+	            			homeDomain = "rcs.lannion.com";
+	            			sipUri = number + "@" + homeDomain;
+	        				privateSipUri = sipUri;
+	            			imsPwd = "alu2012";
+	            			imsRealm = "rcs.lannion.com";
+	            			imsAddrForMobile = "80.12.197.184";
+	            			imsPortForMobile = 5080;
+	            			imsAddrForWifi = "80.12.197.184";
+	            			imsPortForWifi = 5080;
+	            			confUri = "sip:Conference-Factory@" + homeDomain;
+	            			break;
+                    	case 1: // NSN Brune
 	            			homeDomain = "rcs.brune.com";
             				sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -336,18 +348,6 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForMobile = 5060;
 	            			imsAddrForWifi = "80.12.197.74";
 	            			imsPortForWifi = 5060;
-	            			confUri = "sip:Conference-Factory@" + homeDomain;
-	            			break;
-                    	case 1: // NSN Lannion
-	            			homeDomain = "rcs.lannion.com";
-	            			sipUri = number + "@" + homeDomain;
-            				privateSipUri = sipUri;
-	            			imsPwd = "alu2012";
-	            			imsRealm = "rcs.lannion.com";
-	            			imsAddrForMobile = "80.12.197.184";
-	            			imsPortForMobile = 5080;
-	            			imsAddrForWifi = "80.12.197.184";
-	            			imsPortForWifi = 5080;
 	            			confUri = "sip:Conference-Factory@" + homeDomain;
 	            			break;
                         case 2: // Margaux (albatros)

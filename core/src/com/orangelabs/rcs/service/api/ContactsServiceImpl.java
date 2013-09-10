@@ -61,6 +61,40 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	}
     
     /**
+     * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
+     * 
+     * @param contactId Contact ID
+     * @return Contact
+     * @throws ServerApiException
+     */
+	public JoynContact getJoynContact(String contactId) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Get joyn contact " + contactId);
+		}
+
+		// Read capabilities in the local database
+		ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contactId);
+		if (contactInfo !=  null) {
+			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
+    		Set<String> exts = new HashSet<String>();
+    		List<String> listExts = capabilities.getSupportedExtensions();
+    		for(int j=0; j < listExts.size(); j++) {
+    			exts.add(listExts.get(j));
+    		}
+    		Capabilities capaApi = new Capabilities(
+    				capabilities.isImageSharingSupported(),
+    				capabilities.isVideoSharingSupported(),
+    				capabilities.isImSessionSupported(),
+    				capabilities.isFileTransferSupported(),
+    				exts); 
+			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+			return new JoynContact(contactId, registered, capaApi);
+		} else {
+			return null;
+		}
+    }	
+	
+    /**
      * Returns the list of joyn contacts
      * 
      * @return List of contacts

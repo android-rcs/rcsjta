@@ -27,6 +27,7 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
+import org.gsma.joyn.JoynServiceRegistrationListener;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -103,6 +104,60 @@ public class MultimediaSessionService extends JoynService {
         }
     };
 
+    /**
+     * Returns true if the service is registered to the platform, else returns false
+     * 
+	 * @return Returns true if registered else returns false
+     * @throws JoynServiceException
+     */
+    public boolean isServiceRegistered() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.isServiceRegistered();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }
+    
+	/**
+	 * Registers a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
+	 */
+	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addServiceRegistrationListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+	
+	/**
+	 * Unregisters a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
+	 */
+	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeServiceRegistrationListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}     
+    
     /**
      * Initiates a new multimedia session with a remote contact and for a given service.
      * The SDP (Session Description Protocol) parameter is used to describe the supported

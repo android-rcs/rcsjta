@@ -1,5 +1,6 @@
 package org.gsma.joyn.capability;
 
+import org.gsma.joyn.IJoynServiceRegistrationListener;
 import org.gsma.joyn.capability.Capabilities;
 import org.gsma.joyn.capability.ICapabilitiesListener;
 
@@ -7,6 +8,12 @@ import org.gsma.joyn.capability.ICapabilitiesListener;
  * Capability service API
  */
 interface ICapabilityService {
+    boolean isServiceRegistered();
+
+	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+
+	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+
 	Capabilities getMyCapabilities();
 
 	Capabilities getContactCapabilities(in String contact);

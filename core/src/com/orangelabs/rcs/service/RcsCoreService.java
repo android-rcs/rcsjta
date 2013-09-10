@@ -376,6 +376,32 @@ public class RcsCoreService extends Service implements CoreListener {
     }
     
     /*---------------------------- CORE EVENTS ---------------------------*/
+
+    /**
+	 * Notify registration status to API
+	 * 
+	 * @param status Status
+	 */
+	private void notifyRegistrationStatusToApi(boolean status) {
+		if (capabilityApi != null) {
+			capabilityApi.notifyRegistrationEvent(status);
+		}
+		if (chatApi != null) {
+			chatApi.notifyRegistrationEvent(status);
+		}
+		if (ftApi != null) {
+			ftApi.notifyRegistrationEvent(status);
+		}
+		if (vshApi != null) {
+			vshApi.notifyRegistrationEvent(status);
+		}
+		if (ishApi != null) {
+			ishApi.notifyRegistrationEvent(status);
+		}
+		if (sessionApi != null) {
+			sessionApi.notifyRegistrationEvent(status);
+		}
+	}    
     
     /**
      * Core layer has been started
@@ -412,6 +438,9 @@ public class RcsCoreService extends Service implements CoreListener {
 		
 		// Display a notification
 		addRcsServiceNotification(true, getString(R.string.rcs_core_ims_connected));
+		
+		// Notify APIs
+		notifyRegistrationStatusToApi(true);
 	}
 
 	/**
@@ -426,6 +455,9 @@ public class RcsCoreService extends Service implements CoreListener {
 
 		// Display a notification
 		addRcsServiceNotification(false, getString(R.string.rcs_core_ims_connection_failed));
+
+		// Notify APIs
+		notifyRegistrationStatusToApi(false);
 	}
 
 	/**
@@ -443,6 +475,9 @@ public class RcsCoreService extends Service implements CoreListener {
             // Display a notification
         	addRcsServiceNotification(false, getString(R.string.rcs_core_ims_disconnected));
         }
+        
+		// Notify APIs
+		notifyRegistrationStatusToApi(false);
 	}
 
     /**

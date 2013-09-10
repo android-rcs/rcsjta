@@ -26,6 +26,7 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
+import org.gsma.joyn.JoynServiceRegistrationListener;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -124,6 +125,60 @@ public class CapabilityService extends JoynService {
         }
     };
     
+    /**
+     * Returns true if the service is registered to the platform, else returns false
+     * 
+	 * @return Returns true if registered else returns false
+     * @throws JoynServiceException
+     */
+    public boolean isServiceRegistered() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.isServiceRegistered();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }
+    
+	/**
+	 * Registers a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
+	 */
+	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addServiceRegistrationListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+	
+	/**
+	 * Unregisters a listener on service registration events
+	 * 
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
+	 */
+	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeServiceRegistrationListener(listener);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}        
+
     /**
      * Returns the capabilities supported by the local end user. The supported
      * capabilities are fixed by the MNO and read during the provisioning.
@@ -287,7 +342,7 @@ public class CapabilityService extends JoynService {
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-	public void addCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
+	public void addCapabilitiesListener(Set<String> contacts, CapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				Iterator<String> list = contacts.iterator();
@@ -311,7 +366,7 @@ public class CapabilityService extends JoynService {
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-	public void removeCapabilitiesListener(Set<String> contacts, ICapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
+	public void removeCapabilitiesListener(Set<String> contacts, CapabilitiesListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
 				Iterator<String> list = contacts.iterator();

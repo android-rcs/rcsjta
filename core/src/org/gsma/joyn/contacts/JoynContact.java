@@ -47,12 +47,12 @@ public class JoynContact implements Parcelable {
     /**
 	 * Constructor
 	 * 
-	 * @param contact Contact ID
+	 * @param contactId Contact ID
 	 * @param registered Registration state
 	 * @param capabilities Capabilities 
 	 */
-	public JoynContact(String contact, boolean registered, Capabilities capabilities) {
-		this.contactId = contact;
+	public JoynContact(String contactId, boolean registered, Capabilities capabilities) {
+		this.contactId = contactId;
 		this.registered = registered;
 		this.capabilities = capabilities;
 	}

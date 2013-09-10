@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import com.orangelabs.rcs.utils.PhoneUtils;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -64,7 +66,7 @@ public class ChatProvider extends ContentProvider {
         uriMatcher.addURI("com.orangelabs.rcs.chat", "message", MESSAGES);
         uriMatcher.addURI("com.orangelabs.rcs.chat", "message/#", MESSAGE_ID);
 		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message", RCSAPI_MESSAGES);
-		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message/#", RCSAPI_MESSAGE_ID);
+		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
     }
 
     /**
@@ -164,14 +166,14 @@ public class ChatProvider extends ContentProvider {
 			case CHAT_ID:
 			case RCSAPI_CHAT_ID:
 		        qb.setTables(TABLE_CHAT);
-                qb.appendWhere(ChatData.KEY_ID + "=");
+                qb.appendWhere(ChatData.KEY_CHAT_ID + "=");
                 qb.appendWhere(uri.getPathSegments().get(1));
                 break;
 			case MESSAGE_ID:
 			case RCSAPI_MESSAGE_ID:
 		        qb.setTables(TABLE_MESSAGE);
-                qb.appendWhere(MessageData.KEY_ID + "=");
-                qb.appendWhere(uri.getPathSegments().get(1));
+                qb.appendWhere(MessageData.KEY_CHAT_ID + "= '" +
+                		PhoneUtils.formatNumberToInternational(uri.getPathSegments().get(1)) + "'");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -260,7 +262,7 @@ public class ChatProvider extends ContentProvider {
 	        case MESSAGE_ID:
 	        case RCSAPI_MESSAGE_ID:
 				count = db.delete(TABLE_MESSAGE, MessageData.KEY_ID + "="
-						+ uri.getPathSegments().get(1)
+						+ PhoneUtils.formatNumberToInternational(uri.getPathSegments().get(1))
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);
 				break;
