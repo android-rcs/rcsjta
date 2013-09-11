@@ -239,7 +239,7 @@ function resizeHeight() {
   // Get the window height and always resize the doc-content and side-nav divs
   var windowHeight = ($(window).height() - HEADER_HEIGHT);
   docContent.css({height:windowHeight + "px"});
-  $("#side-nav").css({height:windowHeight + "px"});
+  $("#side-nav").css({height:$("#side-nav").parent().height()});
 
   var href = location.href;
   // If in the reference docs, also resize the "swapper", "classes-nav", and "nav-tree"  divs

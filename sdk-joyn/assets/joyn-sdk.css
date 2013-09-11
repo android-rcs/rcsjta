@@ -1,17 +1,19 @@
 /*generic page style*/ 
 
 .background-sdk{
- background-color:#F1F1F1;
- margin:0;
+ background-color: rgb(249, 249, 249);
+ margin:auto;
  position:relative;
  width:100%;
- display:inline-block;
  padding-bottom:20px;
+ width:1402px;
 }
 
 .content-block{
-width:60%;
+width:1000px;
 margin:auto;
+margin-left:200px;
+margin-right:200px;
 padding-top:10px;
 border: 1px solid #d1d1d1;
 background-color:white;
@@ -203,15 +205,22 @@ color: rgb(100, 99, 96);
 
 }
 
+.nav-block{
+padding:0;
+border:0;
+
+}
+
+
 .nav{
-width: 12%;
+width: 180px;
 padding: 5px 1% 5px 1%;
 border: 1px solid gainsboro;
 float: right;
 position: absolute;
-left: 5%;
+left: 60px;
 z-index: 100;
-margin-top: 50px;
+margin-top: 120px;
 background-color: white;
 display:inline-block;
 }
@@ -243,12 +252,9 @@ display:inline-block;
 
 .button-download{
 	
-	padding: 1px;
 	font-size: 15px;
-	margin: auto;
 	
 	height: 30px;
-	width: 45%;
 	margin-bottom: 1%;
 }
 
@@ -260,7 +266,7 @@ padding: 10px;
 border-radius: 7px;
 background-color: #dadada;
 vertical-align: middle;
-float: left;
+float: right;
 margin-right:10px;
 font-weight: bold;
 color: #FFF;
@@ -278,7 +284,14 @@ text-shadow: -1px -1px #000;
 	color: #b3b3b3;
 }
 
-
+.footer{
+	margin-left: 200px;
+	margin-right: 200px;
+	width: 200px;
+	padding-right: 800px;
+	
+	margin-bottom:10px;
+}
 
 
 /*Java code (generated)*/

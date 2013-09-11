@@ -225,17 +225,6 @@
  visibility="public"
 >
 </method>
-<method name="isServiceRegistered"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
 </class>
 <class name="JoynService.Build"
  extends="java.lang.Object"
@@ -488,28 +477,6 @@
 <parameter name="error" type="int">
 </parameter>
 </method>
-<method name="onServiceRegistered"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onServiceUnregistered"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
 </interface>
 <class name="JoynServiceNotAvailableException"
  extends="org.gsma.joyn.JoynServiceException"
@@ -544,6 +511,45 @@
  visibility="public"
 >
 </constructor>
+</class>
+<class name="JoynServiceRegistrationListener"
+ extends="org.gsma.joyn.IJoynServiceRegistrationListener.Stub"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="JoynServiceRegistrationListener"
+ type="org.gsma.joyn.JoynServiceRegistrationListener"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="onServiceRegistered"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="onServiceUnregistered"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
 </class>
 <class name="JoynUtils"
  extends="java.lang.Object"
@@ -958,10 +964,25 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.capability.ICapabilitiesListener">
+<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
 </parameter>
 <exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
 </exception>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
@@ -1028,6 +1049,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="removeCapabilitiesListener"
  return="void"
  abstract="false"
@@ -1055,10 +1089,25 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.capability.ICapabilitiesListener">
+<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
 </parameter>
 <exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
 </exception>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
@@ -1539,6 +1588,16 @@
  transient="false"
  volatile="false"
  value="&quot;sender&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CONTENT_CHAT_URI"
+ type="android.net.Uri"
+ transient="false"
+ volatile="false"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2147,6 +2206,21 @@
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -2300,6 +2374,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="openSingleChat"
  return="org.gsma.joyn.chat.Chat"
  abstract="false"
@@ -2345,6 +2432,21 @@
  visibility="public"
 >
 <parameter name="listener" type="org.gsma.joyn.chat.NewChatListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
 </parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
@@ -3379,6 +3481,21 @@
  visibility="public"
 >
 </method>
+<method name="getJoynContact"
+ return="org.gsma.joyn.contacts.JoynContact"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contactId" type="java.lang.String">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="getJoynContacts"
  return="java.util.Set&lt;org.gsma.joyn.contacts.JoynContact&gt;"
  abstract="false"
@@ -3449,7 +3566,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="contact" type="java.lang.String">
+<parameter name="contactId" type="java.lang.String">
 </parameter>
 <parameter name="registered" type="boolean">
 </parameter>
@@ -4221,6 +4338,21 @@
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -4310,6 +4442,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="removeNewFileTransferListener"
  return="void"
  abstract="false"
@@ -4321,6 +4466,21 @@
  visibility="public"
 >
 <parameter name="listener" type="org.gsma.joyn.ft.NewFileTransferListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
 </parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
@@ -5166,6 +5326,21 @@
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -5255,6 +5430,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="removeNewImageSharingListener"
  return="void"
  abstract="false"
@@ -5266,6 +5454,21 @@
  visibility="public"
 >
 <parameter name="listener" type="org.gsma.joyn.ish.NewImageSharingListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
 </parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
@@ -5957,6 +6160,21 @@
 <parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
 </parameter>
 </constructor>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -6057,6 +6275,34 @@
  deprecated="not deprecated"
  visibility="public"
 >
+</method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
 </method>
 <method name="sendMessage"
  return="boolean"
@@ -7356,6 +7602,21 @@
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>
 </method>
+<method name="addServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -7445,6 +7706,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceRegistered"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
 <method name="removeNewVideoSharingListener"
  return="void"
  abstract="false"
@@ -7456,6 +7730,21 @@
  visibility="public"
 >
 <parameter name="listener" type="org.gsma.joyn.vsh.NewVideoSharingListener">
+</parameter>
+<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+</exception>
+</method>
+<method name="removeServiceRegistrationListener"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
 </parameter>
 <exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
 </exception>

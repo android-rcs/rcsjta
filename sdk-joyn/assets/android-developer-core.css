@@ -72,7 +72,7 @@ embed,object,applet {
 /* BASICS */
 
 html, body {
-  overflow:hidden; /* keeps scrollbar off IE */
+  overflow:visible; /* keeps scrollbar off IE */
   background-color:#fff;
 }
 
@@ -242,20 +242,19 @@ hr.blue {
   margin:0;
   position:relative;
   width:100%;
+  display:inline-block;
+  background-color: rgb(249, 249, 249);
 }
 
 #header {
   position:relative;
   z-index:100;
-  min-width:576px;
-  padding:0 10px;
-  border-bottom:2px solid #ff6600;
-  
+
+  width:1250px;
 }
 
 #headerLeft{
   padding: 25px 0 0;
-  width:80%
 }
 
 #headerLeft img{
@@ -273,8 +272,9 @@ font-size:20px;
 
 
 #headerRight {
- float: right;
-margin: 85px 70px 0;
+position: absolute;
+top: 83px;
+right: 5%;
 }
 
 /* Tabs in the header */
@@ -505,10 +505,11 @@ div.indent {
 /* Footer */
 #footer {
   float: left;
-  width:90%;
-  margin: 20px;
+  width: 1402px;
   color: #aaa;
   font-size: 11px;
+  margin:auto;
+  
 }
 
 #footer a {
