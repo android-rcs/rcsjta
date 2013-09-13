@@ -8,7 +8,7 @@
 	<property name="terminal.core" 		value="${terminal.root}/core/bin/RCSJTA_core.apk"/>
 	<property name="terminal.build"		value="${terminal.root}/core/bin"/>
 	<property name="src.path" 		value="${terminal.root}/core/src"/>
-	<property name="sdk.version" 		value="3.0.0"/>
+	<property name="sdk.version" 		value="3.0.1"/>
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
@@ -40,7 +40,7 @@
 
     <target name="sdk" description="Generate RCS SDK" depends="">
         
-	    <echo>Generate SDK ${terminal.build}/classes</echo>
+	    <echo>Generate SDK</echo>
 	    <mkdir dir="${terminal.root}/sdk-joyn"/>
 	    
 	    <echo>copy ${terminal.api} file</echo>
@@ -52,6 +52,10 @@
 		<echo>copy ${terminal.ri} application</echo>
 		<copy file="${terminal.ri}" tofile="${terminal.root}/sdk-joyn/tools/RI.apk"/>
     
+		<echo> copy ${terminal.root}/samples</echo>
+		<copy todir="${terminal.root}/sdk-joyn/sample_projects">
+		    <fileset dir="${terminal.root}/samples"/>
+		</copy>
 		
 		<echo>Generate Javadoc</echo>
 	
@@ -67,6 +71,8 @@
 			    <param name="-d" value="${terminal.root}/sdk-joyn"/>			    
 		        <param name="-templatedir"/><param name="${terminal.root}/templates-sdk" />
 		        <param name="-hdf"/> <param name="project.name"/> <param name="RCS SDK"/>
+			  <param name="-hdf"/> <param name="sdk.version"/> <param name="${sdk.version}"/>
+
 		        <param name="-htmldir"/> <param name="${terminal.root}/sdk" />
 		        <param name="-overview"/> <param name="${terminal.root}/sdk-joyn/overview.html" />
 		        <param name="-generatesources"/>
@@ -83,9 +89,9 @@
 		</copy>
 		<delete dir="${terminal.root}/sdk-joyn/reference"/>
 		
+		<move file="${terminal.root}/sdk-joyn/releases/joyn-sdk.txt" tofile="${terminal.root}/sdk-joyn/releases/joyn-sdk-${sdk.version}.txt"/>
 		<echo>zip sdk</echo>
-		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/rcs-api-sdk-${sdk.version}.zip"/>
-		
+		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/joyn-sdk-${sdk.version}.zip"/>		
 		<echo>cleanup</echo>
 		<delete dir="${terminal.root}/sdk-joyn2"/>
 	</target>
@@ -93,11 +99,9 @@
 	<target name="generate-api">
 	    <ant dir="${terminal.root}/core" antfile="build-local.xml" target="api" inheritAll="false" />        
 	</target>
-	<target name="generate-ri-apk">
+	<target name="generate-ri-apk" depends="generate-api">
 	    <ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
 	</target>
-
-	 
 	
 </project>
 

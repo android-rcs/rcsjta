@@ -1,0 +1,46 @@
+page.title=New multimedia Capability
+doc.type=tutorials
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>New Multimedia capability or capacity extension</h1></p>
+			<p><span>Capacity extensions enable you to declare new capabilities for your applications.</span></p>			
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>1. Creating a new capability</h2>
+				<p></p>
+				<p>A capacity extension is just an identifier helping similar applications recognise same capabilities and allowing them to communicate with each other.</p>
+				<p>The new capability is just declared in the Manifest file of the application and that's it. Then when the application is installed on the device, the joyn service in background will detect it and will automatically share this new capability with joyn contacts of your Address Book.</p>						
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.MyApp&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.my.new.extension&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt; <br />
+						&lt;/activity&gt;<br />
+						<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>An extension should have the following syntax :</p>
+				<p><b>+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.XXXX</b>,</br>where XXXX is your service ID (in client side and network side also).</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Using your new capability</h2>
+				<p></p>
+				<p>To get an idea of what you can do with capacity extensions, have a look at the <a href="{@docRoot}tutorials/popUpApp.html">Popup Application tutorial</a>.</p>
+				<p>This tutorial will take you through the process of creating an application with a new extension.</p>						
+				<p>The important thing to remember is that the extension is just an identifier. It identifies your application's capabilities, but also identifies incoming and outgoing sip messages.</p>
+				<p>It is up to you to choose the protocol, format and contents of those messages in order to correctly exchange information with another device, using the extension as identifier.</p>
+				<p></p>
+			</div>
+			</br>
+		</div>
+	</div>
+</div>

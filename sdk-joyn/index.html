@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, './/javadoc/')"
-							  onkeyup="return search_changed(event, false, './/javadoc/')" />
+							  onkeydown="return search_changed(event, true, './javadoc/')"
+							  onkeyup="return search_changed(event, false, './javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="./index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="./index.html" tabindex="-1"><img
               src="./assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="home">
               <li id="home-link"><a href="./index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="./tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="./faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="./FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="./download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -173,23 +173,26 @@
 <div class="background-sdk">
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">	
-			<p><h1>Welcome to the joyn Android terminal SDK! </h1></p>
+			<p><h1>Welcome to the joyn SDK for Android terminal</h1></p>
 			<span>
-				<p>With joyn, customers can enrich their calls with video sharing, IM and file transfer, sharing across any compatible device or network, with anyone in their mobile address book. </p>
+				
+				<img src="./assets/images/joyn-logo.png" height="30" width="33" style="float:left;margin-top: -8px;margin-right: 5px;"/>
+				<p><span style="text-decoration:underline"><a target="_blank" href="http://www.joynus.com/" style="color:#333">joyn™</a></span> is a certification trade mark of the GSMA (GSM Association) for RCS (Rich Communication Suite) which is an industry standard that is being adopted across the world by mobile operators. RCS is a set of new communication services to improve traditional communications with real times services.</p>
+				<p>This SDK offers the first implementation of the joyn API which is under standardization with <a style="text-decoration:underline" href="http://www.gsma.com/rcs">GSMA</a> and where Orange is the main contributor with several OEMs (Samsung, Qualcomm ...).</p>
 				<div style="margin-bottom: 3%;">
 					<iframe frameborder="0" width="320" height="180" src="http://www.dailymotion.com/embed/video/xv7nmq" class="video-frame"></iframe>
 				</div>
-				<p><b>Enhance your app with joyn rich communication APIs. </b>joyn APIs are based on the enhanced Rich Communication Suite (RCS-e) set of standards defined by the GSMA. These APIs leverage the device address book to encourage social recommendation; provide group chat and notifications; and image, audio and video file sharing during voice calls. </p>
+				<p><b>Enhance your app with joyn rich communication APIs. </b>joyn APIs leverage the device address book to encourage social recommendation from your phone numbers ; provide <b>rich messaging</b> with chat, file transfer and group chat ; provide <b>rich call</b> with image and live video sharing during voice calls ; and offer the possibility to <b>create your new joyn services</b>.</p>
 			</span>
 		</div>
 		</br>
 		<div class="button-download">
 		<div style="width: 50%;height: 100%;float: left;">
-			<a class="dl-btn" href="https://rcsjta.googlecode.com/files/joyn-sdk-.zip">Download the latest SDK</a>
+			<a class="dl-btn" href="https://rcsjta.googlecode.com/git/joyn-sdk-3.0.1.zip">Download the latest SDK</a>
 		</div>
 		<div style="padding: 2px;">
-			<p>The latest version as of August, 28 is </p>
-			<p>You will find the release note <a href="./releases/joyn-sdk-v.txt">here</a>.</p>	
+			<p>The latest version as of August, 28 is 3.0.1</p>
+			<p>You will find the release note <a href="./releases/joyn-sdk-3.0.1.txt">here</a>.</p>	
 		</div>			
 		</div>
 		</br>
@@ -199,7 +202,7 @@
 					<p><b><a href="./getStarted.html">Get Started</a></b></p>
 				</div>	
 				<div>
-					<p>Learn how to get joyn up and running on an android device.
+					<p>Learn how to get joyn up and running on an Android device.
 					</p>
 				</div>
 			</div>
@@ -220,7 +223,7 @@
 				</div>
 				<div>
 					<p>
-					Discover the concepts behind joyn. Get to know the basic tools for building a joyn application.
+					Discover the concepts used in the joyn APIs.
 					</p>
 				</div>	
 			</div>

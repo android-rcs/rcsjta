@@ -1693,8 +1693,8 @@ public class ProvisioningParser {
             if (nameNode.getNodeValue().equalsIgnoreCase(paramName)) {
             	String value = valueNode.getNodeValue();
                 if (logger.isActivated()) {
-                    logger.debug("Read parameter " + paramName + ": " + value);
-                 // For debug only: logger.debug("Read parameter " + paramName);
+                    // logger.debug("Read parameter " + paramName + ": " + value);
+                	logger.debug("Read parameter " + paramName);
                 }
             	
             	// Check type

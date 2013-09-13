@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, '..//javadoc/')"
-							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="../index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
               src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="tools">
               <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="../tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="../faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -161,6 +161,28 @@
   </div>
   </div>
   
+	
+	<div style="margin: 0;position: relative;width: 100%;">
+		<div class="background-sdk" style="padding: 0;">
+			<div class="content-block nav-block" >
+				<div id="tools-nav" class="nav">
+					<p class="selected" style="margin-top: 15px;"><a  href="../tools/index.html"><b>Tools</b></a></p>
+					<ul>
+						<li>
+							<div >
+								<a href="../tools/installJoynServices.html">> Standalone joyn service</a>
+							</div>
+						</li>
+						<li>
+							<div >
+								<a href="../tools/getToKnow.html">> RI</a>
+							</div>
+						</li>						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 
   
@@ -177,12 +199,18 @@
 			<p><span>This section regroups a number of specific tools that can help you with your application development.</span></p>
 		</div>
 		<div class="content-body center">
-			<ul class="list">
+			<ul class="list clickable">
 				<li>
 					<div>
-						<h2 >joyn services application</h2>
-						<p>If a native version of joyn services is not provided on your device you will need to install the <a href="../tools/joyn-core.apk">joyn-services</a> test application and configure it.</p>
-						<p>You will find a step by step explanation on how to accomplish this in our dedicated <a href="../tools/installJoynServices.html">guide</a>.</p>
+						<a href="../tools/installJoynServices.html"><span class="item-link"></span><h2 >Standalone joyn service</h2></a>
+						<p>If your device is not natively joyn compliant, you should deploy a standalone joyn service on your device before using the joyn APIs from applications.</p>
+						<p>You will find a step by step explanation on how to accomplish this in our dedicated <a style="text-decoration:underline;z-index:2;position:relative;" href="../tools/installJoynServices.html">guide</a>.</p>
+					</div>
+				</li>
+				<li>
+					<div>
+						<a href="../tools/getToKnow.html"><span class="item-link"></span><h2>Reference Implementation (RI)</h2></a>
+						<p>The Reference Implementation is an application with a very basic UI which allows you to test the joyn features (chat, file transfer, sharing) step by step. See also the source code of the RI <a target="_blank" style="text-decoration:underline;z-index:2;position:relative;" href="https://code.google.com/p/rcsjta/source/browse/#git%2FRI%2Fsrc%2Fcom%2Forangelabs%2Frcs%2Fri">here</a>.</p>
 					</div>
 				</li>
 			</ul>

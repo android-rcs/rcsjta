@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, '..//javadoc/')"
-							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,9 +137,9 @@
       <div id="headerLeft">
 		
 		
-          <a  href="../index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
               src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
-          <ul class="samples">
+          <ul class="tools">
               <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
               <li id="source-link"><a href="../javadoc/index.html"
                                   onClick="return loadLast('source')"><span>Javadoc</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="../tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="../faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -164,35 +164,20 @@
 	
 	<div style="margin: 0;position: relative;width: 100%;">
 		<div class="background-sdk" style="padding: 0;">
-			<div class="content-block nav-block">
-				<div id="guide-nav" class="nav">
-					<p  style="margin-top: 15px;"><a  href="../samples/index.html"><b>Samples</b></a></p>
+			<div class="content-block nav-block" >
+				<div id="tools-nav" class="nav">
+					<p  style="margin-top: 15px;"><a  href="../tools/index.html"><b>Tools</b></a></p>
 					<ul>
 						<li>
 							<div >
-								<a href="../samples/connectService.html" >> How to connect to a joyn service</a>
+								<a href="../tools/installJoynServices.html">> Standalone joyn service</a>
 							</div>
 						</li>
 						<li>
-							<div >
-								<a href="../samples/initChat.html" >> How to initialise a chat</a>
+							<div class="selected">
+								<a href="../tools/getToKnow.html">> RI</a>
 							</div>
-						</li>
-						<li>
-							<div >
-								<a href="../samples/createExtension.html">> How to create a new capacity extension</a>
-							</div>
-						</li>
-						<li>
-							<div >
-								<a href="../samples/listContacts.html">> How to get online contacts</a>
-							</div>
-						</li>
-						<li>
-							<div >
-								<a href="../samples/detectServices.html">> How to detect if joyn service is started</a>
-							</div>
-						</li>
+						</li>						
 					</ul>
 				</div>
 			</div>

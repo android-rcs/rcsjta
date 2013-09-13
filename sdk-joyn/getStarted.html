@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, './/javadoc/')"
-							  onkeyup="return search_changed(event, false, './/javadoc/')" />
+							  onkeydown="return search_changed(event, true, './javadoc/')"
+							  onkeyup="return search_changed(event, false, './javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="./index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="./index.html" tabindex="-1"><img
               src="./assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="home">
               <li id="home-link"><a href="./index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="./tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="./faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="./FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="./download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -174,7 +174,7 @@
 	<div class="content-block">
 		<div class="intro center">
 			<p><h1>Lets get started ...</h1></p>
-			<p><span>The joyn android terminal SDK regroups all the knowledge needed to develop Rich Communication apps. But before getting down to business, lets take some time and make sure you have everything you need to <b>get started</b> in the best of ways.</span></p>
+			<p><span>The joyn android terminal SDK regroups all the knowledge needed to develop joyn apps. But before getting down to business, lets take some time and make sure you have everything you need to get started in the best of ways.</span></p>
 		</div>
 		<div class="content-body ">
 			<div class="step_header getStarted">
@@ -184,7 +184,7 @@
 				<p><a id="hide1" style="display:none;" onClick="hideStep(this,'show1','step1');">hide</a></p>
 			</div>
 			<div id="step1" class="step_content center" style="display:none;">
-					<p>The required version of the Android SDK is 2.3 (Gingerbread).</p>
+					<p>The required version for the Android SDK is at least 2.3 (Gingerbread).</p>
 					<p>There are two ways to install Eclipse, Android SDK and ADT.</p>					
 					<p><h3>Solution 1 : </h3></p>
 					<p>Go to <a target="_blank" href="http://developer.android.com/sdk/index.html">Android Developers website</a> and download the latest version of the ADT bundle for windows. Unzip the bundle and launch Eclipse. Create a new workspace if need. </p>
@@ -201,26 +201,35 @@
 					</ul>
 			</div>
 			<div class="step_header getStarted">
-				<p><h2><span class="h_num">2</span>Install and configure joyn services on android terminal</h2></p>
-				<p>Install joyn services and configure stack if not pre-installed on device</p>
+				<p><h2><span class="h_num">2</span>Install the joyn SDK</h2></p>
+				<p>Download and install the latest joyn SDK on your PC.</p>
 				<p><a id="show2" onclick="showStep(this,'hide2','step2');">show</a></p>
 				<p><a id="hide2" style="display:none;" onClick="hideStep(this,'show2','step2');">hide</a></p>
 			</div>
 			<div id="step2" class="step_content center" style="display:none;">
-					<p>If your device does not provide a native version of joyn stack services, you must install and configure these services</p>
-					<p>Please refer to the <a href="./tools/index.html">tools page</a> for more information.</p>
-					<p>You can get the joyn service application <a href="./tools/joyn-core.apk">here</a>.</p>
-					<p>There is also a dedicated <a href="./tools/installJoynServices.html">guide</a> explaining the installation and configuration of these services.</p>					
+					<p>You can donwload directly our SDK from <a  href="https://rcsjta.googlecode.com/git/joyn-sdk-3.0.1.zip">here</a></p>	
+					<p>You can also visit our <a href="./download/index.html">Downloads</a> page where you will find more information about the latest release and a link to the latest version.</p>
+					<p>Once you have download the ZIP file, all you need to do is Unzip the package to a directory of your choice.
 			</div>
 			<div class="step_header getStarted">
-				<p><h2><span class="h_num">3</span>Import sample projects</h2></p>
-				<p>Import and configure sample projects</p>
+				<p><h2><span class="h_num">3</span>Install and configure the joyn service on your Android terminal</h2></p>
+				<p>Install joyn services and configure stack if not pre-installed on device</p>
 				<p><a id="show3" onclick="showStep(this,'hide3','step3');">show</a></p>
 				<p><a id="hide3" style="display:none;" onClick="hideStep(this,'show3','step3');">hide</a></p>
 			</div>
 			<div id="step3" class="step_content center" style="display:none;">
-					<p>First download the <a href="https://rcsjta.googlecode.com/files/joyn-sdk-.zip">latest version</a> of the sdk. Unzip the package to a directory of your choice.</p>
-					<p>Now open eclipse.</p>
+					<p>If your device is not natively joyn, you must install the standalone joyn services and configure it.</p>
+					<p>You can get the standalone joyn service application from <a href="./tools/joyn-core.apk">here</a>.</p>
+					<p>There is also a dedicated <a href="./tools/installJoynServices.html">guide</a> explaining the installation and configuration of these services.</p>					
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">4</span>Import sample projects</h2></p>
+				<p>Import and configure sample projects</p>
+				<p><a id="show4" onclick="showStep(this,'hide4','step4');">show</a></p>
+				<p><a id="hide4" style="display:none;" onClick="hideStep(this,'show4','step4');">hide</a></p>
+			</div>
+			<div id="step4" class="step_content center" style="display:none;">			
+					<p>First open Eclipse IDE.</p>
 					<p>Open the <b>file</b> menu and click <b>import</b>.</p>
 					<div style="width:700px;margin:auto;">
 						<img src="./assets-sdk/images/tuto_sample_1.png" width="100%"/>
@@ -240,18 +249,19 @@
 					<p></p>
 					<p>Select <b>Copy projects into workspace</b> (If the projects are already present under your workspace directory, do not select). </p>
 					<p>Finally, click on <b>Finish</b>.</p>
+					<p>You will have to add the joyn-API JAR to the project's build path (if this is not already the case). You will find the JAR file in the <b>lib</b> folder of the SDK. Copy it to a new folder in your project and add to build path.</p>
 					<p></p>
 			</div>
 			<div class="step_header getStarted">
-				<p><h2><span class="h_num">4</span>Run a sample project</h2></p>
-				<p>Try out a joyn application on your terminal</p>
-				<p><a id="show4" onclick="showStep(this,'hide4','step4');">show</a></p>
-				<p><a id="hide4" style="display:none;" onClick="hideStep(this,'show4','step4');">hide</a></p>
+				<p><h2><span class="h_num">5</span>Run a sample project</h2></p>
+				<p>Try out a joyn sample application on your terminal</p>
+				<p><a id="show5" onclick="showStep(this,'hide5','step5');">show</a></p>
+				<p><a id="hide5" style="display:none;" onClick="hideStep(this,'show5','step5');">hide</a></p>
 			</div>
-			<div id="step4" class="step_content center" style="display:none;">					
-					<p>The easiest way to install and run an application your terminal is to use eclipse.</p>
+			<div id="step5" class="step_content center" style="display:none;">					
+					<p>The easiest way to install and run an application on your terminal is to use Eclipse.</p>
 					<P>Connect your device via USB and make sure <b>Android debug</b> is activated.</p>
-					<p>In eclipse, right-click on your project, go to <b>Run As</b> then <b>Android Application</b>.</p>
+					<p>In Eclipse, right-click on your project, go to <b>Run As</b> then <b>Android Application</b>.</p>
 					<div style="width:400px;margin:auto;">
 						<img src="./assets-sdk/images/tuto_sample_4.png" width="100%"/>
 					</div>
@@ -265,14 +275,13 @@
 					<p></p>
 			</div>
 			<div class="step_header getStarted">
-				<p><h2><span class="h_num">5</span>Nearly there</h2></p>
+				<p><h2><span class="h_num">6</span>Nearly there</h2></p>
 				<p>Before you start coding, have a look at the different <a href="./concepts.html">concepts</a> behind joyn APIs.</p>
-				<p>There are also a number of <a href="./tutorials/index.html">tutorials</a> and <a href="./samples/index.html">samples/guides</a> that can help you kick-start your application development.</p>
+				<p>There are also a number of <a href="./tutorials/index.html">tutorials</a> and <a href="./samples/index.html">samples</a> that can help you kick-start your application development.</p>
 			</div>
 			<div class="step_header getStarted">
 				<p><h2><span class="h_num"><img src="./assets/images/rcs_notif_icon.png" height="100%"/></span>Have fun</h2></p>
-				<p>and if you have any questions, </p>
-				<p>take a look at our <a href="./faq/index.html">FAQ</a> or <a>contact</a> us.</p>
+				<p>and if you have any questions don't hesitate to <a href="mailto:jeanmarc.auffret@orange.com">contact</a> us.</p>
 			</div>
 		</div>
 		

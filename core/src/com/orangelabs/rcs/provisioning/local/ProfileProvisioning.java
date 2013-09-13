@@ -294,7 +294,7 @@ public class ProfileProvisioning extends Activity {
         Spinner spinner = (Spinner)view.findViewById(R.id.ims);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, platforms);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinner.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)

@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, '..//javadoc/')"
-							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="../index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
               src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="download">
               <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="../tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="../faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -171,11 +171,42 @@
 <div id="doc-content" style="position:relative;">
 
 <div class="background-sdk">
-	<div class="content-block" style="height:700px;">
-		<div class="intro center">	
+	<div class="content-block" style="min-height:700px;background-image: url('../assets/images/joyn_logo_sdk_bg.png');background-repeat: no-repeat;background-position: center;background-position-y: bottom;">
+		<div class="intro center" >	
 			<p><h1>Downloads</h1></p>
-			<span></span>
+			<p><span>The SDK is delivered as a ZIP file which may be deployed anywhere in a local directory on your PC.</span></p>
+			<p></p>
+			<p><span>The SDK contains:</span></p>
+			<p></p>
+			<ul>
+				<li>
+					<p><span>A complete Javadoc.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Source code samples.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Tutorials.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Tools: a standalone RCS service if your device is not natively joyn compliant, a Reference Implementation (RI) which allows you to test the joyn features.</span></p>
+				</li>
+				
+				<li>
+					<p><span>The joyn API library: this is the JAR file which allows you to implement your joyn app.</span></p>
+				</li>
+			</ul>
+			<p></p>
+			<p><span>Download the latest SDK release from here:</span></p>
+			<p><span style="margin-left:30px"><a href="https://rcsjta.googlecode.com/git/joyn-sdk-3.0.1.zip">joyn SDK 3.0.1</a><span style="margin-left:30px"><a href="../releases/joyn-sdk-3.0.1.txt">README</a></span></p>
 		</div>
+		
+				
+				
+			
 		<div class="content-body center">
 			
 		</div>

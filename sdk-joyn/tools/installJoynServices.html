@@ -64,7 +64,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
-<title>Install joyn Services | joyn SDK</title>
+<title>Install joyn standalone service | joyn SDK</title>
 
 
 </script>
@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, '..//javadoc/')"
-							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="../index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
               src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="tools">
               <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="../tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="../faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -161,6 +161,28 @@
   </div>
   </div>
   
+	
+	<div style="margin: 0;position: relative;width: 100%;">
+		<div class="background-sdk" style="padding: 0;">
+			<div class="content-block nav-block" >
+				<div id="tools-nav" class="nav">
+					<p  style="margin-top: 15px;"><a  href="../tools/index.html"><b>Tools</b></a></p>
+					<ul>
+						<li>
+							<div class="selected">
+								<a href="../tools/installJoynServices.html">> Standalone joyn service</a>
+							</div>
+						</li>
+						<li>
+							<div >
+								<a href="../tools/getToKnow.html">> RI</a>
+							</div>
+						</li>						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 
   
@@ -173,7 +195,7 @@
 <div class="background-sdk">
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">
-			<p><h1>Install and configure joyn services</h1></p>
+			<p><h1>Install and configure joyn standalone service</h1></p>
 			<p><span>On some devices the joyn service stack may not be installed. If this is the case, we provide a joyn-service test application. Once these services are configured appropriately, your Rich Communication application will be able to communicate with them via joyn APIs.</span></p>
 		</div>
 		<div class="content-body center">

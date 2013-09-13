@@ -1,0 +1,27 @@
+page.title=FAQ
+doc.type=faq
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="height:700px;">
+		<div class="intro center">	
+			<p><h1>Frequently asked questions</h1></p>
+			<p><span>Here we provide some answers to problems you may have encountered using joyn APIs</span></p>
+		</div>
+		<div class="content-body center">
+			<ul class="list">
+				<li>
+					<div >
+						<p><h3>Why is my local configuration not taken into account by the provisioning application?</h3></p>
+						<p>Don’t forget to save the modification via the menu “Save”. This should be done folder by folder in the provisioning application.</p>
+					</div>
+				</li>
+				<li>
+					<div >
+					<p><h3>How do I see SIP traces in the logcat ouput?</h3></p>
+					<p>By default the traces are not displayed in traces. To activate SIP traces, you should select the corresponding settings from the provisioning application (see folder “Logger”). There is the same kind of parameter for media traces (e.g. MSRP packet).</p>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

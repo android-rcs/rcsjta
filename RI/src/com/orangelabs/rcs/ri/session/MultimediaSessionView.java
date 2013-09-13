@@ -278,16 +278,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     }    
 	
     /**
-     * Accept button listener
-     */
-    private OnClickListener acceptBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {     
-        	// Accept invitation
-        	acceptInvitation();
-        }
-    };
-
-    /**
      * Start session
      */
     private void startSession() {
@@ -329,6 +319,16 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		}
     }        
     
+    /**
+     * Accept button listener
+     */
+    private OnClickListener acceptBtnListener = new OnClickListener() {
+        public void onClick(DialogInterface dialog, int which) {     
+        	// Accept invitation
+        	acceptInvitation();
+        }
+    };
+
     /**
      * Reject button listener
      */    
@@ -461,7 +461,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater=new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu_ft, menu);
+		inflater.inflate(R.menu.menu_mm_session, menu);
 		return true;
 	}
     

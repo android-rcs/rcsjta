@@ -113,15 +113,15 @@
 		  <div id="search" >
 			  <div id="searchForm">
 				  <form accept-charset="utf-8" class="gsc-search-box" 
-						onsubmit="return submit_search()">
+						>
 					
 							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
 							  title="search javadoc" name="q"
 							  value="search javadoc"
 							  onFocus="search_focus_changed(this, true)"
 							  onBlur="search_focus_changed(this, false)"
-							  onkeydown="return search_changed(event, true, '..//javadoc/')"
-							  onkeyup="return search_changed(event, false, '..//javadoc/')" />
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
 						  <div id="search_filtered_div" class="no-display">
 							  <table id="search_filtered" cellspacing=0>
 							  </table>
@@ -137,7 +137,7 @@
       <div id="headerLeft">
 		
 		
-          <a  href="../index.html" tabindex="-1"><img
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
               src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
           <ul class="tutorials">
               <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
@@ -149,8 +149,8 @@
                                   onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
               <li id="tools-link"><a href="../tools/index.html"
                                   onClick="return loadLast('tools')"><span>Tools</span></a></li>
-              <li id="faq-link"><a href="../faq/index.html"
-                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
           </ul> 
@@ -175,14 +175,20 @@
 						</li>
 						<li>
 							<div >
+								<a href="../tutorials/multiCapability.html">> New multimedia Capability</a>
+							</div>
+						</li>
+						<li>
+							<div >
 								<a href="../tutorials/popUpApp.html">> Popup application</a>
 							</div>
 						</li>
 						<li>
 							<div >
-								<a href="../tutorials/multiService.html">> New multimedia service</a>
+								<a href="../tutorials/multiApp.html">> New multimedia application</a>
 							</div>
 						</li>
+						
 					</ul>
 				</div>
 			</div>
@@ -201,8 +207,8 @@
 	<div class="content-block" style="height:700px;">
 		<div class="intro center">
 			<p><h1>Tutorials</h1></p>
-			<p><span>Step-by-step explanations helping you master joyn APIs.</span></p>		
-			<p><span>Before starting our tutorials, make sure you are familiar with joyn <a href="../concepts.html">concepts</a> and don't be afraid to check out are <a href="../getStarted.html">Get Started</a> page.</span></p>
+			<p><span>Step-by-step explanations helping you master joyn APIs with complete and runnable applications.</span></p>		
+			<p><span>Before starting our tutorials, make sure you are familiar with joyn <a href="../concepts.html">concepts</a> and don't be afraid to check out our <a href="../getStarted.html">Get Started</a> page. See also the API <a href="../javadoc/index.html">Javadoc</a>.</span></p>
 		</div>
 		<div class="content-body center">
 			<ul class="list clickable">
@@ -216,20 +222,28 @@
 				</li>
 				<li>					
 					<div class="easy">
+						<a href="../tutorials/multiCapability.html"><span class="item-link"></span>
+							<h2>New multimedia capability</h2>
+						</a>
+						<p>This tutorial shows you how to create a new capacity extension enabling new capability features for your application.</p>
+					</div>						
+				</li>
+				<li>					
+					<div class="easy">
 						<a href="../tutorials/popUpApp.html"><span class="item-link"></span>
 							<h2>Popup application</h2>
 						</a>
 						<p>This tutorial demonstrates how to build a new multimedia application based on the joyn technology.</p>
-						<p>The idea of the Popup application is to offer a service which allows one to send animated popups to remote joyn contacts who also have the same application on their devices.</p>
+						<p>The idea of the Popup application is to offer a service which allows one to send animated popups to remote joyn contacts having the same application installed on their devices.</p>
 					</div>						
 				</li>
 				
 				<li>					
 					<div class="hard">
-						<a href="../tutorials/multiMessage.html"><span class="item-link"></span>
-							<h2>Send multimedia message</h2>
+						<a href="../tutorials/multiApp.html"><span class="item-link"></span>
+							<h2>New multimedia application</h2>
 						</a>
-						<p></p>
+						<p>This tutorial demonstrates how to create a new multimedia service based on the joyn technology. Here the proposed application exchanges text in real-time via a mobile-to-mobile TCP connection.</p>
 					</div>						
 				</li>
 			</ul>
