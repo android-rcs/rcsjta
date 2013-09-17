@@ -77,12 +77,15 @@
 <link href=".././assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
 <link href=".././assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
 <link href=".././assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href=".././assets/skin.css" rel="stylesheet" type="text/css" />
 <script src=".././assets/jquery-1.10.2.min.js" type="text/javascript"></script>
 <script src=".././assets/search_autocomplete.js" type="text/javascript"></script>
 <script src=".././assets/jquery-resizable.min.js" type="text/javascript"></script>
 <script src=".././assets/android-developer-docs.js" type="text/javascript"></script>
 <script src=".././assets/prettify.js" type="text/javascript"></script>
 <script src=".././assets/joyn-sdk.js" type="text/javascript"></script>
+<script src=".././assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src=".././assets/jquery.jcarousel.min.js"></script>
 <script type="text/javascript">
   setToRoot(".././");
 </script>
@@ -96,6 +99,37 @@
     #resize-packages-nav{border-bottom:3px solid #666;}
   </style>
 </noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			}
+		});
+	});
+
+</script>
 </head>
 
 

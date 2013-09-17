@@ -1,311 +1,311 @@
-/* file: carousel.js
-   date: oct 2008
-   author: jeremydw,smain
-   info: operates the carousel widget for announcements on 
-         the android developers home page. modified from the
-         original market.js from jeremydw. */
 
-/* -- video switcher -- */
-
-var oldVid = "multi"; // set the default video
-var nowPlayingString = "Now playing:";
-var assetsRoot = "assets/";
+////////////////////////////////////////////////////////
 
 
-/* -- app thumbnail switcher -- */
 
-var currentDroid;
-var oldDroid;
+/*
+ *  Slideshow 1.0
+ *  Used on /index.html and /develop/index.html for carousel
+ *
+ *  Sample usage:
+ *  HTML -
+ *  <div class="slideshow-container">
+ *   <a href="" class="slideshow-prev">Prev</a>
+ *   <a href="" class="slideshow-next">Next</a>
+ *   <ul>
+ *       <li class="item"><img src="images/marquee1.jpg"></li>
+ *       <li class="item"><img src="images/marquee2.jpg"></li>
+ *       <li class="item"><img src="images/marquee3.jpg"></li>
+ *       <li class="item"><img src="images/marquee4.jpg"></li>
+ *   </ul>
+ *  </div>
+ *
+ *   <script type="text/javascript">
+ *   $('.slideshow-container').dacSlideshow({
+ *       auto: true,
+ *       btnPrev: '.slideshow-prev',
+ *       btnNext: '.slideshow-next'
+ *   });
+ *   </script>
+ *
+ *  Options:
+ *  btnPrev:    optional identifier for previous button
+ *  btnNext:    optional identifier for next button
+ *  btnPause:   optional identifier for pause button
+ *  auto:       whether or not to auto-proceed
+ *  speed:      animation speed
+ *  autoTime:   time between auto-rotation
+ *  easing:     easing function for transition
+ *  start:      item to select by default
+ *  scroll:     direction to scroll in
+ *  pagination: whether or not to include dotted pagination
+ *
+ */
 
-// shows a random application
-function randomDroid(){
+ (function($) {
+ $.fn.dacSlideshow = function(o) {
 
-	// count the total number of apps
-	var droidListLength = 0;
-	for (var k in droidList)
-		droidListLength++;
-		
-	// pick a random app and show it
-  var j = 0;
-  var i = Math.floor(droidListLength*Math.random());
-  for (var x in droidList) {
-    if(j++ == i){
-    	currentDroid = x;
-    	showPreview(x);
-    	centerSlide(x);
-    }
-  }
+     //Options - see above
+     o = $.extend({
+         btnPrev:   null,
+         btnNext:   null,
+         btnPause:  null,
+         auto:      true,
+         speed:     500,
+         autoTime:  12000,
+         easing:    null,
+         start:     0,
+         scroll:    1,
+         pagination: true
 
-}
+     }, o || {});
 
-// shows a bulletin, swaps the carousel highlighting
-function droid(appName){
+     //Set up a carousel for each
+     return this.each(function() {
 
-  oldDroid = $("#droidlink-"+currentDroid);
-  currentDroid = appName;
+         var running = false;
+         var animCss = o.vertical ? "top" : "left";
+         var sizeCss = o.vertical ? "height" : "width";
+         var div = $(this);
+         var ul = $("ul", div);
+         var tLi = $("li", ul);
+         var tl = tLi.size();
+         var timer = null;
 
-  var droid = droidList[appName];
-  
-  $("#"+appName).show().siblings().hide();
+         var li = $("li", ul);
+         var itemLength = li.size();
+         var curr = o.start;
 
-  if(oldDroid)
-    oldDroid.removeClass("selected");
+         li.css({float: o.vertical ? "none" : "left"});
+         ul.css({margin: "0", padding: "0", position: "relative", "list-style-type": "none", "z-index": "1"});
+         div.css({position: "relative", "z-index": "2", left: "0px"});
 
-  $("#droidlink-"+appName).addClass("selected");
-}
+         var liSize = o.vertical ? height(li) : width(li);
+         var ulSize = liSize * itemLength;
+         var divSize = liSize;
 
+         li.css({width: li.width(), height: li.height()});
+         ul.css(sizeCss, ulSize+"px").css(animCss, -(curr*liSize));
 
-// -- * build the carousel based on the droidList * -- //
-function buildCarousel() {
-  var appList = document.getElementById("app-list");
-  for (var x in droidList) {
-    var droid = droidList[x];
-    var icon = droid.icon;
-    var name = droid.name;
-    var a = document.createElement("a");
-    var img = document.createElement("img");
-    var br = document.createElement("br");
-    var span = document.createElement("span");
-    var text = document.createTextNode(droid.name);
+         div.css(sizeCss, divSize+"px");
 
-    a.setAttribute("id", "droidlink-" + x);
-    a.className = x;
-    a.setAttribute("href", "#");
-    a.onclick = function() { showPreview(this.className); return false; }
-    img.setAttribute("src", toRoot + assetsRoot + "images/home/" + droid.icon);
-    img.setAttribute("alt", "");
+         //Pagination
+         if (o.pagination) {
+             var pagination = $("<div class='pagination'></div>");
+             var pag_ul = $("<ul></ul>");
+             if (tl > 1) {
+               for (var i=0;i<tl;i++) {
+                    var li = $("<li>"+i+"</li>");
+                    pag_ul.append(li);
+                    if (i==o.start) li.addClass('active');
+                        li.click(function() {
+                        go(parseInt($(this).text()));
+                    })
+                }
+                pagination.append(pag_ul);
+                div.append(pagination);
+             }
+         }
 
-    span.appendChild(text);
-    a.appendChild(img);
-    a.appendChild(br);
-    a.appendChild(span);
-    appList.appendChild(a);
-    
-    
-    /* add the bulletins */
-    var layout = droid.layout;
-    var div = document.createElement("div");
-    var imgDiv = document.createElement("div");
-    var descDiv = document.createElement("div");
-    
-    div.setAttribute("id", x);
-    div.setAttribute("style", "display:none");
-    imgDiv.setAttribute("class", "bulletinImg");
-    descDiv.setAttribute("class", "bulletinDesc");
-	
-	  if (layout == "imgLeft") {
-	    $(imgDiv).addClass("img-left");
-	    $(descDiv).addClass("desc-right");
-	  } else if (layout == "imgTop") {
-	    $(imgDiv).addClass("img-top");
-	    $(descDiv).addClass("desc-bottom");
-	  } else if (layout == "imgRight") {
-	    $(imgDiv).addClass("img-right");
-	    $(descDiv).addClass("desc-left");
-	  }
-	
-	  imgDiv.innerHTML = "<img src='" + toRoot + assetsRoot + "images/home/" + droid.img + "'>";
-	  descDiv.innerHTML = (droid.title != "") ? "<h3>" + droid.title + "</h3>" + droid.desc : droid.desc;
-		$(div).append(imgDiv);
-		$(div).append(descDiv);
-    
-    $("#carouselMain").append(div);
-    
-  }
-}
+         //Previous button
+         if(o.btnPrev)
+             $(o.btnPrev).click(function(e) {
+                 e.preventDefault();
+                 return go(curr-o.scroll);
+             });
 
-// -- * slider * -- //
+         //Next button
+         if(o.btnNext)
+             $(o.btnNext).click(function(e) {
+                 e.preventDefault();
+                 return go(curr+o.scroll);
+             });
 
-// -- dependencies:
-//    (1) div containing slides, (2) a "clip" div to hide the scroller
-//    (3) control arrows
+         //Pause button
+         if(o.btnPause)
+             $(o.btnPause).click(function(e) {
+                 e.preventDefault();
+                 if ($(this).hasClass('paused')) {
+                     startRotateTimer();
+                 } else {
+                     pauseRotateTimer();
+                 }
+             });
 
-// -- * config below * -- //
+         //Auto rotation
+         if(o.auto) startRotateTimer();
 
-var slideCode = droidList; // the dictionary of slides
-var slideList = 'app-list'; // the div containing the slides
-var arrowRight = 'arrow-right'; // the right control arrow
-var arrowLeft = 'arrow-left'; // the left control arrow
+         function startRotateTimer() {
+             clearInterval(timer);
+             timer = setInterval(function() {
+                  if (curr == tl-1) {
+                    go(0);
+                  } else {
+                    go(curr+o.scroll);
+                  }
+              }, o.autoTime);
+             $(o.btnPause).removeClass('paused');
+         }
 
+         function pauseRotateTimer() {
+             clearInterval(timer);
+             $(o.btnPause).addClass('paused');
+         }
 
-function showPreview(slideName) {
-  centerSlide(slideName);
-  if (slideName.indexOf('selected') != -1) {
-    return false;
-  }
-  droid(slideName); // do this function when slide is clicked
-}
+         //Go to an item
+         function go(to) {
+             if(!running) {
 
-var thumblist = document.getElementById(slideList);// the div containing the slides
+                 if(to<0) {
+                    to = itemLength-1;
+                 } else if (to>itemLength-1) {
+                    to = 0;
+                 }
+                 curr = to;
 
-var slideWidth = 144; // width of a slide including all margins, etc.
-var slidesAtOnce = 3; // no. of slides to appear at once (requires odd number to have a centered slide)
+                 running = true;
 
-// -- * no editing should be needed below * -- //
+                 ul.animate(
+                     animCss == "left" ? { left: -(curr*liSize) } : { top: -(curr*liSize) } , o.speed, o.easing,
+                     function() {
+                         running = false;
+                     }
+                 );
 
-var originPosition = {};
-var is_animating = 0;
-var currentStripPosition = 0;
-var centeringPoint = 0;
-var rightScrollLimit = 0;
-
-// makeSlideStrip()
-// - figures out how many slides there are
-// - determines the centering point of the slide strip
-function makeSlideStrip() {
-  var slideTotal = 0;
-  centeringPoint = Math.ceil(slidesAtOnce/2);
-  for (var x in slideCode) {
-    slideTotal++;
-  }
-  var i = 0;
-  for (var code in slideCode) {
-    if (i <= centeringPoint-1) {
-      originPosition[code] = 0;
-    } else {
-      if (i >= slideTotal-centeringPoint+1)  {
-        originPosition[code] = (slideTotal-slidesAtOnce)*slideWidth;
-      } else {
-        originPosition[code] = (i-centeringPoint+1)*slideWidth;
-      }
-    }
-    i++;
-  }
-  rightScrollLimit = -1*(slideTotal-slidesAtOnce)*slideWidth;
-}
-
-// slides with acceleration
-function slide(goal, id, go_left, cp) {
-  var div = document.getElementById(id);
-  var animation = {};
-  animation.time = 0.5;  // in seconds
-  animation.fps = 60;
-  animation.goal = goal;
-  origin = 0.0;
-  animation.origin = Math.abs(origin);  
-  animation.frames = (animation.time * animation.fps) - 1.0;
-  var current_frame = 0;
-  var motions = Math.abs(animation.goal - animation.origin);
-  function animate() {
-    var ease_right = function (t) { return (1 - Math.cos(t * Math.PI))/2.0; };
-    var ease = ease_right;
-    if (go_left == 1) {
-      ease = function(t) { return 1.0 - ease_right(t); };
-    }
-    var left = (ease(current_frame/animation.frames) * Math.abs(animation.goal - animation.origin)) - cp; 
-    if(left < 0) {
-      left = 0;
-    }
-    if(!isNaN(left)) {
-      div.style.left = '-' + Math.round(left) + 'px';
-    }
-    current_frame += 1;
-    if (current_frame == animation.frames) {
-      is_animating = 0;
-      window.clearInterval(timeoutId)
-    }
-  }
-  var timeoutId = window.setInterval(animate, animation.time/animation.fps * 1000);
-}
-
-//Get style property
-function getStyle(element, cssProperty){
-  var elem = document.getElementById(element);
-  if(elem.currentStyle){
-    return elem.currentStyle[cssProperty]; //IE
-  } else{
-    var style =  document.defaultView.getComputedStyle(elem, null); //firefox, Opera
-    return style.getPropertyValue(cssProperty);
-  }
-}
-
-// Left and right arrows
-function page_left() {
-  var amount = slideWidth;
-  animateSlide(amount, 'left');
-}
-
-function page_right() { 
-  var amount = slideWidth;
-  animateSlide(amount, 'right');
-}
+                 $(o.btnPrev + "," + o.btnNext).removeClass("disabled");
+                 $( (curr-o.scroll<0 && o.btnPrev)
+                     ||
+                    (curr+o.scroll > itemLength && o.btnNext)
+                     ||
+                    []
+                  ).addClass("disabled");
 
 
-// animates the strip
-// - sets arrows to on or off
-function animateSlide(amount,dir) {
-  var currentStripPosition = parseInt(getStyle(slideList,'left'));
-  var motionDistance;
-  if (amount == slideWidth ) {
-    motionDistance = slideWidth;
-  } else {
-    motionDistance = amount;
-  }
-  
-  var rightarrow = document.getElementById(arrowRight);
-  var leftarrow = document.getElementById(arrowLeft);
-  
-  function aToggle(state,aDir) {
-    if (state == 'on') {
-      if (aDir =='right') {
-        rightarrow.className = 'arrow-right-on';
-        rightarrow.href = "javascript:page_right()";
-      } else {
-        leftarrow.className = 'arrow-left-on';
-        leftarrow.href = "javascript:page_left()";
-      }
-    } else {
-      if (aDir =='right') {
-        rightarrow.href = "javascript:{}";
-        rightarrow.className = 'arrow-right-off'; 
-      } else {
-        leftarrow.href = "javascript:{}";
-        leftarrow.className = 'arrow-left-off';
-      }
-    }
-  }
-  
-  function arrowChange(rP) {
-    if (rP >= rightScrollLimit) {
-      aToggle('on','right');
-    }
-    if (rP <= rightScrollLimit) {
-      aToggle('off','right');
-    }
-    if (rP <= slideWidth) {
-      aToggle('on','left');
-    }
-    if (rP >= 0) {
-      aToggle('off','left');
-    }
-  }
-
-  if (dir == 'right' && is_animating == 0) {
-    arrowChange(currentStripPosition-motionDistance);
-    is_animating = 1;
-    slide(motionDistance, slideList, 0, currentStripPosition);
-  } else if (dir == 'left' && is_animating == 0) {
-    arrowChange(currentStripPosition+motionDistance);
-    is_animating = 1;
-    rightStripPosition = currentStripPosition + motionDistance;
-    slide(motionDistance, slideList, 1, rightStripPosition);
-  }
-}
-
-function centerSlide(slideName) {
-  var currentStripPosition = parseInt(getStyle(slideList,'left'));
-  var dir = 'left';
-  var originpoint = Math.abs(currentStripPosition);
-  if (originpoint <= originPosition[slideName]) {
-    dir = 'right';
-  }
-  var motionValue = Math.abs(originPosition[slideName]-originpoint);
-  animateSlide(motionValue,dir);
-}
+                 var nav_items = $('li', pagination);
+                 nav_items.removeClass('active');
+                 nav_items.eq(to).addClass('active');
 
 
-function initCarousel(def) {
-  buildCarousel();
-  showPreview(def);
-  makeSlideStrip();
-}
+             }
+             if(o.auto) startRotateTimer();
+             return false;
+         };
+     });
+ };
+
+ function css(el, prop) {
+     return parseInt($.css(el[0], prop)) || 0;
+ };
+ function width(el) {
+     return  el[0].offsetWidth + css(el, 'marginLeft') + css(el, 'marginRight');
+ };
+ function height(el) {
+     return el[0].offsetHeight + css(el, 'marginTop') + css(el, 'marginBottom');
+ };
+
+ })(jQuery);
+
+
+/*
+ *  dacSlideshow 1.0
+ *  Used on develop/index.html for side-sliding tabs
+ *
+ *  Sample usage:
+ *  HTML -
+ *  <div class="slideshow-container">
+ *   <a href="" class="slideshow-prev">Prev</a>
+ *   <a href="" class="slideshow-next">Next</a>
+ *   <ul>
+ *       <li class="item"><img src="images/marquee1.jpg"></li>
+ *       <li class="item"><img src="images/marquee2.jpg"></li>
+ *       <li class="item"><img src="images/marquee3.jpg"></li>
+ *       <li class="item"><img src="images/marquee4.jpg"></li>
+ *   </ul>
+ *  </div>
+ *
+ *   <script type="text/javascript">
+ *   $('.slideshow-container').dacSlideshow({
+ *       auto: true,
+ *       btnPrev: '.slideshow-prev',
+ *       btnNext: '.slideshow-next'
+ *   });
+ *   </script>
+ *
+ *  Options:
+ *  btnPrev:    optional identifier for previous button
+ *  btnNext:    optional identifier for next button
+ *  auto:       whether or not to auto-proceed
+ *  speed:      animation speed
+ *  autoTime:   time between auto-rotation
+ *  easing:     easing function for transition
+ *  start:      item to select by default
+ *  scroll:     direction to scroll in
+ *  pagination: whether or not to include dotted pagination
+ *
+ */
+ (function($) {
+ $.fn.dacTabbedList = function(o) {
+
+     //Options - see above
+     o = $.extend({
+         speed : 250,
+         easing: null,
+         nav_id: null,
+         frame_id: null
+     }, o || {});
+
+     //Set up a carousel for each
+     return this.each(function() {
+
+         var curr = 0;
+         var running = false;
+         var animCss = "margin-left";
+         var sizeCss = "width";
+         var div = $(this);
+
+         var nav = $(o.nav_id, div);
+         var nav_li = $("li", nav);
+         var nav_size = nav_li.size();
+         var frame = div.find(o.frame_id);
+         var content_width = $(frame).find('ul').width();
+         //Buttons
+         $(nav_li).click(function(e) {
+           go($(nav_li).index($(this)));
+         })
+
+         //Go to an item
+         function go(to) {
+             if(!running) {
+                 curr = to;
+                 running = true;
+
+                 frame.animate({ 'margin-left' : -(curr*content_width) }, o.speed, o.easing,
+                     function() {
+                         running = false;
+                     }
+                 );
+
+
+                 nav_li.removeClass('active');
+                 nav_li.eq(to).addClass('active');
+
+
+             }
+             return false;
+         };
+     });
+ };
+
+ function css(el, prop) {
+     return parseInt($.css(el[0], prop)) || 0;
+ };
+ function width(el) {
+     return  el[0].offsetWidth + css(el, 'marginLeft') + css(el, 'marginRight');
+ };
+ function height(el) {
+     return el[0].offsetHeight + css(el, 'marginTop') + css(el, 'marginBottom');
+ };
+
+ })(jQuery);
+
+

@@ -312,6 +312,40 @@ line-height: 50px;
 line-height: 35px;
 }
 
+.content-left {
+float: left;
+text-align: center;
+vertical-align: center;
+margin: 0 0 0 35px;
+width:300px;
+}
+
+.content-right {
+margin: 80px 40px 0 0;
+width:300px;
+float:right;
+}
+
+.slide-btn div{
+float:left;
+height:12px;
+width:12px;
+border-radius:6px;
+background-color:#ccc;
+float: left;
+margin: 0 5px 20px;
+}
+
+.slide-btn  div:hover{
+background-color:rgba(255, 102, 0, 0.42);
+}
+
+.left div{
+margin-left:250px;
+}
+.right div{
+margin-right:200px;
+}
 /*Java code (generated)*/
 
 
