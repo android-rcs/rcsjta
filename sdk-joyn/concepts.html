@@ -218,27 +218,31 @@
 			</ul>
 			<p></p>
 			</br>
-			<p><span>The joyn services are implemented via an Android service which runs in background on the device and which offers a joyn API interface for third party applications. Several applications may be connected at time to the the single joyn service by using a local client/server model. Several services may be used at a time.</span></p>
-			<p><span>The joyn API uses the following Android concepts:</span></p>
-			<ul >
-				<li>
-					<p><span>Android Intents </span></p>
-				</li>
-				<li>
-					<p><span>Android content providers</span></p>
-				</li>
-				<li>
-					<p><span>AIDL interfaces</span></p>
-				</li>
-			</ul>
-			<p></p>
-			<div style="width:700px;margin:auto;">
-				<img src="./assets-sdk/images/concepts_1.png" width="100%"/>
-			</div>
-			<p></p>
-			</br>
+			
 		</div>
 		<div class="content-body center">
+			<div class="guide-block">	
+				<h2>Architecture</h2>
+				<p><span>The joyn services are implemented via an Android service which runs in background on the device and which offers a joyn API interface for third party applications. Several applications may be connected at time to the the single joyn service by using a local client/server model. Several services may be used at a time.</span></p>
+				<p><span>The joyn API uses the following Android concepts:</span></p>
+				<ul >
+					<li>
+						<p><span>Android <a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> </span></p>
+					</li>
+					<li>
+						<p><span>Android <a href="http://developer.android.com/guide/topics/providers/content-providers.html">Content Providers</a></span></p>
+					</li>
+					<li>
+						<p><span><a href="http://developer.android.com/guide/components/aidl.html">AIDL</a> interfaces</span></p>
+					</li>
+				</ul>
+				<p></p>
+				<div style="width:700px;margin:auto;">
+					<img src="./assets-sdk/images/concepts_1.png" width="100%"/>
+				</div>
+				<p></p>			
+			</div>
+			</br>
 			<div class="guide-block">
 				<h2>Intents</h2>
 				<p><a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> are used to broadcast incoming invitations to applications (eg. file transfer invitation, multimedia session invitation, new chat message, .etc). Then it’s up to the application to catch the Intent and to display a popup or any UI associated to the incoming event.</p>				

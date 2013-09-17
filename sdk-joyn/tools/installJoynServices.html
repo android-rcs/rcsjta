@@ -196,63 +196,80 @@
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">
 			<p><h1>Install and configure joyn standalone service</h1></p>
-			<p><span>On some devices the joyn service stack may not be installed. If this is the case, we provide a joyn-service test application. Once these services are configured appropriately, your Rich Communication application will be able to communicate with them via joyn APIs.</span></p>
+			<p><span>Some devices the are not yet joyn compliant, so it is necessary to instal a standalone joyn service on your device before using the joyn APIs on your application. The joyn SDK provides a joyn-service test application. Once these services are configured appropriately, your application will be able to communicate via joyn APIs and joyn network.</span></p>
 		</div>
 		<div class="content-body center">
 			<div class="guide-block">
-					<p><h2>1. Install application</h2></p>
-					<p>First copy <a href="../tools/joyn-core.apk">joyn-core</a> to the directory of your choice.</p>									
+					<p><h2>1. Install the standalone joyn service on your device</h2></p>								
 					<p>To install the application, connect your device via USB. Make sure that USB debugging is active.</p>
-					<p>Locate Android SDK on your file system and run the following command from the platform-tools directory.</p>
-					<p><code style="background-color:#e1e1e1;">adb install PATH_TO\joyn-core.apk</code> - Replace <span style="font-style:italic">PATH_TO</span> with the location of the apk on your file system.</p>
+					<p>Then use the following command:</p>
+					<p><code style="background-color:#e1e1e1;">adb install &lt;SDK&gt;\tools\joyn-core.apk</code> </p>
+					<p>Get more information on the adb tool <a href="http://developer.android.com/tools/help/adb.html" target="_blank">here</a></p>
+					<p>Once joyn-core.apk installed, there will be two new applications present on your device:</p>
+					<ul>
+						<li>
+							<p>The joyn service, an Android background service delivering the joyn service.</p>
+						</li>
+						<li>
+							<p>The joyn provisioning tool which allows you to configure your joyn service and end user profile.</p>
+						</li>
+					</ul>
 			</div>
 			</br>
 			<div class="guide-block">
-				<p><h2>2. Automatic Configuration</h2></p>
-				<p>Once joyn-core.apk installed, there will be two new applications present on your device as well as the joyn services.</p>
+				<p><h2>2. Configure the joyn service</h2></p>
+				<p>There are 2 ways of provisioning your joyn client: Automatic and Manual. By default the manual provisioning is activated.
+				<p><h3>Automatic provisioning</h3></p>
 				<div style="width:100%;display:inline-block;margin-bottom:15px">
 					<div style="width:60%;float:right;margin:75px 5% 0 0">
 						<p>First open the application named <b>Provisioning</b> and go to the second tab named <b>Stack</b>.</p>
-						<p>Before trying a manual configuration it is possible that your configuration may be done automatically. To do so, select <b>HTTPS</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
+						<p>Select <b>HTTPS</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
 					</div>
 					<div class="img-ssh">
 						<img src="../assets-sdk/images/tuto_ss_prov.png" width="100%"  />
 					</div>
 				</div>
-				<div style="width:100%;display:inline-block;">
-					<div class="img-ssh" style="float:right;">
-						<img src="../assets-sdk/images/tuto_ss_settings.png" width="100%"  />
-					</div>
-					<div style="width:60%;float:left;margin:75px 5% 0 0">
-						<p>The joyn services must now be restarted.</p>
-						<p>You can either restart your device or use the second application named <b>Settings</b>.</p>
-						<p>By toggling the first option <b>joyn service</b> you can turn joyn services on and off.</p>
-					</div>
-				</div>
+				<p>Then restart the joyn service (see step 3).</p>
 				</br>
-				</br>
-				<p>If the automatic configuration succeeded, the joyn icon in the notification bar should turn yellow. If this is the case you can now use joyn APIs to communicate with these services.</p>
-				<p>Otherwise you must proceed with the manual configuration.</p>						
-			</div>
-			</br>
-			<div class="guide-block">
-				<p><h2>3. Manual Configuration</h2></p>
+				<p><h3>Manual provisioning</h3></b></p>
 				<p>Return to <b>Provisioning</b> application and go to the second tab named <b>Stack</b>.</p>
 				<p>Select <b>none</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
 				<div style="width:100%;display:inline-block;margin-bottom:15px">
 					<div style="width:60%;float:right;margin:75px 5% 0 0">
 						<p>Now go to the first tab named <b>Profile</b>.</p>
 						<p>Press <b>Generate profile</b>.</p>
-						<p>Fill-in the form as asked by entering your phone number, then by selecting the platform you are <b>supposed</b> to connect to.</p>
-						<p>Press <b>OK</b>.</p>
+						<p>Fill-in the form as asked by entering your phone number, then by selecting the joyn platform you are <b>supposed</b> to connect to.</p>
+						<p>Press <b>OK</b> and press <b>Save</b> to validate your config.</p>
 					</div>
 					<div class="img-ssh">
 						<img src="../assets-sdk/images/tuto_ss_prov2.png" width="100%"  />
 					</div>
 				</div>
-				<p>You must now restart joyn services as described in <b>Step 2</b>.</p>
+				<p>Then restart the joyn service (see step 3).</p>				
+				</br>			
 			</div>
 			</br>
+			<div class="guide-block">
+				<p><h2>3. Start the joyn service</h2></p>
+				<div style="width:100%;display:inline-block;">
+					<div class="img-ssh" style="float:right;">
+						<img src="../assets-sdk/images/tuto_ss_settings.png" width="100%"  />
+					</div>
+					<div style="width:60%;float:left;margin:75px 5% 0 0">
+						<p>The joyn service is started automatically at device boot or via its settings Acitivity: see chexboxe "joyn Service".</p>
+					</div>
+				</div>
+				</br>
+			</div>
+			</br>
+			<div class="guide-block">
+				<p><h2>4. Debugging</h2></p>
+				<div style="width:100%;display:inline-block;">
+					<p>Dispaly SIP traces...</p>
+					<p>+ Logcat</p>
+				</div>
+				</br>
+			</div>
 			</br>
 		</div>
 		

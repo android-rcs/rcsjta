@@ -1,27 +1,25 @@
 README - joyn SDK
-Release 2.5.8
 
 
-News:
------
+News v3.0.1:
+------------
+
+- See complete API javadoc:
+	https://rcsjta.googlecode.com/git/sdk-joyn/javadoc/packages.html.
+
+- See API samples:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
+
+- See API tutorials:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
 
 
 
 Bugs fixed:
 -----------
 
-See Opensource issue details at http://code.google.com/p/android-rcs-ims-stack/issues/list
+Concerning the open source stack and RI application, see details at http://code.google.com/p/android-rcs-ims-stack/issues/list.
 
-
-
-Known bugs:
------------
-
-
-
-Notes:
--------
-- This release runs from Android 2.x release.
 
 
 Contact:

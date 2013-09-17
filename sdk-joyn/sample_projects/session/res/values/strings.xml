@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-<string name="app_name">New MM service</string>
+<string name="app_name">New service</string>
 <string name="title_msg">Information</string>
 <string name="label_accept">Accept</string>
 <string name="label_decline">Decline</string>
@@ -25,7 +25,8 @@
 <string name="label_session_failed">Session has failed (error code %d)</string>
 <string name="title_session">Multimedia session</string>
 <string name="label_session_has_expired">Session has expired</string>
-<string name="title_recv_session">Session invitation from %s</string>
+<string name="title_recv_invitation">New session invitation</string>
+<string name="label_recv_invitation">from %s</string>
 <string name="label_remote">Contact:</string>
 
 </resources>

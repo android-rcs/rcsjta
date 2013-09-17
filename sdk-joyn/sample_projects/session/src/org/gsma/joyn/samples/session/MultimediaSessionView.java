@@ -1,8 +1,15 @@
 package org.gsma.joyn.samples.session;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Vector;
+
 import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
+import org.gsma.joyn.samples.session.sdp.MediaDescription;
+import org.gsma.joyn.samples.session.sdp.SdpParser;
+import org.gsma.joyn.samples.session.sdp.SdpUtils;
 import org.gsma.joyn.samples.session.utils.Utils;
 import org.gsma.joyn.session.MultimediaSession;
 import org.gsma.joyn.session.MultimediaSessionIntent;
@@ -37,7 +44,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	 */
 	public final static int MODE_INCOMING = 0;
 	public final static int MODE_OUTGOING = 1;
-	public final static int MODE_OPEN = 2;
 
 	/**
 	 * Intent parameters
@@ -56,6 +62,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	 */
 	private MultimediaSessionService sessionApi;
 
+	/**
+	 * Mode
+	 */
+	private int mode;
+	
 	/**
 	 * Session ID
 	 */
@@ -81,6 +92,22 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	 */
 	private Dialog progressDialog = null;
 
+	/**
+	 * Local TCP port
+	 */
+	private int localPort = 7000;
+	
+	/**
+	 * TCP input stream
+	 */
+	private InputStream inStream = null;
+	
+	/**
+	 * TCP output stream
+	 */
+	private OutputStream outStream = null;
+
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,7 +118,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         setContentView(R.layout.session_view);
 
         // Set title
-        setTitle(R.string.title_mm_session);
+        setTitle(R.string.title_session);
     	    	
     	// Instanciate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
@@ -115,7 +142,104 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         // Disconnect API
         sessionApi.disconnect();
 	}
+		    
+    /**
+     * Callback called when service is connected. This method is called when the
+     * service is well connected to the RCS service (binding procedure successfull):
+     * this means the methods of the API may be used.
+     */
+    public void onServiceConnected() {
+		try {
+	        mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
+			if (mode == MultimediaSessionView.MODE_OUTGOING) {
+				// Outgoing session
+
+	            // Check if the service is available
+	        	boolean registered = false;
+	        	try {
+	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
+	        			registered = true;
+	        		}
+	        	} catch(Exception e) {}
+	            if (!registered) {
+	    	    	Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_service_not_available));
+	    	    	return;
+	            } 
+	            
+		    	// Get remote contact
+				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
+		        
+		        // Initiate session
+    			startSession();
+			} else {
+				// Incoming session from its Intent
+		        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+
+		        // Get the session
+	    		session = sessionApi.getSession(sessionId);
+				if (session == null) {
+					// Session not found or expired
+					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_has_expired));
+					return;
+				}
+				
+    			// Add session event listener
+				session.addEventListener(sessionListener);
+				
+		    	// Get remote contact
+				contact = session.getRemoteContact();
 		
+        		// Start the TCP server
+/*		    	Thread t = new Thread() {
+		        	public void run() {
+		            	try {
+        		System.out.println(">>>>>>>>>>>>> START SERVER on " + localPort);
+		            		TcpServerConnection tcpServer = new TcpServerConnection();
+		            		tcpServer.open(localPort);
+        		System.out.println(">>>>>>>>>>>>> WAIT CONNECTION");
+		            		TcpClientConnection socket = tcpServer.acceptConnection();
+        		System.out.println(">>>>>>>>>>>>> CONNECTED");
+		            		inStream = socket.getInputStream();
+		            		outStream = socket.getOutputStream();
+        		System.out.println(">>>>>>>>>>>>> " + inStream);
+        		System.out.println(">>>>>>>>>>>>> " + outStream);
+		            	} catch(Exception e) {
+		            		e.printStackTrace();
+		            	}
+		        	}
+		        };
+		        t.start();*/
+
+		        // Manual accept
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.title_session);
+				builder.setMessage(getString(R.string.label_from) +	" " + contact);
+				builder.setCancelable(false);
+				builder.setIcon(R.drawable.notif_invitation_icon);
+				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+				builder.show();
+			}
+			
+			// Display session info
+	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
+	    	contactEdit.setText(contact);
+		} catch(JoynServiceException e) {
+			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
+		}
+    }
+    
+    /**
+     * Callback called when service has been disconnected. This method is called when
+     * the service is disconnected from the RCS service (e.g. service deactivated).
+     * 
+     * @param error Error
+     * @see JoynService.Error
+     */
+    public void onServiceDisconnected(int error) {
+		Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_disabled));
+    }    
+	
 	/**
 	 * Accept invitation
 	 */
@@ -124,7 +248,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         	public void run() {
             	try {
             		// Accept the invitation
-        			session.acceptInvitation(ServiceUtils.getLocalSdp("passive"));
+        			session.acceptInvitation(ServiceUtils.getLocalSdp("active", localPort));
             	} catch(Exception e) {
         			handler.post(new Runnable() { 
         				public void run() {
@@ -153,104 +277,8 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         };
         thread.start();
 	}	
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		try {
-	        int mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
-			if (mode == MultimediaSessionView.MODE_OUTGOING) {
-				// Outgoing session
 
-	            // Check if the service is available
-	        	boolean registered = false;
-	        	try {
-	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
-	        			registered = true;
-	        		}
-	        	} catch(Exception e) {}
-	            if (!registered) {
-	    	    	Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_service_not_available));
-	    	    	return;
-	            } 
-	            
-		    	// Get remote contact
-				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
-		        
-		        // Initiate session
-    			startSession();
-			} else
-			if (mode == MultimediaSessionView.MODE_OPEN) {
-				// Open an existing session
-				
-				// Incoming session
-		        sessionId = getIntent().getStringExtra(MultimediaSessionView.EXTRA_SESSION_ID);
-
-		    	// Get the session
-	    		session = sessionApi.getSession(sessionId);
-				if (session == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_has_expired));
-					return;
-				}
-				
-    			// Add session event listener
-				session.addEventListener(sessionListener);
-				
-		    	// Get remote contact
-				contact = session.getRemoteContact();
-			} else {
-				// Incoming session from its Intent
-		        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
-
-		    	// Get the session
-	    		session = sessionApi.getSession(sessionId);
-				if (session == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_has_expired));
-					return;
-				}
-				
-    			// Add session event listener
-				session.addEventListener(sessionListener);
-				
-		    	// Get remote contact
-				contact = session.getRemoteContact();
-		
-				// Manual accept
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(R.string.title_mm_session);
-				builder.setMessage(getString(R.string.label_from) +	" " + contact);
-				builder.setCancelable(false);
-				builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-				builder.show();
-			}
-			
-			// Display session info
-	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
-	    	contactEdit.setText(contact);
-		} catch(JoynServiceException e) {
-			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
-		}
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_disabled));
-    }    
-	
-    /**
+	/**
      * Start session
      */
     private void startSession() {
@@ -261,7 +289,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					// Initiate session
 					session = sessionApi.initiateSession(ServiceUtils.SERVICE_ID,
 							contact,
-							ServiceUtils.getLocalSdp("active"),
+							ServiceUtils.getLocalSdp("active", localPort),
 							sessionListener);
             	} catch(Exception e) {
             		e.printStackTrace();
@@ -279,7 +307,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         progressDialog = Utils.showProgressDialog(MultimediaSessionView.this, getString(R.string.label_command_in_progress));
         progressDialog.setOnCancelListener(new OnCancelListener() {
 			public void onCancel(DialogInterface dialog) {
-				Toast.makeText(MultimediaSessionView.this, getString(R.string.label_mm_session_canceled), Toast.LENGTH_SHORT).show();
+				Toast.makeText(MultimediaSessionView.this, getString(R.string.label_session_canceled), Toast.LENGTH_SHORT).show();
 				quitSession();
 			}
 		});
@@ -324,7 +352,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     private class MySessionListener extends MultimediaSessionListener {
     	// Session ringing
     	public void onSessionRinging() {
-    		// TODO: play ringtone
     	}
 
     	// Session started
@@ -333,6 +360,38 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
+					
+            		// Start the TCP client
+		    		Thread t = new Thread() {
+		    			public void run() {
+		    				try  {
+								// Parse the remote SDP
+								String sdp = session.getRemoteSdp();
+								SdpParser parser = new SdpParser(sdp.getBytes());
+					    		Vector<MediaDescription> media = parser.getMediaDescriptions();
+								MediaDescription mediaDesc = media.elementAt(0);
+					    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+					    		int remotePort = mediaDesc.port;
+
+            		System.out.println(">>>>>>>>>>>>> START CLIENT");
+					    		TcpClientConnection tcpClient = new TcpClientConnection();
+            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
+			            		tcpClient.open(remoteHost, remotePort);
+			            		inStream = tcpClient.getInputStream();
+			            		outStream = tcpClient.getOutputStream();
+            		System.out.println(">>>>>>>>>>>>> " + inStream);
+            		System.out.println(">>>>>>>>>>>>> " + outStream);
+		    				} catch(Exception e) {
+								e.printStackTrace();
+								
+								// Can't connect media: abort the session
+								try {
+									session.abortSession();
+								} catch(Exception ex) {}
+		    				}
+		    			}
+		    		};
+		    		t.start();
 				}
 			});
     	}
@@ -345,7 +404,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					hideProgressDialog();
 
 					// Show info
-					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_aborted));
+					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_aborted));
 				}
 			});
     	}
@@ -359,13 +418,12 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					
 					// Display error
 					if (error == MultimediaSession.Error.INVITATION_DECLINED) {
-						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_declined));
+						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_declined));
 					} else {
-						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_mm_session_failed, error));
+						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_failed, error));
 					}					
 				}
 			});
-			
     	}
     };
         
@@ -429,7 +487,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater=new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu_mm_session, menu);
+		inflater.inflate(R.menu.menu_session, menu);
 		return true;
 	}
     

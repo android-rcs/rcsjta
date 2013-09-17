@@ -18,7 +18,7 @@
 	
 	    <TableRow android:padding="5dip"></TableRow>
         
-		<Button android:text="@string/label_initiate_mm_session"
+		<Button android:text="@string/label_initiate_session"
 		 android:layout_marginLeft="5dip"
 		 android:layout_marginRight="5dip"
 		 android:id="@+id/initiate_btn"/>

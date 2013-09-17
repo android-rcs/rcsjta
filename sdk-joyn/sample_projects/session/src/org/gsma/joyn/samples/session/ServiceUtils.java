@@ -5,6 +5,7 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 
 import org.gsma.joyn.capability.CapabilityService;
+import org.gsma.joyn.samples.session.sdp.SdpUtils;
 
 public class ServiceUtils {
 	/**
@@ -56,18 +57,21 @@ public class ServiceUtils {
 	 * Returns local SDP
 	 * 
 	 * @param mode Connection mode (active or passive)
+	 * @param port Local port
 	 * @return SDP
 	 */
-	public static String getLocalSdp(String mode) {
+	public static String getLocalSdp(String mode, int port) {
 		String ntpTime = ServiceUtils.constructNTPtime(System.currentTimeMillis());
-		String myIpAddress = ServiceUtils.getLocalIpAddress();
+		String ipAddress = ServiceUtils.getLocalIpAddress();
 		String sdp =
     		"v=0" + "\r\n" +
-            "o=- " + ntpTime + " " + ntpTime + " IN IP4 " + myIpAddress + CRLF +
-            "s=DEMO" + CRLF +
-			"c=IN IP4 " + myIpAddress + CRLF +
+            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + CRLF +
+            "s=DEMO joyn API" + CRLF +
+			"c=" + SdpUtils.formatAddressType(ipAddress) + CRLF +
             "t=0 0" + CRLF +
-            "m=text 5000 TCP 96" + CRLF + 
+//            "m=text " + port + " TCP *" + CRLF + 
+            "m=message " + port + " TCP/MSRP *" + CRLF + 
+            "a=path:" + "msrp://" + ipAddress + ":" + port + "/" + System.currentTimeMillis() + ";tcp" + CRLF +
             "a=setup:" + mode + CRLF +
 			"a=sendrecv" + CRLF;
 		return sdp;

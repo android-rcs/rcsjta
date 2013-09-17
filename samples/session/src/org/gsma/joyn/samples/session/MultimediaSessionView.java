@@ -193,16 +193,16 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 /*		    	Thread t = new Thread() {
 		        	public void run() {
 		            	try {
-		            		System.out.println(">>>>>>>>>>>>> START SERVER on " + localPort);
+        		System.out.println(">>>>>>>>>>>>> START SERVER on " + localPort);
 		            		TcpServerConnection tcpServer = new TcpServerConnection();
 		            		tcpServer.open(localPort);
-		            		System.out.println(">>>>>>>>>>>>> WAIT CONNECTION");
+        		System.out.println(">>>>>>>>>>>>> WAIT CONNECTION");
 		            		TcpClientConnection socket = tcpServer.acceptConnection();
-		            		System.out.println(">>>>>>>>>>>>> CONNECTED");
+        		System.out.println(">>>>>>>>>>>>> CONNECTED");
 		            		inStream = socket.getInputStream();
 		            		outStream = socket.getOutputStream();
-		            		System.out.println(">>>>>>>>>>>>> " + inStream);
-		            		System.out.println(">>>>>>>>>>>>> " + outStream);
+        		System.out.println(">>>>>>>>>>>>> " + inStream);
+        		System.out.println(">>>>>>>>>>>>> " + outStream);
 		            	} catch(Exception e) {
 		            		e.printStackTrace();
 		            	}
@@ -373,15 +373,14 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
 					    		int remotePort = mediaDesc.port;
 
-			            		System.out.println(">>>>>>>>>>>>> START CLIENT");
+            		System.out.println(">>>>>>>>>>>>> START CLIENT");
 					    		TcpClientConnection tcpClient = new TcpClientConnection();
-					    		tcpClient.setSoTimeout(10 * 1000);
-			            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
+            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
 			            		tcpClient.open(remoteHost, remotePort);
 			            		inStream = tcpClient.getInputStream();
 			            		outStream = tcpClient.getOutputStream();
-			            		System.out.println(">>>>>>>>>>>>> " + inStream);
-			            		System.out.println(">>>>>>>>>>>>> " + outStream);
+            		System.out.println(">>>>>>>>>>>>> " + inStream);
+            		System.out.println(">>>>>>>>>>>>> " + outStream);
 		    				} catch(Exception e) {
 								e.printStackTrace();
 								

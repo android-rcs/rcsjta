@@ -45,7 +45,7 @@ public class InitiateMultimediaSession extends Activity {
 		setContentView(R.layout.session_initiate);
 
 		// Set title
-		setTitle(R.string.menu_initiate_mm_session);
+		setTitle(R.string.menu_initiate_session);
 		
 		// Set contact selector
 		Spinner spinner = (Spinner)findViewById(R.id.contact);

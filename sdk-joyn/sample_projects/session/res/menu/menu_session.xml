@@ -3,5 +3,5 @@
 	
 	<item android:id="@+id/menu_close_session"
 		android:title="@string/menu_close_session"
-		android:icon="@drawable/ri_menu_close_session"/>
+		android:icon="@drawable/menu_close_session"/>
 </menu>
