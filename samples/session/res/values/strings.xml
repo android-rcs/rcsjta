@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name="app_name">New service</string>
+<string name="title_msg">Information</string>
+<string name="label_accept">Accept</string>
+<string name="label_decline">Decline</string>
+<string name="label_ok">OK</string>
+<string name="label_cancel">Cancel</string>
+<string name="menu_close_session">Quit</string>
+<string name="label_from">From:</string>
+<string name="label_command_in_progress">Command in progress...</string>
+<string name="label_confirm_close">Do you want to close the session on quit?</string>
+<string name="label_invitation_failed">Invitation has failed</string>
+<string name="label_api_failed">Call API method has failed</string>
+<string name="label_api_disabled">joyn service is not available</string>
+<string name="label_service_not_available">The service is not available. Please retry later.</string>
+<string name="menu_initiate_session">Initiate session</string>
+<string name="label_initiate_session">Initiate session</string>
+<string name="label_close_session">Close session</string>
+<string name="label_session_in_progress">Session in progress...</string>
+<string name="label_session_canceled">Session initiation has been canceled</string>
+<string name="label_session_aborted">Session aborted</string>
+<string name="label_session_declined">Session invitation has been declined</string>
+<string name="label_session_failed">Session has failed (error code %d)</string>
+<string name="title_session">Multimedia session</string>
+<string name="label_session_has_expired">Session has expired</string>
+<string name="title_recv_invitation">New session invitation</string>
+<string name="label_recv_invitation">from %s</string>
+<string name="label_remote">Contact:</string>
+
+</resources>
+

@@ -27,12 +27,14 @@ import javax2.sip.header.ExpiresHeader;
 import javax2.sip.header.Header;
 import javax2.sip.header.ViaHeader;
 
+import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -93,11 +95,6 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private boolean needUnregister = false;
 
-	/**
-	 * NAT traversal
-	 */
-	private boolean natTraversal = false;
-	
 	/**
 	 * Number of 401 failures
 	 */
@@ -210,7 +207,10 @@ public class RegistrationManager extends PeriodicRefresher {
     	        dialogPath.incrementCseq();
             }
 
-            // Create REGISTER request
+        	// Reset the number of 401 failures
+    		nb401Failures = 0;
+
+    		// Create REGISTER request
             SipRequest register = SipMessageFactory.createRegister(dialogPath,
             		featureTags,
             		RcsSettings.getInstance().getRegisterExpirePeriod(),
@@ -308,9 +308,10 @@ public class RegistrationManager extends PeriodicRefresher {
 	 * Send REGISTER message
 	 * 
 	 * @param register SIP REGISTER
-	 * @throws Exception
+	 * @throws SipException
+	 * @throws CoreException
 	 */
-	private void sendRegister(SipRequest register) throws Exception {
+	private void sendRegister(SipRequest register) throws SipException, CoreException {
         if (logger.isActivated()) {
         	logger.info("Send REGISTER, expire=" + register.getExpires());
         }
@@ -325,15 +326,16 @@ public class RegistrationManager extends PeriodicRefresher {
         if (ctx.isSipResponse()) {
         	// A response has been received
             if (ctx.getStatusCode() == 200) {
-            	// Reset the number of 401 failures
-        		nb401Failures = 0;        		
-
         		// 200 OK
         		if (register.getExpires() != 0) {
         			handle200OK(ctx);
         		} else {
         			handle200OkUnregister(ctx);
         		}
+            } else
+            if (ctx.getStatusCode() == 302) {
+        		// 302 Moved Temporarily
+            	handle302MovedTemporarily(ctx);
             } else
             if (ctx.getStatusCode() == 401) {
         		// Increment the number of 401 failures
@@ -346,9 +348,6 @@ public class RegistrationManager extends PeriodicRefresher {
             	} else { 
                 	// We reached 3 successive 401 failures, stop registration retries
             		handleError(new ImsError(ImsError.REGISTRATION_FAILED, "too many 401"));
-            		
-                	// Reset the number of 401 failures
-            		nb401Failures = 0;
             	}
             } else
             if (ctx.getStatusCode() == 423) {
@@ -369,9 +368,10 @@ public class RegistrationManager extends PeriodicRefresher {
 	 * Handle 200 0K response 
 	 * 
 	 * @param ctx SIP transaction context
-	 * @throws Exception
+	 * @throws SipException
+	 * @throws CoreException
 	 */
-	private void handle200OK(SipTransactionContext ctx) throws Exception {
+	private void handle200OK(SipTransactionContext ctx) throws SipException, CoreException {
         // 200 OK response received
     	if (logger.isActivated()) {
     		logger.info("200 OK response received");
@@ -407,13 +407,31 @@ public class RegistrationManager extends PeriodicRefresher {
     	ViaHeader respViaHeader = ctx.getSipResponse().getViaHeaders().next();
     	String received = respViaHeader.getParameter("received");
     	if (!respViaHeader.getHost().equals(localIpAddr) || ((received != null) && !received.equals(localIpAddr))) {
-    		natTraversal = true;
+    		networkInterface.setNatTraversal(true);
+    		networkInterface.setNatPublicAddress(received);
+    		String viaRportStr = respViaHeader.getParameter("rport");
+    		int viaRport = -1;
+    		if (viaRportStr != null) {
+	    		try {
+	    			viaRport = Integer.parseInt(viaRportStr);
+	    		} catch (NumberFormatException e) {
+	    			if (logger.isActivated()) {
+	    				logger.warn("Non-numeric rport value \"" + viaRportStr + "\"");
+	    			} 
+	    		}
+	    	}
+    		networkInterface.setNatPublicPort(viaRport);
+    		if (logger.isActivated()) {
+    			logger.debug("NAT public interface detected: " + received + ":" + viaRport);
+    		}
     	} else {
-    		natTraversal = false;
+    		networkInterface.setNatTraversal(false);
+    		networkInterface.setNatPublicAddress(null);
+    		networkInterface.setNatPublicPort(-1);
     	}        	
         if (logger.isActivated()) {
-            logger.debug("NAT traversal detection: " + natTraversal);
-        }
+            logger.debug("NAT traversal detection: " + networkInterface.isBehindNat());
+        }        
 		
         // Read the security header
     	registrationProcedure.readSecurityHeader(resp);
@@ -448,15 +466,56 @@ public class RegistrationManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.info("200 OK response received");
         }
+        
+    	// Reset the NAT parameters as we are not expecting any more messages
+        // for this registration
+    	networkInterface.setNatPublicAddress(null);
+    	networkInterface.setNatPublicPort(-1);
+	}
+	
+	/**
+	 * Handle 302 response
+	 * 
+	 * @param ctx SIP transaction context
+	 * @throws SipException
+	 * @throws CoreException
+	 */
+	private void handle302MovedTemporarily(SipTransactionContext ctx) throws SipException, CoreException {
+        // 302 Moved Temporarily response received
+        if (logger.isActivated()) {
+            logger.info("302 Moved Temporarily response received");
+        }
+        
+        // Extract new target URI from Contact header of the received response
+		SipResponse resp = ctx.getSipResponse();
+        ContactHeader contactHeader = (ContactHeader)resp.getStackMessage().getHeader(ContactHeader.NAME);
+		String newUri = contactHeader.getAddress().getURI().toString();
+		dialogPath.setTarget(newUri);
+
+		// Increment the Cseq number of the dialog path
+		dialogPath.incrementCseq();
+
+		// Create REGISTER request with security token
+		if (logger.isActivated()) {
+			logger.info("Send REGISTER to new address");
+		}
+		SipRequest register = SipMessageFactory.createRegister(dialogPath,
+				featureTags,
+				ctx.getTransaction().getRequest().getExpires().getExpires(),
+				instanceId);
+
+		// Send REGISTER request
+		sendRegister(register);
 	}
 
 	/**
 	 * Handle 401 response 
 	 * 
 	 * @param ctx SIP transaction context
-	 * @throws Exception
+	 * @throws SipException
+	 * @throws CoreException
 	 */
-	private void handle401Unauthorized(SipTransactionContext ctx) throws Exception {
+	private void handle401Unauthorized(SipTransactionContext ctx) throws SipException, CoreException {
 		// 401 response received
     	if (logger.isActivated()) {
     		logger.info("401 response received, nbFailures=" + nb401Failures);
@@ -485,11 +544,12 @@ public class RegistrationManager extends PeriodicRefresher {
 
 	/**
 	 * Handle 423 response 
-	 * 
+	 *
 	 * @param ctx SIP transaction context
-	 * @throws Exception
+	 * @throws SipException
+	 * @throws CoreException
 	 */
-	private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
+	private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipException, CoreException {
 		// 423 response received
     	if (logger.isActivated()) {
     		logger.info("423 response received");
@@ -595,14 +655,5 @@ public class RegistrationManager extends PeriodicRefresher {
     		logger.info("Execute re-registration");
     	}
         registration();
-    }
-    
-    /**
-     * Is behind a NAT
-     *
-     * @return Boolean
-     */
-    public boolean isBehindNat() {
-    	return natTraversal;
     }
 }
