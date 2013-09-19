@@ -17,6 +17,11 @@
  ******************************************************************************/
 package org.gsma.joyn;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+
 /**
  * joyn Service configuration
  *  
@@ -27,22 +32,44 @@ public class JoynServiceConfiguration {
 	 * Returns True if the joyn service is activated, else returns False. The service may be activated or
 	 * deactivated by the end user via the joyn settings application.
 	 * 
+	 * @param ctx Context
 	 * @return Boolean
 	 */
-	public static boolean isServiceActivated() {
-		// TODO
-		return true;
+	public boolean isServiceActivated(Context ctx) {
+		// TODO: to be changed
+		boolean result = false;
+		Uri databaseUri = Uri.parse("content://com.orangelabs.rcs.settings/settings");
+		ContentResolver cr = ctx.getContentResolver();
+        Cursor c = cr.query(databaseUri, null, "key" + "='" + "ServiceActivated" + "'", null, null);
+        if (c != null) {
+        	if ((c.getCount() > 0) && c.moveToFirst()) {
+	        	String value = c.getString(2);
+	    		result = Boolean.parseBoolean(value);
+        	}
+	        c.close();
+        }
+		return result;
 	}
-	
 	
 	/**
 	 * Returns the display name associated to the joyn user account. The display name may be updated by
 	 * the end user via the joyn settings application.
 	 * 
+	 * @param ctx Context
 	 * @return Display name
 	 */
-	public static String getUserDisplayName() {
-		// TODO
-		return null;
-	}
+	public static String getUserDisplayName(Context ctx) {
+		// TODO: to be changed
+		String result = null;
+		Uri databaseUri = Uri.parse("content://com.orangelabs.rcs.settings/settings");
+		ContentResolver cr = ctx.getContentResolver();
+        Cursor c = cr.query(databaseUri, null, "key" + "='" + "ImsDisplayName" + "'", null, null);
+        if (c != null) {
+        	if ((c.getCount() > 0) && c.moveToFirst()) {
+	        	result = c.getString(2);
+        	}
+	        c.close();
+        }
+		return result;
+	}	
 }

@@ -187,6 +187,8 @@
                                   onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
           </ul> 
 		  
       </div>
@@ -241,7 +243,7 @@
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">
 			<p><h1>New Multimedia capability or capacity extension</h1></p>
-			<p><span>Capacity extensions enable you to declare new capabilities for your applications.</span></p>			
+			<p><span>Capacity extensions enable you to declare new capabilities for your applications. This concept allows to extend dynamically the joyn services.</span></p>			
 		</div>
 		<div class="content-body center">
 			<div class="guide-block">
@@ -262,7 +264,7 @@
 					</tt>
 				</div>
 				<p></p>
-				<p>An extension should have the following syntax :</p>
+				<p>An extension should have the following syntax (case sensitive):</p>
 				<p><b>+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.XXXX</b>,</br>where XXXX is your service ID (in client side and network side also).</p>
 				<p></p>
 			</div>
@@ -270,10 +272,9 @@
 			<div class="guide-block">
 				<h2>2. Using your new capability</h2>
 				<p></p>
-				<p>To get an idea of what you can do with capacity extensions, have a look at the <a href="../tutorials/popUpApp.html">Popup Application tutorial</a>.</p>
-				<p>This tutorial will take you through the process of creating an application with a new extension.</p>						
-				<p>The important thing to remember is that the extension is just an identifier. It identifies your application's capabilities, but also identifies incoming and outgoing sip messages.</p>
-				<p>It is up to you to choose the protocol, format and contents of those messages in order to correctly exchange information with another device, using the extension as identifier.</p>
+				<p>To get an idea of what you can do with capacity extensions, have a look at the <a href="../tutorials/popUpApp.html">Popup application tutorial</a>. This tutorial will take you through the process of creating an application with a new extension.</p>						
+				<p>The important thing to remember is that the extension is just an identifier. It identifies your application's capabilities, but also identifies incoming and outgoing SIP messages to be rooted internally in the device and also in the joyn network.</p>
+				<p>Then it is up to you to choose a media protocol, format and contents used for your new service.</p>
 				<p></p>
 			</div>
 			</br>

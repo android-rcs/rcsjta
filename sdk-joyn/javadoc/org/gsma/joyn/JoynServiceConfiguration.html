@@ -209,6 +209,8 @@
                                   onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../../../../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../../../../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
           </ul> 
 		  
       </div>
@@ -525,7 +527,7 @@ Summary:
             String
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html#getUserDisplayName()">getUserDisplayName</a></span>()
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html#getUserDisplayName(android.content.Context)">getUserDisplayName</a></span>(Context ctx)
         
         <div class="jd-descrdiv">Returns the display name associated to the joyn user account.</div>
   
@@ -538,12 +540,12 @@ Summary:
             
             
             
-            static
+            
             
             boolean
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html#isServiceActivated()">isServiceActivated</a></span>()
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html#isServiceActivated(android.content.Context)">isServiceActivated</a></span>(Context ctx)
         
         <div class="jd-descrdiv">Returns True if the joyn service is activated, else returns False.</div>
   
@@ -816,7 +818,7 @@ From class
 
 
 
-<a id="getUserDisplayName()"></a>
+<a id="getUserDisplayName(android.content.Context)"></a>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -829,7 +831,7 @@ From class
         String
       </span>
       <span class="sympad">getUserDisplayName</span>
-      <span class="normal">()</span>
+      <span class="normal">(Context ctx)</span>
     </h4>
       <div class="api-level">
         <div>
@@ -846,6 +848,15 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Returns the display name associated to the joyn user account. The display name may be updated by
  the end user via the joyn settings application.</p></div>
   <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>ctx</th>
+          <td>Context</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Display name
 </li></ul>
@@ -855,20 +866,20 @@ From class
 </div>
 
 
-<a id="isServiceActivated()"></a>
+<a id="isServiceActivated(android.content.Context)"></a>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-        static 
+         
          
          
          
         boolean
       </span>
       <span class="sympad">isServiceActivated</span>
-      <span class="normal">()</span>
+      <span class="normal">(Context ctx)</span>
     </h4>
       <div class="api-level">
         <div>
@@ -884,6 +895,15 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns True if the joyn service is activated, else returns False. The service may be activated or
  deactivated by the end user via the joyn settings application.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>ctx</th>
+          <td>Context</td>
+        </tr>
+      </table>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Boolean

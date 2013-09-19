@@ -187,6 +187,8 @@
                                   onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
               <li id="download-link"><a href="../download/index.html"
                                   onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
           </ul> 
 		  
       </div>
@@ -299,8 +301,21 @@
 			<div class="guide-block">
 				<p><h2>4. Debugging</h2></p>
 				<div style="width:100%;display:inline-block;">
-					<p>Dispaly SIP traces...</p>
-					<p>+ Logcat</p>
+					<p>The internal traces of the joyn service may be activated from the <b>Provisioning application</b> via the <b>Logger</b> tab:</p>
+					<p></p>
+					<div style="width:200px;margin:auto;">
+						<img src="../assets-sdk/images/tuto_ss_logger.png" width="100%"  />
+					</div>
+					<p></p>
+					<p>The option <b>Application traces</b> and <b>Trace level</b> allows one to generate logcat traces on the Device: joyn traces always starts with the following prefix “<b>[RCS]</b>”.</p>
+					<p>You can also activate <b>SIP traces</b> which are sent to SDTOUT and also stored into a file on the SDCARD.</p>
+					<p>You can also activate <b>Media traces</b> which are sent to SDTOUT. Media traces only concerns MSRP protocol.</p>
+					<p>For SDTOUT traces, you can create a filter with DDMS tool: </p>
+					<p></p>
+					<div style="width:450px;margin:auto;">
+						<img src="../assets-sdk/images/tuto_ss_logfilter.png" width="100%"  />
+					</div>
+					<p></p>
 				</div>
 				</br>
 			</div>

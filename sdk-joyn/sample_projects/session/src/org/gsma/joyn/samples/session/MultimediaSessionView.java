@@ -95,7 +95,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	/**
 	 * Local TCP port
 	 */
-	private int localPort = 7000;
+	private int localPort;
 	
 	/**
 	 * TCP input stream
@@ -169,6 +169,9 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
 		        
+				// Set local port
+				localPort = 9;
+				
 		        // Initiate session
     			startSession();
 			} else {
@@ -189,8 +192,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	// Get remote contact
 				contact = session.getRemoteContact();
 		
+				// Set local port
+				localPort = ServiceUtils.generateLocalTcpPort(5000);
+				
         		// Start the TCP server
-/*		    	Thread t = new Thread() {
+		    	Thread t = new Thread() {
 		        	public void run() {
 		            	try {
         		System.out.println(">>>>>>>>>>>>> START SERVER on " + localPort);
@@ -208,7 +214,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		            	}
 		        	}
 		        };
-		        t.start();*/
+		        t.start();
 
 		        // Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -248,7 +254,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         	public void run() {
             	try {
             		// Accept the invitation
-        			session.acceptInvitation(ServiceUtils.getLocalSdp("active", localPort));
+        			session.acceptInvitation(ServiceUtils.getLocalSdp("passive", localPort));
             	} catch(Exception e) {
         			handler.post(new Runnable() { 
         				public void run() {
@@ -362,36 +368,38 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					hideProgressDialog();
 					
             		// Start the TCP client
-		    		Thread t = new Thread() {
-		    			public void run() {
-		    				try  {
-								// Parse the remote SDP
-								String sdp = session.getRemoteSdp();
-								SdpParser parser = new SdpParser(sdp.getBytes());
-					    		Vector<MediaDescription> media = parser.getMediaDescriptions();
-								MediaDescription mediaDesc = media.elementAt(0);
-					    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
-					    		int remotePort = mediaDesc.port;
-
-            		System.out.println(">>>>>>>>>>>>> START CLIENT");
-					    		TcpClientConnection tcpClient = new TcpClientConnection();
-            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
-			            		tcpClient.open(remoteHost, remotePort);
-			            		inStream = tcpClient.getInputStream();
-			            		outStream = tcpClient.getOutputStream();
-            		System.out.println(">>>>>>>>>>>>> " + inStream);
-            		System.out.println(">>>>>>>>>>>>> " + outStream);
-		    				} catch(Exception e) {
-								e.printStackTrace();
-								
-								// Can't connect media: abort the session
-								try {
-									session.abortSession();
-								} catch(Exception ex) {}
-		    				}
-		    			}
-		    		};
-		    		t.start();
+					if (mode == MultimediaSessionView.MODE_OUTGOING) {
+			    		Thread t = new Thread() {
+			    			public void run() {
+			    				try  {
+									// Parse the remote SDP
+									String sdp = session.getRemoteSdp();
+									SdpParser parser = new SdpParser(sdp.getBytes());
+						    		Vector<MediaDescription> media = parser.getMediaDescriptions();
+									MediaDescription mediaDesc = media.elementAt(0);
+						    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+						    		int remotePort = mediaDesc.port;
+	
+	            		System.out.println(">>>>>>>>>>>>> START CLIENT");
+						    		TcpClientConnection tcpClient = new TcpClientConnection();
+	            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
+				            		tcpClient.open(remoteHost, remotePort);
+				            		inStream = tcpClient.getInputStream();
+				            		outStream = tcpClient.getOutputStream();
+	            		System.out.println(">>>>>>>>>>>>> " + inStream);
+	            		System.out.println(">>>>>>>>>>>>> " + outStream);
+			    				} catch(Exception e) {
+									e.printStackTrace();
+									
+									// Can't connect media: abort the session
+									try {
+										session.abortSession();
+									} catch(Exception ex) {}
+			    				}
+			    			}
+			    		};
+			    		t.start();
+					}
 				}
 			});
     	}

@@ -34,6 +34,12 @@ margin-top:10px;
 	line-height: 20px;
 }
 
+.intro h1{
+border-bottom : 1px solid #505050;
+color:#505050;
+}
+
+
 .content-body{
 margin-top: 40px;
 }
@@ -101,8 +107,8 @@ text-decoration:underline;
 }
 .getStarted{
 background: rgba(236, 213, 188, 0.34);
-border-top: 1px solid #Ff6600;
-border-bottom: 1px solid #Ff6600;
+border-top: 1px solid #505050;
+border-bottom: 1px solid #505050;
 }
 
 .getStarted span{
