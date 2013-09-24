@@ -169,7 +169,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, 		"300");
             addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT, 					"5060");
             addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,   ListeningPoint.UDP);
-            addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,     ListeningPoint.TCP);
+            addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,     ListeningPoint.UDP);
             addParameter(db, RcsSettingsData.TLS_CERTIFICATE_ROOT,              "");
             addParameter(db, RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE,      "");
             addParameter(db, RcsSettingsData.SIP_TRANSACTION_TIMEOUT, 			"120");

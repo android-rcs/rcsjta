@@ -215,28 +215,6 @@ public abstract class OneOneChatSession extends ChatSession {
 	}
 	
 	/**
-	 * Send message delivery status via MSRP
-	 * 
-	 * @param contact Contact that requested the delivery status
-	 * @param msgId Message ID
-	 * @param status Status
-	 */
-	public void sendMsrpMessageDeliveryStatus(String contact, String msgId, String status) {
-		// Send status in CPIM + IMDN headers
-		String from = ChatUtils.ANOMYNOUS_URI;
-		String to = ChatUtils.ANOMYNOUS_URI;
-		String imdn = ChatUtils.buildDeliveryReport(msgId, status);
-		String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
-		
-		// Send data
-		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
-		if (result) {
-			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
-		}
-	}	
-
-	/**
 	 * Reject the session invitation
 	 */
 	public void rejectSession() {

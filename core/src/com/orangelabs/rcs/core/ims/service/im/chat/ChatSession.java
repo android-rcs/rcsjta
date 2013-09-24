@@ -47,6 +47,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
+import com.orangelabs.rcs.provider.messaging.RichMessaging;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.StringUtils;
@@ -726,15 +727,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	public abstract void sendTextMessage(String msgId, String txt);
 	
 	/**
-	 * Send message delivery status via MSRP
-	 * 
-	 * @param contact Contact that requested the delivery status
-	 * @param msgId Message ID
-	 * @param status Status
-	 */
-	public abstract void sendMsrpMessageDeliveryStatus(String contact, String msgId, String status);
-		
-	/**
 	 * Send is composing status
 	 * 
 	 * @param status Status
@@ -755,6 +747,28 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 */
 	public abstract void addParticipants(List<String> participants);
 
+	/**
+	 * Send message delivery status via MSRP
+	 * 
+	 * @param contact Contact that requested the delivery status
+	 * @param msgId Message ID
+	 * @param status Status
+	 */
+	public void sendMsrpMessageDeliveryStatus(String contact, String msgId, String status) {
+		// Send status in CPIM + IMDN headers
+		String from = ChatUtils.ANOMYNOUS_URI;
+		String to = ChatUtils.ANOMYNOUS_URI;
+		String imdn = ChatUtils.buildDeliveryReport(msgId, status);
+		String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
+		
+		// Send data
+		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
+		if (result) {
+			// Update rich messaging history
+			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+		}
+	}	
+	
 	/**
      * Receive a message delivery status from a SIP message
      * 
