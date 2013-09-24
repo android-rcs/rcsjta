@@ -1,7 +1,30 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.samples.session;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Vector;
 
 import org.gsma.joyn.JoynService;
@@ -25,6 +48,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +63,8 @@ import android.widget.Toast;
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaSessionView extends Activity implements JoynServiceListener {
+	private static final String TAG = "JoynSession";
+
 	/**
 	 * View modes
 	 */
@@ -96,17 +122,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	 * Local TCP port
 	 */
 	private int localPort;
-	
-	/**
-	 * TCP input stream
-	 */
-	private InputStream inStream = null;
-	
-	/**
-	 * TCP output stream
-	 */
-	private OutputStream outStream = null;
-
 	
 	/** Called when the activity is first created. */
     @Override
@@ -199,16 +214,21 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	Thread t = new Thread() {
 		        	public void run() {
 		            	try {
-        		System.out.println(">>>>>>>>>>>>> START SERVER on " + localPort);
-		            		TcpServerConnection tcpServer = new TcpServerConnection();
-		            		tcpServer.open(localPort);
-        		System.out.println(">>>>>>>>>>>>> WAIT CONNECTION");
-		            		TcpClientConnection socket = tcpServer.acceptConnection();
-        		System.out.println(">>>>>>>>>>>>> CONNECTED");
-		            		inStream = socket.getInputStream();
-		            		outStream = socket.getOutputStream();
-        		System.out.println(">>>>>>>>>>>>> " + inStream);
-        		System.out.println(">>>>>>>>>>>>> " + outStream);
+				    		// TCP connection
+		            		Log.d(TAG, "Start TCP server connection on " + localPort);
+		            		ServerSocket serverSocket = new ServerSocket(localPort);
+		            		Log.d(TAG, "Wait TCP connection");
+		            		Socket socket = serverSocket.accept();
+		            		Log.d(TAG, "TCP connected");
+		            		
+		            		// Read data
+		            		Log.d(TAG, "Read data over TCP");
+		            		InputStream inStream = socket.getInputStream();
+		            		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
+		            		String line = null;
+		                    while ((line = reader.readLine()) != null) {
+		                        System.out.println(">" + line);
+		                    }
 		            	} catch(Exception e) {
 		            		e.printStackTrace();
 		            	}
@@ -369,6 +389,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					
             		// Start the TCP client
 					if (mode == MultimediaSessionView.MODE_OUTGOING) {
+						// Originating
 			    		Thread t = new Thread() {
 			    			public void run() {
 			    				try  {
@@ -379,18 +400,23 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 									MediaDescription mediaDesc = media.elementAt(0);
 						    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
 						    		int remotePort = mediaDesc.port;
-	
-	            		System.out.println(">>>>>>>>>>>>> START CLIENT");
-						    		TcpClientConnection tcpClient = new TcpClientConnection();
-	            		System.out.println(">>>>>>>>>>>>> CONNECT to " + remoteHost + ":" + remotePort);
-				            		tcpClient.open(remoteHost, remotePort);
-				            		inStream = tcpClient.getInputStream();
-				            		outStream = tcpClient.getOutputStream();
-	            		System.out.println(">>>>>>>>>>>>> " + inStream);
-	            		System.out.println(">>>>>>>>>>>>> " + outStream);
+
+						    		// TCP connection
+						    		Log.d(TAG, "Start TCP client on " + remoteHost + ":" + remotePort);
+						    		Socket socket = new Socket(remoteHost, remotePort);
+				            		
+				            		// Send data
+				            		Log.d(TAG, "Send data over TCP");
+				            		OutputStream outStream = socket.getOutputStream();
+				            		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
+				            		for(int i=0; i < 1000; i++) {
+				            			String txt = "Blablablablablablablablablablablabla " + i + "\n";
+				            			writer.write(txt);
+				            			writer.flush();
+				            		}
+	            					outStream.close();
 			    				} catch(Exception e) {
 									e.printStackTrace();
-									
 									// Can't connect media: abort the session
 									try {
 										session.abortSession();

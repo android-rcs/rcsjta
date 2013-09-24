@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	<item 	
+		android:state_focused="true" 
+		android:state_pressed="false"
+		android:drawable="@drawable/rcs_eab_my_profile_bubble_focused" 
+	/>
+	<item 	
+		android:state_focused="true" 
+		android:state_pressed="true"
+		android:drawable="@drawable/rcs_eab_my_profile_bubble_pressed"	/>
+	<item 	
+		android:state_focused="false" 
+		android:state_pressed="true"
+		android:drawable="@drawable/rcs_eab_my_profile_bubble_pressed"	/>
+	<item 	
+		android:drawable="@drawable/rcs_eab_my_profile_bubble_normal"
+	/>
+</selector>

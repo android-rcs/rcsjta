@@ -1,0 +1,23 @@
+ <!-- list_item.xml -->  
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	>
+ <TextView  
+     android:id="@+id/my_profile_list_item_text"  
+     android:layout_width="wrap_content"  
+     android:layout_height="fill_parent"  
+     android:paddingTop="2dip"  
+     android:paddingBottom="2dip"  
+     android:paddingLeft="15dip"  
+     android:textAppearance="?android:attr/textAppearanceSmall"  
+     />
+  <ImageView
+  	android:id="@+id/my_profile_list_item_icon"
+  	android:layout_width="wrap_content"
+  	android:layout_height="wrap_content"
+  	android:layout_alignParentRight="true"
+  	android:layout_marginRight="20dip"
+  	/>
+</RelativeLayout>

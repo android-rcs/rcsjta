@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<dimen name="rcs_widget_footprint_unit_width">94dip</dimen>
+	<dimen name="rcs_widget_footprint_unit_height">@dimen/rcs_widget_panel_line_height</dimen>
+	
+	<dimen name="rcs_widget_panel_line_height">49dip</dimen>
+	<dimen name="rcs_widget_panel_font_size_large">13dip</dimen>
+	<dimen name="rcs_widget_panel_font_size_medium">11dip</dimen>
+	<dimen name="rcs_widget_panel_font_size_small">10dip</dimen>
+	<dimen name="rcs_widget_panel_edit_button_size">58dip</dimen>
+	<dimen name="rcs_widget_panel_edit_button_padding_horizontal">5dip</dimen>
+	<dimen name="rcs_widget_panel_edit_font_size_large">13dip</dimen>
+	<dimen name="rcs_widget_panel_edit_font_size_small">11dip</dimen>
+	
+	<dimen name="rcs_widget_bottom_bar_icon_width">48dip</dimen>
+	<dimen name="rcs_widget_bottom_bar_icon_height">40dip</dimen>
+	<dimen name="rcs_widget_bottom_bar_font_size">13dip</dimen>
+	<dimen name="rcs_widget_bottom_bar_height_for_portrait">72dip</dimen>
+	<dimen name="rcs_widget_bottom_bar_width_for_landscape">80dip</dimen>
+	
+	<dimen name="rcs_widget_info_bar_font_size">16dip</dimen>
+	<dimen name="rcs_widget_applauncher_font_size">13dip</dimen>
+	
+	<dimen name="rcs_widget_help_bar_icon_size_large">32dip</dimen>
+	<dimen name="rcs_widget_help_bar_icon_size_small">24dip</dimen>
+	<dimen name="rcs_widget_help_bar_button_width_portrait">80dip</dimen>
+	<dimen name="rcs_widget_help_bar_button_height_portrait">50dip</dimen>
+	<dimen name="rcs_widget_help_bar_button_height_landscape">40dip</dimen>
+	<dimen name="rcs_widget_help_bar_font_size">12dip</dimen>
+	<dimen name="rcs_widget_help_bar_padding">5dip</dimen>
+
+	<dimen name="rcs_widget_catalogue_item_icon_size">32dip</dimen>
+	<dimen name="rcs_widget_catalogue_item_font_size">12dip</dimen>
+	<dimen name="rcs_widget_catalogue_item_padding_vertical_portrait">5dip</dimen>
+	<dimen name="rcs_widget_catalogue_item_padding_vertical_landscape">5dip</dimen>
+	<dimen name="rcs_widget_catalogue_item_label_height">30dip</dimen>
+	<dimen name="rcs_widget_catalogue_dot_size">12dip</dimen>
+	<dimen name="rcs_widget_catalogue_dot_padding_top">5dip</dimen>
+	<dimen name="rcs_widget_catalogue_dot_padding_bottom">10dip</dimen>
+	<dimen name="rcs_widget_catalogue_padding">5dip</dimen>
+	<dimen name="rcs_widget_catalogue_top_offset_portrait">124dip</dimen>
+	<dimen name="rcs_widget_catalogue_top_offset_landscape">35dip</dimen>
+	<dimen name="rcs_widget_catalogue_height_landscape">195dip</dimen>
+
+	<dimen name="rcs_widget_canvas_slot_horizon_padding_portrait">8dip</dimen>
+	<dimen name="rcs_widget_canvas_slot_horizon_padding_landscape">48dip</dimen>
+	
+	<dimen name="rcs_widget_dialog_title_font_size">20dip</dimen>
+	<dimen name="rcs_widget_dialog_title_padding">5dip</dimen>
+	<dimen name="rcs_widget_dialog_title_icon_size">32dip</dimen>
+	<dimen name="rcs_widget_dialog_message_font_size">16dip</dimen>
+	<dimen name="rcs_widget_dialog_padding">12dip</dimen>
+	<dimen name="rcs_widget_dialog_message_padding">5dip</dimen>
+
+	<dimen name="rcs_widget_window_title_font_size">24dip</dimen>
+	<dimen name="rcs_widget_window_description_font_size">16dip</dimen>
+
+	<dimen name="rcs_widget_app_icon_size">48dip</dimen>
+	
+	<dimen name="rcs_widget_month_planner_font_size">12dip</dimen>
+	<dimen name="rcs_widget_month_planner_padding">3dip</dimen>
+	<dimen name="rcs_widget_month_planner_date_width">100dip</dimen>
+	
+	<dimen name="rcs_widget_panel_icon_size_extra">42dip</dimen>
+	<dimen name="rcs_widget_panel_icon_size_wide">30dip</dimen>
+	<dimen name="rcs_widget_panel_icon_size_large">36dip</dimen>
+	<dimen name="rcs_widget_panel_icon_size_normal">24dip</dimen>
+	<dimen name="rcs_widget_panel_icon_size_small">20dip</dimen>
+	<dimen name="rcs_widget_panel_icon_size_tiny">16dip</dimen>
+	<dimen name="rcs_widget_panel_item_width">115dip</dimen>
+	<dimen name="rcs_widget_panel_margin_size_large">10dip</dimen>
+	<dimen name="rcs_widget_panel_margin_size_normal">6dip</dimen>
+	<dimen name="rcs_widget_panel_margin_size_small">3dip</dimen>
+	
+	<dimen name="rcs_widget_application_boxed_height">88dip</dimen>
+	<dimen name="rcs_widget_application_boxed_padding_top">6dip</dimen>
+	<dimen name="rcs_widget_application_boxed_padding_bottom">3dip</dimen>
+	<dimen name="rcs_widget_application_boxed_drawable_padding">0dip</dimen>
+	
+	<dimen name="rcs_widget_gallery_bar_button_size">40dip</dimen>
+	<dimen name="rcs_widget_gallery_image_item_width">76dip</dimen>
+	<dimen name="rcs_widget_gallery_image_item_height">92dip</dimen>
+	<dimen name="rcs_widget_gallery_single_item_text1_width">140dip</dimen>
+	<dimen name="rcs_widget_gallery_single_item_text2_width">80dip</dimen>
+	<dimen name="rcs_widget_gallery_single_item_text_width">235dip</dimen>
+	<dimen name="rcs_widget_gallery_single_item_text_padding">5dip</dimen>
+	<dimen name="rcs_widget_gallery_items_text_width">190dip</dimen>
+	<dimen name="rcs_widget_gallery_items_text_padding">4dip</dimen>
+	<dimen name="rcs_widget_gallery_more_items_text_width">190dip</dimen>
+	<dimen name="rcs_widget_gallery_more_items_text_padding">10dip</dimen>
+	
+	<dimen name="rcs_widget_calendar_shortcut_margin_left">2dip</dimen>
+	<dimen name="rcs_widget_calendar_shortcut_margin_top">2dip</dimen>
+	
+	<dimen name="rcs_widget_number_icon_bottom_panel_font_size_small">10dip</dimen>
+	<dimen name="rcs_widget_number_icon_bottom_margin_right">1dip</dimen>
+	<dimen name="rcs_widget_number_icon_bottom_margin_bottom">2dip</dimen>
+	<dimen name="rcs_widget_number_icon_top_margin_right">2dip</dimen>
+	<dimen name="rcs_widget_number_icon_top_margin_top">0dip</dimen>
+	<dimen name="rcs_widget_number_icon_number_width">12dip</dimen>
+	<dimen name="rcs_widget_number_icon_number_height">12dip</dimen>
+	
+	<dimen name="rcs_widget_icon_number_position_percentage_x">72dip</dimen>
+	<dimen name="rcs_widget_icon_number_position_percentage_y">80dip</dimen>
+	
+	<dimen name="rcs_widget_alarm_clock_time_width">78dip</dimen>
+	<dimen name="rcs_widget_alarm_clock_time_margin">2dip</dimen>
+	
+	<dimen name="rcs_widget_gallery_item_image_size">18dip</dimen>
+	<dimen name="rcs_widget_gallery_item_short_text_margin">6dip</dimen>
+	<dimen name="rcs_widget_gallery_item_short_text_width">80dip</dimen>
+	<dimen name="rcs_widget_gallery_item_long_text_width">160dip</dimen>
+	
+	<dimen name="rcs_widget_gallery_item_single_event_text_padding">10dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_text_padding">5dip</dimen>
+	<dimen name="rcs_widget_gallery_item_single_event_title_text_width">140dip</dimen>
+	<dimen name="rcs_widget_gallery_item_single_event_title_text_height">22dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_title_text_width">110dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_title_text_height">22dip</dimen>
+	<dimen name="rcs_widget_gallery_item_single_event_date_text_width">90dip</dimen>
+	<dimen name="rcs_widget_gallery_item_single_event_date_text_height">22dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_date_text_width">70dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_date_text_height">22dip</dimen>
+	<dimen name="rcs_widget_gallery_item_single_event_content_text_width">230dip</dimen>
+	<dimen name="rcs_widget_gallery_item_events_content_text_width">160dip</dimen>
+	<dimen name="rcs_widget_gallery_item_more_event_title_text_width">180dip</dimen>
+	<dimen name="rcs_widget_gallery_item_more_event_title_text_height">22dip</dimen>
+
+	<dimen name="rcs_widget_music_player_album_frame_size">90dip</dimen>
+	<dimen name="rcs_widget_music_player_music_info_height">35dip</dimen>
+	<dimen name="rcs_widget_music_player_media_button_height">45dip</dimen>
+	<dimen name="rcs_widget_music_player_prg_bar_padding_vertical">4dip</dimen>
+	<dimen name="rcs_widget_music_player_time_pos_width">50dip</dimen>
+	
+	<dimen name="rcs_widget_web_search_button_width">80dip</dimen>
+	<dimen name="rcs_widget_web_search_label_max_width">60dip</dimen>
+	<dimen name="rcs_widget_wikipedia_search_button_width">60dip</dimen>
+	<dimen name="rcs_widget_wikipedia_search_adv_height">13dip</dimen>
+	<dimen name="rcs_widget_wikipedia_search_input_margin_vertical">3dip</dimen>
+	<dimen name="rcs_widget_wikipedia_adv_font_size">10dip</dimen>
+	<dimen name="rcs_widget_wikipedia_logo_size">50dip</dimen>
+	
+	<dimen name="rcs_widget_photography_gallery_padding">4dip</dimen>
+	<dimen name="rcs_widget_photography_gallery_width">158dip</dimen>
+	<dimen name="rcs_widget_photography_shortcut_width">79dip</dimen>
+	
+	<dimen name="rcs_widget_profile_padding">2dip</dimen>
+	<dimen name="rcs_widget_profile_status_font_size">16dip</dimen>
+	
+	<dimen name="rcs_widget_setup_window_padding">10dip</dimen>
+	
+	<dimen name="rcs_widget_single_text_shortcut_text1_size">26dip</dimen>
+	<dimen name="rcs_widget_single_text_shortcut_text2_size">10dip</dimen>
+	<dimen name="rcs_widget_single_text_shortcut_text2_margin">2dip</dimen>
+	
+	<dimen name="rcs_widget_connection_shortcut_icon_size">28dip</dimen>
+	<dimen name="rcs_widget_connection_shortcut_font_size">13dip</dimen>
+	<dimen name="rcs_widget_connection_shortcut_font_size_2nd_line">13dip</dimen>
+	<dimen name="rcs_widget_connection_shortcut_status_text_height">18dip</dimen>
+	
+	<dimen name="rcs_widget_progress_bar_height">18dip</dimen>
+	
+	<dimen name="rcs_widget_device_status_title_font_size">24dip</dimen>
+	<dimen name="rcs_widget_device_status_info_font_size">20dip</dimen>
+	<dimen name="rcs_widget_device_status_indicator_text_width">85dip</dimen>
+	<dimen name="rcs_widget_device_status_indicator_icon_size">32dip</dimen>
+	<dimen name="rcs_widget_device_status_info_padding_vertical">10dip</dimen>
+	<dimen name="rcs_widget_device_status_prg_padding_vertical">15dip</dimen>
+	
+	<dimen name="rcs_widget_suggestion_dropdown_width">294dip</dimen>
+	
+	<dimen name="rcs_widget_google_search_go_button_size">42dip</dimen>
+	<dimen name="rcs_widget_input_panel_padding">5dip</dimen>
+	
+	<dimen name="rcs_widget_list_item_padding_vertical">7dip</dimen>
+	
+</resources>

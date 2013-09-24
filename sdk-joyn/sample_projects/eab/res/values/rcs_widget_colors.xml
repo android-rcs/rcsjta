@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="rcs_widget_shadow">#FF333333</color>
+    <color name="rcs_widget_transparent">#00000000</color>
+    <color name="rcs_widget_disabled">#ff666666</color>
+
+   	<color name="rcs_widget_gray">#FFF7F7F7</color>
+   	<color name="rcs_widget_dark">#FF333333</color>
+   	<color name="rcs_widget_gray_dark">#FF606060</color>
+   	<color name="rcs_widget_gray_widget_1">#FFCDCDCD</color>
+   	<color name="rcs_widget_gray_widget_2">#FFC2C2C2</color>
+   	 
+    <color name="rcs_widget_window_background">#FF191919</color>
+    
+    <color name="rcs_widget_catalogue_items_view_background">#FF343434</color>
+   	<color name="rcs_widget_bottom_bar_text">#FFFFFFFF</color>
+   	<color name="rcs_widget_panel_text">#00000000</color>
+   	<color name="rcs_widget_panel_2nd_line_text">#FF000000</color>
+   	
+    <color name="rcs_widget_default_bottom_bar_bg">#80FFFF00</color>
+    <color name="rcs_widget_default_info_bar_bg">#80FF0000</color>
+    <color name="rcs_widget_default_workspace_bg">#8000FFFF</color>
+    
+	<drawable name="rcs_widget_screen_background_black">#ff000000</drawable>
+    <drawable name="rcs_widget_transparent_background">#a0000000</drawable>
+    
+</resources>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+>
+	<include
+           android:id="@+id/header"
+           layout="@layout/list_section"
+       />
+
+<RelativeLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="2dip"
+    android:paddingRight="2dip"
+    android:orientation="vertical"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+>
+
+	<QuickContactBadge android:id="@+id/icon"
+        android:layout_marginTop="7dip"
+        android:layout_marginLeft="7dip"
+        android:layout_width="50dip"
+        android:layout_height="50dip"
+        android:layout_marginRight="10dip"/>
+
+	<ImageView android:id="@+id/availability"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+        android:layout_marginTop="44dip"
+        android:layout_marginLeft="45dip"
+        android:src="@drawable/rcs_eab_presence_offline"/>
+
+	<ImageView android:id="@+id/contact_status"
+        android:layout_marginTop="44dip"
+        android:layout_marginLeft="1dip"
+        android:layout_alignParentTop="true"
+        android:layout_width="18dip"
+        android:layout_height="18dip"
+	/>
+	
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="?android:attr/listPreferredItemHeight"
+		android:layout_toRightOf="@id/icon"
+		>
+		
+		<ImageButton android:id="@+id/presenceStatus"
+	        android:layout_width="?android:attr/listPreferredItemHeight"
+	        android:layout_height="?android:attr/listPreferredItemHeight"
+	        android:background="@null"
+	        android:focusable="false"
+	        android:visibility="gone"
+	        android:layout_alignParentRight="true"
+	    />
+		
+		<LinearLayout
+			android:layout_width="wrap_content"
+	        android:layout_height="?android:attr/listPreferredItemHeight"
+			android:orientation="vertical"
+			android:gravity="center_vertical"
+			android:layout_toLeftOf="@id/presenceStatus">
+		
+		    <TextView android:id="@+id/name"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:singleLine="true"
+		        android:ellipsize="end"
+		        android:textAppearance="?android:attr/textAppearanceLarge"
+		        android:textStyle="normal"
+		        android:layout_centerVertical="true"
+		    />
+		
+		    <TextView android:id="@+id/freeTxt"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="2dip"
+		        android:layout_marginRight="2dip"
+		        android:singleLine="true"
+		        android:textAppearance="?android:attr/textAppearanceMedium"
+		        android:textColor="#CCC"
+		        android:visibility="gone"
+		    />
+		</LinearLayout>
+	
+
+	</RelativeLayout>
+
+	</RelativeLayout>
+</LinearLayout>

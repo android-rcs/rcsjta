@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2006 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+	<!-- Application name -->
+	<string name="rcs_eab_application_title">Contacts</string>
+
+	<!-- Transfer from gallery -->
+	<string name="rcs_eab_title_dialog_filetransfer_from_gallery_nocontacts">No contact(s) available for file transfer</string>
+	<string name="rcs_eab_button_dialog_filetransfer_from_gallery_quit">Quit</string>
+	
+    <!-- Title displayed when the bookmarks page is shown -->
+    <string name="rcs_eab_browser_bookmarks_page_bookmarks_text">Bookmarks</string>
+
+     <!-- Activities titles -->
+    <string name="rcs_eab_viewMyProfileTitle">My profile</string>
+    <string name="rcs_eab_editWebLinkActivityTitle">Edit web link</string>
+    <string name="rcs_eab_viewRCSMapViewTitle">View my RCS contacts</string>
+
+	<!-- Edit web link texts -->
+	<string name="rcs_eab_edit_web_link_presentation">Select a web link that will be shared as part of your profile. You can edit the location by hand or select a link from the lists below.</string>
+	<string name="rcs_eab_current_location">Current location</string>
+	<string name="rcs_eab_select_from">Select from...</string>
+	<string name="rcs_eab_bookmarks">Bookmarks</string>
+	<string name="rcs_eab_suggested_link">Suggested links</string>
+	<string name="rcs_eab_what_location">What location do you want to share?</string>
+	
+	<!-- In view my profile -->
+	<!-- View my profile infos -->
+	<string name="rcs_eab_my_profile_info_item">Profile info</string>
+	<string name="rcs_eab_updated">Updated:</string>
+	<string name="rcs_eab_what_up_to">What are you up to?</string>
+	<string name="rcs_eab_edit_weblink">Edit web link</string>
+	<string name="rcs_eab_edit_weblink_details">Set a favorite web link</string>
+	<string name="rcs_eab_my_availability">Change availability</string>
+	<string name="rcs_eab_my_availability_details">Set my status</string>
+	<string name="rcs_eab_profile_sharing_invitations_title">Profile sharing invitations</string>
+	<string name="rcs_eab_profile_sharing_invitations_received">Received</string>
+	<string name="rcs_eab_profile_sharing_invitations_sent">Sent</string>
+	<string name="rcs_eab_profile_sharing_invitations_declined">Declined</string>
+
+	<!-- View my profile modify photo -->
+	<string name="rcs_eab_dialog_choice_title">Photo action</string>
+	<string name="rcs_eab_take_photo_from_camera">Take photo from camera</string>
+	<string name="rcs_eab_take_photo_from_gallery">Take photo from gallery</string>
+	<string name="rcs_eab_remove_photo">Remove photo</string>
+
+	<!-- View my profile invitations lists -->
+	<!-- Received invitations -->
+	<string name="rcs_eab_noReceivedInvitation">No invitation pending</string>
+	<string name="rcs_eab_oneReceivedInvitation">1 invitation pending</string>
+	<string name="rcs_eab_manyReceivedInvitation">invitations pending</string>
+	<!-- Sent invitations -->
+	<string name="rcs_eab_noSentInvitation">No invitation pending</string>
+	<string name="rcs_eab_oneSentInvitation">1 invitation pending</string>
+	<string name="rcs_eab_manySentInvitation">invitations pending</string>
+	<!-- Declined invitations -->
+	<string name="rcs_eab_noDeclinedInvitation">No invitation declined</string>
+	<string name="rcs_eab_oneDeclinedInvitation">1 invitation declined</string>
+	<string name="rcs_eab_manyDeclinedInvitation">invitations declined</string>
+
+	<!-- Publish confirmation box when leaving my profile with unsaved changes -->
+	<string name="rcs_eab_publish_changes_title">Publish?</string> 
+	<string name="rcs_eab_confirm_publish_quit_with_changes">You made changes to your profile. Publish in order to confirm.</string>
+	<string name="rcs_eab_publish">Publish</string>
+
+	<!-- Save confirmation box when leaving edit weblink with unsaved changes -->
+	<string name="rcs_eab_save_changes_title">Save changes?</string> 
+	<string name="rcs_eab_confirm_weblink_quit_with_changes">You may want to save your weblink changes before to quit.</string>
+
+	<!-- Free text chooser, when long click on edit free text -->
+	<string name="rcs_eab_choose_free_text">Pick some text</string>
+	
+	<!-- Weblink chooser, when long click on weblink text -->
+	<string name="rcs_eab_choose_weblink">Pick an url</string>
+	
+	<!-- Menus -->
+	<string name="rcs_eab_menu_publish">Publish</string>
+	<string name="rcs_eab_menu_add_icon">Add icon</string>
+	<string name="rcs_eab_menu_remove_icon">Remove icon</string>
+	<string name="rcs_eab_menu_visit_link">Visit link</string>
+
+	<!-- In view contact -->
+	<string name="rcs_eab_noFreeText">No free text</string>
+    <string name="rcs_eab_lastUpdate"></string>
+	<string name="rcs_eab_mobile_profile">%s\'s profile</string>
+	<string name="rcs_eab_visit_web_link">Visit web link</string>
+	<string name="rcs_eab_visit_web_link_at">at %s</string>
+	<string name="rcs_eab_view_aggregated_call_log">Event log</string>
+	<string name="rcs_eab_transfer_file">Transfer file to %s</string>
+	<string name="rcs_eab_view_call_log">View call log for %s</string>
+	<string name="rcs_eab_manage_profile_sharing">Manage profile sharing</string>
+	<string name="rcs_eab_make_default_image">Make default image</string>
+	<string name="rcs_eab_make_default_image_details">Save this image as contact icon</string>
+	<string name="rcs_eab_stop_sharing_this_profile">Stop sharing this profile</string>
+	<string name="rcs_eab_start_sharing_this_profile">Invite this profile to share presence</string>
+	<string name="rcs_eab_block_this_profile">Block this profile</string>
+	<string name="rcs_eab_unblock_this_profile">Unblock this profile</string>
+	<string name="rcs_eab_with">with %s</string>
+
+	<!-- In edit contact -->
+	<!-- Account selection dialog -->
+	<string name="rcs_eab_phoneLocalAccountName">Phone</string>
+	<string name="rcs_eab_phoneOnlyUnsynced">Phone-only (unsynced)</string>
+
+	<!-- Manage invitations activities -->
+	<string name="rcs_eab_receivedInvitationsActivityTitle">Received invitations</string>
+	<string name="rcs_eab_sentInvitationsActivityTitle">Sent invitations</string>
+	<string name="rcs_eab_blockedInvitationsActivityTitle">Blocked invitations</string>
+	<string name="rcs_eab_received_invitations_presentation">You haven\'t answered to the following invitations yet.</string>
+	<string name="rcs_eab_blocked_invitations_presentation">You have blocked the invitations below. While blocked, the sender of an invitation can\'t invite you again, and you are not bothered by reminders. You may want to unblock these invitations.</string>
+	<string name="rcs_eab_sent_invitations_presentation">The following invitations haven\'t been answered by their recipient yet. You may want to cancel them.</string>
+	<string name="rcs_eab_answerInvitationFrom">Answer invitation from %s</string>
+	<string name="rcs_eab_unblockInvitationFrom">Unblock invitation from %s</string>
+	<string name="rcs_eab_cancelInvitationTo">Cancel invitation to %s ?</string>
+	<string name="rcs_eab_unblockContact">Re-activates the invitation from %s so you can answer it. Also, you may receive reminders for it. Please confirm.</string>
+	<string name="rcs_eab_unblock">Unblock</string>
+	
+	<!-- Manage profile sharing activity -->
+	<string name="rcs_eab_manageProfileSharingActivityTitle">Manage profile sharing</string>
+	<string name="rcs_eab_manage_profile_sharing_presentation">Manage your profile sharing relationship with %s\'s numbers.</string>
+	<string name="rcs_eab_more">More</string>
+	<string name="rcs_eab_learn_more_about_RCS">Learn more about RCS</string>
+	<string name="rcs_eab_learn_more_about_RCS_details">(Rich Communication Suite)</string>
+	<string name="rcs_eab_RCS_settings">RCS settings</string>
+	<string name="rcs_eab_RCS_settings_enabled">RCS is currently enabled</string>
+	<string name="rcs_eab_RCS_settings_disabled">RCS is currently disabled</string>
+	<string name="rcs_eab_sendInvitation_to">Send invitation to %s</string>
+	<string name="rcs_eab_stopSharing_to">Stop sharing to %s</string>
+	<string name="rcs_eab_cancelInvitation_to">Cancel invitation to %s</string>
+	<string name="rcs_eab_answerInvitation_from">Answer invitation from %s</string>
+	<string name="rcs_eab_sentTimestamp">Sent %s</string>
+	<string name="rcs_eab_receivedTimestamp">Received %s</string>
+	<string name="rcs_eab_currentlyDeclined">Currently declined</string>
+	
+	<!-- SMS teasing activity -->
+	<string name="rcs_eab_smsTeasingActivityTitle">Send a SMS to show RCS to your friend !</string>
+	<string name="rcs_eab_not_rcs_capable">%s is not RCS capable, you can send him a SMS if you want to show him RCS !</string>
+	<string name="rcs_eab_send_sms_button">Send a SMS now !</string>
+	<string name="rcs_eab_sms_teasing_text">You should subscribe to the RCS service! Visit www.orange-rcs.com to find more!</string>
+	
+	<!-- Profile options -->
+	<string name="rcs_eab_save_image">Save image</string>
+	<string name="rcs_eab_call_now">Call now!</string>
+	<string name="rcs_eab_text_now">Text now!</string>
+	
+	<!-- Phone number selector -->
+	<string name="rcs_eab_call_using">Call using</string>
+	<string name="rcs_eab_text_using">Text using</string>
+	
+	<!-- My name -->
+    <string name="rcs_eab_myName">Me</string>
+
+	<!--  RCS -->
+	<string name="RCS">Rich Communication Suite</string>
+
+	<!-- Presence invitation activity -->
+	<string name="rcs_eab_title_presence_invitation_notification">New profile sharing invitation</string>
+	<string name="rcs_eab_label_presence_invitation_question">Do you want to share your presence profile with %s ?</string>
+	<string name="rcs_eab_label_ignore_invitation">Later</string>
+	<string name="rcs_eab_label_presence_notification">Click to Accept, Block or Ignore the invitation</string>
+	<!-- Presence invitation activity, when cancelled -->	
+	<string name="rcs_eab_label_cancelled_presence_invitation_question">Invitation no longer valid. Do you want to share your presence profile with %s ?</string>
+	<string name="rcs_eab_invite_contact">Invite</string>
+	<string name="rcs_eab_remove_cancelled_invitation">Remove</string>
+	
+	<!-- Edit favorite link -->
+	<string name="rcs_eab_name">Name</string>
+	<string name="rcs_eab_location">Location</string>
+	<string name="rcs_eab_http">http://</string>
+	<string name="rcs_eab_save">Ok</string>
+	<string name="rcs_eab_do_not_save">Cancel</string>
+	<string name="rcs_eab_empty_link">Empty link</string>
+	<string name="rcs_eab_link_needs_url">Link needs an url</string>
+	
+	<!--  Intent title when trying to get weblink from webpage -->
+	<string name="rcs_eab_title_rcs_favorite_link">My favorite web link</string>	
+
+	<!--  Intent title when trying to get photo from gallery -->
+	<string name="rcs_eab_title_rcs_my_profile_icon">My RCS profile icon</string>	
+	
+	<!-- Waiting messages -->
+	<string name="rcs_eab_uploadPhotoInProgress">Waiting to modify photo...</string>
+	<string name="rcs_eab_presencePublishInProgress">Waiting to publish your profile...</string>
+	<string name="rcs_eab_cancelInviteContactInProgress">Cancelling the invitation...</string>
+	<string name="rcs_eab_inviteContactInProgress">Waiting to invite...</string>
+	<string name="rcs_eab_revokeContactInProgress">Waiting to revoke...</string>
+	<string name="rcs_eab_unblockInProgress">Waiting to unblock...</string>
+	<string name="rcs_eab_unrevokeInProgress">Waiting to unrevoke...</string>
+	<string name="rcs_eab_blockInProgress">Waiting to block...</string>
+
+	<!--  Edit contact profile share button text -->
+	<string name="rcs_eab_revokeInvitation">Revoke invitation to share our profile</string>
+	<string name="rcs_eab_pendingInvitation">Invitation to share our profile is pending</string>
+	<string name="rcs_eab_sendInvitation">Send invitation to share our profile</string>
+	<string name="rcs_eab_modifyRcsNumber">Modify number</string>
+	<string name="rcs_eab_modifyRcsNumberRevokeConfirmation">Are you sure you want to modify this number? If you do so, this contact will no longer be a rich contact. It won\'t see your profile anymore, and vice versa.</string>
+	<string name="rcs_eab_deleteRcsContact">Delete contact</string>
+	<string name="rcs_eab_deleteRcsContactRevokeConfirmation">Are you sure you want to delete this contact? If you do so, this contact will no longer be a rich contact. It won\'t see your profile anymore, and vice versa.</string>
+	
+	<!-- Contact list activity -->
+	<string name="rcs_eab_label_invitation">has invited you to share profile.</string>
+	<string name="rcs_eab_title_contact_in_blacklist_notification">%s is blocked</string>
+	<string name="rcs_eab_label_isInBlacklist">Do you want to unblock this contact?</string>
+	<string name="rcs_eab_title_waiting_contact_answer_notification">%s has not answered yet</string>
+	<string name="rcs_eab_label_waiting_invitation_sent">Wait for an answer from this contact.</string>
+	<string name="rcs_eab_label_hasBeenRevoked"> has been revoked.</string>
+	<string name="rcs_eab_label_is_invited"> has shared profile with you.</string>
+	<string name="rcs_eab_unRevoke">Unrevoke</string>
+	<string name="rcs_eab_label_block_contact">Block</string>
+	<string name="rcs_eab_label_revoke_contact">Revoke</string>
+	<string name="rcs_eab_confirm_block">Are you sure you want to block %s ?</string> 
+	<string name="rcs_eab_confirm_revoke">Are you sure you want to revoke %s ?</string>
+	<string name="rcs_eab_from">From</string>
+	<string name="rcs_eab_loading">Loading, please wait...</string>
+	<string name="rcs_eab_yes">Yes</string>
+	<string name="rcs_eab_no">No</string>
+	<string name="rcs_eab_menu_call_contact">Call contact</string>
+	<string name="rcs_eab_menu_text_contact">Text contact</string>
+	<string name="rcs_eab_menu_add_starred">Add to starred</string>
+	<string name="rcs_eab_menu_remove_starred">Remove from starred</string>
+	<string name="rcs_eab_menu_view_event_log">View event log</string>
+
+	<!-- My profile entry name -->
+	<string name="rcs_eab_my_profile">My RCS profile</string>
+	<string name="rcs_eab_my_profile_escaped">\u0020My RCS profile</string>
+	
+	<!-- The text displayed when the contacts list is empty while displaying results after searching contacts --> 
+	<string name="rcs_eab_noMatchingContacts">No matching contacts found.</string>
+	<!-- Displayed full screen when the user has no favorites and they are displaying the favorites tab --> 
+	<string name="rcs_eab_noFavoritesHelpText">"You don't have any favorites.\n\nTo add a contact to your list of favorites:\n 
+		<li>Touch the <b>Contacts</b> tab\n</li>
+		\n<li>Touch the contact you want to add to your favorites\n</li>
+		\n<li>Touch the star next to the contact\'s name\n</li>"
+	</string>
+	
+	<!-- Error popup messages -->
+	<string name="rcs_eab_revokeContactError">Could not revoke contact</string>
+	<string name="rcs_eab_unrevokeContactError">Could not unrevoke contact</string>
+	<string name="rcs_eab_blockContactError">Could not block contact</string>
+	<string name="rcs_eab_unblockContactError">Could not unblock contact</string>
+	<string name="rcs_eab_inviteContactError">Could not invite contact</string>
+	<string name="rcs_eab_uninviteContactError">Could not cancel invitation</string>
+	<string name="rcs_eab_acceptInviteContactError">Could not accept invitation</string>
+	<string name="rcs_eab_uploadPhotoError">Could not upload photo</string>
+	<string name="rcs_eab_removePhotoError">Could not remove photo</string>
+	<string name="rcs_eab_presencePublishError">Could not publish profile changes</string>
+    <string name="rcs_eab_deleteRcsContactFailed">Could not delete enriched contact, retry later</string>
+    
+    <!-- Success toasts -->
+	<string name="rcs_eab_revokeContactSuccess">Contact revoked</string>
+	<string name="rcs_eab_unrevokeContactSuccess">Contact no longer revoked</string>
+	<string name="rcs_eab_blockContactSuccess">Contact blocked</string>
+	<string name="rcs_eab_unblockContactSuccess">Contact no longer blocked</string>
+	<string name="rcs_eab_inviteContactSuccess">Contact invited</string>
+	<string name="rcs_eab_uninviteContactSuccess">Contact no longer invited</string>
+	<string name="rcs_eab_acceptInviteContactSuccess">Invitation accepted</string>
+    
+    <!-- This can be used in any application wanting to disable the text "Emergency number" -->
+    <string name="rcs_eab_emergency_call_dialog_number_for_display">Emergency number</string>
+    
+    <!-- Aggregated call log -->
+    <string name="rcs_eab_eventslog_title">Event log</string>
+    <string name="rcs_eab_eventslog_label">Event log for %s</string>
+    <string name="rcs_eab_eventslog_empty">Event log is empty</string>
+    <string name="rcs_eab_eventslog_menu_filter_logs">Filter logs</string>
+    <string name="rcs_eab_eventslog_menu_clear_logs">Clear logs</string>
+    <string name="rcs_eab_eventslog_dialog_filter_logs_title">Set Filters</string>
+    <string name="rcs_eab_eventslog_chat_text">Chat: %s</string>
+	<string name="rcs_eab_eventslog_richevent_image_size">Image %1$.2f%2$s</string>
+	<string name="rcs_eab_eventslog_richevent_video_size">Video %1$.2f%2$s</string>
+	<string name="rcs_eab_eventslog_richevent_doc_size">Document %1$.2f%2$s</string>
+	<string name="rcs_eab_eventslog_richevent_audio_size">Audio %1$.2f%2$s</string>
+	<string name="rcs_eab_eventslog_richevent_other_size">Other %1$.2f%2$s</string>
+	<string name="rcs_eab_eventslog_richevent_image">image</string>
+	<string name="rcs_eab_eventslog_richevent_video">video</string>
+	<string name="rcs_eab_eventslog_richevent_doc">document</string>
+	<string name="rcs_eab_eventslog_richevent_audio">audio</string>
+	<string name="rcs_eab_eventslog_richevent_other">other</string>
+	<string name="rcs_eab_eventslog_richevent_videolive">Video live</string>
+	<string name="rcs_eab_eventslog_richevent_underline_format">&lt;u>%s&lt;/u></string>
+	<string name="rcs_eab_eventslog_richevent_normal_format">%s</string>
+	<string name="rcs_eab_eventslog_richevent_inprogress">in progress</string>
+	
+	<string name="rcs_eab_eventslog_smsmms">Sms/Mms</string>
+    <string name="rcs_eab_eventslog_call">Call</string>
+    <string name="rcs_eab_eventslog_filetransfer">File Transfer</string>
+    <string name="rcs_eab_eventslog_chat">Chat</string>
+    <string name="rcs_eab_eventslog_richcall">RichCall</string>
+    
+    <string name="rcs_eab_eventslog_remove_item">Remove from event log</string>
+    <string name="rcs_eab_eventslog_view_item">View %s</string>
+    <string name="rcs_eab_eventslog_call_number">Call %s</string>
+    <string name="rcs_eab_eventslog_view_chat_history">View chat history</string>
+    <string name="rcs_eab_eventslog_view_filetransfer_detail">View File Transfer history</string>
+    <string name="rcs_eab_eventslog_send_message">Send message</string>
+    
+    <string name="rcs_eab_eventslog_confirm_dialog_delete_title">Delete</string>
+    <string name="rcs_eab_eventslog_confirm_delete_message">This message will be deleted.</string>
+    <string name="rcs_eab_eventslog_delete">Delete</string>
+    <!-- Others -->
+    <string name="rcs_eab_feature_not_available">Feature not yet available</string>
+    <string name="rcs_eab_user_not_rcs_anymore">Your contact is not RCS anymore</string>
+	<string name="rcs_eab_label_user_profile_updated">Your profile has been published</string>
+	<string name="rcs_eab_label_user_profile_not_updated">Your profile can\'t be published, retry later</string>
+    <string name="rcs_eab_deleteEnrichedContactTitle">Delete a rich contact</string>
+    <string name="rcs_eab_deleteConfirmationActive">If you delete this contact, you won\'t see this user\'s profile anymore and the owner will not see yours.</string>
+    <string name="rcs_eab_deleteMultipleConfirmationActive">If you delete this contact, you won\'t see this user\'s profiles anymore and the owner will not see yours.</string>
+
+    <string name="rcs_eab_revokeConfirmation_title">Stop sharing</string>
+    <string name="rcs_eab_revokeConfirmation">You won\'t see this profile anymore and the owner will no longer see yours. File transfer with the associated number will be disabled.</string>
+    <string name="rcs_eab_inviteConfirmation_title">Invite to share profiles</string>
+    <string name="rcs_eab_inviteConfirmation">An invitation will be sent to %s.</string>
+    <string name="rcs_eab_blockConfirmation_title">Block this profile sharing</string>
+    <string name="rcs_eab_blockConfirmation">Block %s ? You will not be able to see the invitations coming from this profile.</string>
+    <string name="rcs_eab_unblockConfirmation_title">Unblock this profile sharing</string>
+    <string name="rcs_eab_unblockConfirmation">Unblock %s ? You will be able to see the invitations coming from this profile.</string>
+    <string name="rcs_eab_cancelConfirmation_title">Cancel invitation</string>
+    <string name="rcs_eab_cancelConfirmation">Are you sure you want to cancel the invitation to %s?</string>
+    <string name="rcs_eab_stopSharing">Stop sharing</string>
+    <string name="rcs_eab_blockSharing">Block sharing</string>
+    <string name="rcs_eab_unblockSharing">Unblock sharing</string>
+
+    <string name="rcs_eab_fast_scroll_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+
+	<string name="rcs_eab_make_primary">Make primary</string>
+
+</resources>

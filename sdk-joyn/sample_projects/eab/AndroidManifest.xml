@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ android:versionName="2.4.2"
+ package="com.orangelabs.rcs.eab">
+
+	<uses-sdk android:minSdkVersion="5"/>
+
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"/>
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.mail"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="com.orangelabs.rcs.permission.RCS"/>
+
+    <application android:icon="@drawable/rcs_eab_icon_48x48" android:label="@string/rcs_eab_application_title" android:name="com.orangelabs.rcs.eab.RcsApp">
+
+	    <!-- ************************************* -->
+        <!--                RCS EAB		           -->
+        <!-- ************************************* -->
+
+        <!-- A virtual 12 key dialer -->
+        <activity android:launchMode="singleTop" android:name="com.orangelabs.rcs.eab.TwelveKeyDialer">
+            <intent-filter>
+                <action android:name="com.orangelabs.rcs.phone.action.TOUCH_DIALER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+        </activity>
+
+        <!-- A list of recent calls -->
+        <activity android:label="@string/recentCallsIconLabel" android:name="com.orangelabs.rcs.eab.RecentCallsListActivity">
+            <intent-filter>
+                <action android:name="com.orangelabs.rcs.phone.action.RECENT_CALLS"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+        </activity>
+        
+        <!-- Tab container for TwelveKeyDialer and RecentCallsList -->
+          <activity android:clearTaskOnLaunch="true" android:icon="@drawable/rcs_eab_icon_48x48" android:label="@string/launcherDialer" android:launchMode="singleTask" android:name="com.orangelabs.rcs.eab.DialtactsActivity" android:screenOrientation="nosensor" android:theme="@android:style/Theme.NoTitleBar">
+	    </activity>
+
+        <!-- An empty activity that presents the DialtactActivity's Contacts tab -->
+        <activity-alias android:icon="@drawable/rcs_eab_icon_48x48" android:label="@string/rcs_eab_application_title" android:name="com.orangelabs.rcs.eab.DialtactsContactsEntryActivity" android:targetActivity="com.orangelabs.rcs.eab.DialtactsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.dir/person"/>
+            </intent-filter>
+            
+            <intent-filter>
+                <action android:name="com.android.contacts.action.FILTER_CONTACTS"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity-alias>
+
+        <!-- An empty activity that presents the DialtactActivity's Favorites tab -->
+        <activity-alias android:icon="@drawable/rcs_eab_icon_48x48" android:label="@string/strequentList" android:name="com.orangelabs.rcs.eab.DialtactsFavoritesEntryActivity" android:targetActivity="com.orangelabs.rcs.eab.DialtactsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity-alias>
+    	    
+        <!-- The actual list of contacts, usually embedded in ContactsActivity -->
+        <activity android:clearTaskOnLaunch="true" android:configChanges="orientation" android:label="@string/contactsList" android:name="com.orangelabs.rcs.eab.ContactsListActivity">
+        
+            <intent-filter>
+                <action android:name="com.android.contacts.action.LIST_DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.android.contacts.action.LIST_CONTACTS"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.android.contacts.action.LIST_ALL_CONTACTS"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.android.contacts.action.LIST_CONTACTS_WITH_PHONES"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+
+            <intent-filter android:label="@string/starredList">
+                <action android:name="com.android.contacts.action.LIST_STARRED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+            
+            <intent-filter android:label="@string/frequentList">
+                <action android:name="com.android.contacts.action.LIST_FREQUENT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+
+            <intent-filter android:label="@string/strequentList">
+                <action android:name="com.android.contacts.action.LIST_STREQUENT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.TAB"/>
+            </intent-filter>
+            
+            <!-- Intent coming from FileTransfer app to pick a contact -->
+            <intent-filter>
+                <action android:name="com.orangelabs.rcs.action.PICK_RCSCONTACT_FOR_FILETRANSFER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+
+        <activity android:label="@string/callDetailTitle" android:name="com.orangelabs.rcs.eab.CallDetailActivity" android:theme="@style/OrangeTallTitleBarTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/calls"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Views the details of a single contact -->
+        <activity android:configChanges="orientation" android:label="@string/viewContactTitle" android:name="com.orangelabs.rcs.eab.ViewContactActivity">
+            <intent-filter android:label="@string/viewContactDesription">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/person"/>
+            </intent-filter>
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/com.orangelabs.rcs.rcs-contact"/>
+            </intent-filter>
+        </activity>
+        
+       
+		<!-- Edits the details of a single contact -->
+        <activity android:configChanges="orientation" android:label="@string/editContactDescription" android:name="com.orangelabs.rcs.eab.EditContactActivity" android:windowSoftInputMode="stateHidden|adjustResize">
+            <intent-filter android:label="@string/editContactDescription">
+                <action android:name="android.intent.action.EDIT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="contacts" android:mimeType="vnd.android.cursor.item/person"/>
+                <data android:host="com.android.contacts" android:mimeType="vnd.android.cursor.item/contact"/>
+                <data android:host="com.android.contacts" android:mimeType="vnd.android.cursor.item/raw_contact"/>
+            </intent-filter>
+            <intent-filter android:label="@string/insertContactDescription">
+                <action android:name="android.intent.action.INSERT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.dir/person"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Makes .ContactsListActivity the search target for any activity in Contacts -->
+        <meta-data android:name="android.app.default_searchable" android:value="com.orangelabs.rcs.eab.ContactsListActivity"/>
+
+		<receiver android:name="com.orangelabs.rcs.eab.PresenceSharingInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="com.orangelabs.rcs.presence.PRESENCE_SHARING_INVITATION"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Added for RCS Shows the presence invitation activity -->
+        <activity android:configChanges="orientation" android:name="com.orangelabs.rcs.eab.PresenceSharingInvitation" android:theme="@style/InvitationDialogTheme">
+        	<intent-filter>
+        		<category android:name="android.intent.category.LAUNCHER"/>
+        		<category android:name="android.intent.category.DEFAULT"/>
+        	</intent-filter>
+        </activity>
+        
+		<!-- Added for RCS Shows the profile options activity -->
+        <activity android:configChanges="orientation" android:name="com.orangelabs.rcs.eab.ProfileOptionsActivity" android:theme="@style/InvitationDialogTheme">
+        </activity>
+        
+        <!-- Added for RCS Shows the phone number selector activity -->
+        <activity android:configChanges="orientation" android:name="com.orangelabs.rcs.eab.PhoneNumberSelectorActivity" android:theme="@style/InvitationDialogTheme">
+        </activity>
+        
+        <!-- Added for RCS Browser Bookmarks page -->
+        <activity android:name="com.orangelabs.rcs.eab.BrowserBookmarksPage">
+        	<intent-filter>
+        		<category android:name="android.intent.category.LAUNCHER"/>
+        		<category android:name="android.intent.category.DEFAULT"/>
+        	</intent-filter>
+        </activity>
+
+	    <!-- ************************************* -->
+        <!--                RCS WIDGET             -->
+        <!-- ************************************* -->
+        <receiver android:icon="@drawable/rcs_widget_my_rcs_profile" android:label="@string/rcs_widget_label_myprofile" android:name="com.orangelabs.rcs.eab.widget.MyRcsProfileWidget">
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/rcs_widget_myprofile"/>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.orangelabs.rcs.presence.MY_PRESENCE_INFO_CHANGED"/>
+                <action android:name="com.orangelabs.rcs.presence.MY_PRESENCE_STATUS_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        
+        <receiver android:icon="@drawable/rcs_widget_my_contacts" android:label="@string/rcs_widget_label_contacts" android:name="com.orangelabs.rcs.eab.widget.MyRcsContactsWidget">
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/rcs_widget_contacts"/>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_ENABLED"/>
+                <action android:name="com.orangelabs.rcs.presence.CONTACT_INFO_CHANGED"/>
+                <action android:name="com.orangelabs.rcs.presence.CONTACT_PHOTO_CHANGED"/>
+                <action android:name="com.orangelabs.rcs.presence.PRESENCE_SHARING_CHANGED"/>
+                <action android:name="com.orangelabs.rcs.WIDGET_CONTACT_REMOVE_CURRENT"/>
+                <action android:name="com.orangelabs.rcs.WIDGET_CONTACT_GOTO_PREVIOUS"/>
+                <action android:name="com.orangelabs.rcs.WIDGET_CONTACT_GOTO_NEXT"/>
+            </intent-filter>
+        </receiver>
+
+	</application>
+
+</manifest>

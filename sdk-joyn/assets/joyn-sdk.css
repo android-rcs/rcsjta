@@ -52,6 +52,13 @@ margin-top: 40px;
 
 }
 
+.video-frame-carousel{
+display: block;
+margin: auto;
+width: 160px;
+height: 90px;
+}
+
 .video-frame{
 display: block;
 margin: auto;
@@ -59,6 +66,29 @@ width: 320px;
 height: 180px;
 }
 
+.video-carousel{
+display: inline-block;
+position: absolute;
+left: 10px;
+top: 120px;
+}
+
+.video-header{
+display: inline-block;
+position: absolute;
+left: 10px;
+top: 70px;
+width:160px;
+background-color:#fcfcfc;
+}
+
+.tweet-container{
+display: inline-block;
+position: absolute;
+right: 10px;
+top: 80px;
+width:180px;
+}
 /*box layout*/
 
 .demo_box{
@@ -106,13 +136,13 @@ width: 90%;
 text-decoration:underline;
 }
 .getStarted{
-background: rgba(236, 213, 188, 0.34);
+background-color: rgba(255, 102, 0, 0.13);
 border-top: 1px solid #505050;
 border-bottom: 1px solid #505050;
 }
 
-.getStarted span{
-color: #Ff6600;
+.getStarted span,h2{
+color: #505050;
 }
 
 
@@ -280,7 +310,6 @@ display: inline-block;
 background: url(./images/dl-btn.png) no-repeat 0 0;
 padding: 10px;
 border-radius: 7px;
-background-color: #dadada;
 vertical-align: middle;
 float: right;
 margin-right:10px;

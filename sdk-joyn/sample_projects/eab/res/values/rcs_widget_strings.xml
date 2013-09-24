@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rcs_widget_application_title">RCS Widgets</string>
+    <string name="rcs_widget_label_rcs">Widget RCS</string>
+    <string name="rcs_widget_label_contacts">Contacts</string>
+    <string name="rcs_widget_label_myprofile">My RCS profile</string>
+    <string name="rcs_widget_label_mycontacts">My RCS contacts</string>
+    <string name="rcs_widget_set_freetext">Click to set your FreeText</string>
+    <string name="rcs_widget_shortcut_label_rich_contacts">Contacts</string>
+    <string name="rcs_widget_shortcut_label_rich_invitations">Invitations</string>
+    <string name="rcs_widget_shortcut_label_rich_settings">Settings</string>
+</resources>

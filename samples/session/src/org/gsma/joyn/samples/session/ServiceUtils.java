@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.samples.session;
 
 import java.io.IOException;
@@ -65,7 +82,6 @@ public class ServiceUtils {
 	public static String getLocalSdp(String mode, int port) {
 		String ntpTime = ServiceUtils.constructNTPtime(System.currentTimeMillis());
 		String ipAddress = ServiceUtils.getLocalIpAddress();
-		// Test MSRP
 		String sdp =
     		"v=0" + "\r\n" +
             "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + CRLF +
@@ -76,16 +92,6 @@ public class ServiceUtils {
             "a=path:" + "msrp://" + ipAddress + ":" + port + "/" + System.currentTimeMillis() + ";tcp" + CRLF +
             "a=setup:" + mode + CRLF +
 			"a=sendrecv" + CRLF;
-/*		// Test RTP audio
- 		String sdp =
-	    		"v=0" + "\r\n" +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + CRLF +
-	            "s=DEMO joyn API" + CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + CRLF +
-	            "t=0 0" + CRLF +
-	            "m=audio 5000 RTP/AVP 96" + CRLF +
-	            "a=rtpmap:96 AMR" + CRLF +            
-				"a=sendrecv" + CRLF;*/
 		return sdp;
 	}
 

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+   	<declare-styleable name="OutlineLabel">
+        <attr name="text" format="string"/>
+        <attr name="textColor" format="color"/>
+        <attr name="textSize" format="dimension"/>
+        <attr name="outlineColor" format="color"/>
+        <attr name="outlineSize" format="dimension"/>
+        <attr name="alignment" format="string"/>
+		<attr name="font" format="string"/>
+		<attr name="fontStyle">
+	        <flag name="normal" value="0" />
+	        <flag name="bold" value="1" />
+	        <flag name="italic" value="2" />
+	    </attr>
+    </declare-styleable>
+ 
+    <declare-styleable name="DateTimeTextView">
+        <attr name="timeFormat" format="string"/>
+        <attr name="dateFormat" format="string"/>
+        <attr name="is12Hours" format="boolean"/>
+        <attr name="displayTime" format="boolean"/>
+        <attr name="displayDate" format="boolean"/>
+    </declare-styleable>
+
+	<declare-styleable name="BaseDots">
+        <attr name="dotSize" format="dimension"/>
+        <attr name="dotNum" format="integer"/>
+        <attr name="activeDot" format="integer"/>
+    </declare-styleable>
+    
+	<declare-styleable name="ColorDots">
+        <attr name="dotColor" format="color"/>
+    </declare-styleable>
+    
+	<declare-styleable name="FlingLayout">
+        <!-- The first page the FlingLayout should display. -->
+        <attr name="defaultPage" format="integer"  />
+    </declare-styleable>
+
+    <declare-styleable name="SlidingDrawer">
+		<!--  Identifier for the child that represents the drawer's handle. 
+	  	--> 
+	  	<attr name="handle" format="reference" /> 
+		<!--  Identifier for the child that represents the drawer's content. 
+	  	--> 
+	  	<attr name="content" format="reference" /> 
+		<!--  Orientation of the SlidingDrawer. 
+		--> 
+		<attr name="orientation" format="integer"/> 
+		<!--  Extra offset for the handle at the bottom of the SlidingDrawer. 
+	  	--> 
+		<attr name="bottomOffset" format="dimension" /> 
+		<!--  Extra offset for the handle at the top of the SlidingDrawer. 
+		--> 
+		<attr name="topOffset" format="dimension" /> 
+		<!-- 
+	 		Indicates whether the drawer should be opened/closed with an animation
+	        when the user clicks the handle. Default is true. 
+		--> 
+	  	<attr name="animateOnClick" format="boolean" /> 
+		<!--  Whether fit content to size of SlidingDrawer 
+	  	--> 
+	  	<attr name="fitContent" format="boolean" /> 
+	</declare-styleable>
+	
+   	<declare-styleable name="BottomBarItem">
+		<attr name="itemText" format="string"/>
+		<attr name="itemImage" format="reference|color"/>
+    
+    </declare-styleable>
+    	
+    <declare-styleable name="TFTextView">
+		<attr name="typeface" format="string"/>
+		<attr name="textStyle">
+	        <flag name="normal" value="0" />
+	        <flag name="bold" value="1" />
+	        <flag name="italic" value="2" />
+	    </attr>
+    </declare-styleable>
+    
+    <declare-styleable name="TFButton">
+		<attr name="buttonTypeface" format="string"/>
+		<attr name="buttonTextStyle">
+	        <flag name="normal" value="0" />
+	        <flag name="bold" value="1" />
+	        <flag name="italic" value="2" />
+	    </attr>
+    </declare-styleable>
+    
+    <declare-styleable name="TFAutoCompleteTextView">
+		<attr name="autoCompleteTextViewTypeface" format="string"/>
+		<attr name="autoCompleteTextViewTextStyle">
+	        <flag name="normal" value="0" />
+	        <flag name="bold" value="1" />
+	        <flag name="italic" value="2" />
+	    </attr>
+    </declare-styleable>
+    
+    <declare-styleable name="ShortItem">
+		<attr name="intentAction" format="string"/>
+		<attr name="actionData" format="string"/>
+		<attr name="packageName" format="string"/>
+		<attr name="component" format="string"/>
+		<attr name="icon" format="reference"/>
+		<attr name="textLine1" format="reference"/>
+		<attr name="textLine2" format="reference"/>
+		<attr name="layoutStyle" format="string"/>
+		<attr name="iconSize" format="integer"/>
+		<attr name="numberPositionOffsetX" format="integer"/>
+		<attr name="numberPositionOffsetY" format="integer"/>
+    </declare-styleable>
+    
+    <declare-styleable name="NumberIcon">
+		<attr name="numberIcon" format="reference"/>
+		<attr name="numberText" format="string"/>
+		<attr name="iconStyle" format="string"/>
+    </declare-styleable>    
+    
+	<declare-styleable name="ConnectionShortcut">
+		<attr name="connectionName" format="reference"/>
+		<attr name="connectionIcon" format="reference"/>
+    </declare-styleable>
+    
+	<declare-styleable name="MonthView">
+        <attr name="fontSize" format="dimension"/>
+        <attr name="fontName" format="string"/>
+    </declare-styleable>
+    
+</resources>

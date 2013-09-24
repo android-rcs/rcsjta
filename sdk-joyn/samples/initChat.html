@@ -71,7 +71,8 @@
 <link href="../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
 <link href="../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
 <link href="../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
-<link href="../assets/skin.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
 <script src="../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
 <script src="../assets/search_autocomplete.js" type="text/javascript"></script>
 <script src="../assets/jquery-resizable.min.js" type="text/javascript"></script>
@@ -80,6 +81,7 @@
 <script src="../assets/joyn-sdk.js" type="text/javascript"></script>
 <script src="../assets/carousel.js" type="text/javascript"></script>
 <script type="text/javascript" src="../assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="../assets/widget.js"></script>
 <script type="text/javascript">
   setToRoot("../");
 </script>
@@ -122,8 +124,17 @@
 			}
 		});
 	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
 
 </script>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
 </head>
 
 
@@ -260,9 +271,9 @@
 			</div>
 			</br>
 			<div class="guide-block">
-				<h2>2. Check if the service is well connected to the joyn platform</h2>
+				<h2>2. Check if the service is connected to the joyn platform</h2>
 				<p></p>
-				<p>Before initiating a chat you should check if the service platform is properly available : use the method <a href="{@docRoot]javadoc/org/gsma/joyn/chat/ChatService.html#isServiceRegistered()">isServiceRegistered</a> from the service API in order to get the last registration state which indicates if the device is registered on the joyn platform.</p>
+				<p>Before initiating a chat you should check if the service platform is properly available : use the method <a href="../javadoc/org/gsma/joyn/chat/ChatService.html#isServiceRegistered()">isServiceRegistered</a> from the service API in order to get the last registration state which indicates if the device is registered on the joyn platform.</p>
 				<p>If the joyn platform is not available you can redirect the end user to classic services like SMS/MMS.</p>
 				<p></p>
 			</div>
@@ -277,7 +288,7 @@
 			<div class="guide-block">
 				<h2>4. Initiate a single chat conversation</h2>
 				<p></p>
-				<p>To initiate a chat conversation you just need to use the method <a href="{@docRoot}javadoc/org/gsma/joyn/chat/ChatService.html#openSingleChat(java.lang.String, org.gsma.joyn.chat.ChatListener)">openSingleChat</a> from the API, by passing the remote contact (ie. phone number) as parameter and also a listener on the chat events. The method will return a <a href="../javadoc/javadoc/org/gsma/joyn/chat/Chat.html">Chat</a> object of the corresponding conversation.. The chat session is really established after sending a first message.</p>
+				<p>To initiate a chat conversation you just need to use the method <a href="../javadoc/org/gsma/joyn/chat/ChatService.html#openSingleChat(java.lang.String, org.gsma.joyn.chat.ChatListener)">openSingleChat</a> from the API, by passing the remote contact (ie. phone number) as parameter and also a listener on the chat events. The method will return a <a href="../javadoc/javadoc/org/gsma/joyn/chat/Chat.html">Chat</a> object of the corresponding conversation.. The chat session is really established after sending a first message.</p>
 				<p></p>
 				<div class="code-block">
 					<tt class="java"><span class="java3">// Open chat<br />

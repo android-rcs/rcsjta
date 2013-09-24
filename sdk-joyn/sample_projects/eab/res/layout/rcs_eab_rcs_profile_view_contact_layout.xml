@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright (C) 2007 The Android Open Source Project Licensed under the
+	Apache License, Version 2.0 (the "License"); you may not use this file
+	except in compliance with the License. You may obtain a copy of the
+	License at http://www.apache.org/licenses/LICENSE-2.0 Unless required
+	by applicable law or agreed to in writing, software distributed under
+	the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+	CONDITIONS OF ANY KIND, either express or implied. See the License for
+	the specific language governing permissions and limitations under the
+	License.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" 
+	android:layout_height="80dip"
+	android:paddingBottom="3dip" 
+	android:paddingRight="12dip">
+	
+	<ImageView android:id="@+id/rcs_picture"
+		android:layout_width="60dip" 
+		android:layout_height="60dip"
+		android:layout_marginRight="10dip" 
+		android:scaleType="fitCenter"
+		android:layout_marginLeft="8dip" 
+		android:layout_marginTop="9dip" />
+
+	<ImageView android:id="@+id/rcs_availability"
+		android:layout_marginTop="2dip"
+		android:layout_marginLeft="2dip"
+        android:layout_alignParentTop="true"
+        android:layout_width="72dip"
+        android:layout_height="72dip"
+		android:src="@drawable/rcs_availability_67x67"
+		android:visibility="invisible"/>
+
+		<TextView android:id="@+id/rcs_free_text"
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"
+			android:textSize="22sp" 
+			android:textColor="@drawable/rcs_eab_view_contact_weblink_color"
+			android:singleLine="true" 
+			android:layout_marginRight="8dip"
+			android:layout_toRightOf="@id/rcs_picture"
+			android:layout_alignTop="@id/rcs_picture"/>
+
+			<TextView android:id="@+id/rcs_last_update_time"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content"
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:layout_alignParentRight="true" 
+				android:layout_alignBottom="@id/rcs_picture" />
+
+			<Button android:id="@+id/rcs_weblink" 
+				android:layout_width="wrap_content"
+				android:layout_height="30dip" 
+				android:layout_marginRight="70dip"
+				android:textColor="@drawable/rcs_eab_view_contact_weblink_color"
+				android:padding="0dip" 
+				android:singleLine="true" 
+				android:background="@null"
+				android:clickable="false" 
+				android:focusable="false"
+				android:focusableInTouchMode="false" 
+				android:layout_toRightOf="@id/rcs_picture"
+				android:layout_toLeftOf="@id/rcs_picture"
+				android:layout_alignBottom="@id/rcs_last_update_time"/>
+
+</RelativeLayout>
