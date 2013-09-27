@@ -69,15 +69,15 @@ height: 180px;
 .video-carousel{
 display: inline-block;
 position: absolute;
-left: 10px;
-top: 120px;
+left: 15px;
+top: 95px;
 }
 
 .video-header{
 display: inline-block;
 position: absolute;
-left: 10px;
-top: 70px;
+left: 20px;
+top: 35px;
 width:160px;
 background-color:#fcfcfc;
 }
