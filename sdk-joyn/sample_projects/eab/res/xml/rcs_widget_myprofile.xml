@@ -1,8 +1,0 @@
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="146dp"
-    android:minHeight="146dp"
-    android:updatePeriodMillis="600000"
-    android:initialLayout="@layout/rcs_widget_myprofile_layout"
-    android:icon="@drawable/rcs_widget_icon_rcs" 
-    android:label="@string/rcs_widget_label_rcs">
-</appwidget-provider>

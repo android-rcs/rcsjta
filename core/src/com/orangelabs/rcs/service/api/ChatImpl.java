@@ -119,50 +119,52 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @return Unique message ID or null in case of error
      */
     public String sendMessage(String message) {
-		if (logger.isActivated()) {
-			logger.debug("Send message");
-		}
-		
-		// Check if a session should be initiated or not
-    	if ((session == null) || session.getDialogPath().isSessionTerminated()) {
-    		try {
-    			if (logger.isActivated()) {
-    				logger.debug("Core session is not yet established: initiate a new session to send the message");
-    			}
-
-    			// Initiate a new session
-				session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, message);
-				
-				// Update with new session
-				setCoreSession(session);
-		
-				// Update rich messaging history
-				RichMessaging.getInstance().addChatMessage(session.getFirstMessage(),
-						ChatLog.Message.Direction.OUTGOING);
-
-				// Start the session
-				session.startSession();
-				return session.getFirstMessage().getMessageId();
-			} catch(Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't send a new chat message", e);
-				}
-				return null;
-			}			
-    	} else {
+    	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.debug("Core session is established: use exeistong one to send the message");
+				logger.debug("Send message");
 			}
-
-			// Generate a message Id
-			String msgId = ChatUtils.generateMessageId();
+			
+			// Check if a session should be initiated or not
+	    	if ((session == null) || session.getDialogPath().isSessionTerminated()) {
+	    		try {
+	    			if (logger.isActivated()) {
+	    				logger.debug("Core session is not yet established: initiate a new session to send the message");
+	    			}
 	
-			// Send text message
-			session.sendTextMessage(msgId, message);
-			return msgId;
-    	}
-	}
+	    			// Initiate a new session
+					session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, message);
+					
+					// Update with new session
+					setCoreSession(session);
+			
+					// Update rich messaging history
+					RichMessaging.getInstance().addChatMessage(session.getFirstMessage(),
+							ChatLog.Message.Direction.OUTGOING);
 	
+					// Start the session
+					session.startSession();
+					return session.getFirstMessage().getMessageId();
+				} catch(Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't send a new chat message", e);
+					}
+					return null;
+				}			
+	    	} else {
+				if (logger.isActivated()) {
+					logger.debug("Core session is established: use existing one to send the message");
+				}
+	
+				// Generate a message Id
+				String msgId = ChatUtils.generateMessageId();
+		
+				// Send text message
+				session.sendTextMessage(msgId, message);
+				return msgId;
+	    	}
+		}
+    }
+    
     /**
      * Sends a displayed delivery report for a given message ID
      * 

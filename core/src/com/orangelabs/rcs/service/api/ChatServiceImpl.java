@@ -363,7 +363,9 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.debug("Remove a chat session from the list (size=" + chatSessions.size() + ") for " + contact);
 		}
 		
-		chatSessions.remove(contact);
+		if ((chatSessions != null) && (contact != null)) {
+			chatSessions.remove(contact);
+		}
 	}
 	
     /**

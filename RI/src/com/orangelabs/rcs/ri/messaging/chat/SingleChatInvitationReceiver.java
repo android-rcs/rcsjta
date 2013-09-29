@@ -58,7 +58,7 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
 		ChatMessage firstMessage = invitation.getParcelableExtra(ChatIntent.EXTRA_MESSAGE);		
 		
 		// Test if we are not already in the chat view
-		if (!SingleChatView.isDisplayed()) {
+// TODO		if (!SingleChatView.isDisplayed()) {
 	        // Create notification
 			Intent intent = new Intent(invitation);
 			intent.setClass(context, SingleChatView.class);
@@ -76,7 +76,7 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
 	        // Send notification
 			NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 	        notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
-		}
+//		}
     }
     
     /**
