@@ -1,6 +1,12 @@
 README - joyn SDK
 
 
+News v3.0.2:
+------------
+
+- Bug fix on single chat (joyn servcei + RI).
+
+
 News v3.0.1:
 ------------
 
