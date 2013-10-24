@@ -96,8 +96,15 @@ public class OptionsRequestTask implements Runnable {
     		logger.info("Send an OPTIONS message to " + contact);                
     	}
 
-    	try {
-        	// Create a dialog path
+        try {
+            if (!imsModule.getCurrentNetworkInterface().isRegistered()) {
+                if (logger.isActivated()) {
+                    logger.debug("IMS not registered, do nothing");
+                }
+                return;
+            }
+
+            // Create a dialog path
         	String contactUri = PhoneUtils.formatNumberToSipUri(contact);
         	dialogPath = new SipDialogPath(
         			imsModule.getSipManager().getSipStack(),

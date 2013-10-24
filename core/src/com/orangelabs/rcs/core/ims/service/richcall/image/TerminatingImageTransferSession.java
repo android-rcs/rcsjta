@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Vector;
 
 import com.orangelabs.rcs.core.content.ContentManager;
-import com.orangelabs.rcs.core.content.PhotoContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -46,7 +46,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating content sharing session (transfer)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TerminatingImageTransferSession extends ImageTransferSession implements MsrpEventListener {
 	/**
@@ -85,9 +85,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 	    	// Check if the MIME type is supported
-	    	if ((getContent() == null) || !(getContent() instanceof PhotoContent)) {
+	    	if (getContent() == null) {
 	    		if (logger.isActivated()){
-    				logger.debug("MIME type is not an image");
+    				logger.debug("MIME type is not supported");
     			}
 
     			// Send a 415 Unsupported media type response
@@ -143,13 +143,18 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         	SdpParser parser = new SdpParser(remoteSdp.getBytes());
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
+            String protocol = mediaDesc.protocol;
+            boolean isSecured = false;
+            if (protocol != null) {
+                isSecured = protocol.equalsIgnoreCase(MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL);
+            }
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("file-selector");
             String fileSelector = attr1.getName() + ":" + attr1.getValue();
 			MediaAttribute attr2 = mediaDesc.getMediaAttribute("file-transfer-id");
             String fileTransferId = attr2.getName() + ":" + attr2.getValue();
 			MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter
@@ -179,7 +184,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             // Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
-    		
+            msrpMgr.setSecured(isSecured);
+
 			// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -189,7 +195,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	            "s=-" + SipUtils.CRLF +
 				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " TCP/MSRP *" + SipUtils.CRLF +
+	            "m=message " + localMsrpPort + " " + msrpMgr.getLocalSocketProtocol() + " *" + SipUtils.CRLF +
 	            "a=" + fileSelector + SipUtils.CRLF +
 	    		"a=" + fileTransferId + SipUtils.CRLF +
 	            "a=accept-types:" + getContent().getEncoding() + SipUtils.CRLF +
@@ -420,7 +426,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-		if (isInterrupted()) {
+        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
 			return;
 		}
 
@@ -439,7 +445,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	   			logger.error("Can't close correctly the image sharing session", e);
 	   		}
 	   	}
-		
+
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+
     	// Remove the current session
     	getImsService().removeSession(this);
 

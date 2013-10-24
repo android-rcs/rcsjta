@@ -124,7 +124,10 @@ public class ProvisioningParser {
                             if (typenode.getNodeValue().equalsIgnoreCase("VERS")) {
                                 parseVersion(childnode);
                             } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("MSG")) {
+                            if (typenode.getNodeValue().equalsIgnoreCase("TOKEN")) {
+                                parseToken(childnode);
+                            } else
+                        	if (typenode.getNodeValue().equalsIgnoreCase("MSG")) {
                                 parseTermsMessage(childnode);
                             } else
                             if (typenode.getNodeValue().equalsIgnoreCase("APPLICATION")) {
@@ -156,6 +159,9 @@ public class ProvisioningParser {
                             } else
                             if (typenode.getNodeValue().equalsIgnoreCase("SUPL")) {
                                 parseSupl(childnode);
+                            } else
+                            if (typenode.getNodeValue().equalsIgnoreCase("SERVICEPROVIDEREXT")) {
+                                parseServiceProviderExt(childnode);
                             }
                         }
                     }
@@ -198,6 +204,37 @@ public class ProvisioningParser {
                     }
                 }
             } while((versionchild = versionchild.getNextSibling()) != null);
+        }
+    }
+    
+    /**
+     * Parse the provisioning Token
+     *
+     * @param node Node
+     */
+    private void parseToken(Node node) {
+        String version = null;
+        String validity = null;
+        if (node == null) {
+            return;
+        }
+        Node tokenChild = node.getFirstChild();
+
+        if (tokenChild != null) {
+            do {
+                if (version == null) {
+                    if ((version = getValueByParamName("token", tokenChild, TYPE_TXT)) != null) {
+                        provisioningInfo.setVersion(version);
+                        continue;
+                    }
+                }
+                if (validity == null) {
+                    if ((validity = getValueByParamName("validity", tokenChild, TYPE_INT)) != null) {
+                        provisioningInfo.setValidity(Long.parseLong(validity));
+                        continue;
+                    }
+                }
+            } while((tokenChild = tokenChild.getNextSibling()) != null);
         }
     }
 
@@ -448,6 +485,7 @@ public class ProvisioningParser {
     private void parseServices(Node node) {
         String presencePrfl = null;
         String chatAuth = null;        
+        String groupChatAuth = null;        
         String ftAuth = null;
         String geolocPushAuth = null;
         String vsAuth = null;
@@ -472,6 +510,19 @@ public class ProvisioningParser {
                         continue;
                     }
                 }
+
+            	 if (groupChatAuth == null) {
+                     if ((groupChatAuth = getValueByParamName("groupChatAuth", childnode, TYPE_INT)) != null) {
+                         if (groupChatAuth.equals("1")) {
+                             RcsSettings.getInstance().writeParameter(
+                                     RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, RcsSettingsData.TRUE);
+                         } else {
+                             RcsSettings.getInstance().writeParameter(
+                                     RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, RcsSettingsData.FALSE);
+                         }
+                         continue;
+                     }
+                 }
 
                 if (ftAuth == null) {
                     if ((ftAuth = getValueByParamName("ftAuth", childnode, TYPE_INT)) != null) {
@@ -644,12 +695,102 @@ public class ProvisioningParser {
     }
     
     /**
+     * Parse service provider ext
+     * 
+     * @param node Node
+     */
+    private void parseServiceProviderExt(Node node) {
+        Node typenode = null;
+        if (node == null) {
+            return;
+        }
+        Node childnode = node.getFirstChild();
+        if (childnode != null) {
+            do {
+                if (childnode.getNodeName().equals("characteristic")) {
+                    if (childnode.getAttributes().getLength() > 0) {
+                        typenode = childnode.getAttributes().getNamedItem("type");
+                        if (typenode != null) {
+                            if (typenode.getNodeValue().equalsIgnoreCase("joyn")) {
+                                parseJoyn(childnode);
+                            }
+                        }
+                    }
+                }
+            } while ((childnode = childnode.getNextSibling()) != null);
+        }
+    }
+    
+    /**
+     * Parse joyn
+     * 
+     * @param node Node
+     */
+    private void parseJoyn(Node node) {
+        Node typenode = null;
+        if (node == null) {
+            return;
+        }
+        Node childnode = node.getFirstChild();
+        if (childnode != null) {
+            do {
+                if (childnode.getNodeName().equals("characteristic")) {
+                    if (childnode.getAttributes().getLength() > 0) {
+                        typenode = childnode.getAttributes().getNamedItem("type");
+                        if (typenode != null) {
+                            if (typenode.getNodeValue().equalsIgnoreCase("UX")) {
+                                parseUx(childnode);
+                            }
+                        }
+                    }
+                }
+            } while ((childnode = childnode.getNextSibling()) != null);
+        }
+    }
+    
+    /**
+     * Parse joyn
+     * 
+     * @param node Node
+     */
+    private void parseUx(Node node) {
+        String messagingUX = null;
+        if (node == null) {
+            return;
+        }
+        Node childnode = node.getFirstChild();
+
+        if (childnode != null) {
+            do {
+                if (messagingUX == null) {
+                    if ((messagingUX = getValueByParamName("messagingUX", childnode, TYPE_INT)) != null) {
+                        if (messagingUX.equals("1")) {
+                        	RcsSettings.getInstance().writeParameter(
+                                RcsSettingsData.CONVERGENT_MESSAGING_UX, RcsSettingsData.TRUE);
+                        } else {
+                            RcsSettings.getInstance().writeParameter(
+                        		RcsSettingsData.CONVERGENT_MESSAGING_UX, RcsSettingsData.FALSE);
+                        }
+                        continue;
+                    }
+                }
+
+            } while((childnode = childnode.getNextSibling()) != null);
+        }
+        // Not used: e2eIPCallLabel
+     	// Not used: breakoutIPCallLabel
+        // Not used: e2eVoiceCapabilityHandling
+        // Not used: oneButtonVideoCall
+    }
+    
+    /**
      * Parse IM
      *
      * @param node Node
      */
     private void parseIM(Node node) {
         String imCapAlwaysOn = null;
+        String ftCapAlwaysOn = null;
         String imWarnSF = null;
         String imSessionStart = null;
         String ftWarnSize = null;
@@ -679,7 +820,7 @@ public class ProvisioningParser {
 
         if (childnode != null) {
             do {
-                if (imCapAlwaysOn == null) {
+            	if (imCapAlwaysOn == null) {
                     if ((imCapAlwaysOn = getValueByParamName("imCapAlwaysON", childnode, TYPE_INT)) != null) {
                         if (imCapAlwaysOn.equals("0")) {
                             RcsSettings.getInstance().writeParameter(
@@ -688,6 +829,21 @@ public class ProvisioningParser {
                         } else {
                             RcsSettings.getInstance().writeParameter(
                                     RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,
+                                    RcsSettingsData.TRUE);
+                        }
+                        continue;
+                    }
+                }
+            	
+            	if (ftCapAlwaysOn == null) {
+                    if ((ftCapAlwaysOn = getValueByParamName("ftCapAlwaysON", childnode, TYPE_INT)) != null) {
+                        if (ftCapAlwaysOn.equals("0")) {
+                            RcsSettings.getInstance().writeParameter(
+                                    RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
+                                    RcsSettingsData.FALSE);
+                        } else {
+                            RcsSettings.getInstance().writeParameter(
+                                    RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
                                     RcsSettingsData.TRUE);
                         }
                         continue;
@@ -1694,7 +1850,7 @@ public class ProvisioningParser {
             	String value = valueNode.getNodeValue();
                 if (logger.isActivated()) {
                     // logger.debug("Read parameter " + paramName + ": " + value);
-                	logger.debug("Read parameter " + paramName);
+                    logger.debug("Read parameter " + paramName);
                 }
             	
             	// Check type

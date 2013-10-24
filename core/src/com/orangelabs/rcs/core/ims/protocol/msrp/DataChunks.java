@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * Data chunks
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class DataChunks {
     /**

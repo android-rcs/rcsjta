@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 /**
  * Chat session listener
  * 
- * @author JM. Auffret
+ * @author Jean-Marc AUFFRET
  */
 public interface ChatSessionListener extends ImsSessionListener {
 	/**

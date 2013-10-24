@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * Network ressource manager
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class NetworkRessourceManager {
     /**

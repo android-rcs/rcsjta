@@ -54,6 +54,21 @@ public class ContactsProvider {
 	public final static String MIME_TYPE_FILE_TRANSFER = "vnd.android.cursor.item/org.gsma.joyn.file-transfer";
 
 	/**
+	 * Geolocation push capability support
+	 */
+	public final static String MIME_TYPE_GEOLOC_PUSH = "vnd.android.cursor.item/org.gsma.joyn.geoloc-push";
+
+	/**
+	 * IP voice call capability support
+	 */
+	public final static String MIME_TYPE_IP_VOICE_CALL = "vnd.android.cursor.item/org.gsma.joyn.ip-voice-call";
+
+	/**
+	 * IP video call capability support
+	 */
+	public final static String MIME_TYPE_IP_VIDEO_CALL = "vnd.android.cursor.item/org.gsma.joyn.ip-video-call";
+	
+	/**
 	 * RCS extensions supported
 	 */
 	public final static String MIME_TYPE_EXTENSIONS = "vnd.android.cursor.item/org.gsma.joyn.extensions";

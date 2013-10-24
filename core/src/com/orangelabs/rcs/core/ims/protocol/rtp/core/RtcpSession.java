@@ -50,7 +50,7 @@ public class RtcpSession {
     /**
      * RTCP bandwidth
      */
-    private double rtcp_bandwidth;
+    private double rtcpBandwidth;
 
     /**
      * Minimum time between RTCP message (ms)
@@ -149,7 +149,7 @@ public class RtcpSession {
         members = 2;
         senders = 1;
         this.bandwidth = bandwidth;
-        rtcp_bandwidth = 0.05 * bandwidth;
+        rtcpBandwidth = 0.05 * bandwidth;
         avgrtcpsize = 128;
         initial = true;
 
@@ -206,10 +206,10 @@ public class RtcpSession {
         n = members;
         if (senders > 0 && senders < members * RTCP_SENDER_BW_FRACTION) {
             if (isSender) {
-                rtcp_bandwidth *= RTCP_SENDER_BW_FRACTION;
+                rtcpBandwidth *= RTCP_SENDER_BW_FRACTION;
                 n = senders;
             } else {
-                rtcp_bandwidth *= RTCP_RCVR_BW_FRACTION;
+                rtcpBandwidth *= RTCP_RCVR_BW_FRACTION;
                 n -= senders;
             }
         }

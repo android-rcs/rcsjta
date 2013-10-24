@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Chunks receiver
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ChunkReceiver extends Thread {
 	/**
@@ -157,7 +157,7 @@ public class ChunkReceiver extends Thread {
 				Hashtable<String, String> headers = new Hashtable<String, String>();
 				char continuationFlag = '\0';
 				long totalSize = 0;
-				while(continuationFlag == '\0') {
+				while(continuationFlag == '\0' && !terminated) {
 					line = readLine();
 					if (MsrpConnection.MSRP_TRACE_ENABLED) {
 						trace.append(line);

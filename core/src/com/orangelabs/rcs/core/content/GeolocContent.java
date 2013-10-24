@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.core.content;
 
+import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
+
 /**
  * Geoloc content
  *
@@ -27,7 +29,7 @@ public class GeolocContent extends MmContent {
 	/**
 	 * Encoding type
 	 */
-	public static final String ENCODING = "application/vnd.gsma.rcspushlocation+xml";
+	public static final String ENCODING = GeolocInfoDocument.MIME_TYPE;
 
 	/**
 	 * Constructor

@@ -23,7 +23,7 @@ import com.orangelabs.rcs.utils.IpAddressUtils;
 /**
  * SDP utility functions
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class SdpUtils {
 	/**
@@ -41,6 +41,32 @@ public class SdpUtils {
 			return null;
 		}
 	}
+	
+    /**
+     * Extract the remote host address from the connection info
+     * 
+     * @param sessionDescription Session description part of SDP
+     * @param mediaDescription Media description part of SDP
+     * @return Remote host address or null if not found
+     */
+    public static String extractRemoteHost(SessionDescription sessionDescription, MediaDescription mediaDescription) {
+        String remoteHost = null;
+        
+        // First we need try to use the media description connection info
+        if ((mediaDescription != null) &&
+				(mediaDescription.connectionInfo != null)) {
+            remoteHost = extractRemoteHost(mediaDescription.connectionInfo);
+        }
+        
+        // If media description has no connection info or remote host information, we need to try
+        // to use the session description connection info
+        if ((remoteHost == null) &&
+        		(sessionDescription != null) &&
+        			(sessionDescription.connectionInfo != null)) {
+            remoteHost = extractRemoteHost(sessionDescription.connectionInfo);
+        }
+        return remoteHost;
+    }
 
     /**
      * Format "IN IP" attribute (4 or 6)

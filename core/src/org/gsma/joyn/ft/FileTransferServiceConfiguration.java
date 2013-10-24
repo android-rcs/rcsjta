@@ -43,16 +43,30 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	private boolean autoAcceptMode;
 	
 	/**
+	 * File icon
+	 */
+	private boolean fileIcon;
+
+	/**
+	 * File icon size limit
+	 */
+	private long maxFileIconSize;
+	
+	/**
 	 * Constructor
 	 * 
 	 * @param warnSize File transfer size threshold
 	 * @param maxSize File transfer size limit
 	 * @param autoAcceptMode File transfer auto accept mode
+	 * @param fileIcon File icon
+	 * @param maxFileIconSize File icon size limit
 	 */
-	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode) {
+	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode, boolean fileIcon, long maxFileIconSize) {
 		this.warnSize = warnSize;
 		this.maxSize = maxSize;
 		this.autoAcceptMode = autoAcceptMode;
+		this.fileIcon = fileIcon;
+		this.maxFileIconSize = maxFileIconSize;
     }	
 	
 	/**
@@ -64,6 +78,8 @@ public class FileTransferServiceConfiguration implements Parcelable {
 		this.warnSize = source.readLong();
 		this.maxSize = source.readLong();
 		this.autoAcceptMode = source.readInt() != 0;
+		this.fileIcon = source.readInt() != 0;
+		this.maxFileIconSize = source.readLong();
     }
 
 	/**
@@ -86,6 +102,8 @@ public class FileTransferServiceConfiguration implements Parcelable {
     	dest.writeLong(warnSize);
     	dest.writeLong(maxSize);
     	dest.writeInt(autoAcceptMode ? 1 : 0);    	
+    	dest.writeInt(fileIcon ? 1 : 0);    	
+    	dest.writeLong(maxFileIconSize);
     }
 
     /**
@@ -130,4 +148,22 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	public boolean isAutoAcceptMode() {
 		return autoAcceptMode;
 	}
+
+	/**
+	 * Is file icon supported 
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isFileIconSupported() {
+		return autoAcceptMode;
+	}
+
+	/**
+	 * Returns the file transfer size limit. It returns 0 if there is no limitation.
+	 * 
+	 * @return Size in kilobytes
+	 */
+	public long getMaxFileIconSize() {
+		return maxFileIconSize;
+	}	
 }

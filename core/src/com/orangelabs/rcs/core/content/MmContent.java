@@ -28,7 +28,7 @@ import com.orangelabs.rcs.platform.file.FileFactory;
 /**
  * Multimedia content
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class MmContent {
 	/**
@@ -54,7 +54,12 @@ public abstract class MmContent {
     /**
      * Stream to write received data direct to file.
      */
-    private BufferedOutputStream out = null;  
+    private BufferedOutputStream out = null;
+
+    /**
+     * Name of the file
+     */
+	private String name;  
 
     /**
      * Constructor
@@ -63,7 +68,7 @@ public abstract class MmContent {
      * @param encoding Encoding
      */
 	public MmContent(String url, String encoding) {
-		this.url = url;
+		setUrl(url);
 		this.encoding = encoding;
 		this.size = -1;
 	}
@@ -76,7 +81,7 @@ public abstract class MmContent {
      * @param size Content size
      */
 	public MmContent(String url, String encoding, long size) {
-		this.url = url;
+	    setUrl(url);
 		this.encoding = encoding;
 		this.size = size;
 	}
@@ -89,6 +94,23 @@ public abstract class MmContent {
 	public String getUrl() {
 		return url;
 	}
+
+    /**
+     * Set the URL
+     * 
+     * @param url URL
+     */
+    public void setUrl(String url) {
+        this.url = url;
+
+        // Extract filename from URL
+        int index = url.lastIndexOf('/');
+        if (index != -1) {
+            this.name = url.substring(index+1);
+        } else {
+            this.name =  url;
+        }
+    }
 
     /**
      * Returns the content size in bytes
@@ -155,13 +177,16 @@ public abstract class MmContent {
      * @return Name
      */
 	public String getName() {
-		// Extract filename from URL
-		int index = url.lastIndexOf('/');
-		if (index != -1) {
-			return url.substring(index+1);
-		} else {
-			return url;
-		}
+		return name;
+    }
+	
+	/**
+     * Set the name
+     * 
+     * @return Name
+     */
+	public void setName(String name) {
+		this.name = name;
     }
 
 	/**

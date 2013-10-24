@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
 
-import com.orangelabs.rcs.core.ims.service.richcall.video.VideoSdpBuilder;
+import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 
 /**
  * RCS Video orientation
@@ -30,7 +30,7 @@ public class VideoOrientation {
     /**
      * Header Id
      */
-    private int headerId = VideoSdpBuilder.DEFAULT_EXTENSION_ID;
+    private int headerId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
 
     /**
      * Camera

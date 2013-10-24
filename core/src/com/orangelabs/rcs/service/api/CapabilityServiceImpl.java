@@ -37,6 +37,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Capability service API implementation
+ * 
+ * @author Jean-Marc AUFFRET
  */
 public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
@@ -154,12 +156,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Capabilities
      */
 	public Capabilities getMyCapabilities() {
-		com.orangelabs.rcs.core.ims.service.capability.Capabilities c = RcsSettings.getInstance().getMyCapabilities();
-		Set<String> exts = new HashSet<String>(c.getSupportedExtensions());
-		return new Capabilities(c.isImageSharingSupported(),
-    			c.isVideoSharingSupported(),
-    			c.isImSessionSupported(),
-    			c.isFileTransferSupported(),
+		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = RcsSettings.getInstance().getMyCapabilities();
+		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
+		return new Capabilities(capabilities.isImageSharingSupported(),
+				capabilities.isVideoSharingSupported(),
+				capabilities.isImSessionSupported(),
+				capabilities.isFileTransferSupported(),
+				capabilities.isGeolocationPushSupported(),
+				capabilities.isIPVoiceCallSupported(),
+				capabilities.isIPVideoCallSupported(),
     			exts);
 	}
 
@@ -187,6 +192,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isVideoSharingSupported(),
     				capabilities.isImSessionSupported(),
     				capabilities.isFileTransferSupported(),
+    				capabilities.isGeolocationPushSupported(),
+    				capabilities.isIPVoiceCallSupported(),
+    				capabilities.isIPVideoCallSupported(),
     				exts); 
 		} else {
 			return null;
@@ -246,6 +254,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isVideoSharingSupported(),
     				capabilities.isImSessionSupported(),
     				capabilities.isFileTransferSupported(),
+    				capabilities.isGeolocationPushSupported(),
+    				capabilities.isIPVoiceCallSupported(),
+    				capabilities.isIPVideoCallSupported(),
     				exts); 
 
     		// Notify capabilities listeners

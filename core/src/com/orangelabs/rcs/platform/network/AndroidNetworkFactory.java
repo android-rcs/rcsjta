@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.IpAddressUtils;
 /**
  * Android network factory
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class AndroidNetworkFactory extends NetworkFactory {
 

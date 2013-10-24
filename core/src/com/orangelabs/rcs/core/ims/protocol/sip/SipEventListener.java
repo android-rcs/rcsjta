@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.sip;
 /**
  * SIP event listener
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface SipEventListener {
 	/**

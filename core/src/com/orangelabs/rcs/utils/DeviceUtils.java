@@ -28,7 +28,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /***
  * Device utility functions
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class DeviceUtils {
 	/**

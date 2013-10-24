@@ -25,7 +25,7 @@ import android.content.Intent;
 /**
  * Device boot event receiver: automatically starts the RCS service
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class DeviceBoot extends BroadcastReceiver {
     @Override

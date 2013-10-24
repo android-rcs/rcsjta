@@ -29,7 +29,7 @@ import java.util.Vector;
 /**
  * RTCP packet transmitter
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpPacketTransmitter extends Thread {
     /**
@@ -138,8 +138,13 @@ public class RtcpPacketTransmitter extends Thread {
      * @throws IOException
      */
 	public void close() throws IOException {
-        rtcpSession.isByeRequested = true;
+	    if (closed) {
+            return;
+        }
+
+	    rtcpSession.isByeRequested = true;
         closed = true;
+        
         // Close the datagram connection
 		if (datagramConnection != null) {
 			datagramConnection.close();

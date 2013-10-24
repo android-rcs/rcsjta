@@ -32,7 +32,7 @@ public class ImageSharingIntent {
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the image sharing.
-     * <li> {@link #EXTRA_FILENAME} containing the name of image to be shared.
+     * <li> {@link #EXTRA_FILENAME} containing the filename of image to be shared.
      * <li> {@link #EXTRA_FILESIZE} containing the size of the image to be shared.
      * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the image to be shared.
      * </ul>

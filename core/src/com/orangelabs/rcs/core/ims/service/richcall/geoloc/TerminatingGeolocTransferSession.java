@@ -46,7 +46,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating geoloc sharing session (transfer)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TerminatingGeolocTransferSession extends GeolocTransferSession implements MsrpEventListener {
 	/**
@@ -149,7 +149,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             String fileTransferId = attr2.getName() + ":" + attr2.getValue();
 			MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter
@@ -383,7 +383,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-		if (isInterrupted()) {
+        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
 			return;
 		}
 
@@ -396,6 +396,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
     	// Remove the current session
     	getImsService().removeSession(this);

@@ -30,7 +30,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * MSRP session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MsrpSession {
 	/**

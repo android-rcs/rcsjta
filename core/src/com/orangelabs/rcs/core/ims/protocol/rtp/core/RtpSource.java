@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 /**
  * RTP source
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  * @author Deutsche Telekom
  */
 public class RtpSource {

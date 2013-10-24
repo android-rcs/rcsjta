@@ -28,13 +28,14 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 
 /**
  * Messaging settings display
- * 
- * @author Jean-Marc AUFFRET
+ *
+ * @author jexa7410
  */
 public class MessagingSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
-	private CheckBoxPreference filetransfer_vibrate;
-	private CheckBoxPreference chat_vibrate;
-	
+    private CheckBoxPreference filetransfer_vibrate;
+    private CheckBoxPreference chat_vibrate;
+    private CheckBoxPreference chat_displayed_notification;
+
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,23 +46,32 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
         filetransfer_vibrate = (CheckBoxPreference)findPreference("filetransfer_invitation_vibration");
         filetransfer_vibrate.setPersistent(false);
         filetransfer_vibrate.setOnPreferenceChangeListener(this);
-        filetransfer_vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForFileTransferInvitation());        
+        filetransfer_vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForFileTransferInvitation());
 
         chat_vibrate = (CheckBoxPreference)findPreference("chat_invitation_vibration");
         chat_vibrate.setPersistent(false);
         chat_vibrate.setOnPreferenceChangeListener(this);
-        chat_vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForChatInvitation());        
+        chat_vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForChatInvitation());
+
+        chat_displayed_notification = (CheckBoxPreference)findPreference("chat_displayed_notification");
+        chat_displayed_notification.setPersistent(false);
+        chat_displayed_notification.setOnPreferenceChangeListener(this);
+        chat_displayed_notification.setChecked(RcsSettings.getInstance().isImDisplayedNotificationActivated());
 	}
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
         if (preference.getKey().equals("filetransfer_invitation_vibration")) {
         	Boolean state = (Boolean)objValue;
         	RcsSettings.getInstance().setPhoneVibrateForFileTransferInvitation(state.booleanValue());
-        }
+        } else
         if (preference.getKey().equals("chat_invitation_vibration")) {
         	Boolean state = (Boolean)objValue;
         	RcsSettings.getInstance().setPhoneVibrateForChatInvitation(state.booleanValue());
+        } else
+        if (preference.getKey().equals("chat_displayed_notification")) {
+            Boolean state = (Boolean)objValue;
+            RcsSettings.getInstance().setImDisplayedNotificationActivated(state.booleanValue());
         }
         return true;
-    }    
+    }
 }

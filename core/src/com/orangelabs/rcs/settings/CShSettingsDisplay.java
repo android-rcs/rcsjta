@@ -29,7 +29,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Content sharing settings display
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class CShSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
 	private CheckBoxPreference beep;

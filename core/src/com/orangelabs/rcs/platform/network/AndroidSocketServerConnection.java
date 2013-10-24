@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Android socket connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class AndroidSocketServerConnection implements SocketServerConnection {
 	/**

@@ -22,7 +22,7 @@ import java.util.Vector;
 /**
  * Conference-Info document
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ConferenceInfoDocument {
     /** STATE values*/ 

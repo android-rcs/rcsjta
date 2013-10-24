@@ -18,6 +18,9 @@
 
 package org.gsma.joyn.contacts;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +34,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 
 /**
  * Contacts service offers additional methods to manage RCS info in the
@@ -190,4 +198,47 @@ public class ContactsService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }
+    
+    /**
+     * Returns the vCard of a contact. The method returns the complete filename including the path of the visit
+     * card. The filename has the file extension “.vcf” and is generated from the native address book
+     * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which returns
+     * the referenced contact formatted as a vCard when opened through openAssetFileDescriptor(Uri, String)).
+     * 
+     * @param contactUri Contact URI of the contact in the native address book
+     * @return Filename of vCard
+     * @throws JoynServiceException
+     */
+    public String getVCard(Uri contactUri) throws JoynServiceException {
+    	String fileName = null;
+		Cursor cursor = ctx.getContentResolver().query(contactUri, null, null, null, null);   			
+    	while(cursor.moveToNext()) {
+    		String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+    		String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+    		Uri vCardUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+    		AssetFileDescriptor fd;
+    		try {
+    			fd = ctx.getContentResolver().openAssetFileDescriptor(vCardUri, "r");
+    			FileInputStream fis = fd.createInputStream();
+    			byte[] buf = new byte[(int) fd.getDeclaredLength()];
+    			fis.read(buf);
+    			String Vcard = new String(buf);
+
+    			fileName = Environment.getExternalStorageDirectory().toString() + File.separator + name + ".vcf";
+    			
+    			File vCardFile = new File(fileName);
+
+    			if (vCardFile.exists()) 
+    				vCardFile.delete();
+
+    			FileOutputStream mFileOutputStream = new FileOutputStream(vCardFile, true);
+    			mFileOutputStream.write(Vcard.toString().getBytes());
+    			mFileOutputStream.close();
+    		} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+    		}
+    	}
+    	cursor.close();
+    	return fileName;    	
+    }    
 }

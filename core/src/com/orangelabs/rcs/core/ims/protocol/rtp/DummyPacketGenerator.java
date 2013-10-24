@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Dummy packet generator for maintaining alive the network address in NAT
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class DummyPacketGenerator {
     /**

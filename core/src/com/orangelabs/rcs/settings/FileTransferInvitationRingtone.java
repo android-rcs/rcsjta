@@ -29,7 +29,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * File tranfser invitation ringtone
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class FileTransferInvitationRingtone extends RingtonePreference {
 

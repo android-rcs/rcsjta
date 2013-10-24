@@ -579,6 +579,28 @@ public class RcsSettings {
 		}
     }
 
+    /**
+     * Get the value of the MSISDN
+     *
+     * @return MSISDN
+     */
+	public String getMsisdn() {
+		String result = null;
+		if (instance != null) {
+			result = readParameter(RcsSettingsData.MSISDN);
+		}
+		return result;
+    }
+	
+	/**
+     * Set the value of the MSISDN
+     */
+	public void setMsisdn(String value) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.MSISDN, value);
+		}
+    }
+
 	/**
      * Get user profile IMS display name associated to IMPU
      *
@@ -1082,6 +1104,11 @@ public class RcsSettings {
 		capabilities.setVideoSharingSupport(isVideoSharingSupported());
 		capabilities.setGeolocationPushSupport(isGeoLocationPushSupported());
 		capabilities.setFileTransferThumbnailSupport(isFileTransferThumbnailSupported());
+		capabilities.setFileTransferStoreForwardSupport(isFileTransferStoreForwardSupported());
+		capabilities.setIPVoiceCallSupport(isIPVoiceCallSupported());
+		capabilities.setIPVideoCallSupport(isIPVideoCallSupported());
+		capabilities.setGroupChatStoreForwardSupport(isGroupChatStoreForwardSupported());
+		capabilities.setSipAutomata(isSipAutomata());
 		capabilities.setTimestamp(System.currentTimeMillis());
 
 		// Add extensions
@@ -1275,7 +1302,22 @@ public class RcsSettings {
 		}
 		return result;
 	}
-
+	
+    /**
+     * Get max number of simultaneous IP call sessions
+     *
+     * @return Number of sessions
+     */
+	public int getMaxIPCallSessions() {
+		int result = 1;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IP_CALL_SESSIONS));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+	
 	/**
      * Is SMS fallback service activated
      *
@@ -1388,7 +1430,7 @@ public class RcsSettings {
 	}
 	
 	/**
-	 * Get max number of entries per contact in the ipcall log
+	 * Get max number of entries per contact in the IP call log
 	 * 
 	 * @return Number
 	 */
@@ -1899,6 +1941,19 @@ public class RcsSettings {
 		}
 		return result;
 	}
+	
+	/**
+     * Is IM group session supported
+     *
+     * @return Boolean
+     */
+	public boolean isImGroupSessionSupported() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION));
+		}
+		return result;
+	}
 
 	/**
      * Is image sharing supported
@@ -1997,7 +2052,7 @@ public class RcsSettings {
 	}
 
 	 /**
-     * Is IPCall (Audio) supported
+     * Is IP voice call supported
      *
      * @return Boolean
      */
@@ -2010,7 +2065,7 @@ public class RcsSettings {
 	}
 	
 	/**
-     * Is IPCall (Video) supported
+     * Is IP video call supported
      *
      * @return Boolean
      */
@@ -2069,6 +2124,19 @@ public class RcsSettings {
 		boolean result = false;
 		if (instance != null) {
 			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IM_CAPABILITY_ALWAYS_ON));
+		}
+		return result;
+	}
+	
+	/**
+     * Is File Transfer always-on thanks to the Store & Forward functionality
+     *
+     * @return Boolean
+     */
+	public boolean isFtAlwaysOn() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON));
 		}
 		return result;
 	}
@@ -2304,16 +2372,51 @@ public class RcsSettings {
     }
 
     /**
-     * Get provisioning address
+     * Get secondary provisioning address
      *
-     * @return Version
+     * @return Address
      */
-    public String getProvisioningAddress() {
+    public String getSecondaryProvisioningAddress() {
         String result = "";
         if (instance != null) {
-            result = readParameter(RcsSettingsData.PROVISIONING_ADDRESS);
+            result = readParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS);
         }
         return result;
+    }
+
+    /**
+     * Set secondary provisioning address
+     *
+     * @param Address
+     */
+    public void setSecondaryProvisioningAddress(String value) {
+        if (instance != null) {
+            writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, value);
+        }
+    }
+
+    /**
+     * Is secondary provisioning address only used
+     *
+     * @return Boolean
+     */
+    public boolean isSecondaryProvisioningAddressOnly() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY));
+        }
+        return result;
+    }
+
+    /**
+     * Set secondary provisioning address only used
+     *
+     * @param Boolean
+     */
+    public void setSecondaryProvisioningAddressOnly(boolean value) {
+        if (instance != null) {
+            writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, Boolean.toString(value));
+        }
     }
 
     /**
@@ -2331,6 +2434,8 @@ public class RcsSettings {
         setXdmPassword("");
         setXdmServer("");
         setProvisioningVersion("0");
+        setProvisioningToken("");
+        setMsisdn("");
     }
 
     /**
@@ -2565,5 +2670,60 @@ public class RcsSettings {
 			} catch(Exception e) {}
 		}
 		return result;
+	}
+
+	public void setProvisioningToken(String token) {
+		if (instance != null) {
+            writeParameter(RcsSettingsData.PROVISIONING_TOKEN, token);
+        }
+	}
+
+	public String getProvisioningToken() {
+		String result = "0";
+        if (instance != null) {
+            result = readParameter(RcsSettingsData.PROVISIONING_TOKEN);
+        }
+        return result;
+	}
+	
+    /**
+     * Is SIP device an automata ?
+     *
+     * @return Boolean
+     */
+	public boolean isSipAutomata() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_SIP_AUTOMATA));
+		}
+		return result;
+	}
+	
+	/**
+     * Get max file-icon size
+     *
+     * @return Size in kilobytes
+     */
+	public int getMaxFileIconSize() {
+		int result = 50;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_FILE_ICON_SIZE));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+	
+	/**
+	 * Is voice breakout supported
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isVoiceBreakoutSupported() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.VOICE_BREAKOUT));
+        }
+        return result;
 	}
 }

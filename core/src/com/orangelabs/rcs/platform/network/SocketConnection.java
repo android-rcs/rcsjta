@@ -25,7 +25,7 @@ import java.io.OutputStream;
 /**
  * Socket client connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface SocketConnection {
 	/**

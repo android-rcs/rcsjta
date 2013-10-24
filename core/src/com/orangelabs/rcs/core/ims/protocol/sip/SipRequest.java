@@ -24,7 +24,7 @@ import javax2.sip.message.Request;
 /**
  * SIP request
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class SipRequest extends SipMessage {
 	

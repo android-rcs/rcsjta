@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.media;
 /**
  * Media input (e.g. camera, microphone)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface MediaInput {
 	/**

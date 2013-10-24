@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Wifi access network
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class WifiNetworkAccess extends NetworkAccess {
 	/**

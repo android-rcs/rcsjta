@@ -18,10 +18,11 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp.stream;
 
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.concurrent.TimeoutException;
 
-
-import java.net.SocketTimeoutException;
-
+import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpPacketReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpPacketTransmitter;
 import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpSession;
@@ -31,13 +32,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtpPacketReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.Format;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
-import com.orangelabs.rcs.core.ims.service.richcall.video.VideoSdpBuilder;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * RTP input stream
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtpInputStream implements ProcessorInputStream {
     /**
@@ -99,7 +99,17 @@ public class RtpInputStream implements ProcessorInputStream {
     /**
      * The negotiated orientation extension header id
      */
-    private int extensionHeaderId = VideoSdpBuilder.DEFAULT_EXTENSION_ID;
+    private int extensionHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
+
+    /**
+     * Indicates if the stream was closed
+     */
+    private boolean isClosed = false;
+
+    /**
+     * Sequence RTP packets buffer
+     */
+    private PriorityQueue<RtpPacket> rtpPacketsBuffer;
 
 	/**
 	 * The logger
@@ -119,6 +129,19 @@ public class RtpInputStream implements ProcessorInputStream {
 		this.inputFormat = inputFormat;
 
         rtcpSession = new RtcpSession(false, 16000);
+
+        rtpPacketsBuffer = new PriorityQueue<RtpPacket>(10, new Comparator<RtpPacket>() {
+            @Override
+            public int compare(RtpPacket object1, RtpPacket object2) {
+                if (object1.seqnum == object2.seqnum) {
+                    return 0;
+                } else if (object1.seqnum < object2.seqnum) {
+                    return -1;
+                }
+                return 1;
+            }
+        });
+
     }
 
     /**
@@ -129,6 +152,7 @@ public class RtpInputStream implements ProcessorInputStream {
     public void open() throws Exception {
     	// Create the RTP receiver
         rtpReceiver = new RtpPacketReceiver(localPort, rtcpSession, RTP_SOCKET_TIMEOUT);
+        rtpReceiver.start();
 
     	// Create the RTCP receiver
         rtcpReceiver = new RtcpPacketReceiver(localPort + 1, rtcpSession);
@@ -140,6 +164,8 @@ public class RtpInputStream implements ProcessorInputStream {
                 rtcpSession,
                 rtcpReceiver.getConnection());
         rtcpTransmitter.start();
+
+        isClosed = false;
     }
 
     /**
@@ -147,6 +173,8 @@ public class RtpInputStream implements ProcessorInputStream {
      */
     public void close() {
 		try {
+            isClosed = true;
+
             // Close the RTCP transmitter
             if (rtcpTransmitter != null)
                 rtcpTransmitter.close();
@@ -160,6 +188,7 @@ public class RtpInputStream implements ProcessorInputStream {
 			if (rtcpReceiver != null) {
 				rtcpReceiver.close();
 			}
+            rtpStreamListener = null;
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't close correctly RTP ressources", e);
@@ -193,23 +222,30 @@ public class RtpInputStream implements ProcessorInputStream {
      */
     public Buffer read() throws Exception {
         try {
-        	// Wait and read a RTP packet
-        	RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
-        	if (rtpPacket == null) {
-        		return null;
-        	}
-    
+            do {
+                // Wait and read a RTP packet
+                RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
+                if (rtpPacket == null) {
+                    return null;
+                }
+
+                // Add the buffer in queue
+                rtpPacketsBuffer.add(rtpPacket);
+            } while (rtpPacketsBuffer.size() <= 5);
+
+            RtpPacket packet = rtpPacketsBuffer.poll();
+
         	// Create a buffer
-            buffer.setData(rtpPacket.data);
-            buffer.setLength(rtpPacket.payloadlength);
+            buffer.setData(packet.data);
+            buffer.setLength(packet.payloadlength);
             buffer.setOffset(0);
             buffer.setFormat(inputFormat);
-        	buffer.setSequenceNumber(rtpPacket.seqnum);
-        	buffer.setRTPMarker(rtpPacket.marker!=0);
-        	buffer.setTimeStamp(rtpPacket.timestamp);
+        	buffer.setSequenceNumber(packet.seqnum);
+        	buffer.setRTPMarker(packet.marker!=0);
+        	buffer.setTimeStamp(packet.timestamp);
 
-            if (rtpPacket.extensionHeader != null) {
-                ExtensionElement element = rtpPacket.extensionHeader.getElementById(extensionHeaderId);
+            if (packet.extensionHeader != null) {
+                ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
                 if (element != null) {
                     buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
                 }
@@ -218,12 +254,14 @@ public class RtpInputStream implements ProcessorInputStream {
         	// Set inputFormat back to null
         	inputFormat = null;
         	return buffer;
-        } catch (SocketTimeoutException ex) {
-            if (logger.isActivated()) {
-                logger.error("RTP Packet receiver socket error", ex);
-            }
-            if (rtpStreamListener != null) {
-                rtpStreamListener.rtpStreamAborted();
+        } catch (TimeoutException ex) {
+            if (!isClosed) {
+                if (logger.isActivated()) {
+                    logger.error("RTP Packet receiver socket error", ex);
+                }
+                if (rtpStreamListener != null) {
+                    rtpStreamListener.rtpStreamAborted();
+                }
             }
             return null;
         }

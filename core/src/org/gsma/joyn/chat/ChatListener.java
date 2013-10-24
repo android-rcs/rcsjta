@@ -27,9 +27,11 @@ public abstract class ChatListener extends IChatListener.Stub {
 	 * Callback called when a new message has been received
 	 * 
 	 * @param message Chat message
+	 * @see ChatMessage
+	 * @see GeolocMessage
 	 */
 	public abstract void onNewMessage(ChatMessage message);
-
+	
 	/**
 	 * Callback called when a message has been delivered to the remote
 	 * 

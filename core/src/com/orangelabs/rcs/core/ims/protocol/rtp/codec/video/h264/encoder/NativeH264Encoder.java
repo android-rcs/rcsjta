@@ -27,6 +27,10 @@ public class NativeH264Encoder {
 
     public static native int InitEncoder(NativeH264EncoderParams nativeH264EncoderParams);
 
+    // Resize the frame and Encode
+    public static native byte[] ResizeAndEncodeFrame(byte abyte0[], long l, boolean mirroring, int srcWidth, int srcHeight);
+
+    // Scale the frame and Encode
     public static native byte[] EncodeFrame(byte abyte0[], long l, boolean mirroring, float scalingFactor);
 
     public static native byte[] getNAL();

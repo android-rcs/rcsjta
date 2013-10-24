@@ -42,7 +42,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating one-to-one chat session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TerminatingOne2OneChatSession extends OneOneChatSession implements MsrpEventListener {
 	/**
@@ -92,7 +92,8 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
                 }
             }
 
-            if (RcsSettings.getInstance().isChatAutoAccepted()) {
+            // Check if Auto-accept (FT HTTP force auto-accept for the chat session)
+            if (RcsSettings.getInstance().isChatAutoAccepted() || ChatUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
                 if (logger.isActivated()) {
                     logger.debug("Auto accept chat invitation");
                 }
@@ -152,7 +153,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr1.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter

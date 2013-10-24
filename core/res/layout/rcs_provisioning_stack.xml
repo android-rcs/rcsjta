@@ -27,17 +27,23 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-        <TextView android:text="Provisioning server:"
+        <TextView android:text="Secondary provisioning server:"
         android:paddingTop="5dip"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
-        <EditText android:id="@+id/ProvisioningAddress"
-        android:hint="let blank for automatic address"
+        <EditText android:id="@+id/SecondaryProvisioningAddress"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dip"
         android:layout_marginRight="5dip"
         android:maxLength="100" android:lines="1"/>
+
+        <CheckBox android:id="@+id/SecondaryProvisioningAddressOnly"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:text="Use only the secondary provisioning server"/>
 
        	<TextView android:text="Network access:"
 	    android:paddingTop="5dip"
@@ -61,6 +67,17 @@
 	 	android:layout_marginRight="5dip"
 	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
 
+       	<TextView android:text="Default protocol for file transfer:"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<Spinner android:id="@+id/FtProtocol"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+		android:drawSelectorOnTop="true"/>
+		
 		<TextView android:text="Default SIP protocol for Mobile access:"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
@@ -364,6 +381,13 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
         android:text="IM always-on"/>
+		
+		<CheckBox android:id="@+id/FtAlwaysOn"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:text="FT always-on"/>
 
         <CheckBox android:id="@+id/ImUseReports"
 		android:layout_height="wrap_content"

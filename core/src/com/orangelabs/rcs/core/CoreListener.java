@@ -29,6 +29,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSess
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
@@ -38,7 +39,7 @@ import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 /**
  * Observer of core events
  * 
- * @author JM. Auffret
+ * @author Jean-Marc AUFFRET
  */
 public interface CoreListener {
     /**
@@ -101,6 +102,13 @@ public interface CoreListener {
     public void handlePresenceSharingInvitation(String contact);
     
     /**
+     * A new IP call invitation has been received
+     * 
+     * @param session IP call session
+     */
+    public void handleIPCallInvitation(IPCallSession session);
+    
+    /**
      * A new content sharing transfer invitation has been received
      * 
      * @param session CSh session
@@ -126,7 +134,21 @@ public interface CoreListener {
 	 * 
 	 * @param session File transfer session
 	 */
-	public void handleFileTransferInvitation(FileSharingSession session);
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession);
+
+	/**
+	 * A new file transfer invitation has been received and creating a chat session
+	 * 
+	 * @param session File transfer session
+	 */
+	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, TerminatingOne2OneChatSession one2oneChatSession);
+
+	/**
+	 * A new file transfer invitation has been received and creating a chat session
+	 * 
+	 * @param session File transfer session
+	 */
+	public void handleGroupFileTransferInvitation(FileSharingSession fileSharingSession, TerminatingAdhocGroupChatSession groupChatSession);
 
     /**
      * New one-to-one chat session invitation
@@ -167,21 +189,29 @@ public interface CoreListener {
     public void handleMessageDeliveryStatus(String contact, String msgId, String status);
 
     /**
+     * New file delivery status
+     *
+     * @param ftSessionId File transfer session Id
+     * @param status Delivery status
+     */
+    public void handleFileDeliveryStatus(String ftSessionId, String status); 
+
+    /**
      * New SIP session invitation
      * 
 	 * @param intent Resolved intent
      * @param session SIP session
      */
     public void handleSipSessionInvitation(Intent intent, GenericSipSession session);
-
+    
 	/**
 	 * New SIP instant message received
 	 * 
      * @param intent Resolved intent
      * @param message Instant message request
 	 */
-    public void handleSipInstantMessageReceived(Intent intent, SipRequest message);    
-    
+    public void handleSipInstantMessageReceived(Intent intent, SipRequest message);  
+
 	/**
      * User terms confirmation request
      *

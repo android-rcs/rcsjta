@@ -42,7 +42,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating geoloc sharing session (transfer)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class OriginatingGeolocTransferSession extends GeolocTransferSession implements MsrpEventListener {
 	/**
@@ -173,7 +173,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         MediaDescription mediaDesc = media.elementAt(0);
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");
         String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
         // Create the MSRP session
@@ -296,7 +296,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-    	if (isInterrupted()) {
+        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
 			return;
 		}
 
@@ -310,9 +310,12 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+
 		// Remove the current session
     	getImsService().removeSession(this);
-    	
+
     	// Notify listeners
     	for(int j=0; j < getListeners().size(); j++) {
     		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));

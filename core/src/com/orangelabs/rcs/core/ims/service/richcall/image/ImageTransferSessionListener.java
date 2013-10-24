@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 /**
  * Image sharing transfer session listener
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface ImageTransferSessionListener extends ImsSessionListener  {
 	/**

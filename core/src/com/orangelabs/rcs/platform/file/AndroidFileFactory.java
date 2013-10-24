@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Android file factory
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class AndroidFileFactory extends FileFactory {
 	/**

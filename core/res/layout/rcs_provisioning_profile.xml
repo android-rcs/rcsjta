@@ -307,12 +307,39 @@
 		android:enabled="true"
         android:text="File transfer" />
 
+        <CheckBox android:id="@+id/file_transfer_http"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="File transfer HTTP" />
+        
         <CheckBox android:id="@+id/im"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
         android:textStyle="bold"
         android:text="IM session" />
         
+        <CheckBox android:id="@+id/im_group"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="IM Group session" />
+        
+        <CheckBox android:id="@+id/ip_voice_call"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:enabled="true"
+        android:text="IP Voice call" />
+        
+        <CheckBox android:id="@+id/ip_video_call"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:enabled="true"
+        android:text="IP Video call" />
+
         <CheckBox android:id="@+id/cs_video"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
@@ -333,6 +360,42 @@
 	    android:textStyle="bold"
 		android:enabled="true"
         android:text="Social presence" />
+		
+		<CheckBox android:id="@+id/geolocation_push"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:textStyle="bold"
+		android:enabled="true"
+        android:text="Geolocation push" />
+		
+		<CheckBox android:id="@+id/file_transfer_thumbnail"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="File transfer thumbnail" />
+
+		<CheckBox android:id="@+id/file_transfer_sf"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="File transfer Store &amp; Forward" />
+
+		<CheckBox android:id="@+id/group_chat_sf"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="Group chat Store &amp; Forward" />
+		
+		<CheckBox android:id="@+id/sip_automata"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:textStyle="bold"
+		android:enabled="true"
+        android:text="SIP automata" />
+		
 	</LinearLayout>
 	</ScrollView>
 	

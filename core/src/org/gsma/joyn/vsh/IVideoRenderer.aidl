@@ -17,6 +17,8 @@ interface IVideoRenderer {
 
 	int getLocalRtpPort();
 
+	VideoCodec getCodec();
+
 	VideoCodec[] getSupportedCodecs();
 	
 	void addEventListener(in IVideoRendererListener listener);

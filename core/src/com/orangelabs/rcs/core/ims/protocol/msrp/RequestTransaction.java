@@ -24,7 +24,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Request transaction
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RequestTransaction extends Object {
     /**

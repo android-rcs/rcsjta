@@ -42,7 +42,7 @@ import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.sharing.RichCall;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -228,7 +228,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		
 		// Update rich call history
         VideoContent content = (VideoContent)session.getContent();
-		RichCall.getInstance().addVideoSharing(number, session.getSessionID(),
+		RichCallHistory.getInstance().addVideoSharing(number, session.getSessionID(),
 				VideoSharing.Direction.INCOMING,
 				content,
     			VideoSharing.State.INVITED);
@@ -299,7 +299,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     .initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
-			RichCall.getInstance().addVideoSharing(contact, session.getSessionID(),
+			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
 					VideoSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			VideoSharing.State.INITIATED);

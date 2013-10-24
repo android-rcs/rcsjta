@@ -28,7 +28,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -331,7 +331,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param contact Contact
 	 * @param session Chat session
 	 */
-	protected static void addChatSession(String contact, ChatImpl session) {
+	public static void addChatSession(String contact, ChatImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a chat session in the list (size=" + chatSessions.size() + ") for " + contact);
 		}
@@ -424,7 +424,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-		RichMessaging.getInstance().addGroupChat(session.getContributionID(),
+		RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
 				session.getSubject(), session.getParticipants().getList(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
 		
 		// Add session in the list
@@ -507,7 +507,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessaging.getInstance().addGroupChat(session.getContributionID(),
+			RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
 					session.getSubject(), session.getParticipants().getList(),
 					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
 
@@ -630,7 +630,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	}
     
     /**
-     * Adds a listener on new chat invitation event
+     * Adds a listener on new chat invitation events
      * 
      * @param listener Chat invitation listener
      * @throws ServerApiException
@@ -644,7 +644,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
     
     /**
-     * Removes a listener on new chat invitation event.
+     * Removes a listener on new chat invitation events
      * 
      * @param listener Chat invitation listener
      * @throws ServerApiException
@@ -674,7 +674,9 @@ public class ChatServiceImpl extends IChatService.Stub {
     			RcsSettings.getInstance().isSmsFallbackServiceActivated(),
     			RcsSettings.getInstance().isChatAutoAccepted(),
     			RcsSettings.getInstance().isGroupChatAutoAccepted(),
-    			RcsSettings.getInstance().isImReportsActivated());
+    			RcsSettings.getInstance().isImReportsActivated(),
+    			RcsSettings.getInstance().getMaxGeolocLabelLength(),
+    			RcsSettings.getInstance().getGeolocExpirationTime());
 	}    
 
     /**

@@ -22,7 +22,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 /**
  * Capability error
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class CapabilityError extends ImsServiceError {
 	static final long serialVersionUID = 1L;

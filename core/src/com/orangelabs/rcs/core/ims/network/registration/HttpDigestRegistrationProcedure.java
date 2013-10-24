@@ -32,7 +32,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * HTTP Digest MD5 registration procedure
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  * @author Deutsche Telekom AG
  */
 public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
@@ -183,8 +183,11 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
 		if (infoHeader != null) {
 			// Retrieve data from the header Authentication-Info (200 OK response)
 			try {
-				// Get nextnonce to be used
-		   		digest.setNextnonce(infoHeader.getNextNonce());
+				// Check if 200 OK really included Authentication-Info: nextnonce=""
+				if ( infoHeader.getNextNonce() != null ) { 
+					// Get nextnonce to be used
+			   		digest.setNextnonce(infoHeader.getNextNonce());
+				}
 			} catch(Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't read the authentication-info header", e);

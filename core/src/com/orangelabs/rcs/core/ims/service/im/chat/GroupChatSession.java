@@ -20,9 +20,9 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.List;
 
-import javax2.sip.header.ExtensionHeader;
-
 import org.gsma.joyn.chat.ChatLog;
+
+import javax2.sip.header.ExtensionHeader;
 
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -38,7 +38,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.event.ConferenceEventSubscrib
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -68,18 +70,25 @@ public abstract class GroupChatSession extends ChatSession {
 	 */
 	public GroupChatSession(ImsService parent, String conferenceId, ListOfParticipant participants) {
 		super(parent, conferenceId, participants);
+		
+		// Set feature tags
+        setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
+		
+		// Set accept-types
+		String acceptTypes = CpimMessage.MIME_TYPE;	
+        setAcceptTypes(acceptTypes);
+				
+		// Set accept-wrapped-types
+		String wrappedTypes = InstantMessage.MIME_TYPE + " " + IsComposingInfo.MIME_TYPE;
+		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        	wrappedTypes += " " + GeolocInfoDocument.MIME_TYPE;
+        }
+        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        	wrappedTypes += " " + FileTransferHttpInfoDocument.MIME_TYPE;
+        }		
+        setWrappedTypes(wrappedTypes);
 	}
 
-	/**
-	 * Constructor for terminating side
-	 * 
-	 * @param parent IMS service
-	 * @param contact Remote contact
-	 */
-	public GroupChatSession(ImsService parent, String contact) {
-		super(parent, contact);
-	}
-	
 	/**
 	 * Is group chat
 	 * 
@@ -186,7 +195,7 @@ public abstract class GroupChatSession extends ChatSession {
 	public void sendTextMessage(String msgId, String txt) {
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
-		String to = getRemoteContact();
+		String to = ChatUtils.ANOMYNOUS_URI;
 		
 		String content;
 		if (useImdn) {
@@ -195,17 +204,20 @@ public abstract class GroupChatSession extends ChatSession {
 		} else {
 			// Send message in CPIM
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
-		}				
-		// Update rich messaging history
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
-		RichMessaging.getInstance().addGroupChatMessage(getContributionID(), msg,
-				ChatLog.Message.Direction.OUTGOING);
-
+		}		
+		
 		// Send data
 		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
+
+		// Update rich messaging history
+		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
+		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg,
+				ChatLog.Message.Direction.OUTGOING);
+
+		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -223,9 +235,9 @@ public abstract class GroupChatSession extends ChatSession {
 	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
-		String to = getRemoteContact();
+		String to = ChatUtils.ANOMYNOUS_URI;
 		String geoDoc = ChatUtils.buildGeolocDocument(geoloc, ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-
+		
 		String content;
 		if (useImdn) {
 			// Send message in CPIM + IMDN delivered
@@ -235,16 +247,18 @@ public abstract class GroupChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, geoDoc, GeolocInfoDocument.MIME_TYPE);
 		}
 		
-		// Update rich messaging history
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessaging.getInstance().addGroupChatMessage(getContributionID(),
-				geolocMsg, ChatLog.Message.Direction.OUTGOING);
-
 		// Send data
 		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
+
+		// Update rich messaging history
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
+		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
+				ChatLog.Message.Direction.OUTGOING);
+
+		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -260,9 +274,9 @@ public abstract class GroupChatSession extends ChatSession {
 	 */
 	public void sendIsComposingStatus(boolean status) {
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
-		String to = getRemoteContact();
-		String content = ChatUtils.buildCpimMessage(from, to, IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
+		String to = ChatUtils.ANOMYNOUS_URI;
 		String msgId = ChatUtils.generateMessageId();
+		String content = ChatUtils.buildCpimMessage(from, to, IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
 		sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);	
 	}
 	
@@ -481,7 +495,7 @@ public abstract class GroupChatSession extends ChatSession {
 	        }
         }
 	}
-
+	
 	/**
 	 * Reject the session invitation
 	 */

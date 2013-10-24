@@ -19,6 +19,8 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -35,13 +37,14 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Terminating ad-hoc group chat session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
 	/**
@@ -56,7 +59,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	 * @param invite Initial INVITE request
 	 */
 	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite) {
-		super(parent, ChatUtils.getReferredIdentity(invite));
+		super(parent, ChatUtils.getReferredIdentity(invite), ChatUtils.getListOfParticipants(invite));
 
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);
@@ -68,10 +71,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);				
-
-		// Set participants
-		ListOfParticipant participants = ChatUtils.getListOfParticipants(invite);
-		setParticipants(participants);
 	}
 
 	/**
@@ -83,7 +82,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	    		logger.info("Initiate a new ad-hoc group chat session as terminating");
 	    	}
 
-            if (RcsSettings.getInstance().isGroupChatAutoAccepted()) {
+            if (RcsSettings.getInstance().isGroupChatAutoAccepted() || ChatUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
                 if (logger.isActivated()) {
                     logger.debug("Auto accept group chat invitation");
                 }
@@ -142,7 +141,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr1.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter
@@ -267,6 +266,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     	    	// Subscribe to event package
             	getConferenceEventSubscriber().subscribe();
 
+            	// Invite missing participant
+            	inviteMissingParticipants();
+            	
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
@@ -288,5 +290,40 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION,
 					e.getMessage()));
 		}		
+	}
+	
+	/***
+	 * Invite missing participants in background
+	 */
+	private void inviteMissingParticipants() {
+		Thread t = new Thread() {
+			public void run() {
+				try {
+		        	if (logger.isActivated()) {
+		        		logger.debug("Check if participants are missing in the conference");
+		        	}
+					List<String> connected = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(getContributionID());
+					List<String> invited = getParticipants().getList();
+					List<String> missing = new ArrayList<String>();
+					for(int i= 0; i < connected.size(); i++) {
+						String contact = connected.get(i);
+						if (!invited.contains(contact)) {
+							missing.add(contact);
+						}
+					}
+					if (missing.size() > 0) {
+			        	if (logger.isActivated()) {
+			        		logger.debug("Add " + missing.size() + " missing participants in the conference");
+			        	}
+						addParticipants(missing);
+					}
+				} catch(Exception e) {
+		        	if (logger.isActivated()) {
+		        		logger.error("Session initiation has failed", e);
+		        	}
+				}
+			}
+		};
+		t.start();
 	}
 }

@@ -10,15 +10,15 @@ import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
  * Image sharing service API
  */
 interface IImageSharingService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 
 	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
 
-    ImageSharingServiceConfiguration getConfiguration();
+	ImageSharingServiceConfiguration getConfiguration();
     
-    List<IBinder> getImageSharings();
+	List<IBinder> getImageSharings();
 	
 	IImageSharing getImageSharing(in String sharingId);
 

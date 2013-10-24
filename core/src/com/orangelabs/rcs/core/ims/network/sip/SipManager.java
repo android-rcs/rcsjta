@@ -18,10 +18,14 @@
 
 package com.orangelabs.rcs.core.ims.network.sip;
 
+import java.util.ListIterator;
+
+import javax2.sip.header.ViaHeader;
 import javax2.sip.header.WarningHeader;
 import javax2.sip.message.Request;
 
 import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface;
+import com.orangelabs.rcs.core.ims.protocol.sip.KeepAliveManager;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipInterface;
@@ -29,6 +33,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipMessage;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -187,7 +192,44 @@ public class SipManager {
                     throw new SipException("Not registered");
                 }
             }
-
+            
+			KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack().getKeepAliveManager();
+			if (message instanceof SipRequest && ctx.isSipResponse()) {
+				String method = ((SipRequest) message).getMethod();
+				if (method != null && keepAliveManager != null) {
+					if (method.equals(Request.INVITE) || method.equals(Request.REGISTER)) {
+						// Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
+						int viaKeep = -1;
+						ListIterator<ViaHeader> iterator = ctx.getSipResponse().getViaHeaders();
+						if (iterator != null) {
+							ViaHeader respViaHeader = iterator.next();
+							// Retrieve "keep" value
+							String keepStr = respViaHeader.getParameter("keep");
+							if (keepStr != null) {
+								// Convert "keep" value to integer
+								try {
+									viaKeep = Integer.parseInt(keepStr);
+									if (viaKeep > 0) {
+										// If "keep" value is valid, set keep alive period
+										keepAliveManager.setPeriod(viaKeep);
+									} else {
+										if (logger.isActivated())
+											logger.warn("Non positive keep value \"" + keepStr + "\"");
+									}
+								} catch (NumberFormatException e) {
+									if (logger.isActivated())
+										logger.warn("Non-numeric keep value \"" + keepStr + "\"");
+								}
+							}
+						}
+						// If "keep" value is invalid or not present, set keep alive period to default value
+						if (viaKeep <= 0) {
+							keepAliveManager.setPeriod(RcsSettings.getInstance().getSipKeepAlivePeriod());
+						}
+					}
+				}
+			}
+			
             // Return the transaction context 
             return ctx;
 		} else {

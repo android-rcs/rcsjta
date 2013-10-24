@@ -21,7 +21,7 @@ package com.orangelabs.rcs.utils.logger;
 /**
  * Appender
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class Appender {
 	/**

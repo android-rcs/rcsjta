@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 
+import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
@@ -46,6 +48,11 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -55,7 +62,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * Chat utility functions
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ChatUtils {
 	/**
@@ -73,6 +80,70 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
+	/**
+	 * Get supported feature tags for a group chat
+	 *
+	 * @return List of tags
+	 */
+	public static List<String> getSupportedFeatureTagsForGroupChat() {
+		List<String> tags = new ArrayList<String>(); 
+		tags.add(FeatureTags.FEATURE_OMA_IM);
+		
+		String additionalRcseTags = "";
+		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_HTTP + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_SF;
+        }
+        if (additionalRcseTags.length() > 0) {
+        	if (additionalRcseTags.endsWith(",")) {
+        		additionalRcseTags = additionalRcseTags.substring(0, additionalRcseTags.length()-1);
+        	}
+        	tags.add(FeatureTags.FEATURE_RCSE + "=\"" + additionalRcseTags + "\"");
+        }
+        
+        return tags;
+	}	
+	
+	/**
+	 * Get supported feature tags for a chat
+	 *
+	 * @return List of tags
+	 */
+	public static List<String> getSupportedFeatureTagsForChat() {
+		List<String> tags = new ArrayList<String>(); 
+		tags.add(FeatureTags.FEATURE_OMA_IM);
+		
+		String additionalRcseTags = "";
+		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_HTTP + ",";
+        }
+        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_SF;
+        }
+        if (additionalRcseTags.length() > 0) {
+        	if (additionalRcseTags.endsWith(",")) {
+        		additionalRcseTags = additionalRcseTags.substring(0, additionalRcseTags.length()-1);
+        	}
+        	tags.add(FeatureTags.FEATURE_RCSE + "=\"" + additionalRcseTags + "\"");
+        }
+		
+	    return tags;
+	}	
+	
 	/**
 	 * Get contribution ID
 	 * 
@@ -191,6 +262,20 @@ public class ChatUtils {
     }
     
     /**
+     * Is a file transfer HTTP event type
+     * 
+     * @param mime MIME type
+     * @return Boolean
+     */
+    public static boolean isFileTransferHttpType(String mime) {
+    	if ((mime != null) && mime.toLowerCase().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
+    /**
      * Generate a unique message ID
      * 
      * @return Message ID
@@ -235,15 +320,16 @@ public class ChatUtils {
 		for(int i=0; i < newParticipants.size(); i++) {
 			String contact = newParticipants.get(i);
 			if (contact.equals(existingParticipant)) {
-				uriList.append(" <entry uri=\"" + PhoneUtils.formatNumberToSipUri(existingParticipant) +
+				uriList.append(" <entry cp:copyControl=\"to\" uri=\"" + PhoneUtils.formatNumberToSipUri(existingParticipant) +
 					StringUtils.encodeXML(replaceHeader) + "\"/>" + CRLF);
 			} else {
-				uriList.append(" <entry uri=\"" + PhoneUtils.formatNumberToSipUri(contact) + "\"/>" + CRLF);
+				uriList.append(" <entry cp:copyControl=\"to\" uri=\"" + PhoneUtils.formatNumberToSipUri(contact) + "\"/>" + CRLF);
 			}
 		}
 		
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
-			"<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\">" +
+			"<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" " + 
+			"xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">" +
 			"<list>" + CRLF +
 			uriList.toString() +
 			"</list></resource-lists>";
@@ -390,7 +476,7 @@ public class ChatUtils {
 			CpimMessage.HEADER_TO + ": " + ChatUtils.formatCpimSipUri(to) + CRLF + 
 			CpimMessage.HEADER_DATETIME + ": " + DateUtils.encodeDate(System.currentTimeMillis()) + CRLF + 
 			CRLF +  
-			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + "; charset=utf-8" + CRLF + 
+			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + ";charset=utf-8" + CRLF + 
 			CRLF + 
 			content;	
 		   
@@ -398,7 +484,7 @@ public class ChatUtils {
 	}
 	
 	/**
-	 * Build a CPIM message with IMDN headers
+	 * Build a CPIM message with full IMDN headers
 	 * 
 	 * @param from From URI
 	 * @param to To URI
@@ -416,7 +502,7 @@ public class ChatUtils {
 			CpimMessage.HEADER_DATETIME + ": " + DateUtils.encodeDate(System.currentTimeMillis()) + CRLF + 
 			ImdnUtils.HEADER_IMDN_DISPO_NOTIF + ": " + ImdnDocument.POSITIVE_DELIVERY + ", " + ImdnDocument.DISPLAY + CRLF +
 			CRLF +  
-			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + "; charset=utf-8" + CRLF +
+			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + ";charset=utf-8" + CRLF +
 			CpimMessage.HEADER_CONTENT_LENGTH + ": " + content.getBytes().length + CRLF + 
 			CRLF + 
 			content;	
@@ -424,7 +510,7 @@ public class ChatUtils {
 	}
 	
 	/**
-	 * Build a CPIM message with IMDN headers
+	 * Build a CPIM message with IMDN delivered header
 	 * 
 	 * @param from From URI
 	 * @param to To URI
@@ -442,12 +528,12 @@ public class ChatUtils {
 			CpimMessage.HEADER_DATETIME + ": " + DateUtils.encodeDate(System.currentTimeMillis()) + CRLF + 
 			ImdnUtils.HEADER_IMDN_DISPO_NOTIF + ": " + ImdnDocument.POSITIVE_DELIVERY + CRLF +
 			CRLF +  
-			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + "; charset=utf-8" + CRLF +
+			CpimMessage.HEADER_CONTENT_TYPE + ": " + contentType + ";charset=utf-8" + CRLF +
 			CpimMessage.HEADER_CONTENT_LENGTH + ": " + content.getBytes().length + CRLF + 
 			CRLF + 
 			content;	
 		return cpim;
-	}	
+	}
 	
 	/**
 	 * Build a CPIM delivery report
@@ -582,7 +668,7 @@ public class ChatUtils {
 	
 	/**
 	 * Parse a geoloc document
-	 *  
+	 *
 	 * @param xml XML document
 	 * @return Geoloc info
 	 */
@@ -590,8 +676,8 @@ public class ChatUtils {
 		try {
 		    InputSource geolocInput = new InputSource(new ByteArrayInputStream(xml.getBytes()));
 		    GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput);
-		    GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();		    
-		    if (geolocDocument != null) {			    
+		    GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();
+		    if (geolocDocument != null) {
 			    GeolocPush geoloc = new GeolocPush(geolocDocument.getLabel(),
 			    		geolocDocument.getLatitude(),
 			    		geolocDocument.getLongitude(),
@@ -603,7 +689,40 @@ public class ChatUtils {
 		} catch(Exception e) {
 			return null;
 		}
-	    return null;	    
+	    return null;
+	}
+	
+	/**
+	 * Parse a file transfer over HTTP document
+	 *
+	 * @param xml XML document
+	 * @return File transfer document
+	 */
+	public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml) {
+		try {
+		    InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
+		    FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput);
+		    return ftHttpParser.getFtInfo();
+		} catch(Exception e) {
+			return null;
+		}
+	}
+	
+
+	/**
+	 * Parse a file transfer resume info
+	 *
+	 * @param xml XML document
+	 * @return File transfer resume info
+	 */
+	public static FileTransferHttpResumeInfo parseFileTransferHttpResumeInfo(byte[] xml) {
+		try {
+		    InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
+		    FileTransferHttpResumeInfoParser ftHttpParser = new FileTransferHttpResumeInfoParser(ftHttpInput);
+		    return ftHttpParser.getResumeInfo();
+		} catch(Exception e) {
+			return null;
+		}
 	}
 	
 	/**
@@ -834,4 +953,34 @@ public class ChatUtils {
 		}		
 		return null;
     }
+
+    /**
+     * Is request is for FToHTTP
+     *
+     * @param request
+     * @return true if FToHTTP
+     */
+    public static boolean isFileTransferOverHttp(SipRequest request) {
+        CpimMessage message = extractCpimMessage(request);
+        if (message != null && message.getContentType().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get the HTTP file transfer info document
+     *
+     * @param request Request
+     * @return FT HTTP info
+     */
+	public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
+        InstantMessage message = getFirstMessage(request);
+        if (message != null) {
+            return parseFileTransferHttpDocument(message.getTextMessage().getBytes());
+        } else {
+            return null;
+        }
+	}
 }

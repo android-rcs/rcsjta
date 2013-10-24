@@ -35,18 +35,18 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Terminating Store & Forward session for messages
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession implements MsrpEventListener {
 	/**
@@ -62,6 +62,9 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	 */
 	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite) {
 		super(parent, ChatUtils.getReferredIdentity(invite));
+
+		// Set feature tags
+		setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());
 
 		// Set first message
     	InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
@@ -84,9 +87,6 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	    		logger.info("Initiate a store & forward session for messages");
 	    	}
 
-	    	// Send a 180 Ringing response
-			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
-			
 			// Send message delivery report if requested
 			if (ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
 				// Check notification disposition
@@ -99,44 +99,58 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 				}
 			}
 
-			// Wait invitation answer
-	    	int answer = waitInvitationAnswer();
-			if (answer == ImsServiceSession.INVITATION_REJECTED) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected by user");
-				}
-				
-		    	// Remove the current session
-		    	getImsService().removeSession(this);
-
-		    	// Notify listeners
-		    	for(int i=0; i < getListeners().size(); i++) {
-		    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
-		        }
-				return;
-			} else
-			if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected on timeout");
-				}
-
-				// Ringing period timeout
-				send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
-				
-		    	// Remove the current session
-		    	getImsService().removeSession(this);
-
-		    	// Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
-		        }
-				return;
-			} else
-            if (answer == ImsServiceSession.INVITATION_CANCELED) {
+			 // Check if Auto-accept (FT HTTP force auto-accept for the chat session)
+            if (RcsSettings.getInstance().isChatAutoAccepted() || ChatUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
                 if (logger.isActivated()) {
-                    logger.debug("Session has been canceled");
+                    logger.debug("Auto accept store and forward chat invitation");
                 }
-                return;
+            } else {
+            	if (logger.isActivated()) {
+                    logger.debug("Accept manually store and forward chat invitation");
+                }
+
+    	    	// Send a 180 Ringing response
+    			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+    			// Wait invitation answer
+		    	int answer = waitInvitationAnswer();
+				if (answer == ImsServiceSession.INVITATION_REJECTED) {
+					if (logger.isActivated()) {
+						logger.debug("Session has been rejected by user");
+					}
+					
+			    	// Remove the current session
+			    	getImsService().removeSession(this);
+	
+			    	// Notify listeners
+			    	for(int i=0; i < getListeners().size(); i++) {
+			    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
+			        }
+					return;
+				} else
+				if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
+					if (logger.isActivated()) {
+						logger.debug("Session has been rejected on timeout");
+					}
+	
+					// Ringing period timeout
+					send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+					
+			    	// Remove the current session
+			    	getImsService().removeSession(this);
+	
+			    	// Notify listeners
+	    	    	for(int i=0; i < getListeners().size(); i++) {
+	    	    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
+			        }
+					return;
+				} else
+	            if (answer == ImsServiceSession.INVITATION_CANCELED) {
+	                if (logger.isActivated()) {
+	                    logger.debug("Session has been canceled");
+	                }
+	                return;
+	            }
             }
 
         	// Parse the remote SDP part
@@ -146,7 +160,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr1.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter
@@ -231,7 +245,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
         		logger.info("Send 200 OK");
         	}
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-            		InstantMessagingService.CHAT_FEATURE_TAGS, sdp);
+            		getFeatureTags(), sdp);
 
             // The signalisation is established
             getDialogPath().sigEstablished();

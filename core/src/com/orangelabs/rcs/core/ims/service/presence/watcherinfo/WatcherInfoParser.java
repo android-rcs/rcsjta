@@ -32,7 +32,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Watcher-info parser
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class WatcherInfoParser extends DefaultHandler {
 	/* Watcher-Info SAMPLE:

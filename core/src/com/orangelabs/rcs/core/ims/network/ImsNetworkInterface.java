@@ -55,7 +55,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Abstract IMS network interface
  *
- * @author JM. Auffret
+ * @author Jean-Marc AUFFRET
  */
 public abstract class ImsNetworkInterface {
 	/**
@@ -462,8 +462,11 @@ public abstract class ImsNetworkInterface {
 		    	} else {
 					throw new SipException("Unkown SIP protocol");
 		    	}
+		    	
+		    	boolean resolved = false;
 				Record[] naptrRecords = getDnsRequest(imsProxyAddr, resolver, Type.NAPTR);
 				if ((naptrRecords != null) && (naptrRecords.length > 0)) {
+					// First try with NAPTR
 					if (logger.isActivated()) {
 						logger.debug("NAPTR records found: " + naptrRecords.length);
 					}
@@ -483,10 +486,13 @@ public abstract class ImsNetworkInterface {
 								// Direct DNS A lookup
 								resolvedIpAddress = getDnsA(imsProxyAddr);
 							}
+					    	resolved = true;
 						}
 			        }
-				} else {
-					// Direct DNS SRV lookup
+				}
+				
+				if (!resolved) {
+					// If no NAPTR: direct DNS SRV lookup
 					if (logger.isActivated()) {
 						logger.debug("No NAPTR record found: use DNS SRV instead");
 					}
@@ -501,14 +507,17 @@ public abstract class ImsNetworkInterface {
 						SRVRecord srvRecord = getBestDnsSRV(srvRecords);
 						resolvedIpAddress = getDnsA(srvRecord.getTarget().toString());
 						resolvedPort = srvRecord.getPort();
-					} else {
-						// Direct DNS A lookup
-						if (logger.isActivated()) {
-							logger.debug("No SRV record found: use DNS A instead");
-						}
-						resolvedIpAddress = getDnsA(imsProxyAddr);
+				    	resolved = true;
 					}
-				}		
+				}
+				
+				if (!resolved) {
+					// If not resolved: direct DNS A lookup
+					if (logger.isActivated()) {
+						logger.debug("No SRV record found: use DNS A instead");
+					}
+					resolvedIpAddress = getDnsA(imsProxyAddr);
+				}
 			}
 			
 	        if (resolvedIpAddress == null) {

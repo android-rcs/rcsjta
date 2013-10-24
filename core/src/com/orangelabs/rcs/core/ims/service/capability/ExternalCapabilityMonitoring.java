@@ -27,7 +27,7 @@ import android.content.Intent;
 /**
  * External capability monitoring
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     @Override

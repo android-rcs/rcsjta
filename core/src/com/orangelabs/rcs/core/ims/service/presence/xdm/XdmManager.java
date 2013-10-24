@@ -34,6 +34,12 @@ import android.graphics.BitmapFactory;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.ImsModule;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpDeleteRequest;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpGetRequest;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpPutRequest;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpRequest;
+import com.orangelabs.rcs.core.ims.protocol.http.HttpResponse;
 import com.orangelabs.rcs.core.ims.service.presence.PhotoIcon;
 import com.orangelabs.rcs.core.ims.service.presence.directory.Folder;
 import com.orangelabs.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
@@ -46,13 +52,23 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * XDM manager
  *
- * @author JM. Auffret
+ * @author Jean-Marc AUFFRET
  */
 public class XdmManager {
 	/**
 	 * XDM server address
 	 */
 	private String xdmServerAddr;
+
+	/**
+	 * XDM server login
+	 */
+	private String xdmServerLogin;
+
+	/**
+	 * XDM server password
+	 */
+	private String xdmServerPwd;
 
 	/**
 	 * Managed documents
@@ -71,6 +87,8 @@ public class XdmManager {
 	 */
 	public XdmManager(ImsModule parent) {
 		xdmServerAddr = ImsModule.IMS_USER_PROFILE.getXdmServerAddr();
+		xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
+		xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
 	}
 	
 	/**
@@ -81,21 +99,21 @@ public class XdmManager {
 	 * @throws CoreException
 	 */
 	private HttpResponse sendRequestToXDMS(HttpRequest request) throws CoreException {
-		return sendRequestToXDMS(request, false);
+		return sendRequestToXDMS(request, new HttpAuthenticationAgent(xdmServerLogin, xdmServerPwd));
 	}
 	
 	/**
-	 * Send HTTP PUT request
+	 * Send HTTP PUT request with authentication
 	 * 
 	 * @param request HTTP request
-	 * @param authenticate Authentication needed
+	 * @param authenticationAgent Authentication agent
 	 * @return HTTP response
 	 * @throws CoreException
 	 */
-	private HttpResponse sendRequestToXDMS(HttpRequest request, boolean authenticate) throws CoreException {
+	private HttpResponse sendRequestToXDMS(HttpRequest request, HttpAuthenticationAgent authenticationAgent) throws CoreException {
 		try {
 			// Send first request
-			HttpResponse response = sendHttpRequest(request, authenticate);
+			HttpResponse response = sendHttpRequest(request, authenticationAgent);
 			
 			// Analyze the response
 			if (response.getResponseCode() == 401) {
@@ -104,15 +122,17 @@ public class XdmManager {
 					logger.debug("401 Unauthorized response received");
 				}
 	
-				// Update the authentication agent
-				request.getAuthenticationAgent().readWwwAuthenticateHeader(response.getHeader("www-authenticate"));
+				if (authenticationAgent != null) {
+					// Update the authentication agent
+					authenticationAgent.readWwwAuthenticateHeader(response.getHeader("www-authenticate"));
+				}
 	
 				// Set the cookie from the received response
 				String cookie = response.getHeader("set-cookie");
 				request.setCookie(cookie);
 				
 				// Send second request with authentification header
-				response = sendRequestToXDMS(request, true);
+				response = sendRequestToXDMS(request, authenticationAgent);
 			} else
 			if (response.getResponseCode() == 412) {
 				// 412 response received
@@ -143,12 +163,12 @@ public class XdmManager {
 	 * Send HTTP PUT request
 	 * 
 	 * @param request HTTP request
-	 * @param authenticate Authentication needed
+	 * @param authenticationAgent Authentication agent
 	 * @return HTTP response
 	 * @throws IOException
 	 * @throws CoreException
 	 */
-	private HttpResponse sendHttpRequest(HttpRequest request, boolean authenticate) throws IOException, CoreException {
+	private HttpResponse sendHttpRequest(HttpRequest request, HttpAuthenticationAgent authenticationAgent) throws IOException, CoreException {
 		// Extract host & port
 		String[] parts = xdmServerAddr.substring(7).split(":|/");
 		String host = parts[0];		
@@ -170,9 +190,9 @@ public class XdmManager {
 				"Host: " + host + ":" + port + HttpUtils.CRLF +
 				"User-Agent: " + TerminalInfo.getProductName() + " " + TerminalInfo.getProductVersion() + HttpUtils.CRLF;
 		
-		if (authenticate) {
+		if (authenticationAgent != null) {
 			// Set the Authorization header
-			String authorizationHeader = request.getAuthenticationAgent().generateAuthorizationHeader(
+			String authorizationHeader = authenticationAgent.generateAuthorizationHeader(
 					request.getMethod(), requestUri, request.getContent());
 			httpRequest += authorizationHeader + HttpUtils.CRLF;
 		}

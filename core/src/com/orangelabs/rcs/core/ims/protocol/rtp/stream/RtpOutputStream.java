@@ -33,7 +33,7 @@ import java.io.IOException;
 /**
  * RTP output stream
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener {
     /**
@@ -154,7 +154,8 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
         if (localRtpPort != -1) {
             // Create the RTP receiver
             rtpReceiver = new RtpPacketReceiver(localRtpPort, rtcpSession);
-            
+            rtpReceiver.start();
+
             // Create the RTCP receiver
             rtcpReceiver = new RtcpPacketReceiver(localRtpPort + 1, rtcpSession, rtcpSocketTimeout);
             rtcpReceiver.addRtcpListener(this);

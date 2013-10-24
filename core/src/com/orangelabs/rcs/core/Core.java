@@ -22,6 +22,7 @@ import com.orangelabs.rcs.addressbook.AddressBookManager;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityService;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceService;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
@@ -260,6 +261,15 @@ public class Core {
 		return getImsModule().getCapabilityService();
 	}
 
+	/**
+	 * Returns the IP call service
+	 * 
+	 * @return Rich call service
+	 */
+	public IPCallService getIPCallService() {
+		return getImsModule().getIPCallService();
+	}
+	
 	/**
 	 * Returns the richcall service
 	 * 

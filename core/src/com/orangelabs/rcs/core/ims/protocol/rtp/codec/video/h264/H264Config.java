@@ -44,7 +44,7 @@ public class H264Config {
     public static final int VGA_HEIGHT = 480;
 
     /**
-     * H264 Codec Name
+     * Codec name
      */
     public final static String CODEC_NAME = "H264";
 

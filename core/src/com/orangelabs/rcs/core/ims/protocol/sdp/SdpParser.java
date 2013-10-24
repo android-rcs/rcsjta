@@ -24,7 +24,7 @@ import java.util.Vector;
 /**
  * SDP parser
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class SdpParser extends Parser {
 	/**
@@ -201,12 +201,26 @@ public class SdpParser extends Parser {
                     descs.elementAt(i).connectionInfo = connectionInfo;
                 }
             }
-            
+
             // Bandwidth information
-            if (getToken(bin, "b=")) {
-                String bandwidthInfo = getLine(bin);
-                for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).bandwidthInfo = bandwidthInfo;
+            while(getToken(bin, "b=")) {
+                line = getLine(bin);
+                int index = line.indexOf(':');
+                if (index > 0) {
+                    String valueAttribute = line.substring(index + 1);
+                    if (line.contains("AS")) {
+                        for (int i = 0; i < descs.size(); i++) {
+                            descs.elementAt(i).bandwidthInfo = valueAttribute;
+                        }
+                    } else if (line.contains("RS")) {
+                        for (int i = 0; i < descs.size(); i++) {
+                            descs.elementAt(i).senderBandwidthInfo = valueAttribute;
+                        }
+                    } else if (line.contains("RR")) {
+                        for (int i = 0; i < descs.size(); i++) {
+                            descs.elementAt(i).receiverBandwidthInfo = valueAttribute;
+                        }
+                    }
                 }
             }
 

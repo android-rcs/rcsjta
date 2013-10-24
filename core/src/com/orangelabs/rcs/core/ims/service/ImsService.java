@@ -27,14 +27,16 @@ import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Vector;
 
 /**
  * Abstract IMS service
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class ImsService {
     /**
@@ -51,21 +53,26 @@ public abstract class ImsService {
      * Instant Messaging service
      */
 	public static final int IM_SERVICE = 2;
+	
+	/**
+     * IP call service
+     */
+	public static final int IPCALL_SERVICE = 3;
 
     /**
      * Richcall service
      */
-	public static final int RICHCALL_SERVICE = 3;
+	public static final int RICHCALL_SERVICE = 4;
 
     /**
      * Presence service
      */
-	public static final int PRESENCE_SERVICE = 4;
+	public static final int PRESENCE_SERVICE = 5;
 
     /**
      * SIP service
      */
-	public static final int SIP_SERVICE = 5;
+	public static final int SIP_SERVICE = 6;
 	
 	/**
 	 * Activation flag
@@ -85,7 +92,7 @@ public abstract class ImsService {
     /**
      * List of managed sessions
      */
-    private Hashtable<String, ImsServiceSession> sessions = new Hashtable<String, ImsServiceSession>();
+    private Map<String, ImsServiceSession> sessions = Collections.synchronizedMap(new LinkedHashMap<String, ImsServiceSession>());
 
 	/**
      * The logger
@@ -149,14 +156,15 @@ public abstract class ImsService {
      */
 	public Enumeration<ImsServiceSession> getSessions(String contact) {
 		Vector<ImsServiceSession> result = new Vector<ImsServiceSession>();
-		Enumeration<ImsServiceSession> list = sessions.elements();
-		while(list.hasMoreElements()) {
-			ImsServiceSession session = list.nextElement();
-			if (PhoneUtils.compareNumbers(session.getRemoteContact(), contact)){
-				result.add(session);
-			}
-		}
-
+        synchronized(sessions) {
+            Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
+            while(list.hasMoreElements()) {
+                ImsServiceSession session = list.nextElement();
+                if (PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
+                    result.add(session);
+                }
+            }
+        }
 		return result.elements();
     }
 
@@ -168,11 +176,13 @@ public abstract class ImsService {
      */
     public int getNumberOfSessions(String contact) {
         int result = 0;
-        Enumeration<ImsServiceSession> list = sessions.elements();
-        while (list.hasMoreElements()) {
-            ImsServiceSession session = list.nextElement();
-            if (PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
-                result++;
+        synchronized(sessions) {
+            Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
+            while (list.hasMoreElements()) {
+                ImsServiceSession session = list.nextElement();
+                if (PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
+                    result++;
+                }
             }
         }
         return result;
@@ -184,7 +194,12 @@ public abstract class ImsService {
      * @return List of sessions
      */
 	public Enumeration<ImsServiceSession> getSessions() {
-		return sessions.elements();
+        Vector<ImsServiceSession> result;
+        synchronized(sessions) {
+            result = new Vector<ImsServiceSession>(sessions.values());
+        }
+        return result.elements();
+
     }
 
     /**

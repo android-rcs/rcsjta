@@ -1052,6 +1052,11 @@ public class SipUri extends GenericURI implements javax2.sip.address.SipURI , Si
             return (String) this.uriParms.getValue(GRUU);   // JvB: fixed to not add duplicates
     }
 
+	@Override
+	public void setParameter(NameValue nameValue) throws ParseException {
+		// Not used
+	}
+
     /**
      *remove the +sip-instance value from the parameter list if it exists.
      */

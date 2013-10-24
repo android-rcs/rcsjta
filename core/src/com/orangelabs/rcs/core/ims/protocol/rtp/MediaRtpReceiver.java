@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp;
 
-
-
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.Format;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaOutput;
@@ -35,22 +33,22 @@ public class MediaRtpReceiver {
     /**
      * Media processor
      */
-    private Processor processor = null;
+    protected Processor processor = null;
 
 	/**
 	 * Local port number (RTP listening port)
 	 */
-	private int localPort;
+    protected int localPort;
 
     /**
      * RTP Input Stream
      */
-    private RtpInputStream inputStream = null;
+	protected RtpInputStream inputStream = null;
 
 	/**
 	 * The logger
 	 */
-	private Logger logger =	Logger.getLogger(this.getClass().getName());
+	protected Logger logger =	Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor
@@ -66,19 +64,17 @@ public class MediaRtpReceiver {
      *
      * @param remoteAddress Remote address 
      * @param remotePort Remote port
-     * @param orientationHeaderId RTP orientation extension header id 
      * @param renderer Renderer
-     * @param format Video format
+     * @param format format
      * @param rtpStreamListener RTP Stream listener
      * @throws RtpException When an error occurs
      */
-    public void prepareSession(String remoteAddress, int remotePort, int orientationHeaderId, 
+    public void prepareSession(String remoteAddress, int remotePort, 
             MediaOutput renderer, Format format, RtpStreamListener rtpStreamListener)
             throws RtpException {
     	try {
 			// Create the input stream
             inputStream = new RtpInputStream(remoteAddress, remotePort, localPort, format);
-            inputStream.setExtensionHeaderId(orientationHeaderId);
             inputStream.addRtpStreamListener(rtpStreamListener);
     		inputStream.open();
 			if (logger.isActivated()) {

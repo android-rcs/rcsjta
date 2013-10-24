@@ -23,7 +23,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * HTTP Digest MD5 authentication (see RFC2617)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class HttpDigestMd5Authentication {
 	/**

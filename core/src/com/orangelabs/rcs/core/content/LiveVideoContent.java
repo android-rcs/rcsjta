@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.content;
 /**
  * Live video content
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class LiveVideoContent extends VideoContent {
 	/**

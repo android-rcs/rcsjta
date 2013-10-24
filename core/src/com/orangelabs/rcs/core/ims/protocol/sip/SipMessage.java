@@ -39,6 +39,7 @@ import javax2.sip.header.ToHeader;
 import javax2.sip.header.ViaHeader;
 import javax2.sip.message.Message;
 
+import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
@@ -47,7 +48,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * SIP message
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  * @author Deutsche Telekom AG
  */
 public abstract class SipMessage {
@@ -420,7 +421,10 @@ public abstract class SipMessage {
 	        String tag = temp.get(i);
 			
 	        // Reject parameter not starting with a +
-			if (!tag.startsWith("+")) {
+	        // FEATURE_SIP_AUTOMATA and FEATURE_RCSE_IP_VIDEO_CALL doesn't start with '+'
+			if (!tag.startsWith("+")
+				&& (!tag.equals(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL))
+					&& (!tag.equals(FeatureTags.FEATURE_SIP_AUTOMATA))) {
 				continue;
 			}
 
@@ -435,7 +439,7 @@ public abstract class SipMessage {
             }
         }
         
-		return tags;
+		return tags;		
 	}
 	
 	/**

@@ -57,16 +57,27 @@ public class Chat {
      * Sends a chat message
      * 
      * @param message Message
-     * @return Unique message ID
+	 * @return Unique message ID or null in case of error
    	 * @throws JoynServiceException
      */
     public String sendMessage(String message) throws JoynServiceException {
 		try {
-			String msgId = chatInf.sendMessage(message);
-			if (msgId == null) {
-				throw new JoynServiceException("Send message has failed");
-			}
-			return msgId;
+			return chatInf.sendMessage(message);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	
+    }
+    
+	/**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc info
+	 * @return Unique message ID or null in case of error
+   	 * @throws JoynServiceException
+     */
+    public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
+		try {
+			return chatInf.sendGeoloc(geoloc);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}    	

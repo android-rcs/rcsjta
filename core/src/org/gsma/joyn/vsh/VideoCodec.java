@@ -1,10 +1,29 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.vsh;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+
 /**
- * Video codec maintains all the information related to a video codec.
+ * Video codec
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -139,11 +158,11 @@ public class VideoCodec implements Parcelable {
     }
     
     /**
-     * Returns the codec payload (e.g. 96)
+     * Returns the codec payload type (e.g. 96)
      * 
-     * @return Payload number
+     * @return Payload type
      */
-    public int getPayload() {
+    public int getPayloadType() {
     	return payload;
     }
     
@@ -200,5 +219,29 @@ public class VideoCodec implements Parcelable {
      */
     public String getParameters() {
     	return parameters;    	
+    }
+
+    /**
+     * Compare codec
+     *
+     * @param codec Codec to compare
+     * @return Returns True if codecs are equals, else returns False
+     */
+    public boolean compare(VideoCodec codec) {
+        boolean ret = false;
+        if (getEncoding().equalsIgnoreCase(codec.getEncoding()) 
+                && (getVideoWidth() == codec.getVideoWidth() || getVideoWidth() == 0 || codec.getVideoWidth() == 0)
+                && (getVideoHeight() == codec.getVideoHeight() || getVideoHeight() == 0 || codec.getVideoHeight() == 0)) {
+            if (getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
+                if (H264Config.getCodecProfileLevelId(getParameters()).compareToIgnoreCase(H264Config.getCodecProfileLevelId(codec.getParameters())) == 0) {
+                    ret =  true;
+                }
+            } else {
+                if (getParameters().equalsIgnoreCase(codec.getParameters())) {
+                    ret = true;
+                }
+            }
+        }
+        return ret;
     }
 }

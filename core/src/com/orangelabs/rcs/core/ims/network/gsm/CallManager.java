@@ -36,7 +36,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * directly to CONNETED even if the remote has not ringing. For the incoming
  * call, the capability are requested when phone is ringing.
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class CallManager {
 	/**

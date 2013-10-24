@@ -17,6 +17,8 @@ interface IFileTransfer {
 
 	String getFileType();
 
+	String getFileIconName();
+
 	int getState();
 	
 	int getDirection();

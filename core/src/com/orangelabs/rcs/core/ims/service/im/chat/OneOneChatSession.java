@@ -36,7 +36,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.StringUtils;
 
 /**
@@ -57,12 +59,24 @@ public abstract class OneOneChatSession extends ChatSession {
 	 * @param contact Remote contact
 	 */
 	public OneOneChatSession(ImsService parent, String contact) {
-		super(parent, contact);
+		super(parent, contact, OneOneChatSession.generateOneOneParticipants(contact));
 		
-		// Set list of participants
-		ListOfParticipant participants = new ListOfParticipant();
-		participants.addParticipant(contact);
-		setParticipants(participants);		
+		// Set feature tags
+        setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());
+		
+		// Set accept-types
+		String acceptTypes = CpimMessage.MIME_TYPE + " " + IsComposingInfo.MIME_TYPE;
+        setAcceptTypes(acceptTypes);
+				
+		// Set accept-wrapped-types
+		String wrappedTypes = InstantMessage.MIME_TYPE + " " + ImdnDocument.MIME_TYPE;
+		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        	wrappedTypes += " " + GeolocInfoDocument.MIME_TYPE;
+        }
+		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        	wrappedTypes += " " + FileTransferHttpInfoDocument.MIME_TYPE;
+        }
+        setWrappedTypes(wrappedTypes);
 	}
 	
 	/**
@@ -75,6 +89,18 @@ public abstract class OneOneChatSession extends ChatSession {
 	}
 	
 	/**
+	 * Generate the list of participants for a 1-1 chat
+	 * 
+	 * @param contact Contact
+	 * @return List of participants
+	 */
+    private static ListOfParticipant generateOneOneParticipants(String contact) {
+    	ListOfParticipant list = new ListOfParticipant();
+    	list.addParticipant(contact);
+		return list;
+	}
+
+    /**
 	 * Returns the list of participants currently connected to the session
 	 * 
 	 * @return List of participants
@@ -115,15 +141,17 @@ public abstract class OneOneChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		}
 
-		// Update rich messaging history
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
-		RichMessaging.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
-
 		// Send content
 		boolean result = sendDataChunks(msgId, content, mime);
+
+		// Update rich messaging history
+		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
+		RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
+
+		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -154,15 +182,17 @@ public abstract class OneOneChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, geoDoc, GeolocInfoDocument.MIME_TYPE);
 		}
 
-		// Update rich messaging history
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessaging.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
-
 		// Send content
 		boolean result = sendDataChunks(msgId, content, mime);
+
+		// Update rich messaging history
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
+		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+
+		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -213,7 +243,7 @@ public abstract class OneOneChatSession extends ChatSession {
 		// Start the session
 		session.startSession();
 	}
-	
+
 	/**
 	 * Reject the session invitation
 	 */

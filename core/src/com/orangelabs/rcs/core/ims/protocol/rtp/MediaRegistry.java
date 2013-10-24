@@ -24,15 +24,15 @@ import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.Format;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.audio.AmrWbAudioFormat;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.audio.AudioFormat;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H263VideoFormat;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoFormat;
 
 /**
  * Media registry that handles the supported codecs
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MediaRegistry {
 
@@ -42,6 +42,7 @@ public class MediaRegistry {
 	private static Hashtable<String, Format> SUPPORTED_CODECS = new Hashtable<String, Format>();
 	static {
 		SUPPORTED_CODECS.put(H264VideoFormat.ENCODING.toLowerCase(), new H264VideoFormat());
+		SUPPORTED_CODECS.put(AmrWbAudioFormat.ENCODING.toLowerCase(), new AmrWbAudioFormat());
 	}
 
 	/**
@@ -110,13 +111,6 @@ public class MediaRegistry {
 	            new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer()
 	        };
 	        return chain;
-    	} else
-    	if (encoding.equalsIgnoreCase(H263VideoFormat.ENCODING)) {
-    		// Java H263 packetizer
-    		Codec[] chain = {
-    			new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h263.JavaPacketizer()
-    		};
-    		return chain;
 		} else { 
 			// Codec implemented in the native part
 			return new Codec[0];
@@ -136,13 +130,6 @@ public class MediaRegistry {
 	            new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer()
 	        };
 	        return chain;
-		} else
-    	if (encoding.equalsIgnoreCase(H263VideoFormat.ENCODING)) {
-    		// Java H263 depacketizer
-    		Codec[] chain = {
-    			new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h263.JavaDepacketizer()
-    		};
-    		return chain;        
 		} else {
 			// Codec implemented in the native part
 			return new Codec[0];

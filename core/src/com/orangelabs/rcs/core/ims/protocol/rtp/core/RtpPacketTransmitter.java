@@ -29,7 +29,7 @@ import java.io.IOException;
 /**
  * RTP packet transmitter
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtpPacketTransmitter {
 
@@ -220,9 +220,9 @@ public class RtpPacketTransmitter {
             rtcpSession.packetCount++;
             rtcpSession.octetCount += data.length;
 		} catch (IOException e) {
-			if (logger.isActivated()) {
-				logger.error("Can't send the RTP packet", e);
-			}
+//			if (logger.isActivated()) {
+//				logger.error("Can't send the RTP packet", e);
+//			}
         }
     }
 

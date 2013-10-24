@@ -181,6 +181,16 @@ public class ChatLog {
 	         * System message
 	         */
 	        public static final int SYSTEM = 1;
+	        
+	        /**
+	         * Geoloc message
+	         */
+	        public static final int GEOLOC = 2;
+
+	        /**
+	         * File transfer
+	         */
+	        public static final int FILE_TRANSFER = 3;
         }
         	
         /**

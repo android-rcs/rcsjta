@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Media capture stream
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MediaCaptureStream implements ProcessorInputStream {
 	/**
@@ -43,12 +43,12 @@ public class MediaCaptureStream implements ProcessorInputStream {
     /**
      * Sequence number
      */
-    private long seqNo = 0;
+    protected long seqNo = 0;
 
     /**
      * Input buffer
      */
-	private Buffer buffer = new Buffer();
+	protected Buffer buffer = new Buffer();
 
 	/**
      * The logger
@@ -95,7 +95,7 @@ public class MediaCaptureStream implements ProcessorInputStream {
 			logger.debug("Media capture stream closed");
 		}
     }
-    
+
     /**
      * Format of the data provided by the source stream
      * 
@@ -103,6 +103,15 @@ public class MediaCaptureStream implements ProcessorInputStream {
      */
     public Format getFormat() {
     	return format;
+    }
+
+    /**
+     * returns the MediaInput
+     *
+     * @return MediaInput
+     */
+    public MediaInput getPlayer() {
+        return player;
     }
 
     /**
@@ -127,7 +136,6 @@ public class MediaCaptureStream implements ProcessorInputStream {
     		buffer.setFlags(Buffer.FLAG_RTP_MARKER);
     	}
     	buffer.setTimeStamp(sample.getTimeStamp());
-        buffer.setVideoOrientation(sample.getVideoOrientation());
     	return buffer;
     }
 }

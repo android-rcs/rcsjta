@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Capability discovery service
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class CapabilityService extends ImsService implements AddressBookEventListener {
 	/**
@@ -180,6 +180,13 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @return Capabilities
      */
 	public synchronized Capabilities requestContactCapabilities(String contact) {
+    	if (logger.isActivated()) {
+    		logger.debug("Request capabilities to " + contact);
+    	}
+
+    	// Extract contact phone number
+		contact = PhoneUtils.extractNumberFromUri(contact);
+
         // Check if if it is a valid RCS number
         if (!ContactsManager.getInstance().isRcsValidNumber(contact)) {
             if (logger.isActivated()) {
@@ -187,13 +194,6 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             }
             return null;
         }
-
-    	if (logger.isActivated()) {
-    		logger.debug("Request capabilities to " + contact);
-    	}
-
-    	// Extract contact phone number
-		contact = PhoneUtils.extractNumberFromUri(contact);
 
 		// Read capabilities from the database
 		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
@@ -296,7 +296,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 				// If this number is not considered RCS valid or has already an entry with RCS, skip it
                 if (ContactsManager.getInstance().isRcsValidNumber(phoneNumber)
 						&& !ContactsManager.getInstance().isRcsAssociated(phoneNumber)
-						&& ( !ContactsManager.getInstance().isOnlySimAssociated(phoneNumber) || (Build.VERSION.SDK_INT > 10))) { //Build.VERSION_CODES.GINGERBREAD_MR1
+						&& ( !ContactsManager.getInstance().isOnlySimAssociated(phoneNumber) || (Build.VERSION.SDK_INT > 10))) {
 					// This entry is valid and not already has a RCS raw contact, it can be treated
                     // We exclude the number that comes from SIM only contacts, as those cannot be
                     // aggregated to RCS raw contacts only if OS version if gingebread or fewer

@@ -27,7 +27,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Packet;
 /**
  * RTCP compound packet
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpCompoundPacket extends RtcpPacket {
 	public RtcpPacket[] packets;

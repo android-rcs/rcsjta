@@ -39,17 +39,22 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
+import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Originating file transfer session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
-public class OriginatingFileSharingSession extends FileSharingSession implements MsrpEventListener {
+public class OriginatingFileSharingSession extends ImsFileSharingSession implements MsrpEventListener {
 	/**
 	 * Boundary tag
 	 */
@@ -78,6 +83,10 @@ public class OriginatingFileSharingSession extends FileSharingSession implements
 		
 		// Create dialog path
 		createOriginatingDialogPath();
+		
+		// Set contribution ID
+		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
+		setContributionID(id);		
 	}
 
 	/**
@@ -94,14 +103,22 @@ public class OriginatingFileSharingSession extends FileSharingSession implements
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-            
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+            }
+
 			// Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
-	    	
+            if (getImsService().getImsModule().isConnectedToWifiAccess()) {
+                msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
+            }
+
 			// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -207,7 +224,7 @@ public class OriginatingFileSharingSession extends FileSharingSession implements
         MediaDescription mediaDesc = media.elementAt(0);
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");
         String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
         // Create the MSRP client session
@@ -273,6 +290,10 @@ public class OriginatingFileSharingSession extends FileSharingSession implements
     	for(int j=0; j < getListeners().size(); j++) {
     		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent().getUrl());
         }
+
+        // Notify delivery
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DELIVERED);
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 	}
 	
 	/**
@@ -317,38 +338,6 @@ public class OriginatingFileSharingSession extends FileSharingSession implements
 	public void msrpTransferAborted() {
     	if (logger.isActivated()) {
     		logger.info("Data transfer aborted");
-    	}
-	}	
-
-    /**
-     * Data transfer error
-     *
-     * @param msgId Message ID
-     * @param error Error code
-     */
-    public void msrpTransferError(String msgId, String error) {
-		if (isInterrupted()) {
-			return;
-		}
-
-		if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
-    	}
-    	
-        // Close the media session
-        closeMediaSession();
-			
-		// Terminate session
-		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-	   	
-    	// Remove the current session
-    	getImsService().removeSession(this);
-
-    	// Notify listeners
-    	if (!isInterrupted()) {
-        	for(int j=0; j < getListeners().size(); j++) {
-        		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
-	        }
     	}
 	}
 

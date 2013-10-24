@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * Datagram connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface DatagramConnection {
 	/**
@@ -70,16 +70,7 @@ public interface DatagramConnection {
 	 * @throws IOException
 	 */
 	public byte[] receive() throws IOException;
-	
-	/**
-	 * Receive data with a specific buffer size
-	 * 
-	 * @param bufferSize Buffer size 
-	 * @return Byte array
-	 * @throws IOException
-	 */
-	public byte[] receive(int bufferSize) throws IOException;	
-	
+
 	/**
 	 * Returns the local address
 	 * 

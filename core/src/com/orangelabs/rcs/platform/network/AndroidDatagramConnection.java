@@ -23,22 +23,21 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-
 /**
  * Android datagram server connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class AndroidDatagramConnection implements DatagramConnection {
 	/**
 	 * Datagram connection
 	 */
 	private DatagramSocket connection = null;
-	
-	/**
-	 * Internal buffer
-	 */
-	private byte[] buf = new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE];
+
+    /**
+     * Datagram Packet
+     */
+    private DatagramPacket packet = null;
 
     /**
      * Connection timeout
@@ -49,6 +48,8 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	 * Constructor
 	 */
 	public AndroidDatagramConnection() {
+        packet = new DatagramPacket(new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE],
+                DatagramConnection.DEFAULT_DATAGRAM_SIZE);
 	}
 
     /**
@@ -57,6 +58,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
      * @param timeout SO Timeout
      */
     public AndroidDatagramConnection(int timeout) {
+        this();
         this.timeout = timeout;
     }
 
@@ -95,41 +97,24 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	
 	/**
 	 * Receive data with a specific buffer size
-	 * 
-	 * @param bufferSize Buffer size 
+	 *
 	 * @return Byte array
 	 * @throws IOException
 	 */
-	public byte[] receive(int bufferSize) throws IOException {
+	public byte[] receive() throws IOException {
 		if (connection != null) {
-		    // Increase buffer size if necessary
-		    if (bufferSize > buf.length)  {
-		        buf = new byte[bufferSize];
-		    }
+            packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
+            connection.receive(packet);
 
-			DatagramPacket packet = new DatagramPacket(buf, bufferSize);
-			connection.receive(packet);
-			
-			int packetLength = packet.getLength();
-	        byte[] bytes =  packet.getData();
-	        byte[] data = new byte[packetLength];
-	        System.arraycopy(bytes, 0, data, 0, packetLength);
+            int packetLength = packet.getLength();
+            byte[] data = new byte[packetLength];
+            System.arraycopy(packet.getData(), 0, data, 0, packetLength);
 			return data;
 		} else {
 			throw new IOException("Connection not openned");
 		}
 	}
-	
-	/**
-	 * Receive data
-	 * 
-	 * @return Byte array
-	 * @throws IOException
-	 */
-	public byte[] receive() throws IOException {
-		return receive(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
-	}
-	
+
 	/**
 	 * Send data
 	 * 

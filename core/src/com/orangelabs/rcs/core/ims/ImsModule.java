@@ -38,6 +38,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceDispatcher;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityService;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferManager;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceService;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
@@ -114,6 +116,7 @@ public class ImsModule implements SipEventListener {
 		SipManager.TIMEOUT = RcsSettings.getInstance().getSipTransactionTimeout();
 		RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
 		MsrpConnection.MSRP_TRACE_ENABLED = RcsSettings.getInstance().isMediaTraceActivated();
+		HttpTransferManager.HTTP_TRACE_ENABLED = RcsSettings.getInstance().isMediaTraceActivated();
 
 		// Load keystore for certificates
 		try {
@@ -126,7 +129,7 @@ public class ImsModule implements SipEventListener {
 		}
 		
 		// Instanciates the IMS services
-        services = new ImsService[6];
+        services = new ImsService[7];
         
         // Create terms & conditions service
         services[ImsService.TERMS_SERVICE] = new TermsConditionsService(this);
@@ -136,6 +139,9 @@ public class ImsModule implements SipEventListener {
         
         // Create IM service (mandatory)
         services[ImsService.IM_SERVICE] = new InstantMessagingService(this);
+        
+        // Create IP call service (optional)
+        services[ImsService.IPCALL_SERVICE] = new IPCallService(this);
         
         // Create richcall service (optional)
         services[ImsService.RICHCALL_SERVICE] = new RichcallService(this);
@@ -341,7 +347,16 @@ public class ImsModule implements SipEventListener {
     public CapabilityService getCapabilityService() {
     	return (CapabilityService)services[ImsService.CAPABILITY_SERVICE];
     }
-
+    
+    /**
+     * Returns the IP call service
+     * 
+     * @return IP call service
+     */
+    public IPCallService getIPCallService() {
+    	return (IPCallService)services[ImsService.IPCALL_SERVICE];
+    }
+    
     /**
      * Returns the rich call service
      * 
@@ -410,19 +425,27 @@ public class ImsModule implements SipEventListener {
 	 * Abort all sessions
 	 */
 	public void abortAllSessions() {
-		if (logger.isActivated()) {
-			logger.debug("Abort all pending sessions");
-		}
-		ImsService[] services = getImsServices();
-		for(int i=0; i < services.length; i++) {
-			ImsService service = services[i];
-			for (Enumeration<ImsServiceSession> e = service.getSessions(); e.hasMoreElements() ;) {
-				ImsServiceSession session = (ImsServiceSession)e.nextElement();
-				if (logger.isActivated()) {
-					logger.debug("Abort session " + session.getSessionID());
-				}
-				session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-			}
-		}
-	}		
+        try {
+            if (logger.isActivated()) {
+                logger.debug("Abort all pending sessions");
+            }
+            ImsService[] services = getImsServices();
+            for (int i = 0; i < services.length; i++) {
+                ImsService service = services[i];
+                for (Enumeration<ImsServiceSession> e = service.getSessions(); e.hasMoreElements();) {
+                    ImsServiceSession session = (ImsServiceSession) e.nextElement();
+                    if (logger.isActivated()) {
+                        logger.debug("Abort session " + session.getSessionID());
+                    }
+                    session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                }
+            }
+        } catch (Exception e) {
+            // Aborting sessions may fail (e.g. due to ConcurrentModificationException)
+            // we don't want the whole shutdown to be interrupted just because of this
+            if (logger.isActivated()) {
+                logger.error("Aborting all sessions failed", e);
+            }
+        }
+	}
 }

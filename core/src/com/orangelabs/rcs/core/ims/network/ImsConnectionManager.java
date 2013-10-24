@@ -50,11 +50,6 @@ import java.util.Random;
  */
 public class ImsConnectionManager implements Runnable {
 	/**
-	 * Roaming option intent
-	 */
-	public static final String ROAMING_OPTION_INTENT = "com.orangelabs.rcs.ROAMING_OPTION";
-	
-	/**
      * IMS module
      */
     private ImsModule imsModule;
@@ -145,9 +140,6 @@ public class ImsConnectionManager implements Runnable {
 
         // Battery management
         AndroidFactory.getApplicationContext().registerReceiver(batteryLevelListener, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)); 
-
-        // Roaming option management
-        AndroidFactory.getApplicationContext().registerReceiver(roamingOptionListener, new IntentFilter(ROAMING_OPTION_INTENT)); 
 	}
 	
 	/**
@@ -237,13 +229,6 @@ public class ImsConnectionManager implements Runnable {
             // Nothing to do
         }
 
-        // Unregister roaming option listener
-        try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(roamingOptionListener);
-        } catch (IllegalArgumentException e) {
-            // Nothing to do
-        }
-
         // Unregister network state listener
     	try {
     		AndroidFactory.getApplicationContext().unregisterReceiver(networkStateListener);
@@ -309,16 +294,18 @@ public class ImsConnectionManager implements Runnable {
 			return;
 		}
 
-        // Check if SIM account has changed
-        String lastUserAccount = LauncherUtils.getLastUserAccount(AndroidFactory.getApplicationContext());
-        String currentUserAccount = LauncherUtils.getCurrentUserAccount(AndroidFactory.getApplicationContext());
-        if (lastUserAccount != null) {
-            if ((currentUserAccount == null) || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
-                imsModule.getCoreListener().handleSimHasChanged();
-                return;
-            }
-        }
-
+        // Check if SIM account has changed (i.e. hot SIM swap)
+		if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+	        String lastUserAccount = LauncherUtils.getLastUserAccount(AndroidFactory.getApplicationContext());
+	        String currentUserAccount = LauncherUtils.getCurrentUserAccount(AndroidFactory.getApplicationContext());
+	        if (lastUserAccount != null) {
+	            if ((currentUserAccount == null) || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
+	                imsModule.getCoreListener().handleSimHasChanged();
+	                return;
+	            }
+	        }
+		}
+		
 		// Get the current local IP address
 		String localIpAddr = NetworkFactory.getFactory().getLocalIpAddress(networkInfo.getType());
 		if (logger.isActivated()) {
@@ -487,7 +474,7 @@ public class ImsConnectionManager implements Runnable {
 			imsPollingThread.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
-				logger.error("Intrenal exception while starting IMS polling thread", e);
+				logger.error("Internal exception while starting IMS polling thread", e);
 			}
 		}
 	}
@@ -513,7 +500,7 @@ public class ImsConnectionManager implements Runnable {
 			imsPollingThread = null;
 		} catch(Exception e) {
 			if (logger.isActivated()) {
-				logger.error("Intrenal exception while stopping IMS polling thread", e);
+				logger.error("Internal exception while stopping IMS polling thread", e);
 			}
 		}
 		
@@ -550,15 +537,21 @@ public class ImsConnectionManager implements Runnable {
 
     				// Try to register to IMS
     	    		if (currentNetworkInterface.register()) {
-    	            	if (logger.isActivated()) {
-    	            		logger.debug("Registered to the IMS with success: start IMS services");
-    	            	}
-    	            	
-    	            	// Start IMS services
-        	        	imsModule.startImsServices();
-        	        	
-        	        	// Reset number of failures
-        	        	nbFailures = 0;
+                        // InterruptedException thrown by stopImsConnection() may be caught by one
+                        // of the methods used in currentNetworkInterface.register() above
+                        if (imsPollingThreadID != Thread.currentThread().getId()) {
+                            logger.debug("IMS connection polling thread race condition");
+                            break;
+                        } else {
+                            if (logger.isActivated()) {
+                                logger.debug("Registered to the IMS with success: start IMS services");
+                            }
+                            // Start IMS services
+                            imsModule.startImsServices();
+    
+                            // Reset number of failures
+                            nbFailures = 0;
+                        }
     	    		} else {
     	            	if (logger.isActivated()) {
     	            		logger.debug("Can't register to the IMS");
@@ -573,7 +566,7 @@ public class ImsConnectionManager implements Runnable {
     	        	}
     	        	imsModule.checkImsServices();
     			}
-			} catch(Exception e) {
+            } catch (Exception e) {
 				if (logger.isActivated()) {
 		    		logger.error("Internal exception", e);
 		    	}
@@ -642,17 +635,6 @@ public class ImsConnectionManager implements Runnable {
             } else {
                 disconnectedByBattery = false;
             }
-        }
-    };
-
-    /**
-     * Roaming option listener
-     */
-    private BroadcastReceiver roamingOptionListener = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Reconnect with a connection event
-            connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
         }
     };
 }

@@ -29,7 +29,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Resource list parser
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ResourceListParser extends DefaultHandler {
 	

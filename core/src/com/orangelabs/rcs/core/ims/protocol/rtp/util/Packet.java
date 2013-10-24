@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.util;
 /**
  * Generic packet
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class Packet {
 	/**

@@ -10,19 +10,19 @@ import org.gsma.joyn.ft.FileTransferServiceConfiguration;
  * File transfer service API
  */
 interface IFileTransferService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 
 	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
 
-    FileTransferServiceConfiguration getConfiguration();
+	FileTransferServiceConfiguration getConfiguration();
 
 	List<IBinder> getFileTransfers();
 	
 	IFileTransfer getFileTransfer(in String transferId);
 
-	IFileTransfer transferFile(in String contact, in String filename, in IFileTransferListener listener);
+	IFileTransfer transferFile(in String contact, in String filename, in String fileicon, in IFileTransferListener listener);
 	
 	void addNewFileTransferListener(in INewFileTransferListener listener);
 

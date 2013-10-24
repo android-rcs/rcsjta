@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * GIBA or early-IMS registration procedure
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class GibaRegistrationProcedure extends RegistrationProcedure {
 	/**

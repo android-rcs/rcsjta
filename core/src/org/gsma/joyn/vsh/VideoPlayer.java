@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.vsh;
 
 import java.util.HashSet;
@@ -86,7 +103,14 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	public abstract VideoCodec[] getSupportedCodecs();
 	
 	/**
-	 * Returns the list of event listeners
+	 * Returns the current codec
+	 * 
+	 * @return Codec
+	 */
+	public abstract VideoCodec getCodec();
+
+	/**
+	 * Returns the list of player event listeners
 	 * 
 	 * @return Listeners
 	 */
@@ -95,7 +119,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	}
 
 	/**
-	 * Adds a listener on video player events
+	 * Adds a listener on player events
 	 * 
 	 * @param listener Listener
 	 */
@@ -104,7 +128,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	}
 
 	/**
-	 * Removes a listener from video player
+	 * Removes a listener from player events
 	 * 
 	 * @param listener Listener
 	 */
@@ -113,7 +137,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	}
 	
 	/**
-	 * Removes all listeners from video player
+	 * Removes all listeners from player events
 	 */
 	public void removeAllEventListeners() {
 		listeners.clear();

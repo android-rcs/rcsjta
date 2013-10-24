@@ -431,7 +431,7 @@ public class RegistrationManager extends PeriodicRefresher {
     	}        	
         if (logger.isActivated()) {
             logger.debug("NAT traversal detection: " + networkInterface.isBehindNat());
-        }        
+        }
 		
         // Read the security header
     	registrationProcedure.readSecurityHeader(resp);

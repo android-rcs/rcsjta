@@ -30,7 +30,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * PDIF parser
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RlmiParser extends DefaultHandler {
 	/* RLMI SAMPLE:

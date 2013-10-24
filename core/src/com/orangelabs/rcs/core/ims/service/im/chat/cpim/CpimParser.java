@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.StringUtils;
 /**
  * CPIM parser (see RFC3862)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class CpimParser {
 	/**
@@ -94,8 +94,7 @@ public class CpimParser {
 		try {
 			// Read message headers
 			int begin = 0;
-			int end = data.indexOf(DOUBLE_CRLF);
-			end = data.indexOf(DOUBLE_CRLF, begin);
+			int end = data.indexOf(DOUBLE_CRLF, begin);
 			String block2 = data.substring(begin, end);
 			StringTokenizer lines = new StringTokenizer(block2, CRLF); 
 			Hashtable<String, String> headers = new Hashtable<String, String>();

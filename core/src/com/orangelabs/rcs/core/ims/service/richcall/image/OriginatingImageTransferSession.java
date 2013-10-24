@@ -43,13 +43,15 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
+import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Originating content sharing session (transfer)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class OriginatingImageTransferSession extends ImageTransferSession implements MsrpEventListener {
 	/**
@@ -96,10 +98,15 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-	    	
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4	    	
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+            }
+
 			// Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
@@ -113,7 +120,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	            "s=-" + SipUtils.CRLF +
 				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " TCP/MSRP *" + SipUtils.CRLF +
+	            "m=message " + localMsrpPort + " " + msrpMgr.getLocalSocketProtocol() + " *" + SipUtils.CRLF +
 	            "a=path:" + msrpMgr.getLocalMsrpPath() + SipUtils.CRLF +
 	            "a=setup:" + localSetup + SipUtils.CRLF +
 	    		"a=accept-types:" + getContent().getEncoding() + SipUtils.CRLF +
@@ -211,7 +218,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         MediaDescription mediaDesc = media.elementAt(0);
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");
         String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
         // Create the MSRP session
@@ -345,7 +352,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-    	if (isInterrupted()) {
+        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
 			return;
 		}
 
@@ -358,6 +365,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
 		// Remove the current session
     	getImsService().removeSession(this);

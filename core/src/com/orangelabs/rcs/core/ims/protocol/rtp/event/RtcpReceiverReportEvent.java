@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpReceiverReportPacket;
 /**
  * RTCP receiver report event
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpReceiverReportEvent extends RtcpEvent {
 

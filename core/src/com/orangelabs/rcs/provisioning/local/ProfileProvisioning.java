@@ -132,6 +132,15 @@ public class ProfileProvisioning extends Activity {
 		txt = (EditText)this.findViewById(R.id.XdmServerPassword);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.XDM_PASSWORD));
         
+        txt = (EditText)this.findViewById(R.id.FtHttpServerAddr);
+        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.FT_HTTP_SERVER));
+
+		txt = (EditText)this.findViewById(R.id.FtHttpServerLogin);
+        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.FT_HTTP_LOGIN));
+
+		txt = (EditText)this.findViewById(R.id.FtHttpServerPassword);
+        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.FT_HTTP_PASSWORD));
+        
 		txt = (EditText)this.findViewById(R.id.ImConferenceUri);
 		txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.IM_CONF_URI));
 
@@ -156,9 +165,21 @@ public class ProfileProvisioning extends Activity {
         box = (CheckBox)findViewById(R.id.file_transfer);
         box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER)));
 
+        box = (CheckBox)findViewById(R.id.file_transfer_http);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP)));
+
         box = (CheckBox)findViewById(R.id.im);
         box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_IM_SESSION)));
+       
+        box = (CheckBox)findViewById(R.id.im_group);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION)));
         
+        box = (CheckBox)findViewById(R.id.ip_voice_call);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_IP_VOICE_CALL)));
+        
+        box = (CheckBox)findViewById(R.id.ip_video_call);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL)));
+
         box = (CheckBox)findViewById(R.id.cs_video);
         box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_CS_VIDEO)));
 
@@ -167,6 +188,21 @@ public class ProfileProvisioning extends Activity {
 
         box = (CheckBox)findViewById(R.id.social_presence);
         box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE)));
+        
+        box = (CheckBox)findViewById(R.id.geolocation_push);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH)));
+        
+        box = (CheckBox)findViewById(R.id.file_transfer_thumbnail);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL)));	
+
+        box = (CheckBox)findViewById(R.id.file_transfer_sf);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF)));	
+
+        box = (CheckBox)findViewById(R.id.group_chat_sf);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF)));
+        
+        box = (CheckBox)findViewById(R.id.sip_automata);
+        box.setChecked(Boolean.parseBoolean(RcsSettings.getInstance().readParameter(RcsSettingsData.CAPABILITY_SIP_AUTOMATA)));
 	}
 
     /**
@@ -228,6 +264,16 @@ public class ProfileProvisioning extends Activity {
         txt = (EditText)this.findViewById(R.id.XdmServerPassword);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.XDM_PASSWORD, txt.getText().toString());
 
+        txt = (EditText)this.findViewById(R.id.FtHttpServerAddr);
+		RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_HTTP_SERVER, txt.getText().toString());
+
+        txt = (EditText)this.findViewById(R.id.FtHttpServerLogin);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_HTTP_LOGIN, txt.getText().toString());
+
+        txt = (EditText)this.findViewById(R.id.FtHttpServerPassword);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, txt.getText().toString());
+
+        
         txt = (EditText)this.findViewById(R.id.ImConferenceUri);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.IM_CONF_URI, txt.getText().toString());
 
@@ -253,8 +299,20 @@ public class ProfileProvisioning extends Activity {
         box = (CheckBox)findViewById(R.id.file_transfer);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER, Boolean.toString(box.isChecked()));
 
+        box = (CheckBox)findViewById(R.id.file_transfer_http);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, Boolean.toString(box.isChecked()));
+
         box = (CheckBox)findViewById(R.id.im);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_IM_SESSION, Boolean.toString(box.isChecked()));
+
+        box = (CheckBox)findViewById(R.id.im_group);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, Boolean.toString(box.isChecked()));
+        
+        box = (CheckBox)findViewById(R.id.ip_voice_call);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_IP_VOICE_CALL, Boolean.toString(box.isChecked()));
+        
+        box = (CheckBox)findViewById(R.id.ip_video_call);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, Boolean.toString(box.isChecked()));
         
         box = (CheckBox)findViewById(R.id.cs_video);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_CS_VIDEO, Boolean.toString(box.isChecked()));
@@ -265,6 +323,21 @@ public class ProfileProvisioning extends Activity {
         box = (CheckBox)findViewById(R.id.social_presence);
         RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, Boolean.toString(box.isChecked()));
 
+        box = (CheckBox)findViewById(R.id.geolocation_push);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH, Boolean.toString(box.isChecked()));
+        
+        box = (CheckBox)findViewById(R.id.file_transfer_thumbnail);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, Boolean.toString(box.isChecked()));
+        
+        box = (CheckBox)findViewById(R.id.file_transfer_sf);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, Boolean.toString(box.isChecked()));
+
+        box = (CheckBox)findViewById(R.id.group_chat_sf);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, Boolean.toString(box.isChecked()));
+
+        box = (CheckBox)findViewById(R.id.sip_automata);
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.CAPABILITY_SIP_AUTOMATA, Boolean.toString(box.isChecked()));
+        
         Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();    	
     }
     
@@ -288,7 +361,7 @@ public class ProfileProvisioning extends Activity {
         textEdit.setText(RcsSettings.getInstance().getCountryCode());
 
         final String[] platforms = {
-        		"NSN Lannion", "NSN Brune", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
+                "NSN Brune", "NSN Lannion", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
                 "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini", "JibeNet"
         };
         Spinner spinner = (Spinner)view.findViewById(R.id.ims);
@@ -326,19 +399,7 @@ public class ProfileProvisioning extends Activity {
         			String confUri = "";
         			String enduserConfirmUri = "";
                     switch(index) {
-	                	case 0: // NSN Lannion
-	            			homeDomain = "rcs.lannion.com";
-	            			sipUri = number + "@" + homeDomain;
-	        				privateSipUri = sipUri;
-	            			imsPwd = "alu2012";
-	            			imsRealm = "rcs.lannion.com";
-	            			imsAddrForMobile = "80.12.197.184";
-	            			imsPortForMobile = 5080;
-	            			imsAddrForWifi = "80.12.197.184";
-	            			imsPortForWifi = 5080;
-	            			confUri = "sip:Conference-Factory@" + homeDomain;
-	            			break;
-                    	case 1: // NSN Brune
+                    	case 0: // NSN Brune
 	            			homeDomain = "rcs.brune.com";
             				sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
@@ -350,20 +411,32 @@ public class ProfileProvisioning extends Activity {
 	            			imsPortForWifi = 5060;
 	            			confUri = "sip:Conference-Factory@" + homeDomain;
 	            			break;
+                    	case 1: // NSN Lannion
+	            			homeDomain = "rcs.lannion.com";
+	            			sipUri = number + "@" + homeDomain;
+            				privateSipUri = sipUri;
+	            			imsPwd = "alu2012";
+	            			imsRealm = "rcs.lannion.com";
+	            			imsAddrForMobile = "80.12.197.184";
+	            			imsPortForMobile = 5080;
+	            			imsAddrForWifi = "80.12.197.184";
+	            			imsPortForWifi = 5080;
+	            			confUri = "sip:Conference-Factory@" + homeDomain;
+	            			break;
                         case 2: // Margaux (albatros)
                             homeDomain = "sip.mobistar.com";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
                             imsPwd = "imt30imt30";
 	            			imsRealm = "sip.mobistar.com";
-	            			imsAddrForMobile = "sip.mobistar.com";
-	            			imsPortForMobile = 5060;
-	            			imsAddrForWifi = "sip.mobistar.com";
-	            			imsPortForWifi = 5060;
+	            			imsAddrForMobile = "172.20.84.114";
+	            			imsPortForMobile = 5080;
+	            			imsAddrForWifi = "172.20.84.114";
+	            			imsPortForWifi = 5080;
 	            			confUri  = "sip:Conference-Factory@" + homeDomain;
-	            			ftHttpServerAddr = "";
-	            			ftHttpServerLogin = "";
-	            			ftHttpServerPwd = "";
+	            			ftHttpServerAddr = "https://ftcontentserver.rcs.mnc001.mcc208.pub.3gppnetwork.org/rcse-hcs/upload";
+	            			ftHttpServerLogin = sipUri;
+	            			ftHttpServerPwd = "imt30imt30";
                             break;
                         case 3: // Margaux (blackbird)
                             homeDomain = "rcs.lannion-e.com";
@@ -376,7 +449,7 @@ public class ProfileProvisioning extends Activity {
                             imsAddrForWifi = "172.20.84.114";
                             imsPortForWifi = 5080;
                             confUri  = "sip:Conference-Factory@" + homeDomain;
-                            ftHttpServerAddr = "https://172.20.65.52/rcse-hcs/upload";
+                            ftHttpServerAddr = "https://ftcontentserver.rcs.mnc001.mcc208.pub.3gppnetwork.org/rcse-hcs/upload";
                             ftHttpServerLogin = sipUri;
                             ftHttpServerPwd = "imt30imt30";
                             break;

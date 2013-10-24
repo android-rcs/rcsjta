@@ -37,7 +37,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Restart group chat session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RestartGroupChatSession extends GroupChatSession {
 	/**
@@ -88,10 +88,15 @@ public class RestartGroupChatSession extends GroupChatSession {
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-            
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
+
 	    	// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();

@@ -20,7 +20,8 @@ package com.orangelabs.rcs.core.ims.network.sip;
 /**
  * Feature tags
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
+ * @author yplo6403
  */
 public class FeatureTags {
 	/**
@@ -47,7 +48,6 @@ public class FeatureTags {
 	 * 3GPP location share feature tag
 	 */
 	public final static String FEATURE_3GPP_LOCATION_SHARE = "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush\"";
-
 	
 	/**
 	 * RCS-e feature tag prefix
@@ -95,7 +95,45 @@ public class FeatureTags {
 	public final static String FEATURE_RCSE_FT_THUMBNAIL = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftthumb";
 
 	/**
+	 * RCS-e file transfer S&F feature tag
+	 */
+	public final static String FEATURE_RCSE_FT_SF = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftstandfw";
+
+	/**
+	 * RCS-e group chat S&F feature tag
+	 */
+	public final static String FEATURE_RCSE_GC_SF = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fullsfgroupchat";
+	
+	/**
+	 * 3GPP IP call feature tag
+	 */
+	public final static String FEATURE_3GPP_IP_VOICE_CALL = "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"";
+	
+	/**
+	 * RCS-e IP call feature tag
+	 */
+	public final static String FEATURE_RCSE_IP_VOICE_CALL = "+g.gsma.rcs.ipcall";
+	
+	/**
+	 * RCS IP video call feature tag
+	 */
+	public final static String FEATURE_RCSE_IP_VIDEO_CALL = "video";
+
+	/**
 	 * RCS-e extension feature tag prefix
 	 */
 	public final static String FEATURE_RCSE_EXTENSION = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse";
+	
+	/**
+	 * SIP Automata feature tag
+	 * 
+	 * <pre>
+	 * @see RFC 3840 "Indicating User Agent Capabilities in the Session Initiation Protocol (SIP)"
+	 * 
+	 * The automata tag indicates whether the UA represents an automata (such as a voicemail server, 
+	 * conference server, IVR, or recording device) or a human.
+	 * </pre>
+	 */
+	public final static String FEATURE_SIP_AUTOMATA = "automata";
+
 }

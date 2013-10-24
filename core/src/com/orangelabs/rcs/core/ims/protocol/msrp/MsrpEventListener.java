@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 /**
  * MSRP event listener
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  * @author Deutsche Telekom AG
  */
 public interface MsrpEventListener {

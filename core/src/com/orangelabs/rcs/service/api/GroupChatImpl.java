@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.chat.GroupChat;
 import org.gsma.joyn.chat.IGroupChat;
 import org.gsma.joyn.chat.IGroupChatListener;
+import org.gsma.joyn.ft.IFileTransfer;
+import org.gsma.joyn.ft.IFileTransferListener;
 
 import android.os.RemoteCallbackList;
 
@@ -23,7 +26,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -156,7 +159,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 
 		// Update rich messaging history
-		RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+		RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
 		
         // Reject invitation
 		session.rejectSession();
@@ -237,8 +240,33 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 		return msgId;
 	}
-
+	
 	/**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Unique message ID or null in case of error
+     */
+    public String sendGeoloc(Geoloc geoloc) {
+    	// TODO
+    	return null;
+    }	
+
+    /**
+     * Transfers a file to participants. The parameter filename contains the complete
+     * path of the file to be transferred.
+     * 
+     * @param filename Filename to transfer
+     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param listener File transfer event listener
+     * @return File transfer
+     */
+    public IFileTransfer sendFile(String filename, String fileicon, IFileTransferListener listener) {
+    	// TODO
+    	return null;
+    }
+
+    /**
 	 * Sends a “is-composing” event. The status is set to true when typing
 	 * a message, else it is set to false.
 	 * 
@@ -290,8 +318,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 
 			// Update rich messaging history
-			RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.STARTED);
-			RichMessaging.getInstance().updateGroupChatRejoinId(getChatId(), session.getImSessionIdentity());
+			RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.STARTED);
+			RichMessagingHistory.getInstance().updateGroupChatRejoinId(getChatId(), session.getImSessionIdentity());
 			
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -321,12 +349,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	
 			// Update rich messaging history
 			if (reason == ImsServiceSession.TERMINATION_BY_USER) {
-				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.CLOSED_BY_USER);
+				RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.CLOSED_BY_USER);
 			} else {
 				if (session.getDialogPath().isSessionCancelled()) {
-					RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+					RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
 				} else {
-					RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+					RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
 				}
 			}
 			
@@ -359,9 +387,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	
 			// Update rich messaging history
 			if (session.getDialogPath().isSessionCancelled()) {
-				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+				RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
 			} else {
-				RichMessaging.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+				RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
 			}
 			
 	  		// Notify event listeners
@@ -394,7 +422,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			
 			// Update rich messaging history
-			RichMessaging.getInstance().addGroupChatMessage(session.getContributionID(),
+			RichMessagingHistory.getInstance().addGroupChatMessage(session.getContributionID(),
 					message, ChatLog.Message.Direction.INCOMING);
 			
 	  		// Notify event listeners
@@ -439,7 +467,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    			// These errors are not logged
 	    			break;
 		    	default:
-					RichMessaging.getInstance().updateGroupChatStatus(session.getContributionID(), GroupChat.State.FAILED);
+					RichMessagingHistory.getInstance().updateGroupChatStatus(session.getContributionID(), GroupChat.State.FAILED);
 		    		break;
 	    	}
 	    	
@@ -522,21 +550,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            try {
 	            	if (state.equals(User.STATE_CONNECTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
+	        			RichMessagingHistory.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantJoined(contact, contactDisplayname);
 	            	} else
 	            	if (state.equals(User.STATE_DISCONNECTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
+	        			RichMessagingHistory.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contact);
 	            	} else
 	            	if (state.equals(User.STATE_DEPARTED)) {
 	        			// Update rich messaging history
-	        			RichMessaging.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
+	        			RichMessagingHistory.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
 
 	        	  		// Notify event listener
 	        			listeners.getBroadcastItem(i).onParticipantLeft(contact);
@@ -564,7 +592,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
         	
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();

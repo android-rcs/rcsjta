@@ -1,6 +1,7 @@
 package org.gsma.joyn.chat;
 
 import org.gsma.joyn.chat.IChatListener;
+import org.gsma.joyn.chat.Geoloc;
 
 /**
  * Chat interface
@@ -17,4 +18,6 @@ interface IChat {
 	void addEventListener(in IChatListener listener);
 	
 	void removeEventListener(in IChatListener listener);
+
+	String sendGeoloc(in Geoloc geoloc);
 }

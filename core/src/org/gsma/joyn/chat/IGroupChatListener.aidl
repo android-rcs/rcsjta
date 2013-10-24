@@ -1,6 +1,7 @@
 package org.gsma.joyn.chat;
 
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.GeolocMessage;
 
 /**
  * Group chat event listener
@@ -13,7 +14,7 @@ interface IGroupChatListener {
 	void onSessionError(in int reason);
 		
 	void onNewMessage(in ChatMessage message);
-	
+
 	void onReportMessageDelivered(in String msgId);
 
 	void onReportMessageDisplayed(in String msgId);

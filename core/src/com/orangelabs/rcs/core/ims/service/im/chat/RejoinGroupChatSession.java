@@ -30,7 +30,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -82,10 +82,15 @@ public class RejoinGroupChatSession extends GroupChatSession {
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-            
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
+
 	    	// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -165,7 +170,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
      */
     public void handle404SessionNotFound(SipResponse resp) {
 		// Rejoin session has failed, we update the database with status terminated by remote
-        RichMessaging.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
+        RichMessagingHistory.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
 
 		// Notify listener
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));

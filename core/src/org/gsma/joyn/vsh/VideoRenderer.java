@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.vsh;
 
 import java.util.HashSet;
@@ -14,7 +31,7 @@ import java.util.Set;
  */
 public abstract class VideoRenderer extends IVideoRenderer.Stub {
     /**
-     * Video player error
+     * Video renderer error
      */
     public static class Error {
     	/**
@@ -73,6 +90,12 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	 */
 	public abstract int getLocalRtpPort();
 	
+	/**
+	 * Returns the current codec
+	 * 
+	 * @return Codec
+	 */
+	public abstract VideoCodec getCodec();
 	
 	/**
 	 * Returns the list of codecs supported by the renderer
@@ -82,7 +105,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	public abstract VideoCodec[] getSupportedCodecs();
 	
 	/**
-	 * Returns the list of event listeners
+	 * Returns the list of renderer event listeners
 	 * 
 	 * @return Listeners
 	 */
@@ -91,7 +114,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	}
 	
 	/**
-	 * Adds a listener on video renderer events
+	 * Adds a listener on renderer events
 	 * 
 	 * @param listener Listener
 	 */
@@ -100,7 +123,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	}
 
 	/**
-	 * Removes a listener from video renderer
+	 * Removes a listener from renderer events
 	 * 
 	 * @param listener Listener
 	 */
@@ -109,7 +132,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	}	
 
 	/**
-	 * Removes all listeners from video renderer
+	 * Removes all listeners from renderer events
 	 */
 	public void removeAllEventListeners() {
 		listeners.clear();

@@ -26,7 +26,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.sharing.RichCall;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -187,7 +187,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich call history
-		RichCall.getInstance().addImageSharing(number, session.getSessionID(),
+		RichCallHistory.getInstance().addImageSharing(number, session.getSessionID(),
 				ImageSharing.Direction.INCOMING,
 				session.getContent(),
 				ImageSharing.State.INVITED);
@@ -263,7 +263,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, false);
 
 			// Update rich call history
-			RichCall.getInstance().addImageSharing(contact, session.getSessionID(),
+			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
 					ImageSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			ImageSharing.State.INITIATED);

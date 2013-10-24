@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.IdGenerator;
 /**
  * Content sharing session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class ContentSharingSession extends ImsServiceSession {
 	/**
@@ -95,6 +95,6 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * @return String
 	 */
 	public String getFileTransferId() {
-		return "Ft" + IdGenerator.getIdentifier();
+		return "CSh" + IdGenerator.getIdentifier().replace('_', '-');
 	}
 }

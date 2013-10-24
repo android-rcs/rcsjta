@@ -49,7 +49,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Conference event subscribe manager
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	/**

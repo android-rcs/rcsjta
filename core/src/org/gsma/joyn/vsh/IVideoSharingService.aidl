@@ -11,7 +11,7 @@ import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
  * Video sharing service API
  */
 interface IVideoSharingService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 

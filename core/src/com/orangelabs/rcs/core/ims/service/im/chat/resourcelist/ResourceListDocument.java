@@ -22,7 +22,7 @@ import java.util.Vector;
 /**
  * Resource-list document
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ResourceListDocument {
 	private Vector<String> entries = new Vector<String>();

@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Watcher info document
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class WatcherInfoDocument {
 	private String resource;

@@ -12,31 +12,31 @@ import org.gsma.joyn.chat.ChatServiceConfiguration;
  * Chat service API
  */
 interface IChatService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
     
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 
 	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
 
-    ChatServiceConfiguration getConfiguration();
+	ChatServiceConfiguration getConfiguration();
     
-    IChat openSingleChat(in String contact, in IChatListener listener);
+	IChat openSingleChat(in String contact, in IChatListener listener);
 
-    IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
+	IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
     
-    IGroupChat rejoinGroupChat(in String chatId);
+	IGroupChat rejoinGroupChat(in String chatId);
     
-    IGroupChat restartGroupChat(in String chatId);
+	IGroupChat restartGroupChat(in String chatId);
     
-    void addNewChatListener(in INewChatListener listener);
+	void addNewChatListener(in INewChatListener listener);
     
-    void removeNewChatListener(in INewChatListener listener);
+	void removeNewChatListener(in INewChatListener listener);
     
-    IChat getChat(in String contact);
+	IChat getChat(in String contact);
 
-    List<IBinder> getChats();
+	List<IBinder> getChats();
 
-    List<IBinder> getGroupChats();
+	List<IBinder> getGroupChats();
     
-    IGroupChat getGroupChat(in String chatId);
+	IGroupChat getGroupChat(in String chatId);
 }

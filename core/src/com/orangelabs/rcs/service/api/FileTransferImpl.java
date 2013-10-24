@@ -29,7 +29,10 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -117,35 +120,75 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     }
 
 	/**
+     * Returns the complete filename including the path of the file icon
+     *
+     * @return Filename
+     */
+	public String getFileIconName() {
+		// TODO
+		return null;
+	}
+
+	/**
 	 * Returns the state of the file transfer
 	 * 
 	 * @return State 
 	 */
 	public int getState() {
 		int result = FileTransfer.State.UNKNOWN;
-		SipDialogPath dialogPath = session.getDialogPath();
-		if (dialogPath != null) {
-			if (dialogPath.isSessionCancelled()) {
+		if (session instanceof HttpFileTransferSession) {
+			// HTTP transfer
+			int state = ((HttpFileTransferSession)session).getSessionState(); 
+			if (state == HttpTransferState.CANCELLED) {
 				// Session canceled
 				result = FileTransfer.State.ABORTED;
 			} else
-			if (dialogPath.isSessionEstablished()) {
+			if (state == HttpTransferState.ESTABLISHED) {
 				// Session started
 				result = FileTransfer.State.STARTED;
 			} else
-			if (dialogPath.isSessionTerminated()) {
+			if (state == HttpTransferState.TERMINATED) {
 				// Session terminated
 				if (session.isFileTransfered()) {
 					result = FileTransfer.State.TRANSFERRED;
 				} else {
 					result = FileTransfer.State.ABORTED;
 				}
-			} else {
+			} else
+			if (state == HttpTransferState.PENDING) {
 				// Session pending
-				if (session instanceof OriginatingFileSharingSession) {
+				if (session instanceof OriginatingHttpFileSharingSession) {
 					result = FileTransfer.State.INITIATED;
 				} else {
 					result = FileTransfer.State.INVITED;
+				}
+			}
+		} else {
+			// MSRP transfer
+			SipDialogPath dialogPath = session.getDialogPath();
+			if (dialogPath != null) {
+				if (dialogPath.isSessionCancelled()) {
+					// Session canceled
+					result = FileTransfer.State.ABORTED;
+				} else
+				if (dialogPath.isSessionEstablished()) {
+					// Session started
+					result = FileTransfer.State.STARTED;
+				} else
+				if (dialogPath.isSessionTerminated()) {
+					// Session terminated
+					if (session.isFileTransfered()) {
+						result = FileTransfer.State.TRANSFERRED;
+					} else {
+						result = FileTransfer.State.ABORTED;
+					}
+				} else {
+					// Session pending
+					if (session instanceof OriginatingFileSharingSession) {
+						result = FileTransfer.State.INITIATED;
+					} else {
+						result = FileTransfer.State.INVITED;
+					}
 				}
 			}
 		}
@@ -187,7 +230,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		}
 		
 		// Update rich messaging history
-  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 
   		// Reject invitation
 		session.rejectSession(603);
@@ -226,7 +269,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	}
 	
 	/**
-	 * Removes a listener from file transfer
+	 * Removes a listener from file transfer events
 	 * 
 	 * @param listener Listener
 	 */
@@ -252,7 +295,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -281,7 +324,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -316,7 +359,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	  		} else {
 				// Update rich messaging history
-		  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+		  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 		
 		  		// Notify event listeners
 				final int N = listeners.beginBroadcast();
@@ -354,7 +397,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-	  		RichMessaging.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
+	  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -402,7 +445,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 			
 			// Update rich messaging history
-	  		RichMessaging.getInstance().updateFileTransferProgress(session.getSessionID(), currentSize, totalSize);
+	  		RichMessagingHistory.getInstance().updateFileTransferProgress(session.getSessionID(), currentSize, totalSize);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -431,7 +474,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateFileTransferUrl(session.getSessionID(), filename);
+			RichMessagingHistory.getInstance().updateFileTransferUrl(session.getSessionID(), filename);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -444,7 +487,14 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	            	}
 	            }
 	        }
-	        listeners.finishBroadcast();		
+	        listeners.finishBroadcast();
 	    }	
+    }
+    
+    /**
+     * File transfer has been paused
+     */
+    public void handleFileUploadPaused() {
+    	// TODO
     }
 }

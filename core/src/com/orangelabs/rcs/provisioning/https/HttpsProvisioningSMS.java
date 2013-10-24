@@ -1,0 +1,178 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+package com.orangelabs.rcs.provisioning.https;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Random;
+
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HttpContext;
+
+import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.telephony.SmsMessage;
+
+/**
+ * HTTPS provisioning - SMS management
+ *
+ * @author Orange
+ */
+public class HttpsProvisioningSMS {
+    /**
+     * HttpsProvisioningManager manages http and SMS reception to load provisioning from network
+     */
+    HttpsProvisioningManager manager;
+
+    /**
+     * SMS provisioning receiver
+     */
+    private BroadcastReceiver smsProvisioningReceiver = null;
+
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    /**
+     * Constructor
+     *
+     * @param httpsProvisioningManager
+     */
+    public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager) {
+        manager = httpsProvisioningManager;
+    }
+
+    /**
+     * Generate an SMS port for provisioning
+     * 
+     * @return SMS port
+     */
+    protected static String generateSmsPortForProvisioning() {
+        int minPort = 10000;
+        int maxPort = 40000;
+        return String.valueOf((new Random()).nextInt(maxPort - minPort) + minPort);
+    }
+
+    /**
+     * Register the SMS provisioning receiver
+     * 
+     * @param smsPort SMS port
+     * @param requestUri Request URI
+     * @param client Instance of {@link DefaultHttpClient}
+     * @param localContext Instance of {@link HttpContext}
+     */
+    protected void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
+            final DefaultHttpClient client, final HttpContext localContext) {
+        // Unregister previous one
+        unregisterSmsProvisioningReceiver();
+
+        if (logger.isActivated()) {
+            logger.debug("Registering SMS provider receiver in port: " + smsPort);
+        }
+
+        // Instantiate the receiver
+        smsProvisioningReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, final Intent intent) {
+                if (logger.isActivated()) {
+                    logger.debug("SMS provider receiver - Received broadcast: " + intent.toString());
+                }
+
+                if (HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(intent.getAction())) {
+                    if (logger.isActivated()) {
+                        logger.debug("Receiving binary SMS");
+                    }
+
+                    Bundle bundle = intent.getExtras();
+                    if (bundle != null) {
+                        Object[] pdus = (Object[]) bundle.get("pdus");
+                        SmsMessage[] msgs = new SmsMessage[pdus.length];
+                        byte[] data = null;
+                        byte[] smsBuffer = new byte[0];
+                        byte[] smsBufferTemp = null;
+
+                        for (int i = 0; i < msgs.length; i++) {
+                            msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+
+                            data = msgs[i].getUserData();
+                            smsBufferTemp = new byte[smsBuffer.length + data.length];
+                            System.arraycopy(smsBuffer, 0, smsBufferTemp, 0, smsBuffer.length);
+                            System.arraycopy(data, 0, smsBufferTemp, smsBuffer.length, data.length);
+                            smsBuffer = smsBufferTemp;
+                        }
+
+                        try {
+                            final String smsOTP = new String(smsBuffer, "UCS2");
+
+                            if (logger.isActivated()) {
+                                logger.debug("Binary SMS OTP = " + smsOTP);
+                            }
+
+                            Thread t = new Thread() {
+                                public void run() {
+                                    manager.updateConfigWithOTP(smsOTP, requestUri, client,
+                                            localContext);
+                                }
+                            };
+                            t.start();
+
+                            // Unregister SMS provisioning receiver
+                            unregisterSmsProvisioningReceiver();
+                        } catch (UnsupportedEncodingException e) {
+                            if (logger.isActivated()) {
+                                logger.debug("Parsing sms OTP failed: " + e);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Register receiver
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED);
+        intentFilter.addDataScheme("sms");
+        intentFilter.addDataAuthority("*", smsPort);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        manager.getContext().registerReceiver(smsProvisioningReceiver, intentFilter);
+    }
+
+    /**
+     * Unregister the SMS provisioning receiver
+     */
+    protected void unregisterSmsProvisioningReceiver() {
+        if (smsProvisioningReceiver != null) {
+            if (logger.isActivated()) {
+                logger.debug("Unregistering SMS provider receiver");
+            }
+
+            try {
+                manager.getContext().unregisterReceiver(smsProvisioningReceiver);
+            } catch (IllegalArgumentException e) {
+                // Nothing to do
+            }
+            smsProvisioningReceiver = null;
+        }
+    }
+}

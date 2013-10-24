@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 /**
  * File transfer session listener
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface FileSharingSessionListener extends ImsSessionListener  {
 	/**
@@ -43,8 +43,16 @@ public interface FileSharingSessionListener extends ImsSessionListener  {
     
     /**
      * File has been transfered
-     * 
+     * In case of file transfer over MSRP, the terminating side has received the file, 
+     * but in case of file transfer over HTTP, only the content server has received the
+     * file.
+     *
      * @param filename Filename associated to the received file
      */
     public void handleFileTransfered(String filename);
+    
+    /**
+     * File transfer has been paused
+     */
+    public void handleFileUploadPaused();
 }

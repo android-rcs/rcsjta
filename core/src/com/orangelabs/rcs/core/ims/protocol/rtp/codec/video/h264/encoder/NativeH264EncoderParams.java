@@ -287,7 +287,7 @@ public class NativeH264EncoderParams {
         this.pquant = 12;
         this.bquant = 0;
         this.sceneDetection = false;
-        this.iFrameInterval = 15;
+        this.iFrameInterval = 1;
         this.numIntraMBRefresh = 50;
         this.clipDuration = 0;
         this.fSIBuff = null;

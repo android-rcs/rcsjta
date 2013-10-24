@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.content;
 /**
  * Live photo content
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class LivePhotoContent extends PhotoContent {
 	/**

@@ -102,4 +102,28 @@ public class FifoBuffer {
 		// Free the semaphore
 		this.notifyAll();
 	}
+
+    /**
+     * Get FIFO size
+     *
+     * @return size of the FIFO
+     */
+    public int size() {
+        return fifo.size();
+    }
+
+    /**
+     * clean FIFO
+     *
+     * @return size of the FIFO
+     */
+    public void clean(int size) {
+        if (fifo.size() > size) {
+            while (size > 0) {
+                fifo.removeElementAt(0);
+                nbObjects--;
+                size--;
+            }
+        }
+    }
 }

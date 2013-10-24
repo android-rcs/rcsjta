@@ -23,7 +23,7 @@ import com.orangelabs.rcs.platform.FactoryException;
 /**
  * Network factory 
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class NetworkFactory {
 	/**

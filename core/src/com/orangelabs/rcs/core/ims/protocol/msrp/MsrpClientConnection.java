@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * MSRP client connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MsrpClientConnection extends MsrpConnection {
 	/**

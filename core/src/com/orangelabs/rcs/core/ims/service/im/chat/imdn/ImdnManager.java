@@ -27,7 +27,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.FifoBuffer;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * IMDN manager (see RFC5438)
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ImdnManager extends Thread {
     /**
@@ -98,11 +98,10 @@ public class ImdnManager extends Thread {
 		while((delivery = (DeliveryStatus)buffer.getObject()) != null) {
 			try {
 				// Send SIP MESSAGE
-				sendSipMessageDeliveryStatus(delivery);
+				sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
 
 				// Update rich messaging history
-				RichMessaging.getInstance().updateChatMessageDeliveryStatus(delivery.getMsgId(), delivery.getStatus());
-				
+				RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(delivery.getMsgId(), delivery.getStatus());
 			} catch(Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Unexpected exception", e);
@@ -126,25 +125,6 @@ public class ImdnManager extends Thread {
 		DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
 		buffer.addObject(delivery);
 	}
-	
-	/**
-	 * Send a message delivery status immediately
-	 * 
-	 * @param contact Contact
-	 * @param msgId Message ID
-	 * @param status Delivery status
-	 */
-	public void sendMessageDeliveryStatusImmediately(String contact, String msgId, String status) {
-		// Execute request in background
-		final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
-		Thread thread = new Thread(){
-			public void run() {
-				// Send SIP MESSAGE
-				sendSipMessageDeliveryStatus(delivery);
-			}
-		};
-		thread.start();
-	}
 
     /**
      * Send a message delivery status immediately
@@ -165,15 +145,6 @@ public class ImdnManager extends Thread {
         thread.start();
     }
 
-    /**
-     * Send message delivery status via SIP MESSAGE
-     * 
-     * @param deliveryStatus Delivery status
-     */
-    private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus) {
-        sendSipMessageDeliveryStatus(deliveryStatus, null);
-    }
-
 	/**
 	 * Send message delivery status via SIP MESSAGE
 	 *
@@ -182,6 +153,10 @@ public class ImdnManager extends Thread {
 	 */
 	private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId) {
 		try {
+            if (!RcsSettings.getInstance().isImDisplayedNotificationActivated() && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(deliveryStatus.getStatus())) {
+                return;
+            }
+
 			if (logger.isActivated()) {
        			logger.debug("Send delivery status " + deliveryStatus.getStatus() + " for message " + deliveryStatus.getMsgId());
        		}

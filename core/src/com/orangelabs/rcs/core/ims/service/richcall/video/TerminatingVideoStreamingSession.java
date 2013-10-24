@@ -20,9 +20,9 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
-import org.gsma.joyn.vsh.IVideoRendererListener;
 import org.gsma.joyn.vsh.VideoCodec;
 
+import org.gsma.joyn.vsh.IVideoRendererListener;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -77,8 +77,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
             // Parse the remote SDP part
             SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
-            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
             MediaDescription mediaVideo = parser.getMediaDescription("video");
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
             int remotePort = mediaVideo.port;
 
             // Extract video codecs from SDP
@@ -128,8 +128,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 return;
             }
 
-            // Check that a media renderer has been set
-            if (getMediaRenderer() == null) {
+            // Check that a video renderer has been set
+            if (getVideoRenderer() == null) {
                 handleError(new ContentSharingError(
                         ContentSharingError.MEDIA_RENDERER_NOT_INITIALIZED));
                 return;
@@ -137,7 +137,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
             // Codec negotiation
             VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-                    getMediaRenderer().getSupportedCodecs(), proposedCodecs);
+            		getVideoRenderer().getSupportedCodecs(), proposedCodecs);
             if (selectedVideoCodec == null) {
                 if (logger.isActivated()){
                     logger.debug("Proposed codecs are not supported");
@@ -152,22 +152,21 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             }
 
             // Set the OrientationHeaderID
-            /*SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
+            SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
             if (extensionHeader != null) {
-                getMediaRenderer().setOrientationHeaderId(extensionHeader.getExtensionId());
-            }*/
-            // TODO
+            	// TODO getVideoRenderer().setOrientationHeaderId(extensionHeader.getExtensionId());
+            }
 
-            // Set media renderer event listener
-            getMediaRenderer().addEventListener(new MyRendererEventListener(this));
+            // Set video renderer event listener
+            getVideoRenderer().addEventListener(new MyRendererEventListener(this));
 
-            // Open the media renderer
-            getMediaRenderer().open(selectedVideoCodec, remoteHost, remotePort);
+            // Open the video renderer
+            getVideoRenderer().open(selectedVideoCodec, remoteHost, remotePort);
 
             // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            String videoSdp = VideoSdpBuilder.buildResponseSdp(selectedVideoCodec, getMediaRenderer().getLocalRtpPort(), mediaVideo); 
+            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, getVideoRenderer().getLocalRtpPort(), mediaVideo); 
             String sdp =
             	"v=0" + SipUtils.CRLF +
             	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
@@ -203,8 +202,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 // The session is established
                 getDialogPath().sessionEstablished();
 
-                // Start the media renderer
-                getMediaRenderer().start();
+                // Start the video renderer
+                getVideoRenderer().start();
 
                 // Start session timer
                 if (getSessionTimerManager().isSessionTimerActivated(resp)) {
@@ -264,10 +263,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      */
     public void closeMediaSession() {
         try {
-            // Close the media renderer
-            if (getMediaRenderer() != null) {
-                getMediaRenderer().stop();
-                getMediaRenderer().close();
+            // Close the video renderer
+            if (getVideoRenderer() != null) {
+            	getVideoRenderer().stop();
+            	getVideoRenderer().close();
             }
         } catch(Exception e) {
             if (logger.isActivated()) {
@@ -282,7 +281,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @throws Exception 
      */
     public void prepareMediaSession() throws Exception {
-        // Nothing to do in terminating side
+          // Nothing to do in terminating side
     }
 
     /**
@@ -293,7 +292,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
     public void startMediaSession() throws Exception {
         // Nothing to do in terminating side
     }
-    
+
     /**
      * My renderer event listener
      */
@@ -377,6 +376,6 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Request capabilities to the remote
             getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
     	}
-    }    
+    }
 }
 

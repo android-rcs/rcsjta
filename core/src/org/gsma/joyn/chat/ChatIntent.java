@@ -49,6 +49,7 @@ public class ChatIntent {
 	 * Received message
 	 * 
 	 * @see ChatMessage
+	 * @see GeolocMessage
 	 */
 	public final static String EXTRA_MESSAGE = "message";
 }

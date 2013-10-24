@@ -166,9 +166,9 @@ public class RichcallService extends ImsService {
 		}
 
 		// Test if call is established
-		if (!getImsModule().getCallManager().isCallConnected()) {
+		if (!getImsModule().getCallManager().isCallConnected() && !getImsModule().getIPCallService().isCallConnectedWith(contact)) {
 			if (logger.isActivated()) {
-				logger.debug("Rich call not established: cancel the initiation");
+				logger.debug("No call (CS call or IP call) has been established: cancel the initiation");
 			}
             throw new CoreException("Call not established");
         }
@@ -369,7 +369,7 @@ public class RichcallService extends ImsService {
         }
 
 		// Create a new session
-        OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(
+		OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(
 				this,
 				player,
                 ContentManager.createGenericLiveVideoContent(),
@@ -517,7 +517,7 @@ public class RichcallService extends ImsService {
 			boolean richcall = getImsModule().getCallManager().isRichcallSupportedWith(contact);
 	        SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options,
 	        		getImsModule().getSipManager().getSipStack().getContact(),
-	        		CapabilityUtils.getSupportedFeatureTags(richcall),
+	        		CapabilityUtils.getSupportedFeatureTags(richcall, false),
 	        		CapabilityUtils.buildSdp(ipAddress, richcall));
 
 	        // Send 200 OK response

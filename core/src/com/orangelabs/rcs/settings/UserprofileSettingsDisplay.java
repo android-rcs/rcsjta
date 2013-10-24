@@ -29,7 +29,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * Presence settings display
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class UserprofileSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
 	

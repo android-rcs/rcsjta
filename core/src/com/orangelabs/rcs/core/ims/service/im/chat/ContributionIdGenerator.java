@@ -28,7 +28,7 @@ import com.orangelabs.rcs.utils.DeviceUtils;
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ContributionIdGenerator {
 	/**
@@ -53,7 +53,7 @@ public class ContributionIdGenerator {
         // Keep only 128 bits
         byte[] secretKey = new byte[16];
         for (int i = 0; i < 16; i++) {
-            if (key.length >= 16) {
+            if (key != null && key.length >= 16) {
                 secretKey[i] = key[i];
             } else {
                 secretKey[i] = '0';

@@ -125,6 +125,9 @@
 		<provider android:authorities="com.orangelabs.rcs.chat;org.gsma.joyn.provider.chat"
 			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
 			
+		<provider android:authorities="com.orangelabs.rcs.ipcall;org.gsma.joyn.provider.ipcall"
+			android:name="com.orangelabs.rcs.provider.ipcall.IPCallProvider"/>
+		
 		<!-- Device events receiver -->	
 
 		<receiver android:name="com.orangelabs.rcs.service.DeviceBoot">

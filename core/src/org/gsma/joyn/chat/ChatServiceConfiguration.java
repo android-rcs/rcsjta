@@ -57,10 +57,10 @@ public class ChatServiceConfiguration {
 	private int maxMsgLengthGroupChat;
 
 	/**
-	 * Max chat sessions
+	 * Max group chat sessions
 	 */
-	private int maxChat; 
-
+	private int maxGroupChat; 
+	
 	/**
 	 * SMS fallback
 	 */
@@ -82,36 +82,51 @@ public class ChatServiceConfiguration {
 	private boolean displayedDeliveryReport;
 	
 	/**
+	 * Max geoloc label length
+	 */
+	private int maxGeolocLabelLength;
+
+	/**
+	 * Geoloc expiraion time
+	 */
+	private int geolocExpireTime;
+	
+	/**
 	 * Constructor
 	 * 
+	 * @param chatSF Chat S&F
+	 * @param groupChatSF Group chat S&F
 	 * @param warnSF Store and Forward warning
 	 * @param chatTimeout Chat timeout
 	 * @param isComposingTimeout Is-composing timeout
 	 * @param maxGroupChatParticipants Max participants in a group chat
 	 * @param maxMsgLengthSingleChat Max length of a message in a single chat
 	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
-	 * @param maxSingleChat Max single chats
 	 * @param maxGroupChat Max group chats
 	 * @param smsFallback SMS fallback
 	 * @param autoAcceptSingleChat Auto accept mode for single chat
 	 * @param autoAcceptGroupChat Auto accept mode for group chat
 	 * @param displayedDeliveryReport Displayed delivery report
+	 * @param maxGeolocLabelLength Max geoloc label length
+	 * @param geolocExpireTime Geoloc expiration time
 	 */
 	public ChatServiceConfiguration(boolean warnSF, int chatTimeout, int isComposingTimeout,
 			int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
-			int maxChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
-			boolean displayedDeliveryReport) {
+			int maxGroupChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
+			boolean displayedDeliveryReport, int maxGeolocLabelLength, int geolocExpireTime) {
 		this.warnSF = warnSF;
 		this.chatTimeout = chatTimeout;
 		this.isComposingTimeout = isComposingTimeout;
 		this.maxGroupChatParticipants = maxGroupChatParticipants;
 		this.maxMsgLengthSingleChat = maxMsgLengthSingleChat;
 		this.maxMsgLengthGroupChat = maxMsgLengthGroupChat;
-		this.maxChat = maxChat; 
+		this.maxGroupChat = maxGroupChat;
 		this.smsFallback = smsFallback;
 		this.autoAcceptSingleChat = autoAcceptSingleChat;
 		this.autoAcceptGroupChat = autoAcceptGroupChat;
 		this.displayedDeliveryReport = displayedDeliveryReport;
+		this.maxGeolocLabelLength = maxGeolocLabelLength;
+		this.geolocExpireTime = geolocExpireTime;
     }	
 	
 	/**
@@ -126,7 +141,7 @@ public class ChatServiceConfiguration {
 		this.maxGroupChatParticipants = source.readInt();
 		this.maxMsgLengthSingleChat = source.readInt();
 		this.maxMsgLengthGroupChat = source.readInt();
-		this.maxChat = source.readInt(); 
+		this.maxGroupChat = source.readInt(); 
 		this.smsFallback = source.readInt() != 0;
 		this.autoAcceptSingleChat = source.readInt() != 0;
 		this.autoAcceptGroupChat = source.readInt() != 0;
@@ -156,7 +171,7 @@ public class ChatServiceConfiguration {
     	dest.writeInt(maxGroupChatParticipants);
     	dest.writeInt(maxMsgLengthSingleChat);
     	dest.writeInt(maxMsgLengthGroupChat);
-    	dest.writeInt(maxChat);
+    	dest.writeInt(maxGroupChat);
     	dest.writeInt(smsFallback ? 1 : 0);
     	dest.writeInt(autoAcceptSingleChat ? 1 : 0);
     	dest.writeInt(autoAcceptGroupChat ? 1 : 0);
@@ -179,12 +194,12 @@ public class ChatServiceConfiguration {
 	
 	/**
 	 * Does the UX should alert the user that messages are handled differently when
-	 * the store and forward functionality is involved. It returns True if user should
+	 * the Store and Forward functionality is involved. It returns True if user should
 	 * be informed when sending message to offline user.
 	 * 
 	 * @return Boolean
 	 */
-	public boolean isImWarnSF() {
+	public boolean isChatWarnSF() {
 		return warnSF;
 	}
 	
@@ -207,7 +222,7 @@ public class ChatServiceConfiguration {
 	}	
 	
 	/**
-	 * Returns maximum participants in group chat session
+	 * Returns maximum number of participants in a group chat
 	 * 
 	 * @return Number
 	 */
@@ -216,7 +231,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Return maximum single chat message’s length can have
+	 * Return maximum length of a single chat message
 	 * 
 	 * @return Number of bytes
 	 */
@@ -225,7 +240,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the maximum single group chat message’s length can have
+	 * Return maximum length of a group chat message
 	 * 
 	 * @return Number of bytes
 	 */
@@ -234,16 +249,16 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the max number of simultaneous chat sessions
+	 * Returns the max number of simultaneous group chats
 	 * 
 	 * @return Number
 	 */
-	public int getMaxChatSessions() {
-		return maxChat;
+	public int getMaxGroupChats() {
+		return maxGroupChat;
 	}
 	
 	/**
-	 * Does the UX proposes automatically a SMS fallback in case of chat initiation failure. It
+	 * Does the UX proposes automatically a SMS fallback in case of chat failure. It
 	 * returns True if SMS fallback procedure is activated, else returns False.
 	 * 
 	 * @return Boolean
@@ -253,7 +268,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns True if auto accept mode activated for chat, else returns False
+	 * Does auto accept mode activated for single chat
 	 * 
 	 * @return Boolean
 	 */
@@ -262,7 +277,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns True if auto accept mode activated for group chat, else returns False
+	 * Does auto accept mode activated for group chat
 	 * 
 	 * @return Boolean
 	 */
@@ -271,7 +286,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Is displayed delivery report on received chat messages activated
+	 * Does displayed delivery report activated on received chat messages
 	 * 
 	 * @return Boolean
 	 */
@@ -286,5 +301,23 @@ public class ChatServiceConfiguration {
 	 */
 	public void setDisplayedDeliveryReport(boolean state) {
 		this.displayedDeliveryReport = state;
+	}
+
+	/**
+	 * Return maximum length of a geoloc label
+	 * 
+	 * @return Number of bytes
+	 */
+	public int getGeolocLabelMaxLength() {
+		return maxGeolocLabelLength;
+	}
+
+    /**
+     * Get geoloc expiration time
+     *
+     * @return Time in seconds
+     */
+	public int getGeolocExpirationTime() {
+		return geolocExpireTime;
 	}
 }

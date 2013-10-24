@@ -48,18 +48,18 @@ public class VideoCodecManager {
             for (int j = 0; j < supportedCodecs.length; j++) {
                 VideoCodec videoCodec = supportedCodecs[j];
                 int videoCodecPref = supportedCodecs.length - 1 - j;
-                // Compare codecs
-                if (compareCodec(proposedCodec, videoCodec)) {
+                // Compare codec
+                if (proposedCodec.compare(videoCodec)) {
                     if (videoCodecPref > pref) {
                         pref = videoCodecPref;
                         selectedCodec = new VideoCodec(proposedCodec.getEncoding(),
-                                (proposedCodec.getPayload() == 0) ? videoCodec.getPayload() : proposedCodec.getPayload(),
-                                (proposedCodec.getClockRate() == 0) ? videoCodec.getClockRate() : proposedCodec.getClockRate(),
-                                (proposedCodec.getFrameRate() == 0) ? videoCodec.getFrameRate() : proposedCodec.getFrameRate(),
-                                (proposedCodec.getBitRate() == 0) ? videoCodec.getBitRate() : proposedCodec.getBitRate(),
-                                (proposedCodec.getVideoWidth() == 0) ? videoCodec.getVideoWidth() : proposedCodec.getVideoWidth(),
-                                (proposedCodec.getVideoHeight() == 0) ? videoCodec.getVideoHeight() : proposedCodec.getVideoHeight(),
-                                (proposedCodec.getParameters().length() == 0) ? videoCodec.getParameters() : proposedCodec.getParameters());
+                            (proposedCodec.getPayloadType() == 0) ? videoCodec.getPayloadType() : proposedCodec.getPayloadType(),
+                            (proposedCodec.getClockRate() == 0) ? videoCodec.getClockRate() : proposedCodec.getClockRate(),
+                            (proposedCodec.getFrameRate() == 0) ? videoCodec.getFrameRate() : proposedCodec.getFrameRate(),
+                            (proposedCodec.getBitRate() == 0) ? videoCodec.getBitRate() : proposedCodec.getBitRate(),
+                            (proposedCodec.getVideoWidth() == 0) ? videoCodec.getVideoWidth() : proposedCodec.getVideoWidth(),
+                            (proposedCodec.getVideoHeight() == 0) ? videoCodec.getVideoHeight() : proposedCodec.getVideoHeight(),
+                            (proposedCodec.getParameters().length() == 0) ? videoCodec.getParameters() : proposedCodec.getParameters());
                     }
                 }
             }
@@ -68,30 +68,6 @@ public class VideoCodecManager {
     }
 
     
-    /**
-     * Compare codec encodings and resolutions
-     *
-     * @param codec1 Codec to compare
-     * @param codec2 Codec to compare
-     * @return True if codecs are equals
-     */
-    public static boolean compareCodec(VideoCodec codec1, VideoCodec codec2) {
-        boolean ret = false;
-        if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding()) 
-                && (codec1.getVideoWidth() == codec2.getVideoWidth() || codec1.getVideoWidth() == 0 || codec2.getVideoWidth() == 0)
-                && (codec1.getVideoHeight() == codec2.getVideoHeight() || codec1.getVideoHeight() == 0 || codec2.getVideoHeight() == 0)) {
-            if (codec1.getParameters().equalsIgnoreCase(H264Config.CODEC_NAME)) {
-                if (H264Config.getCodecProfileLevelId(codec1.getParameters()).compareToIgnoreCase(H264Config.getCodecProfileLevelId(codec2.getParameters())) == 0) {
-                    ret =  true;
-                }
-            } else {
-                if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding())) {
-                    ret = true;
-                }
-            }
-        }
-        return ret;
-    }    
 
     /**
      * Create a video codec from its SDP description
@@ -168,8 +144,7 @@ public class VideoCodecManager {
 	        VideoCodec videoCodec = new VideoCodec(codecName,
 	        		Integer.parseInt(media.payload), clockRate,
 	        		frameRate, 0,
-	                videoWidth, videoHeight,
-	                codecParameters);
+	                videoWidth, videoHeight, codecParameters);
 
             return videoCodec;
     	} catch(NullPointerException e) {

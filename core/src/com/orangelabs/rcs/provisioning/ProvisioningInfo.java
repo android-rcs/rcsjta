@@ -32,6 +32,16 @@ public class ProvisioningInfo {
 	 * Validity of the provisioning document
 	 */
     private long validity = 0L;
+    
+	/**
+	 * Token of the provisioning document
+	 */
+    private String token = null;
+	
+	/**
+	 * Validity of the token of the provisioning document
+	 */
+    private long tokenValidity = 0L;
 	
 	/**
 	 * Title for terms and conditions
@@ -159,5 +169,23 @@ public class ProvisioningInfo {
      */
     public boolean getRejectBtn() {
         return rejectBtn;
+    }
+
+    /**
+     * Get token
+     *
+     * @return token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Get token validity
+     *
+     * @return token validity
+     */
+    public long getTokenValidity() {
+        return tokenValidity;
     }
 }

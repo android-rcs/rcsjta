@@ -18,14 +18,11 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp;
 
-
-
-
-
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.Format;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.MediaCaptureStream;
+import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpOutputStream;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -37,32 +34,32 @@ public class MediaRtpSender {
 	/**
 	 * Format
 	 */
-	private Format format;
+	protected Format format;
 
     /**
      * Media processor
      */
-    private Processor processor = null;
+	protected Processor processor = null;
 
     /**
      * MediaCaptureStream
      */
-    MediaCaptureStream inputStream = null;
+	protected MediaCaptureStream inputStream = null;
 
     /**
      * RTP output stream
      */
-    private RtpOutputStream outputStream = null;
+	protected RtpOutputStream outputStream = null;
 
     /**
      * Local RTP port
      */
-    private int localRtpPort;
+	protected int localRtpPort;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	protected Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor
@@ -85,6 +82,10 @@ public class MediaRtpSender {
     public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpStreamListener rtpStreamListener)
             throws RtpException {
     	try {
+			if (logger.isActivated()) {
+				logger.debug("Prepare session");
+			}
+			
     		// Create the input stream
             inputStream = new MediaCaptureStream(format, player);
     		inputStream.open();
@@ -104,6 +105,60 @@ public class MediaRtpSender {
         	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
 
             // Create the media processor
+			if (logger.isActivated()) {
+				logger.debug("New processor");
+			}
+    		processor = new Processor(inputStream, outputStream, codecChain);
+
+        	if (logger.isActivated()) {
+        		logger.debug("Session has been prepared with success");
+            }
+        } catch(Exception e) {
+        	if (logger.isActivated()) {
+        		logger.error("Can't prepare resources correctly", e);
+        	}
+        	throw new RtpException("Can't prepare resources");
+        }
+    }
+    
+    /**
+     * Prepare the RTP session for a sender associated to a receiver
+     *
+     * @param player Media player
+     * @param remoteAddress Remote address
+     * @param remotePort Remote port
+     * @throws RtpException
+     */
+    public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
+            throws RtpException {
+    	try {
+			if (logger.isActivated()) {
+				logger.debug("Prepare session");
+			}
+			
+    		// Create the input stream
+            inputStream = new MediaCaptureStream(format, player);
+    		inputStream.open();
+			if (logger.isActivated()) {
+				logger.debug("Input stream: " + inputStream.getClass().getName());
+			}
+
+            // Create the output stream
+            //outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+			outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
+            outputStream.addRtpStreamListener(rtpStreamListener);
+            outputStream.open();
+			if (logger.isActivated()) {
+				logger.debug("Output stream: " + outputStream.getClass().getName());
+			}
+
+        	// Create the codec chain
+        	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
+
+            // Create the media processor
+			if (logger.isActivated()) {
+				logger.debug("New processor");
+			}
     		processor = new Processor(inputStream, outputStream, codecChain);
 
         	if (logger.isActivated()) {

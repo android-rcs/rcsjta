@@ -494,7 +494,6 @@ public class SipInterface implements SipListener {
         SipURI contactURI = (SipURI)SipUtils.ADDR_FACTORY.createSipURI(null, localIpAddress);
         contactURI.setPort(listeningPort);
         contactURI.setParameter("transport", defaultProtocol);
-        contactURI.setSecure(defaultProtocol.equals(ListeningPoint.TLS));
         
         // Create the Contact header
         Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);

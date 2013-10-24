@@ -18,11 +18,12 @@
 
 package com.orangelabs.rcs.service;
 
-import org.gsma.joyn.Intents;
 import org.gsma.joyn.capability.ICapabilityService;
 import org.gsma.joyn.chat.IChatService;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.ft.IFileTransferService;
+import org.gsma.joyn.intent.ClientIntents;
+import org.gsma.joyn.ipcall.IIPCallService;
 import org.gsma.joyn.ish.IImageSharingService;
 import org.gsma.joyn.session.IMultimediaSessionService;
 import org.gsma.joyn.vsh.IVideoSharingService;
@@ -51,6 +52,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSess
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
@@ -59,13 +61,15 @@ import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.sharing.RichCall;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
+import com.orangelabs.rcs.service.api.IPCallServiceImpl;
 import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
 import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
@@ -127,7 +131,12 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
     private ImageSharingServiceImpl ishApi = null; 
 
-	/**
+    /**
+	 * IP call API
+	 */
+    private IPCallServiceImpl ipcallApi = null; 
+
+    /**
 	 * Multimedia session API
 	 */
 	private MultimediaSessionServiceImpl sessionApi = null; 
@@ -196,6 +205,7 @@ public class RcsCoreService extends Service implements CoreListener {
             ftApi = new FileTransferServiceImpl(); 
             vshApi = new VideoSharingServiceImpl(); 
             ishApi = new ImageSharingServiceImpl(); 
+            ipcallApi = new IPCallServiceImpl(); 
         	sessionApi = new MultimediaSessionServiceImpl();             
             
             // Set the logger properties
@@ -211,10 +221,13 @@ public class RcsCoreService extends Service implements CoreListener {
             ContactsManager.createInstance(getApplicationContext());
 
             // Instantiate the rich messaging history 
-            RichMessaging.createInstance(getApplicationContext());
+            RichMessagingHistory.createInstance(getApplicationContext());
             
             // Instantiate the rich call history 
-            RichCall.createInstance(getApplicationContext());
+            RichCallHistory.createInstance(getApplicationContext());
+
+            // Instantiate the IP call history 
+            IPCallHistory.createInstance(getApplicationContext());
 
             // Create the core
 			Core.createCore(this);
@@ -286,6 +299,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		ftApi.close();
 		chatApi.close();
 		ishApi.close();
+		ipcallApi.close();
     	vshApi.close();
 
     	// Terminate the core in background
@@ -337,6 +351,12 @@ public class RcsCoreService extends Service implements CoreListener {
     		}
             return ishApi;
         } else
+        if (IIPCallService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("IP call service API binding");
+    		}
+            return ipcallApi;
+        } else
         if (IMultimediaSessionService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("SIP API binding");
@@ -355,7 +375,7 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     public static void addRcsServiceNotification(boolean state, String label) {
     	// Create notification
-    	Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
+    	Intent intent = new Intent(ClientIntents.ACTION_VIEW_SETTINGS);
     	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(AndroidFactory.getApplicationContext(), 0, intent, 0);
 		int iconId; 
@@ -594,6 +614,36 @@ public class RcsCoreService extends Service implements CoreListener {
 	}
     
 	/**
+	 * A new one to one file transfer invitation has been received
+	 * 
+	 * @param session File transfer session
+	 * @param one2oneChatSession the created chat session (1to1)
+	 */
+	public void handle1to1FileTransferInvitation(FileSharingSession session, TerminatingOne2OneChatSession one2oneChatSession) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event file transfer invitation outside an existing session");
+		}
+		
+    	// Broadcast the invitation
+    	// TODO ftApi.receiveFileTransferInvitation(session, one2oneChatSession);
+	}
+	
+	/**
+	 * A new file transfer invitation has been received
+	 * 
+	 * @param session File transfer session
+	 * @param groupChatSession the created chat session (group)
+	 */
+	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession groupChatSession) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event file transfer invitation outside an existing session");
+		}
+		
+    	// Broadcast the invitation
+    	// TODO ftApi.receiveFileTransferInvitation(session, groupChatSession);
+	}
+
+	/**
      * New one-to-one chat session invitation
      * 
      * @param session Chat session
@@ -666,6 +716,21 @@ public class RcsCoreService extends Service implements CoreListener {
 		chatApi.receiveMessageDeliveryStatus(contact, msgId, status);
     }
     
+    /**
+     * New file delivery status
+     *
+     * @param ftSessionId File transfer session ID
+     * @param status Delivery status
+     */
+    public void handleFileDeliveryStatus(String ftSessionId, String status) {
+        if (logger.isActivated()) {
+            logger.debug("Handle file delivery status: session " + ftSessionId + " status " + status);
+        }
+
+        // Notify listeners
+        // TODO ftApi.handleFileDeliveryStatus(ftSessionId, status);
+    }
+
     /**
      * New SIP session invitation
      * 
@@ -765,4 +830,18 @@ public class RcsCoreService extends Service implements CoreListener {
         LauncherUtils.stopRcsService(getApplicationContext());
         LauncherUtils.launchRcsService(getApplicationContext(), true);
     }
+
+    /**
+     * New IP call invitation
+     * 
+     * @param session IP call session
+     */
+	public void handleIPCallInvitation(IPCallSession session) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event IP call invitation");
+		}
+		
+		// Broadcast the invitation
+		ipcallApi.receiveIPCallInvitation(session);
+	}
 }

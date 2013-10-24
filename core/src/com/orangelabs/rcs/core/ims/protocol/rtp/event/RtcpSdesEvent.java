@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpSdesPacket;
 /**
  * RTCP session description event
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpSdesEvent extends RtcpEvent {
 

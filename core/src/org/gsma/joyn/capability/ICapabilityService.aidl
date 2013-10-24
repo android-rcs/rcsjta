@@ -8,7 +8,7 @@ import org.gsma.joyn.capability.ICapabilitiesListener;
  * Capability service API
  */
 interface ICapabilityService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 

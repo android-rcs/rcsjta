@@ -33,7 +33,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Image sharing transfer session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class ImageTransferSession extends ContentSharingSession {
 	/**

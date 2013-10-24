@@ -62,7 +62,8 @@ public class VideoSharingLog {
     public static final String TIMESTAMP = "timestamp";
     
     /**
-     * The name of the column containing the duration of the sharing (in seconds).
+     * The name of the column containing the duration of the sharing (in seconds). The
+     * value is only set at the end of the call.
      * <P>Type: LONG</P>
      */
     public static final String DURATION = "duration";    

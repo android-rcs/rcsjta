@@ -90,5 +90,11 @@ public class FileTransferLog {
      * <P>Type: INTEGER</P>
 	 * @see FileTransfer.State
      */
-    public static final String STATE = "state";    
+    public static final String STATE = "state";
+    
+    /**
+     * The name of the column containing the file icon (absolute path).
+     * <P>Type: TEXT</P>
+     */
+    public static final String FILEICON = "fileicon";    
 }

@@ -24,6 +24,7 @@ import java.util.Vector;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -45,9 +46,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Terminating file transfer session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
-public class TerminatingFileSharingSession extends FileSharingSession implements MsrpEventListener {
+public class TerminatingFileSharingSession extends ImsFileSharingSession implements MsrpEventListener {
 	/**
 	 * MSRP manager
 	 */
@@ -70,6 +71,10 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
+		
+		// Set contribution ID
+		String id = ChatUtils.getContributionId(invite);
+		setContributionID(id);		
 	}
 	
 	/**
@@ -80,7 +85,7 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new file transfer session as terminating");
 	    	}
-
+	
     		if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
     	    	if (logger.isActivated()) {
     	    		logger.debug("Auto accept file transfer invitation");
@@ -139,13 +144,18 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
         	SdpParser parser = new SdpParser(remoteSdp.getBytes());
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
+            String protocol = mediaDesc.protocol;
+            boolean isSecured = false;
+            if (protocol != null) {
+                isSecured = protocol.equalsIgnoreCase(MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL);
+            }
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("file-selector");
             String fileSelector = attr1.getName() + ":" + attr1.getValue();
 			MediaAttribute attr2 = mediaDesc.getMediaAttribute("file-transfer-id");
             String fileTransferId = attr2.getName() + ":" + attr2.getValue();
 			MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
-    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
             // Extract the "setup" parameter
@@ -175,7 +185,8 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	        // Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
-			
+            msrpMgr.setSecured(isSecured);
+
 			// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -192,7 +203,7 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	            "a=setup:" + localSetup + SipUtils.CRLF +
 	            "a=path:" + msrpMgr.getLocalMsrpPath() + SipUtils.CRLF +
 	    		"a=recvonly" + SipUtils.CRLF;
-            int maxSize = FileSharingSession.getMaxFileSharingSize();
+            int maxSize = ImsFileSharingSession.getMaxFileSharingSize();
 	    	if (maxSize > 0) {
 	    		sdp += "a=max-size:" + maxSize + SipUtils.CRLF;
 	    	}
@@ -210,7 +221,7 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
     				public void run(){
     					try {
 							// Open the MSRP session
-    						msrpMgr.openMsrpSession(FileSharingSession.DEFAULT_SO_TIMEOUT);
+    						msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
     						
 			    	        // Send an empty packet
 			            	sendEmptyDataChunk();
@@ -255,7 +266,7 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
                 	msrpMgr.createMsrpClientSession(remoteHost, remotePort, remotePath, this);
 
 					// Open the MSRP session
-					msrpMgr.openMsrpSession(FileSharingSession.DEFAULT_SO_TIMEOUT);
+					msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
 					
 	    	        // Send an empty packet
 	            	sendEmptyDataChunk();
@@ -303,7 +314,7 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
 	   		}
 		}
 	}	
-	
+
 	/**
 	 * Data has been transfered
 	 * 
@@ -410,44 +421,6 @@ public class TerminatingFileSharingSession extends FileSharingSession implements
             deleteFile();
         }
 	}	
-
-    /**
-     * Data transfer error
-     *
-     * @param msgId Message ID
-     * @param error Error code
-     */
-    public void msrpTransferError(String msgId, String error) {
-		if (isInterrupted()) {
-			return;
-		}
-		
-		if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
-    	}
-
-    	try {
-            // Close the media session
-            closeMediaSession();
-				
-			// Terminate session
-			terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-	   	} catch(Exception e) {
-	   		if (logger.isActivated()) {
-	   			logger.error("Can't close correctly the file transfer session", e);
-	   		}
-	   	}
-
-    	// Remove the current session
-    	getImsService().removeSession(this);
-
-    	// Notify listeners
-		if (!isInterrupted()) {
-	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
-	        }
-		}
-	}
 
     /**
      * Prepare media session

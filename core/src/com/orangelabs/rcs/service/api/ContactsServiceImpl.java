@@ -86,6 +86,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     				capabilities.isVideoSharingSupported(),
     				capabilities.isImSessionSupported(),
     				capabilities.isFileTransferSupported(),
+    				capabilities.isGeolocationPushSupported(),
+    				capabilities.isIPVoiceCallSupported(),
+    				capabilities.isIPVideoCallSupported(),
     				exts); 
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 			return new JoynContact(contactId, registered, capaApi);
@@ -124,6 +127,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	    				capabilities.isVideoSharingSupported(),
 	    				capabilities.isImSessionSupported(),
 	    				capabilities.isFileTransferSupported(),
+	    				capabilities.isGeolocationPushSupported(),
+	    				capabilities.isIPVoiceCallSupported(),
+	    				capabilities.isIPVideoCallSupported(),
 	    				exts); 
 			}
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
@@ -160,6 +166,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		    				capabilities.isVideoSharingSupported(),
 		    				capabilities.isImSessionSupported(),
 		    				capabilities.isFileTransferSupported(),
+		    				capabilities.isGeolocationPushSupported(),
+		    				capabilities.isIPVoiceCallSupported(),
+		    				capabilities.isIPVideoCallSupported(),
 		    				exts); 
 				}
 				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
@@ -212,6 +221,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			    				capabilities.isVideoSharingSupported(),
 			    				capabilities.isImSessionSupported(),
 			    				capabilities.isFileTransferSupported(),
+			    				capabilities.isGeolocationPushSupported(),
+			    				capabilities.isIPVoiceCallSupported(),
+			    				capabilities.isIPVideoCallSupported(),
 			    				new HashSet<String>(capabilities.getSupportedExtensions())); 
 						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 						result.add(new JoynContact(contact, registered, capaApi));

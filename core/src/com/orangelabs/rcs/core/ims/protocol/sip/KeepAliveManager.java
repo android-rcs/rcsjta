@@ -91,4 +91,14 @@ public class KeepAliveManager extends PeriodicRefresher {
             }
         }
     }
+
+	/**
+	 * @param period the keep alive period in seconds
+	 */
+	public void setPeriod(int period) {
+		this.period = period;
+		if (logger.isActivated()) {
+			logger.debug("Set keep-alive period \"" + period + "\"");
+		}
+	}
 }

@@ -27,7 +27,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * MSRP manager
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MsrpManager {
 	/**
@@ -88,9 +88,9 @@ public class MsrpManager {
      */
     public String getLocalSocketProtocol() {
     	if (secured) {
-    		return "TCP/TLS/MSRP";
+    		return MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL;
     	} else {
-    		return "TCP/MSRP";
+    		return MsrpConstants.SOCKET_MSRP_PROTOCOL;
     	}
     }
 

@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.gsma.joyn.JoynContactFormatException;
 import org.gsma.joyn.JoynServiceException;
+import org.gsma.joyn.ft.FileTransfer;
+import org.gsma.joyn.ft.FileTransferListener;
+import org.gsma.joyn.ft.IFileTransfer;
 
 /**
  * Group chat
@@ -232,7 +236,7 @@ public class GroupChat {
 	 * Sends a text message to the group
 	 * 
 	 * @param text Message
-	 * @return Message ID
+	 * @return Unique message ID or null in case of error
 	 * @throws JoynServiceException
 	 */
 	public String sendMessage(String text) throws JoynServiceException {
@@ -243,6 +247,45 @@ public class GroupChat {
 		}		
 	}
 	
+	/**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc info
+	 * @return Unique message ID or null in case of error
+   	 * @throws JoynServiceException
+     */
+    public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
+		try {
+			return chatInf.sendGeoloc(geoloc);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	
+    }	
+
+    /**
+     * Transfers a file to participants. The parameter filename contains the complete
+     * path of the file to be transferred.
+     * 
+     * @param filename Filename to transfer
+     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param listener File transfer event listener
+     * @return File transfer
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+     */
+    public FileTransfer sendFile(String filename, String fileicon, FileTransferListener listener) throws JoynServiceException {
+		try {
+			IFileTransfer ftIntf = chatInf.sendFile(filename, fileicon, listener);
+			if (ftIntf != null) {
+				return new FileTransfer(ftIntf);
+			} else {
+				return null;
+			}
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		} 
+	}	
+    
 	/**
 	 * Sends an Is-composing event. The status is set to true when typing
 	 * a message, else it is set to false.

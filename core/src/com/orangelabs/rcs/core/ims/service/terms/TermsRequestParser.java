@@ -35,7 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * If the message contains the text in different languages it's returns the text
  * in the requested language if present or in the default language (English).
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  * @author Deutsche Telekom AG
  */
 public class TermsRequestParser extends DefaultHandler {

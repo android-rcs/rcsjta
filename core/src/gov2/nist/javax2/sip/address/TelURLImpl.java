@@ -25,6 +25,7 @@
 */
 package gov2.nist.javax2.sip.address;
 
+import gov2.nist.core.NameValue;
 import gov2.nist.core.NameValueList;
 
 import java.text.ParseException;
@@ -219,4 +220,9 @@ public class TelURLImpl
 
         return this.getParameter("phone-context");
     }
+
+	@Override
+	public void setParameter(NameValue nameValue) throws ParseException {
+		// Not used
+	}
 }

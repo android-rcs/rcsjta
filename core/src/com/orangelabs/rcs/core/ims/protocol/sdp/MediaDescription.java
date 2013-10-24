@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Media description
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MediaDescription {
 	/**
@@ -65,6 +65,16 @@ public class MediaDescription {
 	 * Bandwidth info
 	 */
 	public String bandwidthInfo;
+
+    /**
+     * Sender bandwidth info (RFC 3556)
+     */
+    public String senderBandwidthInfo;
+
+    /**
+     * Receiver bandwidth info (RFC 3556)
+     */
+    public String receiverBandwidthInfo;
 
 	/**
 	 * Encryption key

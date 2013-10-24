@@ -179,22 +179,40 @@ public class FileTransferService extends JoynService {
 	}
 
     /**
-     * Transfers a file to a contact. The parameter file contains the complete filename
-     * including the path to be transferred. The parameter contact supports the following
+     * Transfers a file to a contact. The parameter filename contains the complete
+     * path of the file to be transferred. The parameter contact supports the following
      * formats: MSISDN in national or international format, SIP address, SIP-URI or
      * Tel-URI. If the format of the contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contact 
      * @param filename Filename to transfer
-     * @param listenet File transfer event listener
+     * @param listener File transfer event listener
+     * @return File transfer
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+	 */
+    public FileTransfer transferFile(String contact, String filename, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    	return transferFile(contact, filename, null, listener);
+    }    
+    
+    /**
+     * Transfers a file to a contact. The parameter filename contains the complete
+     * path of the file to be transferred. The parameter contact supports the following
+     * formats: MSISDN in national or international format, SIP address, SIP-URI or
+     * Tel-URI. If the format of the contact is not supported an exception is thrown.
+     * 
+     * @param contact 
+     * @param filename Filename to transfer
+     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public FileTransfer transferFile(String contact, String filename, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    public FileTransfer transferFile(String contact, String filename, String fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IFileTransfer ftIntf = api.transferFile(contact, filename, listener);
+				IFileTransfer ftIntf = api.transferFile(contact, filename, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -206,7 +224,7 @@ public class FileTransferService extends JoynService {
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-    }    
+	}
     
     /**
      * Returns the list of file transfers in progress

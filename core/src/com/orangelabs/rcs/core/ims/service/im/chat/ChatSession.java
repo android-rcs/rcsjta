@@ -33,6 +33,7 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
@@ -40,14 +41,17 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimParser;
-import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardNotifSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.StringUtils;
@@ -56,14 +60,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Chat session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class ChatSession extends ImsServiceSession implements MsrpEventListener {
-	/**
-	 * File transfer over HTTP MIME type
-	 */
-	private static final String FT_HTTP_MIME_TYPE = "application/vnd.gsma.rcs-ft-http+xml";
-	
 	/**
 	 * Subject
 	 */
@@ -107,7 +106,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Feature tags
      */
-    private ArrayList<String> featureTags = new ArrayList<String>();
+    private List<String> featureTags = new ArrayList<String>();
     
     /**
      * Accept types
@@ -125,10 +124,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     private boolean geolocSupportedByRemote = false;
     
     /**
-     * File transfer over HTTP supported by remote
+     * File transfer supported by remote
      */
-    private boolean ftHttpSupportedByRemote = false;
-    
+    private boolean ftSupportedByRemote = false;
+
     /**
      * The logger
      */
@@ -139,34 +138,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * 
 	 * @param parent IMS service
 	 * @param contact Remote contact
+	 * @param participants List of participants
 	 */
-	public ChatSession(ImsService parent, String contact) {
+	public ChatSession(ImsService parent, String contact, ListOfParticipant participants) {
 		super(parent, contact);
 
-		// Set feature tags
-		featureTags.add(FeatureTags.FEATURE_OMA_IM);
-		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	featureTags.add(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + "\"");
-        }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	featureTags.add(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_FT_HTTP + "\"");
-        }
-		
-		// Set accept-types
-		acceptTypes = CpimMessage.MIME_TYPE;
-		if (!isGroupChat()) {
-			acceptTypes += " " + IsComposingInfo.MIME_TYPE;
-		}
+		// Set the session participants
+		this.participants = participants;
 				
-		// Set accept-wrapped-types
-		wrappedTypes = InstantMessage.MIME_TYPE + " " + ImdnDocument.MIME_TYPE;
-		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	wrappedTypes += " " + GeolocInfoDocument.MIME_TYPE;
-        }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	wrappedTypes += " " + FT_HTTP_MIME_TYPE;
-        }
-		
         // Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
 		String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
@@ -174,20 +153,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		if (parent.getImsModule().isConnectedToWifiAccess()) {
 			msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
 		}
-	}
-
-    /**
-	 * Constructor
-	 * 
-	 * @param parent IMS service
-	 * @param contact Remote contact
-	 * @param participants List of participants
-	 */
-	public ChatSession(ImsService parent, String contact, ListOfParticipant participants) {
-		this(parent, contact);
-
-		// Set the session participants
-		setParticipants(participants);
 	}
 	
 	/**
@@ -200,6 +165,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 
 	/**
+	 * Set feature tags
+	 * 
+	 * @param tags Feature tags
+	 */
+	public void setFeatureTags(List<String> tags) {
+		this.featureTags = tags;
+	}
+
+	/**
 	 * Get accept types
 	 * 
 	 * @return Accept types
@@ -209,12 +183,30 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 
 	/**
+	 * Set accept types
+	 * 
+	 * @param types Accept types
+	 */
+	public void setAcceptTypes(String types) {
+		this.acceptTypes = types; 
+	}
+
+	/**
 	 * Get wrapped types
 	 * 
 	 * @return Wrapped types
 	 */
 	public String getWrappedTypes() {
 		return wrappedTypes;
+	}
+
+	/**
+	 * Set wrapped types
+	 * 
+	 * @param types Wrapped types
+	 */
+	public void setWrappedTypes(String types) {
+		this.wrappedTypes = types;
 	}
 
 	/**
@@ -298,15 +290,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		return participants;
 	}
         
-    /**
-	 * Set the list of participants
-	 * 
-	 * @param participants List of participants
-	 */
-    public void setParticipants(ListOfParticipant participants) {
-		this.participants = participants;
-	}
-    
 	/**
 	 * Returns the list of participants currently connected to the session
 	 * 
@@ -355,21 +338,21 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 	
 	/**
-	 * Is file transfer over HTTP supported by remote
+	 * Is file transfer supported by remote
 	 * 
 	 * @return Boolean
 	 */
-	public boolean isFileTransferHttpSupportedByRemote() {
-		return ftHttpSupportedByRemote;
+	public boolean isFileTransferSupportedByRemote() {
+		return ftSupportedByRemote;
 	}	
 	
 	/**
-	 * Set file transfer over HTTP supported by remote
+	 * Set file transfer supported by remote
 	 * 
 	 * @param suppported Supported
 	 */
-	public void setFileTransferHttpSupportedByRemote(boolean supported) {
-		this.ftHttpSupportedByRemote = supported;
+	public void setFileTransferSupportedByRemote(boolean supported) {
+		this.ftSupportedByRemote = supported;
 	}
 
 	/**
@@ -408,7 +391,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	        }
 		}
 	}
-
+	
+	/**
+     * Handle 480 Temporarily Unavailable
+     *
+     * @param resp 480 response
+     */
+    public void handle480Unavailable(SipResponse resp) {
+        handleError(new ChatError(ChatError.SESSION_INITIATION_DECLINED, resp.getReasonPhrase()));
+    }
+    
     /**
      * Handle 486 Busy
      *
@@ -470,7 +462,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		} else
 		if (ChatUtils.isTextPlainType(mimeType)) {
 	    	// Text message
-			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), msgId, false, new Date());
+			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date());
 		} else
 		if (ChatUtils.isMessageCpimType(mimeType)) {
 	    	// Receive a CPIM message
@@ -480,9 +472,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 				if (cpimMsg != null) {
 			    	Date date = cpimMsg.getMessageDate();
 			    	String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
-			    	if (cpimMsgId == null) {
-			    		cpimMsgId = msgId;
-			    	}
 			    	String contentType = cpimMsg.getContentType();
 			    	
 			    	String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
@@ -504,7 +493,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	}
 
 			    	// Analyze received message thanks to the MIME type 
-			    	if (ChatUtils.isTextPlainType(contentType)) {
+                    if (ChatUtils.isFileTransferHttpType(contentType)) {
+                        // File transfer over HTTP message
+                        receiveHttpFileTransfer(StringUtils.decodeUTF8(cpimMsg.getMessageContent()), getDialogPath().getInvite(), msgId);
+                    } else
+	                if (ChatUtils.isTextPlainType(contentType)) {
 				    	// Text message
 		    			receiveText(from, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, imdnDisplayedRequested, date);
 			    	} else
@@ -519,7 +512,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	if (ChatUtils.isGeolocType(contentType)) {
 						// Geoloc message
 						receiveGeoloc(from, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, imdnDisplayedRequested, date);
-			    	}
+			    	} 
 				}
 	    	} catch(Exception e) {
 		   		if (logger.isActivated()) {
@@ -573,10 +566,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		if (isInterrupted()) {
 			return;
 		}
-		
 		if (logger.isActivated()) {
             logger.info("Data transfer error " + error);
         }
+
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
         if (msgId != null) {
             // Notify listeners
@@ -603,7 +598,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	private void receiveText(String contact, String txt, String msgId, boolean imdnDisplayedRequested, Date date) {
 		// Is composing event is reset
 	    isComposingMgr.receiveIsComposingEvent(contact, false);
-	    
+
 	    // Notify listeners
     	for(int i=0; i < getListeners().size(); i++) {
     		((ChatSessionListener)getListeners().get(i)).handleReceiveMessage(new InstantMessage(msgId, contact, txt, imdnDisplayedRequested, date));
@@ -639,7 +634,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param contact Contact
 	 * @param geolocDoc Geoloc document
 	 * @param msgId Message Id
-	 * @param flag indicating that an IMDN "displayed" is requested for this message
+	 * @param flag Flag indicating that an IMDN "displayed" is requested for this message
 	 * @param date Date of the message
 	 */
 	private void receiveGeoloc(String contact, String geolocDoc, String msgId, boolean imdnDisplayedRequested, Date date) {
@@ -663,6 +658,63 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 	
 	/**
+	 * Receive HTTP file transfer event
+	 * 
+	 * @param fileInfo File info in XML
+	 * @param invite Incoming request
+	 * @param msgId Message ID
+	 */
+	private void receiveHttpFileTransfer(String fileInfo, SipRequest invite, String msgId) {
+		// Parse HTTP document
+		FileTransferHttpInfoDocument fileTransferInfo = ChatUtils.parseFileTransferHttpDocument(fileInfo.getBytes());
+		if (fileTransferInfo != null ) {
+
+            // Test if the contact is blocked
+            if (ContactsManager.getInstance().isFtBlockedForContact(getRemoteContact())) {
+                if (logger.isActivated()) {
+                    logger.debug("Contact " + getRemoteContact()
+                            + " is blocked, automatically reject the HTTP File transfer");
+                }
+
+                // TODO : reject (SIP MESSAGE ?)
+                return;
+            }
+
+            // Auto reject if file too big
+            int maxSize = FileSharingSession.getMaxFileSharingSize();
+            if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
+                if (logger.isActivated()) {
+                    logger.debug("File is too big, reject the HTTP File transfer");
+                }
+
+                // TODO : reject (SIP MESSAGE ?)
+                return;
+            }
+            
+            // Auto reject if number max of FT reached
+            maxSize = RcsSettings.getInstance().getMaxFileTransferSessions();
+            if (maxSize > 0 && getImsService().getImsModule().getInstantMessagingService().getFileTransferSessions().size() > maxSize) {
+                if (logger.isActivated()) {
+                    logger.debug("Max number of File Tranfer reached, rejecting the HTTP File transfer");
+                }
+
+                // TODO : reject (SIP MESSAGE ?)
+                return;
+            }
+
+			// Create a new session
+			FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId);
+
+	        // Start the session
+			session.startSession();
+
+			// Notify listener
+			getImsService().getImsModule().getCoreListener().handleFileTransferInvitation(session); // TODO, isGroupChat());
+	    }
+		// TODO : else return error to Originating side
+	}
+	
+	/**
 	 * Send data chunk with a specified MIME type
 	 * 
 	 * @param msgId Message ID
@@ -672,13 +724,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 */
 	public boolean sendDataChunks(String msgId, String data, String mime) {
 		try {
-	    	if (msrpMgr != null) {
-				ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
-				msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
-				return true;
-	    	} else {
-	    		return false;	    				
-	    	}
+			ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
+			msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
+			return true;
 		} catch(Exception e) {
 			// Error
 	   		if (logger.isActivated()) {
@@ -687,7 +735,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Is group chat
 	 * 
@@ -701,7 +749,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @return Boolean
 	 */
 	public boolean isStoreAndForward() {
-		if (this instanceof TerminatingStoreAndForwardMsgSession) {
+		if (this instanceof TerminatingStoreAndForwardMsgSession ||
+				this instanceof TerminatingStoreAndForwardNotifSession) {
 			return true;
 		} else {
 			return false;
@@ -746,7 +795,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param participants List of participants
 	 */
 	public abstract void addParticipants(List<String> participants);
-
+	
 	/**
 	 * Send message delivery status via MSRP
 	 * 
@@ -765,9 +814,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
 		if (result) {
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
 		}
-	}	
+	}
 	
 	/**
      * Receive a message delivery status from a SIP message
@@ -776,10 +825,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param status Delivery status
      */
     public void receiveMessageDeliveryStatus(String msgId, String status) {
-		// Notify listeners
-    	for(int i=0; i < getListeners().size(); i++) {
-    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, status);
-		}
+        // Check if message delivery of a FileTransfer
+        String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(msgId);
+        if (ftSessionId == null) {
+    		// Notify listeners
+        	for(int i=0; i < getListeners().size(); i++) {
+        		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, status);
+    		}
+        } else {
+            ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, status);
+        }
     }
     
 	/**
@@ -791,10 +846,18 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     	try {
 			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
 			if (imdn != null) {
-		    	// Notify listeners
-		    	for(int i=0; i < getListeners().size(); i++) {
-		    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(imdn.getMsgId(), imdn.getStatus());
-				}
+	            // Check if message delivery of a FileTransfer
+	            String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
+	            if (ftSessionId == null) {
+	                // Notify listeners
+                    for (int i = 0; i < getListeners().size(); i++) {
+                        ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(
+                                imdn.getMsgId(), imdn.getStatus());
+                    }
+                } else {
+                    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(
+                            ftSessionId, imdn.getStatus());
+                }
 			}
     	} catch(Exception e) {
     		if (logger.isActivated()) {
@@ -833,13 +896,19 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         MediaDescription mediaDesc = media.elementAt(0);
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");
         String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
+        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
         // Create the MSRP session
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
+
+        // Open the MSRP session
+        getMsrpMgr().openMsrpSession();
+
+        // Send an empty packet
+        sendEmptyDataChunk();
     }
 
     /**
@@ -848,11 +917,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @throws Exception 
      */
     public void startMediaSession() throws Exception {
-        // Open the MSRP session
-        getMsrpMgr().openMsrpSession();
-
-        // Send an empty packet
-        sendEmptyDataChunk();
+        // Nothing to do
     }
 
 	/**
@@ -883,7 +948,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         // Check if geolocation push supported by remote
         setGeolocSupportedByRemote(SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH));
 
-        // Check if file transfer over HTTP supported by remote
-        setFileTransferHttpSupportedByRemote(SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_FT_HTTP));
+        // Check if file transfer supported by remote
+        setFileTransferSupportedByRemote(SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_FT) ||
+        		SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_FT_HTTP));
     }	
 }

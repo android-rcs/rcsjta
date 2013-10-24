@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
@@ -26,9 +25,9 @@ import android.os.Parcelable;
 /**
  * Capabilities
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
-public class Capabilities {
+public class Capabilities implements Parcelable {
 	/**
 	 * Image sharing support
 	 */
@@ -38,6 +37,16 @@ public class Capabilities {
 	 * Video sharing support
 	 */
 	private boolean videoSharing = false;
+	
+	/**
+	 * IP voice call support
+	 */
+	private boolean ipVoiceCall = false;
+	
+	/**
+	 * IP video call support
+	 */
+	private boolean ipVideoCall = false;
 	
 	/**
 	 * IM session support
@@ -79,7 +88,22 @@ public class Capabilities {
      */
     private boolean fileTransferThumbnail = false;
 
+    /**
+     * File Transfer S&F
+     */
+    private boolean fileTransferStoreForward = false;
+
+    /**
+     * Group chat S&F
+     */
+    private boolean groupChatStoreForward = false;
+
 	/**
+     * SIP automata (@see RFC 3840)
+     */
+    private boolean sipAutomata = false;
+
+    /**
 	 * List of supported extensions
 	 */
 	private ArrayList<String> extensions = new ArrayList<String>();
@@ -103,6 +127,8 @@ public class Capabilities {
 	public Capabilities(Parcel source) {
 		this.imageSharing = source.readInt() != 0;
 		this.videoSharing = source.readInt() != 0;
+		this.ipVoiceCall = source.readInt() != 0;	
+		this.ipVideoCall = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
 		this.csVideo = source.readInt() != 0;
@@ -111,6 +137,9 @@ public class Capabilities {
         this.fileTransferHttp = source.readInt() != 0;
         this.geolocationPush = source.readInt() != 0;
         this.fileTransferThumbnail = source.readInt() != 0;
+        this.fileTransferStoreForward = source.readInt() != 0;
+        this.groupChatStoreForward = source.readInt() != 0;
+        this.sipAutomata = source.readInt() != 0;
 		this.timestamp = source.readLong();
 		source.readStringList(this.extensions);
     }
@@ -134,6 +163,8 @@ public class Capabilities {
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeInt(imageSharing ? 1 : 0);
     	dest.writeInt(videoSharing ? 1 : 0);
+    	dest.writeInt(ipVoiceCall ? 1 : 0);    
+    	dest.writeInt(ipVideoCall ? 1 : 0);  
     	dest.writeInt(imSession ? 1 : 0);
     	dest.writeInt(fileTransfer ? 1 : 0);
     	dest.writeInt(csVideo ? 1 : 0);
@@ -142,6 +173,9 @@ public class Capabilities {
         dest.writeInt(fileTransferHttp ? 1 : 0);
         dest.writeInt(geolocationPush ? 1 : 0);
         dest.writeInt(fileTransferThumbnail ? 1 : 0);
+        dest.writeInt(fileTransferStoreForward ? 1 : 0);
+        dest.writeInt(groupChatStoreForward ? 1 : 0);
+        dest.writeInt(sipAutomata ? 1 : 0);
     	dest.writeLong(timestamp);
 		if (extensions!=null && extensions.size()>0){
 			dest.writeStringList(extensions);
@@ -198,6 +232,42 @@ public class Capabilities {
 		this.videoSharing = supported;
 	}
 
+	/**
+	 * Is IP voice call supported
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isIPVoiceCallSupported() {
+		return ipVoiceCall;
+	}
+
+	/**
+	 * Is IP video call supported
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isIPVideoCallSupported() {
+		return ipVideoCall;
+	}
+
+	/**
+	 * Set the IP voice call support
+	 * 
+	 * @param supported Supported 
+	 */
+	public void setIPVoiceCallSupport(boolean supported) {
+		this.ipVoiceCall = supported;
+	}
+	
+	/**
+	 * Set the IP video call support
+	 * 
+	 * @param supported Supported 
+	 */
+	public void setIPVideoCallSupport(boolean supported) {
+		this.ipVideoCall = supported;
+	}
+	
 	/**
 	 * Is IM session supported
 	 * 
@@ -343,6 +413,58 @@ public class Capabilities {
 	}
     
 	/**
+	 * Is file transfer S&F supported
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isFileTransferStoreForwardSupported() {
+		return fileTransferStoreForward;
+	}
+	
+	/**
+	 * Set the file transfer S&F support
+	 * 
+	 * @param supported Supported 
+	 */
+	public void setFileTransferStoreForwardSupport(boolean supported) {
+		this.fileTransferStoreForward = supported;
+	}
+
+	/**
+	 * Is group chat S&F supported
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isGroupChatStoreForwardSupported() {
+		return groupChatStoreForward;
+	}
+	
+	/**
+	 * Set the group chat S&F support
+	 * 
+	 * @param supported Supported 
+	 */
+	public void setGroupChatStoreForwardSupport(boolean supported) {
+		this.groupChatStoreForward = supported;
+	}
+
+	/**
+	 * Is device an automata ?
+	 * @return True if automata
+	 */
+	public boolean isSipAutomata() {
+		return sipAutomata;
+	}
+
+	/**
+	 * Set the SIP automata feature tag
+	 * @param sipAutomata
+	 */
+	public void setSipAutomata(boolean sipAutomata) {
+		this.sipAutomata = sipAutomata;
+	}
+
+	/**
 	 * Add supported extension
 	 * 
 	 * @param tag Feature tag
@@ -386,15 +508,17 @@ public class Capabilities {
 	public String toString() {
 		return "Image_share=" + imageSharing +
 			", Video_share=" + videoSharing +
-			", FT=" + fileTransfer +
-			", IM=" + imSession +
+			", IP_voice_call=" + ipVoiceCall +
+			", IP_video_call=" + ipVideoCall +			
+			", File_transfer=" + fileTransfer +
+			", Chat=" + imSession +
 			", CS_video=" + csVideo +
 			", Presence_discovery=" + presenceDiscovery +
 			", Social_presence=" + socialPresence +
-            ", FToHttp=" + fileTransferHttp +
-            ", GeolocationPush=" + geolocationPush +
-            ", FT_Thumbnail=" + fileTransferThumbnail +
-            ", Extensions=" + extensions.size() +
+            ", FT_http=" + fileTransferHttp +
+            ", Geolocation_push=" + geolocationPush +
+            ", FT_thumbnail=" + fileTransferThumbnail +
+            ", SipAutomata=" + sipAutomata +
 			", Timestamp=" + timestamp;
 	}
 }

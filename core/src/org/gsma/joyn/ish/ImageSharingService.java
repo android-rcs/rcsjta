@@ -41,6 +41,8 @@ import android.os.IBinder;
  * The parameter contact in the API supports the following formats:
  * MSISDN in national or international format, SIP address, SIP-URI
  * or Tel-URI.
+ * 
+ * @author Jean-Marc AUFFRET
  */
 public class ImageSharingService extends JoynService {
 	/**
@@ -213,7 +215,7 @@ public class ImageSharingService extends JoynService {
      * @return List of image sharings
      * @throws JoynServiceException
      */
-    public Set<ImageSharing> getImageShares() throws JoynServiceException {
+    public Set<ImageSharing> getImageSharings() throws JoynServiceException {
 		if (api != null) {
 			try {
 	    		Set<ImageSharing> result = new HashSet<ImageSharing>();
@@ -234,6 +236,7 @@ public class ImageSharingService extends JoynService {
     /**
      * Returns a current image sharing from its unique ID
      * 
+     * @param sharingId Sharing ID
      * @return Image sharing or null if not found
      * @throws JoynServiceException
      */

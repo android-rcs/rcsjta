@@ -26,7 +26,7 @@ public class GeolocInfoDocument {
 	/**
 	 * MIME type
 	 */
-	public static final String MIME_TYPE = "application/rcspushlocation+xml";
+	public static final String MIME_TYPE = "application/vnd.gsma.rcspushlocation+xml";
 	
 	/**
 	 * Entity

@@ -1,6 +1,7 @@
 package org.gsma.joyn.chat;
 
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.GeolocMessage;
 
 /**
  * Chat event listener

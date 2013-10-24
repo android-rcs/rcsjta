@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.FifoBuffer;
@@ -46,7 +47,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * IMS service dispatcher
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ImsServiceDispatcher extends Thread {
     /**
@@ -153,7 +154,7 @@ public class ImsServiceDispatcher extends Thread {
 		// First check if the request URI matches with the local interface address
 		isMatchingRegistered = localIpAddress.equals(requestURI.getHost());
 		
-		// If not match, perhaps we are behind a NAT
+		// If no matching, perhaps we are behind a NAT
 		if ((!isMatchingRegistered) && imsNetIntf.isBehindNat()) {
 			// We are behind NAT: check if the request URI contains the previously
 			// discovered public IP address and port number
@@ -166,7 +167,7 @@ public class ImsServiceDispatcher extends Thread {
 				isMatchingRegistered = false;
 			}
 		}
-		
+
 		if (!isMatchingRegistered) {		
 			// Send a 404 error
 			if (logger.isActivated()) {
@@ -217,6 +218,10 @@ public class ImsServiceDispatcher extends Thread {
 	    	if (imsModule.getCallManager().isCallConnected()) { 
 		    	// Rich call service
 	    		imsModule.getRichcallService().receiveCapabilityRequest(request);
+	    	} else
+	    	if (imsModule.getIPCallService().isCallConnected()) { 
+		    	// IP call service
+	    		imsModule.getIPCallService().receiveCapabilityRequest(request);
 	    	} else {
 	    		// Capability discovery service
 	    		imsModule.getCapabilityService().receiveCapabilityRequest(request);
@@ -292,35 +297,53 @@ public class ImsServiceDispatcher extends Thread {
 					sendFinalResponse(request, 603);
 					return;
 	    		}
-	    		
-		    	if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
-		    			(!request.getContentType().contains("multipart"))) {
-	    			// Store & Forward push notifs session
-		    		if (logger.isActivated()) {
-		    			logger.debug("Store & Forward push notifications");
-		    		}
-	    			imsModule.getInstantMessagingService().receiveStoredAndForwardPushNotifications(request);
-		    	} else
-		    	if (ChatUtils.isGroupChatInvitation(request)) {
-			        // Ad-hoc group chat session
-		    		if (logger.isActivated()) {
-		    			logger.debug("Ad-hoc group chat session invitation");
-		    		}
-	    			imsModule.getInstantMessagingService().receiveAdhocGroupChatSession(request);
-		    	} else
-		    	if (SipUtils.getReferredByHeader(request) != null) {
-	    			// Store & Forward push messages session
-		    		if (logger.isActivated()) {
-		    			logger.debug("Store & Forward push messages session");
-		    		}
-	    			imsModule.getInstantMessagingService().receiveStoredAndForwardPushMessages(request);
-		    	} else {
-			        // 1-1 chat session
-		    		if (logger.isActivated()) {
-		    			logger.debug("1-1 chat session invitation");
-		    		}
-	    			imsModule.getInstantMessagingService().receiveOne2OneChatSession(request);
-	    		}
+
+                if (ChatUtils.isFileTransferOverHttp(request)) {
+                    FileTransferHttpInfoDocument ftHttpInfo = ChatUtils.getHttpFTInfo(request);
+                    if (ftHttpInfo != null) {
+                        // HTTP file transfer invitation
+                        if (logger.isActivated()) {
+                            logger.debug("Single file transfer over HTTP invitation");
+                        }
+                        imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request, ftHttpInfo);
+                    } else {
+                        // TODO : else return error to Originating side
+                        // Malformed xml for FToHTTP: automatically reject with a 606 Not Acceptable
+                        if (logger.isActivated()) {
+                            logger.debug("Malformed xml for FToHTTP: automatically reject");
+                        }
+                        sendFinalResponse(request, 606);
+                    }
+                } else {
+	    			if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
+		    			(!request.getContentType().contains("multipart"))) { // TODO: to be removed when corrected by ALU
+	    				// Store & Forward push notifs session
+			    		if (logger.isActivated()) {
+			    			logger.debug("Store & Forward push notifications");
+			    		}
+			    		imsModule.getInstantMessagingService().receiveStoredAndForwardPushNotifications(request);
+			    	} else
+			    	if (ChatUtils.isGroupChatInvitation(request)) {
+				        // Ad-hoc group chat session
+			    		if (logger.isActivated()) {
+			    			logger.debug("Ad-hoc group chat session invitation");
+			    		}
+		    			imsModule.getInstantMessagingService().receiveAdhocGroupChatSession(request);
+			    	} else
+			    	if (SipUtils.getReferredByHeader(request) != null) {
+		    			// Store & Forward push messages session
+			    		if (logger.isActivated()) {
+			    			logger.debug("Store & Forward push messages session");
+			    		}
+		    		 	imsModule.getInstantMessagingService().receiveStoredAndForwardPushMessages(request);
+			    	} else {
+	                    // 1-1 chat session
+	                    if (logger.isActivated()) {
+	                        logger.debug("1-1 chat session invitation");
+	                    }
+	                    imsModule.getInstantMessagingService().receiveOne2OneChatSession(request);
+			    	}
+		    	}
 	    	} else
 	    	if (isTagPresent(sdp, "rtp") &&
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
@@ -353,7 +376,40 @@ public class ImsServiceDispatcher extends Thread {
 						logger.debug("Geoloc share service not supported: automatically reject");
 					}
 					sendFinalResponse(request, 603);
-	    		}	    		
+	    		}		
+		    } else 
+			if (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
+	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL))	{
+	    		// IP voice call
+	    		if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
+		    		if (logger.isActivated()) {
+		    			logger.debug("IP Voice call invitation");
+		    		}
+	    			imsModule.getIPCallService().receiveIPCallInvitation(request, true, false);
+	    		} else {
+					// Service not supported: reject the invitation with a 603 Decline
+					if (logger.isActivated()) {
+						logger.debug("IP Voice call service not supported: automatically reject");
+					}
+					sendFinalResponse(request, 603);
+	    		}	    	
+	    	} else 
+	    	if (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
+	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL) &&
+	    				SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL))	{
+		    		// IP video call
+		    		if (RcsSettings.getInstance().isIPVideoCallSupported()) {
+			    		if (logger.isActivated()) {
+			    			logger.debug("IP video call invitation");
+			    		}
+		    			imsModule.getIPCallService().receiveIPCallInvitation(request, true, true);
+		    		} else {
+						// Service not supported: reject the invitation with a 603 Decline
+						if (logger.isActivated()) {
+							logger.debug("IP video call service not supported: automatically reject");
+						}
+						sendFinalResponse(request, 603);
+		    		}	    		    		
     		} else {
     			Intent intent = intentMgr.isSipRequestResolved(request);
 	    		if (intent != null) {
@@ -532,6 +588,9 @@ public class ImsServiceDispatcher extends Thread {
      * @return IMS session
      */
     private ImsServiceSession searchSession(String callId) {
+        if (callId == null) {
+            return null;
+        }
     	ImsService[] list = imsModule.getImsServices();
     	for(int i=0; i< list.length; i++) {
     		for(Enumeration<ImsServiceSession> e = list[i].getSessions(); e.hasMoreElements();) {

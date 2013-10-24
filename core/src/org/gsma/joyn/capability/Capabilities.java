@@ -54,6 +54,21 @@ public class Capabilities implements Parcelable {
 	private boolean fileTransfer = false;
 	
 	/**
+	 * Geolocation push support
+	 */
+	private boolean geolocPush = false;
+	
+	/**
+	 * IP voice call support
+	 */
+	private boolean ipVoiceCall = false;
+
+	/**
+	 * IP video call support
+	 */
+	private boolean ipVideoCall = false;
+	
+	/**
 	 * List of supported extensions
 	 */
 	private Set<String> extensions = new HashSet<String>();
@@ -65,13 +80,22 @@ public class Capabilities implements Parcelable {
 	 * @param videoSharing Video sharing support
 	 * @param imSession IM/Chat support
 	 * @param fileTransfer File transfer support
+	 * @param geolocPush Geolocation push support
+	 * @param ipVoiceCall IP voice call support
+	 * @param ipVideoCall IP video call support
 	 * @param extensions Set of supported extensions
 	 */
-	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, Set<String> extensions) {
+	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
+			boolean fileTransfer, boolean geolocPush,
+			boolean ipVoiceCall, boolean ipVideoCall,
+			Set<String> extensions) {
 		this.imageSharing = imageSharing; 
 		this.videoSharing = videoSharing; 
 		this.imSession = imSession; 
 		this.fileTransfer = fileTransfer;
+		this.geolocPush = geolocPush;
+		this.ipVoiceCall = ipVoiceCall;
+		this.ipVideoCall = ipVideoCall;
 		this.extensions = extensions; 
 	}
 
@@ -85,6 +109,9 @@ public class Capabilities implements Parcelable {
 		this.videoSharing = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
+		this.geolocPush = source.readInt() != 0;
+		this.ipVoiceCall = source.readInt() != 0;
+		this.ipVideoCall = source.readInt() != 0;
 
 		List<String> exts = new ArrayList<String>();
 		source.readStringList(exts);
@@ -112,6 +139,9 @@ public class Capabilities implements Parcelable {
     	dest.writeInt(videoSharing ? 1 : 0);
     	dest.writeInt(imSession ? 1 : 0);
     	dest.writeInt(fileTransfer ? 1 : 0);
+    	dest.writeInt(geolocPush ? 1 : 0);
+    	dest.writeInt(ipVoiceCall ? 1 : 0);
+    	dest.writeInt(ipVideoCall ? 1 : 0);
 		if (extensions != null) {
 			List<String> exts = new ArrayList<String>();
 			exts.addAll(extensions);
@@ -169,6 +199,34 @@ public class Capabilities implements Parcelable {
 		return fileTransfer;
 	}
 	
+
+	/**
+	 * Is geolocation push supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isGeolocPushSupported() {
+		return geolocPush;		
+	}
+
+	/**
+	 * Is IP voice call supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isIPVoiceCallSupported() {
+		return ipVoiceCall;				
+	}
+
+	/**
+	 * Is IP video call supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isIPVideoCallSupported() {
+		return ipVideoCall;				
+	}
+	
 	/**
 	 * Is extension supported
 	 * 
@@ -178,7 +236,7 @@ public class Capabilities implements Parcelable {
 	public boolean isExtensionSupported(String tag) {
 		return extensions.contains(tag);
 	}
-
+	
 	/**
 	 * Get list of supported extensions
 	 * 

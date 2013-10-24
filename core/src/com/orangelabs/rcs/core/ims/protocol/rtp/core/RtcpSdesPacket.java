@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * RCTP SDES packet
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpSdesPacket extends RtcpPacket {
 

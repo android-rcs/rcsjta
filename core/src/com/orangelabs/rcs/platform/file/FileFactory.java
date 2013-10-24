@@ -28,7 +28,7 @@ import java.io.OutputStream;
 /**
  * File factory
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class FileFactory {
 	/**

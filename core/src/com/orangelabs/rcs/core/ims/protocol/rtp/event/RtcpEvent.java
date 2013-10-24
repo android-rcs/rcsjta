@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpPacket;
 /**
  * Abstract RTCP event
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class RtcpEvent {
 	/**

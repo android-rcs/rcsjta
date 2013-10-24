@@ -18,10 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp;
 
-
-
-
-
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.ProcessorInputStream;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
@@ -32,7 +28,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Media processor. A processor receives an input stream, use a codec chain
  * to filter the data before to send it to the output stream.
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class Processor extends Thread {
 	/**
@@ -54,11 +50,6 @@ public class Processor extends Thread {
 	 * Processor status flag
 	 */
 	private boolean interrupted = false;
-
-    /**
-     * bigger Sequence Number
-     */
-    private long bigSeqNum = 0;
 
     /**
      * The logger
@@ -94,7 +85,6 @@ public class Processor extends Thread {
 			logger.debug("Start media processor");
 		}
 		interrupted = false;
-        bigSeqNum = 0;
         start();
 	}
 
@@ -132,24 +122,16 @@ public class Processor extends Thread {
 					}
 					break;
 				}
-
-                // Drop the old packet
-                long seqNum = inBuffer.getSequenceNumber();
-                if (seqNum + 3 > bigSeqNum) {
-                    if (seqNum > bigSeqNum) {
-                        bigSeqNum = seqNum;
+				
+                // Codec chain processing
+                int result = codecChain.process(inBuffer);
+                if ((result != Codec.BUFFER_PROCESSED_OK)
+                        && (result != Codec.OUTPUT_BUFFER_NOT_FILLED)) {
+                    interrupted = true;
+                    if (logger.isActivated()) {
+                        logger.error("Codec chain processing error: " + result);
                     }
-
-                    // Codec chain processing
-                    int result = codecChain.process(inBuffer);
-                    if ((result != Codec.BUFFER_PROCESSED_OK)
-                            && (result != Codec.OUTPUT_BUFFER_NOT_FILLED)) {
-                        interrupted = true;
-                        if (logger.isActivated()) {
-                            logger.error("Codec chain processing error: " + result);
-                        }
-                        break;
-                    }
+                    break;
                 }
 			}
 		} catch (Exception e) {

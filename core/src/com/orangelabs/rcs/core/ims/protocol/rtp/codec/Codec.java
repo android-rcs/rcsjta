@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 /**
  * Abstract codec
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class Codec {
 

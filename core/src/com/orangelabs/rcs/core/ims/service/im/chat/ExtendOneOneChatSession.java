@@ -18,6 +18,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import javax2.sip.header.RequireHeader;
+import javax2.sip.header.SubjectHeader;
 
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -28,12 +29,13 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
+import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Extends a one-to-one chat session to an ad-hoc session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ExtendOneOneChatSession extends GroupChatSession {
 	/**
@@ -87,10 +89,15 @@ public class ExtendOneOneChatSession extends GroupChatSession {
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-            
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
+
 	    	// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -170,7 +177,13 @@ public class ExtendOneOneChatSession extends GroupChatSession {
         		InstantMessagingService.CHAT_FEATURE_TAGS,
         		content, BOUNDARY_TAG);
 
-        // Add a require header
+        // Test if there is a subject
+    	if (getSubject() != null) {
+	        // Add a subject header
+    		invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(getSubject()));
+    	}
+
+    	// Add a require header
         invite.addHeader(RequireHeader.NAME, "recipient-list-invite");
         
         // Add a contribution ID header

@@ -294,5 +294,4 @@ public class SipService extends ImsService {
 		// Notify listener
 		getImsModule().getCore().getListener().handleSipInstantMessageReceived(intent, message);
 	}
-	
 }

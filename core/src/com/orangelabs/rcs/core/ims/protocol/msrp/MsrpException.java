@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 /**
  * MSRP exception
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MsrpException extends Exception {
 	static final long serialVersionUID = 1L;

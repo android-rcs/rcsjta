@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * Socket server connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface SocketServerConnection {
 	/**

@@ -31,7 +31,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
-import com.orangelabs.rcs.provider.sharing.RichCall;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -174,7 +174,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 
 		// Set the video renderer
-		session.setMediaRenderer(renderer);
+		session.setVideoRenderer(renderer);
 		
 		// Accept invitation
 		session.acceptSession();
@@ -189,7 +189,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		
 		// Update rich call history
-		RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
+		RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
 
 		// Reject invitation
 		session.rejectSession(603);
@@ -223,7 +223,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 
 	/**
-	 * Removes a listener from video sharing
+	 * Removes a listener from video sharing events
 	 * 
 	 * @param listener Listener
 	 */
@@ -249,7 +249,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.STARTED);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.STARTED);
 			startedAt = System.currentTimeMillis();
 			
 			// Notify event listeners
@@ -280,10 +280,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	
 			// Update rich call history
 			if (session.getDialogPath().isSessionCancelled()) {
-				RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
+				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
 			} else {
-				RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
-				RichCall.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+				RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
 			}
 			
 	  		// Notify event listeners
@@ -314,8 +314,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
-			RichCall.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+			RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -352,7 +352,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 	
 			// Update rich call history
-			RichCall.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.FAILED);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.FAILED);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -381,12 +381,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
     
     /**
-     * The size of media has changed
+     * Video stream has been resized
      *
      * @param width Video width
      * @param height Video height
      */
-    public void handleMediaResized(int width, int height) {
+    public void handleVideoResized(int width, int height) {
     	// TODO
     }
 }

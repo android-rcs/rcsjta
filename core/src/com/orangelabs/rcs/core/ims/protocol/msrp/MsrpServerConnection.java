@@ -28,13 +28,18 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * MSRP server connection
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class MsrpServerConnection extends MsrpConnection {
 	/**
 	 * Local TCP port number
 	 */
 	private int localPort; 
+
+    /**
+     * Socket server connection
+     */
+    private SocketServerConnection socketServer = null;
 
 	/**
 	 * The logger
@@ -43,19 +48,18 @@ public class MsrpServerConnection extends MsrpConnection {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param session MSRP session
 	 * @param localPort Local port number
 	 */
 	public MsrpServerConnection(MsrpSession session, int localPort) {
 		super(session);
-		
 		this.localPort = localPort;
 	}
 
 	/**
 	 * Returns the socket connection
-	 * 
+	 *
 	 * @return Socket
 	 * @throws IOException
 	 */
@@ -63,9 +67,9 @@ public class MsrpServerConnection extends MsrpConnection {
 		if (logger.isActivated()) {
 			logger.debug("Open server socket at " + localPort);
 		}
-		SocketServerConnection socketServer = NetworkFactory.getFactory().createSocketServerConnection();
+        socketServer = NetworkFactory.getFactory().createSocketServerConnection();
 		socketServer.open(localPort);
-		
+
 		if (logger.isActivated()) {
 			logger.debug("Wait client connection");
 		}
@@ -76,4 +80,19 @@ public class MsrpServerConnection extends MsrpConnection {
 		}
 		return socket;
 	}
+
+    /**
+     * Close the connection
+     */
+    public void close() {
+        super.close();
+        
+        try {
+            if (socketServer != null) {
+                socketServer.close();
+            }
+        } catch (IOException e) {
+            // Nothing to do
+        }
+    }
 }

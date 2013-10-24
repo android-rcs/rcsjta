@@ -20,26 +20,23 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
 
 import com.orangelabs.rcs.platform.network.DatagramConnection;
 import com.orangelabs.rcs.platform.network.NetworkFactory;
+import com.orangelabs.rcs.utils.FifoBuffer;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * RTP packet receiver
  *
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
-public class RtpPacketReceiver {
+public class RtpPacketReceiver extends Thread {
     /**
      * Statistics
      */
 	private RtpStatisticsReceiver stats = new RtpStatisticsReceiver();
-
-	/**
-     * Buffer size needed to received RTP packet
-     */
-	private int bufferSize = 64000;
 
 	/**
 	 * Datagram connection
@@ -56,6 +53,36 @@ public class RtpPacketReceiver {
      */
     private boolean isClosed = false;
 
+    /**
+     * Fifo buffer for received packet
+     */
+    private FifoBuffer fifo = new FifoBuffer();
+
+    /**
+     * Max size for the fifo
+     */
+    private static final int FIFO_MAX_NUMBER = 100; 
+
+    /**
+     * Number of element to clean in the fifo
+     */
+    private static final int FIFO_CLEAN_NUMBER = 20; 
+
+    /**
+     * Signals that thread is interrupted
+     */
+    private boolean isInterrupted = false;
+
+    /**
+     * Last sequence number
+     */
+    private int lastSeqnum = 0;
+
+    /**
+     * timeout
+     */
+    private int timeout = 0;
+
 	/**
 	 * The logger
 	 */
@@ -70,7 +97,10 @@ public class RtpPacketReceiver {
      * @throws IOException
      */
     public RtpPacketReceiver(int port, RtcpSession rtcpSession, int socketTimeout) throws IOException {
+        super();
+
         this.rtcpSession = rtcpSession;
+        this.timeout = socketTimeout;
         // Create the UDP server
         datagramConnection = NetworkFactory.getFactory().createDatagramConnection(socketTimeout);
         datagramConnection.open(port);
@@ -94,6 +124,14 @@ public class RtpPacketReceiver {
 	 * Close the receiver
 	 */
 	public void close() {
+        // Interrupt the current thread processing
+        try {
+            isInterrupted = true;
+            interrupt();
+        } catch(Exception e) {
+            // Nothing to do
+        }
+
 		// Close the datagram connection
 		if (datagramConnection != null) {
 			try {
@@ -106,24 +144,67 @@ public class RtpPacketReceiver {
 			}
 			datagramConnection = null;
 		}
-
 	}
+
+    /**
+     * Background processing
+     */
+    public void run() {
+        if (logger.isActivated()) {
+            logger.debug("RTP Receiver processing is started");
+        }
+        try {
+            while (datagramConnection != null) {
+                // Wait a new packet
+                byte[] data = datagramConnection.receive();
+
+                if (data.length >= 12) {
+                    // Drop empty packet (payload 20)
+                    int payloadType = (byte) ((data[1] & 0xff) & 0x7f);
+                    if (payloadType != 20) {
+                        // Drop too old packet
+                        int seqnum = (char)((data[2] << 8) | (data[3] & 0xff));
+                        if (seqnum > lastSeqnum - 10) {
+                            // Clean the FIFO if full
+                            if (fifo.size() >= FIFO_MAX_NUMBER) {
+                                fifo.clean(FIFO_CLEAN_NUMBER);
+                            }
+                            fifo.addObject(data);
+                            lastSeqnum = seqnum;
+                        } else {
+                            stats.numBadRtpPkts++;
+                        }
+                    }
+                }
+            }
+        } catch (SocketTimeoutException ex) {
+            
+        } catch (Exception e) {
+            if (!isInterrupted) {
+                if (logger.isActivated()) {
+                    logger.error("Datagram socket server failed", e);
+                }
+            }
+        }
+    }
 
     /**
      * Read a RTP packet (blocking method)
      *
      * @return RTP packet
      */
-    public RtpPacket readRtpPacket() throws SocketTimeoutException {
+    public RtpPacket readRtpPacket() throws TimeoutException {
 		try {
-			// Wait a new packet
-            byte[] data = datagramConnection.receive(bufferSize);
+            // Get a new packet in FIFO
+            byte[] data = (byte[]) fifo.getObject(timeout);
+            if (data == null) {
+                throw new TimeoutException();
+            }
 
 			// Parse the RTP packet
 			RtpPacket pkt = parseRtpPacket(data);
 
-			// Drop the keep-alive packets
-			if ((pkt != null) && (pkt.payloadType != 20)) {
+			if (pkt != null) {
 				// Update statistics
 				stats.numPackets++;
                 stats.numBytes += data.length;
@@ -139,13 +220,11 @@ public class RtpPacketReceiver {
 				return readRtpPacket();
 			}
 
-        } catch (SocketTimeoutException ex) {
-            throw ex;
 		} catch (Exception e) {
             if (!isClosed) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse the RTP packet", e);
-                }
+//                if (logger.isActivated()) {
+//                    logger.error("Can't parse the RTP packet", e);
+//                }
                 stats.numBadRtpPkts++;
             }
 			return null;
@@ -274,5 +353,4 @@ public class RtpPacketReceiver {
             }
         }
     }
-
 }

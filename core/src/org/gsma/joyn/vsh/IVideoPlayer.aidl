@@ -17,8 +17,10 @@ interface IVideoPlayer {
 
 	int getLocalRtpPort();
 
+	VideoCodec getCodec();
+
 	VideoCodec[] getSupportedCodecs();
-	
+
 	void addEventListener(in IVideoPlayerListener listener);
 
 	void removeEventListener(in IVideoPlayerListener listener);	

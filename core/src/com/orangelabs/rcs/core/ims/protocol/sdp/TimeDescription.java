@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Time description
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class TimeDescription {
 	public String timeActive;

@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating ad-hoc group chat session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	/**
@@ -60,9 +60,9 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
 		// Set subject
 		if ((subject != null) && (subject.length() > 0)) {
-			setSubject(subject);		
+			setSubject(subject);
 		}
-		
+
 		// Create dialog path
 		createOriginatingDialogPath();
 		
@@ -85,10 +85,15 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
             if (logger.isActivated()){
 				logger.debug("Local setup attribute is " + localSetup);
 			}
-            
-	    	// Set local port
-	    	int localMsrpPort = 9; // See RFC4145, Page 4
-	    	
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
+
 	    	// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();

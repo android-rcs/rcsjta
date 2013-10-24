@@ -26,7 +26,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Originating SIP session
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class OriginatingSipSession extends GenericSipSession {
 	/**

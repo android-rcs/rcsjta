@@ -27,7 +27,7 @@ import android.content.Intent;
 /**
  * Device shutdown event receiver: automatically stops the RCS service
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class DeviceShutdown extends BroadcastReceiver {
 	/**

@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionBasedServiceError;
 /**
  * Chat error
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class ChatError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;

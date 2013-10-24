@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * RTCP APP packet
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class RtcpAppPacket extends RtcpPacket {
 	public int ssrc;

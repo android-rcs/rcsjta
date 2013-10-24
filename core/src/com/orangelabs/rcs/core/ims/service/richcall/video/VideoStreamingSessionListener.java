@@ -24,7 +24,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 /**
  * Content sharing streaming session listener
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public interface VideoStreamingSessionListener extends ImsSessionListener  {
     /**
@@ -35,10 +35,10 @@ public interface VideoStreamingSessionListener extends ImsSessionListener  {
     public void handleSharingError(ContentSharingError error);
 
     /**
-     * The size of media has changed
+     * Video stream has been resized
      *
      * @param width Video width
      * @param height Video height
      */
-    public void handleMediaResized(int width, int height);
+    public void handleVideoResized(int width, int height);
 }

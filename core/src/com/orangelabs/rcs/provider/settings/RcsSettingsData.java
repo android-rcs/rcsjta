@@ -205,6 +205,11 @@ public class RcsSettingsData {
 	// ---------------------------------------------------------------------------
 
 	/**
+	 * Max file-icon size
+	 */
+	public static final String MAX_FILE_ICON_SIZE = "FileIconSize";
+
+	/**
 	 * Max photo-icon size
 	 */
 	public static final String MAX_PHOTO_ICON_SIZE = "MaxPhotoIconSize";
@@ -265,6 +270,11 @@ public class RcsSettingsData {
 	public static final String MAX_FILE_TRANSFER_SESSIONS = "MaxFileTransferSessions";
 
 	/**
+	 * Max number of simultaneous IP call sessions
+	 */
+	public static final String MAX_IP_CALL_SESSIONS = "MaxIpCallSessions";
+
+	/**
 	 * Activate or not SMS fallback service
 	 */
 	public static final String SMS_FALLBACK_SERVICE = "SmsFallbackService";
@@ -305,7 +315,7 @@ public class RcsSettingsData {
 	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";	
 	
 	/**
-	 * Max entries for ipcall log
+	 * Max entries for IP call log
 	 */
 	public static final String MAX_IPCALL_LOG_ENTRIES = "MaxIpcallLogEntries";	
 	
@@ -323,7 +333,17 @@ public class RcsSettingsData {
      * Minimum storage capacity
      */
     public static final String MIN_STORAGE_CAPACITY = "MinStorageCapacity";
+    
+    /**
+     * Convergent messaging UX option
+     */
+    public static final String CONVERGENT_MESSAGING_UX = "ConvergentMessagingUx";
 
+    /**
+     * Voice breakout option
+     */
+    public static final String VOICE_BREAKOUT = "VoiceBreakout";
+    
     // ---------------------------------------------------------------------------
 	// User profile settings
 	// ---------------------------------------------------------------------------
@@ -432,6 +452,11 @@ public class RcsSettingsData {
      * Country area code
      */
 	public static final String COUNTRY_AREA_CODE = "CountryAreaCode";
+	
+    /**
+     * Msisdn
+     */
+	public static final String MSISDN = "MSISDN";
 
 	// ---------------------------------------------------------------------------
 	// Stack settings
@@ -608,12 +633,12 @@ public class RcsSettingsData {
 	public static final String CAPABILITY_VIDEO_SHARING = "CapabilityVideoShare";
 
 	/**
-	 * IP call Audio capability
+	 * IP voice call capability
 	 */
 	public static final String CAPABILITY_IP_VOICE_CALL = "CapabilityIPVoiceCall";
 	
 	/**
-	 * IP call Video capability
+	 * IP video call capability
 	 */
 	public static final String CAPABILITY_IP_VIDEO_CALL = "CapabilityIPVideoCall";
 	
@@ -621,6 +646,11 @@ public class RcsSettingsData {
 	 * Instant Messaging session capability
 	 */
 	public static final String CAPABILITY_IM_SESSION = "CapabilityImSession";
+	
+	/**
+	 * Group Instant Messaging session capability
+	 */
+	public static final String CAPABILITY_IM_GROUP_SESSION = "CapabilityImGroupSession";
 
 	/**
 	 * File transfer capability
@@ -671,6 +701,16 @@ public class RcsSettingsData {
      * Instant messaging is always on (Store & Forward server)
      */
 	public static final String IM_CAPABILITY_ALWAYS_ON = "ImAlwaysOn";
+	
+	/**
+	 * SIP Automata capability (@see RFC3840)
+	 */
+	public static final String CAPABILITY_SIP_AUTOMATA = "CapabilitySipAutomata";
+	
+	/**
+     * File transfer always on (Store & Forward server)
+     */
+	public static final String FT_CAPABILITY_ALWAYS_ON = "FtAlwaysOn";
 
 	/**
      * Instant messaging use report
@@ -746,11 +786,21 @@ public class RcsSettingsData {
      * Provisioning version
      */
     public static final String PROVISIONING_VERSION = "ProvisioningVersion";
+    
+    /**
+     * Provisioning version
+     */
+    public static final String PROVISIONING_TOKEN = "ProvisioningToken";
 
     /**
-     * Provisioning address (for test purpose)
+     * Secondary provisioning address
      */
-    public static final String PROVISIONING_ADDRESS = "ProvisioningAddress";
+    public static final String SECONDARY_PROVISIONING_ADDRESS = "SecondaryProvisioningAddress";
+
+    /**
+     * Use only the secondary provisioning address
+     */
+    public static final String SECONDARY_PROVISIONING_ADDRESS_ONLY = "SecondaryProvisioningAddressOnly";
 
     /**
      * Directory path for photos
@@ -776,4 +826,5 @@ public class RcsSettingsData {
      * Secured RTP over Wi-Fi
      */
     public static final String SECURE_RTP_OVER_WIFI = "SecureRtpOverWifi";
+
 }

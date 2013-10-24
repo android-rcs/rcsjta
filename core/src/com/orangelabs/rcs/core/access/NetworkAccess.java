@@ -21,7 +21,7 @@ package com.orangelabs.rcs.core.access;
 /**
  * Abstract network access
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public abstract class NetworkAccess {
     /**

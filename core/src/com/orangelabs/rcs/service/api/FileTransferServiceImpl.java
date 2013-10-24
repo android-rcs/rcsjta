@@ -42,7 +42,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -204,7 +204,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-    	RichMessaging.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent(), FileTransfer.State.INVITED);
+    	RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent(), FileTransfer.State.INVITED);
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -245,8 +245,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     	return new FileTransferServiceConfiguration(
     			RcsSettings.getInstance().getWarningMaxFileTransferSize(),
     			RcsSettings.getInstance().getMaxFileTransferSize(),
-    			RcsSettings.getInstance().isFileTransferAutoAccepted());
-	}    
+    			RcsSettings.getInstance().isFileTransferAutoAccepted(),
+    			RcsSettings.getInstance().isFileTransferThumbnailSupported(),
+    			RcsSettings.getInstance().getMaxFileIconSize());
+    }    
     
     /**
      * Transfers a file to a contact. The parameter file contains the complete filename
@@ -256,11 +258,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param contact Contact
      * @param filename Filename to transfer
+     * @param fileicon Filename of the file icon associated to the file to be transfered
      * @param listenet File transfer event listener
      * @return File transfer
      * @throws ServerApiException
      */
-    public IFileTransfer transferFile(String contact, String filename, IFileTransferListener listener) throws ServerApiException {
+    public IFileTransfer transferFile(String contact, String filename, String fileicon, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Transfer file " + filename + " to " + contact);
 		}
@@ -272,14 +275,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, false);
+			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, false, null, null); // TODO
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessaging.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent(), FileTransfer.State.INITIATED);
+			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent(), FileTransfer.State.INITIATED);
 
 			// Start the session
 			session.startSession();
@@ -293,7 +296,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 			throw new ServerApiException(e.getMessage());
 		}
-    }    
+    }
     
     /**
      * Returns the list of file transfers in progress

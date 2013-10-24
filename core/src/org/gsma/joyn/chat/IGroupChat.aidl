@@ -1,6 +1,9 @@
 package org.gsma.joyn.chat;
 
 import org.gsma.joyn.chat.IGroupChatListener;
+import org.gsma.joyn.chat.Geoloc;
+import org.gsma.joyn.ft.IFileTransfer;
+import org.gsma.joyn.ft.IFileTransferListener;
 
 /**
  * Group chat interface
@@ -21,7 +24,7 @@ interface IGroupChat {
 	void rejectInvitation();
 	
 	String sendMessage(in String text);
-	
+
 	void sendIsComposingEvent(in boolean status);
 	
 	void addParticipants(in List<String> participants);
@@ -33,4 +36,8 @@ interface IGroupChat {
 	void addEventListener(in IGroupChatListener listener);
 	
 	void removeEventListener(in IGroupChatListener listener);
+
+	String sendGeoloc(in Geoloc geoloc);
+
+	IFileTransfer sendFile(in String filename, in String fileicon, in IFileTransferListener listener);
 }

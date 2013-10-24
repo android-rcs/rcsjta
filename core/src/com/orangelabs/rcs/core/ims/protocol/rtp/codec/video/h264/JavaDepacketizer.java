@@ -222,7 +222,6 @@ public class JavaDepacketizer extends VideoCodec {
      * Used to assemble fragments with the same timestamp into a single frame.
      */
     public static class FrameAssembler {
-        private boolean rtpMarker = false; // have we received the RTP marker that signifies the end of a frame?
         private byte[][] reassembledData = null; // Frame sequence chunks
         private int[] reassembledDataSize = null; // Sequence chunk size
         private int reassembledDataFullSize = 0; // Frame sequence chunks full size
@@ -233,7 +232,6 @@ public class JavaDepacketizer extends VideoCodec {
         private byte reassembledDataNALHeader = 0; // Final frame NAL header
         private long timeStamp = -1;
         private Format format = null;
-        private byte[] finalData = new byte[MAX_H264_FRAME_SIZE];
         private long seqNumber = -1;
         private VideoOrientation videoOrientation;
 
@@ -243,9 +241,6 @@ public class JavaDepacketizer extends VideoCodec {
          * @param buffer
          */
         public void put(Buffer buffer) {
-
-            // Read rtpMarker
-            rtpMarker = (buffer.isRTPMarkerSet());
 
             if (buffer.getLength() <= 2) {
                 // no actual data in buffer, no need to keep. Typically
@@ -319,10 +314,6 @@ public class JavaDepacketizer extends VideoCodec {
          */
         public boolean complete() {
 
-            if (!rtpMarker) {
-                return false; // need an rtp marker to signify end
-            }
-
             if (!reassembledDataHasStart || !reassembledDataHasEnd) {
                 return false; // has start and end chunk
             }
@@ -350,12 +341,10 @@ public class JavaDepacketizer extends VideoCodec {
          * Assumes that complete() has been called and returns true.
          */
         private void copyToBuffer(Buffer bDest) {
-            if (!rtpMarker)
-                throw new IllegalStateException();
 
             if (reassembledDataFullSize <= MAX_H264_FRAME_SIZE) {
                 // + 1 because of the header size
-                int finalDataLength = reassembledDataFullSize + 1;
+                byte[] finalData = new byte[reassembledDataFullSize + 1];
                 int finalDataPos = 0;
 
                 // Copy NAL header
@@ -385,7 +374,7 @@ public class JavaDepacketizer extends VideoCodec {
                 // reassembled frame size not too big
                 // Set buffer
                 bDest.setData(finalData);
-                bDest.setLength(finalDataLength);
+                bDest.setLength(reassembledDataSize[reassembledDataPosSeqEnd]);
                 bDest.setOffset(0);
                 bDest.setTimeStamp(timeStamp);
                 bDest.setFormat(format);
@@ -466,7 +455,7 @@ public class JavaDepacketizer extends VideoCodec {
          */
         public int createNewAssembler(long timeStamp) {
             int spot = -1;
-            if (numberOfAssemblers < NUMBER_OF_ASSEMBLERS - 1) {
+            if (numberOfAssemblers < NUMBER_OF_ASSEMBLERS) {
                 // If there's enough space left to create a new assembler
                 // We search its spot
                 for (int i = 0; i < numberOfAssemblers; i++) {
@@ -478,23 +467,38 @@ public class JavaDepacketizer extends VideoCodec {
                     spot = numberOfAssemblers;
                 }
                 numberOfAssemblers++;
+
+                // Store the assembler that will be "discarded" and can be reused
+                FrameAssembler oldAssembler = assemblers[numberOfAssemblers - 1];
+
                 // Decale all assemblers with newest timeStamp to the right
-                for (int i = numberOfAssemblers; i > spot; i--) {
+                for (int i = numberOfAssemblers - 1; i > spot; i--) {
                     assemblers[i] = assemblers[i - 1];
                 }
-                if (assemblers[spot] == null) {
-                    assemblers[spot] = new FrameAssembler();
-                } else {
+                if (oldAssembler != null) {
+                    // Reuse and reset the discarded assembler
+                    assemblers[spot] = oldAssembler;
                     assemblers[spot].reset();
+                } else {
+                    assemblers[spot] = new FrameAssembler();
                 }
             } else {
+                // Store the assembler that will be "discarded" and can be reused
+                FrameAssembler oldAssembler = assemblers[0];
+
                 // Not enough space, we destroy the oldest assembler
                 for (int i = 1; i < NUMBER_OF_ASSEMBLERS; i++) {
                     assemblers[i - 1] = assemblers[i];
                 }
                 // Last spot is for the new assembler
-                assemblers[NUMBER_OF_ASSEMBLERS - 1].reset();
-                spot = numberOfAssemblers;
+                spot = NUMBER_OF_ASSEMBLERS - 1;
+                if (oldAssembler != null) {
+                    // Reuse and reset the discarded assembler
+                    assemblers[spot] = oldAssembler;
+                    assemblers[spot].reset();
+                } else {
+                    assemblers[spot] = new FrameAssembler();
+                }
             }
             return spot;
         }
@@ -535,7 +539,7 @@ public class JavaDepacketizer extends VideoCodec {
                 }
             }
             // remove all assemblers with oldest timeStamp to the left
-            for (int i = numberOfAssemblers; i > spot; i--) {
+            for (int i = numberOfAssemblers - 1; i > spot; i--) {
                 assemblers[i - 1] = assemblers[i];
             }
             numberOfAssemblers -= spot + 1;

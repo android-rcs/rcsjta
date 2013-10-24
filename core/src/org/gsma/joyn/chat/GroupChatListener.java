@@ -47,6 +47,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * 
 	 * @param message New chat message
 	 * @see ChatMessage
+	 * @see GeolocMessage
 	 */
 	public abstract void onNewMessage(ChatMessage message);
 

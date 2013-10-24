@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service;
 /**
  * Session ID generator
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class SessionIdGenerator {
 	/**

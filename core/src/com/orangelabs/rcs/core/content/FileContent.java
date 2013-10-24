@@ -22,7 +22,7 @@ package com.orangelabs.rcs.core.content;
 /**
  * File content
  * 
- * @author Jean-Marc AUFFRET
+ * @author jexa7410
  */
 public class FileContent extends MmContent {
 	/**

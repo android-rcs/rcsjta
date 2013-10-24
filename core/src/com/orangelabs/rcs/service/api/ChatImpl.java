@@ -3,6 +3,7 @@ package com.orangelabs.rcs.service.api;
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.chat.IChat;
 import org.gsma.joyn.chat.IChatListener;
 
@@ -18,7 +19,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessaging;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -138,7 +139,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 					setCoreSession(session);
 			
 					// Update rich messaging history
-					RichMessaging.getInstance().addChatMessage(session.getFirstMessage(),
+					RichMessagingHistory.getInstance().addChatMessage(session.getFirstMessage(),
 							ChatLog.Message.Direction.OUTGOING);
 	
 					// Start the session
@@ -165,6 +166,17 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		}
     }
     
+	/**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Unique message ID or null in case of error
+     */
+    public String sendGeoloc(Geoloc geoloc) {
+    	// TODO
+    	return null;
+    }
+
     /**
      * Sends a displayed delivery report for a given message ID
      * 
@@ -290,8 +302,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				logger.info("New IM received");
 			}
 			
+			// TODO: bypass message if already received
+			
 			// Update rich messaging history
-			RichMessaging.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
+			RichMessagingHistory.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
 			
 			// Create a chat message
         	ChatMessage msg = new ChatMessage(message.getMessageId(),
@@ -336,7 +350,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    	switch(error.getErrorCode()){
 		    	case ChatError.SESSION_INITIATION_FAILED:
 		    	case ChatError.SESSION_INITIATION_CANCELLED:
-					RichMessaging.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
+					RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
 							ChatLog.Message.Status.Content.FAILED);
 					// TODO: notify listener
 		    		break;
@@ -389,7 +403,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			RichMessaging.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

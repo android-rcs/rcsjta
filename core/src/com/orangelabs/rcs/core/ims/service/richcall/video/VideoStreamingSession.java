@@ -39,12 +39,12 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public abstract class VideoStreamingSession extends ContentSharingSession {
     /**
-	 * Media renderer
+	 * Video renderer
 	 */
 	private IVideoRenderer renderer = null;
 
     /**
-     * Media renderer
+     * Video renderer
      */
     private IVideoPlayer player = null;
 
@@ -65,38 +65,38 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	}
 
 	/**
-	 * Get the media renderer
+	 * Get the video renderer
 	 * 
 	 * @return Renderer
 	 */
-	public IVideoRenderer getMediaRenderer() {
+	public IVideoRenderer getVideoRenderer() {
 		return renderer;
 	}
 	
 	/**
-	 * Set the media renderer
+	 * Set the video renderer
 	 * 
 	 * @param renderer Renderer
 	 */
-	public void setMediaRenderer(IVideoRenderer renderer) {
+	public void setVideoRenderer(IVideoRenderer renderer) {
 		this.renderer = renderer;
 	}
 
     /**
-     * Get the media player
+     * Get the video player
      * 
      * @return Player
      */
-    public IVideoPlayer getMediaPlayer() {
+    public IVideoPlayer getVideoPlayer() {
         return player;
     }
 
     /**
-     * Set the media player
+     * Set the video player
      *
-     * @param IMediaPlayer
+     * @param Player
      */
-    public void setMediaPlayer(IVideoPlayer player) {
+    public void setVideoPlayer(IVideoPlayer player) {
         this.player = player;
     }
 
