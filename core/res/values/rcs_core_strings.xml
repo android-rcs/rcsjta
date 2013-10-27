@@ -19,8 +19,10 @@
 	<!-- Strings associated to ContactsContract menus -->
 	<string name="rcs_core_my_profile">\u0020My joyn profile</string>	
 	<string name="rcs_core_contact_file_transfer">Transfer a file</string>
-	<string name="rcs_core_contact_im_session">Initiate a chat session</string>
+	<string name="rcs_core_contact_im_session">Initiate a chat</string>
 	<string name="rcs_core_contact_cs_video">Video call</string>
+	<string name="rcs_core_contact_ip_voice_call">IP voice call</string>
+	<string name="rcs_core_contact_ip_video_call">IP video call</string>
 	<string name="rcs_core_contact_extensions">Extensions</string>
 	
 	<!-- Strings linked to joyn account -->

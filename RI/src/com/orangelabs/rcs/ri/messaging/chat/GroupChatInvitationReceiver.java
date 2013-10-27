@@ -17,7 +17,7 @@ import android.text.TextUtils;
 /**
  * Group chat invitation receiver
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class GroupChatInvitationReceiver extends BroadcastReceiver {
 	@Override

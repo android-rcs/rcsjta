@@ -35,7 +35,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Chat invitation receiver
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class SingleChatInvitationReceiver extends BroadcastReceiver {
 	@Override

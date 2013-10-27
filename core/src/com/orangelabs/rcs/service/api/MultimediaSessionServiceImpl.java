@@ -192,6 +192,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		
 		// Broadcast intent related to the received invitation
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 		intent.putExtra(MultimediaSessionIntent.EXTRA_CONTACT, number);
 		intent.putExtra(MultimediaSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(MultimediaSessionIntent.EXTRA_SESSION_ID, session.getSessionID());

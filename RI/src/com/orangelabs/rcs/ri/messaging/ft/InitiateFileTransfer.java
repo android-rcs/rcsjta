@@ -40,6 +40,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract.Data;
 import android.provider.MediaStore;
+import android.telephony.PhoneNumberUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -140,7 +141,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	            if (selectedContact != null) {
 	    	        for (int i=0;i<spinner.getAdapter().getCount();i++) {
 	    	        	MatrixCursor cursor2 = (MatrixCursor)spinner.getAdapter().getItem(i);
-	    	        	if (selectedContact.equalsIgnoreCase(cursor2.getString(1))) {
+						if (PhoneNumberUtils.compare(selectedContact, cursor2.getString(1))) {
 	    	        		// Select contact
 	    	                spinner.setSelection(i);
 	    	                spinner.setEnabled(false);

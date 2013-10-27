@@ -18,10 +18,15 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.ChatService;
+import org.gsma.joyn.chat.Geoloc;
+import org.gsma.joyn.chat.GeolocMessage;
 import org.gsma.joyn.contacts.ContactsService;
 
 import android.app.AlertDialog;
@@ -29,6 +34,7 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +55,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -57,7 +65,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * Chat view
  */
 public abstract class ChatView extends ListActivity implements OnClickListener, OnKeyListener, JoynServiceListener {	
-    /**
+	/**
+	 * Activity result constant
+	 */
+	public final static int SELECT_GEOLOCATION = 0;
+
+	/**
      * UI handler
      */
 	protected Handler handler = new Handler();
@@ -204,7 +217,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 		NotifMessageItem item = new NotifMessageItem(notif);
 		msgListAdapter.add(item);
     }    
-    
+        
     /**
      * Send a text and display it
      */
@@ -227,7 +240,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         }
 
         // Send text message
-        String msgId = sendMessage(text);
+        String msgId = sendTextMessage(text);
     	if (msgId != null) {
 	    	// Add text to the message history
 	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text);
@@ -236,8 +249,36 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
     	}
     }
+
+    /**
+     * Send a geoloc and display it
+     * 
+     * @param geoloc Geoloc
+     */
+    private void sendGeoloc(Geoloc geoloc) {
+        // Check if the service is available
+    	boolean registered = false;
+    	try {
+    		if ((chatApi != null) && chatApi.isServiceRegistered()) {
+    			registered = true;
+    		}
+    	} catch(Exception e) {}
+        if (!registered) {
+	    	Utils.showMessage(ChatView.this, getString(R.string.label_service_not_available));
+	    	return;
+        }
+
+        // Send text message
+        String msgId = sendGeolocMessage(geoloc);
+    	if (msgId != null) {
+	    	// Add text to the message history
+	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me),	GeolocMessage.geolocToString(geoloc));
+    	} else {
+	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
+    	}
+    }
     
-	/**
+    /**
 	 * Display received message
 	 * 
 	 * @param msg Instant message
@@ -541,13 +582,21 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     }
     
     /**
-     * Send message
+     * Send text message
      * 
      * @param msg Message
      * @return Message ID
      */
-    protected abstract String sendMessage(String msg);
+    protected abstract String sendTextMessage(String msg);
     
+    /**
+     * Send geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Message ID
+     */
+    protected abstract String sendGeolocMessage(Geoloc geoloc);
+
     /**
      * Quit the session
      */
@@ -559,4 +608,61 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * @param isTyping Is compoing status
      */
     protected abstract void setTypingStatus(boolean isTyping);
+    
+    /**
+     * Get a geoloc
+     */
+    protected void getGeoLoc() {
+		// Start a new activity to send a geolocation
+    	startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
+    }
+        
+    /**
+     * On activity result
+     * 
+     * @param requestCode Request code
+     * @param resultCode Result code
+     * @param data Data
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (resultCode != RESULT_OK) {
+    		return;
+    	}
+
+    	switch(requestCode) {
+	    	case SELECT_GEOLOCATION: {
+				// Get selected geoloc
+				Geoloc geoloc = data.getParcelableExtra(EditGeoloc.EXTRA_GEOLOC);
+
+				// Send geoloc
+				sendGeoloc(geoloc);
+	    	}             
+	    	break;
+    	}
+    }
+
+    /**
+     * Show us in a map
+     * 
+     * @param participant A participant
+     */
+    protected void showUsInMap(String participant) {
+    	Intent intent = new Intent(this, ShowUsInMap.class);
+    	ArrayList<String> list = new ArrayList<String>();
+    	list.add(participant);
+    	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
+    	startActivity(intent);
+    }    
+
+    /**
+     * Show us in a map
+     * 
+     * @param participants List of participants
+     */
+    protected void showUsInMap(Set<String> participants) {
+    	Intent intent = new Intent(this, ShowUsInMap.class);
+    	ArrayList<String> list = new ArrayList<String>(participants);
+    	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
+    	startActivity(intent);
+    }    
 }

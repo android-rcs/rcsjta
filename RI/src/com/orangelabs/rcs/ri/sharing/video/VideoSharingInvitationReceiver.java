@@ -34,7 +34,7 @@ import android.media.RingtoneManager;
 /**
  * Video sharing invitation receiver
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class VideoSharingInvitationReceiver extends BroadcastReceiver {
 	@Override

@@ -47,7 +47,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 /**
  * Video RTP renderer based on H264 QCIF format
  *
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener {
     /**
@@ -140,7 +140,16 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
 		return list;
 	}    
     
-    /**
+	/**
+	 * Returns the current codec
+	 * 
+	 * @return Codec
+	 */
+	public VideoCodec getCodec() {
+		return defaultVideoCodec;
+	}
+
+	/**
 	 * Opens the renderer and prepares resources (e.g. decoder)
 	 * 
 	 * @param codec Video codec
@@ -484,7 +493,6 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             	}
             }
         }
-
     }
 }
 

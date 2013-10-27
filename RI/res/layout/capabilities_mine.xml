@@ -56,6 +56,42 @@
 			 android:clickable="false"
              android:text="@string/label_capabilities_im" />
 	    </TableRow>
+	    
+        <TableRow>
+            <TextView android:text=""
+             android:layout_marginLeft="5dip"
+             android:gravity="right"/>
+            <CheckBox android:id="@+id/geoloc_push"
+             android:layout_marginLeft="5dip"
+             android:layout_marginRight="5dip"
+             android:textStyle="bold"
+             android:clickable="false"
+             android:text="@string/label_capabilities_geolocation_push" />
+        </TableRow>
+				
+        <TableRow>
+            <TextView android:text=""
+             android:layout_marginLeft="5dip"
+             android:gravity="right"/>
+            <CheckBox android:id="@+id/ip_voice_call"
+             android:layout_marginLeft="5dip"
+             android:layout_marginRight="5dip"
+             android:textStyle="bold"
+             android:clickable="false"
+             android:text="@string/label_capabilities_ip_voice_call" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:text=""
+             android:layout_marginLeft="5dip"
+             android:gravity="right"/>
+            <CheckBox android:id="@+id/ip_video_call"
+             android:layout_marginLeft="5dip"
+             android:layout_marginRight="5dip"
+             android:textStyle="bold"
+             android:clickable="false"
+             android:text="@string/label_capabilities_ip_video_call" />
+        </TableRow>
 
 		<TableRow>
 	        <TextView android:text="@string/label_capabilities_extensions"
@@ -66,6 +102,7 @@
 			 android:layout_marginLeft="5dip"
 			 android:layout_marginRight="5dip"/>
 	    </TableRow>
+        
 	</TableLayout>
 	
 </ScrollView>

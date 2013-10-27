@@ -26,6 +26,8 @@ import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatListener;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.Geoloc;
+import org.gsma.joyn.chat.GeolocMessage;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -56,7 +58,7 @@ public class SingleChatView extends ChatView {
 	 * Intent parameters
 	 */
 	public final static String EXTRA_MODE = "mode";
-	public static String EXTRA_CONTACT = "contact";
+	public final static String EXTRA_CONTACT = "contact";
 
 	/**
 	 * Activity displayed status
@@ -212,12 +214,12 @@ public class SingleChatView extends ChatView {
 	}
 
     /**
-     * Send a message
+     * Send a text message
      * 
      * @param msg Message
      * @return Message ID
      */
-    protected String sendMessage(String msg) {
+    protected String sendTextMessage(String msg) {
     	try {
 			// Send the text to remote
 			String msgId = chat.sendMessage(msg);
@@ -232,6 +234,27 @@ public class SingleChatView extends ChatView {
 	    }
     }
     
+    /**
+     * Send geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Message ID
+     */
+    protected String sendGeolocMessage(Geoloc geoloc) {
+        try {
+			// Send the text to remote
+        	String msgId = chat.sendGeoloc(geoloc);
+	    	
+	        // Warn the composing manager that the message was sent
+	    	composingManager.messageWasSent();
+
+	    	return msgId;
+	    } catch(Exception e) {
+	    	e.printStackTrace();
+	    	return null;
+	    }
+    }
+
     /**
      * Update displayed report
      */
@@ -330,6 +353,19 @@ public class SingleChatView extends ChatView {
 			case R.id.menu_quicktext:
 				addQuickText();
 				break;
+
+			case R.id.menu_send_geoloc:
+				getGeoLoc();
+				break;	
+							
+			case R.id.menu_showus_map:
+				try {
+					showUsInMap(chat.getRemoteContact());
+			    } catch(JoynServiceException e) {
+			    	e.printStackTrace();
+					Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed));
+				}
+				break;	
 
 			case R.id.menu_clear_log:
 				// Delete conversation

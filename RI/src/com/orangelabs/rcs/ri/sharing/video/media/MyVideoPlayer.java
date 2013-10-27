@@ -208,6 +208,15 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
 		return list;
 	}
     
+	/**
+	 * Returns the current codec
+	 * 
+	 * @return Codec
+	 */
+	public VideoCodec getCodec() {
+		return defaultVideoCodec;
+	}
+	
     /**
 	 * Opens the player and prepares resources (e.g. encoder, camera)
 	 * 
@@ -435,24 +444,11 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     }
 
     /**
-     * Get media codec
-     *
-     * @return Media codec
-     */
-    public VideoCodec getVideoCodec() {
-        if (defaultVideoCodec == null) {
-            return null;
-        } else {
-            return defaultVideoCodec;
-        }
-    }
-
-    /**
-     * Get media codec width
+     * Get video width
      *
      * @return Width
      */
-    public int getMediaCodecWidth() {
+    public int getVideoWidth() {
         if (defaultVideoCodec == null) {
             return H264Config.VIDEO_WIDTH;
         } else {
@@ -461,11 +457,11 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
     }
 
     /**
-     * Get media codec height
+     * Get video height
      *
      * @return Height
      */
-    public int getMediaCodecHeight() {
+    public int getVideoHeight() {
         if (defaultVideoCodec == null) {
             return H264Config.VIDEO_HEIGHT;
         } else {

@@ -198,6 +198,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     	
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, number);
     	intent.putExtra(ImageSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());

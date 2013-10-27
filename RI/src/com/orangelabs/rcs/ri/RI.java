@@ -29,6 +29,7 @@ import android.widget.ListView;
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.intents.TestIntentsApi;
+import com.orangelabs.rcs.ri.ipcall.TestIPCallApi;
 import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
 import com.orangelabs.rcs.ri.session.TestMultimediaSessionApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
@@ -56,6 +57,7 @@ public class RI extends ListActivity {
     		getString(R.string.menu_messaging),
     		getString(R.string.menu_sharing),
     		getString(R.string.menu_mm_sessions),
+    		getString(R.string.menu_ipcall),
     		getString(R.string.menu_intents),
     		getString(R.string.menu_about)
         };
@@ -86,10 +88,14 @@ public class RI extends ListActivity {
         		break;
 
         	case 5:
-        		startActivity(new Intent(this, TestIntentsApi.class));
+        		startActivity(new Intent(this, TestIPCallApi.class));
         		break;
 
         	case 6:
+        		startActivity(new Intent(this, TestIntentsApi.class));
+        		break;
+
+        	case 7:
         		startActivity(new Intent(this, AboutRI.class));
         		break;
     	}

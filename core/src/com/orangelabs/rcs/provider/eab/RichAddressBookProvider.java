@@ -85,7 +85,7 @@ public class RichAddressBookProvider extends ContentProvider {
      */
 	private static class DatabaseHelper extends SQLiteOpenHelper{
 		private static final String DATABASE_NAME = "eab.db";
-		private static final int DATABASE_VERSION = 20;
+		private static final int DATABASE_VERSION = 21;
 		
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -134,6 +134,10 @@ public class RichAddressBookProvider extends ContentProvider {
 					+ RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF + " integer, "
+					+ RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF + " integer, "					
 					+ RichAddressBookData.KEY_CAPABILITY_EXTENSIONS + " TEXT, "
 					+ RichAddressBookData.KEY_IM_BLOCKED + " TEXT, "
 					+ RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP + " long, "

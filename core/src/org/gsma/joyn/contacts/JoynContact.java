@@ -50,6 +50,7 @@ public class JoynContact implements Parcelable {
 	 * @param contactId Contact ID
 	 * @param registered Registration state
 	 * @param capabilities Capabilities 
+     * @hide
 	 */
 	public JoynContact(String contactId, boolean registered, Capabilities capabilities) {
 		this.contactId = contactId;
@@ -61,6 +62,7 @@ public class JoynContact implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public JoynContact(Parcel source) {
 		contactId = source.readString();
@@ -78,6 +80,7 @@ public class JoynContact implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -88,6 +91,7 @@ public class JoynContact implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(contactId);
@@ -102,6 +106,8 @@ public class JoynContact implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<JoynContact> CREATOR
             = new Parcelable.Creator<JoynContact>() {

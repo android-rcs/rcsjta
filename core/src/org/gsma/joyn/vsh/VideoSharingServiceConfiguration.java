@@ -35,6 +35,7 @@ public class VideoSharingServiceConfiguration implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param maxTime Maximum authorized duration of the video sharing
+     * @hide
 	 */
 	public VideoSharingServiceConfiguration(long maxTime) {
 		this.maxTime = maxTime;
@@ -44,6 +45,7 @@ public class VideoSharingServiceConfiguration implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public VideoSharingServiceConfiguration(Parcel source) {
 		this.maxTime = source.readLong();
@@ -54,6 +56,7 @@ public class VideoSharingServiceConfiguration implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -64,6 +67,7 @@ public class VideoSharingServiceConfiguration implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeLong(maxTime);
@@ -71,6 +75,8 @@ public class VideoSharingServiceConfiguration implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<VideoSharingServiceConfiguration> CREATOR
             = new Parcelable.Creator<VideoSharingServiceConfiguration>() {

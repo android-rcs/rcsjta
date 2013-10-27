@@ -205,11 +205,12 @@ public class ContactsService extends JoynService {
      * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which returns
      * the referenced contact formatted as a vCard when opened through openAssetFileDescriptor(Uri, String)).
      * 
+     * @param ctx Application context
      * @param contactUri Contact URI of the contact in the native address book
      * @return Filename of vCard
      * @throws JoynServiceException
      */
-    public String getVCard(Uri contactUri) throws JoynServiceException {
+    public static String getVCard(Context ctx, Uri contactUri) throws JoynServiceException {
     	String fileName = null;
 		Cursor cursor = ctx.getContentResolver().query(contactUri, null, null, null, null);   			
     	while(cursor.moveToNext()) {

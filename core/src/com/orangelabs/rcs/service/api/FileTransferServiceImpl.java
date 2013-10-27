@@ -212,6 +212,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     	
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
     	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());

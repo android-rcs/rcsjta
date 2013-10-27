@@ -57,6 +57,9 @@ public class CapabilitiesList extends Activity {
         	CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
         	CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
         	CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+        	CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
+        	CapabilitiesLog.CAPABILITY_IP_VOICE_CALL,
+        	CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL,
         	CapabilitiesLog.CAPABILITY_EXTENSIONS
     		};
         String sortOrder = CapabilitiesLog.CONTACT_NUMBER + " DESC ";
@@ -93,9 +96,12 @@ public class CapabilitiesList extends Activity {
     		cache.ft = cursor.getInt(3);
     		cache.ish = cursor.getInt(4);
     		cache.vsh = cursor.getInt(5);
+    		cache.geoloc = cursor.getInt(6);
+    		cache.ipVoiceCall = cursor.getInt(7);
+    		cache.ipVideoCall = cursor.getInt(8);
 
-    		String exts = "";
-			String[] extensionList = cursor.getString(6).split(";");
+    		String exts = "\n";
+			String[] extensionList = cursor.getString(9).split(";");
 	        for(String value : extensionList) {
 	        	if (value.length() > 0) {
 	        		exts += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
@@ -120,6 +126,12 @@ public class CapabilitiesList extends Activity {
 	        imageCSh.setChecked(cache.ish == CapabilitiesLog.SUPPORTED);
 	        CheckBox videoCSh = (CheckBox)view.findViewById(R.id.video_sharing);
 	        videoCSh.setChecked(cache.vsh == CapabilitiesLog.SUPPORTED);
+	        CheckBox geoloc = (CheckBox)view.findViewById(R.id.geoloc_push);
+	        geoloc.setChecked(cache.geoloc == CapabilitiesLog.SUPPORTED);
+	        CheckBox ipVoiceCall = (CheckBox)view.findViewById(R.id.ip_voice_call);
+	        ipVoiceCall.setChecked(cache.ipVoiceCall == CapabilitiesLog.SUPPORTED);
+	        CheckBox ipVideoCall = (CheckBox)view.findViewById(R.id.ip_video_call);
+	        ipVideoCall.setChecked(cache.ipVideoCall == CapabilitiesLog.SUPPORTED);
     		TextView extsView = (TextView)view.findViewById(R.id.extensions);
     		extsView.setText(getString(R.string.label_extensions, cache.exts));
     	}
@@ -134,6 +146,9 @@ public class CapabilitiesList extends Activity {
 		public int ft;
 		public int ish;
 		public int vsh;
+		public int geoloc;
+		public int ipVoiceCall;
+		public int ipVideoCall;		
 		public String exts;
 	}    
  }

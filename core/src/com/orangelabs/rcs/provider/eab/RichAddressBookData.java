@@ -166,7 +166,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_GEOLOCATION_PUSH = "capability_geolocation_push";
+	static final String KEY_CAPABILITY_GEOLOCATION_PUSH = CapabilitiesLog.CAPABILITY_GEOLOC_PUSH;
 	
 	/**
 	 * Column name
@@ -191,13 +191,33 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_IM_BLOCKED = "im_blocked";
+	static final String KEY_CAPABILITY_IP_VOICE_CALL = CapabilitiesLog.CAPABILITY_IP_VOICE_CALL;
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_CAPABILITY_IP_VIDEO_CALL = CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL;
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_CAPABILITY_GROUP_CHAT_SF = "capability_group_chat_sf";
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_CAPABILITY_FILE_TRANSFER_SF = "capability_file_transfer_sf";
 	
 	/**
 	 * Column name
 	 */
 	static final String KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP = "im_blocked_timestamp";   
 
+	/**
+	 * Column name
+	 */
+	static final String KEY_IM_BLOCKED = "im_blocked";
+	
     /** 
      * TRUE value
      */

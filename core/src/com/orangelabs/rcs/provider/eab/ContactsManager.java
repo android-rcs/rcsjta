@@ -238,6 +238,26 @@ public final class ContactsManager {
      */
     private static final String MIMETYPE_FT_BLOCKED = "vnd.android.cursor.item/com.orangelabs.rcs.ft-blocked";
     
+    /** 
+     * MIME type for RCS IP Voice Call capability 
+     */
+    private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL = ContactsProvider.MIME_TYPE_IP_VOICE_CALL;
+
+    /** 
+     * MIME type for RCS IP Video Call capability 
+     */
+    private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactsProvider.MIME_TYPE_IP_VIDEO_CALL;
+    
+    /** 
+     * MIME type for file transfer S&F capability 
+     */
+    private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER_SF = "vnd.android.cursor.item/com.orangelabs.rcs.capability.file-transfer-sf";
+
+    /** 
+     * MIME type for group chat S&F capability 
+     */
+    private static final String MIMETYPE_CAPABILITY_GROUP_CHAT_SF = "vnd.android.cursor.item/com.orangelabs.rcs.capability.group-chat-sf";
+    
     /**
      * ONLINE available status
      */
@@ -513,6 +533,11 @@ public final class ContactsManager {
 		values.put(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH, setCapabilityToColumn(newCapabilities.isGeolocationPushSupported() && isRegistered));
 		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP, setCapabilityToColumn(newCapabilities.isFileTransferHttpSupported() && isRegistered));
 		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, setCapabilityToColumn(newCapabilities.isFileTransferThumbnailSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL, setCapabilityToColumn(newCapabilities.isIPVoiceCallSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL, setCapabilityToColumn(newCapabilities.isIPVideoCallSupported() && isRegistered));
+		values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF, setCapabilityToColumn((newCapabilities.isFileTransferStoreForwardSupported() && isRegistered) ||
+				(RcsSettings.getInstance().isFtAlwaysOn() && newInfo.isRcsContact())));
+		values.put(RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF, setCapabilityToColumn(newCapabilities.isGroupChatStoreForwardSupported() && isRegistered));
 
 		// Save the capabilities extensions
 		ArrayList<String> newExtensions = newCapabilities.getSupportedExtensions();
@@ -651,7 +676,8 @@ public final class ContactsManager {
     				ops.add(op);
     			}
     			// File transfer
-    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_FILE_TRANSFER, newInfo.getCapabilities().isFileTransferSupported() && isRegistered, oldInfo.getCapabilities().isFileTransferSupported());
+    			// For FT, also check if the FT S&F is activated, for RCS contacts
+    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_FILE_TRANSFER, (newInfo.getCapabilities().isFileTransferSupported() && isRegistered)||(RcsSettings.getInstance().isFileTransferStoreForwardSupported() && newInfo.isRcsContact()), oldInfo.getCapabilities().isFileTransferSupported());
     			if (op!=null){
     				ops.add(op);
     			}
@@ -668,6 +694,16 @@ public final class ContactsManager {
     			}
     			// Video sharing
     			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_VIDEO_SHARING, newInfo.getCapabilities().isVideoSharingSupported() && isRegistered, oldInfo.getCapabilities().isVideoSharingSupported());
+    			if (op!=null){
+    				ops.add(op);
+    			}
+    			// IP Voice call
+    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_IP_VOICE_CALL, newInfo.getCapabilities().isIPVoiceCallSupported() && isRegistered, oldInfo.getCapabilities().isIPVoiceCallSupported());
+    			if (op!=null){
+    				ops.add(op);
+    			}
+    			// IP video call
+    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_IP_VIDEO_CALL, newInfo.getCapabilities().isIPVideoCallSupported() && isRegistered, oldInfo.getCapabilities().isIPVideoCallSupported());
     			if (op!=null){
     				ops.add(op);
     			}
@@ -691,8 +727,18 @@ public final class ContactsManager {
     			if (op!=null){
     				ops.add(op);
     			}
-    			// File transfer http
+    			// File transfer HTTP
     			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_FILE_TRANSFER_HTTP, newInfo.getCapabilities().isFileTransferHttpSupported() && isRegistered, oldInfo.getCapabilities().isFileTransferHttpSupported());
+    			if (op!=null){
+    				ops.add(op);
+    			}
+    			// File transfer S&F
+    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_FILE_TRANSFER_SF, newInfo.getCapabilities().isFileTransferStoreForwardSupported() && isRegistered, oldInfo.getCapabilities().isFileTransferStoreForwardSupported());
+    			if (op!=null){
+    				ops.add(op);
+    			}
+    			// Group chat S&F
+    			op = modifyMimeTypeForContact(rcsRawContactId, contact, MIMETYPE_CAPABILITY_GROUP_CHAT_SF, newInfo.getCapabilities().isGroupChatStoreForwardSupported() && isRegistered, oldInfo.getCapabilities().isGroupChatStoreForwardSupported());
     			if (op!=null){
     				ops.add(op);
     			}
@@ -895,27 +941,34 @@ public final class ContactsManager {
                 presenceInfo.setPhotoIcon(photoIcon);
 
                 // Get the capabilities infos
-                capabilities.setCsVideoSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_CS_VIDEO));
-                capabilities.setFileTransferSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER));
-                capabilities.setImageSharingSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING));
-                capabilities.setImSessionSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_IM_SESSION));
-                capabilities.setPresenceDiscoverySupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY));
-                capabilities.setSocialPresenceSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE));
-                capabilities.setGeolocationPushSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH));
-                capabilities.setVideoSharingSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING));
-                capabilities.setFileTransferThumbnailSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL));
-                capabilities.setFileTransferHttpSupport(getCapabilityFronColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP));
-
+                capabilities.setCsVideoSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_CS_VIDEO));
+                capabilities.setFileTransferSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER));
+                capabilities.setImageSharingSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING));
+                capabilities.setImSessionSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_IM_SESSION));
+                capabilities.setPresenceDiscoverySupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY));
+                capabilities.setSocialPresenceSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE));
+                capabilities.setGeolocationPushSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH));
+                capabilities.setVideoSharingSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING));
+                capabilities.setFileTransferThumbnailSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL));
+                capabilities.setFileTransferHttpSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP));
+                capabilities.setIPVoiceCallSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL));
+                capabilities.setIPVideoCallSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL));
+                capabilities.setFileTransferStoreForwardSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF));
+                capabilities.setGroupChatStoreForwardSupport(getCapabilityFromColumn(cur, RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF));
+                
                 // Set RCS extensions capability
 				String extensions = cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS));
-				String[] extensionList = extensions.split(";");
-				for (int i=0;i<extensionList.length;i++){
-					if (extensionList[i].trim().length()>0){
-						capabilities.addSupportedExtension(extensionList[i]);
+				if (extensions != null) {
+					String[] extensionList = extensions.split(";");
+					for (int i=0;i<extensionList.length;i++){
+						if (extensionList[i].trim().length()>0){
+							capabilities.addSupportedExtension(extensionList[i]);
+						}
 					}
 				}
+				
+				// Set timestamp
 				capabilities.setTimestamp(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_TIMESTAMP)));
-
 			}
 			cur.close();
 		}
@@ -2231,6 +2284,12 @@ public final class ContactsManager {
 		if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_CS_VIDEO)) {
 			return ctx.getString(R.string.rcs_core_contact_cs_video);
 		} else
+		if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VOICE_CALL)) {
+			return ctx.getString(R.string.rcs_core_contact_ip_voice_call);
+		} else
+		if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VIDEO_CALL)) {
+			return ctx.getString(R.string.rcs_core_contact_ip_video_call);
+		} else		
 		if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_COMMON_EXTENSION)) {
 			return ctx.getString(R.string.rcs_core_contact_extensions);
 		} else 
@@ -2366,27 +2425,53 @@ public final class ContactsManager {
 		// Cs Video
 		capabilities.setCsVideoSupport(capabilities.isCsVideoSupported() && isRegistered);
 
-		// File transfer
-		capabilities.setFileTransferSupport(capabilities.isFileTransferSupported() && isRegistered);
+		// File transfer. This capability is enabled:
+		// - if the capability is present and the contact is registered
+		// - if the FT S&F is enabled and the contact is RCS capable		
+		capabilities.setFileTransferSupport((capabilities.isFileTransferSupported() && isRegistered) ||
+				(RcsSettings.getInstance().isFileTransferStoreForwardSupported() && newInfo.isRcsContact()));
+		
 		// Image sharing
 		capabilities.setImageSharingSupport(capabilities.isImageSharingSupported() && isRegistered);
+
 		// IM session
 		// This capability is enabled:
 		// - if the capability is present and the contact is registered
 		// - if the IM store&forward is enabled and the contact is RCS capable
 		capabilities.setImSessionSupport((capabilities.isImSessionSupported() && isRegistered) 
 				|| (RcsSettings.getInstance().isImAlwaysOn() && newInfo.isRcsContact()));
+		
+		// IM session. This capability is enabled:
+		// - if the capability is present and the contact is registered
+		// - if the IM S&F is enabled and the contact is RCS capable
+		// - if the IM store&forward is enabled and the contact is RCS capable
+		capabilities.setImSessionSupport((capabilities.isImSessionSupported() && isRegistered) 
+				|| (RcsSettings.getInstance().isImAlwaysOn() && newInfo.isRcsContact()));
+		
 		// Video sharing
 		capabilities.setVideoSharingSupport(capabilities.isVideoSharingSupported() && isRegistered);
 		
 		// Geolocation push
 		capabilities.setGeolocationPushSupport(capabilities.isGeolocationPushSupported() && isRegistered);
 
-		// FT Thumbnail
+		// FT thumbnail
 		capabilities.setFileTransferThumbnailSupport(capabilities.isFileTransferThumbnailSupported() && isRegistered);
 
-		// FT Http
+		// FT HTTP
 		capabilities.setFileTransferHttpSupport(capabilities.isFileTransferHttpSupported() && isRegistered);
+		
+		// FT S&F
+		capabilities.setFileTransferStoreForwardSupport((capabilities.isFileTransferStoreForwardSupported() && isRegistered)||
+				(RcsSettings.getInstance().isFtAlwaysOn() && newInfo.isRcsContact()));
+
+		// Group chat S&F
+		capabilities.setGroupChatStoreForwardSupport(capabilities.isGroupChatStoreForwardSupported() && isRegistered);
+		
+		// IP voice call
+		capabilities.setIPVoiceCallSupport(capabilities.isIPVoiceCallSupported() && isRegistered);
+		
+		// IP video call
+		capabilities.setIPVideoCallSupport(capabilities.isIPVideoCallSupported() && isRegistered);
 		
 		// Add the capabilities
 		newInfo.setCapabilities(capabilities);
@@ -2622,6 +2707,14 @@ public final class ContactsManager {
         // Video sharing
         if (capabilities.isVideoSharingSupported()) {
             ops.add(createMimeTypeForContact(rawContactRefIms, info.getContact(), MIMETYPE_CAPABILITY_VIDEO_SHARING));
+        }
+        // IP Voice call
+        if (capabilities.isIPVoiceCallSupported()) {
+            ops.add(createMimeTypeForContact(rawContactRefIms, info.getContact(), MIMETYPE_CAPABILITY_IP_VOICE_CALL));
+        }
+        // IP Video call
+        if (capabilities.isIPVideoCallSupported()) {
+            ops.add(createMimeTypeForContact(rawContactRefIms, info.getContact(), MIMETYPE_CAPABILITY_IP_VIDEO_CALL));
         }
         // Presence discovery
         if (capabilities.isPresenceDiscoverySupported()) {
@@ -3692,6 +3785,12 @@ public final class ContactsManager {
     		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_VIDEO_SHARING)){
     			// Set capability video sharing
    				capabilities.setVideoSharingSupport(true);
+    		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VOICE_CALL)){
+    			// Set capability ip voice call
+   				capabilities.setIPVoiceCallSupport(true);
+    		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VIDEO_CALL)){
+    			// Set capability ip video call
+   				capabilities.setIPVideoCallSupport(true);
     		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IM_SESSION)){
     			// Set capability IM session
    				capabilities.setImSessionSupport(true);
@@ -3713,6 +3812,12 @@ public final class ContactsManager {
     		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_FILE_TRANSFER_HTTP)){
     			// Set capability file transfer HTTP
    				capabilities.setFileTransferHttpSupport(true);
+    		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_FILE_TRANSFER_SF)){
+    			// Set capability file transfer S&F
+   				capabilities.setFileTransferStoreForwardSupport(true);
+    		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_GROUP_CHAT_SF)){
+    			// Set capability group chat S&F
+   				capabilities.setGroupChatStoreForwardSupport(true);
     		}else if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_EXTENSIONS)){
     			// Set RCS extensions capability
     			int columnIndex = cursor.getColumnIndex(Data.DATA2);
@@ -3822,6 +3927,13 @@ public final class ContactsManager {
                 + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=?)";
         String[] selectionArgs = {
                 Long.toString(rawContactId), 
@@ -3839,6 +3951,8 @@ public final class ContactsManager {
                 MIMETYPE_CAPABILITY_CS_VIDEO,
                 MIMETYPE_CAPABILITY_IMAGE_SHARING,
                 MIMETYPE_CAPABILITY_VIDEO_SHARING,
+                MIMETYPE_CAPABILITY_IP_VOICE_CALL,
+                MIMETYPE_CAPABILITY_IP_VIDEO_CALL,
                 MIMETYPE_CAPABILITY_IM_SESSION,
                 MIMETYPE_CAPABILITY_FILE_TRANSFER,
                 MIMETYPE_CAPABILITY_PRESENCE_DISCOVERY,
@@ -3846,6 +3960,8 @@ public final class ContactsManager {
                 MIMETYPE_CAPABILITY_GEOLOCATION_PUSH,
                 MIMETYPE_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
                 MIMETYPE_CAPABILITY_FILE_TRANSFER_HTTP,
+                MIMETYPE_CAPABILITY_FILE_TRANSFER_SF,
+                MIMETYPE_CAPABILITY_GROUP_CHAT_SF,
                 MIMETYPE_CAPABILITY_EXTENSIONS
         };
 
@@ -3903,6 +4019,22 @@ public final class ContactsManager {
     	values.put(Data.DATA2, getMimeTypeDescription(MIMETYPE_CAPABILITY_VIDEO_SHARING));
     	ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
     			.withSelection(Data.MIMETYPE + "=?", new String[]{MIMETYPE_CAPABILITY_VIDEO_SHARING})
+    			.withValues(values)
+    			.build());
+
+    	// Update IP voice call menu 
+    	values.clear();
+    	values.put(Data.DATA2, getMimeTypeDescription(MIMETYPE_CAPABILITY_IP_VOICE_CALL));
+    	ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+    			.withSelection(Data.MIMETYPE + "=?", new String[]{MIMETYPE_CAPABILITY_IP_VOICE_CALL})
+    			.withValues(values)
+    			.build());
+
+    	// Update IP video call menu 
+    	values.clear();
+    	values.put(Data.DATA2, getMimeTypeDescription(MIMETYPE_CAPABILITY_IP_VIDEO_CALL));
+    	ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+    			.withSelection(Data.MIMETYPE + "=?", new String[]{MIMETYPE_CAPABILITY_IP_VIDEO_CALL})
     			.withValues(values)
     			.build());
 
@@ -4010,23 +4142,34 @@ public final class ContactsManager {
         String[] projection = {
                 RichAddressBookData.KEY_CONTACT_NUMBER
         };
-        Cursor cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI,
-                projection,
-                null,
-                null,
-                null);
-
-        // Delete EAB Entry where number is not in the address book anymore
-        while (cursor.moveToNext()) {
-            String phoneNumber = cursor.getString(0);
-            if (getRawContactIdsFromPhoneNumber(phoneNumber).isEmpty()) {
-                String where = RichAddressBookData.KEY_CONTACT_NUMBER + "=?";
-                String[] selectionArg = {phoneNumber};
-                ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI,
-                        where,
-                        selectionArg);
-            }
-        }
+        Cursor cursor = null;
+        try {
+	        cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI,
+	                projection,
+	                null,
+	                null,
+	                null);
+	
+	        // Delete EAB Entry where number is not in the address book anymore
+	        while (cursor.moveToNext()) {
+	            String phoneNumber = cursor.getString(0);
+	            if (getRawContactIdsFromPhoneNumber(phoneNumber).isEmpty()) {
+	                String where = RichAddressBookData.KEY_CONTACT_NUMBER + "=?";
+	                String[] selectionArg = {phoneNumber};
+	                ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI,
+	                        where,
+	                        selectionArg);
+	            }
+	        }
+	    } catch (Exception e) {
+	        if (logger.isActivated()) {
+	            logger.error("Clean entries has failed", e);
+	        }
+	    } finally {
+	        if (cursor != null) {
+	            cursor.close();
+	        }
+	    }
     }
 
     /**
@@ -4049,6 +4192,8 @@ public final class ContactsManager {
     		    MIMETYPE_CAPABILITY_CS_VIDEO,
     		    MIMETYPE_CAPABILITY_IMAGE_SHARING,
     		    MIMETYPE_CAPABILITY_VIDEO_SHARING,
+    		    MIMETYPE_CAPABILITY_IP_VOICE_CALL,   
+    		    MIMETYPE_CAPABILITY_IP_VIDEO_CALL, 
     		    MIMETYPE_CAPABILITY_IM_SESSION,
     		    MIMETYPE_CAPABILITY_FILE_TRANSFER,
     		    MIMETYPE_CAPABILITY_PRESENCE_DISCOVERY,
@@ -4056,6 +4201,8 @@ public final class ContactsManager {
     		    MIMETYPE_CAPABILITY_GEOLOCATION_PUSH,
     		    MIMETYPE_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
     		    MIMETYPE_CAPABILITY_FILE_TRANSFER_HTTP,
+    		    MIMETYPE_CAPABILITY_FILE_TRANSFER_SF,
+    		    MIMETYPE_CAPABILITY_GROUP_CHAT_SF,
     		    MIMETYPE_CAPABILITY_EXTENSIONS,
     		    MIMETYPE_SEE_MY_PROFILE,
     		    MIMETYPE_RCS_CONTACT,
@@ -4125,7 +4272,7 @@ public final class ContactsManager {
      * @param column Column name
      * @return Boolean capability
      */
-    private boolean getCapabilityFronColumn(Cursor cursor, String column) {
+    private boolean getCapabilityFromColumn(Cursor cursor, String column) {
     	if (cursor.getInt(cursor.getColumnIndex(column)) == CapabilitiesLog.SUPPORTED) {
     		return true;
     	} else {

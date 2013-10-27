@@ -109,6 +109,7 @@ public class ChatServiceConfiguration {
 	 * @param displayedDeliveryReport Displayed delivery report
 	 * @param maxGeolocLabelLength Max geoloc label length
 	 * @param geolocExpireTime Geoloc expiration time
+     * @hide
 	 */
 	public ChatServiceConfiguration(boolean warnSF, int chatTimeout, int isComposingTimeout,
 			int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
@@ -133,6 +134,7 @@ public class ChatServiceConfiguration {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public ChatServiceConfiguration(Parcel source) {
 		this.warnSF = source.readInt() != 0;
@@ -153,6 +155,7 @@ public class ChatServiceConfiguration {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -163,6 +166,7 @@ public class ChatServiceConfiguration {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeInt(warnSF ? 1 : 0);
@@ -180,6 +184,8 @@ public class ChatServiceConfiguration {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<ChatServiceConfiguration> CREATOR
             = new Parcelable.Creator<ChatServiceConfiguration>() {

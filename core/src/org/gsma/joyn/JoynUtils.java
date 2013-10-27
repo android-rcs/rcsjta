@@ -19,7 +19,7 @@ package org.gsma.joyn;
 
 import java.util.List;
 
-import org.gsma.joyn.intent.ClientIntents;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -43,7 +43,7 @@ public class JoynUtils {
 	 * @return List of application info
 	 */
 	public static List<ResolveInfo> getJoynClients(Context context) {
-		Intent intent = new Intent(ClientIntents.ACTION_VIEW_SETTINGS);
+		Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
 		List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent,
 				PackageManager.MATCH_DEFAULT_ONLY);
 		return list;
@@ -57,7 +57,7 @@ public class JoynUtils {
 	 * @param receiverResult Broadcast receiver result
 	 */
 	public static void isJoynClientActivated(Context context, ResolveInfo appInfo, BroadcastReceiver receiverResult) {
-		Intent broadcastIntent = new Intent(appInfo.activityInfo.packageName + ClientIntents.ACTION_CLIENT_GET_STATUS);
+		Intent broadcastIntent = new Intent(appInfo.activityInfo.packageName + Intents.Client.ACTION_CLIENT_GET_STATUS);
 		context.sendOrderedBroadcast(broadcastIntent, null, receiverResult, null, Activity.RESULT_OK, null, null);		
 	}
 	

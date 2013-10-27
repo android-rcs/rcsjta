@@ -50,12 +50,12 @@ public class Geoloc implements Parcelable {
     /**
      * Expiration date of the geolocation
      */
-    private long expiration;
+    private long expiration = 0L;
     
     /**
      * Accuracy (in meters)
      */
-    private float accuracy = 0;
+    private float accuracy = 0.0f;
 
     /**
      * Constructor
@@ -65,6 +65,7 @@ public class Geoloc implements Parcelable {
      * @param longitude Longitude
      * @param altitude Altitude
      * @param expiration Expiration time
+     * @hide
      */
     public Geoloc(String label, double latitude, double longitude, double altitude, long expiration) {
         this.label = label;
@@ -83,6 +84,7 @@ public class Geoloc implements Parcelable {
      * @param altitude Altitude
      * @param expiration Expiration date
      * @param accuracy Accuracy 
+     * @hide
      */
     public Geoloc(String label, double latitude, double longitude, double altitude, long expiration, float accuracy) {
     	this(label, latitude, longitude, altitude, expiration);
@@ -94,6 +96,7 @@ public class Geoloc implements Parcelable {
      * Constructor
      *
      * @param source Parcelable source
+     * @hide
      */
     public Geoloc(Parcel source) {
     	this.label = source.readString();
@@ -109,6 +112,7 @@ public class Geoloc implements Parcelable {
      * marshalled representation
      *
      * @return Integer
+     * @hide
      */
     public int describeContents() {
         return 0;
@@ -119,6 +123,7 @@ public class Geoloc implements Parcelable {
      *
      * @param dest The Parcel in which the object should be written
      * @param flags Additional flags about how the object should be written
+     * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(label);
@@ -131,6 +136,8 @@ public class Geoloc implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<Geoloc> CREATOR = new Parcelable.Creator<Geoloc>() {
         public Geoloc createFromParcel(Parcel source) {
@@ -215,16 +222,16 @@ public class Geoloc implements Parcelable {
     }
     
     /**
-     * Returns the expiration date
+     * Returns the expiration date of the geolocation
      *
-     * @return Expiration date
+     * @return Expiration date. 0 means no expiration date has been defined.
      */
     public long getExpiration() {
         return expiration;
     }
  
     /**
-     * Set the expiration
+     * Set the expiration date of the geolocation
      *
      * @param expiration Expiration
      */
@@ -235,7 +242,7 @@ public class Geoloc implements Parcelable {
     /**
      * Returns the accuracy
      *
-     * @return Accuracy in meters
+     * @return Accuracy in meters. 0 means no accuracy has been defined.
      */
     public float getAccuracy() {
         return accuracy;

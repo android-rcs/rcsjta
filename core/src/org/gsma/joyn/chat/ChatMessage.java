@@ -61,6 +61,7 @@ public class ChatMessage implements Parcelable {
      * @param message Message content
      * @param receiptAt Receipt date
      * @param displayedReportRequested Flag indicating if a displayed report is requested
+     * @hide
 	 */
 	public ChatMessage(String messageId, String remote, String message, Date receiptAt, boolean displayedReportRequested) {
 		this.id = messageId;
@@ -74,6 +75,7 @@ public class ChatMessage implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public ChatMessage(Parcel source) {
 		this.id = source.readString();
@@ -88,6 +90,7 @@ public class ChatMessage implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -98,6 +101,7 @@ public class ChatMessage implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(id);
@@ -109,6 +113,8 @@ public class ChatMessage implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<ChatMessage> CREATOR
             = new Parcelable.Creator<ChatMessage>() {

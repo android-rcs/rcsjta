@@ -90,6 +90,12 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
 	        ft.setChecked(capabilities.isFileTransferSupported());
 	        CheckBox im = (CheckBox)findViewById(R.id.im);
 	        im.setChecked(capabilities.isImSessionSupported());
+	        CheckBox geolocationPush = (CheckBox)findViewById(R.id.geoloc_push);
+	        geolocationPush.setChecked(capabilities.isGeolocPushSupported());
+	        CheckBox ipVoiceCall = (CheckBox)findViewById(R.id.ip_voice_call);
+	        ipVoiceCall.setChecked(capabilities.isIPVoiceCallSupported());
+	        CheckBox ipVideoCall = (CheckBox)findViewById(R.id.ip_video_call);
+	        ipVideoCall.setChecked(capabilities.isIPVideoCallSupported());
 	        
 	        // Set extensions
 	        TextView extensions = (TextView)findViewById(R.id.extensions);

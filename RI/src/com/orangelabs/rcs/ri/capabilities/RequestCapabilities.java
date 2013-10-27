@@ -295,6 +295,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 		CheckBox videoCSh = (CheckBox)findViewById(R.id.video_sharing);
 		CheckBox ft = (CheckBox)findViewById(R.id.file_transfer);
 		CheckBox im = (CheckBox)findViewById(R.id.im);
+		CheckBox geoloc = (CheckBox)findViewById(R.id.geoloc_push);
+		CheckBox ipVoiceCall = (CheckBox)findViewById(R.id.ip_voice_call);
+		CheckBox ipVideoCall = (CheckBox)findViewById(R.id.ip_video_call);
 		TextView extensions = (TextView)findViewById(R.id.extensions);
     	if (capabilities != null) {
     		// Set capabilities
@@ -302,6 +305,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     		videoCSh.setChecked(capabilities.isVideoSharingSupported());
     		ft.setChecked(capabilities.isFileTransferSupported());
     		im.setChecked(capabilities.isImSessionSupported());
+    		geoloc.setChecked(capabilities.isGeolocPushSupported());
+    		ipVoiceCall.setChecked(capabilities.isIPVoiceCallSupported());
+    		ipVideoCall.setChecked(capabilities.isIPVideoCallSupported());
 
             // Set extensions
     		extensions.setVisibility(View.VISIBLE);

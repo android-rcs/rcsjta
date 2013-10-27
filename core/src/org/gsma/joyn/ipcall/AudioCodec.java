@@ -53,6 +53,7 @@ public class AudioCodec implements Parcelable {
      * @param payload Payload
      * @param sampleRate Sample rate
      * @param parameters Codec parameters
+     * @hide
      */
     public AudioCodec(String encoding, int payload, int sampleRate, String parameters) {
     	this.encoding = encoding;
@@ -65,6 +66,7 @@ public class AudioCodec implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public AudioCodec(Parcel source) {
 		this.encoding = source.readString();
@@ -78,6 +80,7 @@ public class AudioCodec implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -88,6 +91,7 @@ public class AudioCodec implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(encoding);
@@ -98,6 +102,8 @@ public class AudioCodec implements Parcelable {
     
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<AudioCodec> CREATOR
             = new Parcelable.Creator<AudioCodec>() {

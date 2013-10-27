@@ -79,6 +79,7 @@ public class VideoCodec implements Parcelable {
      * @param width Video width
      * @param height Video height
      * @param parameters Codec parameters
+     * @hide
      */
     public VideoCodec(String encoding, int payload, int clockRate, int frameRate, int bitRate, int width, int height, String parameters) {
     	this.encoding = encoding;
@@ -95,6 +96,7 @@ public class VideoCodec implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public VideoCodec(Parcel source) {
 		this.encoding = source.readString();
@@ -112,6 +114,7 @@ public class VideoCodec implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -122,6 +125,7 @@ public class VideoCodec implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(encoding);
@@ -136,6 +140,8 @@ public class VideoCodec implements Parcelable {
     
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<VideoCodec> CREATOR
             = new Parcelable.Creator<VideoCodec>() {

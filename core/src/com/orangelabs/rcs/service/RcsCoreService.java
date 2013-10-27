@@ -18,11 +18,11 @@
 
 package com.orangelabs.rcs.service;
 
+import org.gsma.joyn.Intents;
 import org.gsma.joyn.capability.ICapabilityService;
 import org.gsma.joyn.chat.IChatService;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.ft.IFileTransferService;
-import org.gsma.joyn.intent.ClientIntents;
 import org.gsma.joyn.ipcall.IIPCallService;
 import org.gsma.joyn.ish.IImageSharingService;
 import org.gsma.joyn.session.IMultimediaSessionService;
@@ -375,7 +375,7 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     public static void addRcsServiceNotification(boolean state, String label) {
     	// Create notification
-    	Intent intent = new Intent(ClientIntents.ACTION_VIEW_SETTINGS);
+    	Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
     	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(AndroidFactory.getApplicationContext(), 0, intent, 0);
 		int iconId; 

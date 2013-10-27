@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * FIFO buffer
  * 
- * @author JM. Auffret
+ * @author Jean-Marc AUFFRET
  */
 public class FifoBuffer {
 	/**

@@ -15,6 +15,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
@@ -173,8 +174,15 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @return Unique message ID or null in case of error
      */
     public String sendGeoloc(Geoloc geoloc) {
-    	// TODO
-    	return null;
+		// Generate a message Id
+		String msgId = ChatUtils.generateMessageId();
+
+		// Send geoloc message
+		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
+				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getExpiration(), geoloc.getAccuracy()); 
+		session.sendGeolocMessage(msgId, geolocPush);
+		return msgId;
     }
 
     /**
@@ -315,6 +323,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
+	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msg.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msg);

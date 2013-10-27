@@ -41,6 +41,7 @@ public class ImageSharingServiceConfiguration {
 	 * 
 	 * @param warnSize Image size threshold
 	 * @param maxSize Image size limit
+     * @hide
 	 */
 	public ImageSharingServiceConfiguration(long warnSize, long maxSize) {
 		this.warnSize = warnSize;
@@ -51,6 +52,7 @@ public class ImageSharingServiceConfiguration {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public ImageSharingServiceConfiguration(Parcel source) {
 		this.warnSize = source.readLong();
@@ -62,6 +64,7 @@ public class ImageSharingServiceConfiguration {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -72,6 +75,7 @@ public class ImageSharingServiceConfiguration {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeLong(warnSize);
@@ -80,6 +84,8 @@ public class ImageSharingServiceConfiguration {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<ImageSharingServiceConfiguration> CREATOR
             = new Parcelable.Creator<ImageSharingServiceConfiguration>() {

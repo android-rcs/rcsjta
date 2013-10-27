@@ -56,7 +56,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Initiate image sharing
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class InitiateImageSharing extends Activity implements JoynServiceListener {
 	/**

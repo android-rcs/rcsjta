@@ -27,7 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Capabilities. This class encapsulates the different capabilities
+ * Capabilities of a contact. This class encapsulates the different capabilities
  * which may be supported by the local user or a remote contact.
  * 
  * @author Jean-Marc AUFFRET
@@ -84,6 +84,7 @@ public class Capabilities implements Parcelable {
 	 * @param ipVoiceCall IP voice call support
 	 * @param ipVideoCall IP video call support
 	 * @param extensions Set of supported extensions
+     * @hide
 	 */
 	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
 			boolean fileTransfer, boolean geolocPush,
@@ -103,6 +104,7 @@ public class Capabilities implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public Capabilities(Parcel source) {
 		this.imageSharing = source.readInt() != 0;
@@ -123,6 +125,7 @@ public class Capabilities implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -133,6 +136,7 @@ public class Capabilities implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeInt(imageSharing ? 1 : 0);
@@ -151,6 +155,8 @@ public class Capabilities implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<Capabilities> CREATOR
             = new Parcelable.Creator<Capabilities>() {

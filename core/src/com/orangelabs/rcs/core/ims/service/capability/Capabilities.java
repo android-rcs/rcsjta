@@ -19,15 +19,12 @@ package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Capabilities
  * 
  * @author jexa7410
  */
-public class Capabilities implements Parcelable {
+public class Capabilities {
 	/**
 	 * Image sharing support
 	 */
@@ -118,83 +115,6 @@ public class Capabilities implements Parcelable {
 	 */
 	public Capabilities() {
 	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-	 */
-	public Capabilities(Parcel source) {
-		this.imageSharing = source.readInt() != 0;
-		this.videoSharing = source.readInt() != 0;
-		this.ipVoiceCall = source.readInt() != 0;	
-		this.ipVideoCall = source.readInt() != 0;
-		this.imSession = source.readInt() != 0;
-		this.fileTransfer = source.readInt() != 0;
-		this.csVideo = source.readInt() != 0;
-		this.presenceDiscovery = source.readInt() != 0;
-		this.socialPresence = source.readInt() != 0;
-        this.fileTransferHttp = source.readInt() != 0;
-        this.geolocationPush = source.readInt() != 0;
-        this.fileTransferThumbnail = source.readInt() != 0;
-        this.fileTransferStoreForward = source.readInt() != 0;
-        this.groupChatStoreForward = source.readInt() != 0;
-        this.sipAutomata = source.readInt() != 0;
-		this.timestamp = source.readLong();
-		source.readStringList(this.extensions);
-    }
-
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeInt(imageSharing ? 1 : 0);
-    	dest.writeInt(videoSharing ? 1 : 0);
-    	dest.writeInt(ipVoiceCall ? 1 : 0);    
-    	dest.writeInt(ipVideoCall ? 1 : 0);  
-    	dest.writeInt(imSession ? 1 : 0);
-    	dest.writeInt(fileTransfer ? 1 : 0);
-    	dest.writeInt(csVideo ? 1 : 0);
-    	dest.writeInt(presenceDiscovery ? 1 : 0);
-    	dest.writeInt(socialPresence ? 1 : 0);
-        dest.writeInt(fileTransferHttp ? 1 : 0);
-        dest.writeInt(geolocationPush ? 1 : 0);
-        dest.writeInt(fileTransferThumbnail ? 1 : 0);
-        dest.writeInt(fileTransferStoreForward ? 1 : 0);
-        dest.writeInt(groupChatStoreForward ? 1 : 0);
-        dest.writeInt(sipAutomata ? 1 : 0);
-    	dest.writeLong(timestamp);
-		if (extensions!=null && extensions.size()>0){
-			dest.writeStringList(extensions);
-		}
-    }
-
-    /**
-     * Parcelable creator
-     */
-    public static final Parcelable.Creator<Capabilities> CREATOR
-            = new Parcelable.Creator<Capabilities>() {
-        public Capabilities createFromParcel(Parcel source) {
-            return new Capabilities(source);
-        }
-
-        public Capabilities[] newArray(int size) {
-            return new Capabilities[size];
-        }
-    };	
 
     /**
 	 * Is image sharing supported

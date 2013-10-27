@@ -17,15 +17,21 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import java.util.ArrayList;
+
+import org.gsma.joyn.capability.CapabilitiesLog;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -47,6 +53,7 @@ public class TestChatApi extends ListActivity {
     		getString(R.string.menu_chat_log),
     		getString(R.string.menu_initiate_group_chat),
     		getString(R.string.menu_group_chat_log),
+    		getString(R.string.menu_showus_map),
     		getString(R.string.menu_spambox)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -72,6 +79,22 @@ public class TestChatApi extends ListActivity {
 	            break;
 
 	        case 4:
+	            String[] projection = new String[] {
+	            	CapabilitiesLog.CONTACT_NUMBER
+	            };
+	        	ArrayList<String> list = new ArrayList<String>(); 
+	    		Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, projection, null, null, null);
+	    		while(cursor.moveToNext()) {
+	    			String contact = cursor.getString(0);
+	    			list.add(contact);
+	    		}
+	    		cursor.close();
+	        	Intent intent = new Intent(this, ShowUsInMap.class);
+	        	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
+	        	startActivity(intent);
+	        	break;
+	        	
+	        case 5:
             	Utils.showMessage(this, getString(R.string.label_not_implemented));
 	        	// TODO startActivity(new Intent(this, SpamBox.class));
 	        	break;

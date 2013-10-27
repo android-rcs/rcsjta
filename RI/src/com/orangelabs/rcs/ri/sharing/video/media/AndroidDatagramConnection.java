@@ -26,7 +26,7 @@ import java.net.InetAddress;
 /**
  * Android datagram server connection
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class AndroidDatagramConnection implements DatagramConnection {
 	/**

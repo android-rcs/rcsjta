@@ -43,6 +43,10 @@ public class IntentApps extends Activity {
         btn.setOnClickListener(btnListener);
         btn = (Button)findViewById(R.id.initiate_chat);
         btn.setOnClickListener(btnListener);        
+        btn = (Button)findViewById(R.id.load_ipcall);
+        btn.setOnClickListener(btnListener);        
+        btn = (Button)findViewById(R.id.initiate_ipcall);
+        btn.setOnClickListener(btnListener);        
     }
     
     @Override
@@ -117,7 +121,25 @@ public class IntentApps extends Activity {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
 	    		}
-        	}
+        	} else
+	    	if (v.getId() == R.id.load_ipcall) {
+	    		try {
+	        		Intent intent = new Intent(org.gsma.joyn.Intents.IPCall.ACTION_VIEW_IPCALL);
+	        		startActivity(intent);
+	    		} catch(Exception e) {
+			    	e.printStackTrace();
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+	    		}
+	    	} else
+        	if (v.getId() == R.id.initiate_ipcall) {
+        		try {
+	        		Intent intent = new Intent(org.gsma.joyn.Intents.IPCall.ACTION_INITIATE_IPCALL);
+	        		startActivity(intent);
+	    		} catch(Exception e) {
+			    	e.printStackTrace();
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+	    		}
+	    	}
         }
     };
 }

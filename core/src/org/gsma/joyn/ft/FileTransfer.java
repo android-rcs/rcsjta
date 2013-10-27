@@ -116,8 +116,8 @@ public class FileTransfer {
      * Constructor
      * 
      * @param transferIntf File transfer interface
+     * @hide
      */
-    // TODO: hide in javadoc
     public FileTransfer(IFileTransfer transferIntf) {
     	this.transferInf = transferIntf;
     }

@@ -45,6 +45,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
      * @param geoloc Geolocation info
      * @param receiptAt Receipt date
      * @param displayedReportRequested Flag indicating if a displayed report is requested
+     * @hide
 	 */
 	public GeolocMessage(String messageId, String remote, Geoloc geoloc, Date receiptAt, boolean imdnDisplayedRequested) {
 		super(messageId, remote, GeolocMessage.geolocToString(geoloc), receiptAt, imdnDisplayedRequested);
@@ -56,6 +57,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public GeolocMessage(Parcel source) {
 		super(source);
@@ -68,6 +70,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -78,6 +81,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	super.writeToParcel(dest, flags);
@@ -87,6 +91,8 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<GeolocMessage> CREATOR
             = new Parcelable.Creator<GeolocMessage>() {

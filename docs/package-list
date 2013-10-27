@@ -4,7 +4,6 @@ org.gsma.joyn.chat
 org.gsma.joyn.contacts
 org.gsma.joyn.ft
 org.gsma.joyn.gsh
-org.gsma.joyn.intent
 org.gsma.joyn.ipcall
 org.gsma.joyn.ish
 org.gsma.joyn.session

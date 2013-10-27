@@ -239,6 +239,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, number);
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());

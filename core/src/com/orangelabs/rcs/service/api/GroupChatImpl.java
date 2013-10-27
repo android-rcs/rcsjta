@@ -19,6 +19,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
@@ -248,8 +249,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @return Unique message ID or null in case of error
      */
     public String sendGeoloc(Geoloc geoloc) {
-    	// TODO
-    	return null;
+		// Generate a message Id
+		String msgId = ChatUtils.generateMessageId();
+
+		// Send geoloc message
+		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
+				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getExpiration(), geoloc.getAccuracy()); 
+		session.sendGeolocMessage(msgId, geolocPush);
+		return msgId;
     }	
 
     /**

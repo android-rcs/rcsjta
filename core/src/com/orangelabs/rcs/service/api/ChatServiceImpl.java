@@ -178,6 +178,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(ChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	InstantMessage msg = session.getFirstMessage();
@@ -433,6 +434,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(GroupChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(GroupChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());

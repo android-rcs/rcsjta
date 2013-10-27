@@ -29,6 +29,7 @@ import android.widget.ListView;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
 import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Sharing API
@@ -46,7 +47,8 @@ public class TestSharingApi extends ListActivity {
         // Set items
         String[] items = {
     		getString(R.string.menu_image_sharing),
-    		getString(R.string.menu_video_sharing)
+    		getString(R.string.menu_video_sharing),
+    		getString(R.string.menu_geoloc_sharing)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -60,6 +62,10 @@ public class TestSharingApi extends ListActivity {
                 
 	        case 1:
 	        	startActivity(new Intent(this, TestVideoSharingApi.class));
+                break;
+                
+	        case 2:
+	        	Utils.showMessage(this, getString(R.string.label_not_implemented));
                 break;            
         }
     }

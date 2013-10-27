@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
  android:versionCode="1"
- android:versionName="3.0.0"
+ android:versionName="3.1.0"
  package="com.orangelabs.rcs.ri">
 
 	<uses-sdk android:minSdkVersion="8"
@@ -51,6 +51,8 @@
         <activity android:name=".contacts.OnlineContactsList"/>
         
         <activity android:name=".contacts.SupportedContactsList"/>
+        
+        <activity android:name=".contacts.ContactVCard"/>
         
         <!-- Capabilities API -->
 
@@ -125,6 +127,7 @@
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.im-session"/>
             </intent-filter>
 			<intent-filter>
                 <action android:name="org.gsma.joyn.action.INITIATE_CHAT"/>
@@ -162,6 +165,14 @@
         <activity android:name=".messaging.chat.GroupChatView"/>
                 
         <activity android:name=".messaging.chat.GroupChatList"/>
+        
+        <activity android:name=".messaging.geoloc.EditGeoloc" android:windowSoftInputMode="stateHidden"/> 
+        
+        <activity android:name=".messaging.geoloc.SelectGeoloc"/>
+        
+        <activity android:name=".messaging.geoloc.DisplayGeoloc"/>
+        
+        <activity android:name=".messaging.geoloc.ShowUsInMap"/>        
         
         <!-- Sharing API -->
         
@@ -231,6 +242,23 @@
 		    	</intent-filter>
         </receiver>
 		
+        <!-- IP call API -->
+
+        <activity android:name=".ipcall.TestIPCallApi">
+			<intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+			    <action android:name="org.gsma.joyn.action.VIEW_IPCALL"/>
+            </intent-filter>
+		</activity>
+		
+		<activity android:name=".ipcall.InitiateIPCall">
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.ip-voice-call"/>
+            </intent-filter>
+		</activity>
 </application>
 
 </manifest>

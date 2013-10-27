@@ -69,20 +69,6 @@
 <string name="label_quick_ft">File transfer</string>
 <string name="label_quick_extensions">Extensions</string>
 
-<!-- Intents menu -->
-<string name="menu_intents">Intents</string>
-<string name="menu_clients">Client intents</string>
-<string name="menu_apps">Application intents</string>
-<string name="label_no_clients">No other client detected on the device</string>
-<string name="label_load_settings">Load settings</string>
-<string name="label_load_chat">Load a chat</string>
-<string name="label_initiate_chat">Start a chat</string>
-<string name="label_load_group_chat">Load a group chat</string>
-<string name="label_initiate_group_chat">Start a group chat</string>
-<string name="label_load_ft">Load a file transfer</string>
-<string name="label_initiate_ft">Start a file transfer</string>
-<string name="label_intent_failed">Intent not found</string>
-
 <!-- Contacts API -->
 <string name="menu_contacts">Contacts</string>
 <string name="menu_address_book">Native address book</string>
@@ -90,6 +76,9 @@
 <string name="menu_list_online_contacts">Online joyn contacts</string>        		
 <string name="menu_list_supported_contacts">Contacts supporting a service</string>
 <string name="label_ext_tag">Extension tag:</string>
+<string name="menu_contact_vcard">Contact visit card</string>
+<string name="label_vcard">Visit card:</string>
+<string name="label_show_vcard">Show card</string>
 
 <!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>
@@ -114,6 +103,9 @@
 <string name="label_capabilities_empty">No capabilities</string>
 <string name="label_contact">Contact %s</string>
 <string name="label_extensions">Extensions: %s</string>
+<string name="label_capabilities_geolocation_push">Geolocation push</string>
+<string name="label_capabilities_ip_voice_call">IP voice call</string>
+<string name="label_capabilities_ip_video_call">IP video call</string>
 
 <!-- Messaging menu -->
 <string name="menu_messaging">Messaging</string>
@@ -189,11 +181,14 @@
 <string name="label_chat_declined">Group chat invitation has been declined</string>
 <string name="label_no_participant_found">No participant found or available</string>
 <string name="label_no_subject">no subject</string>
+<string name="label_geoloc_prefix">Geoloc</string>
+<string name="label_ft_thumb">File thumbnail</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
 <string name="menu_image_sharing">Image sharing</string>
 <string name="menu_video_sharing">Video sharing</string>
+<string name="menu_geoloc_sharing">Geoloc sharing</string>
 <string name="label_dial">Dial</string>
 <string name="label_sharing_aborted">Sharing aborted</string>
 <string name="label_sharing_declined">Sharing invitation has been declined</string>
@@ -235,6 +230,8 @@
 <string name="label_switch_camera">Switch camera</string>
 <string name="label_video_duration">Duration: %s s</string>
 
+<!-- Geoloc sharing menu -->
+
 <!--  MM session menu -->
 <string name="menu_mm_sessions">Multimedia session</string>
 <string name="menu_initiate_mm_session">Initiate session</string>
@@ -267,6 +264,65 @@
 <string name="label_mm_session_has_expired">Session has expired</string>
 <string name="title_recv_mm_session">Session invitation from %s</string>
 <string name="label_session">Session %s</string>
+
+<!-- Geolocation push -->
+<string name="label_select_geoloc">Select from a map</string>
+<string name="menu_showus_map">Show us in a map</string>
+<string name="menu_send_geoloc">Send geoloc</string>
+<string name="title_edit_geoloc">Edit a geoloc</string>
+<string name="title_display_geoloc">Show a geoloc</string>
+<string name="label_send_geoloc_failed">Send geoloc has failed</string>
+<string name="label_location">Label:</string>
+<string name="label_latitude">Latitude:</string>
+<string name="label_longitude">Longitude:</string>
+<string name="label_altitude">Altitude:</string>
+<string name="label_accuracy">Accuracy:</string>
+<string name="label_select_geoloc_map">Use a long click to select a location on the map.</string>
+<string name="label_geoloc_not_found">No geoloc info to display!</string>
+
+<!--  IP call menu -->
+<string name="menu_ipcall">IP call</string>
+<string name="menu_initiate_ipcall">Initiate IP call</string>
+<string name="menu_ipcall_sessions">Current IP calls</string>
+<string name="label_audio_video_invite_btn">Video call</string>
+<string name="label_audio_invite_btn">Voice call</string>
+<string name="label_set_onhold_btn">Hold</string>
+<string name="label_resume_btn">Resume</string>
+<string name="label_hangup_btn">Hang Up</string>
+<string name="label_add_video_btn">Add video</string> 
+<string name="label_remove_video_btn">Remove video</string> 
+<string name="title_ipcall">IP call</string> 
+<string name="title_recv_ipcall">New IP call invitation</string>
+<string name="label_ipcall_with">IP call with %s</string>
+<string name="label_incoming_ipcall_dialog_checkbox_text">Accept video call</string>
+<string name="label_incoming_ipcall_failed">Incoming IP call failed</string>
+<string name="label_incoming_ipcall_aborted">Incoming IP call aborted</string>
+<string name="label_incoming_ipcall_terminated_by_remote">Incoming IP call terminated by remote</string>
+<string name="label_outgoing_ipcall_failed">Outgoing IP call failed</string>
+<string name="label_outgoing_ipcall_aborted">Outgoing IP call aborted</string>
+<string name="label_outgoing_ipcall_terminated_by_remote">Outgoing IP call terminated by remote</string>
+<string name="label_videorenderer_start_failed">Video Renderer start failed</string>
+<string name="label_ipcall_failed">IP call has failed or is aborted</string>
+<string name="label_ipcall_canceled">IP call session has been canceled</string>
+<string name="label_ipcall_invitation_declined">IP call invitation has been declined</string>
+<string name="label_ipcall_called_is_busy">called is busy</string>
+<string name="label_sessions_list_empty">No call</string>
+
+<!-- Intents menu -->
+<string name="menu_intents">Intents</string>
+<string name="menu_clients">Client intents</string>
+<string name="menu_apps">Application intents</string>
+<string name="label_no_clients">No other client detected on the device</string>
+<string name="label_load_settings">Load settings</string>
+<string name="label_load_chat">Load a chat</string>
+<string name="label_initiate_chat">Start a chat</string>
+<string name="label_load_group_chat">Load a group chat</string>
+<string name="label_initiate_group_chat">Start a group chat</string>
+<string name="label_load_ft">Load a file transfer</string>
+<string name="label_initiate_ft">Start a file transfer</string>
+<string name="label_intent_failed">Intent not found</string>
+<string name="label_load_ipcall">Load an IP call</string>
+<string name="label_initiate_ipcall">Start an IP call</string>
 
 </resources>
 

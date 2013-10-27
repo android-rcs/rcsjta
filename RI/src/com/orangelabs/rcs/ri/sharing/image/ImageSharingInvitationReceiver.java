@@ -34,7 +34,7 @@ import android.media.RingtoneManager;
 /**
  * Image sharing invitation receiver
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class ImageSharingInvitationReceiver extends BroadcastReceiver {
 	@Override

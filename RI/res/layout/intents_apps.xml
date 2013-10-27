@@ -48,6 +48,18 @@
  			 android:id="@+id/initiate_ft"
 	         android:gravity="center"
 	         android:layout_width="fill_parent"/>
+
+		    <Button android:text="@string/label_load_ipcall"
+ 			 android:layout_marginLeft="5dip"
+ 			 android:id="@+id/load_ipcall"
+	         android:gravity="center"
+	         android:layout_width="fill_parent"/>
+		    
+		    <Button android:text="@string/label_initiate_ipcall"
+ 			 android:layout_marginLeft="5dip"
+ 			 android:id="@+id/initiate_ipcall"
+	         android:gravity="center"
+	         android:layout_width="fill_parent"/>
 	</TableLayout>
 	
 </ScrollView>

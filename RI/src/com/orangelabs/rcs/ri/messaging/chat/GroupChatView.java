@@ -28,6 +28,7 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
+import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.chat.GroupChat;
 import org.gsma.joyn.chat.GroupChatIntent;
 import org.gsma.joyn.chat.GroupChatListener;
@@ -69,10 +70,10 @@ public class GroupChatView extends ChatView {
 	 * Intent parameters
 	 */
 	public final static String EXTRA_MODE = "mode";
-	public static String EXTRA_CHAT_ID = "chat_id";
-	public static String EXTRA_PARTICIPANTS = "participants";
-	public static String EXTRA_SUBJECT = "subject";
-	public static String EXTRA_CONTACT = "contact";
+	public final static String EXTRA_CHAT_ID = "chat_id";
+	public final static String EXTRA_PARTICIPANTS = "participants";
+	public final static String EXTRA_SUBJECT = "subject";
+	public final static String EXTRA_CONTACT = "contact";
 
 	/**
 	 * Remote contact
@@ -358,15 +359,36 @@ public class GroupChatView extends ChatView {
     }
     
     /**
-     * Send message
+     * Send text message
      * 
      * @param msg Message
      * @return Message ID
      */
-    protected String sendMessage(String msg) {
+    protected String sendTextMessage(String msg) {
         try {
 			// Send the text to remote
         	String msgId = groupChat.sendMessage(msg);
+	    	
+	        // Warn the composing manager that the message was sent
+	    	composingManager.messageWasSent();
+
+	    	return msgId;
+	    } catch(Exception e) {
+	    	e.printStackTrace();
+	    	return null;
+	    }
+    }
+    
+    /**
+     * Send geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Message ID
+     */
+    protected String sendGeolocMessage(Geoloc geoloc) {
+        try {
+			// Send the text to remote
+        	String msgId = groupChat.sendGeoloc(geoloc);
 	    	
 	        // Warn the composing manager that the message was sent
 	    	composingManager.messageWasSent();
@@ -557,6 +579,19 @@ public class GroupChatView extends ChatView {
 				addParticipants();
 				break;
 	
+			case R.id.menu_send_geoloc:
+				getGeoLoc();
+				break;	
+							
+			case R.id.menu_showus_map:
+				try {
+					showUsInMap(groupChat.getParticipants());
+			    } catch(JoynServiceException e) {
+			    	e.printStackTrace();
+					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_api_failed));
+				}
+				break;	
+				
 			case R.id.menu_quicktext:
 				addQuickText();
 				break;

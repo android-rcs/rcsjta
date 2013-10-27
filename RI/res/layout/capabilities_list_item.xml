@@ -50,10 +50,34 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:text="@string/label_capabilities_video" />
 	
-    <TextView android:id="@+id/extensions"
+	<CheckBox android:id="@+id/geoloc_push"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/video_sharing"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/label_capabilities_geolocation_push" />
+				
+	<CheckBox android:id="@+id/ip_voice_call"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/geoloc_push"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_ip_voice_call" />
+        
+	<CheckBox android:id="@+id/ip_video_call"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ip_voice_call"
+		android:clickable="false"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/label_capabilities_ip_video_call" />
+	
+    <TextView android:id="@+id/extensions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ip_video_call"
         android:text="Xxxxxxxx"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>

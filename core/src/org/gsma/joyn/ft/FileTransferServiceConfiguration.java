@@ -60,6 +60,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * @param autoAcceptMode File transfer auto accept mode
 	 * @param fileIcon File icon
 	 * @param maxFileIconSize File icon size limit
+     * @hide
 	 */
 	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode, boolean fileIcon, long maxFileIconSize) {
 		this.warnSize = warnSize;
@@ -73,6 +74,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public FileTransferServiceConfiguration(Parcel source) {
 		this.warnSize = source.readLong();
@@ -87,6 +89,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -97,6 +100,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeLong(warnSize);
@@ -108,6 +112,8 @@ public class FileTransferServiceConfiguration implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<FileTransferServiceConfiguration> CREATOR
             = new Parcelable.Creator<FileTransferServiceConfiguration>() {

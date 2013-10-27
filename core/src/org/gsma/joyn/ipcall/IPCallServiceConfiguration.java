@@ -35,6 +35,7 @@ public class IPCallServiceConfiguration implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param voiceBreakout Voice call breakout
+     * @hide
 	 */
 	public IPCallServiceConfiguration(boolean voiceBreakout) {
 		this.voiceBreakout = voiceBreakout;
@@ -44,6 +45,7 @@ public class IPCallServiceConfiguration implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public IPCallServiceConfiguration(Parcel source) {
 		this.voiceBreakout = source.readInt() != 0;
@@ -54,6 +56,7 @@ public class IPCallServiceConfiguration implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -64,6 +67,7 @@ public class IPCallServiceConfiguration implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeInt(voiceBreakout ? 1 : 0);
@@ -71,6 +75,8 @@ public class IPCallServiceConfiguration implements Parcelable {
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator<IPCallServiceConfiguration> CREATOR
             = new Parcelable.Creator<IPCallServiceConfiguration>() {

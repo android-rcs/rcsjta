@@ -26,6 +26,7 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract.Data;
+import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -37,7 +38,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * Initiate chat
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
 public class InitiateSingleChat extends Activity {
     @Override
@@ -74,7 +75,7 @@ public class InitiateSingleChat extends Activity {
 	            if (selectedContact != null) {
 	    	        for (int i=0;i<spinner.getAdapter().getCount();i++) {
 	    	        	MatrixCursor cursor2 = (MatrixCursor)spinner.getAdapter().getItem(i);
-	    	        	if (selectedContact.equalsIgnoreCase(cursor2.getString(1))) {
+						if (PhoneNumberUtils.compare(selectedContact, cursor2.getString(1))) {
 	    	        		// Select contact
 	    	                spinner.setSelection(i);
 	    	                spinner.setEnabled(false);
