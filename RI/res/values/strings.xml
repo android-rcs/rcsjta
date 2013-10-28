@@ -106,6 +106,7 @@
 <string name="label_capabilities_geolocation_push">Geolocation push</string>
 <string name="label_capabilities_ip_voice_call">IP voice call</string>
 <string name="label_capabilities_ip_video_call">IP video call</string>
+<string name="label_extensions_not_found">Build list of extensions has failed</string>
 
 <!-- Messaging menu -->
 <string name="menu_messaging">Messaging</string>

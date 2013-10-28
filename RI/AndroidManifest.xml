@@ -66,6 +66,14 @@
 		
 		<activity android:name=".capabilities.CapabilitiesList"/>
 
+		<activity android:name=".capabilities.ExtensionsCapabilities">
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.extensions"/>
+            </intent-filter>
+        </activity>		
+		
 		<!-- Messaging API -->
 		
         <activity android:name=".messaging.TestMessagingApi"/>
@@ -252,13 +260,13 @@
             </intent-filter>
 		</activity>
 		
-		<activity android:name=".ipcall.InitiateIPCall">
+<!-- 	<activity android:name=".ipcall.InitiateIPCall">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.ip-voice-call"/>
             </intent-filter>
-		</activity>
+		</activity>-->
 </application>
 
 </manifest>
