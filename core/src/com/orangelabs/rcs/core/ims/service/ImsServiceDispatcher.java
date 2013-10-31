@@ -299,24 +299,14 @@ public class ImsServiceDispatcher extends Thread {
 	    		}
 
                 if (ChatUtils.isFileTransferOverHttp(request)) {
-                    FileTransferHttpInfoDocument ftHttpInfo = ChatUtils.getHttpFTInfo(request);
-                    if (ftHttpInfo != null) {
-                        // HTTP file transfer invitation
-                        if (logger.isActivated()) {
-                            logger.debug("Single file transfer over HTTP invitation");
-                        }
-                        imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request, ftHttpInfo);
-                    } else {
-                        // TODO : else return error to Originating side
-                        // Malformed xml for FToHTTP: automatically reject with a 606 Not Acceptable
-                        if (logger.isActivated()) {
-                            logger.debug("Malformed xml for FToHTTP: automatically reject");
-                        }
-                        sendFinalResponse(request, 606);
+                    // HTTP file transfer invitation
+                    if (logger.isActivated()) {
+                        logger.debug("Single file transfer over HTTP invitation");
                     }
+                    imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request);
                 } else {
 	    			if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
-		    			(!request.getContentType().contains("multipart"))) { // TODO: to be removed when corrected by ALU
+		    			(!request.getContentType().contains("multipart"))) {
 	    				// Store & Forward push notifs session
 			    		if (logger.isActivated()) {
 			    			logger.debug("Store & Forward push notifications");

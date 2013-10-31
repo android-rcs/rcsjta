@@ -325,14 +325,17 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     		logger.info("Data received");
     	}
     	
-    	// Geoloc has been transfered
-    	geolocTransfered();
-	
 	   	try {
             // Parse received geoloc info
 			String geolocDoc = new String(data);
             GeolocPush geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
         	
+        	// Set geoloc
+        	setGeoloc(geoloc);
+        	
+        	// Geoloc has been transfered
+        	geolocTransfered();
+
         	// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
 	    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(geoloc);

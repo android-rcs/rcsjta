@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.gsma.joyn.chat.ChatLog;
+import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.ft.FileTransfer;
 
 import android.content.ContentResolver;
@@ -32,6 +33,8 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
@@ -319,6 +322,46 @@ public class RichMessagingHistory {
 	}
 	
 	/**
+	 * Add a chat geoloc
+	 * 
+	 * @param msg Geoloc message
+	 * @param direction Direction
+	 */
+	public void addChatGeoloc(GeolocMessage msg, int direction) {
+		String contact = PhoneUtils.extractNumberFromUri(msg.getRemote());
+		if (logger.isActivated()){
+			logger.debug("Add geoloc message: contact=" + contact + ", msg=" + msg.getMessageId());
+		}
+		
+		GeolocPush geoloc = msg.getGeoloc();
+		Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
+				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getExpiration(), geoloc.getAccuracy());
+		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);		
+		
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, contact);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.GEOLOC);
+		values.put(MessageData.KEY_CONTACT, contact);
+		values.put(MessageData.KEY_CONTENT, content);
+		values.put(MessageData.KEY_CONTENT_TYPE, GeolocMessage.MIME_TYPE);
+		values.put(MessageData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		
+		if (direction == ChatLog.Message.Direction.INCOMING) {
+			if (msg.isImdnDisplayedRequested()) {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
+			} else {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
+			}
+		} else {
+			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		}
+		cr.insert(msgDatabaseUri, values);
+	}
+	
+	/**
 	 * Add a group chat message
 	 * 
 	 * @param chatId Chat ID
@@ -351,6 +394,46 @@ public class RichMessagingHistory {
 		cr.insert(msgDatabaseUri, values);
 	}
 
+	/**
+	 * Add a group chat geoloc
+	 * 
+	 * @param chatId Chat ID
+	 * @param msg Geoloc message
+	 * @param direction Direction
+	 */
+	public void addGroupChatGeoloc(String chatId, GeolocMessage msg, int direction) {
+		if (logger.isActivated()){
+			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
+		}
+		
+		GeolocPush geoloc = msg.getGeoloc();
+		org.gsma.joyn.chat.Geoloc geolocApi = new org.gsma.joyn.chat.Geoloc(geoloc.getLabel(),
+				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getExpiration(), geoloc.getAccuracy());
+		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);
+		
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.GEOLOC);
+		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
+		values.put(MessageData.KEY_CONTENT, content);
+		values.put(MessageData.KEY_CONTENT_TYPE, GeolocMessage.MIME_TYPE);
+		values.put(MessageData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		
+		if (direction == ChatLog.Message.Direction.INCOMING) {
+			if (msg.isImdnDisplayedRequested()) {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
+			} else {
+				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
+			}
+		} else {
+			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		}
+		cr.insert(msgDatabaseUri, values);
+	}	
+	
 	/**
 	 * Add group chat system message
 	 * 
@@ -532,13 +615,12 @@ public class RichMessagingHistory {
      * @param msgId msgId of the corresponding chat
      */
     public void updateFileTransferChatId(String sessionId, String chatId, String msgId) {
-        /* TODO ContentValues values = new ContentValues();
+ /* TODO       ContentValues values = new ContentValues();
         values.put(RichMessagingData.KEY_CHAT_ID, chatId);
         values.put(RichMessagingData.KEY_MESSAGE_ID , msgId);
         cr.update(databaseUri, 
                 values, 
                 RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
-                null);
-                */
+                null);*/
     }    
 }

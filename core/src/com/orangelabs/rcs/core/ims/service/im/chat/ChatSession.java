@@ -462,7 +462,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		} else
 		if (ChatUtils.isTextPlainType(mimeType)) {
 	    	// Text message
-			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date());
+			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), msgId, false, new Date());
 		} else
 		if (ChatUtils.isMessageCpimType(mimeType)) {
 	    	// Receive a CPIM message
@@ -472,6 +472,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 				if (cpimMsg != null) {
 			    	Date date = cpimMsg.getMessageDate();
 			    	String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
+			    	if (cpimMsgId == null) {
+			    		cpimMsgId = msgId;
+			    	}
 			    	String contentType = cpimMsg.getContentType();
 			    	
 			    	String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
@@ -724,9 +727,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 */
 	public boolean sendDataChunks(String msgId, String data, String mime) {
 		try {
-			ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
-			msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
-			return true;
+	    	if (msrpMgr != null) {
+				ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
+				msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
+				return true;
+	    	} else {
+	    		return false;	    				
+	    	}
 		} catch(Exception e) {
 			// Error
 	   		if (logger.isActivated()) {
@@ -903,12 +910,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
-
-        // Open the MSRP session
-        getMsrpMgr().openMsrpSession();
-
-        // Send an empty packet
-        sendEmptyDataChunk();
     }
 
     /**
@@ -917,7 +918,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @throws Exception 
      */
     public void startMediaSession() throws Exception {
-        // Nothing to do
+        // Open the MSRP session
+        getMsrpMgr().openMsrpSession();
+
+        // Send an empty packet
+        sendEmptyDataChunk();
     }
 
 	/**

@@ -126,7 +126,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
      */
 	public String getFileIconName() {
 		// TODO
-		return null;
+		return null; //session.getThumbnail();
 	}
 
 	/**
@@ -253,6 +253,20 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
 	}
 
+	/**
+	 * Pauses the file transfer
+	 */
+	public void pauseTransfer() {
+		// TODO
+	}
+	
+	/**
+	 * Resumes the file transfer
+	 */
+	public void resumeTransfer() {
+		// TODO
+	}	
+	
 	/**
 	 * Adds a listener on file transfer events
 	 * 
@@ -494,7 +508,14 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     /**
      * File transfer has been paused
      */
-    public void handleFileUploadPaused() {
+    public void handleFileTransferPaused() {
+    	// TODO
+    }
+
+    /**
+     * File transfer has been resumed
+     */
+    public void handleFileTransferResumed() {
     	// TODO
     }
 }

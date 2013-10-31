@@ -53,6 +53,7 @@ import android.net.Proxy;
 
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract HTTP transfer manager
@@ -73,7 +74,7 @@ public abstract class HttpTransferManager {
 	/**
      * HTTP server address
      */
-    private String serverAddr = RcsSettings.getInstance().getFtHttpServer();
+    private static String serverAddr = RcsSettings.getInstance().getFtHttpServer();
 
 	/**
      * HTTP server login
@@ -108,7 +109,18 @@ public abstract class HttpTransferManager {
     /**
      * Cancellation flag
      */
-    private boolean isCancelled = false;
+    private boolean isCancelled = false;    
+    
+    /**
+     * Pause flag
+     */
+    private boolean isPaused = false;
+    
+
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor
@@ -116,11 +128,22 @@ public abstract class HttpTransferManager {
      * @param listener HTTP event listener
      */
     public HttpTransferManager(HttpTransferEventListener listener) {
-        this.listener = listener;
-
-        initServerAddress(getHttpServerAddr());
+        this(listener, serverAddr);
     }
 
+    /**
+     * Constructor
+     *
+     * @param listener HTTP event listener
+     * @param address HTTP server address
+     */
+    public HttpTransferManager(HttpTransferEventListener listener, String address) {
+        this.listener = listener;
+
+        initServerAddress(address);
+    }
+
+    
     /**
      * Initialize with server address
      *
@@ -254,14 +277,28 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
 	public void interrupt() {
+    	if (logger.isActivated()) {
+    		logger.error("interrupting transfer");
+    	}
 		isCancelled = true;
+	}
+	
+    /**
+     * Interrupts file transfer
+     */
+	public void pauseTransfer() {
+    	if (logger.isActivated()) {
+    		logger.error("Pausing transfer");
+    	}
+		isPaused = true;
 	}
 	
 	/**
      * Resuming upload so resetting cancelled boolean
      */
-	public void resetCancelled() {
+	public void resetParamForResume() {
 		isCancelled = false;
+		isPaused = false;
 	}
 	
 	/**
@@ -271,5 +308,14 @@ public abstract class HttpTransferManager {
      */
 	public boolean isCancelled() {
 		return this.isCancelled;
+	}
+	
+	/**
+     * Return whether or not the file transfer has been cancelled
+     * 
+     * @return Boolean
+     */
+	public boolean isPaused() {
+		return this.isPaused;
 	}
 }

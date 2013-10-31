@@ -28,5 +28,11 @@
 		<com.orangelabs.rcs.settings.ChatInvitationRingtone
 			android:showSilent="true" android:summary="@string/rcs_settings_summary_chat_ringtone" android:title="@string/rcs_settings_label_ringtone" android:showDefault="true" android:key="chat_invitation_ringtone"/>
 	
+        <CheckBoxPreference
+            android:key="chat_displayed_notification"
+            android:title="@string/rcs_settings_label_displayed_notification"
+            android:summary="@string/rcs_settings_summary_chat_displayed_notification"
+            android:showDefault="true"/>
+				
 	</PreferenceCategory>
 </PreferenceScreen>

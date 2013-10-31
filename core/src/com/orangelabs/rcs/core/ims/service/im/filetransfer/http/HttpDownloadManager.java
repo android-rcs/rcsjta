@@ -3,6 +3,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -29,6 +30,21 @@ public class HttpDownloadManager extends HttpTransferManager {
      * File content to download
      */
     private MmContent content;
+    
+    /**
+     * File to be created
+     */
+    File file;
+    
+    /**
+     * Stream that writes the file
+     */
+    BufferedOutputStream streamForFile = null;
+    
+    /**
+     * number of received bytes calculated
+     */
+    int calclength = 0;
 
     /**
      * File name
@@ -53,10 +69,20 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @param filename Filename to download 
      */
     public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filename) {
-        super(listener);
+        super(listener, content.getUrl());
         
         this.content = content;
         this.contentName = filename;
+        
+        // Init file
+        file = new File(RcsSettings.getInstance().getFileRootDirectory(), contentName);
+    	try {
+			streamForFile = new BufferedOutputStream(new FileOutputStream(file));
+		} catch (FileNotFoundException e) {
+			if (logger.isActivated()) {
+        		logger.error("Could not create stream, file does not exists.");
+        	}
+		}
     }
 
     /**
@@ -86,7 +112,7 @@ public class HttpDownloadManager extends HttpTransferManager {
                 trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
                 System.out.println(trace);
             }
-
+            
             // Execute request with retry procedure
             if (!getFile(request)) {
                 if (retryCount < RETRY_MAX && !isCancelled()) {
@@ -125,9 +151,14 @@ public class HttpDownloadManager extends HttpTransferManager {
      */
     private boolean getFile(HttpGet request) {
         try {
-            // Init file
-            File file = new File(RcsSettings.getInstance().getFileRootDirectory(), contentName);
-
+        	if(streamForFile == null)
+        	{
+            	if (logger.isActivated()) {
+            		logger.error("Stream to write file is null, the file could not be created on device.");
+            	}
+            	return false;
+        	}
+        	
             // Execute HTTP request
             HttpResponse response = getHttpClient().execute(request);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -136,37 +167,47 @@ public class HttpDownloadManager extends HttpTransferManager {
                 trace += "\n" + statusCode + " " + response.getStatusLine().getReasonPhrase();
                 System.out.println(trace);
             }
-            
+        	
             // Analyze HTTP response
-            if (statusCode == 200) {
-                BufferedOutputStream bOutputStream = new BufferedOutputStream(new FileOutputStream(file));
-                byte[] buffer = new byte[CHUNK_MAX_SIZE];
-                HttpEntity entity = response.getEntity();
-                InputStream input = entity.getContent();
-                int calclength = 0;
-                int num;
-                while ((num = input.read(buffer)) != -1 && !isCancelled()) {
-                    calclength += num;
-                    getListener().httpTransferProgress(calclength, content.getSize());
-                    bOutputStream.write(buffer, 0, num);
-                }
-
-    	        bOutputStream.flush();
-                bOutputStream.close();
-
-                if (isCancelled()) {
-    	        	file.delete();
-    	        	return false;
-            	} else {
-            		return true;
-            	}
-            } else {
+            if (statusCode == 200) { // TODO need to check other responses ?
+                calclength = 0;
+            }
+            else if(statusCode == 206){
+            	calclength = Long.valueOf(file.length()).intValue();
+            }
+            else {
             	return false;
             }
+            
+            byte[] buffer = new byte[CHUNK_MAX_SIZE];
+            HttpEntity entity = response.getEntity();
+            InputStream input = entity.getContent();
+            int num;
+            while ((num = input.read(buffer)) != -1 && !isCancelled()) {
+                calclength += num;
+                getListener().httpTransferProgress(calclength, content.getSize());
+                streamForFile.write(buffer, 0, num);
+            }
+
+            streamForFile.flush();
+            
+            if (isPaused()) {
+	        	return false;
+        	}
+
+            streamForFile.close();
+
+            if (isCancelled()) {
+	        	file.delete();
+	        	return false;
+        	} else {
+        		return true;
+        	}
         } catch(Exception e) {
         	if (logger.isActivated()) {
-        		logger.error("Donwload file exception", e);
+        		logger.error("Download file exception", e);
         	}
+        	pauseTransfer();
         	return false;
         }
     }
@@ -190,18 +231,12 @@ public class HttpDownloadManager extends HttpTransferManager {
                 trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
                 System.out.println(trace);
             }
-            
-            // Execute request with retry procedure
+
+            // Execute request
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if ((baos = getThumbnail(request)) == null) {
-                if (retryCount < RETRY_MAX) {
-                    retryCount++;
-                    return downloadThumbnail(thumbnailInfo);
-                } else {
-                    if (logger.isActivated()) {
-                        logger.debug("Failed to download Thumbnail");
-                    }
-                    return null;
+                if (logger.isActivated()) {
+                    logger.debug("Failed to download Thumbnail");
                 }
             }
 
@@ -233,7 +268,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 		    
             // Analyze HTTP response
 		    if (statusCode == 200) {
-				int calclength = 0;
+				calclength = 0;
 			    byte[] buffer = new byte[CHUNK_MAX_SIZE];
 				ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 		        HttpEntity entity = response.getEntity();
@@ -244,7 +279,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 		            getListener().httpTransferProgress(calclength, content.getSize());
 		            bOutputStream.write(buffer, 0, num);
 		        }
-		        
+
 		        bOutputStream.flush();
 		        bOutputStream.close();
 
@@ -263,4 +298,56 @@ public class HttpDownloadManager extends HttpTransferManager {
 		    return null;
 		}
     }
+
+	public boolean resumeDownload() {
+		resetParamForResume();
+		try {
+            if (logger.isActivated()) {
+                logger.debug("Resuming Download file " + content.getUrl()+" from byte "+file.length());
+            }
+            
+            // Send GET request
+            HttpGet request = new HttpGet(content.getUrl());
+            long downloadedLength = file.length();
+            long completeSize = content.getSize();
+            request.addHeader("Range", "bytes="+downloadedLength+"-"+completeSize);
+            if (HTTP_TRACE_ENABLED) {
+                String trace = ">>> Send HTTP request:";
+                trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
+                System.out.println(trace);
+            }
+
+            // Execute request with retry procedure
+            if (!getFile(request)) {
+                if (retryCount < RETRY_MAX && !isCancelled()) {
+                    retryCount++;
+                    return downloadFile();
+                } else {
+                    if (logger.isActivated()) {
+                    	if(isPaused()) {
+                    		if (logger.isActivated()) {
+                    			logger.debug("Download file paused");
+                    		}
+                    	} else if(isCancelled()) {
+                    		if (logger.isActivated()) {
+                    			logger.debug("Download file cancelled");
+                    		}
+                    	} else {
+                    		if (logger.isActivated()) {
+                    			logger.debug("Failed to download file");
+                    		}
+                    	}
+                    }
+                    return false;
+                }
+            }
+            return true;
+        } catch(Exception e) {
+        	if (logger.isActivated()) {
+        		logger.error("Download file exception", e);
+        	}
+        	pauseTransfer();
+            return false;
+        }
+	}
 }

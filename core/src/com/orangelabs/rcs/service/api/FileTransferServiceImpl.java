@@ -38,6 +38,8 @@ import android.os.RemoteCallbackList;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -190,7 +192,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	    }    	    	
     }	
     
-    /**
+	/**
 	 * Receive a new file transfer invitation
 	 * 
 	 * @param session File transfer session
@@ -236,7 +238,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	        listeners.finishBroadcast();
 	    }
     }
-    
+
+    /**
+	 * Receive a new HTTP file transfer invitation outside of an existing chat session
+	 *
+	 * @param session File transfer session
+	 */
+	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
+		// Display invitation
+/* TODO		receiveFileTransferInvitation(session, chatSession.isGroupChat());
+		
+		// Update rich messaging history
+		RichMessaging.getInstance().addIncomingChatSessionByFtHttp(chatSession);
+		
+		// Add session in the list
+		ImSession sessionApi = new ImSession(chatSession);
+		MessagingApiService.addChatSession(sessionApi); */
+	}    
+	
     /**
      * Returns the configuration of the file transfer service
      * 
@@ -366,4 +385,50 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		
 		listeners.unregister(listener);
 	}
+
+    /**
+     * File Transfer delivery status.
+     * In FToHTTP, Delivered status is done just after download information are received by the
+     * terminating, and Displayed status is done when the file is downloaded.
+     * In FToMSRP, the two status are directly done just after MSRP transfer complete.
+     *
+     * @param ftSessionId File transfer session Id
+     * @param status status of File transfer
+     */
+    public void handleFileDeliveryStatus(String ftSessionId, String status) {
+        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+            // Update rich messaging history
+        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+            
+            // Notify File transfer delivery listeners
+            final int N = listeners.beginBroadcast();
+            for (int i=0; i < N; i++) {
+                try {
+                    listeners.getBroadcastItem(i).onReportFileDelivered(ftSessionId);
+                } catch(Exception e) {
+                    if (logger.isActivated()) {
+                        logger.error("Can't notify listener", e);
+                    }
+                }
+            }
+            listeners.finishBroadcast();
+        } else
+        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+            // Update rich messaging history
+        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+            
+            // Notify File transfer delivery listeners
+            final int N = listeners.beginBroadcast();
+            for (int i=0; i < N; i++) {
+                try {
+                    listeners.getBroadcastItem(i).onReportFileDisplayed(ftSessionId);
+                } catch(Exception e) {
+                    if (logger.isActivated()) {
+                        logger.error("Can't notify listener", e);
+                    }
+                }
+            }
+            listeners.finishBroadcast();
+        }
+    }
 }

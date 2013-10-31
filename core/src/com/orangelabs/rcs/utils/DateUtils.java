@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.utils;
 
-import com.orangelabs.rcs.utils.logger.Logger;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,8 +44,6 @@ public class DateUtils {
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"),
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
     };
-
-    private static Logger logger = Logger.getLogger(DateUtils.class.getName());
     
 	/**
 	 * Encode a long date to string value in Z format (see RFC 3339)
@@ -70,34 +66,24 @@ public class DateUtils {
 	public static long decodeDate(String date) {
 	    long millis = -1;
 	    
-	    //try to use ISO8601
-	    //SimpleDateFormat does not support 'Z' literal
+	    // try to use ISO8601
+	    // SimpleDateFormat does not support 'Z' literal
 	    String normalizedDate = date.replaceAll("Z$", "+0000");
 	    for(int i = 0; millis == -1 && i < ISO8601DATEFORMAT.length; i++) {
     	    try {
     	        Date iso8601 = ISO8601DATEFORMAT[i].parse(normalizedDate);
-                if (logger.isActivated()) {
-                    logger.debug("decodeDate " + date + " with " + (i+1) + ". format " + ISO8601DATEFORMAT[i].toPattern());
-                }
     	        millis = iso8601.getTime();
     	    } catch (ParseException ex) {
-    	        //try next format
-                if (logger.isActivated()) {
-                    logger.debug("decodeDate " + date + " caused ParseException using format " + ISO8601DATEFORMAT[i].toPattern());
-                }
+    	        // try next format
     	    }
 	    }
 	    
-	    //if still not valid format is found let's try RFC3339
+	    // if still not valid format is found let's try RFC3339
 	    if (millis == -1) {
 	        Time t = new Time(UTC.getID());
 	        t.parse3339(date);
 	        millis = t.toMillis(false);
 	    }
-	    
-        if (logger.isActivated()) {
-            logger.debug("decodeDate converted " + date + " to " + millis);
-        }
 		return millis;
 	}
 }

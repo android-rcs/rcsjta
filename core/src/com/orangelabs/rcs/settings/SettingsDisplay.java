@@ -158,7 +158,7 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
 		} else
 		if (i == R.id.menu_help) {
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setData(Uri.parse("http://code.google.com/p/android-rcs-ims-stack/"));
+			intent.setData(Uri.parse("https://code.google.com/p/rcsjta/"));
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 			return true;

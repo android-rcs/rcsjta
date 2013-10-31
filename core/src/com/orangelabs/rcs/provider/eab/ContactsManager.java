@@ -2688,6 +2688,7 @@ public final class ContactsManager {
         
         // Insert capabilities if present
         Capabilities capabilities = info.getCapabilities();
+        
         // Cs Video
         if (capabilities.isCsVideoSupported()) {
             ops.add(createMimeTypeForContact(rawContactRefIms, info.getContact(), MIMETYPE_CAPABILITY_CS_VIDEO));
@@ -2760,6 +2761,7 @@ public final class ContactsManager {
 				.withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
 				.withValue(Data.DATA1, info.getContact())
 				.withValue(Data.DATA2, extension.toString())
+				.withValue(Data.DATA3, info.getContact())
 				.build());
 		if (hasCommonExtensions) {
 			// Insert common extensions item

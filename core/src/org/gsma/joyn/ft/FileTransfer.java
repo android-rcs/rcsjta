@@ -274,6 +274,32 @@ public class FileTransfer {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * Pauses the file transfer
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void pauseTransfer() throws JoynServiceException {
+		try {
+			transferInf.pauseTransfer();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Resumes the file transfer
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void resumeTransfer() throws JoynServiceException {
+		try {
+			transferInf.resumeTransfer();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 
 	/**
 	 * Adds a listener on file transfer events

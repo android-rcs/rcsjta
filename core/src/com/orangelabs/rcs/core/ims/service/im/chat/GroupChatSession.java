@@ -195,7 +195,7 @@ public abstract class GroupChatSession extends ChatSession {
 	public void sendTextMessage(String msgId, String txt) {
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
-		String to = ChatUtils.ANOMYNOUS_URI;
+		String to = getRemoteContact();
 		
 		String content;
 		if (useImdn) {
@@ -206,15 +206,13 @@ public abstract class GroupChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		}		
 		
-		// Send data
-		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
-
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
 		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg,
 				ChatLog.Message.Direction.OUTGOING);
 
-		// Check if message has been sent with success or not
+		// Send data
+		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
 		if (!result) {
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);

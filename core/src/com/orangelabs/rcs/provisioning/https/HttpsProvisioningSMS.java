@@ -24,6 +24,8 @@ import java.util.Random;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 
+import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.service.LauncherUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -32,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 
 /**
  * HTTPS provisioning - SMS management
@@ -53,6 +56,12 @@ public class HttpsProvisioningSMS {
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+    
+    /**
+     * Context
+     */
+	private Context context = null;
+
 
     /**
      * Constructor
@@ -61,6 +70,16 @@ public class HttpsProvisioningSMS {
      */
     public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager) {
         manager = httpsProvisioningManager;
+        context = manager.getContext();
+    }
+    
+    /**
+     * Constructor
+     *
+     * @param Context
+     */
+    public HttpsProvisioningSMS(Context ctxt) {
+        context = ctxt;
     }
 
     /**
@@ -82,7 +101,7 @@ public class HttpsProvisioningSMS {
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
      */
-    protected void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
+    public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
             final DefaultHttpClient client, final HttpContext localContext) {
         // Unregister previous one
         unregisterSmsProvisioningReceiver();
@@ -123,22 +142,65 @@ public class HttpsProvisioningSMS {
                         }
 
                         try {
-                            final String smsOTP = new String(smsBuffer, "UCS2");
+                            final String smsData = new String(smsBuffer, "UCS2");
 
                             if (logger.isActivated()) {
-                                logger.debug("Binary SMS OTP = " + smsOTP);
+                                logger.debug("Binary SMS received with :"+smsData);
                             }
-
-                            Thread t = new Thread() {
-                                public void run() {
-                                    manager.updateConfigWithOTP(smsOTP, requestUri, client,
-                                            localContext);
+                            
+                            if (logger.isActivated()) {
+                                logger.debug("Binary SMS reconfiguration received");
+                            }
+                    		
+                            if(smsData.contains(HttpsProvisioningUtils.RESET_CONFIG_SUFFIX)) {
+                                if (logger.isActivated()) {
+                                    logger.debug("Binary SMS reconfiguration received with suffix reconf");
                                 }
-                            };
-                            t.start();
+                                
+                                TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+                               
+                                if(!smsData.contains(tm.getSubscriberId()) && !smsData.contains(RcsSettings.getInstance().getUserProfileImsPrivateId())) {
+                                	if (logger.isActivated()) {
+                                        logger.debug("Binary SMS reconfiguration received but not with my ID");
+                                    }
+                                	return;
+                                }
 
-                            // Unregister SMS provisioning receiver
-                            unregisterSmsProvisioningReceiver();
+                                Thread t = new Thread() {
+                                    public void run() {
+                                    	RcsSettings.getInstance().setProvisioningVersion("0");
+                                    	LauncherUtils.stopRcsService(context);
+                                    	LauncherUtils.resetRcsConfig(context);
+                                    	LauncherUtils.launchRcsService(context, true);
+                                    }
+                                };
+                                t.start();
+                            }
+                            else {
+                                if (logger.isActivated()) {
+                                    logger.debug("Binary SMS received for OTP");
+                                }
+
+                            	if(manager != null){
+	                                Thread t = new Thread() {
+	                                    public void run() {
+	                                    	manager.updateConfigWithOTP(smsData, requestUri, client,
+		                                                localContext);
+	                                    }
+	                                };
+	                                t.start();
+	
+	                                // Unregister SMS provisioning receiver
+	                                unregisterSmsProvisioningReceiver();
+                            	}
+                            	else
+                            	{
+                                    if (logger.isActivated()) {
+                                        logger.warn("Binary sms received, no rcscfg requested and not waiting for OTP... Discarding SMS");
+                                    }
+                            	}
+                            }
+                            	
                         } catch (UnsupportedEncodingException e) {
                             if (logger.isActivated()) {
                                 logger.debug("Parsing sms OTP failed: " + e);
@@ -155,20 +217,20 @@ public class HttpsProvisioningSMS {
         intentFilter.addDataScheme("sms");
         intentFilter.addDataAuthority("*", smsPort);
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        manager.getContext().registerReceiver(smsProvisioningReceiver, intentFilter);
+        context.registerReceiver(smsProvisioningReceiver, intentFilter);
     }
 
     /**
      * Unregister the SMS provisioning receiver
      */
-    protected void unregisterSmsProvisioningReceiver() {
+    public void unregisterSmsProvisioningReceiver() {
         if (smsProvisioningReceiver != null) {
             if (logger.isActivated()) {
                 logger.debug("Unregistering SMS provider receiver");
             }
 
             try {
-                manager.getContext().unregisterReceiver(smsProvisioningReceiver);
+            	context.unregisterReceiver(smsProvisioningReceiver);
             } catch (IllegalArgumentException e) {
                 // Nothing to do
             }

@@ -296,8 +296,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 		     // Initiate a new session
-            VideoStreamingSession session = Core.getInstance().getRichcallService()
-                    .initiateLiveVideoSharingSession(contact, player);
+            VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),

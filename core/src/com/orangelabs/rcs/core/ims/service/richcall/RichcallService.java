@@ -465,8 +465,6 @@ public class RichcallService extends ImsService {
 				PhoneUtils.formatNumberToSipUri(contact),
 				geoloc);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 

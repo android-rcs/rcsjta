@@ -848,10 +848,6 @@ public abstract class ImsServiceSession extends Thread {
                 // 200 OK
                 handle200OK(ctx.getSipResponse());
             } else
-            if (ctx.getStatusCode() == 403) {
-                // 403 session not found
-                handle403Forbidden(ctx.getSipResponse());
-            } else
             if (ctx.getStatusCode() == 404) {
                 // 404 session not found
                 handle404SessionNotFound(ctx.getSipResponse());

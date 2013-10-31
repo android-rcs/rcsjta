@@ -18,7 +18,7 @@
 package org.gsma.joyn.ft;
 
 /**
- * New file transfer invitations event listener
+ * New file transfer invitations event and delivery reports listener
  *  
  * @author Jean-Marc AUFFRET
  */
@@ -29,5 +29,19 @@ public abstract class NewFileTransferListener extends INewFileTransferListener.S
 	 * @param transferId Transfer ID
 	 */
 	public abstract void onNewFileTransfer(String transferId);
-
+	
+	/**
+	 * Callback called when the file has been delivered
+	 * 
+	 * @param transferId Transfer ID
+	 */
+	public abstract void onReportFileDelivered(String transferId);
+	
+	/**
+	 * Callback called when the file has been displayed
+	 * 
+	 * @param transferId Transfer ID
+	 */
+	public abstract void onReportFileDisplayed(String transferId);
+	
 }

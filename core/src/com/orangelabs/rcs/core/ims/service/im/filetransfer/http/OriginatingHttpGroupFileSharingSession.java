@@ -27,6 +27,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -113,13 +114,13 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String mime = CpimMessage.MIME_TYPE;
         String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
         String to = ChatUtils.ANOMYNOUS_URI;
-        String msgId = ChatUtils.generateMessageId();
+        String msgId = IdGenerator.getIdentifier();
 
         // Send file info in CPIM message
         String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
 
         // Send content
-        chatSession.sendDataChunks(msgId, content, mime);
+        chatSession.sendDataChunks(ChatUtils.generateMessageId(), content, mime);
         RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
     }
     
@@ -156,9 +157,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 handleFileTransfered();
             } else {
                 // No chat error
-                if (logger.isActivated()) {
-                    logger.debug("No chat found for file transfer in group");
-                }
                 // TODO handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
 			}
 		} else {

@@ -120,18 +120,18 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
 		accumulator.setLength(0);
 		
-		if (localName.equals("file")) {		
+		if (localName.equalsIgnoreCase("file")) {		
 			ftInfo = new FileTransferHttpInfoDocument();
 		} else
-		if (localName.equals("file-info")) {	
+		if (localName.equalsIgnoreCase("file-info")) {	
 			if (ftInfo != null) {
 				String type = attr.getValue("type").trim();	
-				if (type.equals("thumbnail")) { 
+				if (type.equalsIgnoreCase("thumbnail")) { 
 					thumbnailInfo = new FileTransferHttpThumbnail();
 				}
 			}
 		} else		
-		if (localName.equals("data")) {	
+		if (localName.equalsIgnoreCase("data")) {	
 			if (ftInfo != null) {
 				String url = attr.getValue("url").trim();
 				String validity = attr.getValue("until").trim();
@@ -175,7 +175,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 	 * Receive notification of the end of an element.
 	 */
 	public void endElement(String namespaceURL, String localName, String qname) {
-		if (localName.equals("file-size")) {
+		if (localName.equalsIgnoreCase("file-size")) {
 			if ((ftInfo != null && ftInfo.getFileThumbnail() != null) || (ftInfo != null && thumbnailInfo == null)) {
 				ftInfo.setFileSize(Integer.parseInt(accumulator.toString().trim()));
 			} else
@@ -183,7 +183,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 				thumbnailInfo.setThumbnailSize(Integer.parseInt(accumulator.toString().trim()));
 			}
 		} else
-		if (localName.equals("file-name")) {
+		if (localName.equalsIgnoreCase("file-name")) {
 			if (ftInfo != null) {
 				String s;
 				try {
@@ -196,7 +196,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 				}
 			}
 		} else
-		if (localName.equals("content-type")) {			                  
+		if (localName.equalsIgnoreCase("content-type")) {			                  
 			if (ftInfo != null && (ftInfo.getFileThumbnail() != null  || thumbnailInfo == null )) {
 				ftInfo.setFileType(accumulator.toString().trim());
 			} else
