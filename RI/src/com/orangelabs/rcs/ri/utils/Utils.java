@@ -81,6 +81,11 @@ public class Utils {
 	public static int NOTIF_ID_MM_SESSION = 1005; 
 	
 	/**
+	 * Notification ID for geoloc share
+	 */
+	public static int NOTIF_ID_GEOLOC_SHARE = 1006; 
+
+	/**
 	 * Returns the application version from manifest file 
 	 * 
 	 * @param ctx Context

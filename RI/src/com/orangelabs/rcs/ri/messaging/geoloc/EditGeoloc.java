@@ -136,8 +136,11 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
     public void onServiceConnected() {
 		try {
 			// Set max label length
-			InputFilter maxLengthFilter = new InputFilter.LengthFilter(chatApi.getConfiguration().getGeolocLabelMaxLength());
-			locationEdit.setFilters(new InputFilter[]{ maxLengthFilter });
+			int maxLabelLength = chatApi.getConfiguration().getGeolocLabelMaxLength();
+			if (maxLabelLength > 0) {
+				InputFilter maxLengthFilter = new InputFilter.LengthFilter(maxLabelLength);
+				locationEdit.setFilters(new InputFilter[]{ maxLengthFilter });
+			}
 
 			// Enable button
 	        Button validateBtn = (Button)findViewById(R.id.validate_btn);

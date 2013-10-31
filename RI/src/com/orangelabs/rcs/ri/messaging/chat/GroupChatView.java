@@ -219,11 +219,14 @@ public class GroupChatView extends ChatView {
 			// Load history
 			loadHistory();
 
-			// Set the message composer max length
-			InputFilter[] filterArray = new InputFilter[1];
-			filterArray[0] = new InputFilter.LengthFilter(chatApi.getConfiguration().getGroupChatMessageMaxLength());
-			composeText.setFilters(filterArray);
-
+			// Set max label length
+			int maxMsgLength = chatApi.getConfiguration().getGroupChatMessageMaxLength();
+			if (maxMsgLength > 0) {
+				InputFilter[] filterArray = new InputFilter[1];
+				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+				composeText.setFilters(filterArray);
+			}
+			
 			// Instanciate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
 	    } catch(JoynServiceNotAvailableException e) {

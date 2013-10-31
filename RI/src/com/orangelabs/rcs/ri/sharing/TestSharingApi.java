@@ -27,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.sharing.geoloc.TestGeolocSharingApi;
 import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
 import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -65,7 +66,7 @@ public class TestSharingApi extends ListActivity {
                 break;
                 
 	        case 2:
-	        	Utils.showMessage(this, getString(R.string.label_not_implemented));
+	        	startActivity(new Intent(this, TestGeolocSharingApi.class));
                 break;            
         }
     }

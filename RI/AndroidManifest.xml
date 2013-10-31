@@ -202,6 +202,20 @@
         
         <activity android:name=".sharing.image.ImageSharingList"/>
         
+        <!-- Geoloc sharing API -->
+        
+        <activity android:name=".sharing.geoloc.TestGeolocSharingApi"/>
+
+        <activity android:name=".sharing.geoloc.InitiateGeolocSharing"/>
+        
+		<receiver android:name=".sharing.geoloc.GeolocSharingInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.gsh.action.NEW_GEOLOC_SHARING"/>
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".sharing.geoloc.ReceiveGeolocSharing"/>
+        
         <!-- Video sharing API -->
         
         <activity android:name=".sharing.video.TestVideoSharingApi"/>
