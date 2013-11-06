@@ -32,4 +32,6 @@ interface IFileTransfer {
 	void addEventListener(in IFileTransferListener listener);
 
 	void removeEventListener(in IFileTransferListener listener);
+	
+	int getServiceVersion();
 }

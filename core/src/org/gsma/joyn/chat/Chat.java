@@ -17,7 +17,9 @@
  ******************************************************************************/
 package org.gsma.joyn.chat;
 
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
+import org.gsma.joyn.JoynUtils;
 
 /**
  * Chat
@@ -76,6 +78,7 @@ public class Chat {
    	 * @throws JoynServiceException
      */
     public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
+    	JoynUtils.checkVersionCompatibility(chatInf, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
 		try {
 			return chatInf.sendGeoloc(geoloc);
 		} catch(Exception e) {

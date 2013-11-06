@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.gsma.joyn;
 
+import java.lang.reflect.Method;
+
 import android.content.Context;
 
 /**
@@ -79,7 +81,8 @@ public abstract class JoynService {
     	public static final int API_INCREMENTAL = 0;
    	   	    	
     	private Build() {
-        }    	
+        } 
+    	    	
     }
     
     /**
@@ -115,6 +118,7 @@ public abstract class JoynService {
 	 */
 	protected JoynServiceListener serviceListener;
 	
+		
 	/**
 	 * Constructor
 	 * 
@@ -125,6 +129,7 @@ public abstract class JoynService {
 		this.ctx = ctx;
 		this.serviceListener = listener;
 	}
+		
 	
     /**
      * Connects to the API
@@ -142,4 +147,6 @@ public abstract class JoynService {
 	 * @return Returns true if connected else returns false
      */
     public abstract boolean isServiceConnected();
+    
+   
 }

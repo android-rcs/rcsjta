@@ -39,4 +39,6 @@ interface IChatService {
 	List<IBinder> getGroupChats();
     
 	IGroupChat getGroupChat(in String chatId);
+	
+	int getServiceVersion();
 }

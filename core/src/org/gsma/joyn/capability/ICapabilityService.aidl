@@ -29,4 +29,6 @@ interface ICapabilityService {
 	void addContactCapabilitiesListener(in String contact, in ICapabilitiesListener listener);
 
 	void removeContactCapabilitiesListener(in String contact, in ICapabilitiesListener listener);
+	
+	int getServiceVersion();
 }

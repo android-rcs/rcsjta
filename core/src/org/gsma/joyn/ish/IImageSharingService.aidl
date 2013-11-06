@@ -27,4 +27,6 @@ interface IImageSharingService {
 	void addNewImageSharingListener(in INewImageSharingListener listener);
 
 	void removeNewImageSharingListener(in INewImageSharingListener listener);
+	
+	int getServiceVersion();
 }

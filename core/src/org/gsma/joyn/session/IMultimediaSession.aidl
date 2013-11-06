@@ -29,5 +29,7 @@ interface IMultimediaSession {
 	void addEventListener(in IMultimediaSessionListener listener);
 	
 	void removeEventListener(in IMultimediaSessionListener listener);
+	
+	int getServiceVersion();
 }
 

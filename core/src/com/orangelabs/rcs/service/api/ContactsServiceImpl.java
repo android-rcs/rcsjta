@@ -23,9 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.capability.Capabilities;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.contacts.JoynContact;
+
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -233,5 +236,16 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		
 		return result;
-    }    
+    }
+
+    /**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
+	}    
 }

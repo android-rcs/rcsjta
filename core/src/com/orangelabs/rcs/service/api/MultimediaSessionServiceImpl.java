@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.session.IMultimediaSession;
 import org.gsma.joyn.session.IMultimediaSessionListener;
 import org.gsma.joyn.session.IMultimediaSessionService;
@@ -32,6 +33,7 @@ import org.gsma.joyn.session.MultimediaSessionIntent;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -339,5 +341,16 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		
 		// Broadcast intent related to the received invitation
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
+	}
+
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}    
 }

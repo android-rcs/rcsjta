@@ -13,4 +13,6 @@ interface IContactsService {
 	List<JoynContact> getJoynContactsOnline();
 
 	List<JoynContact> getJoynContactsSupporting(in String tag);
+	
+	int getServiceVersion();
 }

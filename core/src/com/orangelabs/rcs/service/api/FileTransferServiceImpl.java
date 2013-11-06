@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.ft.FileTransfer;
 import org.gsma.joyn.ft.FileTransferIntent;
 import org.gsma.joyn.ft.FileTransferServiceConfiguration;
@@ -34,6 +35,7 @@ import org.gsma.joyn.ft.INewFileTransferListener;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -365,5 +367,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}
 }

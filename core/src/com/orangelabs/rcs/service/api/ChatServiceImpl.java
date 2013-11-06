@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.ChatServiceConfiguration;
@@ -21,6 +22,7 @@ import org.gsma.joyn.chat.INewChatListener;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
@@ -707,5 +709,17 @@ public class ChatServiceImpl extends IChatService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}
 }

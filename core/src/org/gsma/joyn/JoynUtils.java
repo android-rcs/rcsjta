@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.gsma.joyn;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -73,4 +74,37 @@ public class JoynUtils {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 		context.startActivity(intent);
 	}
+	
+	 /**
+     * Returns the version of the joyn service installed on the device
+     * @return 
+     * @throws JoynServiceException 
+     * @hide
+     */
+    private static int getCurrentServiceVersion(android.os.IInterface api) throws JoynServiceException{   			
+		if (api != null ) {
+			try {		
+				Class cls = api.getClass();
+				Method method = cls.getDeclaredMethod("getServiceVersion");
+				return  (Integer) method.invoke(api, null);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else  {
+			throw new JoynServiceNotAvailableException();
+		}
+    }
+    
+    /**
+     * If the the current service version is inferior to the minimum version needed then throw Exception.
+     * @param api
+     * @param minVersion
+     * @throws JoynServiceException
+     * @hide
+     */
+    public static void checkVersionCompatibility(android.os.IInterface api, int minVersion) throws JoynServiceException{
+    	if(getCurrentServiceVersion(api) < minVersion){
+    		throw new JoynServiceException("The current version of joyn services is not compatible with your application");
+    	}
+    }
 }

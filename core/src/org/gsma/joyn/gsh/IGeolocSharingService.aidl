@@ -25,4 +25,6 @@ interface IGeolocSharingService {
 	void addNewGeolocSharingListener(in INewGeolocSharingListener listener);
 
 	void removeNewGeolocSharingListener(in INewGeolocSharingListener listener);
+	
+	int getServiceVersion();
 }

@@ -29,4 +29,6 @@ interface IIPCallService {
 	void addNewIPCallListener(in INewIPCallListener listener);
 
 	void removeNewIPCallListener(in INewIPCallListener listener);
+	
+	int getServiceVersion();
 }

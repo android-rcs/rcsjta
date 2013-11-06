@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.ish.IImageSharing;
 import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.IImageSharingService;
@@ -17,6 +18,7 @@ import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -353,5 +355,16 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}
 }

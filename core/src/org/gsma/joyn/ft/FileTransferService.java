@@ -27,6 +27,7 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
+import org.gsma.joyn.JoynUtils;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -210,7 +211,8 @@ public class FileTransferService extends JoynService {
 	 * @throws JoynContactFormatException
      */
     public FileTransfer transferFile(String contact, String filename, String fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
-		if (api != null) {
+		JoynUtils.checkVersionCompatibility(api, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
+    	if (api != null) {
 			try {
 				IFileTransfer ftIntf = api.transferFile(contact, filename, fileicon, listener);
 				if (ftIntf != null) {

@@ -40,4 +40,6 @@ interface IGroupChat {
 	String sendGeoloc(in Geoloc geoloc);
 
 	IFileTransfer sendFile(in String filename, in String fileicon, in IFileTransferListener listener);
+	
+	int getServiceVersion();
 }

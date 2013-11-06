@@ -27,4 +27,6 @@ interface IFileTransferService {
 	void addNewFileTransferListener(in INewFileTransferListener listener);
 
 	void removeNewFileTransferListener(in INewFileTransferListener listener);
+	
+	int getServiceVersion();
 }

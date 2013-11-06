@@ -18,12 +18,14 @@
 
 package com.orangelabs.rcs.service.api;
 
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.vsh.IVideoRenderer;
 import org.gsma.joyn.vsh.IVideoSharing;
 import org.gsma.joyn.vsh.IVideoSharingListener;
 import org.gsma.joyn.vsh.VideoSharing;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -389,4 +391,15 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     public void handleVideoResized(int width, int height) {
     	// TODO
     }
+
+    /**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
+	}
 }

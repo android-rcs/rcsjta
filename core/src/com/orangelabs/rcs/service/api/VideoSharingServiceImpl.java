@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.vsh.INewVideoSharingListener;
 import org.gsma.joyn.vsh.IVideoPlayer;
 import org.gsma.joyn.vsh.IVideoSharing;
@@ -36,6 +37,7 @@ import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.VideoContent;
@@ -389,5 +391,16 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}
 }

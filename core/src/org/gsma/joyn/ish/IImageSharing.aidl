@@ -30,4 +30,6 @@ interface IImageSharing {
 	void addEventListener(in IImageSharingListener listener);
 
 	void removeEventListener(in IImageSharingListener listener);
+	
+	int getServiceVersion();
 }

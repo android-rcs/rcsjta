@@ -21,6 +21,8 @@ interface IMultimediaSessionService {
 	IMultimediaSession initiateSession(in String serviceId, in String contact, in String sdp, in IMultimediaSessionListener listener);
 	
 	boolean sendMessage(in String serviceId, in String contact, in String content, in String contentType);
+	
+	int getServiceVersion();
 }
 
 

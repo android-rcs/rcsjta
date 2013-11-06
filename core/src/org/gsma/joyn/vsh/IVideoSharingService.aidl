@@ -28,4 +28,6 @@ interface IVideoSharingService {
 	void addNewVideoSharingListener(in INewVideoSharingListener listener);
 
 	void removeNewVideoSharingListener(in INewVideoSharingListener listener);
+	
+	int getServiceVersion();
 }

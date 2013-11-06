@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.gsma.joyn.IJoynServiceRegistrationListener;
+import org.gsma.joyn.JoynService;
 import org.gsma.joyn.ipcall.IIPCall;
 import org.gsma.joyn.ipcall.IIPCallListener;
 import org.gsma.joyn.ipcall.IIPCallPlayer;
@@ -36,6 +37,7 @@ import org.gsma.joyn.ipcall.IPCallServiceConfiguration;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.AudioContent;
@@ -376,5 +378,16 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	/**
+	 * Returns service version.
+	 */
+	@Override
+	public int getServiceVersion() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
+		}
+		return JoynService.Build.GSMA_VERSION;
 	}
 }
