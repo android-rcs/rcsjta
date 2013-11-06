@@ -157,7 +157,7 @@ public class ChunkReceiver extends Thread {
 				Hashtable<String, String> headers = new Hashtable<String, String>();
 				char continuationFlag = '\0';
 				long totalSize = 0;
-				while(continuationFlag == '\0') {
+				while(continuationFlag == '\0' && !terminated) {
 					line = readLine();
 					if (MsrpConnection.MSRP_TRACE_ENABLED) {
 						trace.append(line);

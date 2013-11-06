@@ -183,7 +183,8 @@
 <string name="label_no_participant_found">No participant found or available</string>
 <string name="label_no_subject">no subject</string>
 <string name="label_geoloc_prefix">Geoloc</string>
-<string name="label_ft_thumb">File thumbnail</string>
+<string name="label_ft_thumb">Thumbnail</string>
+<string name="menu_send_file">Send file</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>

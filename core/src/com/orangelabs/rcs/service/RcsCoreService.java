@@ -623,30 +623,30 @@ public class RcsCoreService extends Service implements CoreListener {
 	/**
 	 * A new file transfer invitation has been received
 	 * 
-	 * @param session File transfer session
+	 * @param fileSharingSession File transfer session
+	 * @param isGroup Is group file transfer
 	 */
-	public void handleFileTransferInvitation(FileSharingSession session) {
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 
     	// Broadcast the invitation
-		ftApi.receiveFileTransferInvitation(session);
+		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup);
 	}
     
 	/**
-	 * A new one to one file transfer invitation has been received
+	 * A new file transfer invitation has been received
 	 * 
 	 * @param session File transfer session
-	 * @param one2oneChatSession the created chat session (1to1)
 	 */
-	public void handle1to1FileTransferInvitation(FileSharingSession session, TerminatingOne2OneChatSession one2oneChatSession) {
+	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession one2oneChatSession) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(session, one2oneChatSession);
+    	ftApi.receiveFileTransferInvitation(fileSharingSession, one2oneChatSession);
 	}
 	
 	/**

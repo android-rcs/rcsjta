@@ -196,8 +196,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * Receive a new file transfer invitation
 	 * 
 	 * @param session File transfer session
+	 * @param isGroup is group file transfer
 	 */
-    public void receiveFileTransferInvitation(FileSharingSession session) {
+    public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup) {
 		if (logger.isActivated()) {
 			logger.info("Receive file transfer invitation from " + session.getRemoteContact());
 		}
@@ -221,6 +222,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
     	intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
     	intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+    	/* TODO if (session instanceof HttpFileTransferSession) {
+    	    intent.putExtra("chatSessionId", ((HttpFileTransferSession)session).getChatSessionID());
+    	    if (isGroup) {
+    	        intent.putExtra("chatId", ((HttpFileTransferSession)session).getContributionID());
+    	    }
+    	    intent.putExtra("isGroupTransfer", isGroup);
+    	}*/
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
     	
     	// Notify file transfer invitation listeners
@@ -295,7 +303,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, false, null, null); // TODO
+			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon, null, null); // TODO
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);

@@ -244,7 +244,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
-        intent.putExtra(VideoSharingIntent.EXTRA_FORMAT, ""); // TODO
+        intent.putExtra(VideoSharingIntent.EXTRA_WIDTH, session.getVideoWidth());
+        intent.putExtra(VideoSharingIntent.EXTRA_HEIGHT, session.getVideoHeight());
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
         
     	// Notify video sharing invitation listeners

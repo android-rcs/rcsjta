@@ -462,7 +462,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		} else
 		if (ChatUtils.isTextPlainType(mimeType)) {
 	    	// Text message
-			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), msgId, false, new Date());
+			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date());
 		} else
 		if (ChatUtils.isMessageCpimType(mimeType)) {
 	    	// Receive a CPIM message
@@ -485,6 +485,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	// Check if the message needs a delivery report
 	    			boolean imdnDisplayedRequested = false;
 			    	String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+                    boolean isFToHTTP = ChatUtils.isFileTransferHttpType(contentType);
+                    if (isFToHTTP) {
+                        sendMsrpMessageDeliveryStatus(from, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+                    } else
 			    	if (dispositionNotification != null) {
 			    		if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
 			    			// Positive delivery requested, send MSRP message with status "delivered" 
@@ -496,9 +500,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	}
 
 			    	// Analyze received message thanks to the MIME type 
-                    if (ChatUtils.isFileTransferHttpType(contentType)) {
+                    if (isFToHTTP) {
                         // File transfer over HTTP message
-                        receiveHttpFileTransfer(StringUtils.decodeUTF8(cpimMsg.getMessageContent()), getDialogPath().getInvite(), msgId);
+                        receiveHttpFileTransfer(StringUtils.decodeUTF8(cpimMsg.getMessageContent()), getDialogPath().getInvite(), cpimMsgId);
                     } else
 	                if (ChatUtils.isTextPlainType(contentType)) {
 				    	// Text message
@@ -574,6 +578,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Request capabilities
+		// TODO : only for 1-1 chat
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
         if (msgId != null) {
@@ -599,13 +604,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param date Date of the message
 	 */
 	private void receiveText(String contact, String txt, String msgId, boolean imdnDisplayedRequested, Date date) {
-		// Is composing event is reset
-	    isComposingMgr.receiveIsComposingEvent(contact, false);
-
-	    // Notify listeners
-    	for(int i=0; i < getListeners().size(); i++) {
-    		((ChatSessionListener)getListeners().get(i)).handleReceiveMessage(new InstantMessage(msgId, contact, txt, imdnDisplayedRequested, date));
-		}
+        // TODO if (RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
+			// Is composing event is reset
+		    isComposingMgr.receiveIsComposingEvent(contact, false);
+	
+		    // Notify listeners
+	    	for(int i=0; i < getListeners().size(); i++) {
+	    		((ChatSessionListener)getListeners().get(i)).handleReceiveMessage(new InstantMessage(msgId, contact, txt, imdnDisplayedRequested, date));
+			}
+        // }
 	}
 	
 	/**
@@ -712,7 +719,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			session.startSession();
 
 			// Notify listener
-			getImsService().getImsModule().getCoreListener().handleFileTransferInvitation(session); // TODO, isGroupChat());
+			getImsService().getImsModule().getCoreListener().handleFileTransferInvitation(session, isGroupChat());
 	    }
 		// TODO : else return error to Originating side
 	}
@@ -727,13 +734,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 */
 	public boolean sendDataChunks(String msgId, String data, String mime) {
 		try {
-	    	if (msrpMgr != null) {
-				ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
-				msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
-				return true;
-	    	} else {
-	    		return false;	    				
-	    	}
+			ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes()); 
+			msrpMgr.sendChunks(stream, msgId, mime, data.getBytes().length);
+			return true;
 		} catch(Exception e) {
 			// Error
 	   		if (logger.isActivated()) {
@@ -818,7 +821,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
 		
 		// Send data
-		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
+		boolean result = sendDataChunks(ChatUtils.generateMessageId(), content, CpimMessage.MIME_TYPE);
 		if (result) {
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
@@ -826,21 +829,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 	
 	/**
-     * Receive a message delivery status from a SIP message
+     * Handle a message delivery status from a SIP message
      * 
    	 * @param msgId Message ID
      * @param status Delivery status
      */
-    public void receiveMessageDeliveryStatus(String msgId, String status) {
-        // Check if message delivery of a FileTransfer
-        String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(msgId);
-        if (ftSessionId == null) {
-    		// Notify listeners
-        	for(int i=0; i < getListeners().size(); i++) {
-        		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, status);
-    		}
-        } else {
-            ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, status);
+    public void handleMessageDeliveryStatus(String msgId, String status) {
+        // Notify listeners
+        for (int i = 0; i < getListeners().size(); i++) {
+            ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(
+                    msgId, status);
         }
     }
     
@@ -852,19 +850,20 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void receiveMessageDeliveryStatus(String xml) {
     	try {
 			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-			if (imdn != null) {
+            if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
 	            // Check if message delivery of a FileTransfer
-	            String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
-	            if (ftSessionId == null) {
+	            // String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
+	            // TODO
+	            // if (ftSessionId == null) {
 	                // Notify listeners
                     for (int i = 0; i < getListeners().size(); i++) {
                         ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(
                                 imdn.getMsgId(), imdn.getStatus());
                     }
-                } else {
-                    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(
-                            ftSessionId, imdn.getStatus());
-                }
+                // } else {
+                //    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(
+                //            ftSessionId, imdn.getStatus());
+                //}
 			}
     	} catch(Exception e) {
     		if (logger.isActivated()) {
@@ -910,6 +909,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
+
+        // Open the MSRP session
+        getMsrpMgr().openMsrpSession();
+
+        // Send an empty packet
+        sendEmptyDataChunk();
     }
 
     /**
@@ -918,11 +923,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @throws Exception 
      */
     public void startMediaSession() throws Exception {
-        // Open the MSRP session
-        getMsrpMgr().openMsrpSession();
-
-        // Send an empty packet
-        sendEmptyDataChunk();
+        // Nothing to do
     }
 
 	/**

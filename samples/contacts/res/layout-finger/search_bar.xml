@@ -42,14 +42,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
-            <ImageView 
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" 
-                android:src="@drawable/ic_launcher_contacts"
-                android:layout_marginRight="7dip"
-                android:layout_gravity="center_vertical"
-                android:scaleType="centerInside" />
               
             <view
                 class="org.gsma.joyn.samples.contacts.SearchEditText"

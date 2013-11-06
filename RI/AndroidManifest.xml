@@ -182,6 +182,8 @@
         
         <activity android:name=".messaging.geoloc.ShowUsInMap"/>        
         
+        <activity android:name=".messaging.chat.SendGroupFile"/>        
+        
         <!-- Sharing API -->
         
         <activity android:name=".sharing.TestSharingApi"/>

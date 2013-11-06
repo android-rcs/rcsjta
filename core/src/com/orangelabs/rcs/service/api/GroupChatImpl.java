@@ -88,6 +88,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 	
 	/**
+	 * Returns the direction of the group chat (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 */
+	public int getDirection() {
+		if ((session instanceof OriginatingAdhocGroupChatSession) ||
+				(session instanceof RejoinGroupChatSession) ||
+					(session instanceof RestartGroupChatSession)) {
+			return GroupChat.Direction.OUTGOING;
+		} else {
+			return GroupChat.Direction.INCOMING;
+		}
+	}		
+	
+	/**
 	 * Returns the state of the group chat
 	 * 
 	 * @return State 

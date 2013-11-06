@@ -33,7 +33,8 @@ public class VideoSharingIntent {
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the video sharing.
      * <li> {@link #EXTRA_ENCODING} containing the video encoding.
-     * <li> {@link #EXTRA_FORMAT} containing the video format.
+     * <li> {@link #EXTRA_WIDTH} containing the video width.
+     * <li> {@link #EXTRA_HEIGHT} containing the video height.
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.vsh.action.NEW_VIDEO_SHARING";
@@ -59,7 +60,12 @@ public class VideoSharingIntent {
 	public final static String EXTRA_ENCODING = "encoding";
 
 	/**
-	 * Video format (e.g. QCIF)
+	 * Video width (in pixels)
 	 */
-	public final static String EXTRA_FORMAT = "format";
+	public final static String EXTRA_WIDTH = "width";
+	
+	/**
+	 * Video height (in pixels)
+	 */
+	public final static String EXTRA_HEIGHT = "height";
 }

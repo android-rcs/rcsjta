@@ -2523,7 +2523,7 @@ public final class ContactsManager {
 		ContactInfo contactInfo = getContactInfo(contact);
 		if (contactInfo.getRcsStatus()==ContactInfo.NO_INFO){
 			return null;
-		}else{
+		} else {
 			return contactInfo.getCapabilities();
 		}
 	}

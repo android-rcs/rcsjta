@@ -261,7 +261,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
 			
 			// Initiate a sharing session
-			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, false);
+			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),

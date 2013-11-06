@@ -423,6 +423,20 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
     }
 
     /**
+     * Notify renderer event resized
+     */
+    private void notifyRendererEventResized(int width, int height) {
+    	try {
+	        Iterator<IVideoRendererListener> ite = getEventListeners().iterator();
+	        while (ite.hasNext()) {
+	            ite.next().onRendererResized(width, height);
+	        }
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		}
+    }    
+    
+    /**
      * Media RTP output
      */
     private class MediaRtpOutput implements MediaOutput {
@@ -480,10 +494,10 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
             int[] decodedFrame = NativeH264Decoder.DecodeAndConvert(sample.getData(), videoOrientation.getOrientation().getValue(), decodedFrameDimensions);
             if (NativeH264Decoder.getLastDecodeStatus() == 0) {
                 if ((surface != null) && (decodedFrame.length > 0)) {
-                    // Init rgbFrame with the decoder dimensions
+                    // Init RGB frame with the decoder dimensions
                 	if ((rgbFrame.getWidth() != decodedFrameDimensions[0]) || (rgbFrame.getHeight() != decodedFrameDimensions[1])) {
                         rgbFrame = Bitmap.createBitmap(decodedFrameDimensions[0], decodedFrameDimensions[1], Bitmap.Config.RGB_565);
-                        // TODO: notifyPlayerEventResized(decodedFrameDimensions[0], decodedFrameDimensions[1]);
+                        notifyRendererEventResized(decodedFrameDimensions[0], decodedFrameDimensions[1]);
                     }
 
                 	// Set data in image
@@ -495,4 +509,3 @@ public class MyVideoRenderer extends VideoRenderer implements RtpStreamListener 
         }
     }
 }
-

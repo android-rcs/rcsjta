@@ -39,6 +39,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -586,6 +587,17 @@ public class GroupChatView extends ChatView {
 				getGeoLoc();
 				break;	
 							
+			case R.id.menu_send_file:
+				try {
+					Intent intent = new Intent(this, SendGroupFile.class);
+					intent.putExtra(SendGroupFile.EXTRA_CHAT_ID, groupChat.getChatId());
+					startActivity(intent);
+			    } catch(JoynServiceException e) {
+			    	e.printStackTrace();
+					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_api_failed));
+				}
+				break;	
+
 			case R.id.menu_showus_map:
 				try {
 					showUsInMap(groupChat.getParticipants());

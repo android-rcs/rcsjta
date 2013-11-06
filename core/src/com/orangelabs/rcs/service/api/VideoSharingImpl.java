@@ -21,6 +21,7 @@ package com.orangelabs.rcs.service.api;
 import org.gsma.joyn.vsh.IVideoRenderer;
 import org.gsma.joyn.vsh.IVideoSharing;
 import org.gsma.joyn.vsh.IVideoSharingListener;
+import org.gsma.joyn.vsh.VideoCodec;
 import org.gsma.joyn.vsh.VideoSharing;
 
 import android.os.RemoteCallbackList;
@@ -97,23 +98,22 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 	
 	/**
-	 * Returns the video encoding
+	 * Returns the video codec
 	 * 
-	 * @return Encoding name (e.g. H264)
+	 * @return Video codec
+	 * @see VideoCodec
 	 */
-	public String getVideoEncoding() {
-		// TODO
-		return null;
-	}
-	
-	/**
-	 * Returns the video format
-	 * 
-	 * @return Format (e.g. QCIF)
-	 */
-	public String getVideoFormat() {
-		// TODO
-		return null;
+	public VideoCodec getVideoCodec() {
+		VideoCodec codec = null;
+		try {
+			if (session.getVideoPlayer() != null) {
+				codec = session.getVideoPlayer().getCodec();
+			} else
+			if (session.getVideoRenderer() != null) {
+				codec = session.getVideoRenderer().getCodec();
+			}
+		} catch(Exception e) {}
+		return codec;
 	}
 	
 	/**
@@ -387,6 +387,17 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param height Video height
      */
     public void handleVideoResized(int width, int height) {
-    	// TODO
+    	// Notify event listeners
+		final int N = listeners.beginBroadcast();
+        for (int i=0; i < N; i++) {
+            try {
+            	// TODO listeners.getBroadcastItem(i).handleVideoResized(width, height);
+            } catch(Exception e) {
+            	if (logger.isActivated()) {
+            		logger.error("Can't notify listener", e);
+            	}
+            }
+        }
+        listeners.finishBroadcast();
     }
 }

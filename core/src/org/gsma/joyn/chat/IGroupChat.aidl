@@ -11,6 +11,8 @@ import org.gsma.joyn.ft.IFileTransferListener;
 interface IGroupChat {
 	String getChatId();
 
+	int getDirection();
+	
 	int getState();	
 
 	String getRemoteContact();

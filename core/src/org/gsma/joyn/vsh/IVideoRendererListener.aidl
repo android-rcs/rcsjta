@@ -13,4 +13,6 @@ interface IVideoRendererListener {
 	void onRendererClosed();
 
 	void onRendererError(in int error);
+	
+	void onRendererResized(in int width, in int height);
 }

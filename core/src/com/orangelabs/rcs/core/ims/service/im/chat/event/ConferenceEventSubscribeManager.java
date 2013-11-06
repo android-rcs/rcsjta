@@ -527,7 +527,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         
     	SipResponse resp = ctx.getSipResponse();
 
-    	// Set the remote tag
+        // Set the route path with the Record-Route header
+        Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
+        dialogPath.setRoute(newRoute);
+
+        // Set the remote tag
     	dialogPath.setRemoteTag(resp.getToTag());
     	
     	// Set the target

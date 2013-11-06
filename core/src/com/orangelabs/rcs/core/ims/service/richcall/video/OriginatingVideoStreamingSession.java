@@ -59,7 +59,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
             MmContent content, String contact) {
         super(parent, content, contact);
-
+        
         // Create dialog path
         createOriginatingDialogPath();
 

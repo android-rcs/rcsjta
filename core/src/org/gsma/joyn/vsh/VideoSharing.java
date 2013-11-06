@@ -103,6 +103,16 @@ public class VideoSharing {
     }
 
     /**
+     * Video encoding
+     */
+    public static class Encoding {
+        /**
+         * H264
+         */
+        public static final int H264 = 0;
+    }      
+    
+    /**
      * Video sharing interface
      */
     private IVideoSharing sharingInf;
@@ -145,33 +155,20 @@ public class VideoSharing {
 	}
 
 	/**
-	 * Returns the video encoding
+	 * Returns the video codec
 	 * 
-	 * @return Encoding name (e.g. H264)
+	 * @return Video codec
+	 * @see VideoCodec
 	 * @throws JoynServiceException
 	 */
-	public String getVideoEncoding() throws JoynServiceException {
+	public VideoCodec getVideoCodec() throws JoynServiceException {
 		try {
-			return sharingInf.getVideoEncoding();
+			return sharingInf.getVideoCodec();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
 	
-	/**
-	 * Returns the video format
-	 * 
-	 * @return Format (e.g. QCIF)
-	 * @throws JoynServiceException
-	 */
-	public String getVideoFormat() throws JoynServiceException {
-		try {
-			return sharingInf.getVideoFormat();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-
 	/**
 	 * Returns the state of the sharing
 	 * 

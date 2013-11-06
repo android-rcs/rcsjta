@@ -15,7 +15,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
         
-	    <TableRow android:paddingTop="5dip">
+		<CheckBox android:id="@+id/ft_thumb"			 
+         android:text="@string/label_ft_thumb"
+         android:enabled="false" />
+		
+		<TableRow android:paddingTop="5dip">
 	        <TextView android:text="@string/label_file"
 			 android:layout_marginLeft="5dip"
 			 android:gravity="right"/>

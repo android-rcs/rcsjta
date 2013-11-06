@@ -40,10 +40,8 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.platform.file.FileFactory;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -147,11 +145,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	    	if (getThumbnail() != null) {
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 	    		
-	    		// Create the thumbnail
-	    		byte[] bytes = ChatUtils.createFileThumbnail(getContent().getUrl());
-	    		
 	    		// Encode the thumbnail file
-	    	    String imageEncoded = Base64.encodeBase64ToString(bytes);
+	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail());
 
 	    		// Build multipart
 	    		String multipart = 

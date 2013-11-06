@@ -48,6 +48,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -182,6 +183,15 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         if (spinner.getAdapter().getCount() != 0) {
         	selectBtn.setEnabled(true);
         }
+        
+        // Enable thumbnail option if supported
+        try {
+            CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
+	        if (ftApi.getConfiguration().isFileIconSupported()) {
+	        	ftThumb.setEnabled(true);
+	        }
+        } catch(Exception e) {
+        }
     }
     
     /**
@@ -246,12 +256,21 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
         final String remote = cursor.getString(1);
 
+        // Get thumbnail option
+    	String tumbnail = null; 
+        CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
+        if (ftThumb.isChecked()) {
+        	// Create a tumbnail
+        	tumbnail = Utils.createPictureThumbnail(getApplicationContext(), filename, 50 * 1024);
+        }
+    	final String fileicon = tumbnail; 
+        
         // Initiate session in background
         Thread thread = new Thread() {
         	public void run() {
             	try {
             		// Initiate transfer
-            		fileTransfer = ftApi.transferFile(remote, filename, ftListener);
+            		fileTransfer = ftApi.transferFile(remote, filename, fileicon, ftListener);
             	} catch(Exception e) {
             		e.printStackTrace();
 					handler.post(new Runnable(){
@@ -282,6 +301,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	inviteBtn.setVisibility(View.INVISIBLE);
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setVisibility(View.INVISIBLE);
+        ftThumb.setVisibility(View.INVISIBLE);
     }
        
     /**
@@ -310,7 +330,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	switch(requestCode) {
 	    	case SELECT_IMAGE: {
 	    		if ((data != null) && (data.getData() != null)) {
-	
 	    			// Get selected photo URI
 	    			Uri uri = data.getData();
 	
@@ -330,7 +349,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	    				filesize = -1;
 	    				uriEdit.setText(filename);
 	    			}
-	
+	    			
 	    			// Show invite button
 	    			Button inviteBtn = (Button)findViewById(R.id.invite_btn);
 	    			inviteBtn.setEnabled(true);

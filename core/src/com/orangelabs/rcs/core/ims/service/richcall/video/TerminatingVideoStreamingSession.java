@@ -376,6 +376,18 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Request capabilities to the remote
             getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
     	}
+    	
+    	/**
+    	 * Callback called when the renderer is resized
+    	 * 
+    	 * @param width Width
+    	 * @param height Height
+    	 */    	
+    	public void onRendererResized(int width, int height) {
+            if (logger.isActivated()) {
+                logger.debug("Media renderer is resized");
+            }
+    	}
     }
 }
 
