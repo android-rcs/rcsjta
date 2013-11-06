@@ -132,16 +132,18 @@ public interface CoreListener {
 	/**
 	 * A new file transfer invitation has been received
 	 * 
-	 * @param session File transfer session
+	 * @param fileSharingSession File transfer session
+	 * @param isGroup Is group file transfer
 	 */
-	public void handleFileTransferInvitation(FileSharingSession fileSharingSession);
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup);
 
 	/**
-	 * A new file transfer invitation has been received and creating a chat session
+	 * A new file transfer invitation has been received
 	 * 
-	 * @param session File transfer session
+	 * @param fileSharingSession File transfer session
+	 * @param one2oneChatSession Chat session
 	 */
-	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, TerminatingOne2OneChatSession one2oneChatSession);
+	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession one2oneChatSession);
 
 	/**
 	 * A new file transfer invitation has been received and creating a chat session

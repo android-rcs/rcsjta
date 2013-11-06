@@ -384,7 +384,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

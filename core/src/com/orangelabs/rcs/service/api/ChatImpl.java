@@ -318,7 +318,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			RichMessagingHistory.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
 			
 			// Create a chat message
-        	ChatMessage msg = new ChatMessage(message.getMessageId(),
+        	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
         			PhoneUtils.extractNumberFromUri(message.getRemote()),
         			message.getTextMessage(),
         			message.getServerDate(), message.isImdnDisplayedRequested());
@@ -326,16 +326,16 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msg.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msg);
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
 
 	    	// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onNewMessage(msg);
+	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -472,14 +472,40 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @param geoloc Geoloc message
      */
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
-    	// Not used here
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("New geoloc received");
+			}
+			
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().addChatGeoloc(geoloc, ChatLog.Message.Direction.INCOMING);
+			
+	  		// Notify event listeners
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
+	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
+	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+	            	org.gsma.joyn.chat.GeolocMessage msgApi = new org.gsma.joyn.chat.GeolocMessage(geoloc.getMessageId(),
+	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();		
+	    }
     }
     
     /**
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

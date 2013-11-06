@@ -29,9 +29,16 @@
 		includesfile="${terminal.root}/jarfiles.txt">
 	</jar>
 	<copy file="${terminal.api}" todir="${terminal.root}/../ri/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/contacts/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/popup/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
+    </target>
+
+    <!-- Merge stack from SVN -->
+    <target name="merge">
+      <echo>Merge stack from SVN repositiry</echo>
+	<copy file="${terminal.api}" todir="${terminal.root}/../ri/libs"/>
     </target>
 
 </project>

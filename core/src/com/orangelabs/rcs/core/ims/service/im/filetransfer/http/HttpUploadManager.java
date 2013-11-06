@@ -556,7 +556,7 @@ public class HttpUploadManager extends HttpTransferManager {
         	getListener().httpTransferPaused();
     		return null;
 		}
-    	resetCancelled();
+    	resetParamForResume();
 		
         
         if(resp == null)
@@ -721,6 +721,7 @@ public class HttpUploadManager extends HttpTransferManager {
         	if (logger.isActivated()) {
 	            logger.warn("File Upload aborted due to "+e.getLocalizedMessage()+" now in state pause, waiting for resume...");
 	        }
+        	pauseTransfer();
         	getListener().httpTransferPaused();
         	throw e;
         }

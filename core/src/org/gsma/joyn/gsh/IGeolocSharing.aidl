@@ -27,4 +27,6 @@ interface IGeolocSharing {
 	void addEventListener(in IGeolocSharingListener listener);
 
 	void removeEventListener(in IGeolocSharingListener listener);
+	
+	int getServiceVersion();
 }

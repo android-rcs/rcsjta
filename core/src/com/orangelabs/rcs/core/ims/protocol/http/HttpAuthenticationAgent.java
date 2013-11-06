@@ -20,12 +20,14 @@ package com.orangelabs.rcs.core.ims.protocol.http;
 
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.security.HttpDigestMd5Authentication;
+import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * HTTP Digest MD5 authentication agent
  * 
  * @author JM. Auffret
+ * @author Deutsche Telekom
  */
 public class HttpAuthenticationAgent {
 	/**
@@ -47,6 +49,11 @@ public class HttpAuthenticationAgent {
 	 * HTTP Digest MD5 agent
 	 */
 	private HttpDigestMd5Authentication digest = new HttpDigestMd5Authentication();
+
+    /**
+     * Controls if its a HTTP Digest authentication or Basic
+     */
+	private boolean isDigestAuthentication;
 
 	/**
 	 * Constructor
@@ -85,6 +92,13 @@ public class HttpAuthenticationAgent {
 	 */
 	public String generateAuthorizationHeaderValue(String method, String requestUri, String body) throws CoreException {
 		try {
+            // According to "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013",
+            // the authentication should be performed using basic authentication or HTTP digest as per [RFC2617]
+		    if (!isDigestAuthentication) {
+	            // Build the Basic Authorization header
+		        return "Basic " + Base64.encodeBase64ToString((serverLogin + ":" + serverPwd).getBytes()); 
+		    }
+
 			digest.updateNonceParameters();	
 			
 			
@@ -140,6 +154,13 @@ public class HttpAuthenticationAgent {
 	 */
 	public void readWwwAuthenticateHeader(String header) {
         if (header != null) {
+        	// According to "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013",
+            // the authentication should be performed using basic authentication or HTTP digest as per [RFC2617]
+            isDigestAuthentication = header.startsWith(HttpDigestMd5Authentication.HTTP_DIGEST_SCHEMA);
+            if (!isDigestAuthentication) {
+              return;
+            }
+
             // Get domain name
             String value = getValue(header, "realm");
             digest.setRealm(value);

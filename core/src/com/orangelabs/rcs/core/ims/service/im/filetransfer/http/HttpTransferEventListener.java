@@ -32,6 +32,11 @@ public interface HttpTransferEventListener {
      * HTTP transfer paused
      */
     public void httpTransferPaused();
+    
+    /**
+     * HTTP transfer resumed
+     */
+    public void httpTransferResumed();
 
     /**
      * HTTP transfer progress

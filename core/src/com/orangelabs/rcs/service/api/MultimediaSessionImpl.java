@@ -364,7 +364,7 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

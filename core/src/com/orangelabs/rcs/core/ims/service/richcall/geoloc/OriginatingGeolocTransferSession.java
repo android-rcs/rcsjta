@@ -49,11 +49,6 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	 * MSRP manager
 	 */
 	private MsrpManager msrpMgr = null;
-
-	/**
-	 * Geoloc info
-	 */
-	private GeolocPush geoloc;
 	
 	/**
      * The logger
@@ -74,8 +69,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Create dialog path
 		createOriginatingDialogPath();
 		
-		// Set geoloc
-		this.geoloc = geoloc;
+		// Set geoloc to be sent
+		setGeoloc(geoloc);
 	}
 
 	/**
@@ -243,7 +238,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
     	// Notify listeners
     	for(int j=0; j < getListeners().size(); j++) {
-    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(geoloc);
+    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(getGeoloc());
         }
 	}
 	

@@ -27,7 +27,6 @@ import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,11 +45,6 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class ContactVCard extends Activity {
-	/**
-	 * UI handler
-	 */
-	private final Handler handler = new Handler();
-	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

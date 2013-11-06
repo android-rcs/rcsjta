@@ -81,7 +81,8 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	    	}
 
             // Send message delivery report if requested
-            if (ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
+            if ((ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) ||
+                    (ChatUtils.isFileTransferOverHttp(getDialogPath().getInvite()))) {
                 // Check notification disposition
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {

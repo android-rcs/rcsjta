@@ -61,7 +61,7 @@ public abstract class JoynService {
     	 * 
     	 * @see Build.GSMA_CODES
     	 */
-    	public static final int GSMA_VERSION = GSMA_CODES.RCSE_HOTFIXES_1_2;
+    	public static final int GSMA_VERSION = GSMA_CODES.RCSE_BLACKBIRD;
 
     	/**
     	 * API release implementor name

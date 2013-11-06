@@ -161,7 +161,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * @return Returns true if supported else returns false
 	 */
 	public boolean isFileIconSupported() {
-		return autoAcceptMode;
+		return fileIcon;
 	}
 
 	/**

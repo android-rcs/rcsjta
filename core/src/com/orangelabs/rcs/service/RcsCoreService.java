@@ -23,6 +23,7 @@ import org.gsma.joyn.capability.ICapabilityService;
 import org.gsma.joyn.chat.IChatService;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.ft.IFileTransferService;
+import org.gsma.joyn.gsh.IGeolocSharingService;
 import org.gsma.joyn.ipcall.IIPCallService;
 import org.gsma.joyn.ish.IImageSharingService;
 import org.gsma.joyn.session.IMultimediaSessionService;
@@ -69,6 +70,7 @@ import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
+import com.orangelabs.rcs.service.api.GeolocSharingServiceImpl;
 import com.orangelabs.rcs.service.api.IPCallServiceImpl;
 import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
@@ -130,6 +132,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 * Image sharing API
 	 */
     private ImageSharingServiceImpl ishApi = null; 
+
+    /**
+	 * Geoloc sharing API
+	 */
+    private GeolocSharingServiceImpl gshApi = null; 
 
     /**
 	 * IP call API
@@ -205,6 +212,7 @@ public class RcsCoreService extends Service implements CoreListener {
             ftApi = new FileTransferServiceImpl(); 
             vshApi = new VideoSharingServiceImpl(); 
             ishApi = new ImageSharingServiceImpl(); 
+            gshApi = new GeolocSharingServiceImpl(); 
             ipcallApi = new IPCallServiceImpl(); 
         	sessionApi = new MultimediaSessionServiceImpl();             
             
@@ -299,6 +307,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		ftApi.close();
 		chatApi.close();
 		ishApi.close();
+		gshApi.close();
 		ipcallApi.close();
     	vshApi.close();
 
@@ -350,6 +359,12 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Image sharing service API binding");
     		}
             return ishApi;
+        } else
+        if (IGeolocSharingService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("Geoloc sharing service API binding");
+    		}
+            return gshApi;
         } else
         if (IIPCallService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
@@ -417,6 +432,12 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		if (ishApi != null) {
 			ishApi.notifyRegistrationEvent(status);
+		}
+		if (gshApi != null) {
+			gshApi.notifyRegistrationEvent(status);
+		}
+		if (ipcallApi != null) {
+			ipcallApi.notifyRegistrationEvent(status);
 		}
 		if (sessionApi != null) {
 			sessionApi.notifyRegistrationEvent(status);
@@ -582,7 +603,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 
 		// Broadcast the invitation
-		// TODO richcallApi.receiveGeolocSharingInvitation(session);
+		gshApi.receiveGeolocSharingInvitation(session);
     }
     
     /**
@@ -598,34 +619,34 @@ public class RcsCoreService extends Service implements CoreListener {
 		// Broadcast the invitation
 		vshApi.receiveVideoSharingInvitation(session);
     }
+	
+	/**
+	 * A new file transfer invitation has been received
+	 * 
+	 * @param fileSharingSession File transfer session
+	 * @param isGroup Is group file transfer
+	 */
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event file transfer invitation");
+		}
 
+    	// Broadcast the invitation
+		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup);
+	}
+    
 	/**
 	 * A new file transfer invitation has been received
 	 * 
 	 * @param session File transfer session
 	 */
-	public void handleFileTransferInvitation(FileSharingSession session) {
+	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession one2oneChatSession) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(session);
-	}
-    
-	/**
-	 * A new one to one file transfer invitation has been received
-	 * 
-	 * @param session File transfer session
-	 * @param one2oneChatSession the created chat session (1to1)
-	 */
-	public void handle1to1FileTransferInvitation(FileSharingSession session, TerminatingOne2OneChatSession one2oneChatSession) {
-		if (logger.isActivated()) {
-			logger.debug("Handle event file transfer invitation outside an existing session");
-		}
-		
-    	// Broadcast the invitation
-    	// TODO ftApi.receiveFileTransferInvitation(session, one2oneChatSession);
+    	ftApi.receiveFileTransferInvitation(fileSharingSession, one2oneChatSession);
 	}
 	
 	/**
@@ -636,11 +657,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
 	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession groupChatSession) {
 		if (logger.isActivated()) {
-			logger.debug("Handle event file transfer invitation outside an existing session");
+			logger.debug("Handle event group file transfer invitation");
 		}
 		
     	// Broadcast the invitation
-    	// TODO ftApi.receiveFileTransferInvitation(session, groupChatSession);
+    	ftApi.receiveFileTransferInvitation(session, groupChatSession);
 	}
 
 	/**
@@ -728,7 +749,7 @@ public class RcsCoreService extends Service implements CoreListener {
         }
 
         // Notify listeners
-        // TODO ftApi.handleFileDeliveryStatus(ftSessionId, status);
+        ftApi.handleFileDeliveryStatus(ftSessionId, status);
     }
 
     /**

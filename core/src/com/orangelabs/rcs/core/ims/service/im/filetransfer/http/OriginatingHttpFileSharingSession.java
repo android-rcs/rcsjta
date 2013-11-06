@@ -34,6 +34,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.service.api.ChatImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -126,13 +127,13 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 				String mime = CpimMessage.MIME_TYPE;
 				String from = ChatUtils.ANOMYNOUS_URI;
 				String to = ChatUtils.ANOMYNOUS_URI;
-				String msgId = ChatUtils.generateMessageId();
+				String msgId = IdGenerator.getIdentifier();
 
 				// Send file info in CPIM message
 				String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
 				
 				// Send content
-				chatSession.sendDataChunks(msgId, content, mime);
+				chatSession.sendDataChunks(ChatUtils.generateMessageId(), content, mime);
                 RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
 			} else {
 				// A chat session should be initiated
@@ -156,12 +157,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
                 // Update rich messaging history
                 // TODO: should be done in API server part
-    			RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(),
-    					FileTransfer.Direction.OUTGOING, getContent(), FileTransfer.State.INITIATED);
+                RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(),
+                        FileTransfer.Direction.OUTGOING, getContent(), FileTransfer.State.INITIATED);
     			
-    			// Add session in the list
-    			ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);
-    			ChatServiceImpl.addChatSession(getRemoteContact(), sessionApi); // TODO: method is normally protected, use a callback event instead to separate layers
+				// Add session in the list
+				ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);
+				ChatServiceImpl.addChatSession(getRemoteContact(), sessionApi); // TODO: method is normally protected, use a callback event instead to separate layers
                 // TODO : Check session response ?
 			}
 
@@ -194,6 +195,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	@Override
 	public void pauseFileTransfer() {
+		fileTransferPaused();
 		interruptSession();
 		uploadManager.getListener().httpTransferPaused();
 	}
@@ -203,6 +205,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	@Override
 	public void resumeFileTransfer() {
+		fileTransferResumed();
 		new Thread(new Runnable() {
 		    public void run() {
 				try {

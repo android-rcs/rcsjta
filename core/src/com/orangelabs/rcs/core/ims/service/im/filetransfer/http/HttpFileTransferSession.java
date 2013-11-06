@@ -199,16 +199,23 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Handle file transfer paused
      */
     public void httpTransferPaused() {
-    	
-    	// TODO new state paused or not
-    	
     	// Notify listeners
         for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j))
-                    .handleFileUploadPaused();
+            ((FileSharingSessionListener) getListeners().get(j)).handleFileTransferPaused();
         }
     }
-
+    
+    /**
+     * Handle file transfer paused
+     */
+    public void httpTransferResumed() {
+    	// Notify listeners
+        for (int j = 0; j < getListeners().size(); j++) {
+            ((FileSharingSessionListener) getListeners().get(j)).handleFileTransferResumed();
+        }
+    }
+    
+    
 	/**
      * Get session state
      *

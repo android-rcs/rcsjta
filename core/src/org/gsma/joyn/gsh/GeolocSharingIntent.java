@@ -34,7 +34,7 @@ public class GeolocSharingIntent {
      * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the geoloc sharing.
      * </ul>
      */
-	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.ish.action.NEW_GEOLOC_SHARING";
+	public final static String ACTION_NEW_INVITATION = "org.gsma.joyn.gsh.action.NEW_GEOLOC_SHARING";
 
 	/**
 	 * MSISDN of the contact sending the invitation

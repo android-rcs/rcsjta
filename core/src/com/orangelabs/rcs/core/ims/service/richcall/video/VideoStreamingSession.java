@@ -38,7 +38,17 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public abstract class VideoStreamingSession extends ContentSharingSession {
-    /**
+	/**
+	 * Video width
+	 */
+	private int videoWidth = -1;
+	
+	/**
+	 * Video height
+	 */
+	private int videoHeight = -1;
+
+	/**
 	 * Video renderer
 	 */
 	private IVideoRenderer renderer = null;
@@ -62,6 +72,24 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 */
 	public VideoStreamingSession(ImsService parent, MmContent content, String contact) {
 		super(parent, content, contact);
+	}
+
+	/**
+	 * Get the video width
+	 * 
+	 * @return Width
+	 */
+	public int getVideoWidth() {
+		return videoWidth;
+	}
+
+	/**
+	 * Get the video height
+	 * 
+	 * @return Height
+	 */
+	public int getVideoHeight() {
+		return videoHeight;
 	}
 
 	/**

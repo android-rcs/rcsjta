@@ -24,6 +24,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
@@ -45,7 +46,12 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 */
 	private boolean geolocTransfered = false;
 
-    /**
+	/**
+	 * Geoloc info
+	 */
+	private GeolocPush geoloc = null;
+	
+	/**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -59,6 +65,24 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 */
 	public GeolocTransferSession(ImsService parent, MmContent content, String contact) {
 		super(parent, content, contact);
+	}
+	
+	/**
+	 * Set geoloc
+	 * 
+	 * @param geoloc Geoloc
+	 */
+	public void setGeoloc(GeolocPush geoloc) {
+		this.geoloc = geoloc;
+	}
+	
+	/**
+	 * Get geoloc
+	 * 
+	 * @return Geoloc
+	 */
+	public GeolocPush getGeoloc() {
+		return geoloc;
 	}
 	
 	/**

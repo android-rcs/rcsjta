@@ -297,15 +297,22 @@ public class ImsServiceDispatcher extends Thread {
 					sendFinalResponse(request, 603);
 					return;
 	    		}
-
+	    		
                 if (ChatUtils.isFileTransferOverHttp(request)) {
                     FileTransferHttpInfoDocument ftHttpInfo = ChatUtils.getHttpFTInfo(request);
                     if (ftHttpInfo != null) {
-                        // HTTP file transfer invitation
-                        if (logger.isActivated()) {
-                            logger.debug("Single file transfer over HTTP invitation");
+                    	// HTTP file transfer invitation
+                        if (SipUtils.getReferredByHeader(request) != null) {
+                            if (logger.isActivated()) {
+                                logger.debug("Single S&F file transfer over HTTP invitation");
+                            }
+                            imsModule.getInstantMessagingService().receiveStoredAndForwardHttpFileTranferInvitation(request, ftHttpInfo);
+                        } else {
+		                    if (logger.isActivated()) {
+		                        logger.debug("Single file transfer over HTTP invitation");
+		                    }
+                            imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request, ftHttpInfo);
                         }
-                        imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request, ftHttpInfo);
                     } else {
                         // TODO : else return error to Originating side
                         // Malformed xml for FToHTTP: automatically reject with a 606 Not Acceptable
@@ -316,7 +323,7 @@ public class ImsServiceDispatcher extends Thread {
                     }
                 } else {
 	    			if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
-		    			(!request.getContentType().contains("multipart"))) { // TODO: to be removed when corrected by ALU
+		    			(!request.getContentType().contains("multipart"))) {
 	    				// Store & Forward push notifs session
 			    		if (logger.isActivated()) {
 			    			logger.debug("Store & Forward push notifications");

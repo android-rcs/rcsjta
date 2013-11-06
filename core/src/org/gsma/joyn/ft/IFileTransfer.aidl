@@ -29,6 +29,10 @@ interface IFileTransfer {
 
 	void abortTransfer();
 	
+	void pauseTransfer();
+	
+	void resumeTransfer();
+
 	void addEventListener(in IFileTransferListener listener);
 
 	void removeEventListener(in IFileTransferListener listener);

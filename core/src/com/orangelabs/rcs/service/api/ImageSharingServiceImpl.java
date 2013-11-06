@@ -263,7 +263,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
 			
 			// Initiate a sharing session
-			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, false);
+			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
@@ -361,7 +361,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

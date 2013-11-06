@@ -206,15 +206,13 @@ public abstract class GroupChatSession extends ChatSession {
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		}		
 		
-		// Send data
-		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
-
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
 		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg,
 				ChatLog.Message.Direction.OUTGOING);
 
-		// Check if message has been sent with success or not
+		// Send data
+		boolean result = sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);
 		if (!result) {
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
@@ -279,6 +277,33 @@ public abstract class GroupChatSession extends ChatSession {
 		String content = ChatUtils.buildCpimMessage(from, to, IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
 		sendDataChunks(msgId, content, CpimMessage.MIME_TYPE);	
 	}
+	
+	/**
+     * Send message delivery status via MSRP
+     *
+     * @param contact Contact that requested the delivery status
+     * @param msgId Message ID
+     * @param status Status
+     */
+    public void sendMsrpMessageDeliveryStatus(String contact, String msgId, String status) {
+        // Do not perform Message Delivery Status in Albatros for group chat 
+// TODO       if (RcsSettingsData.VALUE_GSMA_REL_ALBATROS.equals(""+RcsSettings.getInstance().getGsmaRelease())) {
+//            return;
+//        }
+
+        // Send status in CPIM + IMDN headers
+        String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String to = contact;
+        String imdn = ChatUtils.buildDeliveryReport(msgId, status);
+        String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
+        
+        // Send data
+        boolean result = sendDataChunks(ChatUtils.generateMessageId(), content, CpimMessage.MIME_TYPE);
+        if (result) {
+            // Update rich messaging history
+            RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+        }
+    }
 	
 	/**
 	 * Add a participant to the session

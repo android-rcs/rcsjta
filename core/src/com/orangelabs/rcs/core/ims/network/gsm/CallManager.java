@@ -167,10 +167,13 @@ public class CallManager {
 				    // Abort pending richcall sessions
 			    	imsModule.getRichcallService().abortAllSessions();
 
-				    // Disable content sharing capabilities
-					if (remoteParty != null) {
-						imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(remoteParty);
-					}
+                    if (remoteParty != null) {
+                        // Disable content sharing capabilities
+                        imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(remoteParty);
+
+                        // Request capabilities to the remote
+                        imsModule.getCapabilityService().requestContactCapabilities(remoteParty);
+                    }
 
 					// Reset remote party
 					remoteParty = null;

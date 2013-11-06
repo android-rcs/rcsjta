@@ -2,6 +2,7 @@ package org.gsma.joyn.vsh;
 
 import org.gsma.joyn.vsh.IVideoSharingListener;
 import org.gsma.joyn.vsh.IVideoRenderer;
+import org.gsma.joyn.vsh.VideoCodec;
 
 /**
  * Video sharing interface
@@ -12,10 +13,8 @@ interface IVideoSharing {
 
 	String getRemoteContact();
 
-	String getVideoEncoding();
+	VideoCodec getVideoCodec();
 
-	String getVideoFormat();
-	
 	int getState();
 
 	int getDirection();

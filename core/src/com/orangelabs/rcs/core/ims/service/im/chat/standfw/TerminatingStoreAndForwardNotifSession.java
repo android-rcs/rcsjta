@@ -386,6 +386,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
     	try {
 	    	// Parse the IMDN document
     		ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
+    		// TODO: notif for FT
 			if (imdn != null) {
 				// Notify the message delivery outside of the chat session
 				getImsService().getImsModule().getCore().getListener().handleMessageDeliveryStatus(contact,

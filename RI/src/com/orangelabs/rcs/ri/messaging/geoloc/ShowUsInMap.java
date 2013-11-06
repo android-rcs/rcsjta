@@ -76,7 +76,8 @@ public class ShowUsInMap extends MapActivity {
 		ArrayList<String> contacts = getIntent().getStringArrayListExtra(EXTRA_CONTACTS);
 		for (int i=0; i < contacts.size(); i++) {
 			// Get geoloc of a contact
-			String contact = contacts.get(i);		
+			String contact = contacts.get(i);
+			
 			//Get the last incoming geoloc for a contact
 			Geoloc geoloc = getLastGeoloc(contact);
 			if (geoloc != null) {

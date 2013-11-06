@@ -156,11 +156,11 @@ public class RichcallService extends ImsService {
      *
      * @param contact Remote contact
      * @param content Content to be shared
-     * @param thumbnail Thumbnail option
+     * @param thumbnail Thumbnail filename
      * @return CSh session
      * @throws CoreException
      */
-	public ImageTransferSession initiateImageSharingSession(String contact, MmContent content, boolean thumbnail) throws CoreException {
+	public ImageTransferSession initiateImageSharingSession(String contact, MmContent content, String thumbnail) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate image sharing session with contact " + contact + ", file " + content.toString());
 		}
@@ -216,18 +216,19 @@ public class RichcallService extends ImsService {
             throw new CoreException("Max content sharing sessions achieved");
         }
 
-        // Create the thumbnail
-        byte[] thumbnailImage = null;
-        if (thumbnail && content.getEncoding().startsWith("image/")) {
-        	thumbnailImage = ChatUtils.createFileThumbnail(content.getUrl());
-        }             
+		// Get thumbnail data
+        byte[] thumbnailData = null;
+        if (thumbnail != null) {
+			// Create the thumbnail
+        	thumbnailData = ChatUtils.getFileThumbnail(thumbnail);
+		}		
         
 		// Create a new session
 		OriginatingImageTransferSession session = new OriginatingImageTransferSession(
 				this,
 				content,
 				PhoneUtils.formatNumberToSipUri(contact),
-				thumbnailImage);
+				thumbnailData);
 
 		return session;
 	}
@@ -465,8 +466,6 @@ public class RichcallService extends ImsService {
 				PhoneUtils.formatNumberToSipUri(contact),
 				geoloc);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 

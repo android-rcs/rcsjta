@@ -246,7 +246,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
-        intent.putExtra(VideoSharingIntent.EXTRA_FORMAT, ""); // TODO
+        intent.putExtra(VideoSharingIntent.EXTRA_WIDTH, session.getVideoWidth());
+        intent.putExtra(VideoSharingIntent.EXTRA_HEIGHT, session.getVideoHeight());
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
         
     	// Notify video sharing invitation listeners
@@ -298,8 +299,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 		     // Initiate a new session
-            VideoStreamingSession session = Core.getInstance().getRichcallService()
-                    .initiateLiveVideoSharingSession(contact, player);
+            VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
@@ -397,7 +397,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

@@ -18,10 +18,8 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,11 +28,6 @@ import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
 import org.xml.sax.InputSource;
-
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
@@ -879,48 +872,25 @@ public class ChatUtils {
         return participants;
     }
 
-	/**
-	 * Create a thumbnail from a filename
-	 * 
-	 * @param filename Filename
-	 * @return Thumbnail
-	 */
-	public static byte[] createFileThumbnail(String filename) {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			File file = new File(filename);
-			InputStream in = new FileInputStream(file);
-			Bitmap bitmap = BitmapFactory.decodeStream(in);
-			int width = bitmap.getWidth();
-			int height = bitmap.getHeight();
-			long size = file.length();
-
-			// Resize the bitmap
-			float scale = 0.05f;
-			Matrix matrix = new Matrix();
-			matrix.postScale(scale, scale);
-
-			// Recreate the new bitmap
-			Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
-					height, matrix, true);
-
-			// Compress the file to be under the limit (10KBytes)
-			int quality = 90;
-			int maxSize = 1024 * 10;
-			while(size > maxSize) {
-				out = new ByteArrayOutputStream();
-				resizedBitmap.compress(CompressFormat.JPEG, quality, out);
-				out.flush();
-				out.close();
-				size = out.size();
-				quality -= 10;
-			}
-		} catch (Exception e) {
-			return null;
-		}
-		return out.toByteArray();
-	}
-
+    /**
+     * Returns the data of the thumbnail file
+     * 
+     * @param filename Filename
+     * @return Bytes or null in case of error
+     */
+    public static byte[] getFileThumbnail(String filename) {
+    	try {
+	    	File file = new File(filename);
+	    	byte [] data = new byte[(int)file.length()];
+	    	FileInputStream fis = new FileInputStream(file);
+	    	fis.read(data);
+	    	fis.close();
+	    	return data;
+    	} catch(Exception e) {
+    		return null;
+    	}
+    }
+    
     /**
      * Extract thumbnail from incoming INVITE request
      * 

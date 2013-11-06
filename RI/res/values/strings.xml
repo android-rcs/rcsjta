@@ -183,7 +183,8 @@
 <string name="label_no_participant_found">No participant found or available</string>
 <string name="label_no_subject">no subject</string>
 <string name="label_geoloc_prefix">Geoloc</string>
-<string name="label_ft_thumb">File thumbnail</string>
+<string name="label_ft_thumb">Thumbnail</string>
+<string name="menu_send_file">Send file</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
@@ -230,6 +231,12 @@
 <string name="label_outgoing_sharing_aborted">Outgoing sharing aborted</string>
 <string name="label_switch_camera">Switch camera</string>
 <string name="label_video_duration">Duration: %s s</string>
+
+<!-- Geoloc sharing menu -->
+<string name="title_recv_geoloc_sharing">New geoloc sharing invitation</string>
+<string name="label_select_location">Select location</string>
+<string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
+<string name="title_geoloc_sharing">Geoloc sharing</string>
 
 <!-- Geoloc sharing menu -->
 

@@ -27,7 +27,6 @@ import org.gsma.joyn.chat.ChatListener;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
 import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.GeolocMessage;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -138,11 +137,15 @@ public class SingleChatView extends ChatView {
     		// Set chat settings
             isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
 
-	        // Set the message composer max length
-			InputFilter[] filterArray = new InputFilter[1];
-			filterArray[0] = new InputFilter.LengthFilter(chatApi.getConfiguration().getSingleChatMessageMaxLength());
-			composeText.setFilters(filterArray);
-
+			// Set max label length
+			int maxMsgLength = chatApi.getConfiguration().getSingleChatMessageMaxLength();
+			if (maxMsgLength > 0) {
+		        // Set the message composer max length
+				InputFilter[] filterArray = new InputFilter[1];
+				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+				composeText.setFilters(filterArray);
+			}
+			
 			// Open chat
     		chat = chatApi.openSingleChat(contact, chatListener);
 							

@@ -90,6 +90,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 	
 	/**
+	 * Returns the direction of the group chat (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 */
+	public int getDirection() {
+		if ((session instanceof OriginatingAdhocGroupChatSession) ||
+				(session instanceof RejoinGroupChatSession) ||
+					(session instanceof RestartGroupChatSession)) {
+			return GroupChat.Direction.OUTGOING;
+		} else {
+			return GroupChat.Direction.INCOMING;
+		}
+	}		
+	
+	/**
 	 * Returns the state of the group chat
 	 * 
 	 * @return State 
@@ -439,11 +454,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	ChatMessage msg = new ChatMessage(message.getMessageId(),
+	            	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
 	            			message.getTextMessage(),
 	            			message.getServerDate(), message.isImdnDisplayedRequested());
-	            	listeners.getBroadcastItem(i).onNewMessage(msg);
+	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -661,14 +676,41 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @param geoloc Geoloc message
      */
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
-    	// Not used here
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("New geoloc received");
+			}
+			
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().addGroupChatGeoloc(session.getContributionID(),
+					geoloc, ChatLog.Message.Direction.INCOMING);
+			
+	  		// Notify event listeners
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
+	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
+	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+	            	org.gsma.joyn.chat.GeolocMessage msgApi = new org.gsma.joyn.chat.GeolocMessage(geoloc.getMessageId(),
+	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();		
+	    }
     }
 
     /**
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

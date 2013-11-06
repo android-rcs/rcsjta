@@ -40,6 +40,8 @@ import android.os.RemoteException;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -192,12 +194,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	    }    	    	
     }	
     
-    /**
+	/**
 	 * Receive a new file transfer invitation
 	 * 
 	 * @param session File transfer session
+	 * @param isGroup is group file transfer
 	 */
-    public void receiveFileTransferInvitation(FileSharingSession session) {
+    public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup) {
 		if (logger.isActivated()) {
 			logger.info("Receive file transfer invitation from " + session.getRemoteContact());
 		}
@@ -221,6 +224,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
     	intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
     	intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+    	/* TODO if (session instanceof HttpFileTransferSession) {
+    	    intent.putExtra("chatSessionId", ((HttpFileTransferSession)session).getChatSessionID());
+    	    if (isGroup) {
+    	        intent.putExtra("chatId", ((HttpFileTransferSession)session).getContributionID());
+    	    }
+    	    intent.putExtra("isGroupTransfer", isGroup);
+    	}*/
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
     	
     	// Notify file transfer invitation listeners
@@ -238,7 +248,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	        listeners.finishBroadcast();
 	    }
     }
-    
+
+    /**
+	 * Receive a new HTTP file transfer invitation outside of an existing chat session
+	 *
+	 * @param session File transfer session
+	 */
+	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
+		// Display invitation
+/* TODO		receiveFileTransferInvitation(session, chatSession.isGroupChat());
+		
+		// Update rich messaging history
+		RichMessaging.getInstance().addIncomingChatSessionByFtHttp(chatSession);
+		
+		// Add session in the list
+		ImSession sessionApi = new ImSession(chatSession);
+		MessagingApiService.addChatSession(sessionApi); */
+	}    
+	
     /**
      * Returns the configuration of the file transfer service
      * 
@@ -278,7 +305,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, false, null, null); // TODO
+			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon, null, null); // TODO
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -369,11 +396,58 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		listeners.unregister(listener);
 	}
 
-	/**
+	
+    /**
+     * File Transfer delivery status.
+     * In FToHTTP, Delivered status is done just after download information are received by the
+     * terminating, and Displayed status is done when the file is downloaded.
+     * In FToMSRP, the two status are directly done just after MSRP transfer complete.
+     *
+     * @param ftSessionId File transfer session Id
+     * @param status status of File transfer
+     */
+    public void handleFileDeliveryStatus(String ftSessionId, String status) {
+        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+            // Update rich messaging history
+        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+            
+            // Notify File transfer delivery listeners
+            final int N = listeners.beginBroadcast();
+            for (int i=0; i < N; i++) {
+                try {
+                    listeners.getBroadcastItem(i).onReportFileDelivered(ftSessionId);
+                } catch(Exception e) {
+                    if (logger.isActivated()) {
+                        logger.error("Can't notify listener", e);
+                    }
+                }
+            }
+            listeners.finishBroadcast();
+        } else
+        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+            // Update rich messaging history
+        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+            
+            // Notify File transfer delivery listeners
+            final int N = listeners.beginBroadcast();
+            for (int i=0; i < N; i++) {
+                try {
+                    listeners.getBroadcastItem(i).onReportFileDisplayed(ftSessionId);
+                } catch(Exception e) {
+                    if (logger.isActivated()) {
+                        logger.error("Can't notify listener", e);
+                    }
+                }
+            }
+            listeners.finishBroadcast();
+        }
+    }
+    
+    /**
 	 * Returns service version.
 	 */
 	@Override
-	public int getServiceVersion() throws RemoteException {
+	public int getServiceVersion() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
 		}

@@ -43,6 +43,8 @@
 	<string name="rcs_settings_label_beep">Phone beep</string>
     <string name="rcs_settings_label_vibrate">Phone vibrate</string>
     <string name="rcs_settings_label_ringtone">Phone ringtone</string>
+    <string name="rcs_settings_summary_chat_displayed_notification">Send displayed notification during a chat</string>
+    <string name="rcs_settings_label_displayed_notification">Displayed notification</string>
     <string name="rcs_settings_label_rcs_service">joyn service</string>
     <string name="rcs_settings_label_rcs_roaming">Roaming</string>
 	<string name="rcs_settings_label_confirm">Confirmation</string>

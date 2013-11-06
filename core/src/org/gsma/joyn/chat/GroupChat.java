@@ -151,6 +151,21 @@ public class GroupChat {
 	}
 
 	/**
+	 * Returns the direction of the group chat (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see GroupChat.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return chatInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}	
+	
+	/**
 	 * Returns the state of the group chat
 	 * 
 	 * @return State

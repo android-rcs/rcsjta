@@ -18,7 +18,11 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.text.DateFormat;
@@ -38,6 +42,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.widget.Toast;
@@ -80,6 +88,11 @@ public class Utils {
 	 */
 	public static int NOTIF_ID_MM_SESSION = 1005; 
 	
+	/**
+	 * Notification ID for geoloc share
+	 */
+	public static int NOTIF_ID_GEOLOC_SHARE = 1006; 
+
 	/**
 	 * Returns the application version from manifest file 
 	 * 
@@ -417,4 +430,50 @@ public class Utils {
 			return null;
 		}
 	}
+	
+	/**
+	 * Create a thumbnail from a picture filename
+	 * 
+	 * @param ctx Context
+	 * @param filename Filename
+	 * @param maxSize Max size in bytes
+	 * @return Thumbnail filename
+	 */
+	public static String createPictureThumbnail(Context ctx, String filename, int maxSize) {
+		try {
+			File file = new File(filename);
+			InputStream in = new FileInputStream(file);
+			Bitmap bitmap = BitmapFactory.decodeStream(in);
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			long size = file.length();
+			
+			// Resize the bitmap
+			float scale = 0.05f;
+			Matrix matrix = new Matrix();
+			matrix.postScale(scale, scale);
+
+			// Recreate the new bitmap
+			Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
+					height, matrix, true);
+
+			// Compress the file to be under the limit (10KBytes)
+			int quality = 90;
+			String thumbnailFilename = ctx.getExternalFilesDir(null).toString() + File.separatorChar + "thumb_" + file.getName();
+	        File thumbFile = new File(thumbnailFilename);    
+	        FileOutputStream out;  
+			while(size > maxSize) {
+				out = new FileOutputStream(thumbFile);
+				resizedBitmap.compress(CompressFormat.JPEG, quality, out);
+				out.flush();
+				out.close();
+				size = thumbFile.length();
+				quality -= 10;
+			}
+			
+			return thumbnailFilename;
+		} catch (Exception e) {
+			return null;
+		}
+	}	
 }

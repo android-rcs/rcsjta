@@ -64,7 +64,12 @@ public class HttpsProvisioningUtils {
     /**
      * The action if a binary SMS received
      */
-    protected static final String ACTION_BINARY_SMS_RECEIVED = "android.intent.action.DATA_SMS_RECEIVED";
+    public static final String ACTION_BINARY_SMS_RECEIVED = "android.intent.action.DATA_SMS_RECEIVED";
+
+    /**
+     * char sequence in a binary sms to indicate a network initiated configuration
+     */
+    public static final String RESET_CONFIG_SUFFIX = "-rcscfg";
 
     /**
      * Retry max count
@@ -75,6 +80,12 @@ public class HttpsProvisioningUtils {
      * Retry after 511 "Network authentication required" max count
      */
     protected static final int RETRY_AFTER_511_ERROR_MAX_COUNT = 5;
+
+
+    /**
+     * Default SMS port
+     */
+	public static final int DEFAULT_SMS_PORT = 37273;
 
     /**
      * Get the current device language

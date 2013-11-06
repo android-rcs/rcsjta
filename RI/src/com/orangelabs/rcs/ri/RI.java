@@ -49,7 +49,7 @@ public class RI extends ListActivity {
 
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-       
+               
 		// Set items
         String[] items = {
     		getString(R.string.menu_contacts),
