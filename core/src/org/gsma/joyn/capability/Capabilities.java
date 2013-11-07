@@ -111,13 +111,12 @@ public class Capabilities implements Parcelable {
 		this.videoSharing = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
-		this.geolocPush = source.readInt() != 0;
-		this.ipVoiceCall = source.readInt() != 0;
-		this.ipVideoCall = source.readInt() != 0;
-
 		List<String> exts = new ArrayList<String>();
 		source.readStringList(exts);
-		this.extensions = new HashSet<String>(exts);		
+		this.extensions = new HashSet<String>(exts);	
+		this.geolocPush = source.readInt() != 0;
+		this.ipVoiceCall = source.readInt() != 0;
+		this.ipVideoCall = source.readInt() != 0;	
     }
 
 	/**
@@ -143,14 +142,14 @@ public class Capabilities implements Parcelable {
     	dest.writeInt(videoSharing ? 1 : 0);
     	dest.writeInt(imSession ? 1 : 0);
     	dest.writeInt(fileTransfer ? 1 : 0);
-    	dest.writeInt(geolocPush ? 1 : 0);
-    	dest.writeInt(ipVoiceCall ? 1 : 0);
-    	dest.writeInt(ipVideoCall ? 1 : 0);
 		if (extensions != null) {
 			List<String> exts = new ArrayList<String>();
 			exts.addAll(extensions);
 			dest.writeStringList(exts);
 		}
+    	dest.writeInt(geolocPush ? 1 : 0);
+    	dest.writeInt(ipVoiceCall ? 1 : 0);
+    	dest.writeInt(ipVideoCall ? 1 : 0);
     }
 
     /**

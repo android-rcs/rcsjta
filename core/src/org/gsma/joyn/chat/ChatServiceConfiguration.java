@@ -137,17 +137,19 @@ public class ChatServiceConfiguration {
      * @hide
 	 */
 	public ChatServiceConfiguration(Parcel source) {
-		this.warnSF = source.readInt() != 0;
 		this.chatTimeout = source.readInt();
 		this.isComposingTimeout = source.readInt();
 		this.maxGroupChatParticipants = source.readInt();
 		this.maxMsgLengthSingleChat = source.readInt();
 		this.maxMsgLengthGroupChat = source.readInt();
-		this.maxGroupChat = source.readInt(); 
 		this.smsFallback = source.readInt() != 0;
 		this.autoAcceptSingleChat = source.readInt() != 0;
 		this.autoAcceptGroupChat = source.readInt() != 0;
 		this.displayedDeliveryReport = source.readInt() != 0;
+		this.warnSF = source.readInt() != 0;
+		this.maxGroupChat = source.readInt(); 
+		this.maxGeolocLabelLength = source.readInt();
+		this.geolocExpireTime = source.readInt();
     }
 
 	/**
@@ -169,17 +171,19 @@ public class ChatServiceConfiguration {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeInt(warnSF ? 1 : 0);
     	dest.writeInt(chatTimeout);
     	dest.writeInt(isComposingTimeout);
     	dest.writeInt(maxGroupChatParticipants);
     	dest.writeInt(maxMsgLengthSingleChat);
     	dest.writeInt(maxMsgLengthGroupChat);
-    	dest.writeInt(maxGroupChat);
     	dest.writeInt(smsFallback ? 1 : 0);
     	dest.writeInt(autoAcceptSingleChat ? 1 : 0);
     	dest.writeInt(autoAcceptGroupChat ? 1 : 0);
     	dest.writeInt(displayedDeliveryReport ? 1 : 0);
+    	dest.writeInt(warnSF ? 1 : 0);
+    	dest.writeInt(maxGroupChat);
+    	dest.writeInt(maxGeolocLabelLength);
+    	dest.writeInt(geolocExpireTime);
     }
 
     /**
