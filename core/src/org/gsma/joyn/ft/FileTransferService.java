@@ -27,7 +27,6 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
-import org.gsma.joyn.JoynUtils;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -107,6 +106,25 @@ public class FileTransferService extends JoynService {
         }
     };
 
+	/**
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+     * @throws JoynServiceException
+	 */
+	public int getServiceVersion() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getServiceVersion();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }
+	
     /**
      * Returns true if the service is registered to the platform, else returns false
      * 
@@ -211,9 +229,8 @@ public class FileTransferService extends JoynService {
 	 * @throws JoynContactFormatException
      */
     public FileTransfer transferFile(String contact, String filename, String fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
-		JoynUtils.checkVersionCompatibility(api, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
     	if (api != null) {
-			try {
+    		try {
 				IFileTransfer ftIntf = api.transferFile(contact, filename, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);

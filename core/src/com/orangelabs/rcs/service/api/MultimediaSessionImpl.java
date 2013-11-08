@@ -18,13 +18,11 @@
 
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.session.IMultimediaSession;
 import org.gsma.joyn.session.IMultimediaSessionListener;
 import org.gsma.joyn.session.MultimediaSession;
 
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -359,15 +357,4 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	        MultimediaSessionServiceImpl.removeSipSession(session.getSessionID());
 	    }
     }
-
-    /**
-	 * Returns service version.
-	 */
-	@Override
-	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
-		return JoynService.Build.GSMA_VERSION;
-	}
 }

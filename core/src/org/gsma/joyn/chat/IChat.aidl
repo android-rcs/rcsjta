@@ -20,6 +20,4 @@ interface IChat {
 	void removeEventListener(in IChatListener listener);
 
 	String sendGeoloc(in Geoloc geoloc);
-	
-	int getServiceVersion();
 }

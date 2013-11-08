@@ -1,6 +1,5 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.ipcall.IIPCall;
 import org.gsma.joyn.ipcall.IIPCallListener;
 import org.gsma.joyn.ipcall.IIPCallPlayer;
@@ -8,7 +7,6 @@ import org.gsma.joyn.ipcall.IIPCallRenderer;
 import org.gsma.joyn.ipcall.IPCall;
 
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -761,16 +759,5 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			listeners.finishBroadcast();*/
 			// TODO
 		}
-	}
-
-	/**
-	 * Returns service version.
-	 */
-	@Override
-	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
-		return JoynService.Build.GSMA_VERSION;
 	}
 }

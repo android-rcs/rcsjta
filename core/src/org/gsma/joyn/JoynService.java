@@ -17,8 +17,6 @@
  ******************************************************************************/
 package org.gsma.joyn;
 
-import java.lang.reflect.Method;
-
 import android.content.Context;
 
 /**
@@ -27,6 +25,12 @@ import android.content.Context;
  * @author Jean-Marc AUFFRET
  */
 public abstract class JoynService {
+	
+	/**
+	 * Service version
+	 */
+	protected int version = JoynService.Build.GSMA_CODES.RCSE_HOTFIXES_1_2;
+	
     /**
      * Information about the current build
      */
@@ -54,6 +58,11 @@ public abstract class JoynService {
         	 * The original first version of joyn API
         	 */
         	public final static int BASE = 1;
+        	
+        	/**
+        	 * Blackbird version of joyn API
+        	 */
+        	public final static int BLACKBIRD = 2;
         }
     	
     	/**
@@ -73,7 +82,7 @@ public abstract class JoynService {
     	 * 
     	 * @see Build.VERSION_CODES
     	 */
-    	public static final int API_VERSION = VERSION_CODES.BASE;
+    	public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
 
     	/**
     	 * Internal number used by the underlying source control to represent this build
@@ -82,7 +91,6 @@ public abstract class JoynService {
    	   	    	
     	private Build() {
         } 
-    	    	
     }
     
     /**
@@ -117,7 +125,6 @@ public abstract class JoynService {
 	 * Service listener
 	 */
 	protected JoynServiceListener serviceListener;
-	
 		
 	/**
 	 * Constructor
@@ -129,7 +136,6 @@ public abstract class JoynService {
 		this.ctx = ctx;
 		this.serviceListener = listener;
 	}
-		
 	
     /**
      * Connects to the API
@@ -146,7 +152,5 @@ public abstract class JoynService {
      * 
 	 * @return Returns true if connected else returns false
      */
-    public abstract boolean isServiceConnected();
-    
-   
+    public abstract boolean isServiceConnected();   
 }

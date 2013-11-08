@@ -577,10 +577,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             logger.info("Data transfer error " + error);
         }
 
-        // Request capabilities
-		// TODO : only for 1-1 chat
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
-
         if (msgId != null) {
             // Notify listeners
 	        for(int i=0; i < getListeners().size(); i++) {
@@ -852,18 +848,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
             if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
 	            // Check if message delivery of a FileTransfer
-	            // String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
-	            // TODO
-	            // if (ftSessionId == null) {
+            	String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
+            	if (ftSessionId == null) {
 	                // Notify listeners
                     for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(
-                                imdn.getMsgId(), imdn.getStatus());
+                        ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(imdn.getMsgId(), imdn.getStatus());
                     }
-                // } else {
-                //    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(
-                //            ftSessionId, imdn.getStatus());
-                //}
+                } else {
+                    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, imdn.getStatus());
+                }
 			}
     	} catch(Exception e) {
     		if (logger.isActivated()) {

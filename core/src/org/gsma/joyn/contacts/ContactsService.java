@@ -113,6 +113,25 @@ public class ContactsService extends JoynService {
         }
     };
     
+	/**
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+     * @throws JoynServiceException
+	 */
+	public int getServiceVersion() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getServiceVersion();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
+    
     /**
      * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
      * 

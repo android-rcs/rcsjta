@@ -17,9 +17,7 @@
  ******************************************************************************/
 package org.gsma.joyn.ft;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynUtils;
 
 /**
  * File transfer
@@ -201,7 +199,6 @@ public class FileTransfer {
 	 * @throws JoynServiceException
      */
 	public String getFileIconName() throws JoynServiceException {
-		JoynUtils.checkVersionCompatibility(transferInf, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
 		try {
 			return transferInf.getFileIconName();
 		} catch(Exception e) {

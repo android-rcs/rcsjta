@@ -28,8 +28,6 @@ import org.gsma.joyn.capability.Capabilities;
 import org.gsma.joyn.contacts.IContactsService;
 import org.gsma.joyn.contacts.JoynContact;
 
-import android.os.RemoteException;
-
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -238,14 +236,14 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		return result;
     }
 
-    /**
-	 * Returns service version.
+	/**
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+	 * @throws ServerApiException
 	 */
-	@Override
 	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
 		return JoynService.Build.GSMA_VERSION;
-	}    
+	}
 }

@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.gsh.GeolocSharing;
@@ -404,15 +403,4 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	        listeners.finishBroadcast();
 	    }
     }
-    
-    /**
-	 * Returns service version.
-	 */
-	@Override
-	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
-		return JoynService.Build.GSMA_VERSION;
-	}
 }

@@ -55,9 +55,6 @@ public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
 		// Get session ID
 		String sessionId = invitation.getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
 
-		// Get service ID
-		String serviceId = invitation.getType();
-
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, MultimediaSessionView.class);
@@ -67,7 +64,7 @@ public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
         String notifTitle = context.getString(R.string.title_recv_mm_session, contact);
 		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, serviceId, contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, sessionId, contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

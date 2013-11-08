@@ -43,7 +43,8 @@
 	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
 	            <action android:name="org.gsma.joyn.gsh.IGeolocSharingService"/>
 				<action android:name="org.gsma.joyn.session.IMultimediaSessionService"/>
-   	        </intent-filter>
+				<action android:name="org.gsma.joyn.ipcall.IIPCallService"/>
+	        </intent-filter>
 	    </service>
 	
 		<!-- RCS settings application -->

@@ -30,7 +30,6 @@ import org.gsma.joyn.capability.ICapabilitiesListener;
 import org.gsma.joyn.capability.ICapabilityService;
 
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -394,15 +393,14 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		}	
 	}
 
-	
 	/**
-	 * Returns service version.
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+	 * @throws ServerApiException
 	 */
-	@Override
 	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
 		return JoynService.Build.GSMA_VERSION;
 	}
 }

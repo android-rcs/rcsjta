@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -92,6 +91,11 @@ public class Utils {
 	 * Notification ID for geoloc share
 	 */
 	public static int NOTIF_ID_GEOLOC_SHARE = 1006; 
+
+	/**
+	 * Notification ID for IP call
+	 */
+	public static int NOTIF_ID_IP_CALL = 1007; 
 
 	/**
 	 * Returns the application version from manifest file 

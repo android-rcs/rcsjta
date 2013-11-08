@@ -1,45 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="fill_parent"
-        android:layout_width="fill_parent"
-        android:orientation="vertical">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <LinearLayout
-        android:id="@+id/init_call"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Spinner
-            android:id="@+id/contact"
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:paddingTop="10dip" 
+		android:shrinkColumns="1" 
+		android:stretchColumns="1">
+	    
+        <Spinner android:id="@+id/contact"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/audio_invite_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:text="@string/label_audio_invite_btn" />
-
-            <Button
-                android:id="@+id/audio_video_invite_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="74dp"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:text="@string/label_audio_video_invite_btn" />
-        </LinearLayout>
-    </LinearLayout>
-
-</RelativeLayout>
-
+            android:layout_height="wrap_content"/>
+	
+	    <TableRow android:padding="5dip"></TableRow>
+        
+	    <CheckBox android:id="@+id/video"			 
+		android:text="@string/label_video"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"/>
+		
+	    <TableRow android:padding="5dip"></TableRow>
+        
+		<Button android:text="@string/label_initiate_call"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+			 android:id="@+id/initiate_btn"/>
+		
+	</TableLayout>
+	
+</ScrollView>	

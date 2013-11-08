@@ -22,9 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.gsma.joyn.JoynContactFormatException;
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynUtils;
 import org.gsma.joyn.ft.FileTransfer;
 import org.gsma.joyn.ft.FileTransferListener;
 import org.gsma.joyn.ft.IFileTransfer;
@@ -272,7 +270,6 @@ public class GroupChat {
    	 * @throws JoynServiceException
      */
     public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
-    	JoynUtils.checkVersionCompatibility(chatInf, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
 		try {
 			return chatInf.sendGeoloc(geoloc);
 		} catch(Exception e) {
@@ -292,7 +289,6 @@ public class GroupChat {
 	 * @throws JoynContactFormatException
      */
     public FileTransfer sendFile(String filename, String fileicon, FileTransferListener listener) throws JoynServiceException {
-    	JoynUtils.checkVersionCompatibility(chatInf, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
     	try {
 			IFileTransfer ftIntf = chatInf.sendFile(filename, fileicon, listener);
 			if (ftIntf != null) {

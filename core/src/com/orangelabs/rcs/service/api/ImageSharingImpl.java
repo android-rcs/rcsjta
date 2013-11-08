@@ -1,12 +1,10 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.ish.IImageSharing;
 import org.gsma.joyn.ish.IImageSharingListener;
 import org.gsma.joyn.ish.ImageSharing;
 
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -431,15 +429,4 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	        listeners.finishBroadcast();
 	    }
     }
-
-    /**
-	 * Returns service version.
-	 */
-	@Override
-	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
-		return JoynService.Build.GSMA_VERSION;
-	}
 }

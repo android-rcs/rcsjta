@@ -24,6 +24,11 @@ package org.gsma.joyn.ipcall;
  */
 public abstract class IPCallListener extends IIPCallListener.Stub {
 	/**
+	 * Callback called when the call is pending.
+	 */
+	public abstract void onCallRinging();
+	
+	/**
 	 * Callback called when the call is started
 	 */
 	public abstract void onCallStarted();

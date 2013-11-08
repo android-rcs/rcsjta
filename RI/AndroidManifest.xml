@@ -276,13 +276,23 @@
             </intent-filter>
 		</activity>
 		
-<!-- 	<activity android:name=".ipcall.InitiateIPCall">
+	 	<activity android:name=".ipcall.InitiateIPCall">
+			<intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+			    <action android:name="org.gsma.joyn.action.INITIATE_IPCALL"/>
+            </intent-filter>
+	 	    
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.ip-voice-call"/>
             </intent-filter>
-		</activity>-->
+		</activity>
+		
+        <activity android:name=".ipcall.IPCallList"/>
+	 		 	
+        <activity android:name=".ipcall.IPCallView"/>
 </application>
 
 </manifest>

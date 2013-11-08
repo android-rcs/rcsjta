@@ -36,6 +36,4 @@ interface IIPCall {
 	void addEventListener(in IIPCallListener listener);
 
 	void removeEventListener(in IIPCallListener listener);
-	
-	int getServiceVersion();
 }

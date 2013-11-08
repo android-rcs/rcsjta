@@ -322,4 +322,17 @@ public abstract class OneOneChatSession extends ChatSession {
         // Start the activity manager
         getActivityManager().start();
     }
+
+    /**
+     * Data transfer error
+     *
+     * @param msgId Message ID
+     * @param error Error code
+     */
+    public void msrpTransferError(String msgId, String error) {
+    	super.msrpTransferError(msgId, error);
+
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+    }
 }

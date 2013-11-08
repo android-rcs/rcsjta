@@ -34,7 +34,6 @@ import org.gsma.joyn.gsh.INewGeolocSharingListener;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
@@ -350,13 +349,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	}
 	
 	/**
-	 * Returns service version.
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+	 * @throws ServerApiException
 	 */
-	@Override
 	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
 		return JoynService.Build.GSMA_VERSION;
 	}
 }

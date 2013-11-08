@@ -4,6 +4,8 @@ package org.gsma.joyn.ipcall;
  * Callback methods for IP call events
  */
 interface IIPCallListener {
+	void onCallRinging();
+
 	void onCallStarted();
 	
 	void onCallAborted();

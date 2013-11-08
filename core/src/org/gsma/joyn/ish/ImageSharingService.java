@@ -27,7 +27,6 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
-import org.gsma.joyn.JoynUtils;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -106,6 +105,25 @@ public class ImageSharingService extends JoynService {
         	}
         }
     };
+    
+	/**
+	 * Returns service version
+	 * 
+	 * @return Version
+	 * @see JoynService.Build.GSMA_VERSION
+     * @throws JoynServiceException
+	 */
+	public int getServiceVersion() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getServiceVersion();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
     
     /**
      * Returns true if the service is registered to the platform, else returns false
@@ -217,7 +235,6 @@ public class ImageSharingService extends JoynService {
      * @throws JoynServiceException
      */
     public Set<ImageSharing> getImageSharings() throws JoynServiceException {
-    	JoynUtils.checkVersionCompatibility(api, JoynService.Build.GSMA_CODES.RCSE_BLACKBIRD);
 		if (api != null) {
 			try {
 	    		Set<ImageSharing> result = new HashSet<ImageSharing>();

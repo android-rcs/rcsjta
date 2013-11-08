@@ -1,6 +1,5 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.JoynService;
 import org.gsma.joyn.chat.ChatIntent;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.ChatMessage;
@@ -10,7 +9,6 @@ import org.gsma.joyn.chat.IChatListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
@@ -500,15 +498,4 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	        listeners.finishBroadcast();		
 	    }
     }
-    
-    /**
-	 * Returns service version.
-	 */
-	@Override
-	public int getServiceVersion() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Service Version:" + JoynService.Build.GSMA_VERSION);
-		}
-		return JoynService.Build.GSMA_VERSION;
-	}
 }
