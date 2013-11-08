@@ -29,6 +29,7 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
+import org.gsma.joyn.capability.ICapabilityService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +40,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.provider.ContactsContract;
 
 /**
@@ -85,21 +87,13 @@ public class ContactsService extends JoynService {
         }
     }
     
-    /**
-     * Returns true if connected to the service, else returns false
-     * 
-	 * @return Returns true if connected else returns false
-     */
-    public boolean isServiceConnected() {
-    	return (api != null);
-    }
 
     /**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	api = IContactsService.Stub.asInterface(service);
+        	setApi(ICapabilityService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
@@ -112,25 +106,7 @@ public class ContactsService extends JoynService {
         	}
         }
     };
-    
-	/**
-	 * Returns service version
-	 * 
-	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
-     * @throws JoynServiceException
-	 */
-	public int getServiceVersion() throws JoynServiceException {
-		if (api != null) {
-			try {
-				return api.getServiceVersion();
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }    
+      
     
     /**
      * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
@@ -260,5 +236,11 @@ public class ContactsService extends JoynService {
     	}
     	cursor.close();
     	return fileName;    	
-    }    
+    }
+
+	@Override
+	protected void setApi(IInterface api) {
+			this.api = (IContactsService) api;
+			setGenericApi(api);
+	}    
 }

@@ -28,12 +28,15 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
+import org.gsma.joyn.capability.ICapabilityService;
+import org.gsma.joyn.contacts.IContactsService;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.IInterface;
 
 /**
  * Chat service offers the main entry point to initiate chat 1-1 ang group
@@ -80,21 +83,14 @@ public class ChatService extends JoynService {
         }
     }
     
-    /**
-     * Returns true if connected to the service, else returns false
-     * 
-	 * @return Returns true if connected else returns false
-     */
-    public boolean isServiceConnected() {
-    	return (api != null);
-    }
+    
 
     /**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	api = IChatService.Stub.asInterface(service);
+        	setApi(ICapabilityService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
@@ -108,42 +104,7 @@ public class ChatService extends JoynService {
         }
     };
 
-	/**
-	 * Returns service version
-	 * 
-	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
-     * @throws JoynServiceException
-	 */
-	public int getServiceVersion() throws JoynServiceException {
-		if (api != null) {
-			try {
-				return api.getServiceVersion();
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
 	
-	/**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
-	 * @return Returns true if registered else returns false
-     * @throws JoynServiceException
-     */
-    public boolean isServiceRegistered() throws JoynServiceException {
-		if (api != null) {
-			try {
-				return api.isServiceRegistered();
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
     
 	/**
 	 * Registers a listener on service registration events
@@ -481,4 +442,9 @@ public class ChatService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}    
+	@Override
+	protected void setApi(IInterface api) {
+			this.api = (IChatService) api;
+			setGenericApi(api);
+	}  
 }

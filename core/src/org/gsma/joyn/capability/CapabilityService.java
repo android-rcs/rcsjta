@@ -27,12 +27,14 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
+import org.gsma.joyn.contacts.IContactsService;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.IInterface;
 
 /**
  * Capability service offers the main entry point to read capabilities
@@ -111,7 +113,7 @@ public class CapabilityService extends JoynService {
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	api = ICapabilityService.Stub.asInterface(service);
+        	setApi(ICapabilityService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
@@ -400,4 +402,10 @@ public class CapabilityService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
+	
+	@Override
+	protected void setApi(IInterface api) {
+			this.api = (ICapabilityService) api;
+			setGenericApi(api);
+	}  
 }
