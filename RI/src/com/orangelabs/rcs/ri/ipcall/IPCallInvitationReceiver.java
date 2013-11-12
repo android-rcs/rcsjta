@@ -61,10 +61,10 @@ public class IPCallInvitationReceiver extends BroadcastReceiver {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(callId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_ipcall, contact);
+        String notifTitle = context.getString(R.string.title_recv_ipcall);
 		Notification notif = new Notification(R.drawable.ri_notif_ipcall_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, callId, contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

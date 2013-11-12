@@ -21,6 +21,7 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.ipcall.IPCall;
+import org.gsma.joyn.ipcall.IPCallIntent;
 import org.gsma.joyn.ipcall.IPCallListener;
 import org.gsma.joyn.ipcall.IPCallService;
 
@@ -58,7 +59,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 * Intent parameters
 	 */
 	public final static String EXTRA_MODE = "mode";
-	public final static String EXTRA_CALL_ID = "call_id";
+	public final static String EXTRA_CALL_ID = "callId";
 	public final static String EXTRA_CONTACT = "contact";
 	public final static String EXTRA_VIDEO_OPTION = "video";
 
@@ -232,7 +233,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 				// TODO
 			} else {
 				// Incoming session from its Intent
-		        callId = getIntent().getStringExtra(IPCallView.EXTRA_CALL_ID);
+		        callId = getIntent().getStringExtra(IPCallIntent.EXTRA_CALL_ID);
 
 		    	// Get the call
 	    		call = ipcallApi.getIPCall(callId);

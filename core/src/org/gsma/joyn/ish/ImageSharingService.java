@@ -26,9 +26,6 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.JoynServiceRegistrationListener;
-import org.gsma.joyn.capability.ICapabilityService;
-import org.gsma.joyn.contacts.IContactsService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,63 +78,35 @@ public class ImageSharingService extends JoynService {
         }
     }
 
+	/**
+	 * Set API interface
+	 * 
+	 * @param api API interface
+	 */
+    protected void setApi(IInterface api) {
+    	super.setApi(api);
+    	
+        this.api = (IImageSharingService)api;
+    }
+    
     /**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(ICapabilityService.Stub.asInterface(service));
+        	setApi(IImageSharingService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
-        	api = null;
+        	setApi(null);
         	if (serviceListener != null) {
         		serviceListener.onServiceDisconnected(JoynService.Error.CONNECTION_LOST);
         	}
         }
     };
-    
-
-
-
-	/**
-	 * Registers a listener on service registration events
-	 * 
-	 * @param listener Service registration listener
-     * @throws JoynServiceException
-	 */
-	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.addServiceRegistrationListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}
-	
-	/**
-	 * Unregisters a listener on service registration events
-	 * 
-	 * @param listener Service registration listener
-     * @throws JoynServiceException
-	 */
-	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.removeServiceRegistrationListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}     
     
     /**
      * Returns the configuration of image sharing service
@@ -295,10 +264,4 @@ public class ImageSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
-	
-	@Override
-	protected void setApi(IInterface api) {
-			this.api = (IImageSharingService) api;
-			setGenericApi(api);
-	}  
 }

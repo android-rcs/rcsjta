@@ -296,6 +296,11 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
+		// Test if at least the audio media is configured
+		if (player == null) {
+			throw new ServerApiException("Missing video player");
+		}
+
 		try {
 		     // Initiate a new session
             VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);

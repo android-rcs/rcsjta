@@ -26,8 +26,6 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.JoynServiceRegistrationListener;
-import org.gsma.joyn.contacts.IContactsService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -98,16 +96,18 @@ public class CapabilityService extends JoynService {
         	// Nothing to do
         }
     }
-    
-    /**
-     * Returns true if connected to the service, else returns false
-     * 
-	 * @return Returns true if connected else returns false
-     */
-    public boolean isServiceConnected() {
-    	return (api != null);
-    }
 
+	/**
+	 * Set API interface
+	 * 
+	 * @param api API interface
+	 */
+    protected void setApi(IInterface api) {
+    	super.setApi(api);
+    	
+        this.api = (ICapabilityService)api;
+    }
+    
     /**
 	 * Service connection
 	 */
@@ -120,86 +120,13 @@ public class CapabilityService extends JoynService {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-        	api = null;
+        	setApi(null);
         	if (serviceListener != null) {
         		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };
     
-	/**
-	 * Returns service version
-	 * 
-	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
-     * @throws JoynServiceException
-	 */
-	public int getServiceVersion() throws JoynServiceException {
-		if (api != null) {
-			try {
-				return api.getServiceVersion();
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
-    
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
-	 * @return Returns true if registered else returns false
-     * @throws JoynServiceException
-     */
-    public boolean isServiceRegistered() throws JoynServiceException {
-		if (api != null) {
-			try {
-				return api.isServiceRegistered();
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
-    
-	/**
-	 * Registers a listener on service registration events
-	 * 
-	 * @param listener Service registration listener
-     * @throws JoynServiceException
-	 */
-	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.addServiceRegistrationListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}
-	
-	/**
-	 * Unregisters a listener on service registration events
-	 * 
-	 * @param listener Service registration listener
-     * @throws JoynServiceException
-	 */
-	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.removeServiceRegistrationListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}        
-
     /**
      * Returns the capabilities supported by the local end user. The supported
      * capabilities are fixed by the MNO and read during the provisioning.
@@ -402,10 +329,4 @@ public class CapabilityService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
-	
-	@Override
-	protected void setApi(IInterface api) {
-			this.api = (ICapabilityService) api;
-			setGenericApi(api);
-	}  
 }

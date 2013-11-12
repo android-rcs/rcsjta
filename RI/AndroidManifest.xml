@@ -290,7 +290,13 @@
             </intent-filter>
 		</activity>
 		
-        <activity android:name=".ipcall.IPCallList"/>
+		<receiver android:name=".ipcall.IPCallInvitationReceiver">
+            <intent-filter>
+		    	<action android:name="org.gsma.joyn.ipcall.action.NEW_CALL"/>
+            </intent-filter>
+        </receiver>
+	 	
+	 	<activity android:name=".ipcall.IPCallSessionsList"/>
 	 		 	
         <activity android:name=".ipcall.IPCallView"/>
 </application>
