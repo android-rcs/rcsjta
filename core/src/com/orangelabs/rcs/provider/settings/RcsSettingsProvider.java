@@ -123,8 +123,8 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, 				"3072");
             addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, 			"54000");
             addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS, 				"20");
-            addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, 		"1");
-            addParameter(db, RcsSettingsData.MAX_IP_CALL_SESSIONS,				"1");
+            addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, 		"10");
+            addParameter(db, RcsSettingsData.MAX_IP_CALL_SESSIONS,				"5");
             addParameter(db, RcsSettingsData.SMS_FALLBACK_SERVICE, 				RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.WARN_SF_SERVICE,	 				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_CHAT,			 		RcsSettingsData.FALSE);

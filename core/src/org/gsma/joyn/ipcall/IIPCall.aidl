@@ -23,6 +23,8 @@ interface IIPCall {
 
 	void abortCall();
 
+	boolean isVideo();
+
 	void addVideo();
 
 	void removeVideo();

@@ -7,9 +7,9 @@ import org.gsma.joyn.ipcall.IIPCallPlayer;
 import org.gsma.joyn.ipcall.IIPCallRenderer;
 
 import com.orangelabs.rcs.core.CoreException;
+import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.ContentManager;
-import com.orangelabs.rcs.core.content.LiveAudioContent;
-import com.orangelabs.rcs.core.content.LiveVideoContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -111,12 +111,13 @@ public class IPCallService extends ImsService {
      * Initiate an IP call session
      *
      * @param contact Remote contact
+     * @param video Video
      * @param player Player
      * @param renderer Renderer
      * @return IP call session
      * @throws CoreException
      */
-    public IPCallSession initiateIPCallSession(String contact, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
+    public IPCallSession initiateIPCallSession(String contact, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call session");
 		}
@@ -128,17 +129,20 @@ public class IPCallService extends ImsService {
 			}
 			throw new CoreException("Max sessions achieved");
 		}
-        
-		// TODO: how to know if only audio requested?
 		
+		// Create content
+        AudioContent audioContent = ContentManager.createGenericLiveAudioContent();
+        VideoContent videoContent = null;
+	    if (video) { 
+	    	videoContent = ContentManager.createGenericLiveVideoContent();
+	    }
+
         // Create a new session
-        LiveAudioContent liveAudioContent = ContentManager.createGenericLiveAudioContent();
-        LiveVideoContent liveVideoContent = ContentManager.createGenericLiveVideoContent();
 		OriginatingIPCallSession session = new OriginatingIPCallSession(
 				this,
 				PhoneUtils.formatNumberToSipUri(contact),
-				liveAudioContent,
-				liveVideoContent,
+				audioContent,
+				videoContent,
 				player,
 				renderer);
 		

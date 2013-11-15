@@ -63,7 +63,7 @@ public class TestIPCallApi extends ListActivity {
 	            break;
 	            
 	        case 2:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
+            	startActivity(new Intent(this, IPCallList.class));
 	            break;
         }
     }

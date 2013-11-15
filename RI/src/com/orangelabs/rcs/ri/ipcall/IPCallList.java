@@ -1,27 +1,10 @@
-/*******************************************************************************
- * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010 France Telecom S.A.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-package com.orangelabs.rcs.ri.messaging.ft;
+package com.orangelabs.rcs.ri.ipcall;
 
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.FileTransferLog;
+import org.gsma.joyn.ipcall.IPCall;
+import org.gsma.joyn.ipcall.IPCallLog;
 
 import android.app.Activity;
 import android.content.Context;
@@ -43,11 +26,11 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List file transfers from the content provider 
+ * List calls from the content provider 
  *   
  * @author Jean-Marc AUFFRET
  */
-public class FileTransferList extends Activity {
+public class IPCallList extends Activity {
 	
 	/**
 	 * List view
@@ -60,10 +43,10 @@ public class FileTransferList extends Activity {
         
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.filetransfer_list);
+        setContentView(R.layout.ipcall_list);
         
         // Set title
-        setTitle(R.string.menu_file_transfer_log);
+        setTitle(R.string.menu_ipcall_list);
 
         // Set list adapter
         listView = (ListView)findViewById(android.R.id.list);
@@ -83,17 +66,15 @@ public class FileTransferList extends Activity {
 	 * Create list adapter
 	 */
 	private FtListAdapter createListAdapter() {
-		Uri uri = FileTransferLog.CONTENT_URI;
+		Uri uri = IPCallLog.CONTENT_URI;
         String[] projection = new String[] {
-    		FileTransferLog.ID,
-    		FileTransferLog.CONTACT_NUMBER,
-    		FileTransferLog.FILENAME,
-    		FileTransferLog.FILESIZE,
-    		FileTransferLog.STATE,
-    		FileTransferLog.DIRECTION,
-    		FileTransferLog.TIMESTAMP
+    		IPCallLog.ID,
+    		IPCallLog.CONTACT_NUMBER,
+    		IPCallLog.STATE,
+    		IPCallLog.DIRECTION,
+    		IPCallLog.TIMESTAMP
     		};
-        String sortOrder = FileTransferLog.TIMESTAMP + " DESC ";
+        String sortOrder = IPCallLog.TIMESTAMP + " DESC ";
 		Cursor cursor = getContentResolver().query(uri, projection, null, null, sortOrder);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
@@ -119,15 +100,13 @@ public class FileTransferList extends Activity {
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            View view = inflater.inflate(R.layout.filetransfer_list_item, parent, false);
+            View view = inflater.inflate(R.layout.ipcall_list_item, parent, false);
             
-            FileTransferItemCache cache = new FileTransferItemCache();
+            CallItemCache cache = new CallItemCache();
     		cache.number = cursor.getString(1);
-    		cache.filename = cursor.getString(2);
-    		cache.filesize = cursor.getLong(3);
-    		cache.state = cursor.getInt(4);
-    		cache.direction = cursor.getInt(5);
-    		cache.date = cursor.getLong(6);
+    		cache.state = cursor.getInt(2);
+    		cache.direction = cursor.getInt(3);
+    		cache.date = cursor.getLong(4);
             view.setTag(cache);
             
             return view;
@@ -135,13 +114,9 @@ public class FileTransferList extends Activity {
         
     	@Override
     	public void bindView(View view, Context context, Cursor cursor) {
-    		FileTransferItemCache cache = (FileTransferItemCache)view.getTag();
+    		CallItemCache cache = (CallItemCache)view.getTag();
     		TextView numberView = (TextView)view.findViewById(R.id.number);
     		numberView.setText(getString(R.string.label_contact, cache.number));
-    		TextView filenameView = (TextView)view.findViewById(R.id.filename);
-    		filenameView.setText(getString(R.string.label_filename, cache.filename));
-    		TextView filesizeView = (TextView)view.findViewById(R.id.filesize);
-    		filesizeView.setText(getString(R.string.label_filesize, cache.filesize));
     		TextView stateView = (TextView)view.findViewById(R.id.state);
     		stateView.setText(getString(R.string.label_session_state, decodeState(cache.state)));
     		TextView directionView = (TextView)view.findViewById(R.id.direction);
@@ -152,12 +127,10 @@ public class FileTransferList extends Activity {
     }
 
     /**
-     * File transfer item in cache
+     * Call item in cache
      */
-	private class FileTransferItemCache {
+	private class CallItemCache {
 		public String number;
-		public String filename;
-		public long filesize;
 		public int direction;
 		public int state;
 		public long date;
@@ -170,23 +143,23 @@ public class FileTransferList extends Activity {
 	 * @return String
 	 */
 	private String decodeState(int state) {
-		if (state == FileTransfer.State.ABORTED) {
+		if (state == IPCall.State.ABORTED) {
 			return getString(R.string.label_state_aborted);
 		} else
-		if (state == FileTransfer.State.FAILED) {
+		if (state == IPCall.State.TERMINATED) {
+			return getString(R.string.label_state_terminated);
+		} else
+		if (state == IPCall.State.FAILED) {
 			return getString(R.string.label_state_failed);
 		} else
-		if (state == FileTransfer.State.INITIATED) {
+		if (state == IPCall.State.INITIATED) {
 			return getString(R.string.label_state_initiated);
 		} else
-		if (state == FileTransfer.State.INVITED) {
+		if (state == IPCall.State.INVITED) {
 			return getString(R.string.label_state_invited);
 		} else
-		if (state == FileTransfer.State.STARTED) {
+		if (state == IPCall.State.STARTED) {
 			return getString(R.string.label_state_started);
-		} else
-		if (state == FileTransfer.State.TRANSFERRED) {
-			return getString(R.string.label_state_transferred);
 		} else {
 			return getString(R.string.label_state_unknown);
 		}
@@ -199,7 +172,7 @@ public class FileTransferList extends Activity {
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
-		if (direction == FileTransfer.Direction.INCOMING) {
+		if (direction == IPCall.Direction.INCOMING) {
 			return getString(R.string.label_incoming);
 		} else {
 			return getString(R.string.label_outgoing);
@@ -229,7 +202,7 @@ public class FileTransferList extends Activity {
 		switch (item.getItemId()) {
 			case R.id.menu_clear_log:
 				// Delete all
-				getContentResolver().delete(FileTransferLog.CONTENT_URI, null, null);
+				getContentResolver().delete(IPCallLog.CONTENT_URI, null, null);
 				
 				// Refresh view
 		        listView.setAdapter(createListAdapter());		

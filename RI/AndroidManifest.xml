@@ -298,7 +298,9 @@
 	 	
 	 	<activity android:name=".ipcall.IPCallSessionsList"/>
 	 		 	
-        <activity android:name=".ipcall.IPCallView"/>
+	 	<activity android:name=".ipcall.IPCallList"/>
+	 	
+	 	<activity android:name=".ipcall.IPCallView"/>
 </application>
 
 </manifest>

@@ -35,7 +35,13 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallPlayer;
@@ -83,6 +89,11 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 */
     private String contact;
 
+	/**
+	 * Video
+	 */
+    private boolean video = false;
+
     /**
 	 * IP call
 	 */
@@ -119,7 +130,11 @@ public class IPCallView extends Activity implements JoynServiceListener {
         // Set title
         setTitle(R.string.title_ipcall);
     	
-    	// Instanciate API
+		// Set buttons callback
+        Button hangupBtn = (Button)findViewById(R.id.hangup_btn);
+        hangupBtn.setOnClickListener(btnHangupListener);
+
+        // Instanciate API
         ipcallApi = new IPCallService(getApplicationContext(), this);
         
         // Connect API
@@ -149,6 +164,10 @@ public class IPCallView extends Activity implements JoynServiceListener {
     	Thread thread = new Thread() {
         	public void run() {
             	try {
+            		// Instanciate player and renderer
+            		player = new MyIPCallPlayer();
+            		renderer = new MyIPCallRenderer();
+
             		// Accept the invitation
         			call.acceptInvitation(player, renderer);
             	} catch(Exception e) {
@@ -206,7 +225,10 @@ public class IPCallView extends Activity implements JoynServiceListener {
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(IPCallView.EXTRA_CONTACT);
 		        
-		        // Initiate call
+		    	// Get video option
+				video = getIntent().getBooleanExtra(IPCallView.EXTRA_VIDEO_OPTION, false);
+
+				// Initiate call
     			startCall();
 			} else
 			if (mode == IPCallView.MODE_OPEN) {
@@ -223,14 +245,14 @@ public class IPCallView extends Activity implements JoynServiceListener {
 					return;
 				}
 				
+		    	// Get video option
+				video = call.isVideo();
+				
     			// Add call event listener
 				call.addEventListener(callListener);
 				
 		    	// Get remote contact
 				contact = call.getRemoteContact();
-		
-				// Display call info
-				// TODO
 			} else {
 				// Incoming session from its Intent
 		        callId = getIntent().getStringExtra(IPCallIntent.EXTRA_CALL_ID);
@@ -249,12 +271,16 @@ public class IPCallView extends Activity implements JoynServiceListener {
 		    	// Get remote contact
 				contact = call.getRemoteContact();
 		
-				// Display call info
-				// TODO
+		    	// Get video option
+				video = call.isVideo();
 
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(R.string.title_ipcall);
+				if (video) {
+					builder.setTitle(R.string.title_ipcall_video);
+				} else {
+					builder.setTitle(R.string.title_ipcall);
+				}
 				builder.setMessage(getString(R.string.label_from) +	" " + contact);
 				builder.setCancelable(false);
 				builder.setIcon(R.drawable.ri_notif_ipcall_icon);
@@ -264,7 +290,14 @@ public class IPCallView extends Activity implements JoynServiceListener {
 			}
 			
 			// Display call info
-			// TODO
+	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
+	    	contactEdit.setText(contact);
+	        ToggleButton videoBtn = (ToggleButton)findViewById(R.id.video);
+	        videoBtn.setChecked(video);        
+	        videoBtn.setOnCheckedChangeListener(btnVideoListener);        
+	        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+	        holdBtn.setChecked(false);
+	        holdBtn.setOnCheckedChangeListener(btnHoldListener);        
 		} catch(JoynServiceException e) {
 			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_failed));
 		}
@@ -294,7 +327,13 @@ public class IPCallView extends Activity implements JoynServiceListener {
             		renderer = new MyIPCallRenderer();
             		
 					// Initiate session
-					call = ipcallApi.initiateCall(contact, player, renderer, callListener);
+            		if (video) {
+            			// Visio call
+            			call = ipcallApi.initiateVisioCall(contact, player, renderer, callListener);
+            		} else {
+            			// Audio call
+            			call = ipcallApi.initiateCall(contact, player, renderer, callListener);
+            		}
             	} catch(Exception e) {
             		e.printStackTrace();
             		handler.post(new Runnable(){
@@ -365,9 +404,6 @@ public class IPCallView extends Activity implements JoynServiceListener {
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
-					
-					// Update UI
-					// TODO
 				}
 			});
     	}
@@ -376,7 +412,9 @@ public class IPCallView extends Activity implements JoynServiceListener {
     	public void onCallHeld() {
 			handler.post(new Runnable() { 
 				public void run() {
-					// TODO
+					// Update UI
+			        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+			        holdBtn.setChecked(true);
 				}
 			});
     	}
@@ -385,7 +423,9 @@ public class IPCallView extends Activity implements JoynServiceListener {
     	public void onCallContinue() {
 			handler.post(new Runnable() { 
 				public void run() {
-					// TODO
+					// Update UI
+			        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+			        holdBtn.setChecked(false);
 				}
 			});
     	}
@@ -477,5 +517,113 @@ public class IPCallView extends Activity implements JoynServiceListener {
         }
 
         return super.onKeyDown(keyCode, event);
-    }    
+    }
+    
+    /**
+     * Hangup button callback
+     */
+    private android.view.View.OnClickListener btnHangupListener = new android.view.View.OnClickListener() {
+        public void onClick(View v) {
+        	// Quit the session
+        	quitSession();
+        }
+    };
+
+    /**
+	 * Video toggle button listener
+     */
+    private OnCheckedChangeListener btnVideoListener = new OnCheckedChangeListener() {
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        	if (isChecked) {
+				// Add the video stream
+				addVideo();
+			} else {
+				// Remove the video stream
+				removeVideo();
+			}
+		}
+	};
+    
+	/**
+	 * Add video
+	 */
+	private void addVideo() {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					call.addVideo();
+				} catch(Exception e) {
+					e.printStackTrace();
+					// TODO: update UI
+				}
+			}
+		};
+		thread.start();
+	}
+
+	/**
+	 * Remove the video
+	 */
+	private void removeVideo() {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					call.removeVideo();
+				} catch(Exception e) {
+					e.printStackTrace();
+					// TODO: update UI
+				}
+			}
+		};
+		thread.start();
+	}
+
+	/**
+	 * Hold toggle button listener
+     */
+    private OnCheckedChangeListener btnHoldListener = new OnCheckedChangeListener() {
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        	if (isChecked) {
+				// Hold the call
+				holdCall();
+			} else {
+				// Continue the call
+				continueCall();
+			}
+		}
+	};
+	
+	/**
+	 * Hold the call
+	 */
+	private void holdCall() {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					call.holdCall();
+				} catch(Exception e) {
+					e.printStackTrace();
+					// TODO: update UI
+				}
+			}
+		};
+		thread.start();
+	}
+
+	/**
+	 * Continue the call
+	 */
+	private void continueCall() {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					call.continueCall();
+				} catch(Exception e) {
+					e.printStackTrace();
+					// TODO: update UI
+				}
+			}
+		};
+		thread.start();
+	}
 }

@@ -26,6 +26,8 @@ interface IIPCallService {
 
 	IIPCall initiateCall(in String contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
 	
+	IIPCall initiateVisioCall(in String contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
+
 	void addNewIPCallListener(in INewIPCallListener listener);
 
 	void removeNewIPCallListener(in INewIPCallListener listener);

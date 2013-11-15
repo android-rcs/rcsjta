@@ -21,14 +21,65 @@ import org.gsma.joyn.ipcall.AudioCodec;
 import org.gsma.joyn.ipcall.IPCallPlayer;
 import org.gsma.joyn.ipcall.VideoCodec;
 
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
+import com.orangelabs.rcs.ri.sharing.video.media.NetworkRessourceManager;
+
 /**
  * IP call player 
  */
 public class MyIPCallPlayer extends IPCallPlayer {
+	/**
+	 * Audio codec
+	 */
 	private AudioCodec audiocodec;
 	
+	/**
+	 * Local RTP port for audio
+	 */
+	private int localAudioRtpPort;
+
+	/**
+	 * Video codec
+	 */
 	private VideoCodec videocodec;
 
+	/**
+	 * Local RTP port for video
+	 */
+	private int localVideoRtpPort;
+
+	/**
+	 * Is video activated
+	 */
+	private boolean video = false;
+	
+    /**
+     * Constructor
+     */
+    public MyIPCallPlayer() {
+    	// Set the local RTP port for audio
+        localAudioRtpPort = NetworkRessourceManager.generateLocalRtpPort();
+
+        // Set the default audio codec
+    	audiocodec = new AudioCodec("AMR", 97, 8000, "");
+    	
+    	// Set the local RTP port for video
+        localVideoRtpPort = NetworkRessourceManager.generateLocalRtpPort();
+
+        // Set the default video codec
+    	videocodec = new VideoCodec(H264Config.CODEC_NAME,
+			H264VideoFormat.PAYLOAD,
+            H264Config.CLOCK_RATE,
+            15,
+            96000,
+            H264Config.QCIF_WIDTH, 
+            H264Config.QCIF_HEIGHT,
+			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
+    }
+	
 	public void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost, int remoteAudioPort, int remoteVideoPort) {
 		// TODO
 		this.audiocodec = audiocodec;
@@ -64,20 +115,48 @@ public class MyIPCallPlayer extends IPCallPlayer {
 	public AudioCodec[] getSupportedAudioCodecs() {
 		// TODO
 		AudioCodec[] codecs = {
-			new AudioCodec("AMR", 96, 8000, "")
+			new AudioCodec("AMR", 97, 8000, "")
 		};
 		return codecs;
 	}
 
 	public VideoCodec[] getSupportedVideoCodecs() {
-		// TODO
 		VideoCodec[] codecs = {
-			new VideoCodec("H264", 97, 90000, 10, 96000, 176, 144, "")
+			new VideoCodec(H264Config.CODEC_NAME,
+    			H264VideoFormat.PAYLOAD,
+                H264Config.CLOCK_RATE,
+                15,
+                96000,
+                H264Config.QCIF_WIDTH, 
+                H264Config.QCIF_HEIGHT,
+    			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE)
 		};
 		return codecs;
 	}
 
 	public VideoCodec getVideoCodec() {
-		return videocodec;
+		if (video) {
+			return videocodec;
+		} else {
+			return null;			
+		}
+	}
+	
+	/**
+	 * Is video activated
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isVideoActivated() {
+		return video;
+	}
+	
+	/**
+	 * Set video activated
+	 * 
+	 * @param video Video flag
+	 */
+	public void setVideoActivation(boolean video) {
+		this.video = video;
 	}
 }

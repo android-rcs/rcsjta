@@ -43,7 +43,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List video sharing from the content provider 
+ * List video sharings from the content provider 
  *   
  * @author Jean-Marc AUFFRET
  */

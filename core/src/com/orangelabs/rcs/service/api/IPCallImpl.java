@@ -16,6 +16,7 @@ import com.orangelabs.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener
 import com.orangelabs.rcs.core.ims.service.ipcall.OriginatingIPCallSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -70,7 +71,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return Contact
 	 */
 	public String getRemoteContact() {
-		return session.getRemoteContact();
+		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 	}
 
 	/**
@@ -130,6 +131,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Accept call invitation");
 		}
 
+		// Set player and renderer
+		session.setPlayer(player);
+		session.setRenderer(renderer);
+		
 		// Accept invitation
 		session.acceptSession();
 	}
@@ -159,6 +164,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
 		// Abort the session
 		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+	}
+
+	/**
+	 * Is video activated
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isVideo() {
+		return session.isVideoActivated();
 	}
 
 	/**
@@ -313,8 +327,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 				logger.info("Call aborted (reason " + reason + ")");
 			}
 
-			// Update IP call history
-			IPCallHistory.getInstance().setCallStatus(session.getSessionID(), IPCall.State.ABORTED); 
+			// Update rich messaging history
+			if (session.getDialogPath().isSessionCancelled()) {
+				IPCallHistory.getInstance().setCallStatus(session.getSessionID(), IPCall.State.ABORTED); 
+			} else {
+				IPCallHistory.getInstance().setCallStatus(session.getSessionID(), IPCall.State.TERMINATED); 
+			}
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
