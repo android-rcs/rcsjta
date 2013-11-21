@@ -86,7 +86,7 @@ public class IPCallService extends JoynService {
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(ICapabilityService.Stub.asInterface(service));
+        	setApi(IIPCallService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}

@@ -28,8 +28,6 @@ import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
 import org.gsma.joyn.JoynServiceRegistrationListener;
-import org.gsma.joyn.capability.ICapabilityService;
-import org.gsma.joyn.contacts.IContactsService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -90,7 +88,7 @@ public class ChatService extends JoynService {
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(ICapabilityService.Stub.asInterface(service));
+        	setApi(IChatService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}

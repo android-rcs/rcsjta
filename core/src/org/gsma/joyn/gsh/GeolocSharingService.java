@@ -90,7 +90,7 @@ public class GeolocSharingService extends JoynService {
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(ICapabilityService.Stub.asInterface(service));
+        	setApi(IGeolocSharingService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
