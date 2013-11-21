@@ -17,9 +17,7 @@
  ******************************************************************************/
 package org.gsma.joyn;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import android.content.Context;
 import android.os.IInterface;
 
@@ -127,28 +125,59 @@ public abstract class JoynService {
 	protected JoynServiceListener serviceListener;
 
 	/**
-	 * joyn Interface containing mandatory methods.
-	 * 
-	 * @hide
+	 * API interface
 	 */
-	private IInterface genericApi;
+	private IInterface api = null;
 
 	/**
 	 * Service version
 	 */
-	private Integer version;
+	private Integer version = null;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param ctx
-	 *            Application context
-	 * @param listener
-	 *            Service listener
+	 * @param ctx Application context
+	 * @param listener Service listener
 	 */
 	public JoynService(Context ctx, JoynServiceListener listener) {
 		this.ctx = ctx;
 		this.serviceListener = listener;
+	}
+
+	/**
+	 * Call specific method on the API interface
+	 * 
+	 * @param method Method to be called
+	 * @param param Parameters of the method
+	 * @return Object
+	 * @throws JoynServiceException
+	 */
+	private Object callApiMethod(String method, Object param) throws JoynServiceException {
+		if (api != null) {
+			Class c = api.getClass();
+			try {
+				Method m = c.getDeclaredMethod(method, null);
+				if (param != null) {
+					return m.invoke(api, param);
+				} else {
+					return m.invoke(api);					
+				}
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+	
+	/**
+	 * Set API interface
+	 * 
+	 * @param api API interface
+	 */
+	protected void setApi(IInterface api) {
+		this.api = api;
 	}
 
 	/**
@@ -167,7 +196,7 @@ public abstract class JoynService {
 	 * @return Returns true if connected else returns false
 	 */
 	public boolean isServiceConnected() {
-		return (genericApi != null);
+		return (api != null);
 	}
 
 	/**
@@ -178,10 +207,10 @@ public abstract class JoynService {
 	 * @throws JoynServiceException
 	 */
 	public int getServiceVersion() throws JoynServiceException {
-		if (genericApi != null) {
+		if (api != null) {
 			if (version == null) {
 				try {
-					version = (Integer) callApiMethod("getServiceVersion");
+					version = (Integer)callApiMethod("getServiceVersion", null);
 				} catch (Exception e) {
 					throw new JoynServiceException(e.getMessage());
 				}
@@ -200,51 +229,38 @@ public abstract class JoynService {
 	 * @throws JoynServiceException
 	 */
 	public boolean isServiceRegistered() throws JoynServiceException {
-		if (genericApi != null) {
-			return (Boolean) callApiMethod("isServiceRegistered");
+		if (api != null) {
+			return (Boolean)callApiMethod("isServiceRegistered", null);
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
 
 	/**
-	 * Call specific method on api
+	 * Registers a listener on service registration events
 	 * 
-	 * @param method
-	 * @return
-	 * @throws JoynServiceException
-	 * @hide
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
 	 */
-	private Object callApiMethod(String method) throws JoynServiceException {
-		if (genericApi != null) {
-			Class c = genericApi.getClass();
-			try {
-				Method m = c.getDeclaredMethod(method, null);
-				return m.invoke(genericApi, null);
-			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
+	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			callApiMethod("addServiceRegistrationListener", listener);
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-
 	}
-
+	
 	/**
-	 * Set API used to call generic methods
+	 * Unregisters a listener on service registration events
 	 * 
-	 * @param genericApi
-	 * @hide
+	 * @param listener Service registration listener
+     * @throws JoynServiceException
 	 */
-	protected void setGenericApi(android.os.IInterface genericApi) {
-		this.genericApi = genericApi;
-	}
-
-	/**
-	 * Use to set specific joyn service API and generic API
-	 * 
-	 * @hide
-	 */
-	protected abstract void setApi(IInterface api);
-
+	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
+		if (api != null) {
+			callApiMethod("removeServiceRegistrationListener", listener);
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}        
 }

@@ -86,44 +86,16 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener  {
      *
      */
 	public void handleRemoveVideoAborted(int code);
-	
 
 	/**
-     * Call Hold Invitation
+     * Call hold
      *
      */
     public void handleCallHold();
 
     /**
-     * Call Resume Invitation
+     * Call resume
      *
      */
     public void handleCallResume();  
-	
-	/**
-     * Call Hold accepted 
-     *
-     */
-	public void handleCallHoldAccepted();
-
-	 /**
-     * Call Hold aborted 
-     *
-     * @param errorCode
-     */
-	public void handleCallHoldAborted(int errorCode);
-	
-	/**
-     * Call resume accepted (200OK response)
-     *
-     */
-	public void handleCallResumeAccepted();
-
-	/**
-     * Call resume aborted 
-     *
-     */
-	public void handleCallResumeAborted(int code);
-
-
 }

@@ -15,7 +15,7 @@
 			android:layout_marginRight="5dip"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
-	
+        
 	    <TableRow android:padding="5dip"></TableRow>
         
 		<Button android:text="@string/label_initiate_mm_session"

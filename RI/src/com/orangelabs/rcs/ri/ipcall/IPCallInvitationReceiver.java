@@ -55,16 +55,24 @@ public class IPCallInvitationReceiver extends BroadcastReceiver {
 		// Get call ID
 		String callId = invitation.getStringExtra(IPCallIntent.EXTRA_CALL_ID);
 
+		// Get video
+		String video = invitation.getStringExtra(IPCallIntent.EXTRA_VIDEO_ENCODING);
+
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, IPCallView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(callId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_ipcall, contact);
+        String notifTitle;
+        if (video != null) {
+        	notifTitle = context.getString(R.string.title_recv_ipcall_video);
+        } else {
+        	notifTitle = context.getString(R.string.title_recv_ipcall);
+        }        
 		Notification notif = new Notification(R.drawable.ri_notif_ipcall_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, callId, contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

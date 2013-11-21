@@ -231,6 +231,7 @@
 <string name="label_outgoing_sharing_aborted">Outgoing sharing aborted</string>
 <string name="label_switch_camera">Switch camera</string>
 <string name="label_video_duration">Duration: %s s</string>
+<string name="label_note_sharing_codec">Note: the video codec is an H264 codec from the Google Android open source and is a contribution from PacketVideo (Apache 2 license).</string>
 
 <!-- Geoloc sharing menu -->
 <string name="title_recv_geoloc_sharing">New geoloc sharing invitation</string>
@@ -270,8 +271,9 @@
 <string name="label_mm_session_failed">Session has failed (error code %d)</string>
 <string name="title_mm_session">Multimedia session</string>
 <string name="label_mm_session_has_expired">Session has expired</string>
-<string name="title_recv_mm_session">Session invitation from %s</string>
+<string name="title_recv_mm_session">Multimedia Session invitation</string>
 <string name="label_session">Session %s</string>
+<string name="label_session_from">from %s</string>
 
 <!-- Geolocation push -->
 <string name="label_select_geoloc">Select from a map</string>
@@ -293,7 +295,9 @@
 <string name="menu_initiate_ipcall">Initiate IP call</string>
 <string name="menu_ipcall_sessions">Current IP calls</string>
 <string name="title_ipcall">IP call</string> 
+<string name="title_ipcall_video">IP video call</string> 
 <string name="title_recv_ipcall">New IP call invitation</string>
+<string name="title_recv_ipcall_video">New IP video call invitation</string>
 <string name="label_ipcall_has_expired">Call has expired</string>
 <string name="label_ipcall_aborted">Call aborted</string>
 <string name="label_ipcall_declined">Call invitation has been declined</string>
@@ -304,9 +308,10 @@
 <string name="label_no_ipcall">No call</string>
 <string name="label_video">Video</string>
 <string name="label_initiate_call">Call</string>
-<string name="label_onhold">Hold</string>
+<string name="label_hold">Hold</string>
 <string name="label_resume">Resume</string>
 <string name="label_hangup">Hang Up</string>
+<string name="label_note_ipcall_codec">Note: the media codecs are not available in the RI due to patent issue on this open source part. Nevertheless the media for audio and video should be implemented in the application side thanks to the RCS API interface. So in this sample no audio and video will be played.</string>
 
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>

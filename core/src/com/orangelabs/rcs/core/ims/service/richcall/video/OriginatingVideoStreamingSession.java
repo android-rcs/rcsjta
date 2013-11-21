@@ -76,13 +76,6 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
                 logger.info("Initiate a new live video sharing session as originating");
             }
 
-            // Check player 
-            if (getVideoPlayer() == null) {
-                handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE,
-                        "Video codec not selected"));
-                return;
-            }
-
             // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();

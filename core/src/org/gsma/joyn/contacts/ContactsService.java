@@ -29,7 +29,6 @@ import org.gsma.joyn.JoynService;
 import org.gsma.joyn.JoynServiceException;
 import org.gsma.joyn.JoynServiceListener;
 import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.capability.ICapabilityService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -86,8 +85,18 @@ public class ContactsService extends JoynService {
         	// Nothing to do
         }
     }
-    
 
+	/**
+	 * Set API interface
+	 * 
+	 * @param api API interface
+	 */
+    protected void setApi(IInterface api) {
+    	super.setApi(api);
+    	
+        this.api = (IContactsService)api;
+    }
+    
     /**
 	 * Service connection
 	 */
@@ -100,13 +109,12 @@ public class ContactsService extends JoynService {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-        	api = null;
+        	setApi(null);
         	if (serviceListener != null) {
         		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };
-      
     
     /**
      * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
@@ -237,10 +245,4 @@ public class ContactsService extends JoynService {
     	cursor.close();
     	return fileName;    	
     }
-
-	@Override
-	protected void setApi(IInterface api) {
-			this.api = (IContactsService) api;
-			setGenericApi(api);
-	}    
 }

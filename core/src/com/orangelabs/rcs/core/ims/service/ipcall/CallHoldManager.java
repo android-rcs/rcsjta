@@ -44,6 +44,8 @@ public abstract class  CallHoldManager {
 		
 	
 	public abstract void prepareSession();
-	
 
+	public boolean isCallHold() {
+		return ((state == HOLD_INPROGRESS) || (state == HOLD));
+	}
 }

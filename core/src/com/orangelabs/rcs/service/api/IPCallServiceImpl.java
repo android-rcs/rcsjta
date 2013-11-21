@@ -264,7 +264,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
     public IIPCall initiateCall(String contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an IP call session with " + contact);
+			logger.info("Initiate an IP call audio session with " + contact);
 		}
 
 		// Test IMS connection
@@ -277,7 +277,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, player, renderer);
+			IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
 
 			// Update IP call history
 			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
@@ -300,6 +300,56 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		}
 	} 
 	
+    /**
+     * Initiates an IP call visio with a contact (audio and video). The parameter contact supports the following
+     * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the format of
+     * the contact is not supported an exception is thrown.
+     * 
+     * @param contact Contact
+     * @param player IP call player
+     * @param renderer IP call renderer
+     * @param listener IP call event listener
+     * @return IP call
+	 * @throws ServerApiException 
+     */
+    public IIPCall initiateVisioCall(String contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Initiate an IP call visio session with " + contact);
+		}
+
+		// Test IMS connection
+		ServerApiUtils.testIms();
+
+		// Test if at least the audio media is configured
+		if ((player == null) || (renderer == null)) {
+			throw new ServerApiException("Missing audio player or renderer");
+		}
+		
+		try {
+			// Initiate a new session
+			IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
+
+			// Update IP call history
+			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
+					IPCall.Direction.OUTGOING,
+					session.getAudioContent(), session.getVideoContent(),
+					IPCall.State.INITIATED);
+
+			// Add session in the list
+			IPCallImpl sessionApi = new IPCallImpl(session);
+			sessionApi.addEventListener(listener);
+			
+			// Start the session
+			session.startSession();
+			
+			// Add session in the list
+			IPCallServiceImpl.addIPCallSession(sessionApi);
+			return sessionApi;
+		} catch (Exception e) {
+			throw new ServerApiException(e.getMessage());
+		}
+	}     
+    
     /**
      * Returns a current IP call from its unique ID
      * 

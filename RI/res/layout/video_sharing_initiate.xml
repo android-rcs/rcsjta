@@ -14,8 +14,16 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip" />
-
-		<Button
+	
+        <TextView android:text="@string/label_note_sharing_codec"
+	     android:paddingTop="5dip" 
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:layout_width="fill_parent"
+    	 android:layout_height="wrap_content"
+    	 android:gravity="center"/>
+        
+   		<Button
             android:id="@+id/dial_btn"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

@@ -221,6 +221,20 @@ public class IPCall {
 	}
 
 	/**
+	 * Is video activated
+	 * 
+	 * @return Boolean
+	 * @throws JoynServiceException
+	 */
+	public boolean isVideo() throws JoynServiceException {
+		try {
+			return callInf.isVideo();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Add video stream
 	 * 
 	 * @throws JoynServiceException
