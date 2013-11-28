@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,16 +292,16 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.html">FileTransfer</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html">FileTransfer.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Error.html">FileTransfer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.State.html">FileTransfer.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferIntent.html">FileTransferIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferListener.html">FileTransferListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferLog.html">FileTransferLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferServiceConfiguration.html">FileTransferServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/NewFileTransferListener.html">NewFileTransferListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.html">FileTransfer</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html">FileTransfer.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Error.html">FileTransfer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.State.html">FileTransfer.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferIntent.html">FileTransferIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferListener.html">FileTransferListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferLog.html">FileTransferLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferServiceConfiguration.html">FileTransferServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/NewFileTransferListener.html">NewFileTransferListener</a></li>
       </ul>
     </li>
               
@@ -346,7 +365,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -432,27 +451,45 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	private boolean autoAcceptMode;
 	
 	/**
+	 * File icon
+	 */
+	private boolean fileIcon;
+
+	/**
+	 * File icon size limit
+	 */
+	private long maxFileIconSize;
+	
+	/**
 	 * Constructor
 	 * 
 	 * @param warnSize File transfer size threshold
 	 * @param maxSize File transfer size limit
 	 * @param autoAcceptMode File transfer auto accept mode
+	 * @param fileIcon File icon
+	 * @param maxFileIconSize File icon size limit
+     * @hide
 	 */
-	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode) {
+	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptMode, boolean fileIcon, long maxFileIconSize) {
 		this.warnSize = warnSize;
 		this.maxSize = maxSize;
 		this.autoAcceptMode = autoAcceptMode;
+		this.fileIcon = fileIcon;
+		this.maxFileIconSize = maxFileIconSize;
     }	
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public FileTransferServiceConfiguration(Parcel source) {
 		this.warnSize = source.readLong();
 		this.maxSize = source.readLong();
 		this.autoAcceptMode = source.readInt() != 0;
+		this.fileIcon = source.readInt() != 0;
+		this.maxFileIconSize = source.readLong();
     }
 
 	/**
@@ -460,6 +497,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -470,15 +508,20 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeLong(warnSize);
     	dest.writeLong(maxSize);
     	dest.writeInt(autoAcceptMode ? 1 : 0);    	
+    	dest.writeInt(fileIcon ? 1 : 0);    	
+    	dest.writeLong(maxFileIconSize);
     }
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator&lt;FileTransferServiceConfiguration&gt; CREATOR
             = new Parcelable.Creator&lt;FileTransferServiceConfiguration&gt;() {
@@ -519,6 +562,24 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	public boolean isAutoAcceptMode() {
 		return autoAcceptMode;
 	}
+
+	/**
+	 * Is file icon supported 
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isFileIconSupported() {
+		return fileIcon;
+	}
+
+	/**
+	 * Returns the file transfer size limit. It returns 0 if there is no limitation.
+	 * 
+	 * @return Size in kilobytes
+	 */
+	public long getMaxFileIconSize() {
+		return maxFileIconSize;
+	}	
 }
 
   </pre>
@@ -526,7 +587,7 @@ public class FileTransferServiceConfiguration implements Parcelable {
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

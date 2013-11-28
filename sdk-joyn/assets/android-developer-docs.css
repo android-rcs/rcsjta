@@ -344,7 +344,9 @@ links to summary tables) */
 #api-level-toggle {
   padding:0 10px;
   font-size:11px;
-  float:left;
+  position: absolute;
+  top: -17px;
+  left: -90px;
 }
 
 #api-level-toggle label.disabled {

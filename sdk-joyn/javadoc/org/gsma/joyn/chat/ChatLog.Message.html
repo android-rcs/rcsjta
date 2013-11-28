@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,27 +292,29 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/Geoloc.html">Geoloc</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/GeolocMessage.html">GeolocMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
       </ul>
     </li>
               
@@ -378,7 +399,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -415,7 +436,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -481,7 +502,7 @@ Summary:
 
 
   
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
       <td class="jd-typecol">
         
          
@@ -494,7 +515,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
       <td class="jd-typecol">
         
          
@@ -507,7 +528,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
       <td class="jd-typecol">
         
          
@@ -539,91 +560,91 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#BODY">BODY</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the message body.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CHAT_ID">CHAT_ID</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the chat ID.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CONTACT_NUMBER">CONTACT_NUMBER</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the identity of the sender of the message.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#DIRECTION">DIRECTION</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the message direction.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#ID">ID</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the unique ID for a row.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_ID">MESSAGE_ID</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the message ID.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_STATUS">MESSAGE_STATUS</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the message status.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_TYPE">MESSAGE_TYPE</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the type of message.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MIME_TYPE">MIME_TYPE</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the MIME-TYPE of the message.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP">TIMESTAMP</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the time when message is created.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_DELIVERED">TIMESTAMP_DELIVERED</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the time when message is delivered.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_DISPLAYED">TIMESTAMP_DISPLAYED</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the time when message is delivered.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_SENT">TIMESTAMP_SENT</a></td>
         <td class="jd-descrcol" width="100%">The name of the column containing the time when message is sent.</td>
@@ -644,7 +665,7 @@ Summary:
 
 
     
-      <tr class="alt-color api apilevel-" >
+      <tr class="alt-color api apilevel-Albatros" >
           <td class="jd-typecol">
           public
           static
@@ -655,7 +676,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class=" api apilevel-Albatros" >
           <td class="jd-typecol">
           public
           static
@@ -682,7 +703,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -916,7 +937,7 @@ From class
 
 <a id="BODY"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -929,7 +950,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -959,7 +980,7 @@ From class
 
 <a id="CHAT_ID"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -972,7 +993,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1002,7 +1023,7 @@ From class
 
 <a id="CONTACT_NUMBER"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1015,7 +1036,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1045,7 +1066,7 @@ From class
 
 <a id="DIRECTION"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1058,7 +1079,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1088,7 +1109,7 @@ From class
 
 <a id="ID"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1101,7 +1122,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1131,7 +1152,7 @@ From class
 
 <a id="MESSAGE_ID"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1144,7 +1165,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1174,7 +1195,7 @@ From class
 
 <a id="MESSAGE_STATUS"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1187,7 +1208,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1217,7 +1238,7 @@ From class
 
 <a id="MESSAGE_TYPE"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1230,7 +1251,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1264,7 +1285,7 @@ From class
 
 <a id="MIME_TYPE"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1277,7 +1298,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1307,7 +1328,7 @@ From class
 
 <a id="TIMESTAMP"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1320,7 +1341,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1350,7 +1371,7 @@ From class
 
 <a id="TIMESTAMP_DELIVERED"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1363,7 +1384,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1393,7 +1414,7 @@ From class
 
 <a id="TIMESTAMP_DISPLAYED"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1406,7 +1427,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1436,7 +1457,7 @@ From class
 
 <a id="TIMESTAMP_SENT"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1449,7 +1470,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1489,7 +1510,7 @@ From class
 
 <a id="CONTENT_CHAT_URI"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1502,7 +1523,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1524,7 +1545,7 @@ From class
 
 <a id="CONTENT_URI"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1537,7 +1558,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1566,7 +1587,7 @@ From class
 
 <a id="ChatLog.Message()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1582,7 +1603,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1620,7 +1641,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

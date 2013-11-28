@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -272,24 +291,25 @@
               
     <li><h2>Interfaces</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a></li>
       </ul>
     </li>
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.html">Intents</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.Chat.html">Intents.Chat</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.Client.html">Intents.Client</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.FileTransfer.html">Intents.FileTransfer</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.html">JoynService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.html">JoynService.Build</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.GSMA_CODES.html">JoynService.Build.GSMA_CODES</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.VERSION_CODES.html">JoynService.Build.VERSION_CODES</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Error.html">JoynService.Error</a></li>
-          <li class="api apilevel-"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html">JoynServiceConfiguration</a></li>
-          <li class="api apilevel-"><a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynUtils.html">JoynUtils</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.html">Intents</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.Chat.html">Intents.Chat</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.Client.html">Intents.Client</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.FileTransfer.html">Intents.FileTransfer</a></li>
+          <li class="api apilevel-"><a href="../../../org/gsma/joyn/Intents.IPCall.html">Intents.IPCall</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.html">JoynService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.html">JoynService.Build</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.GSMA_CODES.html">JoynService.Build.GSMA_CODES</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.VERSION_CODES.html">JoynService.Build.VERSION_CODES</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Error.html">JoynService.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html">JoynServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynUtils.html">JoynUtils</a></li>
       </ul>
     </li>
               
@@ -297,10 +317,10 @@
               
     <li><h2>Exceptions</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynContactFormatException.html">JoynContactFormatException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceNotAvailableException.html">JoynServiceNotAvailableException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceNotRegisteredException.html">JoynServiceNotRegisteredException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynContactFormatException.html">JoynContactFormatException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceNotAvailableException.html">JoynServiceNotAvailableException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceNotRegisteredException.html">JoynServiceNotRegisteredException</a></li>
       </ul>
     </li>
               
@@ -352,7 +372,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -505,14 +525,37 @@ public class Intents {
     	private FileTransfer() {
         }    	
     }
+    
+    /**
+     * Intents for IP call service
+     */
+    public static class IPCall {
+    	/**
+    	 * Load the IP call application to view a call. This Intent takes into parameter an URI on
+    	 * the call (i.e. content://ipcalls/ipcall_ID). If no parameter found the main entry of the
+    	 * IP call application is displayed.
+    	 */
+    	public static final String ACTION_VIEW_IPCALL = "org.gsma.joyn.action.VIEW_IPCALL";
+
+    	/**
+    	 * Load the IP call application to start a new call to a given contact. This Intent takes
+    	 * into parameter a contact URI (i.e. content://contacts/people/contact_ID). If no parameter
+    	 * the main entry of the IP call application is displayed.
+    	 */
+    	public static final String ACTION_INITIATE_IPCALL = "org.gsma.joyn.action.INITIATE_IPCALL";
+
+    	private IPCall() {
+        }    	
+    }
 }
+
 
   </pre>
 </div>
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,16 +292,16 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.html">FileTransfer</a></li>
-          <li class="selected api apilevel-"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html">FileTransfer.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Error.html">FileTransfer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransfer.State.html">FileTransfer.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferIntent.html">FileTransferIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferListener.html">FileTransferListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferLog.html">FileTransferLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/FileTransferServiceConfiguration.html">FileTransferServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ft/NewFileTransferListener.html">NewFileTransferListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.html">FileTransfer</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html">FileTransfer.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Error.html">FileTransfer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransfer.State.html">FileTransfer.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferIntent.html">FileTransferIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferListener.html">FileTransferListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferLog.html">FileTransferLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/FileTransferServiceConfiguration.html">FileTransferServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ft/NewFileTransferListener.html">NewFileTransferListener</a></li>
       </ul>
     </li>
               
@@ -361,7 +380,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -398,7 +417,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -474,7 +493,7 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html#INCOMING">INCOMING</a></td>
         <td class="jd-descrcol" width="100%">Incoming transfer
@@ -482,7 +501,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ft/FileTransfer.Direction.html#OUTGOING">OUTGOING</a></td>
         <td class="jd-descrcol" width="100%">Outgoing transfer
@@ -510,7 +529,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -744,7 +763,7 @@ From class
 
 <a id="INCOMING"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -757,7 +776,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -787,7 +806,7 @@ From class
 
 <a id="OUTGOING"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -800,7 +819,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -842,7 +861,7 @@ From class
 
 <a id="FileTransfer.Direction()"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -858,7 +877,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -896,7 +915,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

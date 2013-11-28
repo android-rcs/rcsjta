@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,16 +292,16 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharing.html">ImageSharing</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/ish/ImageSharing.Direction.html">ImageSharing.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharing.Error.html">ImageSharing.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharing.State.html">ImageSharing.State</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html">ImageSharingIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharingListener.html">ImageSharingListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharingLog.html">ImageSharingLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharingService.html">ImageSharingService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/ImageSharingServiceConfiguration.html">ImageSharingServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/ish/NewImageSharingListener.html">NewImageSharingListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharing.html">ImageSharing</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharing.Direction.html">ImageSharing.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharing.Error.html">ImageSharing.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharing.State.html">ImageSharing.State</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html">ImageSharingIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharingListener.html">ImageSharingListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharingLog.html">ImageSharingLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharingService.html">ImageSharingService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/ImageSharingServiceConfiguration.html">ImageSharingServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/ish/NewImageSharingListener.html">NewImageSharingListener</a></li>
       </ul>
     </li>
               
@@ -361,7 +380,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -398,7 +417,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -473,14 +492,14 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#ACTION_NEW_INVITATION">ACTION_NEW_INVITATION</a></td>
         <td class="jd-descrcol" width="100%">Broadcast action: a new image sharing invitation has been received.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_CONTACT">EXTRA_CONTACT</a></td>
         <td class="jd-descrcol" width="100%">MSISDN of the contact sending the invitation
@@ -488,7 +507,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_DISPLAY_NAME">EXTRA_DISPLAY_NAME</a></td>
         <td class="jd-descrcol" width="100%">Display name of the contact sending the invitation
@@ -496,7 +515,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILENAME">EXTRA_FILENAME</a></td>
         <td class="jd-descrcol" width="100%">Name of the file
@@ -504,7 +523,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILESIZE">EXTRA_FILESIZE</a></td>
         <td class="jd-descrcol" width="100%">Size of the file in byte
@@ -512,7 +531,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILETYPE">EXTRA_FILETYPE</a></td>
         <td class="jd-descrcol" width="100%">MIME type of the file
@@ -520,7 +539,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_SHARING_ID">EXTRA_SHARING_ID</a></td>
         <td class="jd-descrcol" width="100%">Unique ID of the image sharing
@@ -548,7 +567,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -782,7 +801,7 @@ From class
 
 <a id="ACTION_NEW_INVITATION"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -795,7 +814,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -812,7 +831,7 @@ From class
  <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_DISPLAY_NAME">EXTRA_DISPLAY_NAME</a></code> containing the display name of the
   contact sending the invitation (extracted from the SIP address).
  <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_SHARING_ID">EXTRA_SHARING_ID</a></code> containing the unique ID of the image sharing.
- <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILENAME">EXTRA_FILENAME</a></code> containing the name of image to be shared.
+ <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILENAME">EXTRA_FILENAME</a></code> containing the filename of image to be shared.
  <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILESIZE">EXTRA_FILESIZE</a></code> containing the size of the image to be shared.
  <li> <code><a href="../../../../org/gsma/joyn/ish/ImageSharingIntent.html#EXTRA_FILETYPE">EXTRA_FILETYPE</a></code> containing the MIME type of the image to be shared.
  </ul>
@@ -835,7 +854,7 @@ From class
 
 <a id="EXTRA_CONTACT"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -848,7 +867,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -877,7 +896,7 @@ From class
 
 <a id="EXTRA_DISPLAY_NAME"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -890,7 +909,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -919,7 +938,7 @@ From class
 
 <a id="EXTRA_FILENAME"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -932,7 +951,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -961,7 +980,7 @@ From class
 
 <a id="EXTRA_FILESIZE"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -974,7 +993,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1003,7 +1022,7 @@ From class
 
 <a id="EXTRA_FILETYPE"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1016,7 +1035,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1045,7 +1064,7 @@ From class
 
 <a id="EXTRA_SHARING_ID"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1058,7 +1077,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1099,7 +1118,7 @@ From class
 
 <a id="ImageSharingIntent()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1115,7 +1134,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1153,7 +1172,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

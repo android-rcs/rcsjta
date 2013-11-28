@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,27 +292,29 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/Geoloc.html">Geoloc</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/GeolocMessage.html">GeolocMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
       </ul>
     </li>
               
@@ -348,7 +369,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -443,10 +464,10 @@ public class ChatServiceConfiguration {
 	private int maxMsgLengthGroupChat;
 
 	/**
-	 * Max chat sessions
+	 * Max group chat sessions
 	 */
-	private int maxChat; 
-
+	private int maxGroupChat; 
+	
 	/**
 	 * SMS fallback
 	 */
@@ -468,55 +489,74 @@ public class ChatServiceConfiguration {
 	private boolean displayedDeliveryReport;
 	
 	/**
+	 * Max geoloc label length
+	 */
+	private int maxGeolocLabelLength;
+
+	/**
+	 * Geoloc expiraion time
+	 */
+	private int geolocExpireTime;
+	
+	/**
 	 * Constructor
 	 * 
+	 * @param chatSF Chat S&amp;F
+	 * @param groupChatSF Group chat S&amp;F
 	 * @param warnSF Store and Forward warning
 	 * @param chatTimeout Chat timeout
 	 * @param isComposingTimeout Is-composing timeout
 	 * @param maxGroupChatParticipants Max participants in a group chat
 	 * @param maxMsgLengthSingleChat Max length of a message in a single chat
 	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
-	 * @param maxSingleChat Max single chats
 	 * @param maxGroupChat Max group chats
 	 * @param smsFallback SMS fallback
 	 * @param autoAcceptSingleChat Auto accept mode for single chat
 	 * @param autoAcceptGroupChat Auto accept mode for group chat
 	 * @param displayedDeliveryReport Displayed delivery report
+	 * @param maxGeolocLabelLength Max geoloc label length
+	 * @param geolocExpireTime Geoloc expiration time
+     * @hide
 	 */
 	public ChatServiceConfiguration(boolean warnSF, int chatTimeout, int isComposingTimeout,
 			int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
-			int maxChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
-			boolean displayedDeliveryReport) {
+			int maxGroupChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
+			boolean displayedDeliveryReport, int maxGeolocLabelLength, int geolocExpireTime) {
 		this.warnSF = warnSF;
 		this.chatTimeout = chatTimeout;
 		this.isComposingTimeout = isComposingTimeout;
 		this.maxGroupChatParticipants = maxGroupChatParticipants;
 		this.maxMsgLengthSingleChat = maxMsgLengthSingleChat;
 		this.maxMsgLengthGroupChat = maxMsgLengthGroupChat;
-		this.maxChat = maxChat; 
+		this.maxGroupChat = maxGroupChat;
 		this.smsFallback = smsFallback;
 		this.autoAcceptSingleChat = autoAcceptSingleChat;
 		this.autoAcceptGroupChat = autoAcceptGroupChat;
 		this.displayedDeliveryReport = displayedDeliveryReport;
+		this.maxGeolocLabelLength = maxGeolocLabelLength;
+		this.geolocExpireTime = geolocExpireTime;
     }	
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public ChatServiceConfiguration(Parcel source) {
-		this.warnSF = source.readInt() != 0;
 		this.chatTimeout = source.readInt();
 		this.isComposingTimeout = source.readInt();
 		this.maxGroupChatParticipants = source.readInt();
 		this.maxMsgLengthSingleChat = source.readInt();
 		this.maxMsgLengthGroupChat = source.readInt();
-		this.maxChat = source.readInt(); 
 		this.smsFallback = source.readInt() != 0;
 		this.autoAcceptSingleChat = source.readInt() != 0;
 		this.autoAcceptGroupChat = source.readInt() != 0;
 		this.displayedDeliveryReport = source.readInt() != 0;
+		this.warnSF = source.readInt() != 0;
+		this.maxGroupChat = source.readInt(); 
+		this.maxGeolocLabelLength = source.readInt();
+		this.geolocExpireTime = source.readInt();
     }
 
 	/**
@@ -524,6 +564,7 @@ public class ChatServiceConfiguration {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -534,23 +575,28 @@ public class ChatServiceConfiguration {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeInt(warnSF ? 1 : 0);
     	dest.writeInt(chatTimeout);
     	dest.writeInt(isComposingTimeout);
     	dest.writeInt(maxGroupChatParticipants);
     	dest.writeInt(maxMsgLengthSingleChat);
     	dest.writeInt(maxMsgLengthGroupChat);
-    	dest.writeInt(maxChat);
     	dest.writeInt(smsFallback ? 1 : 0);
     	dest.writeInt(autoAcceptSingleChat ? 1 : 0);
     	dest.writeInt(autoAcceptGroupChat ? 1 : 0);
     	dest.writeInt(displayedDeliveryReport ? 1 : 0);
+    	dest.writeInt(warnSF ? 1 : 0);
+    	dest.writeInt(maxGroupChat);
+    	dest.writeInt(maxGeolocLabelLength);
+    	dest.writeInt(geolocExpireTime);
     }
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator&lt;ChatServiceConfiguration&gt; CREATOR
             = new Parcelable.Creator&lt;ChatServiceConfiguration&gt;() {
@@ -565,12 +611,12 @@ public class ChatServiceConfiguration {
 	
 	/**
 	 * Does the UX should alert the user that messages are handled differently when
-	 * the store and forward functionality is involved. It returns True if user should
+	 * the Store and Forward functionality is involved. It returns True if user should
 	 * be informed when sending message to offline user.
 	 * 
 	 * @return Boolean
 	 */
-	public boolean isImWarnSF() {
+	public boolean isChatWarnSF() {
 		return warnSF;
 	}
 	
@@ -593,7 +639,7 @@ public class ChatServiceConfiguration {
 	}	
 	
 	/**
-	 * Returns maximum participants in group chat session
+	 * Returns maximum number of participants in a group chat
 	 * 
 	 * @return Number
 	 */
@@ -602,7 +648,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Return maximum single chat message’s length can have
+	 * Return maximum length of a single chat message
 	 * 
 	 * @return Number of bytes
 	 */
@@ -611,7 +657,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the maximum single group chat message’s length can have
+	 * Return maximum length of a group chat message
 	 * 
 	 * @return Number of bytes
 	 */
@@ -620,16 +666,16 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the max number of simultaneous chat sessions
+	 * Returns the max number of simultaneous group chats
 	 * 
 	 * @return Number
 	 */
-	public int getMaxChatSessions() {
-		return maxChat;
+	public int getMaxGroupChats() {
+		return maxGroupChat;
 	}
 	
 	/**
-	 * Does the UX proposes automatically a SMS fallback in case of chat initiation failure. It
+	 * Does the UX proposes automatically a SMS fallback in case of chat failure. It
 	 * returns True if SMS fallback procedure is activated, else returns False.
 	 * 
 	 * @return Boolean
@@ -639,7 +685,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns True if auto accept mode activated for chat, else returns False
+	 * Does auto accept mode activated for single chat
 	 * 
 	 * @return Boolean
 	 */
@@ -648,7 +694,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns True if auto accept mode activated for group chat, else returns False
+	 * Does auto accept mode activated for group chat
 	 * 
 	 * @return Boolean
 	 */
@@ -657,7 +703,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Is displayed delivery report on received chat messages activated
+	 * Does displayed delivery report activated on received chat messages
 	 * 
 	 * @return Boolean
 	 */
@@ -673,6 +719,24 @@ public class ChatServiceConfiguration {
 	public void setDisplayedDeliveryReport(boolean state) {
 		this.displayedDeliveryReport = state;
 	}
+
+	/**
+	 * Return maximum length of a geoloc label
+	 * 
+	 * @return Number of bytes
+	 */
+	public int getGeolocLabelMaxLength() {
+		return maxGeolocLabelLength;
+	}
+
+    /**
+     * Get geoloc expiration time
+     *
+     * @return Time in seconds
+     */
+	public int getGeolocExpirationTime() {
+		return geolocExpireTime;
+	}
 }
 
   </pre>
@@ -680,7 +744,7 @@ public class ChatServiceConfiguration {
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

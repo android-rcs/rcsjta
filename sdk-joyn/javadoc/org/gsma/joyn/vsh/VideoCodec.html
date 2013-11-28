@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,23 +292,24 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/NewVideoSharingListener.html">NewVideoSharingListener</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.html">VideoPlayer</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.Error.html">VideoPlayer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoPlayerListener.html">VideoPlayerListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.html">VideoRenderer</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.Error.html">VideoRenderer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoRendererListener.html">VideoRendererListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.html">VideoSharing</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Direction.html">VideoSharing.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Error.html">VideoSharing.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.State.html">VideoSharing.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html">VideoSharingIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingListener.html">VideoSharingListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingLog.html">VideoSharingLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingService.html">VideoSharingService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingServiceConfiguration.html">VideoSharingServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/NewVideoSharingListener.html">NewVideoSharingListener</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.html">VideoPlayer</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.Error.html">VideoPlayer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayerListener.html">VideoPlayerListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.html">VideoRenderer</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.Error.html">VideoRenderer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRendererListener.html">VideoRendererListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.html">VideoSharing</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Direction.html">VideoSharing.Direction</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Encoding.html">VideoSharing.Encoding</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Error.html">VideoSharing.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.State.html">VideoSharing.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html">VideoSharingIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingListener.html">VideoSharingListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingLog.html">VideoSharingLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingService.html">VideoSharingService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingServiceConfiguration.html">VideoSharingServiceConfiguration</a></li>
       </ul>
     </li>
               
@@ -360,13 +380,7 @@ Summary:
   
 
 
-  &#124; <a href="#lfields">Fields</a>
-  
 
-
-
-  &#124; <a href="#pubctors">Ctors</a>
-  
 
 
 
@@ -383,7 +397,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -425,7 +439,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -455,7 +469,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p>Video codec maintains all the information related to a video codec.</p>
+<p>Video codec</p>
 
 
 
@@ -548,75 +562,9 @@ android.os.Parcelable
 
 
 
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-1.0" >
-          <td class="jd-typecol">
-          public
-          static
-          final
-          Creator&lt;<a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a>&gt;</td>
-          <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">Parcelable creator
-</td>
-      </tr>
-      
-    
-
-</table>
 
 
 
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#VideoCodec(java.lang.String, int, int, int, int, int, int, java.lang.String)">VideoCodec</a></span>(String encoding, int payload, int clockRate, int frameRate, int bitRate, int width, int height, String parameters)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#VideoCodec(android.os.Parcel)">VideoCodec</a></span>(Parcel source)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -629,26 +577,25 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
             
             
             
-            int
+            boolean
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#describeContents()">describeContents</a></span>()
+        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#compare(org.gsma.joyn.vsh.VideoCodec)">compare</a></span>(<a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a> codec)
         
-        <div class="jd-descrdiv">Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</div>
+        <div class="jd-descrdiv">Compare codec</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -666,7 +613,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -684,7 +631,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -702,7 +649,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -720,7 +667,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -738,7 +685,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
@@ -748,15 +695,15 @@ android.os.Parcelable
             int
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#getPayload()">getPayload</a></span>()
+        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#getPayloadType()">getPayloadType</a></span>()
         
-        <div class="jd-descrdiv">Returns the codec payload (e.g.</div>
+        <div class="jd-descrdiv">Returns the codec payload type (e.g.</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -774,7 +721,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -787,24 +734,6 @@ android.os.Parcelable
         <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#getVideoWidth()">getVideoWidth</a></span>()
         
         <div class="jd-descrdiv">Returns the video width (e.g.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)
-        
-        <div class="jd-descrdiv">Write parcelable object</div>
   
   </td></tr>
 
@@ -1014,7 +943,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -1030,7 +959,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -1077,164 +1006,7 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<a id="CREATOR"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        Creator&lt;<a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a>&gt;
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Parcelable creator
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
-
-
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<a id="VideoCodec(java.lang.String, int, int, int, int, int, int, java.lang.String)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">VideoCodec</span>
-      <span class="normal">(String encoding, int payload, int clockRate, int frameRate, int bitRate, int width, int height, String parameters)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>encoding</th>
-          <td>Video encoding</td>
-        </tr>
-        <tr>
-          <th>payload</th>
-          <td>Payload</td>
-        </tr>
-        <tr>
-          <th>clockRate</th>
-          <td>Clock rate</td>
-        </tr>
-        <tr>
-          <th>bitRate</th>
-          <td>Bit rate</td>
-        </tr>
-        <tr>
-          <th>width</th>
-          <td>Video width</td>
-        </tr>
-        <tr>
-          <th>height</th>
-          <td>Video height</td>
-        </tr>
-        <tr>
-          <th>parameters</th>
-          <td>Codec parameters
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<a id="VideoCodec(android.os.Parcel)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">VideoCodec</span>
-      <span class="normal">(Parcel source)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>source</th>
-          <td>Parcelable source
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1250,9 +1022,9 @@ From interface
 
 
 
-<a id="describeContents()"></a>
+<a id="compare(org.gsma.joyn.vsh.VideoCodec)"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Blackbird"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1260,15 +1032,15 @@ From interface
          
          
          
-        int
+        boolean
       </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
+      <span class="sympad">compare</span>
+      <span class="normal">(<a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a> codec)</span>
     </h4>
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
 
 </div>
         
@@ -1277,11 +1049,19 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Compare codec</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>codec</th>
+          <td>Codec to compare</td>
+        </tr>
+      </table>
+  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Integer
+      <ul class="nolist"><li>Returns True if codecs are equals, else returns False
 </li></ul>
   </div>
 
@@ -1291,7 +1071,7 @@ From interface
 
 <a id="getBitRate()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1307,7 +1087,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1329,7 +1109,7 @@ From interface
 
 <a id="getClockRate()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1345,7 +1125,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1367,7 +1147,7 @@ From interface
 
 <a id="getEncoding()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1383,7 +1163,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1405,7 +1185,7 @@ From interface
 
 <a id="getFrameRate()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1421,7 +1201,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1443,7 +1223,7 @@ From interface
 
 <a id="getParameters()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1459,7 +1239,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1480,9 +1260,9 @@ From interface
 </div>
 
 
-<a id="getPayload()"></a>
+<a id="getPayloadType()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Blackbird"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1492,13 +1272,13 @@ From interface
          
         int
       </span>
-      <span class="sympad">getPayload</span>
+      <span class="sympad">getPayloadType</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
 
 </div>
         
@@ -1507,10 +1287,10 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the codec payload (e.g. 96)</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the codec payload type (e.g. 96)</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Payload number
+      <ul class="nolist"><li>Payload type
 </li></ul>
   </div>
 
@@ -1520,7 +1300,7 @@ From interface
 
 <a id="getVideoHeight()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1536,7 +1316,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1558,7 +1338,7 @@ From interface
 
 <a id="getVideoWidth()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1574,7 +1354,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1594,53 +1374,6 @@ From interface
 </div>
 
 
-<a id="writeToParcel(android.os.Parcel, int)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel dest, int flags)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Write parcelable object</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>dest</th>
-          <td>The Parcel in which the object should be written</td>
-        </tr>
-        <tr>
-          <th>flags</th>
-          <td>Additional flags about how the object should be written
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1654,7 +1387,7 @@ From interface
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

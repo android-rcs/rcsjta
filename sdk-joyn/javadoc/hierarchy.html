@@ -55,8 +55,6 @@
 
 
 
-
-
 <html>
 <style>
     .jd-hierarchy-spacer {
@@ -117,6 +115,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -135,7 +148,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -147,8 +163,6 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
@@ -163,14 +177,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -255,21 +270,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="./org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="./org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="./org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -401,6 +420,22 @@
     <td class="jd-hierarchy-spacer"></td>
     <td class="jd-hierarchy-data" colspan="2">
     
+        <a href="./org/gsma/joyn/Intents.IPCall.html">Intents.IPCall</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
         <a href="./org/gsma/joyn/JoynService.html">JoynService</a>
     
     </td>
@@ -464,6 +499,38 @@
     <td class="jd-hierarchy-data" colspan="1">
     
         <a href="./org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td><td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="1">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharingService.html">GeolocSharingService</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td><td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="1">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallService.html">IPCallService</a>
     
     </td>
     <td class="jd-hierarchy-data">
@@ -835,6 +902,26 @@
 </tr>
 
 
+<tr>
+    <td class="jd-hierarchy-spacer"></td><td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="1">
+    
+        <a href="./org/gsma/joyn/chat/GeolocMessage.html">GeolocMessage</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+        
+            Parcelable
+         &nbsp;&nbsp;
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
 
 
 <tr>
@@ -845,6 +932,26 @@
     
     </td>
     <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/chat/Geoloc.html">Geoloc</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+        
+            Parcelable
+         &nbsp;&nbsp;
     
     &nbsp;
     </td>
@@ -1070,6 +1177,274 @@
     <td class="jd-hierarchy-data" colspan="2">
     
         <a href="./org/gsma/joyn/ft/FileTransferServiceConfiguration.html">FileTransferServiceConfiguration</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+        
+            Parcelable
+         &nbsp;&nbsp;
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharing.html">GeolocSharing</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharing.Direction.html">GeolocSharing.Direction</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharing.Error.html">GeolocSharing.Error</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharing.State.html">GeolocSharing.State</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/gsh/GeolocSharingIntent.html">GeolocSharingIntent</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/AudioCodec.html">AudioCodec</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+        
+            Parcelable
+         &nbsp;&nbsp;
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCall.html">IPCall</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCall.Direction.html">IPCall.Direction</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCall.Error.html">IPCall.Error</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCall.State.html">IPCall.State</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallIntent.html">IPCallIntent</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallLog.html">IPCallLog</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallPlayer.Error.html">IPCallPlayer.Error</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallRenderer.Error.html">IPCallRenderer.Error</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/IPCallServiceConfiguration.html">IPCallServiceConfiguration</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+        
+            Parcelable
+         &nbsp;&nbsp;
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
+        <a href="./org/gsma/joyn/ipcall/VideoCodec.html">VideoCodec</a>
     
     </td>
     <td class="jd-hierarchy-data">
@@ -1381,6 +1756,22 @@
     <td class="jd-hierarchy-spacer"></td>
     <td class="jd-hierarchy-data" colspan="2">
     
+        <a href="./org/gsma/joyn/vsh/VideoSharing.Encoding.html">VideoSharing.Encoding</a>
+    
+    </td>
+    <td class="jd-hierarchy-data">
+    
+    &nbsp;
+    </td>
+</tr>
+
+
+
+
+<tr>
+    <td class="jd-hierarchy-spacer"></td>
+    <td class="jd-hierarchy-data" colspan="2">
+    
         <a href="./org/gsma/joyn/vsh/VideoSharing.Error.html">VideoSharing.Error</a>
     
     </td>
@@ -1471,7 +1862,7 @@
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

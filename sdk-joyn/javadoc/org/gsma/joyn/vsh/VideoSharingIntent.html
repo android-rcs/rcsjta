@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,23 +292,24 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/NewVideoSharingListener.html">NewVideoSharingListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.html">VideoPlayer</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.Error.html">VideoPlayer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoPlayerListener.html">VideoPlayerListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.html">VideoRenderer</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.Error.html">VideoRenderer.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoRendererListener.html">VideoRendererListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.html">VideoSharing</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Direction.html">VideoSharing.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Error.html">VideoSharing.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.State.html">VideoSharing.State</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html">VideoSharingIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingListener.html">VideoSharingListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingLog.html">VideoSharingLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingService.html">VideoSharingService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/vsh/VideoSharingServiceConfiguration.html">VideoSharingServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/NewVideoSharingListener.html">NewVideoSharingListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoCodec.html">VideoCodec</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.html">VideoPlayer</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayer.Error.html">VideoPlayer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoPlayerListener.html">VideoPlayerListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.html">VideoRenderer</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRenderer.Error.html">VideoRenderer.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoRendererListener.html">VideoRendererListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.html">VideoSharing</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Direction.html">VideoSharing.Direction</a></li>
+          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Encoding.html">VideoSharing.Encoding</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.Error.html">VideoSharing.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharing.State.html">VideoSharing.State</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html">VideoSharingIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingListener.html">VideoSharingListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingLog.html">VideoSharingLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingService.html">VideoSharingService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/vsh/VideoSharingServiceConfiguration.html">VideoSharingServiceConfiguration</a></li>
       </ul>
     </li>
               
@@ -368,7 +388,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -405,7 +425,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -480,14 +500,14 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#ACTION_NEW_INVITATION">ACTION_NEW_INVITATION</a></td>
         <td class="jd-descrcol" width="100%">Broadcast action: a new video sharing invitation has been received.</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_CONTACT">EXTRA_CONTACT</a></td>
         <td class="jd-descrcol" width="100%">MSISDN of the contact sending the invitation
@@ -495,7 +515,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_DISPLAY_NAME">EXTRA_DISPLAY_NAME</a></td>
         <td class="jd-descrcol" width="100%">Display name of the contact sending the invitation
@@ -503,24 +523,33 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_ENCODING">EXTRA_ENCODING</a></td>
         <td class="jd-descrcol" width="100%">Video encoding (e.g.</td>
     </tr>
     
     
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_FORMAT">EXTRA_FORMAT</a></td>
-        <td class="jd-descrcol" width="100%">Video format (e.g.</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_HEIGHT">EXTRA_HEIGHT</a></td>
+        <td class="jd-descrcol" width="100%">Video height (in pixels)
+</td>
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_SHARING_ID">EXTRA_SHARING_ID</a></td>
         <td class="jd-descrcol" width="100%">Unique ID of the video sharing
+</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_WIDTH">EXTRA_WIDTH</a></td>
+        <td class="jd-descrcol" width="100%">Video width (in pixels)
 </td>
     </tr>
     
@@ -545,7 +574,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -779,7 +808,7 @@ From class
 
 <a id="ACTION_NEW_INVITATION"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -792,7 +821,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -810,7 +839,8 @@ From class
   contact sending the invitation (extracted from the SIP address).
  <li> <code><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_SHARING_ID">EXTRA_SHARING_ID</a></code> containing the unique ID of the video sharing.
  <li> <code><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_ENCODING">EXTRA_ENCODING</a></code> containing the video encoding.
- <li> <code><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_FORMAT">EXTRA_FORMAT</a></code> containing the video format.
+ <li> <code><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_WIDTH">EXTRA_WIDTH</a></code> containing the video width.
+ <li> <code><a href="../../../../org/gsma/joyn/vsh/VideoSharingIntent.html#EXTRA_HEIGHT">EXTRA_HEIGHT</a></code> containing the video height.
  </ul>
 </p></div>
 
@@ -831,7 +861,7 @@ From class
 
 <a id="EXTRA_CONTACT"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -844,7 +874,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -873,7 +903,7 @@ From class
 
 <a id="EXTRA_DISPLAY_NAME"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -886,7 +916,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -915,7 +945,7 @@ From class
 
 <a id="EXTRA_ENCODING"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -928,7 +958,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -955,9 +985,9 @@ From class
 
 
 
-<a id="EXTRA_FORMAT"></a>
+<a id="EXTRA_HEIGHT"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -965,12 +995,12 @@ From class
         final 
         String
       </span>
-        EXTRA_FORMAT
+        EXTRA_HEIGHT
     </h4>
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/.html">API Level </a>
 
 
         
@@ -979,7 +1009,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Video format (e.g. QCIF)
+  <div class="jd-tagdata jd-tagdescr"><p>Video height (in pixels)
 </p></div>
 
     
@@ -987,7 +1017,7 @@ From class
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                "format"
+                "height"
             
         </span>
         </div>
@@ -999,7 +1029,7 @@ From class
 
 <a id="EXTRA_SHARING_ID"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1012,7 +1042,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
         
@@ -1039,6 +1069,48 @@ From class
 
 
 
+<a id="EXTRA_WIDTH"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_WIDTH
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/.html">API Level </a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Video width (in pixels)
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "width"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 
 <!-- Fields -->
 
@@ -1053,7 +1125,7 @@ From class
 
 <a id="VideoSharingIntent()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1069,7 +1141,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1107,7 +1179,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,9 +292,9 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/ContactsProvider.html">ContactsProvider</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/ContactsService.html">ContactsService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/ContactsProvider.html">ContactsProvider</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/ContactsService.html">ContactsService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a></li>
       </ul>
     </li>
               
@@ -337,7 +356,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -397,6 +416,9 @@
 
 package org.gsma.joyn.contacts;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -410,7 +432,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
+import android.os.IInterface;
+import android.provider.ContactsContract;
 
 /**
  * Contacts service offers additional methods to manage RCS info in the
@@ -455,29 +483,31 @@ public class ContactsService extends JoynService {
         	// Nothing to do
         }
     }
-    
-    /**
-     * Returns true if connected to the service, else returns false
-     * 
-	 * @return Returns true if connected else returns false
-     */
-    public boolean isServiceConnected() {
-    	return (api != null);
-    }
 
+	/**
+	 * Set API interface
+	 * 
+	 * @param api API interface
+	 */
+    protected void setApi(IInterface api) {
+    	super.setApi(api);
+    	
+        this.api = (IContactsService)api;
+    }
+    
     /**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	api = IContactsService.Stub.asInterface(service);
+        	setApi(IContactsService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
-        	api = null;
+        	setApi(null);
         	if (serviceListener != null) {
         		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
@@ -569,6 +599,50 @@ public class ContactsService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }
+    
+    /**
+     * Returns the vCard of a contact. The method returns the complete filename including the path of the visit
+     * card. The filename has the file extension “.vcf” and is generated from the native address book
+     * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which returns
+     * the referenced contact formatted as a vCard when opened through openAssetFileDescriptor(Uri, String)).
+     * 
+     * @param ctx Application context
+     * @param contactUri Contact URI of the contact in the native address book
+     * @return Filename of vCard
+     * @throws JoynServiceException
+     */
+    public static String getVCard(Context ctx, Uri contactUri) throws JoynServiceException {
+    	String fileName = null;
+		Cursor cursor = ctx.getContentResolver().query(contactUri, null, null, null, null);   			
+    	while(cursor.moveToNext()) {
+    		String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+    		String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+    		Uri vCardUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+    		AssetFileDescriptor fd;
+    		try {
+    			fd = ctx.getContentResolver().openAssetFileDescriptor(vCardUri, "r");
+    			FileInputStream fis = fd.createInputStream();
+    			byte[] buf = new byte[(int) fd.getDeclaredLength()];
+    			fis.read(buf);
+    			String Vcard = new String(buf);
+
+    			fileName = Environment.getExternalStorageDirectory().toString() + File.separator + name + ".vcf";
+    			
+    			File vCardFile = new File(fileName);
+
+    			if (vCardFile.exists()) 
+    				vCardFile.delete();
+
+    			FileOutputStream mFileOutputStream = new FileOutputStream(vCardFile, true);
+    			mFileOutputStream.write(Vcard.toString().getBytes());
+    			mFileOutputStream.close();
+    		} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+    		}
+    	}
+    	cursor.close();
+    	return fileName;    	
+    }
 }
 
   </pre>
@@ -576,7 +650,7 @@ public class ContactsService extends JoynService {
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

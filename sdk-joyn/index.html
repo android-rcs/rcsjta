@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -103,6 +101,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -121,7 +134,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -133,8 +149,6 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
@@ -217,33 +231,118 @@
 <div id="body-content">
 <div id="doc-content" style="position:relative;">
 
+<script type="text/javascript">
+    $('.slideshow-container').dacSlideshow({
+        auto: true,
+        btnPrev: '.slideshow-prev',
+        btnNext: '.slideshow-next'
+    });
+</script>
 <div class="background-sdk">
+
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">	
-			<p><h1 style="border:0;">Welcome to the joyn SDK for Android terminals</h1></p>
-			<span>
-				
-				<img src="./assets-sdk/images/app_icon.png" height="30" width="33" style="float:left;margin-top: -8px;margin-right: 5px;"/>
-				<p><span style="text-decoration:underline"><a target="_blank" href="http://www.joynus.com/" style="color:#333">joyn™</a></span> is a certification trade mark of the GSMA (GSM Association) for RCS (Rich Communication Suite) which is an industry standard that is being adopted across the world by mobile operators. RCS is a set of new communication services to improve traditional communications with real times services.</p>
-				<p>This SDK offers the first implementation of the joyn API which is under standardization with <a style="text-decoration:underline" href="http://www.gsma.com/rcs">GSMA</a> and where Orange is the main contributor with several OEMs (Samsung, Qualcomm, Ericsson, Sony, HTC ...).</p>
-				<div style="margin-bottom: 3%;">
-					<iframe frameborder="0" width="320" height="180" src="http://www.dailymotion.com/embed/video/xv7nmq" class="video-frame"></iframe>
+			<div style="display:inline-block;"">
+				<div style="display:inline-block;float:left;"><h1 style="border:0;">Welcome to the joyn SDK for Android terminals</h1></div>
+				<a  class="dl-btn" href="./demos.html">Demos</a>
+			</div>
+			<div id="mycarousel" class="jcarousel-skin-tango">	
+				<div class="jcarousel-control" >					
+					<ul >
+						<li >
+							<span>				
+								<img src="./assets-sdk/images/app_icon.png" height="30" width="33" style="float:left;margin-top: 0px;margin-right: 5px;"/>
+								<p><span style="text-decoration:underline"><a target="_blank" href="http://www.joynus.com/" style="color:#333">joyn™</a></span> is a certification trade mark of the GSMA (GSM Association) for RCS (Rich Communication Suite) which is an industry standard that is being adopted across the world by mobile operators. RCS is a set of new communication services to improve traditional communications with real times services.</p>
+								<p>This SDK offers the first implementation of the joyn API which is under standardization with <a style="text-decoration:underline" href="http://www.gsma.com/rcs">GSMA</a> and where Orange is the main contributor with several OEMs (Samsung, Qualcomm, Ericsson, Sony, HTC ...).</p>
+								<div style="margin-bottom: 3%;">
+									<iframe width="336" height="189" class="video-frame" src="//www.youtube.com/embed/fu1XFZ2rqiM" frameborder="0" allowfullscreen></iframe>
+								</div>
+								<p><b>Enhance your app with joyn rich communication APIs. </b>joyn APIs leverage the device address book to encourage social recommendation from your phone numbers ; provide <b>rich messaging</b> with chat, file transfer and group chat ; provide <b>rich call</b> experience with image and live video sharing during voice calls ; share your <b>geolocation</b> with your contacts; and offer the possibility to <b>create your new joyn services</b>.</p>
+							</span>
+						</li>		
+						<li >
+							<span>	
+								<p><h2>Capabilities discovery</h2></p>
+								<p>Discover which services are supported by your contacts before do use them.</p>
+								<img class="home-img" src="./assets-sdk/images/home-capa.png"/>
+								<p style="margin:75px 20px 0 0;">
+									When installing a joyn application on a device, a contact gains the capabilities associated with the application. joyn APIs provide you with the capabilities associated with each contact of your native address book. 
+									</br>
+									</br>								
+									Of course you can discover the core capabilities of joyn (chat, file transfer, .etc), but you can also declare and exchange new capabilities. 
+									</br>
+									</br>								
+									Have a look at the <a href="./javadoc/org/gsma/joyn/capability/package-summary.html">Capability</a> API to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>		
+						<li >
+							<span>	
+								<p><h2>Rich messaging</h2></p>
+								<p>Add the real time instant messaging experience in your application.</p>
+								<img class="home-img" src="./assets-sdk/images/home-rm.png"/>
+								<p style="margin:105px 20px 0 0;">
+									May it be point-to-point or group conversations, sending messages (text or geoloc) with delivery reports and transfering files in real time to one or several contacts.
+									</br>
+									</br>								
+									Adding messaging features to games, social media or any application is simplified. 
+									</br>
+									</br>
+									Have a look at the <a href="./javadoc/org/gsma/joyn/chat/package-summary.html">Chat</a> and <a href="./javadoc/org/gsma/joyn/ft/package-summary.html">File transfer</a> APIs to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>	
+						<li >
+							<span>	
+								<p><h2>Rich call</h2></p>
+								<p>Share in real time images, videos and locations during your phone calls.</p>
+								<img class="home-img" src="./assets-sdk/images/home-share.png"/>
+								<p style="margin:105px 20px 0 0;">
+									With joyn APIs it is possible to share images, live videos and geolocations during a phone call. Take a live photo or film your favourite event, share it in real time and continue to comment it by phone.
+									</br>
+									</br>
+									Have a look at the <a href="./javadoc/org/gsma/joyn/ish/package-summary.html">Image sharing</a>, <a href="./javadoc/org/gsma/joyn/vsh/package-summary.html">Video sharing</a> and <a href="./javadoc/org/gsma/joyn/gsh/package-summary.html">Geoloc sharing</a> APIs to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>
+						<li >
+							<span>	
+								<p><h2>New multimedia services</h2></p>
+								<p>With the Multimedia Session concept you can create new joyn services from your application. The Multimedia Session API offers the way to initiate the new communication channel between contacts, then it's up to the application to implement the media corresponding to its service (gaming, music, video, audio, ..., any media).
+								<img class="home-img" src="./assets-sdk/images/home-multi.png"/>
+								<p style="margin:105px 20px 0 0;">
+									</br>
+									</br>
+									Have a look at our dedicated <a href=".//tutorials/multiApp.html">tutorial</a> to better grasp the potential of the <a href="./javadoc/org/gsma/joyn/session/package-summary.html">Multimedia Session</a> API.</p>
+								</p>
+							</span>
+						</li>	
+						<li >
+							<span>	
+								<p><h2>Geolocalisation</h2></p>
+								<p>Share your geolocation with your contacts.</p>
+								<img class="home-img" src="./assets-sdk/images/home-geo.png"/>
+								<p style="margin:105px 20px 0 0;">
+									Share your geolocation with your contacts via a chat or during a rich call.
+									</br>
+									</br>
+									Have a look at the <a href="./javadoc/org/gsma/joyn/chat/package-summary.html">Chat</a> and <a href="./javadoc/org/gsma/joyn/gsh/package-summary.html">Geoloc sharing</a> APIs to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>		
+					</ul>
+					<a href="#" class="slide-btn" id="1"><div style="margin-left:285px"></div></a>
+					<a href="#" class="slide-btn" id="2"><div></div></a>
+					<a href="#" class="slide-btn" id="3"><div></div></a>
+					<a href="#" class="slide-btn" id="4"><div></div></a>
+					<a href="#" class="slide-btn" id="5"><div></div></a>
+					<a href="#" class="slide-btn right" id="6"><div></div></a>
 				</div>
-				<p><b>Enhance your app with joyn rich communication APIs. </b>joyn APIs leverage the device address book to encourage social recommendation from your phone numbers ; provide <b>rich messaging</b> with chat, file transfer and group chat ; provide <b>rich call</b> with image and live video sharing during voice calls ; and offer the possibility to <b>create your new joyn services</b>.</p>
-			</span>
+			</div>
 		</div>
 		</br>
-		<div class="button-download">
-		<div style="width: 50%;height: 100%;float: left;">
-			<a class="dl-btn" href="https://rcsjta.googlecode.com/git/joyn-sdk-3.0.2.zip">Download the latest SDK</a>
-		</div>
-		<div style="padding: 2px;">
-			<p>The latest version is 3.0.2</p>
-			<p>You will find the release note <a href="./releases/joyn-sdk-3.0.2.txt">here</a>.</p>	
-		</div>			
-		</div>
-		</br>
-		<div class="content-body " style="margin: 40px 10%;display: inline-block;">
+		
+		<div class="content-body " style="display:inline-block;margin:30px 5%;width:90%">
 			<div class="demo_box" style="float:left">
 				<div>
 					<p><b><a href="./getStarted.html">Get Started</a></b></p>
@@ -252,6 +351,18 @@
 					<p>Learn how to get joyn up and running on an Android device.
 					</p>
 				</div>
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="https://rcsjta.googlecode.com/git/joyn-sdk-3.1.0.zip">Get latest SDK</a></b></p>
+				</div>
+				<div>
+					<p>
+						The latest version is 3.1.0	</br>				
+						<a style="color:#006699;text-decoration:underline;font-size:14px"href="./releases/joyn-sdk-3.1.0.txt">release note</a>.
+					</p>	
+					
+				</div>	
 			</div>
 			<div class="demo_box" style="float:right">
 				<div>
@@ -264,7 +375,7 @@
 					
 				</div>	
 			</div>
-			<div  style="float:right" class="seperator demo_box">
+			<div  style="float:right" class="demo_box">
 				<div>
 					<p><b><a href="./concepts.html">Concepts</a></b></p>
 				</div>
@@ -275,36 +386,13 @@
 				</div>	
 			</div>
 		</div>
-	</div>
-
-	<div class="video-header">
-	<span style="color: #505050;font-size: 15px;">Applications using the joyn API (<a href="mailto:jeanmarc.auffret@orange.com">contact</a> us to add your app here) </span>
-	</div>
-	
-	<div  class="video-carousel">
-		<div id="carousel-home" class="jcarousel-skin-home">
-			<ul>
-				<li>
-					<iframe frameborder="0" width="160" height="90" src="http://www.dailymotion.com/embed/video/k2EOEbeoEPZ87k3SqZZ" class="video-frame-carousel"></iframe>
-				</li>
-				<li>
-					<iframe frameborder="0" width="160" height="90" src="http://www.dailymotion.com/embed/video/k65awxJFmFbghS3SoSq" class="video-frame-carousel"></iframe>
-				</li>
-				<li>
-					<iframe frameborder="0" width="160" height="90" src="http://www.dailymotion.com/embed/video/k5YBvROqkbZH0O3Sp38" class="video-frame-carousel"></iframe>
-				</li>
-				<li>
-					<iframe frameborder="0" width="160" height="90" src="http://streaming.mediawen.com/player.php?loop=on&num=67424156" class="video-frame-carousel"></iframe>
-				</li>
-			</ul>
-		</div>
-	</div>
+	</div>	
 </div>	
 
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

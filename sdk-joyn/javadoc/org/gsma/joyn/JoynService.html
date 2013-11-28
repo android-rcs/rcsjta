@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -272,24 +291,25 @@
               
     <li><h2>Interfaces</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceListener.html">JoynServiceListener</a></li>
       </ul>
     </li>
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.html">Intents</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.Chat.html">Intents.Chat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.Client.html">Intents.Client</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/Intents.FileTransfer.html">Intents.FileTransfer</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.html">JoynService</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.html">JoynService.Build</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.GSMA_CODES.html">JoynService.Build.GSMA_CODES</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Build.VERSION_CODES.html">JoynService.Build.VERSION_CODES</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynService.Error.html">JoynService.Error</a></li>
-          <li class="api apilevel-"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html">JoynServiceConfiguration</a></li>
-          <li class="api apilevel-"><a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynUtils.html">JoynUtils</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.html">Intents</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.Chat.html">Intents.Chat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.Client.html">Intents.Client</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/Intents.FileTransfer.html">Intents.FileTransfer</a></li>
+          <li class="api apilevel-"><a href="../../../org/gsma/joyn/Intents.IPCall.html">Intents.IPCall</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.html">JoynService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.html">JoynService.Build</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.GSMA_CODES.html">JoynService.Build.GSMA_CODES</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Build.VERSION_CODES.html">JoynService.Build.VERSION_CODES</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynService.Error.html">JoynService.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceConfiguration.html">JoynServiceConfiguration</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynUtils.html">JoynUtils</a></li>
       </ul>
     </li>
               
@@ -297,10 +317,10 @@
               
     <li><h2>Exceptions</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynContactFormatException.html">JoynContactFormatException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceNotAvailableException.html">JoynServiceNotAvailableException</a></li>
-          <li class="api apilevel-1.0"><a href="../../../org/gsma/joyn/JoynServiceNotRegisteredException.html">JoynServiceNotRegisteredException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynContactFormatException.html">JoynContactFormatException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceNotAvailableException.html">JoynServiceNotAvailableException</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../org/gsma/joyn/JoynServiceNotRegisteredException.html">JoynServiceNotRegisteredException</a></li>
       </ul>
     </li>
               
@@ -379,7 +399,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -416,7 +436,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -461,6 +481,10 @@ Summary:
             
               <a href="../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a>,
             
+              <a href="../../../org/gsma/joyn/gsh/GeolocSharingService.html">GeolocSharingService</a>,
+            
+              <a href="../../../org/gsma/joyn/ipcall/IPCallService.html">IPCallService</a>,
+            
               <a href="../../../org/gsma/joyn/ish/ImageSharingService.html">ImageSharingService</a>,
             
               <a href="../../../org/gsma/joyn/session/MultimediaSessionService.html">MultimediaSessionService</a>,
@@ -473,41 +497,49 @@ Summary:
               style="display: none;"
               >
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-1.0" >
+        <tr class="alt-color api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/capability/CapabilityService.html">CapabilityService</a></td>
               <td class="jd-descrcol" width="100%">Capability service offers the main entry point to read capabilities
  of remote contacts, to initiate capability discovery and to receive
  capabilities updates.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-1.0" >
+        <tr class=" api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></td>
               <td class="jd-descrcol" width="100%">Chat service offers the main entry point to initiate chat 1-1 ang group
  conversations with contacts.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-1.0" >
+        <tr class="alt-color api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/contacts/ContactsService.html">ContactsService</a></td>
               <td class="jd-descrcol" width="100%">Contacts service offers additional methods to manage RCS info in the
  local address book.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-1.0" >
+        <tr class=" api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/ft/FileTransferService.html">FileTransferService</a></td>
               <td class="jd-descrcol" width="100%">This class offers the main entry point to transfer files and to
  receive files.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-1.0" >
+        <tr class="alt-color api apilevel-Blackbird" >
+              <td class="jd-linkcol"><a href="../../../org/gsma/joyn/gsh/GeolocSharingService.html">GeolocSharingService</a></td>
+              <td class="jd-descrcol" width="100%">This class offers the main entry point to share geolocation info
+ during a CS call.&nbsp;</td>
+          </tr>
+        <tr class=" api apilevel-Blackbird" >
+              <td class="jd-linkcol"><a href="../../../org/gsma/joyn/ipcall/IPCallService.html">IPCallService</a></td>
+              <td class="jd-descrcol" width="100%">This class offers the main entry point to initiate IP calls.&nbsp;</td>
+          </tr>
+        <tr class="alt-color api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/ish/ImageSharingService.html">ImageSharingService</a></td>
               <td class="jd-descrcol" width="100%">This class offers the main entry point to transfer image during
  a CS call.&nbsp;</td>
           </tr>
-        <tr class=" api apilevel-1.0" >
+        <tr class=" api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/session/MultimediaSessionService.html">MultimediaSessionService</a></td>
               <td class="jd-descrcol" width="100%">This class offers the main entry point to initiate and manage new
  and existing multimedia sessions.&nbsp;</td>
           </tr>
-        <tr class="alt-color api apilevel-1.0" >
+        <tr class="alt-color api apilevel-Albatros" >
               <td class="jd-linkcol"><a href="../../../org/gsma/joyn/vsh/VideoSharingService.html">VideoSharingService</a></td>
-              <td class="jd-descrcol" width="100%">This class offers the main entry point to share live video during a CS
- call.&nbsp;</td>
+              <td class="jd-descrcol" width="100%">This class offers the main entry point to share live video during a CS call.&nbsp;</td>
           </tr>
   </table>
       </div>
@@ -556,7 +588,7 @@ Summary:
 
 
   
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
       <td class="jd-typecol">
         
          
@@ -569,7 +601,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
       <td class="jd-typecol">
         
          
@@ -612,7 +644,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -643,7 +675,25 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynService.html#addServiceRegistrationListener(org.gsma.joyn.JoynServiceRegistrationListener)">addServiceRegistrationListener</a></span>(<a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a> listener)
+        
+        <div class="jd-descrdiv">Registers a listener on service registration events</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -662,7 +712,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -681,9 +731,27 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
-            abstract
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynService.html#getServiceVersion()">getServiceVersion</a></span>()
+        
+        <div class="jd-descrdiv">Returns service version</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">
+            
             
             
             
@@ -694,6 +762,43 @@ Summary:
         <span class="sympad"><a href="../../../org/gsma/joyn/JoynService.html#isServiceConnected()">isServiceConnected</a></span>()
         
         <div class="jd-descrdiv">Returns true if the service is connected, else returns false</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynService.html#isServiceRegistered()">isServiceRegistered</a></span>()
+        
+        <div class="jd-descrdiv">Returns true if the service is registered to the platform, else returns
+ false</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../org/gsma/joyn/JoynService.html#removeServiceRegistrationListener(org.gsma.joyn.JoynServiceRegistrationListener)">removeServiceRegistrationListener</a></span>(<a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a> listener)
+        
+        <div class="jd-descrdiv">Unregisters a listener on service registration events</div>
   
   </td></tr>
 
@@ -918,7 +1023,7 @@ From class
 
 <a id="JoynService(android.content.Context, org.gsma.joyn.JoynServiceListener)"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -934,7 +1039,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -978,9 +1083,60 @@ From class
 
 
 
+<a id="addServiceRegistrationListener(org.gsma.joyn.JoynServiceRegistrationListener)"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">addServiceRegistrationListener</span>
+      <span class="normal">(<a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener on service registration events</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</th>
+          <td>Service registration listener</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <a id="connect()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -996,7 +1152,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1014,7 +1170,7 @@ From class
 
 <a id="disconnect()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1030,7 +1186,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1046,15 +1202,66 @@ From class
 </div>
 
 
-<a id="isServiceConnected()"></a>
+<a id="getServiceVersion()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
          
          
-        abstract 
+         
+         
+        int
+      </span>
+      <span class="sympad">getServiceVersion</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../releases/.html">API Level </a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns service version</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Version</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li>JoynService.Build.GSMA_VERSION</li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="isServiceConnected()"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
          
         boolean
       </span>
@@ -1064,7 +1271,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1084,6 +1291,104 @@ From class
 </div>
 
 
+<a id="isServiceRegistered()"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isServiceRegistered</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the service is registered to the platform, else returns
+ false</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Returns true if registered else returns false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="removeServiceRegistrationListener(org.gsma.joyn.JoynServiceRegistrationListener)"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">removeServiceRegistrationListener</span>
+      <span class="normal">(<a href="../../../org/gsma/joyn/JoynServiceRegistrationListener.html">JoynServiceRegistrationListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../releases/Albatros.html">API Level Albatros</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Unregisters a listener on service registration events</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</th>
+          <td>Service registration listener</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../org/gsma/joyn/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 
 
 
@@ -1097,7 +1402,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

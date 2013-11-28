@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,27 +292,29 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/Geoloc.html">Geoloc</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/GeolocMessage.html">GeolocMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
       </ul>
     </li>
               
@@ -352,17 +373,11 @@ Summary:
 
 
 
-  <a href="#lfields">Fields</a>
-  
 
 
 
-  &#124; <a href="#pubctors">Ctors</a>
-  
 
-
-
-  &#124; <a href="#pubmethods">Methods</a>
+  <a href="#pubmethods">Methods</a>
   
 
 
@@ -375,7 +390,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -412,7 +427,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -487,75 +502,9 @@ Summary:
 
 
 
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-1.0" >
-          <td class="jd-typecol">
-          public
-          static
-          final
-          Creator&lt;<a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a>&gt;</td>
-          <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">Parcelable creator
-</td>
-      </tr>
-      
-    
-
-</table>
 
 
 
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-1.0" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#ChatServiceConfiguration(boolean, int, int, int, int, int, int, boolean, boolean, boolean, boolean)">ChatServiceConfiguration</a></span>(boolean warnSF, int chatTimeout, int isComposingTimeout, int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat, int maxChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat, boolean displayedDeliveryReport)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#ChatServiceConfiguration(android.os.Parcel)">ChatServiceConfiguration</a></span>(Parcel source)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -568,26 +517,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#describeContents()">describeContents</a></span>()
-        
-        <div class="jd-descrdiv">Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -605,7 +535,43 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-Blackbird" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getGeolocExpirationTime()">getGeolocExpirationTime</a></span>()
+        
+        <div class="jd-descrdiv">Get geoloc expiration time</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Blackbird" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getGeolocLabelMaxLength()">getGeolocLabelMaxLength</a></span>()
+        
+        <div class="jd-descrdiv">Return maximum length of a geoloc label</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -617,13 +583,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getGroupChatMaxParticipantsNumber()">getGroupChatMaxParticipantsNumber</a></span>()
         
-        <div class="jd-descrdiv">Returns maximum participants in group chat session</div>
+        <div class="jd-descrdiv">Returns maximum number of participants in a group chat</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -635,13 +601,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getGroupChatMessageMaxLength()">getGroupChatMessageMaxLength</a></span>()
         
-        <div class="jd-descrdiv">Returns the maximum single group chat message’s length can have</div>
+        <div class="jd-descrdiv">Return maximum length of a group chat message</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -659,7 +625,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
@@ -669,15 +635,15 @@ Summary:
             int
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getMaxChatSessions()">getMaxChatSessions</a></span>()
+        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getMaxGroupChats()">getMaxGroupChats</a></span>()
         
-        <div class="jd-descrdiv">Returns the max number of simultaneous chat sessions</div>
+        <div class="jd-descrdiv">Returns the max number of simultaneous group chats</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -689,13 +655,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#getSingleChatMessageMaxLength()">getSingleChatMessageMaxLength</a></span>()
         
-        <div class="jd-descrdiv">Return maximum single chat message’s length can have</div>
+        <div class="jd-descrdiv">Return maximum length of a single chat message</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -707,13 +673,32 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isChatAutoAcceptMode()">isChatAutoAcceptMode</a></span>()
         
-        <div class="jd-descrdiv">Returns True if auto accept mode activated for chat, else returns False</div>
+        <div class="jd-descrdiv">Does auto accept mode activated for single chat</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-Blackbird" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isChatWarnSF()">isChatWarnSF</a></span>()
+        
+        <div class="jd-descrdiv">Does the UX should alert the user that messages are handled differently when
+ the Store and Forward functionality is involved.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -725,13 +710,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isDisplayedDeliveryReport()">isDisplayedDeliveryReport</a></span>()
         
-        <div class="jd-descrdiv">Is displayed delivery report on received chat messages activated</div>
+        <div class="jd-descrdiv">Does displayed delivery report activated on received chat messages</div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -743,32 +728,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isGroupChatAutoAcceptMode()">isGroupChatAutoAcceptMode</a></span>()
         
-        <div class="jd-descrdiv">Returns True if auto accept mode activated for group chat, else returns False</div>
+        <div class="jd-descrdiv">Does auto accept mode activated for group chat</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isImWarnSF()">isImWarnSF</a></span>()
-        
-        <div class="jd-descrdiv">Does the UX should alert the user that messages are handled differently when
- the store and forward functionality is involved.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -780,13 +746,13 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#isSmsFallback()">isSmsFallback</a></span>()
         
-        <div class="jd-descrdiv">Does the UX proposes automatically a SMS fallback in case of chat initiation failure.</div>
+        <div class="jd-descrdiv">Does the UX proposes automatically a SMS fallback in case of chat failure.</div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -799,24 +765,6 @@ Summary:
         <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#setDisplayedDeliveryReport(boolean)">setDisplayedDeliveryReport</a></span>(boolean state)
         
         <div class="jd-descrdiv">Activates or deactivates the displayed delivery report on received chat messages</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)
-        
-        <div class="jd-descrdiv">Write parcelable object</div>
   
   </td></tr>
 
@@ -1031,176 +979,7 @@ From class
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<a id="CREATOR"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        Creator&lt;<a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a>&gt;
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Parcelable creator
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
-
-
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<a id="ChatServiceConfiguration(boolean, int, int, int, int, int, int, boolean, boolean, boolean, boolean)"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">ChatServiceConfiguration</span>
-      <span class="normal">(boolean warnSF, int chatTimeout, int isComposingTimeout, int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat, int maxChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat, boolean displayedDeliveryReport)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>warnSF</th>
-          <td>Store and Forward warning</td>
-        </tr>
-        <tr>
-          <th>chatTimeout</th>
-          <td>Chat timeout</td>
-        </tr>
-        <tr>
-          <th>isComposingTimeout</th>
-          <td>Is-composing timeout</td>
-        </tr>
-        <tr>
-          <th>maxGroupChatParticipants</th>
-          <td>Max participants in a group chat</td>
-        </tr>
-        <tr>
-          <th>maxMsgLengthSingleChat</th>
-          <td>Max length of a message in a single chat</td>
-        </tr>
-        <tr>
-          <th>maxMsgLengthGroupChat</th>
-          <td>Max length of a message in a group chat</td>
-        </tr>
-        <tr>
-          <th>smsFallback</th>
-          <td>SMS fallback</td>
-        </tr>
-        <tr>
-          <th>autoAcceptSingleChat</th>
-          <td>Auto accept mode for single chat</td>
-        </tr>
-        <tr>
-          <th>autoAcceptGroupChat</th>
-          <td>Auto accept mode for group chat</td>
-        </tr>
-        <tr>
-          <th>displayedDeliveryReport</th>
-          <td>Displayed delivery report
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<a id="ChatServiceConfiguration(android.os.Parcel)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">ChatServiceConfiguration</span>
-      <span class="normal">(Parcel source)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>source</th>
-          <td>Parcelable source
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1216,48 +995,9 @@ From class
 
 
 
-<a id="describeContents()"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Integer
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
 <a id="getChatTimeout()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1273,7 +1013,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1293,9 +1033,85 @@ From class
 </div>
 
 
+<a id="getGeolocExpirationTime()"></a>
+
+<div class="jd-details api apilevel-Blackbird"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getGeolocExpirationTime</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Get geoloc expiration time</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Time in seconds
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getGeolocLabelMaxLength()"></a>
+
+<div class="jd-details api apilevel-Blackbird"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getGeolocLabelMaxLength</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Return maximum length of a geoloc label</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Number of bytes
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <a id="getGroupChatMaxParticipantsNumber()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1311,7 +1127,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1320,7 +1136,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns maximum participants in group chat session</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns maximum number of participants in a group chat</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Number
@@ -1333,7 +1149,7 @@ From class
 
 <a id="getGroupChatMessageMaxLength()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1349,7 +1165,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1358,7 +1174,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the maximum single group chat message’s length can have</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Return maximum length of a group chat message</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Number of bytes
@@ -1371,7 +1187,7 @@ From class
 
 <a id="getIsComposingTimeout()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1387,7 +1203,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1407,9 +1223,9 @@ From class
 </div>
 
 
-<a id="getMaxChatSessions()"></a>
+<a id="getMaxGroupChats()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Blackbird"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1419,13 +1235,13 @@ From class
          
         int
       </span>
-      <span class="sympad">getMaxChatSessions</span>
+      <span class="sympad">getMaxGroupChats</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
 
 </div>
         
@@ -1434,7 +1250,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the max number of simultaneous chat sessions</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the max number of simultaneous group chats</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Number
@@ -1447,7 +1263,7 @@ From class
 
 <a id="getSingleChatMessageMaxLength()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1463,7 +1279,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1472,7 +1288,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Return maximum single chat message’s length can have</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Return maximum length of a single chat message</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Number of bytes
@@ -1485,7 +1301,7 @@ From class
 
 <a id="isChatAutoAcceptMode()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1501,7 +1317,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1510,7 +1326,47 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns True if auto accept mode activated for chat, else returns False</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Does auto accept mode activated for single chat</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Boolean
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="isChatWarnSF()"></a>
+
+<div class="jd-details api apilevel-Blackbird"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isChatWarnSF</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../releases/Blackbird.html">API Level Blackbird</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Does the UX should alert the user that messages are handled differently when
+ the Store and Forward functionality is involved. It returns True if user should
+ be informed when sending message to offline user.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Boolean
@@ -1523,7 +1379,7 @@ From class
 
 <a id="isDisplayedDeliveryReport()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1539,7 +1395,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1548,7 +1404,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Is displayed delivery report on received chat messages activated</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Does displayed delivery report activated on received chat messages</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Boolean
@@ -1561,7 +1417,7 @@ From class
 
 <a id="isGroupChatAutoAcceptMode()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1577,7 +1433,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1586,47 +1442,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns True if auto accept mode activated for group chat, else returns False</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Boolean
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<a id="isImWarnSF()"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        boolean
-      </span>
-      <span class="sympad">isImWarnSF</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Does the UX should alert the user that messages are handled differently when
- the store and forward functionality is involved. It returns True if user should
- be informed when sending message to offline user.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Does auto accept mode activated for group chat</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Boolean
@@ -1639,7 +1455,7 @@ From class
 
 <a id="isSmsFallback()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1655,7 +1471,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1664,7 +1480,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Does the UX proposes automatically a SMS fallback in case of chat initiation failure. It
+  <div class="jd-tagdata jd-tagdescr"><p>Does the UX proposes automatically a SMS fallback in case of chat failure. It
  returns True if SMS fallback procedure is activated, else returns False.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1678,7 +1494,7 @@ From class
 
 <a id="setDisplayedDeliveryReport(boolean)"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1694,7 +1510,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1719,53 +1535,6 @@ From class
 </div>
 
 
-<a id="writeToParcel(android.os.Parcel, int)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel dest, int flags)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Write parcelable object</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>dest</th>
-          <td>The Parcel in which the object should be written</td>
-        </tr>
-        <tr>
-          <th>flags</th>
-          <td>Additional flags about how the object should be written
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1779,7 +1548,7 @@ From class
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

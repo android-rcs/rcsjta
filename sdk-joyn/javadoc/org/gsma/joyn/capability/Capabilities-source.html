@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,10 +292,10 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/capability/Capabilities.html">Capabilities</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/capability/CapabilitiesListener.html">CapabilitiesListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/capability/CapabilitiesLog.html">CapabilitiesLog</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/capability/CapabilityService.html">CapabilityService</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/capability/Capabilities.html">Capabilities</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/capability/CapabilitiesListener.html">CapabilitiesListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/capability/CapabilitiesLog.html">CapabilitiesLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/capability/CapabilityService.html">CapabilityService</a></li>
       </ul>
     </li>
               
@@ -340,7 +359,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -410,7 +429,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Capabilities. This class encapsulates the different capabilities
+ * Capabilities of a contact. This class encapsulates the different capabilities
  * which may be supported by the local user or a remote contact.
  * 
  * @author Jean-Marc AUFFRET
@@ -437,6 +456,21 @@ public class Capabilities implements Parcelable {
 	private boolean fileTransfer = false;
 	
 	/**
+	 * Geolocation push support
+	 */
+	private boolean geolocPush = false;
+	
+	/**
+	 * IP voice call support
+	 */
+	private boolean ipVoiceCall = false;
+
+	/**
+	 * IP video call support
+	 */
+	private boolean ipVideoCall = false;
+	
+	/**
 	 * List of supported extensions
 	 */
 	private Set&lt;String&gt; extensions = new HashSet&lt;String&gt;();
@@ -448,13 +482,23 @@ public class Capabilities implements Parcelable {
 	 * @param videoSharing Video sharing support
 	 * @param imSession IM/Chat support
 	 * @param fileTransfer File transfer support
+	 * @param geolocPush Geolocation push support
+	 * @param ipVoiceCall IP voice call support
+	 * @param ipVideoCall IP video call support
 	 * @param extensions Set of supported extensions
+     * @hide
 	 */
-	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession, boolean fileTransfer, Set&lt;String&gt; extensions) {
+	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
+			boolean fileTransfer, boolean geolocPush,
+			boolean ipVoiceCall, boolean ipVideoCall,
+			Set&lt;String&gt; extensions) {
 		this.imageSharing = imageSharing; 
 		this.videoSharing = videoSharing; 
 		this.imSession = imSession; 
 		this.fileTransfer = fileTransfer;
+		this.geolocPush = geolocPush;
+		this.ipVoiceCall = ipVoiceCall;
+		this.ipVideoCall = ipVideoCall;
 		this.extensions = extensions; 
 	}
 
@@ -462,16 +506,19 @@ public class Capabilities implements Parcelable {
 	 * Constructor
 	 * 
 	 * @param source Parcelable source
+     * @hide
 	 */
 	public Capabilities(Parcel source) {
 		this.imageSharing = source.readInt() != 0;
 		this.videoSharing = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
-
 		List&lt;String&gt; exts = new ArrayList&lt;String&gt;();
 		source.readStringList(exts);
-		this.extensions = new HashSet&lt;String&gt;(exts);		
+		this.extensions = new HashSet&lt;String&gt;(exts);	
+		this.geolocPush = source.readInt() != 0;
+		this.ipVoiceCall = source.readInt() != 0;
+		this.ipVideoCall = source.readInt() != 0;
     }
 
 	/**
@@ -479,6 +526,7 @@ public class Capabilities implements Parcelable {
 	 * marshalled representation
 	 * 
 	 * @return Integer
+     * @hide
 	 */
 	public int describeContents() {
         return 0;
@@ -489,6 +537,7 @@ public class Capabilities implements Parcelable {
 	 * 
 	 * @param dest The Parcel in which the object should be written
 	 * @param flags Additional flags about how the object should be written
+     * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeInt(imageSharing ? 1 : 0);
@@ -500,10 +549,15 @@ public class Capabilities implements Parcelable {
 			exts.addAll(extensions);
 			dest.writeStringList(exts);
 		}
+    	dest.writeInt(geolocPush ? 1 : 0);
+    	dest.writeInt(ipVoiceCall ? 1 : 0);
+    	dest.writeInt(ipVideoCall ? 1 : 0);
     }
 
     /**
      * Parcelable creator
+     * 
+     * @hide
      */
     public static final Parcelable.Creator&lt;Capabilities&gt; CREATOR
             = new Parcelable.Creator&lt;Capabilities&gt;() {
@@ -552,6 +606,34 @@ public class Capabilities implements Parcelable {
 		return fileTransfer;
 	}
 	
+
+	/**
+	 * Is geolocation push supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isGeolocPushSupported() {
+		return geolocPush;		
+	}
+
+	/**
+	 * Is IP voice call supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isIPVoiceCallSupported() {
+		return ipVoiceCall;				
+	}
+
+	/**
+	 * Is IP video call supported
+	 * 
+	 * @return Returns true if supported else returns false
+	 */
+	public boolean isIPVideoCallSupported() {
+		return ipVideoCall;				
+	}
+	
 	/**
 	 * Is extension supported
 	 * 
@@ -561,7 +643,7 @@ public class Capabilities implements Parcelable {
 	public boolean isExtensionSupported(String tag) {
 		return extensions.contains(tag);
 	}
-
+	
 	/**
 	 * Get list of supported extensions
 	 * 
@@ -577,7 +659,7 @@ public class Capabilities implements Parcelable {
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

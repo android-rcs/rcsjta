@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,14 +292,14 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSession.html">MultimediaSession</a></li>
-          <li class="api apilevel-"><a href="../../../../org/gsma/joyn/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSession.html">MultimediaSession</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
       </ul>
     </li>
               
@@ -372,7 +391,7 @@
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -416,6 +435,23 @@
 </div><!-- end header -->
 <div id="jd-content">
   <pre class="prettyprint">
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.gsma.joyn.session;
 
 /**
@@ -453,7 +489,7 @@ public abstract class MultimediaSessionListener extends IMultimediaSessionListen
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 

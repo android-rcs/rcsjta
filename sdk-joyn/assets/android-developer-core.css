@@ -250,7 +250,8 @@ hr.blue {
   position:relative;
   z-index:100;
 
-  width:1250px;
+width: 1000px;
+margin-left: 165px;
 }
 
 #headerLeft{
@@ -273,8 +274,8 @@ font-size:20px;
 
 #headerRight {
 position: absolute;
-top: 83px;
-right: 5%;
+top: 87px;
+right: -15px;
 }
 
 /* Tabs in the header */
@@ -505,7 +506,7 @@ div.indent {
 /* Footer */
 #footer {
   float: left;
-  width: 1402px;
+  width: 100%;
   color: #aaa;
   font-size: 11px;
   margin:auto;

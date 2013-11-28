@@ -56,8 +56,6 @@
 
 
 
-
-
 <html>
 
 
@@ -109,6 +107,21 @@
 				return false;
 			}
 		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
 	 };
 	 
 	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
@@ -127,7 +140,10 @@
 			},
 			itemVisibleOutCallback: {
 			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
-			}
+			},
+			auto: 5,
+			wrap: 'last'
+			
 		});
 	});
 	
@@ -139,12 +155,10 @@
 	});
 
 </script>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-
 </head>
 
 
-<body class="1.0">
+<body class="Albatros">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -156,14 +170,15 @@
   <div id="api-level-toggle">
     <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
     <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
     <select id="apiLevelSelector">
       <!-- option elements added by buildApiLevelSelector() -->
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ '1.0' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
     
-    var SINCE_LABELS = [ '1.0' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -248,21 +263,25 @@
               </div>
               <ul>
                 
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
-    <li class="selected api apilevel-1.0">
+    <li class="selected api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
-    <li class="api apilevel-1.0">
+    <li class="api apilevel-Albatros">
   <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
               </ul><br/>
             </div> <!-- end packages -->
@@ -273,9 +292,9 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/ContactsProvider.html">ContactsProvider</a></li>
-          <li class="api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/ContactsService.html">ContactsService</a></li>
-          <li class="selected api apilevel-1.0"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/ContactsProvider.html">ContactsProvider</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/ContactsService.html">ContactsService</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a></li>
       </ul>
     </li>
               
@@ -346,13 +365,7 @@ Summary:
   
 
 
-  &#124; <a href="#lfields">Fields</a>
-  
 
-
-
-  &#124; <a href="#pubctors">Ctors</a>
-  
 
 
 
@@ -369,7 +382,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 
   
@@ -411,7 +424,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-1.0">
+<div id="jd-content" class="api apilevel-Albatros">
 <table class="jd-inheritance-table">
 
 
@@ -534,75 +547,9 @@ android.os.Parcelable
 
 
 
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-1.0" >
-          <td class="jd-typecol">
-          public
-          static
-          final
-          Creator&lt;<a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a>&gt;</td>
-          <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">Parcelable creator
-</td>
-      </tr>
-      
-    
-
-</table>
 
 
 
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
-    <tr class="alt-color api apilevel-1.0" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#JoynContact(java.lang.String, boolean, org.gsma.joyn.capability.Capabilities)">JoynContact</a></span>(String contactId, boolean registered, <a href="../../../../org/gsma/joyn/capability/Capabilities.html">Capabilities</a> capabilities)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#JoynContact(android.os.Parcel)">JoynContact</a></span>(Parcel source)
-        
-        <div class="jd-descrdiv">Constructor</div>
-  
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -615,26 +562,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-1.0" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#describeContents()">describeContents</a></span>()
-        
-        <div class="jd-descrdiv">Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -652,7 +580,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -670,7 +598,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-1.0" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -683,24 +611,6 @@ android.os.Parcelable
         <span class="sympad"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#isRegistered()">isRegistered</a></span>()
         
         <div class="jd-descrdiv">Is contact online (i.e.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../org/gsma/joyn/contacts/JoynContact.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)
-        
-        <div class="jd-descrdiv">Write parcelable object</div>
   
   </td></tr>
 
@@ -910,7 +820,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -926,7 +836,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -973,148 +883,7 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<a id="CREATOR"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        Creator&lt;<a href="../../../../org/gsma/joyn/contacts/JoynContact.html">JoynContact</a>&gt;
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Parcelable creator
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
-
-
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<a id="JoynContact(java.lang.String, boolean, org.gsma.joyn.capability.Capabilities)"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">JoynContact</span>
-      <span class="normal">(String contactId, boolean registered, <a href="../../../../org/gsma/joyn/capability/Capabilities.html">Capabilities</a> capabilities)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>contactId</th>
-          <td>Contact ID</td>
-        </tr>
-        <tr>
-          <th>registered</th>
-          <td>Registration state</td>
-        </tr>
-        <tr>
-          <th>capabilities</th>
-          <td>Capabilities 
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<a id="JoynContact(android.os.Parcel)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        
-      </span>
-      <span class="sympad">JoynContact</span>
-      <span class="normal">(Parcel source)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructor</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>source</th>
-          <td>Parcelable source
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1130,48 +899,9 @@ From interface
 
 
 
-<a id="describeContents()"></a>
-
-<div class="jd-details api apilevel-1.0"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Describe the kinds of special objects contained in this Parcelable's
- marshalled representation</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Integer
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
 <a id="getCapabilities()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1187,7 +917,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1209,7 +939,7 @@ From interface
 
 <a id="getContactId()"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1225,7 +955,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1247,7 +977,7 @@ From interface
 
 <a id="isRegistered()"></a>
 
-<div class="jd-details api apilevel-1.0"> 
+<div class="jd-details api apilevel-Albatros"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1263,7 +993,7 @@ From interface
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#level1.0">API Level 1.0</a>
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
 
 </div>
         
@@ -1283,53 +1013,6 @@ From interface
 </div>
 
 
-<a id="writeToParcel(android.os.Parcel, int)"></a>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel dest, int flags)</span>
-    </h4>
-      <div class="api-level">
-        <div>
-
-  Since: <a href="../../../../guide/appendix/api-levels.html#level">API Level </a>
-
-</div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Write parcelable object</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>dest</th>
-          <td>The Parcel in which the object should be written</td>
-        </tr>
-        <tr>
-          <th>flags</th>
-          <td>Additional flags about how the object should be written
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -1343,7 +1026,7 @@ From interface
 
 <div id="footer">
 <div class="footer">
-Copyright (C) 2013 Orange S.A., Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
 </div>
 </div> <!-- end footer -->
 
