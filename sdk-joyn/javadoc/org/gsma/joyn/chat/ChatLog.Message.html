@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>ChatLog.Message | joyn SDK</title>
+
+
+</script>
+
+
+
+<script src="../../../../../assets/android-developer-reference.js" type="text/javascript"></script>
+
+
+<link href="../../../../../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../assets/prettify.js" type="text/javascript"></script>
+<script src="../../../../../assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="../../../../../assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../../../../assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="../../../../../assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("../../../../../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="Albatros">
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+    
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../../../../')"
+							  onkeyup="return search_changed(event, false, '../../../../')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+		
+		
+          <a style="text-decoration:none;" href="../../../../../index.html" tabindex="-1"><img
+              src="../../../../../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="source">
+              <li id="home-link"><a href="../../../../../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../../../../../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../../../../../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../../../../../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../../../../../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="../../../../../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="../../../../../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../../../../../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+
+  
+
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links">
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/package-summary.html">org.gsma.joyn</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/capability/package-summary.html">org.gsma.joyn.capability</a></li>
+    <li class="selected api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/chat/package-summary.html">org.gsma.joyn.chat</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/contacts/package-summary.html">org.gsma.joyn.contacts</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/ft/package-summary.html">org.gsma.joyn.ft</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/gsh/package-summary.html">org.gsma.joyn.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../org/gsma/joyn/ipcall/package-summary.html">org.gsma.joyn.ipcall</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/ish/package-summary.html">org.gsma.joyn.ish</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/session/package-summary.html">org.gsma.joyn.session</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../org/gsma/joyn/vsh/package-summary.html">org.gsma.joyn.vsh</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/Chat.html">Chat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatIntent.html">ChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatListener.html">ChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.html">ChatLog</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.GroupChat.html">ChatLog.GroupChat</a></li>
+          <li class="selected api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.Content.html">ChatLog.Message.Status.Content</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.System.html">ChatLog.Message.Status.System</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatMessage.html">ChatMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatService.html">ChatService</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/ChatServiceConfiguration.html">ChatServiceConfiguration</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/Geoloc.html">Geoloc</a></li>
+          <li class="api apilevel-Blackbird"><a href="../../../../org/gsma/joyn/chat/GeolocMessage.html">GeolocMessage</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.html">GroupChat</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Direction.html">GroupChat.Direction</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.Error.html">GroupChat.Error</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChat.State.html">GroupChat.State</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatIntent.html">GroupChatIntent</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/GroupChatListener.html">GroupChatListener</a></li>
+          <li class="api apilevel-Albatros"><a href="../../../../org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a></li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links">
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+     
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        
+      
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+<div>
+<a href="ChatLog.Message-source.html">View Source</a>
+</div>
+
+
+Summary:
+
+  <a href="#nestedclasses">Nested Classes</a>
+  
+
+
+
+
+
+  &#124; <a href="#constants">Constants</a>
+  
+
+
+
+  &#124; <a href="#lfields">Fields</a>
+  
+
+
+
+  &#124; <a href="#pubctors">Ctors</a>
+  
+
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+    static 
+     
+    
+    class
+<h1>ChatLog.Message</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Albatros">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">org.gsma.joyn.chat.ChatLog.Message</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>Chat message from a single chat or group chat
+</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+  
+    <tr class="alt-color api apilevel-Albatros" >
+      <td class="jd-typecol">
+        
+         
+         
+        
+        class</td>
+      <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Direction.html">ChatLog.Message.Direction</a></td>
+      <td class="jd-descrcol" width="100%">Direction of the message
+&nbsp;</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+      <td class="jd-typecol">
+        
+         
+         
+        
+        class</td>
+      <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Status.html">ChatLog.Message.Status</a></td>
+      <td class="jd-descrcol" width="100%">Status of the message
+&nbsp;</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+      <td class="jd-typecol">
+        
+         
+         
+        
+        class</td>
+      <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></td>
+      <td class="jd-descrcol" width="100%">Type of the message
+&nbsp;</td>
+    </tr>
+    
+    
+
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#BODY">BODY</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the message body.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CHAT_ID">CHAT_ID</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the chat ID.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CONTACT_NUMBER">CONTACT_NUMBER</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the identity of the sender of the message.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#DIRECTION">DIRECTION</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the message direction.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#ID">ID</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the unique ID for a row.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_ID">MESSAGE_ID</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the message ID.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_STATUS">MESSAGE_STATUS</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the message status.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MESSAGE_TYPE">MESSAGE_TYPE</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the type of message.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#MIME_TYPE">MIME_TYPE</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the MIME-TYPE of the message.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP">TIMESTAMP</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the time when message is created.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_DELIVERED">TIMESTAMP_DELIVERED</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the time when message is delivered.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_DISPLAYED">TIMESTAMP_DISPLAYED</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the time when message is delivered.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#TIMESTAMP_SENT">TIMESTAMP_SENT</a></td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the time when message is sent.</td>
+    </tr>
+    
+    
+
+</table>
+
+
+
+
+
+
+
+<!-- =========== FIELD SUMMARY =========== -->
+<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
+
+
+    
+      <tr class="alt-color api apilevel-Albatros" >
+          <td class="jd-typecol">
+          public
+          static
+          final
+          Uri</td>
+          <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CONTENT_CHAT_URI">CONTENT_CHAT_URI</a></td>
+          <td class="jd-descrcol" width="100%">Content provider URI for chat messages of a given conversation.</td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-Albatros" >
+          <td class="jd-typecol">
+          public
+          static
+          final
+          Uri</td>
+          <td class="jd-linkcol"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#CONTENT_URI">CONTENT_URI</a></td>
+          <td class="jd-descrcol" width="100%">Content provider URI for chat messages
+</td>
+      </tr>
+      
+    
+
+</table>
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Albatros" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.html#ChatLog.Message()">ChatLog.Message</a></span>()
+        
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">equals</span>(Object arg0)
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">getClass</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">hashCode</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notify</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notifyAll</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">toString</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0, int arg1)
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0)
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<a id="BODY"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        BODY
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the message body.
+ <P>Type: TEXT</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "body"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="CHAT_ID"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        CHAT_ID
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the chat ID.
+ <P>Type: TEXT</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "chat_id"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="CONTACT_NUMBER"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        CONTACT_NUMBER
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the identity of the sender of the message.
+ <P>Type: TEXT</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "sender"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="DIRECTION"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        DIRECTION
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the message direction.
+ <P>Type: INTEGER</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "direction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="ID"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        ID
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the unique ID for a row.
+ <P>Type: primary key</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "_id"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="MESSAGE_ID"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        MESSAGE_ID
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the message ID.
+ <P>Type: TEXT</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "msg_id"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="MESSAGE_STATUS"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        MESSAGE_STATUS
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the message status.
+ <P>Type: INTEGER</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "status"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="MESSAGE_TYPE"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        MESSAGE_TYPE
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the type of message.
+ <P>Type: INTEGER</P></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../org/gsma/joyn/chat/ChatLog.Message.Type.html">ChatLog.Message.Type</a></code></li>
+      </ul>
+  </div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "msg_type"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="MIME_TYPE"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        MIME_TYPE
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the MIME-TYPE of the message.
+ <P>Type: TEXT</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "mime_type"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="TIMESTAMP"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TIMESTAMP
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the time when message is created.
+ <P>Type: LONG</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "timestamp"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="TIMESTAMP_DELIVERED"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TIMESTAMP_DELIVERED
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the time when message is delivered. If 0 means not delivered.
+ <P>Type: LONG</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "timestamp_delivered"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="TIMESTAMP_DISPLAYED"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TIMESTAMP_DISPLAYED
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the time when message is delivered. If 0 means not delivered.
+ <P>Type: LONG</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "timestamp_displayed"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<a id="TIMESTAMP_SENT"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TIMESTAMP_SENT
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the time when message is sent. If 0 means not sent.
+ <P>Type: LONG</P>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "timestamp_sent"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
+<!-- Fields -->
+
+
+<!-- ========= FIELD DETAIL ======== -->
+<h2>Fields</h2>
+
+
+
+
+<a id="CONTENT_CHAT_URI"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        Uri
+      </span>
+        CONTENT_CHAT_URI
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Content provider URI for chat messages of a given conversation. In case of single chat
+ the conversation is identified by the contact phone number. In case of group chat the
+ the conversation is identified by the unique chat ID. 
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<a id="CONTENT_URI"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        Uri
+      </span>
+        CONTENT_URI
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Content provider URI for chat messages
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<a id="ChatLog.Message()"></a>
+
+<div class="jd-details api apilevel-Albatros"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">ChatLog.Message</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../releases/Albatros.html">API Level Albatros</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<a id="navbar_top"></a>
+
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>

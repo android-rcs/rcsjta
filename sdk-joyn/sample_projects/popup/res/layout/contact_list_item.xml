@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content">
+
+	<QuickContactBadge android:id="@+id/contact_badge"
+		android:layout_width="60dp"
+		android:layout_height="60dp"
+		android:adjustViewBounds="true" 
+		android:layout_centerVertical="true"
+		android:layout_margin="10dp"
+		android:layout_alignParentLeft="true"
+		android:src="@drawable/default_portrait_icon"/>
+
+		<TextView android:id="@+id/contact"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_toRightOf="@+id/contact_badge"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<ImageView android:id="@+id/status"
+			android:src="@drawable/status_online"
+			android:layout_width="25dip"
+			android:layout_height="25dip"
+			android:paddingLeft="10dip"
+			android:layout_alignParentBottom="true" />
+
+		<ImageView android:id="@+id/rcs_logo"
+			android:src="@drawable/rcs_icon"
+			android:layout_width="wrap_content"
+			android:layout_height="15dip" />
+
+		<CheckBox android:id="@+id/contact_selected"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_centerVertical="true"
+			android:paddingTop="5dp"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:clickable="false"/>
+
+</RelativeLayout>

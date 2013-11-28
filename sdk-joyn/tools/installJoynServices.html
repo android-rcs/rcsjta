@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+<title>Install joyn standalone service | joyn SDK</title>
+
+
+</script>
+<link href="../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../assets/prettify.js" type="text/javascript"></script>
+<script src="../assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="../assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="../assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="../assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
+              src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="tools">
+              <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+	<div style="margin: 0;position: relative;width: 100%;">
+		<div class="background-sdk" style="padding: 0;">
+			<div class="content-block nav-block" >
+				<div id="tools-nav" class="nav">
+					<p  style="margin-top: 15px;"><a  href="../tools/index.html"><b>Tools</b></a></p>
+					<ul>
+						<li>
+							<div class="selected">
+								<a href="../tools/installJoynServices.html">> Standalone joyn service</a>
+							</div>
+						</li>
+						<li>
+							<div >
+								<a href="../tools/getToKnow.html">> RI</a>
+							</div>
+						</li>						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Install and configure joyn standalone service</h1></p>
+			<p><span>Some devices the are not yet joyn compliant, so it is necessary to instal a standalone joyn service on your device before using the joyn APIs on your application. The joyn SDK provides a joyn-service test application. Once these services are configured appropriately, your application will be able to communicate via joyn APIs and joyn network.</span></p>
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+					<p><h2>1. Install the standalone joyn service on your device</h2></p>								
+					<p>To install the application, connect your device via USB. Make sure that USB debugging is active.</p>
+					<p>Then use the following command:</p>
+					<p><code style="background-color:#e1e1e1;">adb install &lt;SDK&gt;\tools\joyn-core.apk</code> </p>
+					<p>Get more information on the adb tool <a href="http://developer.android.com/tools/help/adb.html" target="_blank">here</a></p>
+					<p>Once joyn-core.apk installed, there will be two new applications present on your device:</p>
+					<ul>
+						<li>
+							<p>The joyn service, an Android background service delivering the joyn service.</p>
+						</li>
+						<li>
+							<p>The joyn provisioning tool which allows you to configure your joyn service and end user profile.</p>
+						</li>
+					</ul>
+			</div>
+			</br>
+			<div class="guide-block">
+				<p><h2>2. Configure the joyn service</h2></p>
+				<p>There are 2 ways of provisioning your joyn client: Automatic and Manual. By default the manual provisioning is activated.
+				<p><h3>Automatic provisioning</h3></p>
+				<div style="width:100%;display:inline-block;margin-bottom:15px">
+					<div style="width:60%;float:right;margin:75px 5% 0 0">
+						<p>First open the application named <b>Provisioning</b> and go to the second tab named <b>Stack</b>.</p>
+						<p>Select <b>HTTPS</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
+					</div>
+					<div class="img-ssh">
+						<img src="../assets-sdk/images/tuto_ss_prov.png" width="100%"  />
+					</div>
+				</div>
+				<p>Then restart the joyn service (see step 3).</p>
+				</br>
+				<p><h3>Manual provisioning</h3></b></p>
+				<p>Return to <b>Provisioning</b> application and go to the second tab named <b>Stack</b>.</p>
+				<p>Select <b>none</b> as <b>Auto config mode</b> option and press <b>Save</b>.</p>
+				<div style="width:100%;display:inline-block;margin-bottom:15px">
+					<div style="width:60%;float:right;margin:75px 5% 0 0">
+						<p>Now go to the first tab named <b>Profile</b>.</p>
+						<p>Press <b>Generate profile</b>.</p>
+						<p>Fill-in the form as asked by entering your phone number, then by selecting the joyn platform you are <b>supposed</b> to connect to.</p>
+						<p>Press <b>OK</b> and press <b>Save</b> to validate your config.</p>
+					</div>
+					<div class="img-ssh">
+						<img src="../assets-sdk/images/tuto_ss_prov2.png" width="100%"  />
+					</div>
+				</div>
+				<p>Then restart the joyn service (see step 3).</p>				
+				</br>			
+			</div>
+			</br>
+			<div class="guide-block">
+				<p><h2>3. Start the joyn service</h2></p>
+				<div style="width:100%;display:inline-block;">
+					<div class="img-ssh" style="float:right;">
+						<img src="../assets-sdk/images/tuto_ss_settings.png" width="100%"  />
+					</div>
+					<div style="width:60%;float:left;margin:75px 5% 0 0">
+						<p>The joyn service is started automatically at device boot or via its settings Activity: see checkbox "joyn Service".</p>
+					</div>
+				</div>
+				</br>
+			</div>
+			</br>
+			<div class="guide-block">
+				<p><h2>4. Debugging</h2></p>
+				<div style="width:100%;display:inline-block;">
+					<p>The internal traces of the joyn service may be activated from the <b>Provisioning application</b> via the <b>Logger</b> tab:</p>
+					<p></p>
+					<div style="width:200px;margin:auto;">
+						<img src="../assets-sdk/images/tuto_ss_logger.png" width="100%"  />
+					</div>
+					<p></p>
+					<p>The option <b>Application traces</b> and <b>Trace level</b> allows one to generate logcat traces on the Device: joyn traces always starts with the following prefix “<b>[RCS]</b>”.</p>
+					<p>You can also activate <b>SIP traces</b> which are sent to SDTOUT and also stored into a file on the SDCARD.</p>
+					<p>You can also activate <b>Media traces</b> which are sent to SDTOUT. Media traces only concerns MSRP protocol.</p>
+					<p>For SDTOUT traces, you can create a filter with DDMS tool: </p>
+					<p></p>
+					<div style="width:450px;margin:auto;">
+						<img src="../assets-sdk/images/tuto_ss_logfilter.png" width="100%"  />
+					</div>
+					<p></p>
+				</div>
+				</br>
+			</div>
+			</br>
+		</div>
+		
+	</div>
+</div>
+
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+

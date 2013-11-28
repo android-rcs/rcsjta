@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+<title>New multimedia Capability | joyn SDK</title>
+
+
+</script>
+<link href="../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="../assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../assets/prettify.js" type="text/javascript"></script>
+<script src="../assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="../assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="../assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="../assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../javadoc/')"
+							  onkeyup="return search_changed(event, false, '../javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a style="text-decoration:none;" href="../index.html" tabindex="-1"><img
+              src="../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="tutorials">
+              <li id="home-link"><a href="../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+	<div style="margin: 0;position: relative;width: 100%;">
+		<div class="background-sdk" style="padding: 0;">
+			<div class="content-block nav-block" >
+				<div id="tutorial-nav" class="nav">
+					<p  style="margin-top: 15px;"><a  href="../tutorials/index.html"><b>Tutorials</b></a></p>
+					<ul>
+						<li>
+							<div >
+								<a href="../tutorials/ttsApp.html">> Text to speech application</a>
+							</div>
+						</li>
+						<li>
+							<div class="selected">
+								<a href="../tutorials/multiCapability.html">> New multimedia Capability</a>
+							</div>
+						</li>
+						<li>
+							<div >
+								<a href="../tutorials/popUpApp.html">> Popup application</a>
+							</div>
+						</li>
+						<li>
+							<div >
+								<a href="../tutorials/multiApp.html">> New multimedia application</a>
+							</div>
+						</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>New Multimedia capability or capacity extension</h1></p>
+			<p><span>Capacity extensions enable you to declare new capabilities for your applications. This concept allows to extend dynamically the joyn services.</span></p>			
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>1. Creating a new capability</h2>
+				<p></p>
+				<p>A capacity extension is just an identifier helping similar applications recognise same capabilities and allowing them to communicate with each other.</p>
+				<p>The new capability is just declared in the Manifest file of the application and that's it. Then when the application is installed on the device, the joyn service in background will detect it and will automatically share this new capability with joyn contacts of your Address Book.</p>						
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.MyApp&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.my.new.extension&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt; <br />
+						&lt;/activity&gt;<br />
+						<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>An extension should have the following syntax (case sensitive):</p>
+				<p><b>+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.XXXX</b>,</br>where XXXX is your service ID (in client side and network side also).</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Using your new capability</h2>
+				<p></p>
+				<p>To get an idea of what you can do with capacity extensions, have a look at the <a href="../tutorials/popUpApp.html">Popup application tutorial</a>. This tutorial will take you through the process of creating an application with a new extension.</p>						
+				<p>The important thing to remember is that the extension is just an identifier. It identifies your application's capabilities, but also identifies incoming and outgoing SIP messages to be rooted internally in the device and also in the joyn network.</p>
+				<p>Then it is up to you to choose a media protocol, format and contents used for your new service.</p>
+				<p></p>
+			</div>
+			</br>
+		</div>
+	</div>
+</div>
+
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+
