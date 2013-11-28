@@ -116,7 +116,7 @@ public class Capabilities implements Parcelable {
 		this.extensions = new HashSet<String>(exts);	
 		this.geolocPush = source.readInt() != 0;
 		this.ipVoiceCall = source.readInt() != 0;
-		this.ipVideoCall = source.readInt() != 0;	
+		this.ipVideoCall = source.readInt() != 0;
     }
 
 	/**

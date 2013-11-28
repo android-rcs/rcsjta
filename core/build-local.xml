@@ -33,6 +33,7 @@
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/popup/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
     </target>
 
     <!-- Merge stack from SVN -->

@@ -187,7 +187,7 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+		RichMessagingHistory.getInstance().addChatGeoloc(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {

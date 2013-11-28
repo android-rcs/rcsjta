@@ -129,7 +129,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 	 * Create chat list adapter with unique chat ID entries
 	 */
 	private GroupChatListAdapter createListAdapter() {
-		// TODO: add single chat also
 		Uri uri = ChatLog.GroupChat.CONTENT_URI;
 	    String[] PROJECTION = new String[] {
 	    		ChatLog.GroupChat.ID,

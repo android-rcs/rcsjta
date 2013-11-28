@@ -548,6 +548,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 * Add video
 	 */
 	private void addVideo() {
+		// Initiate the operation in background
 		Thread thread = new Thread() {
 			public void run() {
 				try {
@@ -559,12 +560,21 @@ public class IPCallView extends Activity implements JoynServiceListener {
 			}
 		};
 		thread.start();
+		
+        // Display a progress dialog
+        progressDialog = Utils.showProgressDialog(IPCallView.this, getString(R.string.label_command_in_progress));
+        progressDialog.setOnCancelListener(new OnCancelListener() {
+			public void onCancel(DialogInterface dialog) {
+				// TODO
+			}
+		});
 	}
 
 	/**
 	 * Remove the video
 	 */
 	private void removeVideo() {
+		// Initiate the operation in background
 		Thread thread = new Thread() {
 			public void run() {
 				try {
@@ -576,6 +586,14 @@ public class IPCallView extends Activity implements JoynServiceListener {
 			}
 		};
 		thread.start();
+		
+        // Display a progress dialog
+        progressDialog = Utils.showProgressDialog(IPCallView.this, getString(R.string.label_command_in_progress));
+        progressDialog.setOnCancelListener(new OnCancelListener() {
+			public void onCancel(DialogInterface dialog) {
+				// TODO
+			}
+		});
 	}
 
 	/**

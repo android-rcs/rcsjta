@@ -18,10 +18,12 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.gsma.joyn.JoynUtils;
 import org.gsma.joyn.chat.ChatLog;
 import org.gsma.joyn.chat.Geoloc;
 import org.gsma.joyn.ft.FileTransfer;
@@ -299,12 +301,21 @@ public class RichMessagingHistory {
 		if (logger.isActivated()){
 			logger.debug("Add chat message: contact=" + contact + ", msg=" + msg.getMessageId());
 		}
+		
+		byte[] content;
+		try {
+			content = msg.getTextMessage().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			content = msg.getTextMessage().getBytes();
+			e.printStackTrace();
+		}
+		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_CONTACT, contact);
-		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+		values.put(MessageData.KEY_CONTENT, content);
 		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
@@ -337,7 +348,8 @@ public class RichMessagingHistory {
 		Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);		
+		
+		byte[] content = JoynUtils.marshall(geolocApi);		
 		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact);
@@ -372,12 +384,20 @@ public class RichMessagingHistory {
 		if (logger.isActivated()){
 			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
 		}
+		byte[] content;
+		try {
+			content = msg.getTextMessage().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			content = msg.getTextMessage().getBytes();
+			e.printStackTrace();
+		}
+		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
-		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+		values.put(MessageData.KEY_CONTENT, content);
 		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
@@ -410,7 +430,7 @@ public class RichMessagingHistory {
 		org.gsma.joyn.chat.Geoloc geolocApi = new org.gsma.joyn.chat.Geoloc(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);
+		byte[] content = JoynUtils.marshall(geolocApi);		
 		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
