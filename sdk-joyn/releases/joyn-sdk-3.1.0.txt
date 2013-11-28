@@ -1,6 +1,12 @@
 README - joyn SDK
 
 
+News v3.1.0:
+------------
+
+- Blackbird release.
+
+
 News v3.0.2:
 ------------
 
