@@ -17,11 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.ipcall;
 
-import org.gsma.joyn.ipcall.IPCallIntent;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,6 +24,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+
+import com.gsma.services.rcs.ipcall.IPCallIntent;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * IP call invitation receiver

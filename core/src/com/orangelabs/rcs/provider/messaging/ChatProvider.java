@@ -61,12 +61,12 @@ public class ChatProvider extends ContentProvider {
     static {
         uriMatcher.addURI("com.orangelabs.rcs.chat", "chat", CHATS);
         uriMatcher.addURI("com.orangelabs.rcs.chat", "chat/#", CHAT_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.chat", "chat", RCSAPI_CHATS);
-		uriMatcher.addURI("org.gsma.joyn.provider.chat", "chat/#", RCSAPI_CHAT_ID);	
+		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat", RCSAPI_CHATS);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat/#", RCSAPI_CHAT_ID);	
         uriMatcher.addURI("com.orangelabs.rcs.chat", "message", MESSAGES);
         uriMatcher.addURI("com.orangelabs.rcs.chat", "message/#", MESSAGE_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message", RCSAPI_MESSAGES);
-		uriMatcher.addURI("org.gsma.joyn.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message", RCSAPI_MESSAGES);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
     }
 
     /**

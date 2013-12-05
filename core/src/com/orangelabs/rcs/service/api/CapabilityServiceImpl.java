@@ -23,14 +23,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.capability.Capabilities;
-import org.gsma.joyn.capability.ICapabilitiesListener;
-import org.gsma.joyn.capability.ICapabilityService;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.capability.ICapabilitiesListener;
+import com.gsma.services.rcs.capability.ICapabilityService;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.capability.Capabilities;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;

@@ -23,17 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.GroupChat;
-import org.gsma.joyn.chat.GroupChatIntent;
-import org.gsma.joyn.chat.GroupChatListener;
-import org.gsma.joyn.contacts.JoynContact;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -51,6 +40,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.session.MultimediaSessionView;
 import com.orangelabs.rcs.ri.utils.Smileys;

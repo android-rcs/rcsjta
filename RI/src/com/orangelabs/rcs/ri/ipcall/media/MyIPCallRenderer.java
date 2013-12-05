@@ -17,10 +17,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.ipcall.media;
 
-import org.gsma.joyn.ipcall.AudioCodec;
-import org.gsma.joyn.ipcall.IPCallRenderer;
-import org.gsma.joyn.ipcall.VideoCodec;
-
+import com.gsma.services.rcs.ipcall.AudioCodec;
+import com.gsma.services.rcs.ipcall.IPCallRenderer;
+import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;

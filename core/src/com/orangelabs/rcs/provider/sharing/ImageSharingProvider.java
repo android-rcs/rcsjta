@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.provider.sharing;
 
-import org.gsma.joyn.ish.ImageSharingLog;
+import com.gsma.services.rcs.ish.ImageSharingLog;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -55,8 +55,8 @@ public class ImageSharingProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("com.orangelabs.rcs.ish", "ish", IMAGESHARES);
 		uriMatcher.addURI("com.orangelabs.rcs.ish", "ish/#", IMAGESHARE_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.ish", "ish", RCSAPI);
-		uriMatcher.addURI("org.gsma.joyn.provider.ish", "ish/#", RCSAPI_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ish", "ish", RCSAPI);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ish", "ish/#", RCSAPI_ID);
 	}
 
     /**

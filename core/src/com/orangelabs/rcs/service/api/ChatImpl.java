@@ -1,15 +1,15 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.chat.ChatIntent;
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.IChat;
-import org.gsma.joyn.chat.IChatListener;
+import com.gsma.services.rcs.chat.IChat;
+import com.gsma.services.rcs.chat.IChatListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -485,7 +485,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
 	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
 	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
-	            	org.gsma.joyn.chat.GeolocMessage msgApi = new org.gsma.joyn.chat.GeolocMessage(geoloc.getMessageId(),
+	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
 	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
 	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);

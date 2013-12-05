@@ -17,12 +17,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.IFileTransfer;
-import org.gsma.joyn.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;

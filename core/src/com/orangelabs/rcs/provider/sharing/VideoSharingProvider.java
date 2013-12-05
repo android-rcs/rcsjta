@@ -52,8 +52,8 @@ public class VideoSharingProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh", VIDEOSHARES);
 		uriMatcher.addURI("com.orangelabs.rcs.vsh", "vsh/#", VIDEOSHARE_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.vsh", "vsh", RCSAPI);
-		uriMatcher.addURI("org.gsma.joyn.provider.vsh", "vsh/#", RCSAPI_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.vsh", "vsh", RCSAPI);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.vsh", "vsh/#", RCSAPI_ID);
 	}
 
     /**

@@ -22,12 +22,12 @@ import java.util.List;
 
 import javax2.sip.message.Request;
 
-import org.gsma.joyn.session.MultimediaMessageIntent;
-import org.gsma.joyn.session.MultimediaSessionIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import com.gsma.services.rcs.session.MultimediaMessageIntent;
+import com.gsma.services.rcs.session.MultimediaSessionIntent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.StringUtils;

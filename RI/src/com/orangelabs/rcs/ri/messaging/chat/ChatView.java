@@ -21,14 +21,6 @@ package com.orangelabs.rcs.ri.messaging.chat;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.ChatService;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.GeolocMessage;
-import org.gsma.joyn.contacts.ContactsService;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -54,6 +46,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.contacts.ContactsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;

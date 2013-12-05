@@ -19,10 +19,6 @@ package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import java.util.ArrayList;
 
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.GeolocMessage;
-
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -31,6 +27,9 @@ import android.telephony.PhoneNumberUtils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

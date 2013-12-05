@@ -18,9 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import org.gsma.joyn.chat.ChatIntent;
-import org.gsma.joyn.chat.ChatMessage;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

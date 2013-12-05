@@ -5,24 +5,24 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.chat.ChatIntent;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.ChatServiceConfiguration;
-import org.gsma.joyn.chat.GroupChat;
-import org.gsma.joyn.chat.GroupChatIntent;
-import org.gsma.joyn.chat.IChat;
-import org.gsma.joyn.chat.IChatListener;
-import org.gsma.joyn.chat.IChatService;
-import org.gsma.joyn.chat.IGroupChat;
-import org.gsma.joyn.chat.IGroupChatListener;
-import org.gsma.joyn.chat.INewChatListener;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.chat.IChat;
+import com.gsma.services.rcs.chat.IChatListener;
+import com.gsma.services.rcs.chat.IChatService;
+import com.gsma.services.rcs.chat.IGroupChat;
+import com.gsma.services.rcs.chat.IGroupChatListener;
+import com.gsma.services.rcs.chat.INewChatListener;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;

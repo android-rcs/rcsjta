@@ -17,10 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.session;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.session.MultimediaSessionService;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
@@ -33,6 +29,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.session.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -19,8 +19,6 @@ package com.orangelabs.rcs.ri.contacts;
 
 import java.io.File;
 
-import org.gsma.joyn.contacts.ContactsService;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -36,6 +34,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.contacts.ContactsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

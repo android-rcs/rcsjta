@@ -20,8 +20,8 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
-import org.gsma.joyn.ft.FileTransfer;
 
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;

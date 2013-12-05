@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.provider.sharing;
 
-import org.gsma.joyn.ish.ImageSharingLog;
+import com.gsma.services.rcs.ish.ImageSharingLog;
 
 import android.net.Uri;
 

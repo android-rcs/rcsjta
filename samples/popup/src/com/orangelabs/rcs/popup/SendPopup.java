@@ -21,14 +21,6 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.Vector;
 
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.capability.Capabilities;
-import org.gsma.joyn.capability.CapabilitiesListener;
-import org.gsma.joyn.capability.CapabilityService;
-import org.gsma.joyn.contacts.ContactsService;
-import org.gsma.joyn.contacts.JoynContact;
-import org.gsma.joyn.session.MultimediaSessionService;
-
 import android.app.ListActivity;
 import android.content.ContentUris;
 import android.content.pm.ActivityInfo;
@@ -59,6 +51,13 @@ import android.widget.QuickContactBadge;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.CapabilitiesListener;
+import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.contacts.ContactsService;
+import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.session.MultimediaSessionService;
 import com.orangelabs.rcs.popup.utils.Utils;
 
 /**

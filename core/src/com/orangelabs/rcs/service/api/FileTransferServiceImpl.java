@@ -22,20 +22,20 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.FileTransferIntent;
-import org.gsma.joyn.ft.FileTransferServiceConfiguration;
-import org.gsma.joyn.ft.IFileTransfer;
-import org.gsma.joyn.ft.IFileTransferListener;
-import org.gsma.joyn.ft.IFileTransferService;
-import org.gsma.joyn.ft.INewFileTransferListener;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IFileTransferService;
+import com.gsma.services.rcs.ft.INewFileTransferListener;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransferIntent;
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;

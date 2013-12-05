@@ -2,17 +2,17 @@ package com.orangelabs.rcs.service.api;
 
 import java.util.List;
 
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.chat.GroupChat;
-import org.gsma.joyn.chat.IGroupChat;
-import org.gsma.joyn.chat.IGroupChatListener;
-import org.gsma.joyn.ft.IFileTransfer;
-import org.gsma.joyn.ft.IFileTransferListener;
+import com.gsma.services.rcs.chat.IGroupChat;
+import com.gsma.services.rcs.chat.IGroupChatListener;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
@@ -690,7 +690,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
 	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
 	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
-	            	org.gsma.joyn.chat.GeolocMessage msgApi = new org.gsma.joyn.chat.GeolocMessage(geoloc.getMessageId(),
+	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
 	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
 	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);

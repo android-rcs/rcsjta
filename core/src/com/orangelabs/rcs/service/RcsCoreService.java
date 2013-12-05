@@ -18,17 +18,6 @@
 
 package com.orangelabs.rcs.service;
 
-import org.gsma.joyn.Intents;
-import org.gsma.joyn.capability.ICapabilityService;
-import org.gsma.joyn.chat.IChatService;
-import org.gsma.joyn.contacts.IContactsService;
-import org.gsma.joyn.ft.IFileTransferService;
-import org.gsma.joyn.gsh.IGeolocSharingService;
-import org.gsma.joyn.ipcall.IIPCallService;
-import org.gsma.joyn.ish.IImageSharingService;
-import org.gsma.joyn.session.IMultimediaSessionService;
-import org.gsma.joyn.vsh.IVideoSharingService;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -39,6 +28,16 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 
+import com.gsma.services.rcs.Intents;
+import com.gsma.services.rcs.capability.ICapabilityService;
+import com.gsma.services.rcs.chat.IChatService;
+import com.gsma.services.rcs.contacts.IContactsService;
+import com.gsma.services.rcs.ft.IFileTransferService;
+import com.gsma.services.rcs.gsh.IGeolocSharingService;
+import com.gsma.services.rcs.ipcall.IIPCallService;
+import com.gsma.services.rcs.ish.IImageSharingService;
+import com.gsma.services.rcs.session.IMultimediaSessionService;
+import com.gsma.services.rcs.vsh.IVideoSharingService;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.core.Core;

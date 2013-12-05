@@ -20,9 +20,6 @@ package com.orangelabs.rcs.ri.sharing.image;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.gsma.joyn.ish.ImageSharing;
-import org.gsma.joyn.ish.ImageSharingLog;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -39,6 +36,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.ish.ImageSharing;
+import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -5,20 +5,20 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.ish.IImageSharing;
-import org.gsma.joyn.ish.IImageSharingListener;
-import org.gsma.joyn.ish.IImageSharingService;
-import org.gsma.joyn.ish.INewImageSharingListener;
-import org.gsma.joyn.ish.ImageSharing;
-import org.gsma.joyn.ish.ImageSharingIntent;
-import org.gsma.joyn.ish.ImageSharingServiceConfiguration;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.ish.IImageSharing;
+import com.gsma.services.rcs.ish.IImageSharingListener;
+import com.gsma.services.rcs.ish.IImageSharingService;
+import com.gsma.services.rcs.ish.INewImageSharingListener;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.ish.ImageSharing;
+import com.gsma.services.rcs.ish.ImageSharingIntent;
+import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;

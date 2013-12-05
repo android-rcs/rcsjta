@@ -20,12 +20,6 @@ package com.orangelabs.rcs.ri.sharing.image;
 
 import java.io.File;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.ish.ImageSharing;
-import org.gsma.joyn.ish.ImageSharingListener;
-import org.gsma.joyn.ish.ImageSharingService;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -50,6 +44,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.ish.ImageSharing;
+import com.gsma.services.rcs.ish.ImageSharingListener;
+import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

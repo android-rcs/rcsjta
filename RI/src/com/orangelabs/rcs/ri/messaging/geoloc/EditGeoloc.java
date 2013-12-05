@@ -17,13 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.ChatService;
-import org.gsma.joyn.chat.Geoloc;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +30,12 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

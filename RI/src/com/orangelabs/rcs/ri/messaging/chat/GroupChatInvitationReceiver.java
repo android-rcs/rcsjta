@@ -17,11 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import org.gsma.joyn.chat.GroupChatIntent;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,6 +25,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.text.TextUtils;
+
+import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Group chat invitation receiver

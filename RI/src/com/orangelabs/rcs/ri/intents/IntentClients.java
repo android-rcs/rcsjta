@@ -19,9 +19,6 @@ package com.orangelabs.rcs.ri.intents;
 
 import java.util.List;
 
-import org.gsma.joyn.Intents;
-import org.gsma.joyn.JoynUtils;
-
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +31,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.gsma.services.rcs.JoynUtils;
 import com.orangelabs.rcs.ri.R;
 
 /**
@@ -90,8 +88,8 @@ public class IntentClients extends ListActivity {
 			if (bundle == null) {
 				return;
 			}
-			String client = bundle.getString(Intents.Client.EXTRA_CLIENT);
-			boolean status = bundle.getBoolean(Intents.Client.EXTRA_STATUS, false);
+			String client = bundle.getString(com.gsma.services.rcs.Intents.Client.EXTRA_CLIENT);
+			boolean status = bundle.getBoolean(com.gsma.services.rcs.Intents.Client.EXTRA_STATUS, false);
 			
 			for(int i=0; i < clients.size(); i++) {
 				if (clients.get(i).activityInfo.packageName.equals(client)) {

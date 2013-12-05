@@ -2,15 +2,14 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 
 import java.util.Vector;
 
-import org.gsma.joyn.ipcall.AudioCodec;
-import org.gsma.joyn.ipcall.IIPCallPlayer;
-import org.gsma.joyn.ipcall.IIPCallPlayerListener;
-import org.gsma.joyn.ipcall.IIPCallRenderer;
-import org.gsma.joyn.ipcall.IIPCallRendererListener;
-import org.gsma.joyn.ipcall.VideoCodec;
-
 import android.os.RemoteException;
 
+import com.gsma.services.rcs.ipcall.AudioCodec;
+import com.gsma.services.rcs.ipcall.IIPCallPlayer;
+import com.gsma.services.rcs.ipcall.IIPCallPlayerListener;
+import com.gsma.services.rcs.ipcall.IIPCallRenderer;
+import com.gsma.services.rcs.ipcall.IIPCallRendererListener;
+import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.VideoContent;

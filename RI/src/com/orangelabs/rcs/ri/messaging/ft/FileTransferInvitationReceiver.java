@@ -18,11 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.ft;
 
-import org.gsma.joyn.ft.FileTransferIntent;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,6 +25,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+
+import com.gsma.services.rcs.ft.FileTransferIntent;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * File transfer invitation receiver

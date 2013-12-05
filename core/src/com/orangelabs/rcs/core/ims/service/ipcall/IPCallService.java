@@ -3,9 +3,8 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.gsma.joyn.ipcall.IIPCallPlayer;
-import org.gsma.joyn.ipcall.IIPCallRenderer;
-
+import com.gsma.services.rcs.ipcall.IIPCallPlayer;
+import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.ContentManager;

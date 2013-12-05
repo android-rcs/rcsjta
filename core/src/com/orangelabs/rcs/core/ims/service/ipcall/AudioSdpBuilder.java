@@ -20,8 +20,7 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 
 import java.util.Vector;
 
-import org.gsma.joyn.ipcall.AudioCodec;
-
+import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 
 /**

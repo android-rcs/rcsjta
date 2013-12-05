@@ -78,7 +78,7 @@ public class IntentApps extends Activity {
         public void onClick(View v) {
         	if (v.getId() == R.id.load_settings) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.Client.ACTION_VIEW_SETTINGS);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Client.ACTION_VIEW_SETTINGS);
 	        		startActivity(intent);
         		} catch(Exception e) {
     		    	e.printStackTrace();
@@ -87,7 +87,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.load_chat) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.Chat.ACTION_VIEW_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -96,7 +96,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.initiate_chat) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.Chat.ACTION_INITIATE_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -105,7 +105,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.load_group_chat) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -114,7 +114,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.initiate_group_chat) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -123,7 +123,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.load_ft) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.FileTransfer.ACTION_VIEW_FT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -132,7 +132,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.initiate_ft) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.FileTransfer.ACTION_INITIATE_FT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_FT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -141,7 +141,7 @@ public class IntentApps extends Activity {
         	} else
 	    	if (v.getId() == R.id.load_ipcall) {
 	    		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.IPCall.ACTION_VIEW_IPCALL);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.IPCall.ACTION_VIEW_IPCALL);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -150,7 +150,7 @@ public class IntentApps extends Activity {
 	    	} else
         	if (v.getId() == R.id.initiate_ipcall) {
         		try {
-	        		Intent intent = new Intent(org.gsma.joyn.Intents.IPCall.ACTION_INITIATE_IPCALL);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.IPCall.ACTION_INITIATE_IPCALL);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();

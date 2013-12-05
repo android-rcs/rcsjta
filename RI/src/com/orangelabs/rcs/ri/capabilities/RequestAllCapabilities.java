@@ -17,10 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.capabilities;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.capability.CapabilityService;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -32,6 +28,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

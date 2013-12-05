@@ -277,7 +277,7 @@
 			<p><span>This application uses the following API :</span></p>
 			<ul>
 				<li>
-					<p><span>The <a href="../javadoc/org/gsma/joyn/chat/package-summary.html">Chat</a> API to receive incoming chat message.</span></p>
+					<p><span>The <a href="../javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat</a> API to receive incoming chat message.</span></p>
 				</li>
 				<li>
 					<p><span>The Android <a href="http://developer.android.com/reference/android/speech/tts/TextToSpeech.html">TTS</a> API </span></p>				
@@ -320,16 +320,16 @@
 				
 				<ul>
 					<li>
-						<p>From a chat listener interface <a href="../javadoc/org/gsma/joyn/chat/NewChatListener.html">NewChatListener</a>.</p>
+						<p>From a chat listener interface <a href="../javadoc/com/gsma/services/rcs/chat/NewChatListener.html">NewChatListener</a>.</p>
 					</li>
 					<li>
-						<p>From the Intent <a href="../javadoc/org/gsma/joyn/chat/ChatIntent.html#ACTION_NEW_CHAT">ChatIntent.ACTION_NEW_CHAT</a>.</p>			
+						<p>From the Intent <a href="../javadoc/com/gsma/services/rcs/chat/ChatIntent.html#ACTION_NEW_CHAT">ChatIntent.ACTION_NEW_CHAT</a>.</p>			
 					</li>
 					<li>
 						<p>From a Chat object if a conversation is already opened.</p>		
 					</li>
 					<li>
-						<p>From the Content Provider <a href="../javadoc/org/gsma/joyn/chat/ChatLog.Message.html">ChatLog.Message</a>.</p>	
+						<p>From the Content Provider <a href="../javadoc/com/gsma/services/rcs/chat/ChatLog.Message.html">ChatLog.Message</a>.</p>	
 					</li>
 				</ul>					
 				
@@ -340,7 +340,7 @@
 				<div class="code-block">
 					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;com.orangelabs.rcs.tts.ChatEvent&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
-						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;/intent-filter&gt;<br />
 						&lt;/receiver&gt;</span>
 					</tt>

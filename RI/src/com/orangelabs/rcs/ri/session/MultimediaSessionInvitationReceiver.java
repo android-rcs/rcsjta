@@ -17,11 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.session;
 
-import org.gsma.joyn.session.MultimediaSessionIntent;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,6 +24,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+
+import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Multimedia session invitation receiver

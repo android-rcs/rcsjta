@@ -20,8 +20,8 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.List;
 
-import org.gsma.joyn.chat.GroupChat;
 
+import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;

@@ -23,21 +23,21 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.vsh.INewVideoSharingListener;
-import org.gsma.joyn.vsh.IVideoPlayer;
-import org.gsma.joyn.vsh.IVideoSharing;
-import org.gsma.joyn.vsh.IVideoSharingListener;
-import org.gsma.joyn.vsh.IVideoSharingService;
-import org.gsma.joyn.vsh.VideoSharing;
-import org.gsma.joyn.vsh.VideoSharingIntent;
-import org.gsma.joyn.vsh.VideoSharingServiceConfiguration;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.vsh.INewVideoSharingListener;
+import com.gsma.services.rcs.vsh.IVideoPlayer;
+import com.gsma.services.rcs.vsh.IVideoSharing;
+import com.gsma.services.rcs.vsh.IVideoSharingListener;
+import com.gsma.services.rcs.vsh.IVideoSharingService;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.vsh.VideoSharing;
+import com.gsma.services.rcs.vsh.VideoSharingIntent;
+import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;

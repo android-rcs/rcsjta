@@ -1,13 +1,13 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.ipcall.IIPCall;
-import org.gsma.joyn.ipcall.IIPCallListener;
-import org.gsma.joyn.ipcall.IIPCallPlayer;
-import org.gsma.joyn.ipcall.IIPCallRenderer;
-import org.gsma.joyn.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IIPCall;
+import com.gsma.services.rcs.ipcall.IIPCallListener;
+import com.gsma.services.rcs.ipcall.IIPCallPlayer;
+import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.ipcall.IPCall;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
@@ -93,7 +93,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			} else
 			if (dialogPath.isSessionTerminated()) {
 				// Session terminated
-				result = IPCall.State.ABORTED;
+				result = IPCall.State.TERMINATED;
 			} else {
 				// Session pending
 				if (session instanceof OriginatingIPCallSession) {

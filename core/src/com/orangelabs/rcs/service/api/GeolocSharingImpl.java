@@ -17,14 +17,14 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.gsh.GeolocSharing;
-import org.gsma.joyn.gsh.IGeolocSharing;
-import org.gsma.joyn.gsh.IGeolocSharingListener;
+import com.gsma.services.rcs.gsh.IGeolocSharing;
+import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
@@ -93,7 +93,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	public Geoloc getGeoloc()  {
 		GeolocPush geoloc = session.getGeoloc();
 		if (geoloc != null) {
-			org.gsma.joyn.chat.Geoloc geolocApi = new org.gsma.joyn.chat.Geoloc(geoloc.getLabel(),
+			com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 	    	return geolocApi;
@@ -390,7 +390,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	org.gsma.joyn.chat.Geoloc geolocApi = new org.gsma.joyn.chat.Geoloc(geoloc.getLabel(),
+	            	com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
 	        				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 	        				geoloc.getExpiration(), geoloc.getAccuracy());
 	            	listeners.getBroadcastItem(i).onGeolocShared(geolocApi);

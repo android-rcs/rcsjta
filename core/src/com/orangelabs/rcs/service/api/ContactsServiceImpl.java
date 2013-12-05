@@ -23,11 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.capability.Capabilities;
-import org.gsma.joyn.contacts.IContactsService;
-import org.gsma.joyn.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.IContactsService;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;

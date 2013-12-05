@@ -18,14 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatService;
-import org.gsma.joyn.chat.GroupChat;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +38,13 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

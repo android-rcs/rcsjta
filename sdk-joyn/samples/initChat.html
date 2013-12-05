@@ -272,7 +272,7 @@
 	<div class="content-block" style="min-height:700px;">
 		<div class="intro center">
 			<p><h1>How to initialise a chat</h1></p>
-			<p><span>The <a href="../javadoc/org/gsma/joyn/chat/ChatService.html" >Chat service API</a> offers all the features in order to manage single chat conversations and group chat conferences between joyn contacts.</span></p>
+			<p><span>The <a href="../javadoc/com/gsma/services/rcs/chat/ChatService.html" >Chat service API</a> offers all the features in order to manage single chat conversations and group chat conferences between joyn contacts.</span></p>
 			<p><span>To initiate a chat conversation see the following steps :</span></p>
 		
 		</div>
@@ -287,7 +287,7 @@
 			<div class="guide-block">
 				<h2>2. Check if the service is connected to the joyn platform</h2>
 				<p></p>
-				<p>Before initiating a chat you should check if the service platform is properly available : use the method <a href="../javadoc/org/gsma/joyn/chat/ChatService.html#isServiceRegistered()">isServiceRegistered</a> from the service API in order to get the last registration state which indicates if the device is registered on the joyn platform.</p>
+				<p>Before initiating a chat you should check if the service platform is properly available : use the method <a href="../javadoc/com/gsma/services/rcs/chat/ChatService.html#isServiceRegistered()">isServiceRegistered</a> from the service API in order to get the last registration state which indicates if the device is registered on the joyn platform.</p>
 				<p>If the joyn platform is not available you can redirect the end user to classic services like SMS/MMS.</p>
 				<p></p>
 			</div>
@@ -302,7 +302,7 @@
 			<div class="guide-block">
 				<h2>4. Initiate a single chat conversation</h2>
 				<p></p>
-				<p>To initiate a chat conversation you just need to use the method <a href="../javadoc/org/gsma/joyn/chat/ChatService.html#openSingleChat(java.lang.String, org.gsma.joyn.chat.ChatListener)">openSingleChat</a> from the API, by passing the remote contact (ie. phone number) as parameter and also a listener on the chat events. The method will return a <a href="../javadoc/javadoc/org/gsma/joyn/chat/Chat.html">Chat</a> object of the corresponding conversation.. The chat session is really established after sending a first message.</p>
+				<p>To initiate a chat conversation you just need to use the method <a href="../javadoc/com/gsma/services/rcs/chat/ChatService.html#openSingleChat(java.lang.String, com.gsma.services.rcs.chat.ChatListener)">openSingleChat</a> from the API, by passing the remote contact (ie. phone number) as parameter and also a listener on the chat events. The method will return a <a href="../javadoc/javadoc/com/gsma/services/rcs/chat/Chat.html">Chat</a> object of the corresponding conversation.. The chat session is really established after sending a first message.</p>
 				<p></p>
 				<div class="code-block">
 					<tt class="java"><span class="java3">// Open chat<br />
@@ -350,13 +350,13 @@
 				<div class="code-block">
 					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.messaging.chat.SingleChatInvitationReceiver&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
-						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;/intent-filter&gt;<br />
 						&lt;/receiver&gt;</span>
 					</tt>
 				</div>
 				<p></p>
-				<p>Then like on the originating side, you just have to use the method <a href="../javadoc/org/gsma/joyn/chat/ChatService.html#openSingleChat(java.lang.String, org.gsma.joyn.chat.ChatListener)">openSingleChat</a> from the API to get a <a href="../javadoc/javadoc/org/gsma/joyn/chat/Chat.html">Chat</a> object of the corresponding conversation.</p>
+				<p>Then like on the originating side, you just have to use the method <a href="../javadoc/com/gsma/services/rcs/chat/ChatService.html#openSingleChat(java.lang.String, com.gsma.services.rcs.chat.ChatListener)">openSingleChat</a> from the API to get a <a href="../javadoc/javadoc/com/gsma/services/rcs/chat/Chat.html">Chat</a> object of the corresponding conversation.</p>
 				<p></p>
 			</div>
 			</br>

@@ -8,7 +8,7 @@
 	<property name="terminal.core" 		value="${terminal.root}/core/bin/RCSJTA_core.apk"/>
 	<property name="terminal.build"		value="${terminal.root}/core/bin"/>
 	<property name="src.path" 		value="${terminal.root}/core/src"/>
-	<property name="sdk.version" 		value="3.1.0"/>
+	<property name="sdk.version" 		value="3.2.0"/>
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
@@ -34,7 +34,7 @@
         access="public" 
         classpath="${android_jar}:${project.all.jars.path}" 
         sourcepath="${src.path}"
-        packagenames="org.gsma.joyn.*">
+        packagenames="com.gsma.services.rcs.*">
     </javadoc>
     </target>
 
@@ -75,7 +75,7 @@
 	        access="public" 
 	        classpath=":${terminal.classpath}" 
 	        sourcepath="${src.path}"
-	        packagenames="org.gsma.joyn.*"
+	        packagenames="com.gsma.services.rcs.*"
 	        bootclasspath="${android.root}\platforms\android-17\android.jar:${terminal.root}/core/bin/classes">
 			
 			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">

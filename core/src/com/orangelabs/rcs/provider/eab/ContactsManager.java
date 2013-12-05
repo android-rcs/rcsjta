@@ -29,8 +29,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gsma.joyn.capability.CapabilitiesLog;
-import org.gsma.joyn.contacts.ContactsProvider;
 
 import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
@@ -59,6 +57,8 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.StatusUpdates;
 
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.contacts.ContactsProvider;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;

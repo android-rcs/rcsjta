@@ -18,8 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
-import org.gsma.joyn.vsh.IVideoPlayer;
-
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.orangelabs.rcs.core.content.LiveVideoContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 

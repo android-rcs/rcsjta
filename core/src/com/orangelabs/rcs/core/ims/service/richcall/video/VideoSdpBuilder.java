@@ -20,7 +20,9 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
-import org.gsma.joyn.vsh.VideoCodec;
+import android.media.MediaCodec;
+
+import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;

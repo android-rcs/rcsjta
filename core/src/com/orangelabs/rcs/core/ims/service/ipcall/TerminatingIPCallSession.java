@@ -20,11 +20,10 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 
 import java.util.Vector;
 
-import org.gsma.joyn.ipcall.AudioCodec;
-import org.gsma.joyn.ipcall.VideoCodec;
-
 import android.os.RemoteException;
 
+import com.gsma.services.rcs.ipcall.AudioCodec;
+import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;

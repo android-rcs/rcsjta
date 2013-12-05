@@ -18,14 +18,14 @@
 
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.vsh.IVideoRenderer;
-import org.gsma.joyn.vsh.IVideoSharing;
-import org.gsma.joyn.vsh.IVideoSharingListener;
-import org.gsma.joyn.vsh.VideoCodec;
-import org.gsma.joyn.vsh.VideoSharing;
+import com.gsma.services.rcs.vsh.IVideoRenderer;
+import com.gsma.services.rcs.vsh.IVideoSharing;
+import com.gsma.services.rcs.vsh.IVideoSharingListener;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.vsh.VideoSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
@@ -136,7 +136,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			} else
 			if (dialogPath.isSessionTerminated()) {
 				// Session terminated
-				result = VideoSharing.State.ABORTED;
+				result = VideoSharing.State.TERMINATED;
 			} else {
 				// Session pending
 				if (session instanceof OriginatingVideoStreamingSession) {

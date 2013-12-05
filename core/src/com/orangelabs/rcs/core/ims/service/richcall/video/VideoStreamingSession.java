@@ -18,9 +18,8 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
-import org.gsma.joyn.vsh.IVideoPlayer;
-import org.gsma.joyn.vsh.IVideoRenderer;
-
+import com.gsma.services.rcs.vsh.IVideoPlayer;
+import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;

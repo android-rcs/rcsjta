@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.provider.eab;
 
-import org.gsma.joyn.capability.CapabilitiesLog;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
 
 import android.net.Uri;
 

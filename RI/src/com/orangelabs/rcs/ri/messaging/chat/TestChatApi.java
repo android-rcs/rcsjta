@@ -19,8 +19,6 @@ package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
 
-import org.gsma.joyn.capability.CapabilitiesLog;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -30,6 +28,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 import com.orangelabs.rcs.ri.utils.Utils;

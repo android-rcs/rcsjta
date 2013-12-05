@@ -17,14 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.ipcall;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.ipcall.IPCall;
-import org.gsma.joyn.ipcall.IPCallIntent;
-import org.gsma.joyn.ipcall.IPCallListener;
-import org.gsma.joyn.ipcall.IPCallService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,6 +35,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCallIntent;
+import com.gsma.services.rcs.ipcall.IPCallListener;
+import com.gsma.services.rcs.ipcall.IPCallService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallPlayer;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallRenderer;

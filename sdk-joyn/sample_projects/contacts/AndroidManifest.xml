@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.gsma.joyn.samples.contacts"
+    package="com.gsma.services.rcs.samples.contacts"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -22,7 +22,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-                vnd.android.cursor.item/com.orangelabs.rcs.capability.im-session
             </intent-filter>
 		</activity>
         

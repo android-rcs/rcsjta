@@ -18,16 +18,6 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.gsh.GeolocSharing;
-import org.gsma.joyn.gsh.GeolocSharingListener;
-import org.gsma.joyn.gsh.GeolocSharingService;
-import org.gsma.joyn.ish.ImageSharingIntent;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -43,6 +33,15 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.GeolocSharingIntent;
+import com.gsma.services.rcs.gsh.GeolocSharingListener;
+import com.gsma.services.rcs.gsh.GeolocSharingService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -95,8 +94,8 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 		setTitle(R.string.title_geoloc_sharing);
 
         // Get invitation info
-        sharingId = getIntent().getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
+        sharingId = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
+		remoteContact = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_CONTACT);
 
         // Instanciate API
 		gshApi = new GeolocSharingService(getApplicationContext(), this);

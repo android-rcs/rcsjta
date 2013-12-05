@@ -20,13 +20,13 @@ package com.orangelabs.rcs.provider.sharing;
 
 import java.util.Calendar;
 
-import org.gsma.joyn.ish.ImageSharing;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 
+import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;

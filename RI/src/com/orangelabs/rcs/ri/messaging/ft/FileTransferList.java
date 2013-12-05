@@ -20,9 +20,6 @@ package com.orangelabs.rcs.ri.messaging.ft;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.FileTransferLog;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -39,6 +36,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -35,15 +35,15 @@
 		<service android:name="com.orangelabs.rcs.service.RcsCoreService">  
 	        <intent-filter>
 	            <action android:name="com.orangelabs.rcs.SERVICE"/>
-	            <action android:name="org.gsma.joyn.contacts.IContactsService"/>
-	            <action android:name="org.gsma.joyn.capability.ICapabilityService"/>
-	            <action android:name="org.gsma.joyn.chat.IChatService"/>
-	            <action android:name="org.gsma.joyn.ft.IFileTransferService"/>
-	            <action android:name="org.gsma.joyn.vsh.IVideoSharingService"/>
-	            <action android:name="org.gsma.joyn.ish.IImageSharingService"/>
-	            <action android:name="org.gsma.joyn.gsh.IGeolocSharingService"/>
-				<action android:name="org.gsma.joyn.session.IMultimediaSessionService"/>
-				<action android:name="org.gsma.joyn.ipcall.IIPCallService"/>
+	            <action android:name="com.gsma.services.rcs.contacts.IContactsService"/>
+	            <action android:name="com.gsma.services.rcs.capability.ICapabilityService"/>
+	            <action android:name="com.gsma.services.rcs.chat.IChatService"/>
+	            <action android:name="com.gsma.services.rcs.ft.IFileTransferService"/>
+	            <action android:name="com.gsma.services.rcs.vsh.IVideoSharingService"/>
+	            <action android:name="com.gsma.services.rcs.ish.IImageSharingService"/>
+	            <action android:name="com.gsma.services.rcs.gsh.IGeolocSharingService"/>
+				<action android:name="com.gsma.services.rcs.session.IMultimediaSessionService"/>
+				<action android:name="com.gsma.services.rcs.ipcall.IIPCallService"/>
 	        </intent-filter>
 	    </service>
 	
@@ -64,7 +64,7 @@
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.gsma.joyn.action.VIEW_SETTINGS"/>                
+                <action android:name="com.gsma.services.rcs.action.VIEW_SETTINGS"/>                
             </intent-filter>
  		</activity>
 
@@ -112,22 +112,22 @@
 		<provider android:authorities="com.orangelabs.rcs.settings"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.eab;org.gsma.joyn.provider.capabilities"
+		<provider android:authorities="com.orangelabs.rcs.eab;com.gsma.services.rcs.provider.capabilities"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
-		<provider android:authorities="com.orangelabs.rcs.ft;org.gsma.joyn.provider.ft"
+		<provider android:authorities="com.orangelabs.rcs.ft;com.gsma.services.rcs.provider.ft"
 			android:name="com.orangelabs.rcs.provider.messaging.FileTransferProvider"/>
 		
-		<provider android:authorities="com.orangelabs.rcs.ish;org.gsma.joyn.provider.ish"
+		<provider android:authorities="com.orangelabs.rcs.ish;com.gsma.services.rcs.provider.ish"
 			android:name="com.orangelabs.rcs.provider.sharing.ImageSharingProvider"/>
 	
-		<provider android:authorities="com.orangelabs.rcs.vsh;org.gsma.joyn.provider.vsh"
+		<provider android:authorities="com.orangelabs.rcs.vsh;com.gsma.services.rcs.provider.vsh"
 			android:name="com.orangelabs.rcs.provider.sharing.VideoSharingProvider"/>
 		
-		<provider android:authorities="com.orangelabs.rcs.chat;org.gsma.joyn.provider.chat"
+		<provider android:authorities="com.orangelabs.rcs.chat;com.gsma.services.rcs.provider.chat"
 			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
 			
-		<provider android:authorities="com.orangelabs.rcs.ipcall;org.gsma.joyn.provider.ipcall"
+		<provider android:authorities="com.orangelabs.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
 			android:name="com.orangelabs.rcs.provider.ipcall.IPCallProvider"/>
 		
 		<!-- Device events receiver -->	

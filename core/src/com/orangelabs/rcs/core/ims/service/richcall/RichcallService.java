@@ -21,8 +21,7 @@ package com.orangelabs.rcs.core.ims.service.richcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.gsma.joyn.vsh.IVideoPlayer;
-
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;

@@ -1,6 +1,6 @@
 package com.orangelabs.rcs.provider.ipcall;
 
-import org.gsma.joyn.ipcall.IPCallLog;
+import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.net.Uri;
 

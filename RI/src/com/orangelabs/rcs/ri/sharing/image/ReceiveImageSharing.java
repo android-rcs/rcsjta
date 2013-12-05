@@ -18,15 +18,6 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.ish.ImageSharing;
-import org.gsma.joyn.ish.ImageSharingIntent;
-import org.gsma.joyn.ish.ImageSharingListener;
-import org.gsma.joyn.ish.ImageSharingService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -41,6 +32,14 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.ish.ImageSharing;
+import com.gsma.services.rcs.ish.ImageSharingIntent;
+import com.gsma.services.rcs.ish.ImageSharingListener;
+import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

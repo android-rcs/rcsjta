@@ -274,7 +274,7 @@
 			<p><span>This application uses the following API :</span></p>
 			<ul>
 				<li>
-					<p><span>The <a href="../javadoc/org/gsma/joyn/session/package-summary.html">Multimedia Session</a> API to initiate and to manage multimedia sessions (accept, reject, terminate).</span></p>
+					<p><span>The <a href="../javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session</a> API to initiate and to manage multimedia sessions (accept, reject, terminate).</span></p>
 				</li>
 				<li>
 					<p><span>An SDP API which permits to parse and to build the SDP data exchanged during the multimedia session initialisation. An SDP lib is also provided with this tutorial. The SDP protocol is used to negociate the media session between the two end points (protocol, codecs, format, .etc) and the SDP content depends of the type of media to exchange.</span></p>				
@@ -315,7 +315,7 @@
 				<h2>1. Define a service ID associated to your new application or service</h2>
 				<p></p>
 				<p>A unique service ID should be associated to your application, this ID is used to route the incoming request internally in the API and may be used by the joyn platform for billing and routing.</p>
-				<p>The service ID corresponds also to a capability (or extension) associated to your application (see <a href="../javadoc/org/gsma/joyn/capability/package-summary.html">Capability</a> API).</p>						
+				<p>The service ID corresponds also to a capability (or extension) associated to your application (see <a href="../javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability</a> API).</p>						
 				<p>Here the chosen service ID is :</p>
 				<p><b>+g.3gpp.iari-ref="urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.<span style="color:red">orange.texto</span>"</b></p>
 				<p></p>
@@ -416,7 +416,7 @@
 				<div class="code-block">
 					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.session.MultimediaSessionInvitationReceiver&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
-						&#xA0; action android:name=</span><span class="java5">&#34;org.gsma.joyn.session.action.NEW_SESSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.session.action.NEW_SESSION&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.texto&#34; </span><span class="java10">/&gt;<br />
 						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.LAUNCHER&#34; </span><span class="java10">/&gt;<br />
 						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.DEFAULT&#34; </span><span class="java10">/&gt;<br />

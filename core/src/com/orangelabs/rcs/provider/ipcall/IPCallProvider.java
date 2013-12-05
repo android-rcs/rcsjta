@@ -1,6 +1,6 @@
 package com.orangelabs.rcs.provider.ipcall;
 
-import org.gsma.joyn.ipcall.IPCallLog;
+import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -39,8 +39,8 @@ public class IPCallProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("com.orangelabs.rcs.ipcall", "ipcall", IPCALLS);
 		uriMatcher.addURI("com.orangelabs.rcs.ipcall", "ipcall/#", IPCALL_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.ipcall", "ipcall", RCSAPI);
-		uriMatcher.addURI("org.gsma.joyn.provider.ipcall", "ipcall/#", RCSAPI_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ipcall", "ipcall", RCSAPI);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ipcall", "ipcall/#", RCSAPI_ID);
 	}
 			
 	/**

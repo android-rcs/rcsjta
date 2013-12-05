@@ -291,13 +291,13 @@
 			<p><span>This application uses the following APIs :</span></p>
 			<ul>
 				<li>
-					<p><span>The <a href="../javadoc/org/gsma/joyn/capability/package-summary.html">Capability</a> API to define a new capability (e.g. extension) corresponding to the Popup service.</span></p>
+					<p><span>The <a href="../javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability</a> API to define a new capability (e.g. extension) corresponding to the Popup service.</span></p>
 				</li>
 				<li>
-					<p><span>The <a href="../javadoc/org/gsma/joyn/contacts/package-summary.html">Contact</a> API to extract contacts supporting the Popup service and to know which contact is online or not.</span></p>
+					<p><span>The <a href="../javadoc/com/gsma/services/rcs/contacts/package-summary.html">Contact</a> API to extract contacts supporting the Popup service and to know which contact is online or not.</span></p>
 				</li>
 				<li>
-					<p><span>The <a href="../javadoc/org/gsma/joyn/session/package-summary.html">Multimedia Session y</a> API to send and receive Popups.</span></p>
+					<p><span>The <a href="../javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session y</a> API to send and receive Popups.</span></p>
 				</li>
 				<li>
 					<p><span>The Android <a href="http://developer.android.com/reference/android/speech/tts/TextToSpeech.html">TTS</a> API </span></p>				
@@ -316,7 +316,7 @@
 				<div class="code-block">
 					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.SendPopup&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
-						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.popup&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;/intent-filter&gt; <br />
 						&lt;/activity&gt;<br />
@@ -390,7 +390,7 @@
 			<div class="guide-block">
 				<h2>3. Define a protocol to implement your new service</h2>
 				<p></p>
-				<p>Here we just want to send an instant message or a popup, so there is no session lasting over time. In this case the best practice is to use the method <a href="../javadoc/org/gsma/joyn/session/MultimediaSessionService.html#sendMessage(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">MultimediaSessionService.sendMessage</a> which permits to send a SIP MESSAGE to the joyn network :</p>						
+				<p>Here we just want to send an instant message or a popup, so there is no session lasting over time. In this case the best practice is to use the method <a href="../javadoc/com/gsma/services/rcs/session/MultimediaSessionService.html#sendMessage(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">MultimediaSessionService.sendMessage</a> which permits to send a SIP MESSAGE to the joyn network :</p>						
 				<p></p>
 				<div style="width:600px;margin:auto">
 					<img src="../assets-sdk/images/popup_sample_3.png" width="100%"/>
@@ -445,7 +445,7 @@
 				<div class="code-block">
 					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.PopupReceiver&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
-						&#xA0; &lt;action android:name=</span><span class="java5">&#34;org.gsma.joyn.session.action.NEW_MESSAGE&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.session.action.NEW_MESSAGE&#34; </span><span class="java10">/&gt;<br />
 						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.popup&#34; </span><span class="java10">/&gt;<br />
 						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.LAUNCHER&#34; </span><span class="java10">/&gt;<br />
 						&#xA0; category android:name=</span><span class="java5">&#34;android.intent.category.DEFAULT&#34; </span><span class="java10">/&gt;<br />

@@ -35,8 +35,8 @@ public class FileTransferProvider extends ContentProvider {
     static {
         uriMatcher.addURI("com.orangelabs.rcs.ft", "ft", FILETRANSFERS);
         uriMatcher.addURI("com.orangelabs.rcs.ft", "ft/#", FILETRANSFER_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.ft", "ft", RCSAPI);
-		uriMatcher.addURI("org.gsma.joyn.provider.ft", "ft/#", RCSAPI_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ft", "ft", RCSAPI);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.ft", "ft/#", RCSAPI_ID);
     }
 
     /**

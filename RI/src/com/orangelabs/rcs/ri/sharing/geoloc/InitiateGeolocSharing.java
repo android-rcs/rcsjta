@@ -18,13 +18,6 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.gsh.GeolocSharing;
-import org.gsma.joyn.gsh.GeolocSharingListener;
-import org.gsma.joyn.gsh.GeolocSharingService;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -47,6 +40,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.GeolocSharingListener;
+import com.gsma.services.rcs.gsh.GeolocSharingService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;

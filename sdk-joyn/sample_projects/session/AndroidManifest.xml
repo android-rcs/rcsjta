@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
  android:versionCode="1"
  android:versionName="3.0.0"
- package="org.gsma.joyn.samples.session">
+ package="com.gsma.services.rcs.samples.session">
 
 	<uses-sdk android:minSdkVersion="8"
 		android:targetSdkVersion="15"/>
@@ -23,7 +23,7 @@
         
 		<receiver android:name=".MultimediaSessionInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.session.action.NEW_SESSION"/>
+		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.texto" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />

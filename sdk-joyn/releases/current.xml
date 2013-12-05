@@ -1,8 +1,8 @@
 <api>
-<package name="org.gsma.joyn"
+<package name="com.gsma.services.rcs"
 >
 <class name="JoynContactFormatException"
- extends="org.gsma.joyn.JoynServiceException"
+ extends="com.gsma.services.rcs.JoynServiceException"
  abstract="false"
  static="false"
  final="false"
@@ -10,7 +10,7 @@
  visibility="public"
 >
 <constructor name="JoynContactFormatException"
- type="org.gsma.joyn.JoynContactFormatException"
+ type="com.gsma.services.rcs.JoynContactFormatException"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -27,7 +27,7 @@
  visibility="public"
 >
 <constructor name="JoynService"
- type="org.gsma.joyn.JoynService"
+ type="com.gsma.services.rcs.JoynService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -35,7 +35,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="connect"
@@ -134,7 +134,7 @@
  visibility="public"
 >
 <constructor name="JoynService.Build.GSMA_CODES"
- type="org.gsma.joyn.JoynService.Build.GSMA_CODES"
+ type="com.gsma.services.rcs.JoynService.Build.GSMA_CODES"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -173,7 +173,7 @@
  visibility="public"
 >
 <constructor name="JoynService.Build.VERSION_CODES"
- type="org.gsma.joyn.JoynService.Build.VERSION_CODES"
+ type="com.gsma.services.rcs.JoynService.Build.VERSION_CODES"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -243,7 +243,7 @@
  visibility="public"
 >
 <constructor name="JoynServiceConfiguration"
- type="org.gsma.joyn.JoynServiceConfiguration"
+ type="com.gsma.services.rcs.JoynServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -286,7 +286,7 @@
  visibility="public"
 >
 <constructor name="JoynServiceException"
- type="org.gsma.joyn.JoynServiceException"
+ type="com.gsma.services.rcs.JoynServiceException"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -329,7 +329,7 @@
 </method>
 </interface>
 <class name="JoynServiceNotAvailableException"
- extends="org.gsma.joyn.JoynServiceException"
+ extends="com.gsma.services.rcs.JoynServiceException"
  abstract="false"
  static="false"
  final="false"
@@ -337,7 +337,7 @@
  visibility="public"
 >
 <constructor name="JoynServiceNotAvailableException"
- type="org.gsma.joyn.JoynServiceNotAvailableException"
+ type="com.gsma.services.rcs.JoynServiceNotAvailableException"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -346,7 +346,7 @@
 </constructor>
 </class>
 <class name="JoynServiceNotRegisteredException"
- extends="org.gsma.joyn.JoynServiceException"
+ extends="com.gsma.services.rcs.JoynServiceException"
  abstract="false"
  static="false"
  final="false"
@@ -354,7 +354,7 @@
  visibility="public"
 >
 <constructor name="JoynServiceNotRegisteredException"
- type="org.gsma.joyn.JoynServiceNotRegisteredException"
+ type="com.gsma.services.rcs.JoynServiceNotRegisteredException"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -363,7 +363,7 @@
 </constructor>
 </class>
 <class name="JoynServiceRegistrationListener"
- extends="org.gsma.joyn.IJoynServiceRegistrationListener.Stub"
+ extends="com.gsma.services.rcs.IJoynServiceRegistrationListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -371,7 +371,7 @@
  visibility="public"
 >
 <constructor name="JoynServiceRegistrationListener"
- type="org.gsma.joyn.JoynServiceRegistrationListener"
+ type="com.gsma.services.rcs.JoynServiceRegistrationListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -410,7 +410,7 @@
  visibility="public"
 >
 <constructor name="JoynUtils"
- type="org.gsma.joyn.JoynUtils"
+ type="com.gsma.services.rcs.JoynUtils"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -464,7 +464,7 @@
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.capability"
+<package name="com.gsma.services.rcs.capability"
 >
 <class name="Capabilities"
  extends="java.lang.Object"
@@ -477,7 +477,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="Capabilities"
- type="org.gsma.joyn.capability.Capabilities"
+ type="com.gsma.services.rcs.capability.Capabilities"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -501,7 +501,7 @@
 </parameter>
 </constructor>
 <constructor name="Capabilities"
- type="org.gsma.joyn.capability.Capabilities"
+ type="com.gsma.services.rcs.capability.Capabilities"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -649,7 +649,7 @@
 </field>
 </class>
 <class name="CapabilitiesListener"
- extends="org.gsma.joyn.capability.ICapabilitiesListener.Stub"
+ extends="com.gsma.services.rcs.capability.ICapabilitiesListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -657,7 +657,7 @@
  visibility="public"
 >
 <constructor name="CapabilitiesListener"
- type="org.gsma.joyn.capability.CapabilitiesListener"
+ type="com.gsma.services.rcs.capability.CapabilitiesListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -676,7 +676,7 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="capabilities" type="org.gsma.joyn.capability.Capabilities">
+<parameter name="capabilities" type="com.gsma.services.rcs.capability.Capabilities">
 </parameter>
 </method>
 </class>
@@ -689,7 +689,7 @@
  visibility="public"
 >
 <constructor name="CapabilitiesLog"
- type="org.gsma.joyn.capability.CapabilitiesLog"
+ type="com.gsma.services.rcs.capability.CapabilitiesLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -840,7 +840,7 @@
 </field>
 </class>
 <class name="CapabilityService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -848,7 +848,7 @@
  visibility="public"
 >
 <constructor name="CapabilityService"
- type="org.gsma.joyn.capability.CapabilityService"
+ type="com.gsma.services.rcs.capability.CapabilityService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -856,7 +856,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addCapabilitiesListener"
@@ -869,9 +869,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
+<parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addCapabilitiesListener"
@@ -886,11 +886,11 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
+<parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -903,9 +903,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -931,7 +931,7 @@
 >
 </method>
 <method name="getContactCapabilities"
- return="org.gsma.joyn.capability.Capabilities"
+ return="com.gsma.services.rcs.capability.Capabilities"
  abstract="false"
  native="false"
  synchronized="false"
@@ -942,13 +942,13 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getMyCapabilities"
- return="org.gsma.joyn.capability.Capabilities"
+ return="com.gsma.services.rcs.capability.Capabilities"
  abstract="false"
  native="false"
  synchronized="false"
@@ -957,7 +957,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -981,7 +981,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeCapabilitiesListener"
@@ -994,9 +994,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
+<parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeCapabilitiesListener"
@@ -1011,11 +1011,11 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.capability.CapabilitiesListener">
+<parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -1028,9 +1028,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="requestAllContactsCapabilities"
@@ -1043,7 +1043,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="requestContactCapabilities"
@@ -1058,9 +1058,9 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="requestContactCapabilities"
@@ -1075,9 +1075,9 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <field name="EXTENSION_BASE_NAME"
@@ -1106,7 +1106,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.capability.EXTENSION&quot;"
+ value="&quot;com.gsma.services.rcs.capability.EXTENSION&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -1115,7 +1115,7 @@
 </field>
 </class>
 </package>
-<package name="org.gsma.joyn.chat"
+<package name="com.gsma.services.rcs.chat"
 >
 <class name="Chat"
  extends="java.lang.Object"
@@ -1135,9 +1135,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.ChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.ChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -1150,7 +1150,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -1163,9 +1163,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.ChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.ChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendDisplayedDeliveryReport"
@@ -1180,7 +1180,7 @@
 >
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendGeoloc"
@@ -1193,9 +1193,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendIsComposingEvent"
@@ -1210,7 +1210,7 @@
 >
 <parameter name="status" type="boolean">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -1225,7 +1225,7 @@
 >
 <parameter name="message" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -1238,7 +1238,7 @@
  visibility="public"
 >
 <constructor name="ChatIntent"
- type="org.gsma.joyn.chat.ChatIntent"
+ type="com.gsma.services.rcs.chat.ChatIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1249,7 +1249,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.chat.action.NEW_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.chat.action.NEW_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -1291,7 +1291,7 @@
 </field>
 </class>
 <class name="ChatListener"
- extends="org.gsma.joyn.chat.IChatListener.Stub"
+ extends="com.gsma.services.rcs.chat.IChatListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -1299,7 +1299,7 @@
  visibility="public"
 >
 <constructor name="ChatListener"
- type="org.gsma.joyn.chat.ChatListener"
+ type="com.gsma.services.rcs.chat.ChatListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1329,7 +1329,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="message" type="org.gsma.joyn.chat.ChatMessage">
+<parameter name="message" type="com.gsma.services.rcs.chat.ChatMessage">
 </parameter>
 </method>
 <method name="onReportMessageDelivered"
@@ -1381,7 +1381,7 @@
  visibility="public"
 >
 <constructor name="ChatLog"
- type="org.gsma.joyn.chat.ChatLog"
+ type="com.gsma.services.rcs.chat.ChatLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1398,7 +1398,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.GroupChat"
- type="org.gsma.joyn.chat.ChatLog.GroupChat"
+ type="com.gsma.services.rcs.chat.ChatLog.GroupChat"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1491,7 +1491,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message"
- type="org.gsma.joyn.chat.ChatLog.Message"
+ type="com.gsma.services.rcs.chat.ChatLog.Message"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1671,7 +1671,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message.Direction"
- type="org.gsma.joyn.chat.ChatLog.Message.Direction"
+ type="com.gsma.services.rcs.chat.ChatLog.Message.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1721,7 +1721,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message.Status"
- type="org.gsma.joyn.chat.ChatLog.Message.Status"
+ type="com.gsma.services.rcs.chat.ChatLog.Message.Status"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1738,7 +1738,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message.Status.Content"
- type="org.gsma.joyn.chat.ChatLog.Message.Status.Content"
+ type="com.gsma.services.rcs.chat.ChatLog.Message.Status.Content"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1843,7 +1843,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message.Status.System"
- type="org.gsma.joyn.chat.ChatLog.Message.Status.System"
+ type="com.gsma.services.rcs.chat.ChatLog.Message.Status.System"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -1948,7 +1948,7 @@
  visibility="public"
 >
 <constructor name="ChatLog.Message.Type"
- type="org.gsma.joyn.chat.ChatLog.Message.Type"
+ type="com.gsma.services.rcs.chat.ChatLog.Message.Type"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2011,7 +2011,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="ChatMessage"
- type="org.gsma.joyn.chat.ChatMessage"
+ type="com.gsma.services.rcs.chat.ChatMessage"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2029,7 +2029,7 @@
 </parameter>
 </constructor>
 <constructor name="ChatMessage"
- type="org.gsma.joyn.chat.ChatMessage"
+ type="com.gsma.services.rcs.chat.ChatMessage"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2131,7 +2131,7 @@
 </field>
 </class>
 <class name="ChatService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -2139,7 +2139,7 @@
  visibility="public"
 >
 <constructor name="ChatService"
- type="org.gsma.joyn.chat.ChatService"
+ type="com.gsma.services.rcs.chat.ChatService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2147,7 +2147,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewChatListener"
@@ -2160,9 +2160,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.NewChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.NewChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -2175,9 +2175,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -2203,7 +2203,7 @@
 >
 </method>
 <method name="getChat"
- return="org.gsma.joyn.chat.Chat"
+ return="com.gsma.services.rcs.chat.Chat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2214,11 +2214,11 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getChatFor"
- return="org.gsma.joyn.chat.Chat"
+ return="com.gsma.services.rcs.chat.Chat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2229,11 +2229,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getChats"
- return="java.util.Set&lt;org.gsma.joyn.chat.Chat&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.chat.Chat&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2242,11 +2242,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getConfiguration"
- return="org.gsma.joyn.chat.ChatServiceConfiguration"
+ return="com.gsma.services.rcs.chat.ChatServiceConfiguration"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2255,11 +2255,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGroupChat"
- return="org.gsma.joyn.chat.GroupChat"
+ return="com.gsma.services.rcs.chat.GroupChat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2270,11 +2270,11 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGroupChatFor"
- return="org.gsma.joyn.chat.GroupChat"
+ return="com.gsma.services.rcs.chat.GroupChat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2285,11 +2285,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGroupChats"
- return="java.util.Set&lt;org.gsma.joyn.chat.GroupChat&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.chat.GroupChat&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2298,11 +2298,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="initiateGroupChat"
- return="org.gsma.joyn.chat.GroupChat"
+ return="com.gsma.services.rcs.chat.GroupChat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2315,11 +2315,11 @@
 </parameter>
 <parameter name="subject" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.chat.GroupChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -2343,11 +2343,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="openSingleChat"
- return="org.gsma.joyn.chat.Chat"
+ return="com.gsma.services.rcs.chat.Chat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2358,15 +2358,15 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.chat.ChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.ChatListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejoinGroupChat"
- return="org.gsma.joyn.chat.GroupChat"
+ return="com.gsma.services.rcs.chat.GroupChat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2377,7 +2377,7 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewChatListener"
@@ -2390,9 +2390,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.NewChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.NewChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -2405,13 +2405,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="restartGroupChat"
- return="org.gsma.joyn.chat.GroupChat"
+ return="com.gsma.services.rcs.chat.GroupChat"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2422,7 +2422,7 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -2435,7 +2435,7 @@
  visibility="public"
 >
 <constructor name="ChatServiceConfiguration"
- type="org.gsma.joyn.chat.ChatServiceConfiguration"
+ type="com.gsma.services.rcs.chat.ChatServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2469,7 +2469,7 @@
 </parameter>
 </constructor>
 <constructor name="ChatServiceConfiguration"
- type="org.gsma.joyn.chat.ChatServiceConfiguration"
+ type="com.gsma.services.rcs.chat.ChatServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2682,7 +2682,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="Geoloc"
- type="org.gsma.joyn.chat.Geoloc"
+ type="com.gsma.services.rcs.chat.Geoloc"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2700,7 +2700,7 @@
 </parameter>
 </constructor>
 <constructor name="Geoloc"
- type="org.gsma.joyn.chat.Geoloc"
+ type="com.gsma.services.rcs.chat.Geoloc"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2720,7 +2720,7 @@
 </parameter>
 </constructor>
 <constructor name="Geoloc"
- type="org.gsma.joyn.chat.Geoloc"
+ type="com.gsma.services.rcs.chat.Geoloc"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2911,7 +2911,7 @@
 </field>
 </class>
 <class name="GeolocMessage"
- extends="org.gsma.joyn.chat.ChatMessage"
+ extends="com.gsma.services.rcs.chat.ChatMessage"
  abstract="false"
  static="false"
  final="false"
@@ -2921,7 +2921,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="GeolocMessage"
- type="org.gsma.joyn.chat.GeolocMessage"
+ type="com.gsma.services.rcs.chat.GeolocMessage"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2931,7 +2931,7 @@
 </parameter>
 <parameter name="remote" type="java.lang.String">
 </parameter>
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
 <parameter name="receiptAt" type="java.util.Date">
 </parameter>
@@ -2939,7 +2939,7 @@
 </parameter>
 </constructor>
 <constructor name="GeolocMessage"
- type="org.gsma.joyn.chat.GeolocMessage"
+ type="com.gsma.services.rcs.chat.GeolocMessage"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -2958,11 +2958,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
 </method>
 <method name="getGeoloc"
- return="org.gsma.joyn.chat.Geoloc"
+ return="com.gsma.services.rcs.chat.Geoloc"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2973,7 +2973,7 @@
 >
 </method>
 <method name="stringToGeoloc"
- return="org.gsma.joyn.chat.Geoloc"
+ return="com.gsma.services.rcs.chat.Geoloc"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3014,7 +3014,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -3027,9 +3027,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.GroupChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addParticipants"
@@ -3044,7 +3044,7 @@
 >
 <parameter name="participants" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getChatId"
@@ -3057,7 +3057,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getMaxParticipants"
@@ -3070,7 +3070,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getParticipants"
@@ -3083,7 +3083,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -3096,7 +3096,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -3109,7 +3109,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSubject"
@@ -3122,7 +3122,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="quitConversation"
@@ -3135,7 +3135,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -3148,7 +3148,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -3161,13 +3161,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.chat.GroupChatListener">
+<parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendFile"
- return="org.gsma.joyn.ft.FileTransfer"
+ return="com.gsma.services.rcs.ft.FileTransfer"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3180,9 +3180,9 @@
 </parameter>
 <parameter name="fileicon" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.ft.FileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendGeoloc"
@@ -3195,9 +3195,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendIsComposingEvent"
@@ -3212,7 +3212,7 @@
 >
 <parameter name="status" type="boolean">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -3227,7 +3227,7 @@
 >
 <parameter name="text" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -3240,7 +3240,7 @@
  visibility="public"
 >
 <constructor name="GroupChat.Direction"
- type="org.gsma.joyn.chat.GroupChat.Direction"
+ type="com.gsma.services.rcs.chat.GroupChat.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3418,7 +3418,7 @@
  visibility="public"
 >
 <constructor name="GroupChatIntent"
- type="org.gsma.joyn.chat.GroupChatIntent"
+ type="com.gsma.services.rcs.chat.GroupChatIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3429,7 +3429,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.chat.action.NEW_GROUP_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3482,7 +3482,7 @@
 </field>
 </class>
 <class name="GroupChatListener"
- extends="org.gsma.joyn.chat.IGroupChatListener.Stub"
+ extends="com.gsma.services.rcs.chat.IGroupChatListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -3490,7 +3490,7 @@
  visibility="public"
 >
 <constructor name="GroupChatListener"
- type="org.gsma.joyn.chat.GroupChatListener"
+ type="com.gsma.services.rcs.chat.GroupChatListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3522,7 +3522,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="message" type="org.gsma.joyn.chat.ChatMessage">
+<parameter name="message" type="com.gsma.services.rcs.chat.ChatMessage">
 </parameter>
 </method>
 <method name="onParticipantDisconnected"
@@ -3642,7 +3642,7 @@
 </method>
 </class>
 <class name="NewChatListener"
- extends="org.gsma.joyn.chat.INewChatListener.Stub"
+ extends="com.gsma.services.rcs.chat.INewChatListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -3650,7 +3650,7 @@
  visibility="public"
 >
 <constructor name="NewChatListener"
- type="org.gsma.joyn.chat.NewChatListener"
+ type="com.gsma.services.rcs.chat.NewChatListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3682,12 +3682,12 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="message" type="org.gsma.joyn.chat.ChatMessage">
+<parameter name="message" type="com.gsma.services.rcs.chat.ChatMessage">
 </parameter>
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.contacts"
+<package name="com.gsma.services.rcs.contacts"
 >
 <class name="ContactsProvider"
  extends="java.lang.Object"
@@ -3698,7 +3698,7 @@
  visibility="public"
 >
 <constructor name="ContactsProvider"
- type="org.gsma.joyn.contacts.ContactsProvider"
+ type="com.gsma.services.rcs.contacts.ContactsProvider"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3709,7 +3709,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.extensions&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.extensions&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3720,7 +3720,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.file-transfer&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.file-transfer&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3731,7 +3731,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.geoloc-push&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.geoloc-push&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3742,7 +3742,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.image-sharing&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.image-sharing&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3753,7 +3753,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.im-session&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.im-session&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3764,7 +3764,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.ip-video-call&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3775,7 +3775,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.ip-voice-call&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3786,7 +3786,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.number&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.number&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3797,7 +3797,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.registration-state&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.registration-state&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3808,7 +3808,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/org.gsma.joyn.video-sharing&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.video-sharing&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3817,7 +3817,7 @@
 </field>
 </class>
 <class name="ContactsService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -3825,7 +3825,7 @@
  visibility="public"
 >
 <constructor name="ContactsService"
- type="org.gsma.joyn.contacts.ContactsService"
+ type="com.gsma.services.rcs.contacts.ContactsService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3833,7 +3833,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="connect"
@@ -3859,7 +3859,7 @@
 >
 </method>
 <method name="getJoynContact"
- return="org.gsma.joyn.contacts.JoynContact"
+ return="com.gsma.services.rcs.contacts.JoynContact"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3870,11 +3870,11 @@
 >
 <parameter name="contactId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getJoynContacts"
- return="java.util.Set&lt;org.gsma.joyn.contacts.JoynContact&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.contacts.JoynContact&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3883,11 +3883,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getJoynContactsOnline"
- return="java.util.Set&lt;org.gsma.joyn.contacts.JoynContact&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.contacts.JoynContact&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3896,11 +3896,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getJoynContactsSupporting"
- return="java.util.Set&lt;org.gsma.joyn.contacts.JoynContact&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.contacts.JoynContact&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3911,7 +3911,7 @@
 >
 <parameter name="tag" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVCard"
@@ -3926,7 +3926,7 @@
 >
 <parameter name="contactUri" type="android.net.Uri">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -3952,7 +3952,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="JoynContact"
- type="org.gsma.joyn.contacts.JoynContact"
+ type="com.gsma.services.rcs.contacts.JoynContact"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3962,11 +3962,11 @@
 </parameter>
 <parameter name="registered" type="boolean">
 </parameter>
-<parameter name="capabilities" type="org.gsma.joyn.capability.Capabilities">
+<parameter name="capabilities" type="com.gsma.services.rcs.capability.Capabilities">
 </parameter>
 </constructor>
 <constructor name="JoynContact"
- type="org.gsma.joyn.contacts.JoynContact"
+ type="com.gsma.services.rcs.contacts.JoynContact"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -3987,7 +3987,7 @@
 >
 </method>
 <method name="getCapabilities"
- return="org.gsma.joyn.capability.Capabilities"
+ return="com.gsma.services.rcs.capability.Capabilities"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4046,7 +4046,7 @@
 </field>
 </class>
 </package>
-<package name="org.gsma.joyn.ft"
+<package name="com.gsma.services.rcs.ft"
 >
 <class name="FileTransfer"
  extends="java.lang.Object"
@@ -4057,13 +4057,13 @@
  visibility="public"
 >
 <constructor name="FileTransfer"
- type="org.gsma.joyn.ft.FileTransfer"
+ type="com.gsma.services.rcs.ft.FileTransfer"
  static="false"
  final="false"
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="transferIntf" type="org.gsma.joyn.ft.IFileTransfer">
+<parameter name="transferIntf" type="com.gsma.services.rcs.ft.IFileTransfer">
 </parameter>
 </constructor>
 <method name="abortTransfer"
@@ -4076,7 +4076,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -4089,7 +4089,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -4102,9 +4102,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ft.FileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -4117,7 +4117,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileIconName"
@@ -4130,7 +4130,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileName"
@@ -4143,7 +4143,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileSize"
@@ -4156,7 +4156,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileType"
@@ -4169,7 +4169,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -4182,7 +4182,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -4195,7 +4195,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getTransferId"
@@ -4208,7 +4208,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -4221,7 +4221,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -4234,9 +4234,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ft.FileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -4249,7 +4249,7 @@
  visibility="public"
 >
 <constructor name="FileTransfer.Direction"
- type="org.gsma.joyn.ft.FileTransfer.Direction"
+ type="com.gsma.services.rcs.ft.FileTransfer.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4416,7 +4416,7 @@
  visibility="public"
 >
 <constructor name="FileTransferIntent"
- type="org.gsma.joyn.ft.FileTransferIntent"
+ type="com.gsma.services.rcs.ft.FileTransferIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4427,7 +4427,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.ft.action.NEW_FILE_TRANSFER&quot;"
+ value="&quot;com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -4513,7 +4513,7 @@
 </field>
 </class>
 <class name="FileTransferListener"
- extends="org.gsma.joyn.ft.IFileTransferListener.Stub"
+ extends="com.gsma.services.rcs.ft.IFileTransferListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -4521,7 +4521,7 @@
  visibility="public"
 >
 <constructor name="FileTransferListener"
- type="org.gsma.joyn.ft.FileTransferListener"
+ type="com.gsma.services.rcs.ft.FileTransferListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4601,7 +4601,7 @@
  visibility="public"
 >
 <constructor name="FileTransferLog"
- type="org.gsma.joyn.ft.FileTransferLog"
+ type="com.gsma.services.rcs.ft.FileTransferLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4741,7 +4741,7 @@
 </field>
 </class>
 <class name="FileTransferService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -4749,7 +4749,7 @@
  visibility="public"
 >
 <constructor name="FileTransferService"
- type="org.gsma.joyn.ft.FileTransferService"
+ type="com.gsma.services.rcs.ft.FileTransferService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4757,7 +4757,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewFileTransferListener"
@@ -4770,9 +4770,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ft.NewFileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.NewFileTransferListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -4785,9 +4785,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -4813,7 +4813,7 @@
 >
 </method>
 <method name="getConfiguration"
- return="org.gsma.joyn.ft.FileTransferServiceConfiguration"
+ return="com.gsma.services.rcs.ft.FileTransferServiceConfiguration"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4822,11 +4822,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileTransfer"
- return="org.gsma.joyn.ft.FileTransfer"
+ return="com.gsma.services.rcs.ft.FileTransfer"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4837,11 +4837,11 @@
 >
 <parameter name="transferId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileTransferFor"
- return="org.gsma.joyn.ft.FileTransfer"
+ return="com.gsma.services.rcs.ft.FileTransfer"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4852,11 +4852,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileTransfers"
- return="java.util.Set&lt;org.gsma.joyn.ft.FileTransfer&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.ft.FileTransfer&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4865,7 +4865,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -4889,7 +4889,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewFileTransferListener"
@@ -4902,9 +4902,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ft.NewFileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.NewFileTransferListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -4917,13 +4917,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="transferFile"
- return="org.gsma.joyn.ft.FileTransfer"
+ return="com.gsma.services.rcs.ft.FileTransfer"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4936,15 +4936,15 @@
 </parameter>
 <parameter name="filename" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.ft.FileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="transferFile"
- return="org.gsma.joyn.ft.FileTransfer"
+ return="com.gsma.services.rcs.ft.FileTransfer"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4959,11 +4959,11 @@
 </parameter>
 <parameter name="fileicon" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.ft.FileTransferListener">
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -4978,7 +4978,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="FileTransferServiceConfiguration"
- type="org.gsma.joyn.ft.FileTransferServiceConfiguration"
+ type="com.gsma.services.rcs.ft.FileTransferServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -4996,7 +4996,7 @@
 </parameter>
 </constructor>
 <constructor name="FileTransferServiceConfiguration"
- type="org.gsma.joyn.ft.FileTransferServiceConfiguration"
+ type="com.gsma.services.rcs.ft.FileTransferServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5098,7 +5098,7 @@
 </field>
 </class>
 <class name="NewFileTransferListener"
- extends="org.gsma.joyn.ft.INewFileTransferListener.Stub"
+ extends="com.gsma.services.rcs.ft.INewFileTransferListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -5106,7 +5106,7 @@
  visibility="public"
 >
 <constructor name="NewFileTransferListener"
- type="org.gsma.joyn.ft.NewFileTransferListener"
+ type="com.gsma.services.rcs.ft.NewFileTransferListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5128,7 +5128,7 @@
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.gsh"
+<package name="com.gsma.services.rcs.gsh"
 >
 <class name="GeolocSharing"
  extends="java.lang.Object"
@@ -5148,7 +5148,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -5161,7 +5161,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -5174,9 +5174,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.gsh.GeolocSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.gsh.GeolocSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -5189,11 +5189,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGeoloc"
- return="org.gsma.joyn.chat.Geoloc"
+ return="com.gsma.services.rcs.chat.Geoloc"
  abstract="false"
  native="false"
  synchronized="false"
@@ -5202,7 +5202,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -5215,7 +5215,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -5228,7 +5228,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -5241,7 +5241,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -5254,7 +5254,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -5267,9 +5267,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.gsh.GeolocSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.gsh.GeolocSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -5282,7 +5282,7 @@
  visibility="public"
 >
 <constructor name="GeolocSharing.Direction"
- type="org.gsma.joyn.gsh.GeolocSharing.Direction"
+ type="com.gsma.services.rcs.gsh.GeolocSharing.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5438,7 +5438,7 @@
  visibility="public"
 >
 <constructor name="GeolocSharingIntent"
- type="org.gsma.joyn.gsh.GeolocSharingIntent"
+ type="com.gsma.services.rcs.gsh.GeolocSharingIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5449,7 +5449,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.ish.action.NEW_GEOLOC_SHARING&quot;"
+ value="&quot;com.gsma.services.rcs.ish.action.NEW_GEOLOC_SHARING&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5491,7 +5491,7 @@
 </field>
 </class>
 <class name="GeolocSharingListener"
- extends="org.gsma.joyn.gsh.IGeolocSharingListener.Stub"
+ extends="com.gsma.services.rcs.gsh.IGeolocSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -5499,7 +5499,7 @@
  visibility="public"
 >
 <constructor name="GeolocSharingListener"
- type="org.gsma.joyn.gsh.GeolocSharingListener"
+ type="com.gsma.services.rcs.gsh.GeolocSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5516,7 +5516,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
 </method>
 <method name="onSharingAborted"
@@ -5571,7 +5571,7 @@
 </method>
 </class>
 <class name="GeolocSharingService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -5579,7 +5579,7 @@
  visibility="public"
 >
 <constructor name="GeolocSharingService"
- type="org.gsma.joyn.gsh.GeolocSharingService"
+ type="com.gsma.services.rcs.gsh.GeolocSharingService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5587,7 +5587,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewGeolocSharingListener"
@@ -5600,9 +5600,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.gsh.NewGeolocSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.gsh.NewGeolocSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -5615,9 +5615,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -5643,7 +5643,7 @@
 >
 </method>
 <method name="getGeolocSharing"
- return="org.gsma.joyn.gsh.GeolocSharing"
+ return="com.gsma.services.rcs.gsh.GeolocSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -5654,11 +5654,11 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGeolocSharingFor"
- return="org.gsma.joyn.gsh.GeolocSharing"
+ return="com.gsma.services.rcs.gsh.GeolocSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -5669,11 +5669,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getGeolocSharings"
- return="java.util.Set&lt;org.gsma.joyn.gsh.GeolocSharing&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.gsh.GeolocSharing&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -5682,7 +5682,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -5706,7 +5706,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewGeolocSharingListener"
@@ -5719,9 +5719,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.gsh.NewGeolocSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.gsh.NewGeolocSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -5734,13 +5734,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="shareGeoloc"
- return="org.gsma.joyn.gsh.GeolocSharing"
+ return="com.gsma.services.rcs.gsh.GeolocSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -5751,18 +5751,18 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="geoloc" type="org.gsma.joyn.chat.Geoloc">
+<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.gsh.GeolocSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.gsh.GeolocSharingListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
 <class name="NewGeolocSharingListener"
- extends="org.gsma.joyn.gsh.INewGeolocSharingListener.Stub"
+ extends="com.gsma.services.rcs.gsh.INewGeolocSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -5770,7 +5770,7 @@
  visibility="public"
 >
 <constructor name="NewGeolocSharingListener"
- type="org.gsma.joyn.gsh.NewGeolocSharingListener"
+ type="com.gsma.services.rcs.gsh.NewGeolocSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5792,7 +5792,7 @@
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.intent"
+<package name="com.gsma.services.rcs.intent"
 >
 <class name="ChatIntents"
  extends="java.lang.Object"
@@ -5806,7 +5806,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.INITIATE_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.action.INITIATE_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5817,7 +5817,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.INITIATE_GROUP_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.action.INITIATE_GROUP_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5828,7 +5828,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.VIEW_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.action.VIEW_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5839,7 +5839,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.VIEW_GROUP_CHAT&quot;"
+ value="&quot;com.gsma.services.rcs.action.VIEW_GROUP_CHAT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5870,7 +5870,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.VIEW_SETTINGS&quot;"
+ value="&quot;com.gsma.services.rcs.action.VIEW_SETTINGS&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5912,7 +5912,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.INITIATE_FT&quot;"
+ value="&quot;com.gsma.services.rcs.action.INITIATE_FT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5923,7 +5923,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.VIEW_FT&quot;"
+ value="&quot;com.gsma.services.rcs.action.VIEW_FT&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5943,7 +5943,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.INITIATE_IPCALL&quot;"
+ value="&quot;com.gsma.services.rcs.action.INITIATE_IPCALL&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5954,7 +5954,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.action.VIEW_IPCALL&quot;"
+ value="&quot;com.gsma.services.rcs.action.VIEW_IPCALL&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -5963,7 +5963,7 @@
 </field>
 </class>
 </package>
-<package name="org.gsma.joyn.ipcall"
+<package name="com.gsma.services.rcs.ipcall"
 >
 <class name="AudioCodec"
  extends="java.lang.Object"
@@ -5976,7 +5976,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="AudioCodec"
- type="org.gsma.joyn.ipcall.AudioCodec"
+ type="com.gsma.services.rcs.ipcall.AudioCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -5992,7 +5992,7 @@
 </parameter>
 </constructor>
 <constructor name="AudioCodec"
- type="org.gsma.joyn.ipcall.AudioCodec"
+ type="com.gsma.services.rcs.ipcall.AudioCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6011,7 +6011,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="codec" type="org.gsma.joyn.ipcall.AudioCodec">
+<parameter name="codec" type="com.gsma.services.rcs.ipcall.AudioCodec">
 </parameter>
 </method>
 <method name="describeContents"
@@ -6113,7 +6113,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -6126,11 +6126,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="player" type="org.gsma.joyn.ipcall.IPCallPlayer">
+<parameter name="player" type="com.gsma.services.rcs.ipcall.IPCallPlayer">
 </parameter>
-<parameter name="renderer" type="org.gsma.joyn.ipcall.IPCallRenderer">
+<parameter name="renderer" type="com.gsma.services.rcs.ipcall.IPCallRenderer">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -6143,9 +6143,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IPCallListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IPCallListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addVideo"
@@ -6158,7 +6158,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="continueCall"
@@ -6171,7 +6171,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getCallId"
@@ -6184,7 +6184,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -6197,7 +6197,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -6210,7 +6210,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -6223,7 +6223,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="holdCall"
@@ -6236,7 +6236,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isOnHold"
@@ -6249,7 +6249,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -6262,7 +6262,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -6275,9 +6275,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IPCallListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IPCallListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeVideo"
@@ -6290,7 +6290,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -6303,7 +6303,7 @@
  visibility="public"
 >
 <constructor name="IPCall.Direction"
- type="org.gsma.joyn.ipcall.IPCall.Direction"
+ type="com.gsma.services.rcs.ipcall.IPCall.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6470,7 +6470,7 @@
  visibility="public"
 >
 <constructor name="IPCallIntent"
- type="org.gsma.joyn.ipcall.IPCallIntent"
+ type="com.gsma.services.rcs.ipcall.IPCallIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6481,7 +6481,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.ipcall.action.NEW_CALL&quot;"
+ value="&quot;com.gsma.services.rcs.ipcall.action.NEW_CALL&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -6556,7 +6556,7 @@
 </field>
 </class>
 <class name="IPCallListener"
- extends="org.gsma.joyn.ipcall.IIPCallListener.Stub"
+ extends="com.gsma.services.rcs.ipcall.IIPCallListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -6564,7 +6564,7 @@
  visibility="public"
 >
 <constructor name="IPCallListener"
- type="org.gsma.joyn.ipcall.IPCallListener"
+ type="com.gsma.services.rcs.ipcall.IPCallListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6638,7 +6638,7 @@
  visibility="public"
 >
 <constructor name="IPCallLog"
- type="org.gsma.joyn.ipcall.IPCallLog"
+ type="com.gsma.services.rcs.ipcall.IPCallLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6734,7 +6734,7 @@
 </field>
 </class>
 <class name="IPCallPlayer"
- extends="org.gsma.joyn.ipcall.IIPCallPlayer.Stub"
+ extends="com.gsma.services.rcs.ipcall.IIPCallPlayer.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -6742,7 +6742,7 @@
  visibility="public"
 >
 <constructor name="IPCallPlayer"
- type="org.gsma.joyn.ipcall.IPCallPlayer"
+ type="com.gsma.services.rcs.ipcall.IPCallPlayer"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -6759,7 +6759,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IIPCallPlayerListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallPlayerListener">
 </parameter>
 </method>
 <method name="close"
@@ -6774,7 +6774,7 @@
 >
 </method>
 <method name="getAudioCodec"
- return="org.gsma.joyn.ipcall.AudioCodec"
+ return="com.gsma.services.rcs.ipcall.AudioCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -6785,7 +6785,7 @@
 >
 </method>
 <method name="getEventListeners"
- return="java.util.Set&lt;org.gsma.joyn.ipcall.IIPCallPlayerListener&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IIPCallPlayerListener&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -6818,7 +6818,7 @@
 >
 </method>
 <method name="getSupportedAudioCodecs"
- return="org.gsma.joyn.ipcall.AudioCodec[]"
+ return="com.gsma.services.rcs.ipcall.AudioCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -6829,7 +6829,7 @@
 >
 </method>
 <method name="getSupportedVideoCodecs"
- return="org.gsma.joyn.ipcall.VideoCodec[]"
+ return="com.gsma.services.rcs.ipcall.VideoCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -6840,7 +6840,7 @@
 >
 </method>
 <method name="getVideoCodec"
- return="org.gsma.joyn.ipcall.VideoCodec"
+ return="com.gsma.services.rcs.ipcall.VideoCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -6860,9 +6860,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="audiocodec" type="org.gsma.joyn.ipcall.AudioCodec">
+<parameter name="audiocodec" type="com.gsma.services.rcs.ipcall.AudioCodec">
 </parameter>
-<parameter name="videocodec" type="org.gsma.joyn.ipcall.VideoCodec">
+<parameter name="videocodec" type="com.gsma.services.rcs.ipcall.VideoCodec">
 </parameter>
 <parameter name="remoteHost" type="java.lang.String">
 </parameter>
@@ -6892,7 +6892,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IIPCallPlayerListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallPlayerListener">
 </parameter>
 </method>
 <method name="start"
@@ -6950,7 +6950,7 @@
 </field>
 </class>
 <class name="IPCallPlayerListener"
- extends="org.gsma.joyn.ipcall.IIPCallPlayerListener.Stub"
+ extends="com.gsma.services.rcs.ipcall.IIPCallPlayerListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -6958,7 +6958,7 @@
  visibility="public"
 >
 <constructor name="IPCallPlayerListener"
- type="org.gsma.joyn.ipcall.IPCallPlayerListener"
+ type="com.gsma.services.rcs.ipcall.IPCallPlayerListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7024,7 +7024,7 @@
 </method>
 </class>
 <class name="IPCallRenderer"
- extends="org.gsma.joyn.ipcall.IIPCallRenderer.Stub"
+ extends="com.gsma.services.rcs.ipcall.IIPCallRenderer.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -7032,7 +7032,7 @@
  visibility="public"
 >
 <constructor name="IPCallRenderer"
- type="org.gsma.joyn.ipcall.IPCallRenderer"
+ type="com.gsma.services.rcs.ipcall.IPCallRenderer"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7049,7 +7049,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IIPCallRendererListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallRendererListener">
 </parameter>
 </method>
 <method name="close"
@@ -7064,7 +7064,7 @@
 >
 </method>
 <method name="getAudioCodec"
- return="org.gsma.joyn.ipcall.AudioCodec"
+ return="com.gsma.services.rcs.ipcall.AudioCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -7075,7 +7075,7 @@
 >
 </method>
 <method name="getEventListeners"
- return="java.util.Set&lt;org.gsma.joyn.ipcall.IIPCallRendererListener&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IIPCallRendererListener&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7097,7 +7097,7 @@
 >
 </method>
 <method name="getSupportedAudioCodecs"
- return="org.gsma.joyn.ipcall.AudioCodec[]"
+ return="com.gsma.services.rcs.ipcall.AudioCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -7108,7 +7108,7 @@
 >
 </method>
 <method name="getSupportedVideoCodecs"
- return="org.gsma.joyn.ipcall.VideoCodec[]"
+ return="com.gsma.services.rcs.ipcall.VideoCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -7119,7 +7119,7 @@
 >
 </method>
 <method name="getVideoCodec"
- return="org.gsma.joyn.ipcall.VideoCodec"
+ return="com.gsma.services.rcs.ipcall.VideoCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -7139,9 +7139,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="audiocodec" type="org.gsma.joyn.ipcall.AudioCodec">
+<parameter name="audiocodec" type="com.gsma.services.rcs.ipcall.AudioCodec">
 </parameter>
-<parameter name="videocodec" type="org.gsma.joyn.ipcall.VideoCodec">
+<parameter name="videocodec" type="com.gsma.services.rcs.ipcall.VideoCodec">
 </parameter>
 <parameter name="remoteHost" type="java.lang.String">
 </parameter>
@@ -7171,7 +7171,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.IIPCallRendererListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallRendererListener">
 </parameter>
 </method>
 <method name="start"
@@ -7229,7 +7229,7 @@
 </field>
 </class>
 <class name="IPCallRendererListener"
- extends="org.gsma.joyn.ipcall.IIPCallRendererListener.Stub"
+ extends="com.gsma.services.rcs.ipcall.IIPCallRendererListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -7237,7 +7237,7 @@
  visibility="public"
 >
 <constructor name="IPCallRendererListener"
- type="org.gsma.joyn.ipcall.IPCallRendererListener"
+ type="com.gsma.services.rcs.ipcall.IPCallRendererListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7303,7 +7303,7 @@
 </method>
 </class>
 <class name="IPCallService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -7311,7 +7311,7 @@
  visibility="public"
 >
 <constructor name="IPCallService"
- type="org.gsma.joyn.ipcall.IPCallService"
+ type="com.gsma.services.rcs.ipcall.IPCallService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7319,7 +7319,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewIPCallListener"
@@ -7332,9 +7332,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.NewIPCallListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.NewIPCallListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -7347,9 +7347,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -7375,7 +7375,7 @@
 >
 </method>
 <method name="getConfiguration"
- return="org.gsma.joyn.ipcall.IPCallServiceConfiguration"
+ return="com.gsma.services.rcs.ipcall.IPCallServiceConfiguration"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7384,11 +7384,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getIPCall"
- return="org.gsma.joyn.ipcall.IPCall"
+ return="com.gsma.services.rcs.ipcall.IPCall"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7399,11 +7399,11 @@
 >
 <parameter name="callId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getIPCallFor"
- return="org.gsma.joyn.ipcall.IPCall"
+ return="com.gsma.services.rcs.ipcall.IPCall"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7414,11 +7414,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getIPCalls"
- return="java.util.Set&lt;org.gsma.joyn.ipcall.IPCall&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IPCall&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7427,11 +7427,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="initiateCall"
- return="org.gsma.joyn.ipcall.IPCall"
+ return="com.gsma.services.rcs.ipcall.IPCall"
  abstract="false"
  native="false"
  synchronized="false"
@@ -7442,15 +7442,15 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="player" type="org.gsma.joyn.ipcall.IPCallPlayer">
+<parameter name="player" type="com.gsma.services.rcs.ipcall.IPCallPlayer">
 </parameter>
-<parameter name="renderer" type="org.gsma.joyn.ipcall.IPCallRenderer">
+<parameter name="renderer" type="com.gsma.services.rcs.ipcall.IPCallRenderer">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.ipcall.IPCallListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.IPCallListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -7474,7 +7474,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewIPCallListener"
@@ -7487,9 +7487,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ipcall.NewIPCallListener">
+<parameter name="listener" type="com.gsma.services.rcs.ipcall.NewIPCallListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -7502,9 +7502,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -7519,7 +7519,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="IPCallServiceConfiguration"
- type="org.gsma.joyn.ipcall.IPCallServiceConfiguration"
+ type="com.gsma.services.rcs.ipcall.IPCallServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7529,7 +7529,7 @@
 </parameter>
 </constructor>
 <constructor name="IPCallServiceConfiguration"
- type="org.gsma.joyn.ipcall.IPCallServiceConfiguration"
+ type="com.gsma.services.rcs.ipcall.IPCallServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7587,7 +7587,7 @@
 </field>
 </class>
 <class name="NewIPCallListener"
- extends="org.gsma.joyn.ipcall.INewIPCallListener.Stub"
+ extends="com.gsma.services.rcs.ipcall.INewIPCallListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -7595,7 +7595,7 @@
  visibility="public"
 >
 <constructor name="NewIPCallListener"
- type="org.gsma.joyn.ipcall.NewIPCallListener"
+ type="com.gsma.services.rcs.ipcall.NewIPCallListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7627,7 +7627,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="VideoCodec"
- type="org.gsma.joyn.ipcall.VideoCodec"
+ type="com.gsma.services.rcs.ipcall.VideoCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7651,7 +7651,7 @@
 </parameter>
 </constructor>
 <constructor name="VideoCodec"
- type="org.gsma.joyn.ipcall.VideoCodec"
+ type="com.gsma.services.rcs.ipcall.VideoCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -7670,7 +7670,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="codec" type="org.gsma.joyn.ipcall.VideoCodec">
+<parameter name="codec" type="com.gsma.services.rcs.ipcall.VideoCodec">
 </parameter>
 </method>
 <method name="describeContents"
@@ -7799,7 +7799,7 @@
 </field>
 </class>
 </package>
-<package name="org.gsma.joyn.ish"
+<package name="com.gsma.services.rcs.ish"
 >
 <class name="ImageSharing"
  extends="java.lang.Object"
@@ -7819,7 +7819,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -7832,7 +7832,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -7845,9 +7845,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ish.ImageSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.ish.ImageSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -7860,7 +7860,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileName"
@@ -7873,7 +7873,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileSize"
@@ -7886,7 +7886,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getFileType"
@@ -7899,7 +7899,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -7912,7 +7912,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -7925,7 +7925,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -7938,7 +7938,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -7951,7 +7951,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -7964,9 +7964,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ish.ImageSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.ish.ImageSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -7979,7 +7979,7 @@
  visibility="public"
 >
 <constructor name="ImageSharing.Direction"
- type="org.gsma.joyn.ish.ImageSharing.Direction"
+ type="com.gsma.services.rcs.ish.ImageSharing.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8146,7 +8146,7 @@
  visibility="public"
 >
 <constructor name="ImageSharingIntent"
- type="org.gsma.joyn.ish.ImageSharingIntent"
+ type="com.gsma.services.rcs.ish.ImageSharingIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8157,7 +8157,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.ish.action.NEW_IMAGE_SHARING&quot;"
+ value="&quot;com.gsma.services.rcs.ish.action.NEW_IMAGE_SHARING&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -8232,7 +8232,7 @@
 </field>
 </class>
 <class name="ImageSharingListener"
- extends="org.gsma.joyn.ish.IImageSharingListener.Stub"
+ extends="com.gsma.services.rcs.ish.IImageSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -8240,7 +8240,7 @@
  visibility="public"
 >
 <constructor name="ImageSharingListener"
- type="org.gsma.joyn.ish.ImageSharingListener"
+ type="com.gsma.services.rcs.ish.ImageSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8320,7 +8320,7 @@
  visibility="public"
 >
 <constructor name="ImageSharingLog"
- type="org.gsma.joyn.ish.ImageSharingLog"
+ type="com.gsma.services.rcs.ish.ImageSharingLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8449,7 +8449,7 @@
 </field>
 </class>
 <class name="ImageSharingService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -8457,7 +8457,7 @@
  visibility="public"
 >
 <constructor name="ImageSharingService"
- type="org.gsma.joyn.ish.ImageSharingService"
+ type="com.gsma.services.rcs.ish.ImageSharingService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8465,7 +8465,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewImageSharingListener"
@@ -8478,9 +8478,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ish.NewImageSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.ish.NewImageSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -8493,9 +8493,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -8521,7 +8521,7 @@
 >
 </method>
 <method name="getConfiguration"
- return="org.gsma.joyn.ish.ImageSharingServiceConfiguration"
+ return="com.gsma.services.rcs.ish.ImageSharingServiceConfiguration"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8530,11 +8530,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getImageSharing"
- return="org.gsma.joyn.ish.ImageSharing"
+ return="com.gsma.services.rcs.ish.ImageSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8545,11 +8545,11 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getImageSharingFor"
- return="org.gsma.joyn.ish.ImageSharing"
+ return="com.gsma.services.rcs.ish.ImageSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8560,11 +8560,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getImageSharings"
- return="java.util.Set&lt;org.gsma.joyn.ish.ImageSharing&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.ish.ImageSharing&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8573,7 +8573,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -8597,7 +8597,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewImageSharingListener"
@@ -8610,9 +8610,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.ish.NewImageSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.ish.NewImageSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -8625,13 +8625,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="shareImage"
- return="org.gsma.joyn.ish.ImageSharing"
+ return="com.gsma.services.rcs.ish.ImageSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8644,11 +8644,11 @@
 </parameter>
 <parameter name="filename" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.ish.ImageSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.ish.ImageSharingListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -8661,7 +8661,7 @@
  visibility="public"
 >
 <constructor name="ImageSharingServiceConfiguration"
- type="org.gsma.joyn.ish.ImageSharingServiceConfiguration"
+ type="com.gsma.services.rcs.ish.ImageSharingServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8673,7 +8673,7 @@
 </parameter>
 </constructor>
 <constructor name="ImageSharingServiceConfiguration"
- type="org.gsma.joyn.ish.ImageSharingServiceConfiguration"
+ type="com.gsma.services.rcs.ish.ImageSharingServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8742,7 +8742,7 @@
 </field>
 </class>
 <class name="NewImageSharingListener"
- extends="org.gsma.joyn.ish.INewImageSharingListener.Stub"
+ extends="com.gsma.services.rcs.ish.INewImageSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -8750,7 +8750,7 @@
  visibility="public"
 >
 <constructor name="NewImageSharingListener"
- type="org.gsma.joyn.ish.NewImageSharingListener"
+ type="com.gsma.services.rcs.ish.NewImageSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8772,7 +8772,7 @@
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.session"
+<package name="com.gsma.services.rcs.session"
 >
 <class name="MultimediaMessageIntent"
  extends="java.lang.Object"
@@ -8783,7 +8783,7 @@
  visibility="public"
 >
 <constructor name="MultimediaMessageIntent"
- type="org.gsma.joyn.session.MultimediaMessageIntent"
+ type="com.gsma.services.rcs.session.MultimediaMessageIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8794,7 +8794,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.session.action.NEW_MESSAGE&quot;"
+ value="&quot;com.gsma.services.rcs.session.action.NEW_MESSAGE&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -8864,7 +8864,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -8879,7 +8879,7 @@
 >
 <parameter name="sdp" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -8892,9 +8892,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.session.MultimediaSessionListener">
+<parameter name="listener" type="com.gsma.services.rcs.session.MultimediaSessionListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -8907,7 +8907,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getLocalSdp"
@@ -8920,7 +8920,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -8933,7 +8933,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteSdp"
@@ -8946,7 +8946,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getServiceId"
@@ -8959,7 +8959,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSessionId"
@@ -8972,7 +8972,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -8985,7 +8985,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -8998,7 +8998,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -9011,9 +9011,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.session.MultimediaSessionListener">
+<parameter name="listener" type="com.gsma.services.rcs.session.MultimediaSessionListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -9026,7 +9026,7 @@
  visibility="public"
 >
 <constructor name="MultimediaSession.Direction"
- type="org.gsma.joyn.session.MultimediaSession.Direction"
+ type="com.gsma.services.rcs.session.MultimediaSession.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9182,7 +9182,7 @@
  visibility="public"
 >
 <constructor name="MultimediaSessionIntent"
- type="org.gsma.joyn.session.MultimediaSessionIntent"
+ type="com.gsma.services.rcs.session.MultimediaSessionIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9193,7 +9193,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.session.action.NEW_SESSION&quot;"
+ value="&quot;com.gsma.services.rcs.session.action.NEW_SESSION&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -9235,7 +9235,7 @@
 </field>
 </class>
 <class name="MultimediaSessionListener"
- extends="org.gsma.joyn.session.IMultimediaSessionListener.Stub"
+ extends="com.gsma.services.rcs.session.IMultimediaSessionListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -9243,7 +9243,7 @@
  visibility="public"
 >
 <constructor name="MultimediaSessionListener"
- type="org.gsma.joyn.session.MultimediaSessionListener"
+ type="com.gsma.services.rcs.session.MultimediaSessionListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9298,7 +9298,7 @@
 </method>
 </class>
 <class name="MultimediaSessionService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -9306,7 +9306,7 @@
  visibility="public"
 >
 <constructor name="MultimediaSessionService"
- type="org.gsma.joyn.session.MultimediaSessionService"
+ type="com.gsma.services.rcs.session.MultimediaSessionService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9314,7 +9314,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addServiceRegistrationListener"
@@ -9327,9 +9327,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -9355,7 +9355,7 @@
 >
 </method>
 <method name="getSession"
- return="org.gsma.joyn.session.MultimediaSession"
+ return="com.gsma.services.rcs.session.MultimediaSession"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9366,11 +9366,11 @@
 >
 <parameter name="sessionId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSessionFor"
- return="org.gsma.joyn.session.MultimediaSession"
+ return="com.gsma.services.rcs.session.MultimediaSession"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9381,11 +9381,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSessions"
- return="java.util.Set&lt;org.gsma.joyn.session.MultimediaSession&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.session.MultimediaSession&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9396,11 +9396,11 @@
 >
 <parameter name="serviceId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="initiateSession"
- return="org.gsma.joyn.session.MultimediaSession"
+ return="com.gsma.services.rcs.session.MultimediaSession"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9415,11 +9415,11 @@
 </parameter>
 <parameter name="sdp" type="java.lang.String">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.session.MultimediaSessionListener">
+<parameter name="listener" type="com.gsma.services.rcs.session.MultimediaSessionListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -9443,7 +9443,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -9456,9 +9456,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -9479,17 +9479,17 @@
 </parameter>
 <parameter name="contentType" type="java.lang.String">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
 </package>
-<package name="org.gsma.joyn.vsh"
+<package name="com.gsma.services.rcs.vsh"
 >
 <class name="NewVideoSharingListener"
- extends="org.gsma.joyn.vsh.INewVideoSharingListener.Stub"
+ extends="com.gsma.services.rcs.vsh.INewVideoSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -9497,7 +9497,7 @@
  visibility="public"
 >
 <constructor name="NewVideoSharingListener"
- type="org.gsma.joyn.vsh.NewVideoSharingListener"
+ type="com.gsma.services.rcs.vsh.NewVideoSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9529,7 +9529,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="VideoCodec"
- type="org.gsma.joyn.vsh.VideoCodec"
+ type="com.gsma.services.rcs.vsh.VideoCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9553,7 +9553,7 @@
 </parameter>
 </constructor>
 <constructor name="VideoCodec"
- type="org.gsma.joyn.vsh.VideoCodec"
+ type="com.gsma.services.rcs.vsh.VideoCodec"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9572,7 +9572,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="codec" type="org.gsma.joyn.vsh.VideoCodec">
+<parameter name="codec" type="com.gsma.services.rcs.vsh.VideoCodec">
 </parameter>
 </method>
 <method name="describeContents"
@@ -9701,7 +9701,7 @@
 </field>
 </class>
 <class name="VideoPlayer"
- extends="org.gsma.joyn.vsh.IVideoPlayer.Stub"
+ extends="com.gsma.services.rcs.vsh.IVideoPlayer.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -9709,7 +9709,7 @@
  visibility="public"
 >
 <constructor name="VideoPlayer"
- type="org.gsma.joyn.vsh.VideoPlayer"
+ type="com.gsma.services.rcs.vsh.VideoPlayer"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9726,7 +9726,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.IVideoPlayerListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.IVideoPlayerListener">
 </parameter>
 </method>
 <method name="close"
@@ -9741,7 +9741,7 @@
 >
 </method>
 <method name="getCodec"
- return="org.gsma.joyn.vsh.VideoCodec"
+ return="com.gsma.services.rcs.vsh.VideoCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -9752,7 +9752,7 @@
 >
 </method>
 <method name="getEventListeners"
- return="java.util.Set&lt;org.gsma.joyn.vsh.IVideoPlayerListener&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.vsh.IVideoPlayerListener&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9774,7 +9774,7 @@
 >
 </method>
 <method name="getSupportedCodecs"
- return="org.gsma.joyn.vsh.VideoCodec[]"
+ return="com.gsma.services.rcs.vsh.VideoCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -9794,7 +9794,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="codec" type="org.gsma.joyn.vsh.VideoCodec">
+<parameter name="codec" type="com.gsma.services.rcs.vsh.VideoCodec">
 </parameter>
 <parameter name="remoteHost" type="java.lang.String">
 </parameter>
@@ -9822,7 +9822,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.IVideoPlayerListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.IVideoPlayerListener">
 </parameter>
 </method>
 <method name="start"
@@ -9880,7 +9880,7 @@
 </field>
 </class>
 <class name="VideoPlayerListener"
- extends="org.gsma.joyn.vsh.IVideoPlayerListener.Stub"
+ extends="com.gsma.services.rcs.vsh.IVideoPlayerListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -9888,7 +9888,7 @@
  visibility="public"
 >
 <constructor name="VideoPlayerListener"
- type="org.gsma.joyn.vsh.VideoPlayerListener"
+ type="com.gsma.services.rcs.vsh.VideoPlayerListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9954,7 +9954,7 @@
 </method>
 </class>
 <class name="VideoRenderer"
- extends="org.gsma.joyn.vsh.IVideoRenderer.Stub"
+ extends="com.gsma.services.rcs.vsh.IVideoRenderer.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -9962,7 +9962,7 @@
  visibility="public"
 >
 <constructor name="VideoRenderer"
- type="org.gsma.joyn.vsh.VideoRenderer"
+ type="com.gsma.services.rcs.vsh.VideoRenderer"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -9979,7 +9979,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.IVideoRendererListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.IVideoRendererListener">
 </parameter>
 </method>
 <method name="close"
@@ -9994,7 +9994,7 @@
 >
 </method>
 <method name="getCodec"
- return="org.gsma.joyn.vsh.VideoCodec"
+ return="com.gsma.services.rcs.vsh.VideoCodec"
  abstract="true"
  native="false"
  synchronized="false"
@@ -10005,7 +10005,7 @@
 >
 </method>
 <method name="getEventListeners"
- return="java.util.Set&lt;org.gsma.joyn.vsh.IVideoRendererListener&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.vsh.IVideoRendererListener&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10027,7 +10027,7 @@
 >
 </method>
 <method name="getSupportedCodecs"
- return="org.gsma.joyn.vsh.VideoCodec[]"
+ return="com.gsma.services.rcs.vsh.VideoCodec[]"
  abstract="true"
  native="false"
  synchronized="false"
@@ -10047,7 +10047,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="codec" type="org.gsma.joyn.vsh.VideoCodec">
+<parameter name="codec" type="com.gsma.services.rcs.vsh.VideoCodec">
 </parameter>
 <parameter name="remoteHost" type="java.lang.String">
 </parameter>
@@ -10075,7 +10075,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.IVideoRendererListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.IVideoRendererListener">
 </parameter>
 </method>
 <method name="start"
@@ -10133,7 +10133,7 @@
 </field>
 </class>
 <class name="VideoRendererListener"
- extends="org.gsma.joyn.vsh.IVideoRendererListener.Stub"
+ extends="com.gsma.services.rcs.vsh.IVideoRendererListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -10141,7 +10141,7 @@
  visibility="public"
 >
 <constructor name="VideoRendererListener"
- type="org.gsma.joyn.vsh.VideoRendererListener"
+ type="com.gsma.services.rcs.vsh.VideoRendererListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10224,7 +10224,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -10237,9 +10237,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="renderer" type="org.gsma.joyn.vsh.VideoRenderer">
+<parameter name="renderer" type="com.gsma.services.rcs.vsh.VideoRenderer">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -10252,9 +10252,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.VideoSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.VideoSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getDirection"
@@ -10267,7 +10267,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -10280,7 +10280,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -10293,7 +10293,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getState"
@@ -10306,7 +10306,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVideoEncoding"
@@ -10319,7 +10319,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVideoFormat"
@@ -10332,7 +10332,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -10345,7 +10345,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -10358,9 +10358,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.VideoSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.VideoSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -10373,7 +10373,7 @@
  visibility="public"
 >
 <constructor name="VideoSharing.Direction"
- type="org.gsma.joyn.vsh.VideoSharing.Direction"
+ type="com.gsma.services.rcs.vsh.VideoSharing.Direction"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10529,7 +10529,7 @@
  visibility="public"
 >
 <constructor name="VideoSharingIntent"
- type="org.gsma.joyn.vsh.VideoSharingIntent"
+ type="com.gsma.services.rcs.vsh.VideoSharingIntent"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10540,7 +10540,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;org.gsma.joyn.vsh.action.NEW_VIDEO_SHARING&quot;"
+ value="&quot;com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -10604,7 +10604,7 @@
 </field>
 </class>
 <class name="VideoSharingListener"
- extends="org.gsma.joyn.vsh.IVideoSharingListener.Stub"
+ extends="com.gsma.services.rcs.vsh.IVideoSharingListener.Stub"
  abstract="true"
  static="false"
  final="false"
@@ -10612,7 +10612,7 @@
  visibility="public"
 >
 <constructor name="VideoSharingListener"
- type="org.gsma.joyn.vsh.VideoSharingListener"
+ type="com.gsma.services.rcs.vsh.VideoSharingListener"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10664,7 +10664,7 @@
  visibility="public"
 >
 <constructor name="VideoSharingLog"
- type="org.gsma.joyn.vsh.VideoSharingLog"
+ type="com.gsma.services.rcs.vsh.VideoSharingLog"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10760,7 +10760,7 @@
 </field>
 </class>
 <class name="VideoSharingService"
- extends="org.gsma.joyn.JoynService"
+ extends="com.gsma.services.rcs.JoynService"
  abstract="false"
  static="false"
  final="false"
@@ -10768,7 +10768,7 @@
  visibility="public"
 >
 <constructor name="VideoSharingService"
- type="org.gsma.joyn.vsh.VideoSharingService"
+ type="com.gsma.services.rcs.vsh.VideoSharingService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10776,7 +10776,7 @@
 >
 <parameter name="ctx" type="android.content.Context">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.JoynServiceListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceListener">
 </parameter>
 </constructor>
 <method name="addNewVideoSharingListener"
@@ -10789,9 +10789,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.NewVideoSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.NewVideoSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="addServiceRegistrationListener"
@@ -10804,9 +10804,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="connect"
@@ -10832,7 +10832,7 @@
 >
 </method>
 <method name="getConfiguration"
- return="org.gsma.joyn.vsh.VideoSharingServiceConfiguration"
+ return="com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10841,11 +10841,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVideoSharing"
- return="org.gsma.joyn.vsh.VideoSharing"
+ return="com.gsma.services.rcs.vsh.VideoSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10856,11 +10856,11 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVideoSharingFor"
- return="org.gsma.joyn.vsh.VideoSharing"
+ return="com.gsma.services.rcs.vsh.VideoSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10871,11 +10871,11 @@
 >
 <parameter name="intent" type="android.content.Intent">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="getVideoSharings"
- return="java.util.Set&lt;org.gsma.joyn.vsh.VideoSharing&gt;"
+ return="java.util.Set&lt;com.gsma.services.rcs.vsh.VideoSharing&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10884,7 +10884,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -10908,7 +10908,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeNewVideoSharingListener"
@@ -10921,9 +10921,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.vsh.NewVideoSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.NewVideoSharingListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="removeServiceRegistrationListener"
@@ -10936,13 +10936,13 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="org.gsma.joyn.JoynServiceRegistrationListener">
+<parameter name="listener" type="com.gsma.services.rcs.JoynServiceRegistrationListener">
 </parameter>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 <method name="shareVideo"
- return="org.gsma.joyn.vsh.VideoSharing"
+ return="com.gsma.services.rcs.vsh.VideoSharing"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10953,13 +10953,13 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="player" type="org.gsma.joyn.vsh.VideoPlayer">
+<parameter name="player" type="com.gsma.services.rcs.vsh.VideoPlayer">
 </parameter>
-<parameter name="listener" type="org.gsma.joyn.vsh.VideoSharingListener">
+<parameter name="listener" type="com.gsma.services.rcs.vsh.VideoSharingListener">
 </parameter>
-<exception name="JoynContactFormatException" type="org.gsma.joyn.JoynContactFormatException">
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
-<exception name="JoynServiceException" type="org.gsma.joyn.JoynServiceException">
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
 </class>
@@ -10974,7 +10974,7 @@
 <implements name="android.os.Parcelable">
 </implements>
 <constructor name="VideoSharingServiceConfiguration"
- type="org.gsma.joyn.vsh.VideoSharingServiceConfiguration"
+ type="com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -10984,7 +10984,7 @@
 </parameter>
 </constructor>
 <constructor name="VideoSharingServiceConfiguration"
- type="org.gsma.joyn.vsh.VideoSharingServiceConfiguration"
+ type="com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration"
  static="false"
  final="false"
  deprecated="not deprecated"

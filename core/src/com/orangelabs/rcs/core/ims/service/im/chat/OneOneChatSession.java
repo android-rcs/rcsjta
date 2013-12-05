@@ -21,10 +21,10 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gsma.joyn.chat.ChatLog;
 
 import javax2.sip.header.SubjectHeader;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;

@@ -21,12 +21,12 @@ package com.orangelabs.rcs.utils;
 import java.util.List;
 import java.util.Vector;
 
-import org.gsma.joyn.vsh.VideoCodec;
 
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Build;
 
+import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1_2;

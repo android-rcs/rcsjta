@@ -3,9 +3,6 @@ package com.orangelabs.rcs.ri.ipcall;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.gsma.joyn.ipcall.IPCall;
-import org.gsma.joyn.ipcall.IPCallLog;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -22,6 +19,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

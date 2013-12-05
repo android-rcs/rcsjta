@@ -18,9 +18,8 @@
 
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
-import org.gsma.joyn.ipcall.IIPCallPlayer;
-import org.gsma.joyn.ipcall.IIPCallRenderer;
-
+import com.gsma.services.rcs.ipcall.IIPCallPlayer;
+import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;

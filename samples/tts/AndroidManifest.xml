@@ -21,7 +21,7 @@
 
         <receiver android:name="com.orangelabs.rcs.tts.ChatEvent">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.chat.action.NEW_CHAT"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_CHAT"/>
             </intent-filter>
         </receiver>
 

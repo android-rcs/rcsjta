@@ -4,27 +4,27 @@
 
     <!-- This definition is important for the contact detail plugin -->
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.image-sharing"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-sharing"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />   
 	<ContactsDataKind android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.video-sharing"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-sharing"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_chat_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.im-session"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_ft_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.file-transfer"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_ipcall_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.ip-voice-call"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />
 	<ContactsDataKind android:icon="@drawable/rcs_core_extension_icon"
-        android:mimeType="vnd.android.cursor.item/org.gsma.joyn.extensions"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions"
         android:summaryColumn="data2" android:detailColumn="data3"
         android:detailSocialSummary="false" />        
 </ContactsSource>

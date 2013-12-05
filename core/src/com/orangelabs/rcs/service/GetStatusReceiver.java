@@ -1,12 +1,12 @@
 package com.orangelabs.rcs.service;
 
-import org.gsma.joyn.Intents;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.gsma.services.rcs.Intents;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 
 /**

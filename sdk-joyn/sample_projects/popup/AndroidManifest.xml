@@ -21,14 +21,14 @@
 
             <!-- Declare the RCS extension -->
            	<intent-filter>
-                <action android:name="org.gsma.joyn.capability.EXTENSION"/>
+                <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.popup"/>
             </intent-filter>            
 		</activity>
 		
         <receiver android:name=".PopupReceiver">
 	        <intent-filter>
-		    	<action android:name="org.gsma.joyn.session.action.NEW_MESSAGE" />
+		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE" />
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.popup" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />

@@ -21,16 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.contacts.ContactsService;
-import org.gsma.joyn.contacts.JoynContact;
-
 import android.app.ListActivity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactsService;
+import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -17,8 +17,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.popup;
 
-import org.gsma.joyn.capability.CapabilityService;
-
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.popup.utils.DateUtils;
 
 /**

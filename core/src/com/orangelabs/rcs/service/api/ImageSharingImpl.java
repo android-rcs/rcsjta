@@ -1,11 +1,11 @@
 package com.orangelabs.rcs.service.api;
 
-import org.gsma.joyn.ish.IImageSharing;
-import org.gsma.joyn.ish.IImageSharingListener;
-import org.gsma.joyn.ish.ImageSharing;
+import com.gsma.services.rcs.ish.IImageSharing;
+import com.gsma.services.rcs.ish.IImageSharingListener;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;

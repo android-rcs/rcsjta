@@ -1,6 +1,6 @@
 package com.orangelabs.rcs.provider.messaging;
 
-import org.gsma.joyn.ft.FileTransferLog;
+import com.gsma.services.rcs.ft.FileTransferLog;
 
 import android.net.Uri;
 

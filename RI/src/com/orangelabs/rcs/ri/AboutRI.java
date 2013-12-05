@@ -18,13 +18,12 @@
 
 package com.orangelabs.rcs.ri;
 
-import org.gsma.joyn.JoynService.Build;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService.Build;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**

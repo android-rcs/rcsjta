@@ -20,9 +20,6 @@ package com.orangelabs.rcs.ri.capabilities;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gsma.joyn.capability.CapabilitiesLog;
-import org.gsma.joyn.capability.CapabilityService;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -41,6 +38,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

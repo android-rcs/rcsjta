@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
- package="org.gsma.joyn.samples.extension"
+ package="com.gsma.services.rcs.samples.extension"
  android:versionCode="1"
  android:versionName="1.0">
 	
@@ -16,7 +16,7 @@
 
             <!-- Declare the joyn extension -->
            	<intent-filter>
-                <action android:name="org.gsma.joyn.capability.EXTENSION"/>
+                <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.game"/>
             </intent-filter>            
         </activity>

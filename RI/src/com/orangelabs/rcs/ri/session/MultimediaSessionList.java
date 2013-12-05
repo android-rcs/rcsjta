@@ -21,12 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.session.MultimediaSession;
-import org.gsma.joyn.session.MultimediaSessionService;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -35,6 +29,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.session.MultimediaSession;
+import com.gsma.services.rcs.session.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

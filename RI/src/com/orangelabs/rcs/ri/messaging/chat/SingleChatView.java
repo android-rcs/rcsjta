@@ -18,16 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.chat.Chat;
-import org.gsma.joyn.chat.ChatIntent;
-import org.gsma.joyn.chat.ChatListener;
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.ChatMessage;
-import org.gsma.joyn.chat.Geoloc;
-
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,6 +28,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.chat.Chat;
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatListener;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;

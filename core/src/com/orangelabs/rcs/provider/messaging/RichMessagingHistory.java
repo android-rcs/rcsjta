@@ -22,16 +22,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.gsma.joyn.chat.ChatLog;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.ft.FileTransfer;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
@@ -299,6 +298,7 @@ public class RichMessagingHistory {
 		if (logger.isActivated()){
 			logger.debug("Add chat message: contact=" + contact + ", msg=" + msg.getMessageId());
 		}
+		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
@@ -337,7 +337,7 @@ public class RichMessagingHistory {
 		Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);		
+		String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
 		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact);
@@ -372,6 +372,7 @@ public class RichMessagingHistory {
 		if (logger.isActivated()){
 			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
 		}
+		
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
@@ -407,11 +408,11 @@ public class RichMessagingHistory {
 		}
 		
 		GeolocPush geoloc = msg.getGeoloc();
-		org.gsma.joyn.chat.Geoloc geolocApi = new org.gsma.joyn.chat.Geoloc(geoloc.getLabel(),
+		com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = org.gsma.joyn.chat.GeolocMessage.geolocToString(geolocApi);
-		
+		String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
+
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());

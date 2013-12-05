@@ -22,22 +22,22 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.ipcall.IIPCall;
-import org.gsma.joyn.ipcall.IIPCallListener;
-import org.gsma.joyn.ipcall.IIPCallPlayer;
-import org.gsma.joyn.ipcall.IIPCallRenderer;
-import org.gsma.joyn.ipcall.IIPCallService;
-import org.gsma.joyn.ipcall.INewIPCallListener;
-import org.gsma.joyn.ipcall.IPCall;
-import org.gsma.joyn.ipcall.IPCallIntent;
-import org.gsma.joyn.ipcall.IPCallServiceConfiguration;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.ipcall.IIPCall;
+import com.gsma.services.rcs.ipcall.IIPCallListener;
+import com.gsma.services.rcs.ipcall.IIPCallPlayer;
+import com.gsma.services.rcs.ipcall.IIPCallRenderer;
+import com.gsma.services.rcs.ipcall.IIPCallService;
+import com.gsma.services.rcs.ipcall.INewIPCallListener;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCallIntent;
+import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;

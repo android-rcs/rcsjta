@@ -70,7 +70,7 @@
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.extensions"/>
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions"/>
             </intent-filter>
         </activity>		
 		
@@ -84,7 +84,7 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="org.gsma.joyn.action.VIEW_FT"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_FT"/>
             </intent-filter>
         </activity>
 
@@ -94,19 +94,19 @@
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.file-transfer"/>
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer"/>
             </intent-filter>
             
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.gsma.joyn.action.INITIATE_FT"/>                
+                <action android:name="com.gsma.services.rcsaction.INITIATE_FT"/>                
             </intent-filter>					
 		</activity>
         
 		<receiver android:name=".messaging.ft.FileTransferInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.ft.action.NEW_FILE_TRANSFER"/>
+		    	<action android:name="com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER"/>
             </intent-filter>
         </receiver>
 
@@ -120,12 +120,12 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="org.gsma.joyn.action.VIEW_CHAT"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_CHAT"/>
             </intent-filter>            
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="org.gsma.joyn.action.VIEW_GROUP_CHAT"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT"/>
             </intent-filter>            
 		</activity>
 
@@ -135,17 +135,17 @@
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.im-session"/>
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session"/>
             </intent-filter>
 			<intent-filter>
-                <action android:name="org.gsma.joyn.action.INITIATE_CHAT"/>
+                <action android:name="com.gsma.services.rcs.action.INITIATE_CHAT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 		</activity>        
         
 		<receiver android:name=".messaging.chat.SingleChatInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.chat.action.NEW_CHAT"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_CHAT"/>
             </intent-filter>
         </receiver>
         
@@ -159,14 +159,14 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 			<intent-filter>
-                <action android:name="org.gsma.joyn.action.INITIATE_GROUP_CHAT"/>
+                <action android:name="com.gsma.services.rcs.action.INITIATE_GROUP_CHAT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 		</activity>        
 
 		<receiver android:name=".messaging.chat.GroupChatInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.chat.action.NEW_GROUP_CHAT"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 		
@@ -196,7 +196,7 @@
         
 		<receiver android:name=".sharing.image.ImageSharingInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.ish.action.NEW_IMAGE_SHARING"/>
+		    	<action android:name="com.gsma.services.rcs.ish.action.NEW_IMAGE_SHARING"/>
             </intent-filter>
         </receiver>
 
@@ -212,7 +212,7 @@
         
 		<receiver android:name=".sharing.geoloc.GeolocSharingInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.gsh.action.NEW_GEOLOC_SHARING"/>
+		    	<action android:name="com.gsma.services.rcs.gsh.action.NEW_GEOLOC_SHARING"/>
             </intent-filter>
         </receiver>
 
@@ -226,7 +226,7 @@
         
 		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.vsh.action.NEW_VIDEO_SHARING"/>
+		    	<action android:name="com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING"/>
             </intent-filter>
         </receiver>
 
@@ -242,7 +242,7 @@
         
 		<receiver android:name=".session.MultimediaSessionInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.session.action.NEW_SESSION"/>
+		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
@@ -259,7 +259,7 @@
         
    		<receiver android:name=".session.MultimediaMessageReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.session.action.NEW_MESSAGE"/>
+		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE"/>
                 <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
@@ -272,7 +272,7 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="org.gsma.joyn.action.VIEW_IPCALL"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_IPCALL"/>
             </intent-filter>
 		</activity>
 		
@@ -280,19 +280,19 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="org.gsma.joyn.action.INITIATE_IPCALL"/>
+			    <action android:name="com.gsma.services.rcs.action.INITIATE_IPCALL"/>
             </intent-filter>
 	 	    
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/org.gsma.joyn.ip-voice-call"/>
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call"/>
             </intent-filter>
 		</activity>
 		
 		<receiver android:name=".ipcall.IPCallInvitationReceiver">
             <intent-filter>
-		    	<action android:name="org.gsma.joyn.ipcall.action.NEW_CALL"/>
+		    	<action android:name="com.gsma.services.rcs.ipcall.action.NEW_CALL"/>
             </intent-filter>
         </receiver>
 	 	

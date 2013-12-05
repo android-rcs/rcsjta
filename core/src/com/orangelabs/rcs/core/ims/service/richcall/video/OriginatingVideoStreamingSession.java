@@ -20,10 +20,9 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
-import org.gsma.joyn.vsh.IVideoPlayerListener;
-import org.gsma.joyn.vsh.IVideoPlayer;
-import org.gsma.joyn.vsh.VideoCodec;
-
+import com.gsma.services.rcs.vsh.IVideoPlayer;
+import com.gsma.services.rcs.vsh.IVideoPlayerListener;
+import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;

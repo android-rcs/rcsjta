@@ -17,7 +17,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.sharing;
 
-import org.gsma.joyn.vsh.VideoSharingLog;
+import com.gsma.services.rcs.vsh.VideoSharingLog;
 
 import android.net.Uri;
 

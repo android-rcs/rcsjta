@@ -21,14 +21,13 @@ package com.orangelabs.rcs.ri.sharing.video.media;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.gsma.joyn.vsh.IVideoRendererListener;
-import org.gsma.joyn.vsh.VideoCodec;
-import org.gsma.joyn.vsh.VideoRenderer;
-
 import android.graphics.Bitmap;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
+import com.gsma.services.rcs.vsh.IVideoRendererListener;
+import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.vsh.VideoRenderer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.DummyPacketGenerator;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;

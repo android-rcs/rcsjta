@@ -22,19 +22,19 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.gsma.joyn.IJoynServiceRegistrationListener;
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.chat.Geoloc;
-import org.gsma.joyn.gsh.GeolocSharingIntent;
-import org.gsma.joyn.gsh.IGeolocSharing;
-import org.gsma.joyn.gsh.IGeolocSharingListener;
-import org.gsma.joyn.gsh.IGeolocSharingService;
-import org.gsma.joyn.gsh.INewGeolocSharingListener;
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.gsh.IGeolocSharing;
+import com.gsma.services.rcs.gsh.IGeolocSharingListener;
+import com.gsma.services.rcs.gsh.IGeolocSharingService;
+import com.gsma.services.rcs.gsh.INewGeolocSharingListener;
 
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;

@@ -20,14 +20,6 @@ package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.io.File;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.chat.ChatService;
-import org.gsma.joyn.chat.GroupChat;
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.FileTransferListener;
-import org.gsma.joyn.ft.FileTransferService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -49,10 +41,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransferListener;
+import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

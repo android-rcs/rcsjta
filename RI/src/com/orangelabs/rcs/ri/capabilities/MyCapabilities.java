@@ -20,19 +20,18 @@ package com.orangelabs.rcs.ri.capabilities;
 
 import java.util.Set;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.capability.Capabilities;
-import org.gsma.joyn.capability.CapabilityService;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -17,15 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.sharing.video;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.ish.ImageSharingIntent;
-import org.gsma.joyn.vsh.VideoSharing;
-import org.gsma.joyn.vsh.VideoSharingListener;
-import org.gsma.joyn.vsh.VideoSharingService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -41,6 +32,14 @@ import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.vsh.VideoSharing;
+import com.gsma.services.rcs.vsh.VideoSharingIntent;
+import com.gsma.services.rcs.vsh.VideoSharingListener;
+import com.gsma.services.rcs.vsh.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoRenderer;
@@ -126,8 +125,8 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
         setTitle(R.string.menu_video_sharing);
 
         // Get invitation info
-        sharingId = getIntent().getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
+        sharingId = getIntent().getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
+		remoteContact = getIntent().getStringExtra(VideoSharingIntent.EXTRA_CONTACT);
 
         // Create the live video view
         videoView = (VideoSurfaceView)findViewById(R.id.video_view);

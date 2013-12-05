@@ -44,7 +44,7 @@
             android:orientation="horizontal">
               
             <view
-                class="org.gsma.joyn.samples.contacts.SearchEditText"
+                class="com.gsma.services.rcs.samples.contacts.SearchEditText"
                 android:id="@+id/search_src_text"
                 android:layout_height="wrap_content"
                 android:layout_width="0dip"

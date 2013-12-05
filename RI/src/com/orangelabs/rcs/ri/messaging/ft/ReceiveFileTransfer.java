@@ -20,15 +20,6 @@ package com.orangelabs.rcs.ri.messaging.ft;
 
 import java.io.File;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.JoynServiceNotAvailableException;
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.ft.FileTransferIntent;
-import org.gsma.joyn.ft.FileTransferListener;
-import org.gsma.joyn.ft.FileTransferService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -45,6 +36,13 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransferIntent;
+import com.gsma.services.rcs.ft.FileTransferListener;
+import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

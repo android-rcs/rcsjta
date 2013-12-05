@@ -1,6 +1,6 @@
 package com.orangelabs.rcs.provider.messaging;
 
-import org.gsma.joyn.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog;
 
 import android.net.Uri;
 

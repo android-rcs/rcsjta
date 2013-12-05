@@ -66,8 +66,8 @@ public class RichAddressBookProvider extends ContentProvider {
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "eab/#", CONTACT_ID);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation", AGGREGATIONS);
 		uriMatcher.addURI("com.orangelabs.rcs.eab", "aggregation/#", AGGREGATION_ID);
-		uriMatcher.addURI("org.gsma.joyn.provider.capabilities", "capabilities", RCSAPI);
-		uriMatcher.addURI("org.gsma.joyn.provider.capabilities", "capabilities/#", RCSAPI_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.capabilities", "capabilities", RCSAPI);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.capabilities", "capabilities/#", RCSAPI_ID);
 	}
 
     /**

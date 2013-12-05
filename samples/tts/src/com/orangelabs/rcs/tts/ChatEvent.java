@@ -2,14 +2,14 @@ package com.orangelabs.rcs.tts;
 
 import java.util.ArrayList;
 
-import org.gsma.joyn.chat.ChatIntent;
-import org.gsma.joyn.chat.ChatMessage;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatMessage;
 
 /**
  * Chat invitation event receiver

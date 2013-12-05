@@ -1,8 +1,5 @@
 package com.orangelabs.rcs.ri.capabilities;
 
-import org.gsma.joyn.capability.CapabilitiesLog;
-import org.gsma.joyn.capability.CapabilityService;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -17,6 +14,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

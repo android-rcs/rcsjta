@@ -24,8 +24,8 @@ import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 
-import org.gsma.joyn.chat.ChatLog;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;

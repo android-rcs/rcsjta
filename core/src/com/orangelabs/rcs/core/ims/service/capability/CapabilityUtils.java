@@ -304,7 +304,7 @@ public class CapabilityUtils {
 		try {
 			// Intent query on current installed activities
 			PackageManager packageManager = context.getPackageManager();
-			Intent intent = new Intent(org.gsma.joyn.capability.CapabilityService.INTENT_EXTENSIONS);
+			Intent intent = new Intent(com.gsma.services.rcs.capability.CapabilityService.INTENT_EXTENSIONS);
 			String mime = FeatureTags.FEATURE_RCSE + "/*"; 
 			intent.setType(mime);			
 			List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);

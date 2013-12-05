@@ -20,13 +20,6 @@ package com.orangelabs.rcs.ri.sharing.video;
 
 import java.lang.reflect.Method;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.ft.FileTransfer;
-import org.gsma.joyn.vsh.VideoSharing;
-import org.gsma.joyn.vsh.VideoSharingListener;
-import org.gsma.joyn.vsh.VideoSharingService;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -54,6 +47,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.vsh.VideoSharing;
+import com.gsma.services.rcs.vsh.VideoSharingListener;
+import com.gsma.services.rcs.vsh.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
@@ -368,7 +365,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 					hideProgressDialog();
 					
 					// Display error
-                    if (error == FileTransfer.Error.INVITATION_DECLINED) {
+                    if (error == VideoSharing.Error.INVITATION_DECLINED) {
                         Utils.showMessageAndExit(InitiateVideoSharing.this,
                                 getString(R.string.label_sharing_declined));
                     } else {

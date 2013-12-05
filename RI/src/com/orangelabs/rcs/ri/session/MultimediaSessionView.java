@@ -17,14 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.session;
 
-import org.gsma.joyn.JoynService;
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.JoynServiceListener;
-import org.gsma.joyn.session.MultimediaSession;
-import org.gsma.joyn.session.MultimediaSessionIntent;
-import org.gsma.joyn.session.MultimediaSessionListener;
-import org.gsma.joyn.session.MultimediaSessionService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -41,6 +33,13 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.session.MultimediaSession;
+import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.gsma.services.rcs.session.MultimediaSessionListener;
+import com.gsma.services.rcs.session.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

@@ -21,15 +21,14 @@ package com.orangelabs.rcs.ri.sharing.video.media;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.gsma.joyn.JoynServiceException;
-import org.gsma.joyn.vsh.IVideoPlayerListener;
-import org.gsma.joyn.vsh.VideoCodec;
-import org.gsma.joyn.vsh.VideoPlayer;
-
 import android.hardware.Camera;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.vsh.IVideoPlayerListener;
+import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.vsh.VideoPlayer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
