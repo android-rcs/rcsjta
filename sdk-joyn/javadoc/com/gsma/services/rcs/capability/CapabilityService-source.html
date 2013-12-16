@@ -445,25 +445,20 @@ import android.os.IInterface;
  * MSISDN in national or international format, SIP address, SIP-URI
  * or Tel-URI.
  * 
- * Note: only IARI tags are supported for capabilities extensions.
- * 
  * @author Jean-Marc AUFFRET
  */
 public class CapabilityService extends JoynService {
     /**
      * Intent broadcasted to discover extensions
+     * 
+     * @see CapabilityService.EXTENSION_MIME_TYPE
      */
     public final static String INTENT_EXTENSIONS = "com.gsma.services.rcs.capability.EXTENSION";
     
 	/**
-	 * Extension base name
+	 * Extension MIME type
 	 */
-	public final static String EXTENSION_BASE_NAME = "+g.3gpp.iari-ref";
-
-	/**
-	 * Extension prefix name
-	 */
-	public final static String EXTENSION_PREFIX_NAME = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse";	    
+	public final static String EXTENSION_MIME_TYPE = "com.gsma.services.rcs";
 
 	/**
 	 * API

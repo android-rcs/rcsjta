@@ -1,0 +1,51 @@
+README - joyn SDK
+
+News v3.2.1:
+------------
+
+- Simplify the service ID syntax used by Capability and MM session APIs.
+
+
+News v3.2.0:
+------------
+
+- Rename all packages to "com.gsma.services.rcs".
+
+
+News v3.1.0:
+------------
+
+- Blackbird release.
+
+
+News v3.0.2:
+------------
+
+- Bug fix on single chat (joyn servcei + RI).
+
+
+News v3.0.1:
+------------
+
+- See complete API javadoc:
+	https://rcsjta.googlecode.com/git/sdk-joyn/javadoc/packages.html.
+
+- See API samples:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
+
+- See API tutorials:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
+
+
+
+Bugs fixed:
+-----------
+
+Concerning the open source stack and RI application, see details at http://code.google.com/p/android-rcs-ims-stack/issues/list.
+
+
+
+Contact:
+--------
+Orange Labs
+jeanmarc.auffret@orange.com

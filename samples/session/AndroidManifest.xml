@@ -24,7 +24,7 @@
 		<receiver android:name=".MultimediaSessionInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
-                <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.texto" />
+                <data android:mimeType="com.gsma.services.rcs/sample.texto" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 		    	</intent-filter>

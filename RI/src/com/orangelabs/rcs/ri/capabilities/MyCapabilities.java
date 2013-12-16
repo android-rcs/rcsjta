@@ -77,7 +77,6 @@ public class MyCapabilities extends Activity implements JoynServiceListener {
      */
     public void onServiceConnected() {
     	try {
-System.out.println(">>>>>>>>>>>>>>>>>>> " + capabilityApi.getServiceVersion());
     		// Get the current capabilities from the RCS contacts API
         	Capabilities capabilities = capabilityApi.getMyCapabilities();
 	    	
@@ -102,7 +101,7 @@ System.out.println(">>>>>>>>>>>>>>>>>>> " + capabilityApi.getServiceVersion());
 	        String result = "";
 	        Set<String> extensionList = capabilities.getSupportedExtensions();
 	        for(String value : extensionList) {
-	        	result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
+	        	result += value + "\n";
 	        }
 	        extensions.setText(result);
 	    } catch(JoynServiceNotAvailableException e) {

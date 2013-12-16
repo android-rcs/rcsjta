@@ -15,7 +15,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -99,13 +98,10 @@ public class CapabilitiesList extends Activity {
     		cache.ipVoiceCall = cursor.getInt(7);
     		cache.ipVideoCall = cursor.getInt(8);
 
-    		String exts = "\n";
-			String[] extensionList = cursor.getString(9).split(";");
-	        for(String value : extensionList) {
-	        	if (value.length() > 0) {
-	        		exts += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
-	        	}
-            }
+    		String exts = cursor.getString(9);
+    		if (exts != null) {
+    			exts = exts.replace(';', '\n');
+    		}
     		cache.exts = exts;
             view.setTag(cache);
             

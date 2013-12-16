@@ -68,7 +68,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 
 		// Set a default tag
 		EditText tagEdit = (EditText)findViewById(R.id.tag);			
-		tagEdit.setText("+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.game\"");
+		tagEdit.setText("game");
 
         // Set button callback
         refreshBtn = (Button)findViewById(R.id.refresh_btn);

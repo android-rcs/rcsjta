@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 
 /**
@@ -38,7 +37,7 @@ public class TestMultimediaSessionApi extends ListActivity {
 	/**
 	 * Service ID constant
 	 */
-	public final static String SERVICE_ID = CapabilityService.EXTENSION_BASE_NAME + "=\"" + CapabilityService.EXTENSION_PREFIX_NAME + ".orange.sipdemo\"";
+	public final static String SERVICE_ID = "sipdemo";
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {

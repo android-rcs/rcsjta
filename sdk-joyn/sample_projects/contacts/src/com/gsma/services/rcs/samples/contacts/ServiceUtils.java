@@ -6,23 +6,11 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.util.Enumeration;
 
-import com.gsma.services.rcs.capability.CapabilityService;
-
 public class ServiceUtils {
 	/**
 	 * CRLF constant
 	 */
 	public final static String CRLF = "\r\n";
-
-	/**
-	 * Feature tag for the popup service
-	 */
-	public static final String FEATURE_TAG = CapabilityService.EXTENSION_PREFIX_NAME + ".orange.browser";
-
-	/**
-	 * Service ID constant
-	 */
-	public final static String SERVICE_ID = CapabilityService.EXTENSION_BASE_NAME + "=\"" +	FEATURE_TAG + "\"";
 	
 	/**
 	 * Construct an NTP time from a date in milliseconds

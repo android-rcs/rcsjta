@@ -1208,22 +1208,11 @@
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
-<field name="EXTENSION_BASE_NAME"
+<field name="EXTENSION_MIME_TYPE"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;+g.3gpp.iari-ref&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="EXTENSION_PREFIX_NAME"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;urn%3Aurn-7%3A3gpp-application.ims.iari.rcse&quot;"
+ value="&quot;com.gsma.services.rcs&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3730,7 +3719,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="tag" type="java.lang.String">
+<parameter name="serviceId" type="java.lang.String">
 </parameter>
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>

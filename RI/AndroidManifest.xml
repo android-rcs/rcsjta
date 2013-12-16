@@ -243,7 +243,7 @@
 		<receiver android:name=".session.MultimediaSessionInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
-                <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
+                <data android:mimeType="com.gsma.services.rcs/sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 		    	</intent-filter>
@@ -260,7 +260,7 @@
    		<receiver android:name=".session.MultimediaMessageReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE"/>
-                <data android:mimeType="+g.3gpp.iari-ref/urn%3aurn-7%3a3gpp-application.ims.iari.rcse.orange.sipdemo" />
+                <data android:mimeType="com.gsma.services.rcs/sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 		    	</intent-filter>

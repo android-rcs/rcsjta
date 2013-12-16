@@ -578,19 +578,17 @@ public class ContactsService extends JoynService {
     }
 
     /**
-     * Returns the list of contacts supporting a given extension (i.e. feature tag)
+     * Returns the list of contacts supporting a given extension or service ID
      * 
-     * @param tag Supported extension tag. The format of the tag may be the complete
-     *  IARI tag (i.e. +g.3gpp.iari-ref="xxxxxx") or just the right part of the tag
-     *   without quotes (xxxxxx).
+     * @param serviceId Service ID
      * @return List of contacts
      * @throws JoynServiceException
      */
-    public Set&lt;JoynContact&gt; getJoynContactsSupporting(String tag) throws JoynServiceException {
+    public Set&lt;JoynContact&gt; getJoynContactsSupporting(String serviceId) throws JoynServiceException {
 		if (api != null) {
 			try {
 	    		Set&lt;JoynContact&gt; result = new HashSet&lt;JoynContact&gt;();
-	    		result.addAll(api.getJoynContactsSupporting(tag));
+	    		result.addAll(api.getJoynContactsSupporting(serviceId));
 				return result;
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());

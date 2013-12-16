@@ -24,6 +24,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -73,6 +74,15 @@ public abstract class GenericSipSession extends ImsServiceSession {
 	public String getFeatureTag() {
 		return featureTag;
 	}
+	
+	/**
+	 * Returns the service ID
+	 * 
+	 * @return Service ID
+	 */
+	public String getServiceId() {
+		return CapabilityUtils.extractServiceId(featureTag);
+	}	
 
 	/**
 	 * Get local SDP

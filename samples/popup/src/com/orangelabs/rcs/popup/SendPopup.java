@@ -312,7 +312,7 @@ public class SendPopup extends ListActivity implements OnItemClickListener {
 			boolean online = joynContact.isRegistered();
 			Set<String> exts = joynContact.getCapabilities().getSupportedExtensions();
 			for(String ext : exts) {
-				if (ext.contains(PopupManager.FEATURE_TAG)) {
+				if (ext.equals(PopupManager.SERVICE_ID)) {
 					supported = true;
 					break;
 				}

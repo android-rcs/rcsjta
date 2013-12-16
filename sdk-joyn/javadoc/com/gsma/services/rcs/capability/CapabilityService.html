@@ -472,9 +472,7 @@ Summary:
  
  The parameter contact in the API supports the following formats:
  MSISDN in national or international format, SIP address, SIP-URI
- or Tel-URI.
- 
- Note: only IARI tags are supported for capabilities extensions.</p>
+ or Tel-URI.</p>
 
 
 
@@ -519,27 +517,18 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/capability/CapabilityService.html#EXTENSION_BASE_NAME">EXTENSION_BASE_NAME</a></td>
-        <td class="jd-descrcol" width="100%">Extension base name
+        <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/capability/CapabilityService.html#EXTENSION_MIME_TYPE">EXTENSION_MIME_TYPE</a></td>
+        <td class="jd-descrcol" width="100%">Extension MIME type
 </td>
     </tr>
     
     
     <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/capability/CapabilityService.html#EXTENSION_PREFIX_NAME">EXTENSION_PREFIX_NAME</a></td>
-        <td class="jd-descrcol" width="100%">Extension prefix name
-</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-Albatros" >
-        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/capability/CapabilityService.html#INTENT_EXTENSIONS">INTENT_EXTENSIONS</a></td>
-        <td class="jd-descrcol" width="100%">Intent broadcasted to discover extensions
-</td>
+        <td class="jd-descrcol" width="100%">Intent broadcasted to discover extensions</td>
     </tr>
     
     
@@ -1161,9 +1150,9 @@ From class
 
 
 
-<a id="EXTENSION_BASE_NAME"></a>
+<a id="EXTENSION_MIME_TYPE"></a>
 
-<div class="jd-details api apilevel-Albatros"> 
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1171,12 +1160,12 @@ From class
         final 
         String
       </span>
-        EXTENSION_BASE_NAME
+        EXTENSION_MIME_TYPE
     </h4>
       <div class="api-level">
         
 
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
 
 
         
@@ -1185,7 +1174,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Extension base name
+  <div class="jd-tagdata jd-tagdescr"><p>Extension MIME type
 </p></div>
 
     
@@ -1193,49 +1182,7 @@ From class
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                "+g.3gpp.iari-ref"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<a id="EXTENSION_PREFIX_NAME"></a>
-
-<div class="jd-details api apilevel-Albatros"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTENSION_PREFIX_NAME
-    </h4>
-      <div class="api-level">
-        
-
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
-
-
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extension prefix name
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse"
+                "com.gsma.services.rcs"
             
         </span>
         </div>
@@ -1269,8 +1216,12 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Intent broadcasted to discover extensions
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Intent broadcasted to discover extensions</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li>CapabilityService.EXTENSION_MIME_TYPE</li>
+      </ul>
+  </div>
 
     
         <div class="jd-tagdata">

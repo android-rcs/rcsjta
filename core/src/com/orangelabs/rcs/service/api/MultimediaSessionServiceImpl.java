@@ -35,6 +35,7 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.session.MultimediaMessageIntent;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
@@ -226,7 +227,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
 		try {
 			// Initiate a new session
-			GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	serviceId, sdp);
+			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+			GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	featureTag, sdp);
 			
 			// Add session listener
 			MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
@@ -313,7 +315,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
 		try {
 			// Send instant message
-			return Core.getInstance().getSipService().sendInstantMessage(contact, serviceId, content, contentType);
+			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+			return Core.getInstance().getSipService().sendInstantMessage(contact, featureTag, content, contentType);
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);

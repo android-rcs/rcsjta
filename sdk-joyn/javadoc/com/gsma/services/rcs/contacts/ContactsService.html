@@ -655,9 +655,9 @@ Summary:
             Set&lt;<a href="../../../../../com/gsma/services/rcs/contacts/JoynContact.html">JoynContact</a>&gt;
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/contacts/ContactsService.html#getJoynContactsSupporting(java.lang.String)">getJoynContactsSupporting</a></span>(String tag)
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/contacts/ContactsService.html#getJoynContactsSupporting(java.lang.String)">getJoynContactsSupporting</a></span>(String serviceId)
         
-        <div class="jd-descrdiv">Returns the list of contacts supporting a given extension (i.e.</div>
+        <div class="jd-descrdiv">Returns the list of contacts supporting a given extension or service ID</div>
   
   </td></tr>
 
@@ -1343,7 +1343,7 @@ From class
         Set&lt;<a href="../../../../../com/gsma/services/rcs/contacts/JoynContact.html">JoynContact</a>&gt;
       </span>
       <span class="sympad">getJoynContactsSupporting</span>
-      <span class="normal">(String tag)</span>
+      <span class="normal">(String serviceId)</span>
     </h4>
       <div class="api-level">
         <div>
@@ -1357,15 +1357,13 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the list of contacts supporting a given extension (i.e. feature tag)</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the list of contacts supporting a given extension or service ID</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>tag</th>
-          <td>Supported extension tag. The format of the tag may be the complete
-  IARI tag (i.e. +g.3gpp.iari-ref="xxxxxx") or just the right part of the tag
-   without quotes (xxxxxx).</td>
+          <th>serviceId</th>
+          <td>Service ID</td>
         </tr>
       </table>
   </div>

@@ -17,7 +17,7 @@
             <!-- Declare the joyn extension -->
            	<intent-filter>
                 <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
-                <data android:mimeType="+g.3gpp.iari-ref/urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.game"/>
+                <data android:mimeType="com.gsma.services.rcs/game"/>
             </intent-filter>            
         </activity>
 

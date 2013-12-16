@@ -23,10 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.gsma.services.rcs.contacts.IContactsService;
-
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -183,16 +182,15 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     /**
      * Returns the list of contacts supporting a given extension (i.e. feature tag)
      * 
-     * @param tag Supported extension tag. The format of the tag may be the complete
-     *  IARI tag (i.e. +g.3gpp.iari-ref="xxxxxx") or just the right part of the tag
-     *   without quotes (xxxxxx).
+     * @param serviceId Service ID
      * @return List of contacts
      * @throws ServerApiException
      */
-    public List<JoynContact> getJoynContactsSupporting(String tag) throws ServerApiException {
+    public List<JoynContact> getJoynContactsSupporting(String serviceId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get joyn contacts supporting " + tag);
+			logger.info("Get joyn contacts supporting " + serviceId);
 		}
+		
 		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
 
 		// Read capabilities in the local database
@@ -206,17 +204,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 				ArrayList<String> exts = capabilities.getSupportedExtensions();
 				for (int j=0; j < exts.size(); j++) {
 					String ext = exts.get(j);
-
-					// Extract the right side of the tag to be compared to the extension
-					String formattedTag;
-					String[] tagParts = tag.split("=");
-					if (tagParts.length > 1) {
-						formattedTag = tagParts[1].replace("\"", ""); 
-					} else {
-						formattedTag = tag;
-					}
-					
-					if (ext.equals(formattedTag)) { 
+					if (ext.equals(serviceId)) { 
 						capaApi = new Capabilities(
 			    				capabilities.isImageSharingSupported(),
 			    				capabilities.isVideoSharingSupported(),

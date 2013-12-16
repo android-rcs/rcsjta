@@ -313,7 +313,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             Set<String> extensionList = capabilities.getSupportedExtensions();
 	        for(String value : extensionList) {
 	        	if (value.length() > 0) {
-	        		result += value.substring(CapabilityService.EXTENSION_PREFIX_NAME.length()+1) + "\n";
+	        		result += value + "\n";
 	        	}
             }
             extensions.setText(result);    		

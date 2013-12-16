@@ -135,5 +135,4 @@ public class FeatureTags {
 	 * </pre>
 	 */
 	public final static String FEATURE_SIP_AUTOMATA = "automata";
-
 }

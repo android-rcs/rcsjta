@@ -23,7 +23,6 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.util.Enumeration;
 
-import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.samples.session.sdp.SdpUtils;
 
 public class ServiceUtils {
@@ -35,8 +34,7 @@ public class ServiceUtils {
 	/**
 	 * Service ID constant
 	 */
-	public final static String SERVICE_ID = CapabilityService.EXTENSION_BASE_NAME + "=\"" +
-			CapabilityService.EXTENSION_PREFIX_NAME + ".orange.texto\"";
+	public final static String SERVICE_ID = "sample.texto";
 
 	/**
 	 * Construct an NTP time from a date in milliseconds

@@ -196,6 +196,6 @@ public class ExtensionsCapabilities extends ListActivity implements OnItemClickL
 	 * @return Intent MIME type or null
 	 */
 	private static String formatIntentMimeType(String tag) {
-		return CapabilityService.EXTENSION_BASE_NAME + "/" + tag;
+		return CapabilityService.EXTENSION_MIME_TYPE + "/" + tag;
 	}
 }

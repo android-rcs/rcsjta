@@ -26,9 +26,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.session.MultimediaMessageIntent;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -79,7 +82,7 @@ public class SipIntentManager {
 	 * @param request SIP request
 	 * @param featureTag Feature tag
 	 */
-	public static Intent generateSipIntent(SipRequest request, String featureTag) {
+	private Intent generateSipIntent(SipRequest request, String featureTag) {
 		String mime = formatIntentMimeType(featureTag);
 		String action = formatIntentAction(request.getMethod());
 		Intent intent = new Intent(action);
@@ -94,7 +97,7 @@ public class SipIntentManager {
 	 * @param intent The Intent to resolve
 	 * @return Returns true if the intent has been resolved, else returns false
 	 */
-	public static boolean isSipIntentResolvedByBroadcastReceiver(Intent intent) {
+	private boolean isSipIntentResolvedByBroadcastReceiver(Intent intent) {
 		PackageManager packageManager = AndroidFactory.getApplicationContext().getPackageManager();
 		List<ResolveInfo> list = packageManager.queryBroadcastReceivers(intent,
 				PackageManager.MATCH_DEFAULT_ONLY);
@@ -107,7 +110,7 @@ public class SipIntentManager {
 	 * @param request Request method name
 	 * @return Intent action
 	 */
-	public static String formatIntentAction(String request) { 
+	private String formatIntentAction(String request) { 
 		String action;
 		if (request.equals(Request.MESSAGE)) {
 			action = MultimediaMessageIntent.ACTION_NEW_MESSAGE;
@@ -120,19 +123,11 @@ public class SipIntentManager {
 	/**
 	 * Format intent MIME type
 	 * 
-	 * @param tag Feature tag
+	 * @param featureTag Feature tag
 	 * @return Intent MIME type
 	 */
-	public static String formatIntentMimeType(String tag) { 
-		String mime;
-		if (tag.contains("=")) {
-			// Transform syntax +aaaa="bbbb" to +aaaa/bbbb before intent resolution
-			String[] submime = tag.split("=");
-			mime = submime[0] + "/" + StringUtils.removeQuotes(submime[1]);
-		} else {
-			// Transform syntax +aaaa to +aaaa/* before intent resolution
-			mime = tag + "/*";
-		}
-		return mime;
+	private String formatIntentMimeType(String featureTag) { 
+		String serviceId = CapabilityUtils.extractServiceId(featureTag);
+		return CapabilityService.EXTENSION_MIME_TYPE + "/" + serviceId;
 	}
 }

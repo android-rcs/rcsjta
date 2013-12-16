@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.popup;
 
-import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.popup.utils.DateUtils;
 
 /**
@@ -30,16 +29,11 @@ public class PopupManager {
 	 * CRLF constant
 	 */
 	private static final String CRLF = "\r\n";
-
-	/**
-	 * Feature tag for the popup service
-	 */
-	public static final String FEATURE_TAG = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.orange.popup";
     
 	/**
 	 * Service ID for the service
 	 */
-	public static final String SERVICE_ID = CapabilityService.EXTENSION_BASE_NAME + "=\"" + PopupManager.FEATURE_TAG + "\"";
+	public static final String SERVICE_ID = "orange.popup";
 	
 	/**
 	 * Generate popup

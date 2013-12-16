@@ -18,11 +18,10 @@
 
 package com.orangelabs.rcs.service.api;
 
-import com.gsma.services.rcs.session.IMultimediaSession;
-import com.gsma.services.rcs.session.IMultimediaSessionListener;
-
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.session.IMultimediaSession;
+import com.gsma.services.rcs.session.IMultimediaSessionListener;
 import com.gsma.services.rcs.session.MultimediaSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -141,7 +140,7 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	 * @return Service ID
 	 */
 	public String getServiceId() {
-		return session.getFeatureTag();
+		return session.getServiceId();
 	}	
 	
 	/**

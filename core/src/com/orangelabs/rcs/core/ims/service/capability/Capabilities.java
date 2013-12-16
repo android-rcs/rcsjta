@@ -19,6 +19,8 @@ package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
 
+import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
+
 /**
  * Capabilities
  * 
@@ -387,10 +389,10 @@ public class Capabilities {
 	/**
 	 * Add supported extension
 	 * 
-	 * @param tag Feature tag
+	 * @param serviceId Service ID
 	 */
-	public void addSupportedExtension(String tag) {
-		extensions.add(tag);
+	public void addSupportedExtension(String serviceId) {
+		extensions.add(serviceId);
 	}
 	
 	/**

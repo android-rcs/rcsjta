@@ -133,7 +133,10 @@ public class CapabilityUtils {
 		// RCS extensions support
 		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
 		if ((exts != null) && (exts.length() > 0)) {
-			 supported += exts;
+			String[] values = exts.split(",");
+			for(int i=0; i < values.length; i++) {
+				supported += FeatureTags.FEATURE_RCSE_EXTENSION + "." + values[i] + ",";
+			}
 		}
 
 		// Add RCS-e prefix
@@ -234,9 +237,12 @@ public class CapabilityUtils {
         	} else
     		if (tag.startsWith(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION)) {
     			// Support a RCS extension
-    			String[] value = tag.split("=");
-				capabilities.addSupportedExtension(StringUtils.removeQuotes(value[1]));
-			} else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
+    			String[] values = tag.split("=");
+    			String value =  StringUtils.removeQuotes(values[1]);
+    			String serviceId = value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length()+1, value.length());
+				capabilities.addSupportedExtension(serviceId);
+			} else
+			if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
 				capabilities.setSipAutomata(true);
 			}
     	}
@@ -305,7 +311,7 @@ public class CapabilityUtils {
 			// Intent query on current installed activities
 			PackageManager packageManager = context.getPackageManager();
 			Intent intent = new Intent(com.gsma.services.rcs.capability.CapabilityService.INTENT_EXTENSIONS);
-			String mime = FeatureTags.FEATURE_RCSE + "/*"; 
+			String mime = com.gsma.services.rcs.capability.CapabilityService.EXTENSION_MIME_TYPE + "/*"; 
 			intent.setType(mime);			
 			List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
 			StringBuffer extensions = new StringBuffer();
@@ -412,4 +418,22 @@ public class CapabilityUtils {
         }
         return true;
     }
+    
+	/**
+	 * Extract service ID from fetaure tag extension
+	 * 
+	 * @param featureTag Feature tag
+	 * @return Service ID
+	 */
+	public static String extractServiceId(String featureTag) { 
+		String serviceId;
+		try {
+			String[] values = featureTag.split("=");
+			String value =  StringUtils.removeQuotes(values[1]);
+			serviceId = value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length()+1, value.length());
+		} catch(Exception e) {
+			serviceId = null;
+		}
+		return serviceId;
+	}    
 }
