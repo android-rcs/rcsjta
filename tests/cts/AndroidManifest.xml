@@ -35,11 +35,11 @@
 
     <instrumentation android:name=".InstrumentationRunner"
                      android:targetPackage="android.tests.sigtest"
-                     android:label="API Signature Test"/>
+                     android:label="RCS API Signature Test"/>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
         android:targetPackage="android.tests.sigtest"
-        android:label="Simple API Signature Test">
+        android:label="RCS API Signature Test">
     </instrumentation>
 
 </manifest>
