@@ -22,19 +22,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.gsh.IGeolocSharing;
-import com.gsma.services.rcs.gsh.IGeolocSharingListener;
-import com.gsma.services.rcs.gsh.IGeolocSharingService;
-import com.gsma.services.rcs.gsh.INewGeolocSharingListener;
-
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
+import com.gsma.services.rcs.gsh.IGeolocSharing;
+import com.gsma.services.rcs.gsh.IGeolocSharingListener;
+import com.gsma.services.rcs.gsh.IGeolocSharingService;
+import com.gsma.services.rcs.gsh.INewGeolocSharingListener;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -260,15 +259,20 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			MmContent content = new GeolocContent("geoloc.xml", geolocDoc.getBytes().length, geolocDoc.getBytes());
 
 			// Initiate a sharing session
-			GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geolocPush);
+			final GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geolocPush);
 
 			// Add session listener
 			GeolocSharingImpl sessionApi = new GeolocSharingImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-			session.startSession();
-			
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
+	    	
 			// Add session in the list
 			addGeolocSharingSession(sessionApi);
 			return sessionApi;			
@@ -356,6 +360,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

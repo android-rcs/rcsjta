@@ -62,7 +62,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 		// Set first message
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 		setFirstMesssage(firstMsg);
-				
+		
 		// Create dialog path
 		createTerminatingDialogPath(invite);
 

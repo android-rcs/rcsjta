@@ -257,7 +257,7 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("Get connected participants for " + chatId);
 		}
-    	List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>();
      	Cursor cursor = cr.query(msgDatabaseUri, 
     			new String[] {
     				MessageData.KEY_CONTACT
@@ -284,7 +284,7 @@ public class RichMessagingHistory {
 	 * @param msg Chat message
 	 */
 	public void addSpamMessage(InstantMessage msg) {
-		// TODO
+		addChatMessage(msg, ChatLog.Message.Type.SPAM, ChatLog.Message.Direction.INCOMING);
 	}
 	
 	/**
@@ -294,68 +294,59 @@ public class RichMessagingHistory {
 	 * @param direction Direction
 	 */
 	public void addChatMessage(InstantMessage msg, int direction) {
+		addChatMessage(msg, ChatLog.Message.Type.CONTENT, direction);
+	}
+	
+	/**
+	 * Add a chat message
+	 * 
+	 * @param msg Chat message
+	 * @param type Message type
+	 * @param direction Direction
+	 */
+	private void addChatMessage(InstantMessage msg, int type, int direction) {
 		String contact = PhoneUtils.extractNumberFromUri(msg.getRemote());
 		if (logger.isActivated()){
 			logger.debug("Add chat message: contact=" + contact + ", msg=" + msg.getMessageId());
 		}
-		
+
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_CONTACT, contact);
-		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
 		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		values.put(MessageData.KEY_TYPE, type);
+
+		if (msg instanceof GeolocMessage) {
+			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
+			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
+					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getExpiration(), geoloc.getAccuracy());
+			String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
+			values.put(MessageData.KEY_CONTENT, content);
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+		} else {
+			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+		}
 		
 		if (direction == ChatLog.Message.Direction.INCOMING) {
+			// Receive message
+			values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);		
 			if (msg.isImdnDisplayedRequested()) {
 				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
 			} else {
 				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
 			}
 		} else {
-			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
-		}
-		cr.insert(msgDatabaseUri, values);
-	}
-	
-	/**
-	 * Add a chat geoloc
-	 * 
-	 * @param msg Geoloc message
-	 * @param direction Direction
-	 */
-	public void addChatGeoloc(GeolocMessage msg, int direction) {
-		String contact = PhoneUtils.extractNumberFromUri(msg.getRemote());
-		if (logger.isActivated()){
-			logger.debug("Add geoloc message: contact=" + contact + ", msg=" + msg.getMessageId());
-		}
-		
-		GeolocPush geoloc = msg.getGeoloc();
-		Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
-				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
-				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
-		
-		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_CHAT_ID, contact);
-		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.GEOLOC);
-		values.put(MessageData.KEY_CONTACT, contact);
-		values.put(MessageData.KEY_CONTENT, content);
-		values.put(MessageData.KEY_CONTENT_TYPE, GeolocMessage.MIME_TYPE);
-		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
-		
-		if (direction == ChatLog.Message.Direction.INCOMING) {
-			if (msg.isImdnDisplayedRequested()) {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
-			} else {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
-			}
-		} else {
+			// Send message
+			values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);		
 			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
 		}
 		cr.insert(msgDatabaseUri, values);
@@ -376,64 +367,44 @@ public class RichMessagingHistory {
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
-		values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		values.put(MessageData.KEY_CONTENT_TYPE, InstantMessage.MIME_TYPE);
 		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		
+		if (msg instanceof GeolocMessage) {
+			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
+			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
+					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getExpiration(), geoloc.getAccuracy());
+			String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
+			values.put(MessageData.KEY_CONTENT, content);
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+		} else {
+			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+		}
+
 		if (direction == ChatLog.Message.Direction.INCOMING) {
+			// Receive message
+			values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);		
 			if (msg.isImdnDisplayedRequested()) {
 				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
 			} else {
 				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
 			}
 		} else {
+			// Send message
+			values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
+			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);		
 			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
 		}
 		cr.insert(msgDatabaseUri, values);
 	}
-
-	/**
-	 * Add a group chat geoloc
-	 * 
-	 * @param chatId Chat ID
-	 * @param msg Geoloc message
-	 * @param direction Direction
-	 */
-	public void addGroupChatGeoloc(String chatId, GeolocMessage msg, int direction) {
-		if (logger.isActivated()){
-			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msg.getMessageId());
-		}
-		
-		GeolocPush geoloc = msg.getGeoloc();
-		com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
-				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
-				geoloc.getExpiration(), geoloc.getAccuracy());
-		String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
-
-		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_CHAT_ID, chatId);
-		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.GEOLOC);
-		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
-		values.put(MessageData.KEY_CONTENT, content);
-		values.put(MessageData.KEY_CONTENT_TYPE, GeolocMessage.MIME_TYPE);
-		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(ChatData.KEY_TIMESTAMP, msg.getDate().getTime());
-		
-		if (direction == ChatLog.Message.Direction.INCOMING) {
-			if (msg.isImdnDisplayedRequested()) {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD_REPORT);
-			} else {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.UNREAD);
-			}
-		} else {
-			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
-		}
-		cr.insert(msgDatabaseUri, values);
-	}	
 	
 	/**
 	 * Add group chat system message
@@ -448,6 +419,7 @@ public class RichMessagingHistory {
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_CONTACT, contact);
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.IRRELEVANT);
@@ -467,6 +439,14 @@ public class RichMessagingHistory {
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_STATUS, status);
+		if (status == ChatLog.Message.Status.Content.UNREAD) {
+			// Delivered
+			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance().getTimeInMillis());
+		} else
+		if (status == ChatLog.Message.Status.Content.READ) {
+			// Displayed
+			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
+		}
 		cr.update(msgDatabaseUri, 
 				values, 
 				MessageData.KEY_MSG_ID + " = '" + msgId + "'", 
@@ -503,9 +483,8 @@ public class RichMessagingHistory {
 	 * @param sessionId Session ID
 	 * @param direction Direction
 	 * @param content File content 
-	 * @param status Status
 	 */
-	public void addFileTransfer(String contact, String sessionId, int direction, MmContent content, int status) {
+	public void addFileTransfer(String contact, String sessionId, int direction, MmContent content) {
 		contact = PhoneUtils.extractNumberFromUri(contact);
 		if (logger.isActivated()){
 			logger.debug("Add file transfer entry: sessionID=" + sessionId +
@@ -519,11 +498,29 @@ public class RichMessagingHistory {
 		values.put(FileTransferData.KEY_CONTACT, contact);
 		values.put(FileTransferData.KEY_NAME, content.getUrl());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_STATUS, status);
 		values.put(FileTransferData.KEY_DIRECTION, direction);
-		values.put(FileTransferData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
+		
+		long date = Calendar.getInstance().getTimeInMillis();
+		if (direction == FileTransfer.Direction.INCOMING) {
+			// Receive file
+			values.put(FileTransferData.KEY_TIMESTAMP, date);
+			values.put(FileTransferData.KEY_TIMESTAMP_SENT, 0);
+			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);		
+			values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INVITED);			
+		} else {
+			// Send file
+			values.put(FileTransferData.KEY_TIMESTAMP, date);
+			values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
+			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
+			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);		
+			values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
+		}
+		
+		
+		
 		cr.insert(ftDatabaseUri, values);
 	}
 
@@ -539,6 +536,14 @@ public class RichMessagingHistory {
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_STATUS, status);
+		if (status == FileTransfer.State.DELIVERED) {
+			// Delivered
+			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance().getTimeInMillis());
+		} else
+		if (status == FileTransfer.State.DISPLAYED) {
+			// Displayed
+			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
+		}
 		cr.update(ftDatabaseUri, 
 				values, 
 				FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", 
@@ -586,14 +591,14 @@ public class RichMessagingHistory {
 	}
 	
     /**
-     * Get file transfer ID
+     * Get file transfer ID from a received message
      *
      * @param msgId Message ID
      * @return Chat session ID of the file transfer
      */
     public String getFileTransferId(String msgId) {
         String result = null;
-        Cursor cursor = cr.query(msgDatabaseUri, 
+/* TODO       Cursor cursor = cr.query(msgDatabaseUri, 
                 new String[] {
         		ChatData.KEY_CHAT_ID
                 },
@@ -604,7 +609,7 @@ public class RichMessagingHistory {
         if (cursor.moveToFirst()) {
             result = cursor.getString(0);
         }
-        cursor.close();
+        cursor.close();*/
         return result;
     }
     

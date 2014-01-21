@@ -316,6 +316,20 @@ public class GroupChat {
 		}		
 	}
 	
+    /**
+     * Sends a displayed delivery report for a given message ID
+     * 
+     * @param msgId Message ID
+	 * @throws JoynServiceException
+     */
+    public void sendDisplayedDeliveryReport(String msgId) throws JoynServiceException {
+		try {
+			chatInf.sendDisplayedDeliveryReport(msgId);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	
+    }	
+	
 	/**
 	 * Adds participants to a group chat
 	 * 

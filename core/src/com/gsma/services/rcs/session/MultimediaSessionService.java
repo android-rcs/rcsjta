@@ -215,7 +215,7 @@ public class MultimediaSessionService extends JoynService {
      * Sends an instant message to a contact and for a given service. The message may be any
      * type of content. The parameter contact supports the following formats: MSISDN in
      * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
-     * contact is not supported an exception is thrown.
+     * contact is not supported an exception is thrown. 
      * 
      * @param serviceId Service ID
      * @param contact Contact

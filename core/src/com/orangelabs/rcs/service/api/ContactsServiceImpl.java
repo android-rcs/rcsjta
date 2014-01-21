@@ -89,7 +89,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     				capabilities.isGeolocationPushSupported(),
     				capabilities.isIPVoiceCallSupported(),
     				capabilities.isIPVideoCallSupported(),
-    				exts); 
+    				exts,
+    				capabilities.isSipAutomata()); 
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 			return new JoynContact(contactId, registered, capaApi);
 		} else {
@@ -130,7 +131,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	    				capabilities.isGeolocationPushSupported(),
 	    				capabilities.isIPVoiceCallSupported(),
 	    				capabilities.isIPVideoCallSupported(),
-	    				exts); 
+	    				exts,
+	    				capabilities.isSipAutomata()); 
 			}
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 			result.add(new JoynContact(contact, registered, capaApi));
@@ -169,7 +171,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		    				capabilities.isGeolocationPushSupported(),
 		    				capabilities.isIPVoiceCallSupported(),
 		    				capabilities.isIPVideoCallSupported(),
-		    				exts); 
+		    				exts,
+		    				capabilities.isSipAutomata()); 
 				}
 				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 				result.add(new JoynContact(contact, registered, capaApi));
@@ -213,7 +216,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			    				capabilities.isGeolocationPushSupported(),
 			    				capabilities.isIPVoiceCallSupported(),
 			    				capabilities.isIPVideoCallSupported(),
-			    				new HashSet<String>(capabilities.getSupportedExtensions())); 
+			    				new HashSet<String>(capabilities.getSupportedExtensions()),
+			    				capabilities.isSipAutomata()); 
 						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 						result.add(new JoynContact(contact, registered, capaApi));
 					}
@@ -232,6 +236,6 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

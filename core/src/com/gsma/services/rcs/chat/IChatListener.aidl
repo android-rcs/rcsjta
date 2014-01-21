@@ -9,6 +9,8 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 interface IChatListener {
 	void onNewMessage(in ChatMessage message);
 
+	void onNewGeoloc(in GeolocMessage message);
+
 	void onReportMessageDelivered(in String msgId);
 
 	void onReportMessageDisplayed(in String msgId);

@@ -1,8 +1,8 @@
 package com.orangelabs.rcs.provider.messaging;
 
-import com.gsma.services.rcs.ft.FileTransferLog;
-
 import android.net.Uri;
+
+import com.gsma.services.rcs.ft.FileTransferLog;
 
 /**
  * File transfer data constants
@@ -29,6 +29,21 @@ public class FileTransferData {
 	 * Column name
 	 */
 	static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
+	
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
+    
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
+    
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;	
 
 	/**
 	 * Column name

@@ -1,8 +1,5 @@
 package com.orangelabs.rcs.service.api;
 
-import com.gsma.services.rcs.chat.IChat;
-import com.gsma.services.rcs.chat.IChatListener;
-
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
@@ -10,6 +7,8 @@ import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.IChat;
+import com.gsma.services.rcs.chat.IChatListener;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -115,15 +114,58 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
 	
 	/**
-     * Sends a chat message
+     * Sends a text message
      * 
-     * @param message Message
+     * @param message Text message
      * @return Unique message ID or null in case of error
      */
     public String sendMessage(String message) {
+		if (logger.isActivated()) {
+			logger.debug("Send text message");
+		}
+
+		// Create a text message
+    	InstantMessage msg = ChatUtils.createTextMessage(contact, message,
+    			Core.getInstance().getImService().getImdnManager().isImdnActivated());
+
+    	// Send message
+	    return sendChatMessage(msg);
+    }
+    
+	/**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Unique message ID or null in case of error
+     */
+    public String sendGeoloc(Geoloc geoloc) {
+		if (logger.isActivated()) {
+			logger.debug("Send geoloc message");
+		}
+			
+		// Create a geoloc message
+		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
+				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getExpiration(), geoloc.getAccuracy());
+
+		// Create a geoloc message
+    	GeolocMessage msg = ChatUtils.createGeolocMessage(contact, geolocPush,
+    			Core.getInstance().getImService().getImdnManager().isImdnActivated());
+
+    	// Send message
+	    return sendChatMessage(msg);
+    }
+
+	/**
+     * Sends a chat message
+     * 
+     * @param msg Message
+     * @return Unique message ID or null in case of error
+     */
+    private String sendChatMessage(InstantMessage msg) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.debug("Send message");
+				logger.debug("Send chat message");
 			}
 			
 			// Check if a session should be initiated or not
@@ -133,18 +175,22 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    				logger.debug("Core session is not yet established: initiate a new session to send the message");
 	    			}
 	
-	    			// Initiate a new session
-					session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, message);
+	    	    	// Initiate a new session
+					session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, msg);
 					
 					// Update with new session
 					setCoreSession(session);
 			
 					// Update rich messaging history
-					RichMessagingHistory.getInstance().addChatMessage(session.getFirstMessage(),
-							ChatLog.Message.Direction.OUTGOING);
+					RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 	
 					// Start the session
-					session.startSession();
+			        Thread t = new Thread() {
+			    		public void run() {
+							session.startSession();
+			    		}
+			    	};
+			    	t.start();
 					return session.getFirstMessage().getMessageId();
 				} catch(Exception e) {
 					if (logger.isActivated()) {
@@ -160,31 +206,17 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				// Generate a message Id
 				String msgId = ChatUtils.generateMessageId();
 		
-				// Send text message
-				session.sendTextMessage(msgId, message);
+				// Send message
+				if (msg instanceof GeolocMessage) {
+					session.sendGeolocMessage(msgId, ((GeolocMessage)msg).getGeoloc());
+				} else {
+					session.sendTextMessage(msgId, msg.getTextMessage());					
+				}
 				return msgId;
 	    	}
-		}
+		}    	
     }
     
-	/**
-     * Sends a geoloc message
-     * 
-     * @param geoloc Geoloc
-     * @return Unique message ID or null in case of error
-     */
-    public String sendGeoloc(Geoloc geoloc) {
-		// Generate a message Id
-		String msgId = ChatUtils.generateMessageId();
-
-		// Send geoloc message
-		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
-				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
-				geoloc.getExpiration(), geoloc.getAccuracy()); 
-		session.sendGeolocMessage(msgId, geolocPush);
-		return msgId;
-    }
-
     /**
      * Sends a displayed delivery report for a given message ID
      * 
@@ -345,6 +377,51 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
     
     /**
+     * New geoloc message received
+     * 
+     * @param geoloc Geoloc message
+     */
+    public void handleReceiveGeoloc(GeolocMessage geoloc) {
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("New geoloc received");
+			}
+			
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().addChatMessage(geoloc, ChatLog.Message.Direction.INCOMING);
+			
+			// Create a geoloc message
+        	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
+        			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
+        			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+        	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
+        			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+        			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+
+        	// Broadcast intent related to the received invitation
+	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
+	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
+	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+
+	    	// Notify event listeners
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();		
+	    }
+    }
+    
+    /**
      * IM session error
      * 
      * @param error Error
@@ -462,40 +539,5 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      */
     public void handleAddParticipantFailed(String reason) {
     	// Not used in single chat
-    }
-
-    /**
-     * New geoloc message received
-     * 
-     * @param geoloc Geoloc message
-     */
-    public void handleReceiveGeoloc(GeolocMessage geoloc) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New geoloc received");
-			}
-			
-			// Update rich messaging history
-			RichMessagingHistory.getInstance().addChatGeoloc(geoloc, ChatLog.Message.Direction.INCOMING);
-			
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
-	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
-	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
-	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
-	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
-	    }
     }
 }

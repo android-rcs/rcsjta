@@ -29,6 +29,11 @@ import android.os.Parcelable;
  */
 public class ChatMessage implements Parcelable {
 	/**
+	 * MIME type
+	 */
+	public final static String MIME_TYPE = "text/plain"; 
+	
+	/**
 	 * Unique message Id
 	 */
 	private String id;

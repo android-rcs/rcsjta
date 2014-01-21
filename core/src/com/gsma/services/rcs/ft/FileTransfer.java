@@ -65,7 +65,17 @@ public class FileTransfer {
     	 */
     	public final static int FAILED = 6;
     	
-        private State() {
+    	/**
+    	 * File transfer has been delivered 
+    	 */
+    	public final static int DELIVERED = 7;
+
+    	/**
+    	 * File transfer has been displayed or opened 
+    	 */
+    	public final static int DISPLAYED = 8;
+
+    	private State() {
         }    	
     }
     

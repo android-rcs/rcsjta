@@ -18,10 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 import javax2.sip.header.SubjectHeader;
 
 import com.gsma.services.rcs.chat.ChatLog;
@@ -187,7 +183,7 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
-		RichMessagingHistory.getInstance().addChatGeoloc(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {
@@ -213,38 +209,6 @@ public abstract class OneOneChatSession extends ChatSession {
 	}
 	
 	/**
-	 * Add a participant to the session
-	 * 
-	 * @param participant Participant
-	 */
-	public void addParticipant(String participant) {
-		ArrayList<String> participants = new ArrayList<String>();
-		participants.add(participant);
-		addParticipants(participants);
-	}
-
-	/**
-	 * Add a list of participants to the session
-	 * 
-	 * @param participants List of participants
-	 */
-	public void addParticipants(List<String> participants) {
-		// Build the list of participants
-    	String existingParticipant = getParticipants().getList().get(0);
-    	participants.add(existingParticipant);
-		
-		// Create a new session
-		ExtendOneOneChatSession session = new ExtendOneOneChatSession(
-			getImsService(),
-			ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-			this,
-			new ListOfParticipant(participants));
-		
-		// Start the session
-		session.startSession();
-	}
-
-	/**
 	 * Reject the session invitation
 	 */
 	public void rejectSession() {
@@ -264,8 +228,8 @@ public abstract class OneOneChatSession extends ChatSession {
                     content,
                     BOUNDARY_TAG);
 
-        // Test if there is a first message
-        if (getFirstMessage() != null) {
+        // Test if there is a text message
+        if ((getFirstMessage() != null) && (getFirstMessage().getTextMessage() != null)) {
             // Add a subject header
             invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(getFirstMessage().getTextMessage()));
         }

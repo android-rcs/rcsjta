@@ -163,7 +163,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 				
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 	
 	/**
@@ -178,7 +183,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
 		
         // Reject invitation
-		session.rejectSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -191,7 +201,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 		
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();
 	}
 	
 	/**
@@ -225,7 +240,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * 
 	 * @param participants List of participants
 	 */
-	public void addParticipants(List<String> participants) {
+	public void addParticipants(final List<String> participants) {
 		if (logger.isActivated()) {
 			logger.info("Add " + participants.size() + " participants to the session");
 		}
@@ -234,7 +249,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		int connected = session.getConnectedParticipants().getList().size(); 
         if (connected < max) {
             // Add a list of participants to the session
-            session.addParticipants(participants);
+	        Thread t = new Thread() {
+	    		public void run() {
+	                session.addParticipants(participants);
+	    		}
+	    	};
+	    	t.start();
         } else {
         	// Max participants achieved
             handleAddParticipantFailed("Maximum number of participants reached");
@@ -298,6 +318,26 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	public void sendIsComposingEvent(boolean status) {
 		session.sendIsComposingStatus(status);
 	}
+	
+    /**
+     * Sends a displayed delivery report for a given message ID
+     * 
+     * @param msgId Message ID
+     */
+    public void sendDisplayedDeliveryReport(String msgId) {
+		try {
+			if (logger.isActivated()) {
+				logger.debug("Set displayed delivery report for " + msgId);
+			}
+			
+			// Send MSRP delivery status
+			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Could not send MSRP delivery status",e);
+			}
+		}
+    }	
 	
 	/**
 	 * Adds a listener on chat events
@@ -680,7 +720,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addGroupChatGeoloc(session.getContributionID(),
+			RichMessagingHistory.getInstance().addGroupChatMessage(session.getContributionID(),
 					geoloc, ChatLog.Message.Direction.INCOMING);
 			
 	  		// Notify event listeners

@@ -789,20 +789,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	public abstract void sendIsComposingStatus(boolean status);
 	
 	/**
-	 * Add a participant to the session
-	 * 
-	 * @param participant Participant
-	 */
-	public abstract void addParticipant(String participant);
-	
-	/**
-	 * Add a list of participants to the session
-	 * 
-	 * @param participants List of participants
-	 */
-	public abstract void addParticipants(List<String> participants);
-	
-	/**
 	 * Send message delivery status via MSRP
 	 * 
 	 * @param contact Contact that requested the delivery status
@@ -918,11 +904,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void startMediaSession() throws Exception {
         // Nothing to do
     }
-
-	/**
-	 * Reject the session invitation
-	 */
-	public abstract void rejectSession();
 	
 	/**
 	 * Chat inactivity event

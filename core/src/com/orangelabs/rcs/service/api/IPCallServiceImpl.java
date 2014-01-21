@@ -277,7 +277,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
+			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
 
 			// Update IP call history
 			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
@@ -290,7 +290,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			sessionApi.addEventListener(listener);
 			
 			// Start the session
-			session.startSession();
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
 			
 			// Add session in the list
 			IPCallServiceImpl.addIPCallSession(sessionApi);
@@ -327,7 +332,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
+			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
 
 			// Update IP call history
 			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
@@ -340,8 +345,13 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			sessionApi.addEventListener(listener);
 			
 			// Start the session
-			session.startSession();
-			
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
+	    	
 			// Add session in the list
 			IPCallServiceImpl.addIPCallSession(sessionApi);
 			return sessionApi;
@@ -437,6 +447,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

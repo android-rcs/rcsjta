@@ -19,7 +19,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.Date;
 
-
+import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 
 /**
  * Geoloc message
@@ -30,8 +30,8 @@ public class GeolocMessage extends InstantMessage {
 	/**
 	 * MIME type
 	 */
-	public static final String MIME_TYPE = "text/geoloc";
-
+	public static final String MIME_TYPE = GeolocInfoDocument.MIME_TYPE;
+	
 	/**
 	 * Geoloc info
 	 */
@@ -46,7 +46,7 @@ public class GeolocMessage extends InstantMessage {
      * @param imdnDisplayedRequested Flag indicating that an IMDN "displayed" is requested
 	 */
 	public GeolocMessage(String messageId, String remote, GeolocPush geoloc, boolean imdnDisplayedRequested) {
-		super(messageId, remote, GeolocPush.formatGeolocToStr(geoloc), imdnDisplayedRequested);
+		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested);
 		
 		this.geoloc = geoloc;
 	}
@@ -61,7 +61,7 @@ public class GeolocMessage extends InstantMessage {
 	 * @param serverReceiptAt Receipt date of the message on the server
 	 */
 	public GeolocMessage(String messageId, String remote, GeolocPush geoloc, boolean imdnDisplayedRequested, Date serverReceiptAt) {
-		super(messageId, remote, GeolocPush.formatGeolocToStr(geoloc), imdnDisplayedRequested, serverReceiptAt);
+		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, serverReceiptAt);
 		
 		this.geoloc = geoloc;
 	}

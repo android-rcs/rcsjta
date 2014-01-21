@@ -176,7 +176,12 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 		session.setLocalSdp(sdp);
 		
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -188,8 +193,13 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 		}
 
 		// Reject invitation
-		session.rejectSession(603);
-	}
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
+    }
 
 	/**
 	 * Aborts the session
@@ -200,7 +210,12 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 		}
 
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();
 	}
 
 	/**

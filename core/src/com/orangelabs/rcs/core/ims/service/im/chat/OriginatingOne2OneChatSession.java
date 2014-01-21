@@ -18,12 +18,14 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -45,29 +47,17 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
-     * Is this 1-2-1 chat session initiated with a file transfer invitation
-     */
-	private boolean isFileTransferInit = false;
-
-    /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param contact Remote contact
 	 * @param msg First message of the session
-	 * @param fileTransferInit Is the session initiated for a file transfer
 	 */
-	public OriginatingOne2OneChatSession(ImsService parent, String contact, String msg, boolean fileTransferInit) {
+	public OriginatingOne2OneChatSession(ImsService parent, String contact, InstantMessage msg) {
         super(parent, contact);
-        this.isFileTransferInit = fileTransferInit; 
 
         // Set first message
-        if ((msg != null) && (msg.length() > 0)) {
-            // TODO if msg is for file transfer don't save it in Rich Messaging
-            InstantMessage firstMessage = ChatUtils.createFirstMessage(getRemoteContact(),
-                    msg, getImdnManager().isImdnActivated());
-            setFirstMesssage(firstMessage);
-        }
+        setFirstMesssage(msg);
 
         // Create dialog path
         createOriginatingDialogPath();
@@ -123,30 +113,40 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
 				String to = ChatUtils.ANOMYNOUS_URI;
 
 				boolean useImdn = getImdnManager().isImdnActivated();
+				String formattedMsg;
+				String mime;
+				if (getFirstMessage() instanceof GeolocMessage) {
+					GeolocMessage geolocMsg = (GeolocMessage)getFirstMessage();
+					formattedMsg = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
+							ImsModule.IMS_USER_PROFILE.getPublicUri(),
+							getFirstMessage().getMessageId());
+					mime = GeolocInfoDocument.MIME_TYPE;
+				} else
+				if (getFirstMessage() instanceof FileTransferMessage) {
+					FileTransferMessage fileMsg = (FileTransferMessage)getFirstMessage();
+					formattedMsg = fileMsg.getFileInfo();
+					mime = FileTransferHttpInfoDocument.MIME_TYPE;
+				} else {
+					formattedMsg = getFirstMessage().getTextMessage();
+					mime = InstantMessage.MIME_TYPE;
+				}
+				
 				String cpim;
-				if (isFileTransferInit ) {
-					// Send FileTransferInfo in CPIM + IMDN
-					cpim = ChatUtils.buildCpimMessageWithImdn(
-	    					from,
-	    					to,
-		        			getFirstMessage().getMessageId(),
-		        			StringUtils.encodeUTF8(getFirstMessage().getTextMessage()),
-		        			FileTransferHttpInfoDocument.MIME_TYPE);
-				} else if (useImdn) {
+				if (useImdn) {
 					// Send message in CPIM + IMDN
 					cpim = ChatUtils.buildCpimMessageWithImdn(
 	    					from,
 	    					to,
 		        			getFirstMessage().getMessageId(),
-		        			StringUtils.encodeUTF8(getFirstMessage().getTextMessage()),
-		        			InstantMessage.MIME_TYPE);
+		        			StringUtils.encodeUTF8(formattedMsg),
+		        			mime);
 				} else {
 					// Send message in CPIM
 					cpim = ChatUtils.buildCpimMessage(
 	    					from,
 	    					to,
-		        			StringUtils.encodeUTF8(getFirstMessage().getTextMessage()),
-		        			InstantMessage.MIME_TYPE);
+		        			StringUtils.encodeUTF8(formattedMsg),
+		        			mime);
 				}
 
 		    	// Build multipart

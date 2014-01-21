@@ -24,7 +24,6 @@ import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 
-
 import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
@@ -502,20 +501,7 @@ public class InstantMessagingService extends ImsService {
      * @return IM session
      * @throws CoreException
      */
-    public ChatSession initiateOne2OneChatSession(String contact, String firstMsg) throws CoreException {
-        return initiateOne2OneChatSession(contact, firstMsg, false);
-    }	
-	
-    /**
-     * Initiate a one-to-one chat session
-     * 
-     * @param contact Remote contact
-     * @param firstMsg First message
-     * @param isFileTransferInit Is initiated by a file transfer
-     * @return IM session
-     * @throws CoreException
-     */
-    public ChatSession initiateOne2OneChatSession(String contact, String firstMsg, boolean isFileTransferInit) throws CoreException {
+    public ChatSession initiateOne2OneChatSession(String contact, InstantMessage firstMsg) throws CoreException {
         if (logger.isActivated()) {
             logger.info("Initiate 1-1 chat session with " + contact);
         }
@@ -532,11 +518,10 @@ public class InstantMessagingService extends ImsService {
         OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(
                 this,
                 PhoneUtils.formatNumberToSipUri(contact),
-                firstMsg,
-                isFileTransferInit);
+                firstMsg);
 
         return session;
-    }
+    }	
 
     /**
      * Receive a one-to-one chat session invitation
@@ -736,8 +721,6 @@ public class InstantMessagingService extends ImsService {
 				groupChat.getSubject(),
 				groupChat.getParticipants());
 
-		// Start the session
-		session.startSession();
 		return session;
     }
     
@@ -762,7 +745,7 @@ public class InstantMessagingService extends ImsService {
 		}
 		
 		// Get the group chat info from database
-		GroupChatInfo groupChat = RichMessagingHistory.getInstance().getGroupChatInfo(chatId); 
+		GroupChatInfo groupChat = RichMessagingHistory.getInstance().getGroupChatInfo(chatId);
 		if (groupChat == null) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be restarted: conversation not found");
@@ -791,8 +774,6 @@ public class InstantMessagingService extends ImsService {
 				new ListOfParticipant(participants),
 				chatId);
 
-		// Start the session
-		session.startSession();
 		return session;
     }    
     

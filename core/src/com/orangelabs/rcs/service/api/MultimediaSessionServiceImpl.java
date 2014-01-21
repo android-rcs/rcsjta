@@ -228,14 +228,19 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Initiate a new session
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	featureTag, sdp);
+			final GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	featureTag, sdp);
 			
 			// Add session listener
 			MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-			session.startSession();
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
 			
 			// Add session in the list
 			MultimediaSessionServiceImpl.addSipSession(sessionApi);
@@ -353,6 +358,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

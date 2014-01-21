@@ -74,6 +74,11 @@ public class Capabilities implements Parcelable {
 	private Set<String> extensions = new HashSet<String>();
 	
 	/**
+     * Automata flag
+     */
+    private boolean automata = false;
+    
+    /**
 	 * Constructor
 	 * 
 	 * @param imageSharing Image sharing support
@@ -84,12 +89,13 @@ public class Capabilities implements Parcelable {
 	 * @param ipVoiceCall IP voice call support
 	 * @param ipVideoCall IP video call support
 	 * @param extensions Set of supported extensions
+	 * @param automata Automata flag
      * @hide
 	 */
 	public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
 			boolean fileTransfer, boolean geolocPush,
 			boolean ipVoiceCall, boolean ipVideoCall,
-			Set<String> extensions) {
+			Set<String> extensions, boolean automata) {
 		this.imageSharing = imageSharing; 
 		this.videoSharing = videoSharing; 
 		this.imSession = imSession; 
@@ -97,9 +103,10 @@ public class Capabilities implements Parcelable {
 		this.geolocPush = geolocPush;
 		this.ipVoiceCall = ipVoiceCall;
 		this.ipVideoCall = ipVideoCall;
-		this.extensions = extensions; 
+		this.extensions = extensions;
+		this.automata = automata;
 	}
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -117,6 +124,7 @@ public class Capabilities implements Parcelable {
 		this.geolocPush = source.readInt() != 0;
 		this.ipVoiceCall = source.readInt() != 0;
 		this.ipVideoCall = source.readInt() != 0;
+        this.automata = source.readInt() != 0;
     }
 
 	/**
@@ -150,6 +158,7 @@ public class Capabilities implements Parcelable {
     	dest.writeInt(geolocPush ? 1 : 0);
     	dest.writeInt(ipVoiceCall ? 1 : 0);
     	dest.writeInt(ipVideoCall ? 1 : 0);
+        dest.writeInt(automata ? 1 : 0);
     }
 
     /**
@@ -249,5 +258,14 @@ public class Capabilities implements Parcelable {
 	 */
 	public Set<String> getSupportedExtensions() {
 		return extensions;
+	}
+	
+	/**
+	 * Is automata
+	 * 
+	 * @return Returns true if it's an automata else returns false
+	 */
+	public boolean isAutomata() {
+		return automata;
 	}
 }

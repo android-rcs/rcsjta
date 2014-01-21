@@ -177,7 +177,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		session.setVideoRenderer(renderer);
 		
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 	
 	/**
@@ -192,7 +197,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
 
 		// Reject invitation
-		session.rejectSession(603);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -204,7 +214,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();	
 	}
 
 	/**

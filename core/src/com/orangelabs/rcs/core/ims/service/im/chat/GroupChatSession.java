@@ -493,13 +493,7 @@ public abstract class GroupChatSession extends ChatSession {
 	        }
         }
 	}
-	
-	/**
-	 * Reject the session invitation
-	 */
-	public void rejectSession() {
-		rejectSession(603);
-	}
+
 
     /**
      * Create an INVITE request

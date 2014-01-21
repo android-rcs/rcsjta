@@ -5,26 +5,27 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteCallbackList;
+
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IChat;
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.INewChatListener;
-
-import android.content.Intent;
-import android.os.IBinder;
-import android.os.RemoteCallbackList;
-
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
@@ -183,11 +184,23 @@ public class ChatServiceImpl extends IChatService.Stub {
     	intent.putExtra(ChatIntent.EXTRA_CONTACT, number);
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	InstantMessage msg = session.getFirstMessage();
-    	ChatMessage msgApi = new ChatMessage(msg.getMessageId(),
-    			PhoneUtils.extractNumberFromUri(msg.getRemote()),
-    			msg.getTextMessage(), msg.getServerDate(),
-    			msg.isImdnDisplayedRequested());
-    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
+    	ChatMessage msgApi;
+    	if (msg instanceof GeolocMessage) {
+    		GeolocMessage geoloc = (GeolocMessage)msg;
+        	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
+        			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
+        			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+        	msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
+        			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+        			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
+    	} else {
+        	msgApi = new ChatMessage(msg.getMessageId(),
+        			PhoneUtils.extractNumberFromUri(msg.getRemote()),
+        			msg.getTextMessage(), msg.getServerDate(),
+        			msg.isImdnDisplayedRequested());
+        	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);    		
+    	}
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
     	
     	// Notify chat invitation listeners
@@ -239,7 +252,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 				sessionApi.addEventListener(listener);
 
 				// Check core session state
-				OneOneChatSession coreSession = sessionApi.getCoreSession();
+				final OneOneChatSession coreSession = sessionApi.getCoreSession();
 				if (coreSession != null) {
 					if (logger.isActivated()) {
 						logger.debug("Core chat session already exist: " + coreSession.getSessionID());
@@ -260,7 +273,12 @@ public class ChatServiceImpl extends IChatService.Stub {
 						}
 						
 						// Auto accept the pending session
-						coreSession.acceptSession();
+				        Thread t = new Thread() {
+				    		public void run() {
+								coreSession.acceptSession();
+				    		}
+				    	};
+				    	t.start();
 					} else {
 						if (logger.isActivated()) {
 							logger.debug("Core chat session is already established");
@@ -289,22 +307,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 			throw new ServerApiException(e.getMessage());
 		}
     }    
-    
-	/**
-	 * Extend a 1-1 chat session
-	 * 
-     * @param groupSession Group chat session
-     * @param oneoneSession 1-1 chat session
-	 */
-    public void extendOneOneChatSession(GroupChatSession groupSession, OneOneChatSession oneoneSession) {
-		if (logger.isActivated()) {
-			logger.info("Extend a 1-1 chat session");
-		}
-
-		// Add session in the list
-		GroupChatImpl sessionApi = new GroupChatImpl(groupSession);
-		ChatServiceImpl.addGroupChatSession(sessionApi);
-    }
 
     /**
      * Receive message delivery status
@@ -503,7 +505,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		try {
 			// Initiate the session
-			ChatSession session = Core.getInstance().getImService().initiateAdhocGroupChatSession(contacts, subject);
+			final ChatSession session = Core.getInstance().getImService().initiateAdhocGroupChatSession(contacts, subject);
 
 			// Add session listener
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
@@ -515,7 +517,12 @@ public class ChatServiceImpl extends IChatService.Stub {
 					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
 
 			// Start the session
-			session.startSession();
+	        Thread t = new Thread() {
+	    		public void run() {
+					session.startSession();
+	    		}
+	    	};
+	    	t.start();
 						
 			// Add session in the list
 			ChatServiceImpl.addGroupChatSession(sessionApi);
@@ -545,7 +552,15 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		try {
 			// Initiate the session
-			ChatSession session = Core.getInstance().getImService().rejoinGroupChatSession(chatId);
+			final ChatSession session = Core.getInstance().getImService().rejoinGroupChatSession(chatId);
+			
+			// Start the session
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
 
 			// Add session in the list
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
@@ -576,8 +591,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		try {
 			// Initiate the session
-			ChatSession session = Core.getInstance().getImService().restartGroupChatSession(chatId);
+			final ChatSession session = Core.getInstance().getImService().restartGroupChatSession(chatId);
 
+			// Start the session
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
+			
 			// Add session in the list
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
 			ChatServiceImpl.addGroupChatSession(sessionApi);
@@ -718,6 +741,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

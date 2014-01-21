@@ -29,10 +29,17 @@ public abstract class ChatListener extends IChatListener.Stub {
 	 * 
 	 * @param message Chat message
 	 * @see ChatMessage
-	 * @see GeolocMessage
 	 */
 	public abstract void onNewMessage(ChatMessage message);
 	
+	/**
+	 * Callback called when a new geoloc has been received
+	 * 
+	 * @param message Geoloc message
+	 * @see GeolocMessage
+	 */
+	public abstract void onNewGeoloc(GeolocMessage message);
+
 	/**
 	 * Callback called when a message has been delivered to the remote
 	 * 

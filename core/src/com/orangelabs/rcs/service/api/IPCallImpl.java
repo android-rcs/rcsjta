@@ -1,12 +1,11 @@
 package com.orangelabs.rcs.service.api;
 
+import android.os.RemoteCallbackList;
+
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-
-import android.os.RemoteCallbackList;
-
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -136,7 +135,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		session.setRenderer(renderer);
 		
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -151,7 +155,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		IPCallHistory.getInstance().setCallStatus(session.getSessionID(), IPCall.State.ABORTED); 
 
 		// Reject invitation
-		session.rejectSession(603);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -163,7 +172,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();			
 	}
 
 	/**
@@ -184,7 +198,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 
 		// Add video to session
-		session.addVideo();		
+        Thread t = new Thread() {
+    		public void run() {
+    			session.addVideo();		
+    		}
+    	};
+    	t.start();			
 	}
 
 	/**
@@ -196,7 +215,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 
 		// Remove video from session
-		session.removeVideo();		
+        Thread t = new Thread() {
+    		public void run() {
+    			session.removeVideo();		
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**
@@ -210,7 +234,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		
 		// Accept to add video
-		session.getUpdateSessionManager().acceptReInvite();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.getUpdateSessionManager().acceptReInvite();
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**
@@ -221,11 +250,17 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Reject invitation to add video");
 		}
+		
 		//set video content to null
 		session.setVideoContent(null);
 		
 		// Reject add video
-		session.getUpdateSessionManager().rejectReInvite(603);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.getUpdateSessionManager().rejectReInvite(603);
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**
@@ -236,7 +271,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Hold call");
 		}
 
-		session.setOnHold(true);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.setOnHold(true);
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**
@@ -247,7 +287,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Continue call");
 		}
 
-		session.setOnHold(false);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.setOnHold(false);
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**

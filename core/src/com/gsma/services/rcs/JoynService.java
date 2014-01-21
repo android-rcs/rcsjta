@@ -34,21 +34,6 @@ public abstract class JoynService {
 	 */
 	public static class Build {
 		/**
-		 * List of GSMA versions
-		 */
-		public static class GSMA_CODES {
-			/**
-			 * GSMA RCS-e hotfixes version
-			 */
-			public final static int RCSE_HOTFIXES_1_2 = 0;
-
-			/**
-			 * GSMA RCS-e Blackbird version
-			 */
-			public final static int RCSE_BLACKBIRD = 1;
-		}
-
-		/**
 		 * List of version codes
 		 */
 		public static class VERSION_CODES {
@@ -61,14 +46,12 @@ public abstract class JoynService {
 			 * Blackbird version of joyn API
 			 */
 			public final static int BLACKBIRD = 2;
-		}
 
-		/**
-		 * GSMA version number
-		 * 
-		 * @see Build.GSMA_CODES
-		 */
-		public static final int GSMA_VERSION = GSMA_CODES.RCSE_BLACKBIRD;
+			/**
+			 * Crane version of joyn API
+			 */
+			public final static int CRANE = 3;
+		}
 
 		/**
 		 * API release implementor name
@@ -80,7 +63,7 @@ public abstract class JoynService {
 		 * 
 		 * @see Build.VERSION_CODES
 		 */
-		public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
+		public static final int API_VERSION = VERSION_CODES.CRANE;
 
 		/**
 		 * Internal number used by the underlying source control to represent

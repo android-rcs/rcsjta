@@ -719,23 +719,51 @@ public class ChatUtils {
 	}
 	
 	/**
-	 * Create a first message
+	 * Create a text message
 	 * 
 	 * @param remote Remote contact
 	 * @param txt Text message
 	 * @param imdn IMDN flag
-	 * @return First message
+	 * @return Text message
 	 */
-	public static InstantMessage createFirstMessage(String remote, String msg, boolean imdn) {
-		if ((msg != null) && (msg.length() > 0)) {
-			String msgId = ChatUtils.generateMessageId();
-			return new InstantMessage(msgId,
-					remote,
-					StringUtils.encodeUTF8(msg),
-					imdn);
-		} else {
-			return null;
-		}	
+	public static InstantMessage createTextMessage(String remote, String msg, boolean imdn) {
+		String msgId = ChatUtils.generateMessageId();
+		return new InstantMessage(msgId,
+				remote,
+				StringUtils.encodeUTF8(msg),
+				imdn);
+	}
+	
+	/**
+	 * Create a file transfer message
+	 * 
+	 * @param remote Remote contact
+	 * @param file File info
+	 * @param imdn IMDN flag
+	 * @return File message
+	 */
+	public static FileTransferMessage createFileTransferMessage(String remote, String file, boolean imdn) {
+		String msgId = ChatUtils.generateMessageId();
+		return new FileTransferMessage(msgId,
+				remote,
+				file,
+				imdn);
+	}
+	
+	/**
+	 * Create a geoloc message
+	 * 
+	 * @param remote Remote contact
+	 * @param geoloc Geoloc info
+	 * @param imdn IMDN flag
+	 * @return Geoloc message
+	 */
+	public static GeolocMessage createGeolocMessage(String remote, GeolocPush geoloc, boolean imdn) {
+		String msgId = ChatUtils.generateMessageId();
+		return new GeolocMessage(msgId,
+				remote,
+				geoloc,
+				imdn);
 	}
 	
 	/**
@@ -774,14 +802,30 @@ public class ChatUtils {
 		if (cpimMsg != null) {
 			String remote = ChatUtils.getReferredIdentity(invite);
 			String msgId = ChatUtils.getMessageId(invite);
-			String txt = cpimMsg.getMessageContent();
+			String content = cpimMsg.getMessageContent();
 			Date date = cpimMsg.getMessageDate();
-			if ((remote != null) && (msgId != null) && (txt != null)) {
-				return new InstantMessage(msgId,
-						remote,
-						StringUtils.decodeUTF8(txt),
-						ChatUtils.isImdnDisplayedRequested(invite),
-						date);
+			String mime = cpimMsg.getContentType();
+			if ((remote != null) && (msgId != null) && (content != null) && (mime != null)) {
+				if (mime.contains(GeolocMessage.MIME_TYPE)) {
+					return new GeolocMessage(msgId,
+							remote,
+							ChatUtils.parseGeolocDocument(content),
+							ChatUtils.isImdnDisplayedRequested(invite),
+							date);
+				} else
+				if (mime.contains(FileTransferMessage.MIME_TYPE)) {
+					return new FileTransferMessage(msgId,
+							remote,
+							StringUtils.decodeUTF8(content),
+							ChatUtils.isImdnDisplayedRequested(invite),
+							date);
+				} else {
+					return new InstantMessage(msgId,
+							remote,
+							StringUtils.decodeUTF8(content),
+							ChatUtils.isImdnDisplayedRequested(invite),
+							date);
+				}
 			} else {
 				return null;
 			}
@@ -947,8 +991,10 @@ public class ChatUtils {
      */
 	public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
         InstantMessage message = getFirstMessage(request);
-        if (message != null) {
-            return parseFileTransferHttpDocument(message.getTextMessage().getBytes());
+        if ((message != null) && (message instanceof FileTransferMessage)) {
+        	FileTransferMessage ftMsg = (FileTransferMessage)message;
+			byte[] xml = ftMsg.getFileInfo().getBytes();
+            return parseFileTransferHttpDocument(xml);
         } else {
             return null;
         }

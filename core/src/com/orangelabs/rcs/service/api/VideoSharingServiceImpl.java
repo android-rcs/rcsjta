@@ -23,18 +23,17 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteCallbackList;
+
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.vsh.INewVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoSharingService;
-
-import android.content.Intent;
-import android.os.IBinder;
-import android.os.RemoteCallbackList;
-
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingIntent;
 import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
@@ -303,7 +302,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 		     // Initiate a new session
-            VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
+            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
@@ -316,8 +315,13 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			sessionApi.addEventListener(listener);
 			
 			// Start the session
-			session.startSession();
-			
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();	
+	    	
 			// Add session in the list
 			addVideoSharingSession(sessionApi);
 			return sessionApi;
@@ -405,6 +409,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

@@ -262,7 +262,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
 			
 			// Initiate a sharing session
-			ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
+			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
 			// Update rich call history
 			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
@@ -275,7 +275,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-			session.startSession();
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();	
 			
 			// Add session in the list
 			addImageSharingSession(sessionApi);
@@ -364,6 +369,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

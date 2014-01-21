@@ -20,7 +20,6 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
-
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
@@ -28,6 +27,7 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -93,17 +93,17 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 		}
 	}
 	
-	private void sendResultToContact(byte[] result){
+	private void sendResultToContact(byte[] result) {
 		// Check if upload has been cancelled
         if (uploadManager.isCancelled()) {
         	return;
         }
 
-        if ((result != null) && (ChatUtils.parseFileTransferHttpDocument(result) != null)) {
-        	String fileInfo = new String(result);
+        if (result != null) {
             if (logger.isActivated()) {
-                logger.debug("Upload done with success: " + fileInfo);
+                logger.debug("Upload done with success");
             }
+            String fileInfo = new String(result);
 
 			// Send the file transfer info via a chat message
             ChatSession chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
@@ -120,7 +120,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             if (chatSession != null) {
 				// A chat session exists
                 if (logger.isActivated()) {
-                    logger.debug("Send file transfer info via an existing chat session");
+                    logger.debug("Send file transfer info via an existing chat session " + chatSession.getSessionID());
                 }
 
                 // Get the last chat session in progress to send file transfer info
@@ -143,10 +143,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
                 // Initiate a new chat session to send file transfer info in the first message, session does not need to be retrieved since it is not used
                 try {
-					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), fileInfo, true);
+                	FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false);
+					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), firstMsg);
 				} catch (CoreException e) {
 					if (logger.isActivated()) {
-	                    logger.debug("Couldn't initiate One to one session :"+e);
+	                    logger.error("Couldn't initiate One to one session", e);
 	                }
 					// TODO: no error management!!
 					return;
@@ -157,8 +158,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
                 // Update rich messaging history
                 // TODO: should be done in API server part
-                RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(),
-                        FileTransfer.Direction.OUTGOING, getContent(), FileTransfer.State.INITIATED);
+                RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(), FileTransfer.Direction.OUTGOING, getContent());
     			
 				// Add session in the list
 				ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);

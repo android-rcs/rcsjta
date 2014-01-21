@@ -163,7 +163,7 @@ public class ChatLog {
         public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
 
         /**
-         * The name of the column containing the MIME-TYPE of the message.
+         * The name of the column containing the MIME-TYPE of the message body.
          * <P>Type: TEXT</P>
          */
         public static final String MIME_TYPE = "mime_type";
@@ -183,14 +183,9 @@ public class ChatLog {
 	        public static final int SYSTEM = 1;
 	        
 	        /**
-	         * File transfer
+	         * Spam message
 	         */
-	        public static final int FILE_TRANSFER = 2;
-
-	        /**
-	         * Geoloc message
-	         */
-	        public static final int GEOLOC = 3;
+	        public static final int SPAM = 2;
         }
         	
         /**

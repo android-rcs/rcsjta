@@ -64,4 +64,19 @@ public class MessageData {
 	 * Column name
 	 */
 	static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
+	
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
+    
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
+    
+	/**
+	 * Column name
+	 */
+    static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
 }

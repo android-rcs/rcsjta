@@ -23,14 +23,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.capability.ICapabilitiesListener;
-import com.gsma.services.rcs.capability.ICapabilityService;
-
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.ICapabilitiesListener;
+import com.gsma.services.rcs.capability.ICapabilityService;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -166,7 +165,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 				capabilities.isGeolocationPushSupported(),
 				capabilities.isIPVoiceCallSupported(),
 				capabilities.isIPVideoCallSupported(),
-    			exts);
+    			exts,
+    			capabilities.isSipAutomata());
 	}
 
     /**
@@ -196,7 +196,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isGeolocationPushSupported(),
     				capabilities.isIPVoiceCallSupported(),
     				capabilities.isIPVideoCallSupported(),
-    				exts); 
+    				exts,
+    				capabilities.isSipAutomata()); 
 		} else {
 			return null;
 		}
@@ -217,7 +218,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * @param contact Contact
 	 * @throws ServerApiException
 	 */
-	public void requestContactCapabilities(String contact) throws ServerApiException {
+	public void requestContactCapabilities(final String contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Request capabilities for contact " + contact);
 		}
@@ -225,9 +226,14 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
+		// Request contact capabilities
 		try {
-			// Request contact capabilities
-			Core.getInstance().getCapabilityService().requestContactCapabilities(contact);
+	        Thread t = new Thread() {
+	    		public void run() {
+					Core.getInstance().getCapabilityService().requestContactCapabilities(contact);
+	    		}
+	    	};
+	    	t.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -258,7 +264,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isGeolocationPushSupported(),
     				capabilities.isIPVoiceCallSupported(),
     				capabilities.isIPVideoCallSupported(),
-    				exts); 
+    				exts,
+    				capabilities.isSipAutomata()); 
 
     		// Notify capabilities listeners
         	notifyListeners(contact, c, capabilitiesListeners);
@@ -311,10 +318,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
+		// Request all contacts capabilities
 		try {
-			// Request all contacts capabilities
-			List<String> contactList = ContactsManager.getInstance().getAllContacts();
-			Core.getInstance().getCapabilityService().requestContactCapabilities(contactList);
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			List<String> contactList = ContactsManager.getInstance().getAllContacts();
+	    			Core.getInstance().getCapabilityService().requestContactCapabilities(contactList);
+	    		}
+	    	};
+	    	t.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -401,6 +413,6 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

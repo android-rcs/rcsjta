@@ -158,7 +158,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 	
 	/**
@@ -173,8 +178,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		RichCallHistory.getInstance().setImageSharingStatus(session.getSessionID(), ImageSharing.State.ABORTED);
 
 		// Reject invitation
-		session.rejectSession(603);
-	}
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
+    }
 
 	/**
 	 * Aborts the sharing
@@ -190,7 +200,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 		
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**

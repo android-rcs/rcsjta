@@ -22,20 +22,19 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
-import com.gsma.services.rcs.ft.IFileTransferService;
-import com.gsma.services.rcs.ft.INewFileTransferListener;
-
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IFileTransferService;
+import com.gsma.services.rcs.ft.INewFileTransferListener;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -208,7 +207,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-    	RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent(), FileTransfer.State.INVITED);
+    	RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent());
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -304,17 +303,22 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
 			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-			FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon, null, null); // TODO
+			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon, null, null); // TODO
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent(), FileTransfer.State.INITIATED);
+			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent());
 
 			// Start the session
-			session.startSession();
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
 						
 			// Add session in the list
 			addFileTransferSession(sessionApi);
@@ -408,7 +412,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void handleFileDeliveryStatus(String ftSessionId, String status) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
             // Update rich messaging history
-        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
             
             // Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -425,7 +429,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
             // Update rich messaging history
-        	// TODO RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
             
             // Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -450,6 +454,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.GSMA_VERSION;
+		return JoynService.Build.API_VERSION;
 	}
 }

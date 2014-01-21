@@ -46,7 +46,6 @@ import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
-import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
@@ -690,21 +689,6 @@ public class RcsCoreService extends Service implements CoreListener {
     	// Broadcast the invitation
 		chatApi.receiveGroupChatInvitation(session);
 	}
-    
-    /**
-     * One-to-one chat session extended to a group chat session
-     * 
-     * @param groupSession Group chat session
-     * @param oneoneSession 1-1 chat session
-     */
-    public void handleOneOneChatSessionExtended(GroupChatSession groupSession, OneOneChatSession oneoneSession) {
-		if (logger.isActivated()) {
-			logger.debug("Handle event 1-1 chat session extended");
-		}
-
-    	// Broadcast the event
-		chatApi.extendOneOneChatSession(groupSession, oneoneSession);
-    }
 	
     /**
      * Store and Forward messages session invitation

@@ -170,7 +170,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 
 		// Accept invitation
-		session.acceptSession();
+        Thread t = new Thread() {
+    		public void run() {
+    			session.acceptSession();
+    		}
+    	};
+    	t.start();
 	}
 	
 	/**
@@ -182,7 +187,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 
 		// Reject invitation
-		session.rejectSession(603);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.rejectSession(603);
+    		}
+    	};
+    	t.start();
 	}
 
 	/**
@@ -199,7 +209,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 		
 		// Abort the session
-		session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+    		}
+    	};
+    	t.start();		
 	}
 
 	/**
@@ -381,9 +396,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			String msgId = ChatUtils.generateMessageId();
 			GeolocMessage geolocMsg = new GeolocMessage(msgId, session.getRemoteContact(), geoloc, false);
 			if (session instanceof OriginatingGeolocTransferSession) { 
-				RichMessagingHistory.getInstance().addChatGeoloc(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+				RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 			} else {
-				RichMessagingHistory.getInstance().addChatGeoloc(geolocMsg, ChatLog.Message.Direction.INCOMING);
+				RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.INCOMING);
 			}
 			
 	  		// Notify event listeners

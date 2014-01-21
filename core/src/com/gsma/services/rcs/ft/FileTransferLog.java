@@ -80,7 +80,7 @@ public class FileTransferLog {
     public static final String TRANSFERRED = "transferred";
 
     /**
-     * The name of the column containing the date of the transfer.
+     * The name of the column containing the time when transfer is initiated.
      * <P>Type: LONG</P>
      */
     public static final String TIMESTAMP = "timestamp";
