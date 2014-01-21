@@ -141,6 +141,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 				listView.setAdapter(null);
 			}
 		} catch(Exception e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(SupportedContactsList.this, getString(R.string.label_api_failed));
 		}
     }

@@ -103,6 +103,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
         try {
 	        capabilityApi.removeCapabilitiesListener(capabilitiesListener);
         } catch(JoynServiceException e) {
+        	e.printStackTrace();
         }
 
         // Disconnect API
@@ -189,7 +190,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 		    		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
 		    			registered = true;
 		    		}
-		    	} catch(Exception e) {}
+		    	} catch(Exception e) {
+		    		e.printStackTrace();
+		    	}
 		    	if (!registered) {
 			    	return;
 		        }      	
@@ -245,7 +248,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
         		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
         			registered = true;
         		}
-        	} catch(Exception e) {}
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
             if (!registered) {
     	    	Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
     	    	return;
@@ -265,22 +270,17 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
         // Display info
         Utils.displayLongToast(RequestCapabilities.this, getString(R.string.label_request_in_background, contact));
 
-        // Start request in background
-        Thread t = new Thread() {
-    		public void run() {
-		    	try {
-			        // Request new capabilities 
-			        capabilityApi.requestContactCapabilities(contact);
-			    } catch(JoynServiceNotAvailableException e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
-			    } catch(JoynServiceException e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed));
-				}
-    		}
-    	};
-    	t.start();
+        // Request capabilities
+    	try {
+	        // Request new capabilities 
+	        capabilityApi.requestContactCapabilities(contact);
+	    } catch(JoynServiceNotAvailableException e) {
+	    	e.printStackTrace();
+			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
+	    } catch(JoynServiceException e) {
+	    	e.printStackTrace();
+			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed));
+		}
     }
     
     /**

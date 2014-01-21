@@ -116,6 +116,7 @@ public class OnlineContactsList extends ListActivity implements JoynServiceListe
 				setListAdapter(null);
 			}
 		} catch(Exception e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(OnlineContactsList.this, getString(R.string.label_api_failed));
 		}
     }

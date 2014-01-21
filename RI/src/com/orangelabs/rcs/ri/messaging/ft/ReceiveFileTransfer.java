@@ -125,6 +125,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
         	try {
         		fileTransfer.removeEventListener(ftListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -197,38 +198,26 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Accept the invitation
-        			fileTransfer.acceptInvitation();
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Accept the invitation
+			fileTransfer.acceptInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_invitation_failed));
+    	}
 	}
 	
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		fileTransfer.removeEventListener(ftListener);
-        			fileTransfer.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		fileTransfer.removeEventListener(ftListener);
+			fileTransfer.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
 
 	/**
@@ -371,19 +360,15 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      */
     private void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (fileTransfer != null) {
-                		fileTransfer.removeEventListener(ftListener);
-                		fileTransfer.abortTransfer();
-                    }
-            	} catch(Exception e) {
-            	}
-            	fileTransfer = null;
-        	}
-        };
-        thread.start();
+    	try {
+            if (fileTransfer != null) {
+        		fileTransfer.removeEventListener(ftListener);
+        		fileTransfer.abortTransfer();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	fileTransfer = null;
     	
         // Exit activity
 		finish();

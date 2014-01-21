@@ -18,16 +18,13 @@
 package com.orangelabs.rcs.ri.capabilities;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
@@ -40,19 +37,9 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class RequestAllCapabilities extends Activity implements JoynServiceListener {
     /**
-     * UI handler
-     */
-    private Handler handler = new Handler();    
-    
-    /**
 	 * Capability API
 	 */
     private CapabilityService capabilityApi;
-	
-    /**
-     * Progress dialog
-     */
-    private Dialog progressDialog = null;    
    
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,64 +104,24 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
         		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
         			registered = true;
         		}
-        	} catch(Exception e) {}
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
             if (!registered) {
     	    	Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_service_not_available));
     	    	return;
             }        	
         	
-        	// Execute in background
-        	final SyncTask tsk = new SyncTask(capabilityApi);
-        	tsk.execute();
-
-        	// Display a progress dialog
-            handler.post(new Runnable() { 
-                public void run() {
-                    progressDialog = Utils.showProgressDialog(RequestAllCapabilities.this,
-                            getString(R.string.label_refresh_in_progress));
-                    progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        public void onCancel(DialogInterface dialog) {
-                            try {
-                                tsk.cancel(true);
-                            } catch (Exception e) {
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    };
-    
-    /**
-     * Background task
-     */
-    private class SyncTask extends AsyncTask<Void, Void, Void> {
-    	private CapabilityService api; 
-    	
-    	public SyncTask(CapabilityService api) {
-    		this.api = api;
-    	}
-    	
-        protected Void doInBackground(Void... unused) {        	
         	try {
     			// Refresh all contacts
-        		api.requestAllContactsCapabilities();
+                capabilityApi.requestAllContactsCapabilities();
+                
+        		// Display message
+    			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));
         	} catch(Exception e) {
     	    	e.printStackTrace();
         		Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_refresh_failed));
         	}
-        	return null;
         }
-
-        protected void onPostExecute(Void unused) {
-			// Hide progress dialog
-    		if (progressDialog != null && progressDialog.isShowing()) {
-    			progressDialog.dismiss();
-    			progressDialog = null;
-    		}
-    		
-    		// Display message
-			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));
-        }
-    }    
+    };
 }

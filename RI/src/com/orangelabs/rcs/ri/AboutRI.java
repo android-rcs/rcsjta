@@ -69,11 +69,13 @@ public class AboutRI extends Activity {
 	 * @return String
 	 */
 	private static String getGsmaVersion() {
-		switch(Build.GSMA_VERSION) {
-			case Build.GSMA_CODES.RCSE_HOTFIXES_1_2:
-				return "RCS-e hotfixes";
-			case Build.GSMA_CODES.RCSE_BLACKBIRD:
-				return "RCS-e Blackbird";
+		switch(Build.API_VERSION) {
+			case Build.VERSION_CODES.BASE:
+				return "Albatros hotfixes";
+			case Build.VERSION_CODES.BLACKBIRD:
+				return "Blackbird";
+			case Build.VERSION_CODES.CRANE:
+				return "Crane";
 			default:
 				return "Unknown";
 		}

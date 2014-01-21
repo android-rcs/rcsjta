@@ -116,6 +116,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
         	try {
         		imageSharing.removeEventListener(ishListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -185,38 +186,26 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Accept the invitation
-            		imageSharing.acceptInvitation();
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Accept the invitation
+    		imageSharing.acceptInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    		Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_invitation_failed));
+    	}
 	}
 	
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		imageSharing.removeEventListener(ishListener);
-            		imageSharing.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		imageSharing.removeEventListener(ishListener);
+    		imageSharing.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
 	
 	/**
@@ -331,19 +320,15 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
      */
     private void quitSession() {
 		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-	        	try {
-	                if (imageSharing != null) {
-	                	imageSharing.removeEventListener(ishListener);
-                		imageSharing.abortSharing();
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	imageSharing = null;
-	    	}
-	    };
-	    thread.start();
+    	try {
+            if (imageSharing != null) {
+            	imageSharing.removeEventListener(ishListener);
+        		imageSharing.abortSharing();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	imageSharing = null;
 		
 	    // Exit activity
 		finish();

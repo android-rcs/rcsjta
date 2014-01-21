@@ -138,6 +138,7 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
         	try {
         		geolocSharing.removeEventListener(gshListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -200,7 +201,9 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
         		if ((gshApi != null) && gshApi.isServiceRegistered()) {
         			registered = true;
         		}
-        	} catch(Exception e) {}
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
             if (!registered) {
     	    	Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_service_not_available));
     	    	return;
@@ -212,23 +215,14 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
             contact = cursor.getString(1);
             final String remote = contact;
 
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                        // Initiate location share
-                		geolocSharing = gshApi.shareGeoloc(remote, geoloc, gshListener);
-	            	} catch(Exception e) {
-	            		e.printStackTrace();
-	            		handler.post(new Runnable() { 
-	    					public void run() {
-	    						hideProgressDialog();
-	    						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_invitation_failed));
-		    				}
-		    			});
-	            	}
-            	}
-            };
-            thread.start();
+        	try {
+                // Initiate location share
+        		geolocSharing = gshApi.shareGeoloc(remote, geoloc, gshListener);
+        	} catch(Exception e) {
+        		e.printStackTrace();
+				hideProgressDialog();
+				Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_invitation_failed));
+        	}
 
             // Display a progress dialog
             progressDialog = Utils.showProgressDialog(InitiateGeolocSharing.this, getString(R.string.label_command_in_progress));            
@@ -412,19 +406,15 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
      */
     private void quitSession() {
 		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-	        	try {
-	                if (geolocSharing != null) {
-	                	geolocSharing.removeEventListener(gshListener);
-	                	geolocSharing.abortSharing();
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	geolocSharing = null;
-	    	}
-	    };
-	    thread.start();
+		try {
+	        if (geolocSharing != null) {
+	        	geolocSharing.removeEventListener(gshListener);
+	        	geolocSharing.abortSharing();
+	        }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		geolocSharing = null;
 		
 	    // Exit activity
 		finish();

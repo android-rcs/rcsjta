@@ -123,7 +123,7 @@ public class ShowUsInMap extends MapActivity {
 
 		String sortOrder = ChatLog.Message.TIMESTAMP + " DESC ";
 		String where = ChatLog.Message.CONTACT_NUMBER + "='" + PhoneNumberUtils.formatNumber(contact) + "' AND "
-				+ ChatLog.Message.MESSAGE_TYPE + " = " + ChatLog.Message.Type.GEOLOC + " AND "
+				+ ChatLog.Message.MIME_TYPE + " = '" + GeolocMessage.MIME_TYPE + "' AND "
 				+ ChatLog.Message.DIRECTION + " = " + ChatLog.Message.Direction.INCOMING;
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				ChatLog.Message.CONTENT_URI,
@@ -147,7 +147,7 @@ public class ShowUsInMap extends MapActivity {
 		Geoloc result = null;
 
 		String sortOrder = ChatLog.Message.TIMESTAMP + " DESC ";
-		String where = ChatLog.Message.MESSAGE_TYPE + " = " + ChatLog.Message.Type.GEOLOC + " AND "
+		String where = ChatLog.Message.MIME_TYPE + " = '" + GeolocMessage.MIME_TYPE + "' AND "
 				+ ChatLog.Message.DIRECTION + " = " + ChatLog.Message.Direction.OUTGOING;
 		Cursor cursor = getApplicationContext().getContentResolver().query(
 				ChatLog.Message.CONTENT_URI,

@@ -160,42 +160,30 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Instanciate player and renderer
-            		player = new MyIPCallPlayer();
-            		renderer = new MyIPCallRenderer();
+    	try {
+    		// Instanciate player and renderer
+    		player = new MyIPCallPlayer();
+    		renderer = new MyIPCallRenderer();
 
-            		// Accept the invitation
-        			call.acceptInvitation(player, renderer);
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    		// Accept the invitation
+			call.acceptInvitation(player, renderer);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));
+    	}
 	}
 	
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		call.removeEventListener(callListener);
-        			call.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		call.removeEventListener(callListener);
+			call.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
     
     /**
@@ -215,7 +203,9 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	        		if ((ipcallApi != null) && ipcallApi.isServiceRegistered()) {
 	        			registered = true;
 	        		}
-	        	} catch(Exception e) {}
+	        	} catch(Exception e) {
+	        		e.printStackTrace();
+	        	}
 	            if (!registered) {
 	    	    	Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_service_not_available));
 	    	    	return;
@@ -298,6 +288,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	        holdBtn.setChecked(false);
 	        holdBtn.setOnCheckedChangeListener(btnHoldListener);        
 		} catch(JoynServiceException e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_failed));
 		}
     }
@@ -318,32 +309,23 @@ public class IPCallView extends Activity implements JoynServiceListener {
      */
     private void startCall() {
 		// Initiate the chat session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Instanciate player and renderer
-            		player = new MyIPCallPlayer();
-            		renderer = new MyIPCallRenderer();
-            		
-					// Initiate session
-            		if (video) {
-            			// Visio call
-            			call = ipcallApi.initiateVisioCall(contact, player, renderer, callListener);
-            		} else {
-            			// Audio call
-            			call = ipcallApi.initiateCall(contact, player, renderer, callListener);
-            		}
-            	} catch(Exception e) {
-            		e.printStackTrace();
-            		handler.post(new Runnable(){
-            			public void run(){
-            				Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));		
-            			}
-            		});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Instanciate player and renderer
+    		player = new MyIPCallPlayer();
+    		renderer = new MyIPCallRenderer();
+    		
+			// Initiate session
+    		if (video) {
+    			// Visio call
+    			call = ipcallApi.initiateVisioCall(contact, player, renderer, callListener);
+    		} else {
+    			// Audio call
+    			call = ipcallApi.initiateCall(contact, player, renderer, callListener);
+    		}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));		
+    	}
 
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(IPCallView.this, getString(R.string.label_command_in_progress));
@@ -466,22 +448,15 @@ public class IPCallView extends Activity implements JoynServiceListener {
      */
     private void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (call != null) {
-                    	try {
-                    		call.removeEventListener(callListener);
-                    		call.abortCall();
-                    	} catch(Exception e) {
-                    	}
-                    	call = null;
-                    }
-            	} catch(Exception e) {
-            	}
+        if (call != null) {
+        	try {
+        		call.removeEventListener(callListener);
+        		call.abortCall();
+        	} catch(Exception e) {
+        		e.printStackTrace();
         	}
-        };
-        thread.start();
+        	call = null;
+        }
     	
         // Exit activity
 		finish();
@@ -548,17 +523,12 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 */
 	private void addVideo() {
 		// Initiate the operation in background
-		Thread thread = new Thread() {
-			public void run() {
-				try {
-					call.addVideo();
-				} catch(Exception e) {
-					e.printStackTrace();
-					// TODO: update UI
-				}
-			}
-		};
-		thread.start();
+		try {
+			call.addVideo();
+		} catch(Exception e) {
+			e.printStackTrace();
+			// TODO: update UI
+		}
 		
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(IPCallView.this, getString(R.string.label_command_in_progress));
@@ -574,17 +544,12 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 */
 	private void removeVideo() {
 		// Initiate the operation in background
-		Thread thread = new Thread() {
-			public void run() {
-				try {
-					call.removeVideo();
-				} catch(Exception e) {
-					e.printStackTrace();
-					// TODO: update UI
-				}
-			}
-		};
-		thread.start();
+		try {
+			call.removeVideo();
+		} catch(Exception e) {
+			e.printStackTrace();
+			// TODO: update UI
+		}
 		
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(IPCallView.this, getString(R.string.label_command_in_progress));
@@ -614,33 +579,23 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 * Hold the call
 	 */
 	private void holdCall() {
-		Thread thread = new Thread() {
-			public void run() {
-				try {
-					call.holdCall();
-				} catch(Exception e) {
-					e.printStackTrace();
-					// TODO: update UI
-				}
-			}
-		};
-		thread.start();
+		try {
+			call.holdCall();
+		} catch(Exception e) {
+			e.printStackTrace();
+			// TODO: update UI
+		}
 	}
 
 	/**
 	 * Continue the call
 	 */
 	private void continueCall() {
-		Thread thread = new Thread() {
-			public void run() {
-				try {
-					call.continueCall();
-				} catch(Exception e) {
-					e.printStackTrace();
-					// TODO: update UI
-				}
-			}
-		};
-		thread.start();
+		try {
+			call.continueCall();
+		} catch(Exception e) {
+			e.printStackTrace();
+			// TODO: update UI
+		}
 	}
 }

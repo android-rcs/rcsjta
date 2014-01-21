@@ -135,23 +135,19 @@ public class SendMultimediaMessage extends Activity implements JoynServiceListen
 				public void run() {
 					try {
 						// Initiate session
-						final boolean result = sessionApi.sendMessage(TestMultimediaSessionApi.SERVICE_ID,
-								contact, content, contentType);
-						handler.post(new Runnable(){
-							public void run(){
-								Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_sent));
-								if (result) {
-									Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_success));
-								} else {
-									Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
-								}
-							}
-						});
+						boolean result = sessionApi.sendMessage(TestMultimediaSessionApi.SERVICE_ID, contact, content, contentType);
+						if (result) {
+							Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_success));
+						} else {
+							Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
+						}
 					} catch (Exception e) {
+						Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
 					}
 				}
 			};
 			thread.start();
+			Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_sent));
 		}
 	};
 

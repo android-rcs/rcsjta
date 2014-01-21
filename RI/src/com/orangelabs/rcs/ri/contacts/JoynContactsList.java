@@ -115,6 +115,7 @@ public class JoynContactsList extends ListActivity implements JoynServiceListene
 				setListAdapter(null);
 			}
 		} catch(Exception e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(JoynContactsList.this, getString(R.string.label_api_failed));
 		}
     }

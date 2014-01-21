@@ -154,6 +154,7 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
         	try {
         		videoSharing.removeEventListener(vshListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }    	
     	
@@ -214,38 +215,26 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Accept the invitation
-            		videoSharing.acceptInvitation(videoRenderer);
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Accept the invitation
+    		videoSharing.acceptInvitation(videoRenderer);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_invitation_failed));
+    	}
 	}
 	
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		videoSharing.removeEventListener(vshListener);
-            		videoSharing.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		videoSharing.removeEventListener(vshListener);
+    		videoSharing.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
 	
 	/**
@@ -310,21 +299,16 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
      * Quit the session
      */
     private void quitSession() {
-		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-            	// Stop the sharing
-            	try {
-	                if (videoSharing != null) {
-	                	videoSharing.removeEventListener(vshListener);
-	                	videoSharing.abortSharing();
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	videoSharing = null;
-	    	}
-	    };
-	    thread.start();
+    	// Stop the sharing
+    	try {
+            if (videoSharing != null) {
+            	videoSharing.removeEventListener(vshListener);
+            	videoSharing.abortSharing();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	videoSharing = null;
 		
 	    // Exit activity
 		finish();

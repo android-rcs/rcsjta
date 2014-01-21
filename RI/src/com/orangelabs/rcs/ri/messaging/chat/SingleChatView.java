@@ -36,6 +36,7 @@ import com.gsma.services.rcs.chat.ChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -72,11 +73,6 @@ public class SingleChatView extends ChatView {
      */
 	private Chat chat = null;
 
-	/**
-	 * Delivery display report
-	 */
-	private boolean isDeliveryDisplayed = true;
-	
     /**
      * Chat listener
      */
@@ -188,24 +184,24 @@ public class SingleChatView extends ChatView {
 	    				ChatLog.Message.MESSAGE_TYPE,
 	    				ChatLog.Message.MESSAGE_ID
 	    				},
-	    			null, 
+    				null, 
 	    			null, 
 	    			ChatLog.Message.TIMESTAMP + " ASC");
 	    	while(cursor.moveToNext()) {
 	    		int direction = cursor.getInt(0);
 	    		String contact = cursor.getString(1);
-	    		String text = cursor.getString(2);
+	    		String msg = cursor.getString(2);
 	    		int status = cursor.getInt(4);
 	    		int type = cursor.getInt(5);
 	    		String msgId = cursor.getString(6);
 
-	    		// Add only message to the history
-	    		if (type == ChatLog.Message.Type.CONTENT) {
-					addMessageHistory(direction, contact, text);
-	    		}
+	    		// Add only messages to the history
+	    		if (type != ChatLog.Message.Type.SYSTEM) {
+	        		addMessageHistory(direction, contact, msg);
+	    		}	    			
 	    		
 	    		// Send displayed report for older messages
-		        if ((isDeliveryDisplayed) && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
+		        if (isDeliveryDisplayed && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
 		        	sendDisplayedReport(msgId);
 		        }	    		
 	    	}
@@ -276,7 +272,7 @@ public class SingleChatView extends ChatView {
 			    		String msgId = cursor.getString(1);
 		
 			    		// Send displayed report for older messages
-				        if ((isDeliveryDisplayed) && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
+				        if (isDeliveryDisplayed && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
 				        	sendDisplayedReport(msgId);
 				        }	    		
 			    	}
@@ -298,6 +294,7 @@ public class SingleChatView extends ChatView {
         		chat.removeEventListener(chatListener);
             }
     	} catch(Exception e) {
+    		e.printStackTrace();
     	}
     	chat = null;
         
@@ -327,9 +324,11 @@ public class SingleChatView extends ChatView {
      */
     private void sendDisplayedReport(String msgId) {
         try {
-            chat.sendDisplayedDeliveryReport(msgId);
+			if (chat != null) {
+				chat.sendDisplayedDeliveryReport(msgId);
+			}
         } catch(Exception e) {
-            // Nothing to do
+			e.printStackTrace();
         }
     }
     
@@ -390,12 +389,27 @@ public class SingleChatView extends ChatView {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Send a displayed delivery report
-			        if ((isDeliveryDisplayed) && message.isDisplayedReportRequested()) {
+			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
 			        	sendDisplayedReport(message.getId());
 			        }
-					
-					// Display the received message
+
+			        // Display the received message
 					displayReceivedMessage(message);
+				}
+			});
+    	}
+
+    	// Callback called when a new geoloc has been received
+    	public void onNewGeoloc(final GeolocMessage message) {
+			handler.post(new Runnable() { 
+				public void run() {
+					// Send a displayed delivery report
+			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
+			        	sendDisplayedReport(message.getId());
+			        }
+
+			        // Display the received geoloc
+			        displayReceivedGeoloc(message);
 				}
 			});
     	}

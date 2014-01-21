@@ -114,6 +114,7 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
         	try {
         		geolocSharing.removeEventListener(gshListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -174,37 +175,25 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Accept the invitation
-            		geolocSharing.acceptInvitation();
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Accept the invitation
+    		geolocSharing.acceptInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_invitation_failed));
+    	}
 	}    
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		geolocSharing.removeEventListener(gshListener);
-            		geolocSharing.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		geolocSharing.removeEventListener(gshListener);
+    		geolocSharing.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
 	
 	/**
@@ -323,18 +312,14 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
      */
     private void quitSession() {
 		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-	        	try {
-	                if (geolocSharing != null) {
-	                	geolocSharing.removeEventListener(gshListener);
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	geolocSharing = null;
-	    	}
-	    };
-	    thread.start();
+    	try {
+            if (geolocSharing != null) {
+            	geolocSharing.removeEventListener(gshListener);
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	geolocSharing = null;
 		
 	    // Exit activity
 		finish();

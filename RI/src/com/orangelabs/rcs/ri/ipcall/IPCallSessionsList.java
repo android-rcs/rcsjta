@@ -143,6 +143,7 @@ public class IPCallSessionsList extends ListActivity implements JoynServiceListe
 			intent.putExtra(IPCallView.EXTRA_CALL_ID, callId);
 			startActivity(intent);
 		} catch(JoynServiceException e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed));
 		}
 	}
@@ -170,6 +171,7 @@ public class IPCallSessionsList extends ListActivity implements JoynServiceListe
 				}
 			}
 		} catch(Exception e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed));
 		}
     }

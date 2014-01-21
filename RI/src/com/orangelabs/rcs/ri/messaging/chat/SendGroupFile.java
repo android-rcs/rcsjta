@@ -155,6 +155,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
         	try {
         		fileTransfer.removeEventListener(ftListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -179,6 +180,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	        Button selectBtn = (Button)findViewById(R.id.select_btn);
 	        selectBtn.setEnabled(true);
         } catch(Exception e) {
+        	e.printStackTrace();
         }
     }
     
@@ -202,6 +204,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
         	try {
         		warnSize = ftApi.getConfiguration().getWarnSize();
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         	
             if ((warnSize > 0) && (filesize >= warnSize)) {
@@ -233,7 +236,9 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     		if ((ftApi != null) && ftApi.isServiceRegistered()) {
     			registered = true;
     		}
-    	} catch(Exception e) {}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
         if (!registered) {
 	    	Utils.showMessage(SendGroupFile.this, getString(R.string.label_service_not_available));
 	    	return;
@@ -249,30 +254,20 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     	final String fileicon = tumbnail; 
         
         // Initiate session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Get chat session
-                    GroupChat groupChat = chatApi.getGroupChat(chatId);
-                    if (groupChat == null) {
-                        Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_chat_aborted));
-                        return;
-                    }
-                    
-                    // Initiate transfer
-            		fileTransfer = groupChat.sendFile(filename,  fileicon, ftListener);
-            	} catch(Exception e) {
-            		e.printStackTrace();
-					handler.post(new Runnable(){
-						public void run(){
-    						hideProgressDialog();
-							Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed));
-						}
-					});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Get chat session
+            GroupChat groupChat = chatApi.getGroupChat(chatId);
+            if (groupChat == null) {
+                Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_chat_aborted));
+                return;
+            }
+            
+            // Initiate transfer
+    		fileTransfer = groupChat.sendFile(filename,  fileicon, ftListener);
+    	} catch(Exception e) {
+			hideProgressDialog();
+			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed));
+    	}
         
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(SendGroupFile.this, getString(R.string.label_command_in_progress));
@@ -461,19 +456,15 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
      */
     private void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (fileTransfer != null) {
-                    	fileTransfer.removeEventListener(ftListener);
-                    	fileTransfer.abortTransfer();
-                    }
-            	} catch(Exception e) {
-            	}
-            	fileTransfer = null;
-        	}
-        };
-        thread.start();
+    	try {
+            if (fileTransfer != null) {
+            	fileTransfer.removeEventListener(ftListener);
+            	fileTransfer.abortTransfer();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	fileTransfer = null;
     	
         // Exit activity
 		finish();

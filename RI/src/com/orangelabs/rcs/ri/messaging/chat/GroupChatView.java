@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -40,11 +40,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
@@ -126,7 +128,9 @@ public class GroupChatView extends ChatView {
 	        		if ((chatApi != null) && chatApi.isServiceRegistered()) {
 	        			registered = true;
 	        		}
-	        	} catch(Exception e) {}
+	        	} catch(Exception e) {
+	        		e.printStackTrace();
+	        	}
 	            if (!registered) {
 	    	    	Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_service_not_available));
 	    	    	return;
@@ -218,7 +222,10 @@ public class GroupChatView extends ChatView {
 			// Load history
 			loadHistory();
 
-			// Set max label length
+    		// Set chat settings
+            isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
+
+            // Set max label length
 			int maxMsgLength = chatApi.getConfiguration().getGroupChatMessageMaxLength();
 			if (maxMsgLength > 0) {
 				InputFilter[] filterArray = new InputFilter[1];
@@ -253,21 +260,13 @@ public class GroupChatView extends ChatView {
      */
     private OnClickListener acceptBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                		// Accept the invitation
-            			groupChat.acceptInvitation();
-	            	} catch(Exception e) {
-	        			handler.post(new Runnable() { 
-	        				public void run() {
-	        					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed));
-	        				}
-	        			});
-	            	}
-            	}
-            };
-            thread.start();
+        	try {
+        		// Accept the invitation
+    			groupChat.acceptInvitation();
+        	} catch(Exception e) {
+        		e.printStackTrace();
+				Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed));
+        	}
         }
     };
 
@@ -276,16 +275,12 @@ public class GroupChatView extends ChatView {
      */
     private OnClickListener declineBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                		// Reject the invitation
-            			groupChat.rejectInvitation();
-	            	} catch(Exception e) {
-	            	}
-            	}
-            };
-            thread.start();
+        	try {
+        		// Reject the invitation
+    			groupChat.rejectInvitation();
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
 
             // Exit activity
 			finish();
@@ -297,21 +292,12 @@ public class GroupChatView extends ChatView {
      */
     private void startGroupChat() {
 		// Initiate the chat session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		groupChat = chatApi.initiateGroupChat(new HashSet<String>(participants), subject, chatListener);
-            	} catch(Exception e) {
-            		e.printStackTrace();
-            		handler.post(new Runnable(){
-            			public void run(){
-            				Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed));		
-            			}
-            		});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		groupChat = chatApi.initiateGroupChat(new HashSet<String>(participants), subject, chatListener);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed));		
+    	}
 
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(GroupChatView.this, getString(R.string.label_command_in_progress));
@@ -332,14 +318,17 @@ public class GroupChatView extends ChatView {
 		}
 
 		try {
-	    	Cursor cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, 
+			// TODO bug Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);		
+			Uri uri = ChatLog.Message.CONTENT_URI; 
+	    	Cursor cursor = getContentResolver().query(uri, 
 	    			new String[] {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
 	    				ChatLog.Message.BODY,
 	    				ChatLog.Message.TIMESTAMP,
 	    				ChatLog.Message.MESSAGE_STATUS,
-	    				ChatLog.Message.MESSAGE_TYPE
+	    				ChatLog.Message.MESSAGE_TYPE,
+	    				ChatLog.Message.MESSAGE_ID
 	    				},
 	    			ChatLog.Message.CHAT_ID + "='" + chatId + "'", 
 	    			null, 
@@ -347,13 +336,13 @@ public class GroupChatView extends ChatView {
 	    	while(cursor.moveToNext()) {
 	    		int direction = cursor.getInt(0);
 	    		String contact = cursor.getString(1);
-	    		String text = cursor.getString(2);
+	    		String msg = cursor.getString(2);
 	    		int type = cursor.getInt(5);
 
-	    		// Add only message to the history
-	    		if (type == ChatLog.Message.Type.CONTENT) {
-					addMessageHistory(direction, contact, text);
-	    		}
+	    		// Add only messages to the history
+	    		if (type != ChatLog.Message.Type.SYSTEM) {
+	        		addMessageHistory(direction, contact, msg);
+	    		}	    			
 	    	}
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -407,19 +396,15 @@ public class GroupChatView extends ChatView {
      */
     protected void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (groupChat != null) {
-                    	groupChat.removeEventListener(chatListener);
-                    	groupChat.quitConversation();
-                    }
-            	} catch(Exception e) {
-            	}
-            	groupChat = null;
-        	}
-        };
-        thread.start();
+    	try {
+            if (groupChat != null) {
+            	groupChat.removeEventListener(chatListener);
+            	groupChat.quitConversation();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	groupChat = null;
         
         // Exit activity
 		finish();        
@@ -439,6 +424,21 @@ public class GroupChatView extends ChatView {
 			e.printStackTrace();
 		}
 	}
+    
+    /**
+     * Send a displayed report
+     * 
+     * @param msgId Message ID
+     */
+    private void sendDisplayedReport(String msgId) {
+        try {
+			if (groupChat != null) {
+				groupChat.sendDisplayedDeliveryReport(msgId);
+			}
+        } catch(Exception e) {
+			e.printStackTrace();
+        }
+    }    
     
     /**
 	 * Add participants to be invited in the session
@@ -497,49 +497,32 @@ public class GroupChatView extends ChatView {
     	builder.setPositiveButton(getString(R.string.label_ok), new DialogInterface.OnClickListener() {
         	public void onClick(DialogInterface dialog, int position) {
         		// Add new participants in the session in background
-                Thread thread = new Thread() {
-            		private Dialog progressDialog = null;
-            		public void run() {
-                        try {
-                    		int max = groupChat.getMaxParticipants()-1;
-                    		int connected = groupChat.getParticipants().size(); 
-                    		int limit = max-connected;
-	            			if (selectedParticipants.size() > limit) {
-	            				Utils.showMessage(GroupChatView.this, getString(R.string.label_max_participants));
-	            				return;
-	            			}
-	
-	            			// Display a progress dialog
-	    					handler.post(new Runnable(){
-	    						public void run(){
-	    							progressDialog = Utils.showProgressDialog(GroupChatView.this, getString(R.string.label_command_in_progress));            
-	    						}
-	    					});
+                try {
+            		int max = groupChat.getMaxParticipants()-1;
+            		int connected = groupChat.getParticipants().size(); 
+            		int limit = max-connected;
+        			if (selectedParticipants.size() > limit) {
+        				Utils.showMessage(GroupChatView.this, getString(R.string.label_max_participants));
+        				return;
+        			}
 
-	    					// Add participants
-							groupChat.addParticipants(new HashSet<String>(selectedParticipants));
+        			// Display a progress dialog
+					progressDialog = Utils.showProgressDialog(GroupChatView.this, getString(R.string.label_command_in_progress));            
 
-							// Hide progress dialog 
-							handler.post(new Runnable(){
-        						public void run(){
-        							if (progressDialog != null && progressDialog.isShowing()) {
-										progressDialog.dismiss();
-									}
-        						}
-        					});
-                    	} catch(Exception e) {
-        					handler.post(new Runnable(){
-        						public void run(){
-        							if (progressDialog != null && progressDialog.isShowing()) {
-        								progressDialog.dismiss();
-        							}
-        							Utils.showMessage(GroupChatView.this, getString(R.string.label_add_participant_failed));
-        						}
-        					});
-                    	}
-                	}
-                };
-                thread.start();
+					// Add participants
+					groupChat.addParticipants(new HashSet<String>(selectedParticipants));
+
+					// Hide progress dialog 
+					if (progressDialog != null && progressDialog.isShowing()) {
+						progressDialog.dismiss();
+					}
+            	} catch(Exception e) {
+            		e.printStackTrace();
+					if (progressDialog != null && progressDialog.isShowing()) {
+						progressDialog.dismiss();
+					}
+					Utils.showMessage(GroupChatView.this, getString(R.string.label_add_participant_failed));
+            	}
 		    }
 		});
         AlertDialog alert = builder.create();
@@ -681,10 +664,31 @@ public class GroupChatView extends ChatView {
     	public void onNewMessage(final ChatMessage message) {
 			handler.post(new Runnable() { 
 				public void run() {
+					// Send a displayed delivery report
+			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
+			        	sendDisplayedReport(message.getId());
+			        }
+
+			        // Display the received message
 					displayReceivedMessage(message);
 				}
 			});
     	}
+    	
+    	// Callback called when a new geoloc has been received
+    	public void onNewGeoloc(final GeolocMessage message) {
+			handler.post(new Runnable() { 
+				public void run() {
+					// Send a displayed delivery report
+			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
+			        	sendDisplayedReport(message.getId());
+			        }
+
+			        // Display the received geoloc
+			        displayReceivedGeoloc(message);
+				}
+			});
+    	}    	
 
     	// Callback called when a message has been delivered to the remote
     	public void onReportMessageDelivered(String msgId) {

@@ -30,6 +30,7 @@ import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.orangelabs.rcs.ri.R;
@@ -101,25 +102,18 @@ public class RejoinChat {
     	}
     	
     	// Initiate the session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		groupChat = chatApi.rejoinGroupChat(chatId);
-            		groupChat.addEventListener(chatListener);
-            	} catch(Exception e) {
-            		handler.post(new Runnable(){
-            			public void run(){
-        					// Hide progress dialog
-        					hideProgressDialog();
+    	try {
+    		groupChat = chatApi.rejoinGroupChat(chatId);
+    		groupChat.addEventListener(chatListener);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    		
+			// Hide progress dialog
+			hideProgressDialog();
 
-        					// Show error
-        					Utils.showMessage(activity, activity.getString(R.string.label_rejoin_chat_exception));		
-            			}
-            		});
-            	}
-        	}
-        };
-        thread.start();
+			// Show error
+			Utils.showMessage(activity, activity.getString(R.string.label_rejoin_chat_exception));		
+    	}
         
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(activity, activity.getString(R.string.label_command_in_progress));
@@ -150,19 +144,15 @@ public class RejoinChat {
     	}
 
     	// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (groupChat != null) {
-                    	groupChat.removeEventListener(chatListener);
-                    	groupChat.quitConversation();
-                    }
-            	} catch(Exception e) {
-            	}
-            	groupChat = null;
-        	}
-        };
-        thread.start();
+    	try {
+            if (groupChat != null) {
+            	groupChat.removeEventListener(chatListener);
+            	groupChat.quitConversation();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	groupChat = null;
     }
     
     /**
@@ -233,6 +223,11 @@ public class RejoinChat {
     	public void onNewMessage(ChatMessage message) {
     		// Not used here
     	}
+    	
+    	// New geoloc has been received
+    	public void onNewGeoloc(GeolocMessage message) {
+    		// Not used here
+    	}    	
     	
     	// Message has been delivered to the remote
     	public void onReportMessageDelivered(String msgId) {

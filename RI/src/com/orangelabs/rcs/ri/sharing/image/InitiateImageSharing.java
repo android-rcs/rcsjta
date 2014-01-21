@@ -139,6 +139,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
         	try {
         		imageSharing.removeEventListener(ishListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -201,7 +202,9 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
         		if ((ishApi != null) && ishApi.isServiceRegistered()) {
         			registered = true;
         		}
-        	} catch(Exception e) {}
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
             if (!registered) {
     	    	Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_service_not_available));
     	    	return;
@@ -212,23 +215,14 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
             final String remote = cursor.getString(1);
 
-            Thread thread = new Thread() {
-            	public void run() {
-                	try {
-                        // Initiate sharing
-	            		imageSharing = ishApi.shareImage(remote, filename, ishListener);
-	            	} catch(Exception e) {
-	            		e.printStackTrace();
-	            		handler.post(new Runnable() { 
-	    					public void run() {
-	    						hideProgressDialog();
-	    						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed));
-		    				}
-		    			});
-	            	}
-            	}
-            };
-            thread.start();
+        	try {
+                // Initiate sharing
+        		imageSharing = ishApi.shareImage(remote, filename, ishListener);
+        	} catch(Exception e) {
+        		e.printStackTrace();
+				hideProgressDialog();
+				Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed));
+        	}
 
             // Display a progress dialog
             progressDialog = Utils.showProgressDialog(InitiateImageSharing.this, getString(R.string.label_command_in_progress));            
@@ -423,19 +417,15 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
      */
     private void quitSession() {
 		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-	        	try {
-	                if (imageSharing != null) {
-	                	imageSharing.removeEventListener(ishListener);
-	                	imageSharing.abortSharing();
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	imageSharing = null;
-	    	}
-	    };
-	    thread.start();
+    	try {
+            if (imageSharing != null) {
+            	imageSharing.removeEventListener(ishListener);
+            	imageSharing.abortSharing();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	imageSharing = null;
 		
 	    // Exit activity
 		finish();

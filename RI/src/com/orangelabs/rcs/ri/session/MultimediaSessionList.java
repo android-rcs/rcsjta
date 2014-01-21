@@ -143,6 +143,7 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 			intent.putExtra(MultimediaSessionView.EXTRA_SESSION_ID, sessionId);
 			startActivity(intent);
 		} catch(JoynServiceException e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));
 		}
 	}
@@ -170,6 +171,7 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 				}
 			}
 		} catch(Exception e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));
 		}
     }

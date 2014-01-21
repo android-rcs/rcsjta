@@ -149,38 +149,26 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	 * Accept invitation
 	 */
 	private void acceptInvitation() {
-    	Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Accept the invitation
-        			session.acceptInvitation(localSdp);
-            	} catch(Exception e) {
-        			handler.post(new Runnable() { 
-        				public void run() {
-        					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));
-						}
-	    			});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Accept the invitation
+			session.acceptInvitation(localSdp);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));
+    	}
 	}
 	
 	/**
 	 * Reject invitation
 	 */
 	private void rejectInvitation() {
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Reject the invitation
-            		session.removeEventListener(sessionListener);
-        			session.rejectInvitation();
-            	} catch(Exception e) {
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Reject the invitation
+    		session.removeEventListener(sessionListener);
+			session.rejectInvitation();
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
 	}	
     
     /**
@@ -200,7 +188,9 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
 	        			registered = true;
 	        		}
-	        	} catch(Exception e) {}
+	        	} catch(Exception e) {
+	        		e.printStackTrace();
+	        	}
 	            if (!registered) {
 	    	    	Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_service_not_available));
 	    	    	return;
@@ -277,6 +267,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	    	TextView localSdpEdit = (TextView)findViewById(R.id.local_sdp);
 	    	localSdpEdit.setText(localSdp);
 		} catch(JoynServiceException e) {
+			e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
 		}
     }
@@ -297,22 +288,13 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
      */
     private void startSession() {
 		// Initiate the chat session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-					// Initiate session
-					session = sessionApi.initiateSession(serviceId, contact, localSdp, sessionListener);
-            	} catch(Exception e) {
-            		e.printStackTrace();
-            		handler.post(new Runnable(){
-            			public void run(){
-            				Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));		
-            			}
-            		});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+			// Initiate session
+			session = sessionApi.initiateSession(serviceId, contact, localSdp, sessionListener);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));		
+    	}
 
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(MultimediaSessionView.this, getString(R.string.label_command_in_progress));
@@ -378,6 +360,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 						TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
 						remoteSdpEdit.setText(session.getRemoteSdp());
             		} catch(JoynServiceException e) {
+            			e.printStackTrace();
             			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
                 	}
 				}
@@ -421,22 +404,15 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
      */
     private void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (session != null) {
-                    	try {
-                    		session.removeEventListener(sessionListener);
-                    		session.abortSession();
-                    	} catch(Exception e) {
-                    	}
-                    	session = null;
-                    }
-            	} catch(Exception e) {
-            	}
+        if (session != null) {
+        	try {
+        		session.removeEventListener(sessionListener);
+        		session.abortSession();
+        	} catch(Exception e) {
+        		e.printStackTrace();
         	}
-        };
-        thread.start();
+        	session = null;
+        }
     	
         // Exit activity
 		finish();

@@ -196,6 +196,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         	try {
         		videoSharing.removeEventListener(vshListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }    	
     	
@@ -256,7 +257,9 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         		if ((vshApi != null) && vshApi.isServiceRegistered()) {
         			registered = true;
         		}
-        	} catch(Exception e) {}
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}
             if (!registered) {
     	    	Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_service_not_available));
     	    	return;
@@ -269,27 +272,27 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 
             Thread thread = new Thread() {
             	public void run() {
-                	try {
-                        // Create the video player
-                		videoPlayer = new MyVideoPlayer();
-                		
-                        // Start the camera
-                		openCamera();
-                		
-                        // Initiate sharing
-                        videoSharing = vshApi.shareVideo(remote, videoPlayer, vshListener);
-	            	} catch(Exception e) {
-	            		e.printStackTrace();
+		        	try {
+		                // Create the video player
+		        		videoPlayer = new MyVideoPlayer();
+		        		
+		                // Start the camera
+		        		openCamera();
+		
+		        		// Initiate sharing
+		        		videoSharing = vshApi.shareVideo(remote, videoPlayer, vshListener);
+		        	} catch(Exception e) {
+		        		e.printStackTrace();
 	            		handler.post(new Runnable() { 
 	    					public void run() {
-	    						hideProgressDialog();
-	    						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_invitation_failed));
-		    				}
+								hideProgressDialog();
+								Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_invitation_failed));
+	    		        	}
 		    			});
-	            	}
-            	}
-            };
-            thread.start();
+		        	}
+		    	}
+		    };
+		    thread.start();
 
             // Display a progress dialog
             progressDialog = Utils.showProgressDialog(InitiateVideoSharing.this, getString(R.string.label_command_in_progress));            
@@ -381,24 +384,19 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      * Quit the session
      */
     private void quitSession() {
-		// Stop session
-	    Thread thread = new Thread() {
-	    	public void run() {
-        		// Release the camera
-            	closeCamera();
+		// Release the camera
+    	closeCamera();
 
-            	// Stop the sharing
-            	try {
-	                if (videoSharing != null) {
-	                	videoSharing.removeEventListener(vshListener);
-	                	videoSharing.abortSharing();
-	                }
-	        	} catch(Exception e) {
-	        	}
-	        	videoSharing = null;
-	    	}
-	    };
-	    thread.start();
+    	// Stop the sharing
+    	try {
+            if (videoSharing != null) {
+            	videoSharing.removeEventListener(vshListener);
+            	videoSharing.abortSharing();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	videoSharing = null;
 		
 	    // Exit activity
 		finish();
@@ -472,15 +470,15 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      * Close the camera
      */
     private synchronized void closeCamera() {
-        if (camera != null) {
-            camera.setPreviewCallback(null);
-            if (cameraPreviewRunning) {
-                cameraPreviewRunning = false;
-                camera.stopPreview();
-            }
-            camera.release();
-            camera = null;
-        }
+	    if (camera != null) {
+	        camera.setPreviewCallback(null);
+	        if (cameraPreviewRunning) {
+	            cameraPreviewRunning = false;
+	            camera.stopPreview();
+	        }
+	        camera.release();
+	        camera = null;
+	    }
     }
 
     /**

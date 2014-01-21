@@ -240,7 +240,7 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 			try {
 				// Get selected item
 				GroupChatListItemCache cache = (GroupChatListItemCache)v.getTag();
-
+				
 				// Get group chat
 				GroupChat groupChat = chatApi.getGroupChat(cache.chatId);
 				if (groupChat != null) {

@@ -210,7 +210,9 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 			long expiration = 0L;
 			try {
 				expiration = System.currentTimeMillis() + chatApi.getConfiguration().getGeolocExpirationTime();
-			} catch(Exception e) {}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
     		Geoloc geoloc = new Geoloc(locationEdit.getText().toString(),
     				Double.parseDouble(lat), Double.parseDouble(lon), Double.parseDouble(alt),
     				expiration,

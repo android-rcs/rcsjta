@@ -88,7 +88,7 @@
 <string name="menu_request_capabilities">Request capabilities</string>
 <string name="menu_capabilities_log">Capabilities log</string>
 <string name="label_refresh_failed">Could not refresh contacts</string>
-<string name="label_refresh_success">Contacts has been refreshed</string>
+<string name="label_refresh_success">Contacts will been refreshed in background</string>
 <string name="label_capabilities">Capabilities:</string>
 <string name="label_refresh_all_capabilities">This command permits to force an update of capabilities for each contact in the address book. This may take a long time if there is a lof of contacts.</string>
 <string name="label_refresh_in_progress">Refresh in progress...</string>
@@ -185,6 +185,7 @@
 <string name="label_geoloc_prefix">Geoloc</string>
 <string name="label_ft_thumb">Thumbnail</string>
 <string name="menu_send_file">Send file</string>
+<string name="label_geoloc_msg">Geoloc</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>

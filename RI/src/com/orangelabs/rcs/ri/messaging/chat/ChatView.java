@@ -110,6 +110,11 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected IsComposingManager composingManager = null;
 	
 	/**
+	 * Delivery display report
+	 */
+    protected boolean isDeliveryDisplayed = true;
+    
+	/**
 	 * Smileys
 	 */
     protected Smileys smileyResources;
@@ -232,7 +237,9 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     		if ((chatApi != null) && chatApi.isServiceRegistered()) {
     			registered = true;
     		}
-    	} catch(Exception e) {}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
         if (!registered) {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_service_not_available));
 	    	return;
@@ -261,7 +268,9 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     		if ((chatApi != null) && chatApi.isServiceRegistered()) {
     			registered = true;
     		}
-    	} catch(Exception e) {}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
         if (!registered) {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_service_not_available));
 	    	return;
@@ -271,7 +280,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         String msgId = sendGeolocMessage(geoloc);
     	if (msgId != null) {
 	    	// Add text to the message history
-	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me),	GeolocMessage.geolocToString(geoloc));
+    		String txt = GeolocMessage.geolocToString(geoloc);
+	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me),	txt);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
     	}
@@ -283,9 +293,20 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 * @param msg Instant message
 	 */
     protected void displayReceivedMessage(ChatMessage msg) {
-		String contact = msg.getContact();
+        String contact = msg.getContact();
 		String txt = msg.getMessage();
         addMessageHistory(ChatLog.Message.Direction.INCOMING, contact, txt);
+    }
+
+    /**
+	 * Display received geoloc
+	 * 
+	 * @param geoloc Geoloc message
+	 */
+    protected void displayReceivedGeoloc(GeolocMessage msg) {
+    	// Add text to the message history
+		String txt = GeolocMessage.geolocToString(msg.getGeoloc());
+		addMessageHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), txt);
     }
 
     /**
@@ -332,8 +353,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     /**
 	 * Utility class to handle is_typing timers (see RFC3994)  
 	 */
-	protected class IsComposingManager{
-
+	protected class IsComposingManager {
         // Idle time out (in ms)
         private int idleTimeOut = 0;
 

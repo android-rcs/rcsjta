@@ -65,6 +65,7 @@ public class TestContactsApi extends ListActivity {
 	    			try {
 	    				startActivity(new Intent("com.android.contacts.action.LIST_DEFAULT"));
 	    			} catch(ActivityNotFoundException e2) {
+	    				e2.printStackTrace();
 	    				Utils.showMessage(this, getString(R.string.label_ab_not_found));
 	    			}
 	    		}

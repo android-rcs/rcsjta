@@ -163,6 +163,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         	try {
         		fileTransfer.removeEventListener(ftListener);
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         }
 
@@ -190,6 +191,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	        	ftThumb.setEnabled(true);
 	        }
         } catch(Exception e) {
+        	e.printStackTrace();
         }
     }
     
@@ -213,6 +215,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         	try {
         		warnSize = ftApi.getConfiguration().getWarnSize();
         	} catch(Exception e) {
+        		e.printStackTrace();
         	}
         	
             if ((warnSize > 0) && (filesize >= warnSize)) {
@@ -244,7 +247,9 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     		if ((ftApi != null) && ftApi.isServiceRegistered()) {
     			registered = true;
     		}
-    	} catch(Exception e) {}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
         if (!registered) {
 	    	Utils.showMessage(InitiateFileTransfer.this, getString(R.string.label_service_not_available));
 	    	return;
@@ -265,23 +270,14 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	final String fileicon = tumbnail; 
         
         // Initiate session in background
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-            		// Initiate transfer
-            		fileTransfer = ftApi.transferFile(remote, filename, fileicon, ftListener);
-            	} catch(Exception e) {
-            		e.printStackTrace();
-					handler.post(new Runnable(){
-						public void run(){
-    						hideProgressDialog();
-							Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed));
-						}
-					});
-            	}
-        	}
-        };
-        thread.start();
+    	try {
+    		// Initiate transfer
+    		fileTransfer = ftApi.transferFile(remote, filename, fileicon, ftListener);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+			hideProgressDialog();
+			Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed));
+    	}
         
         // Display a progress dialog
         progressDialog = Utils.showProgressDialog(InitiateFileTransfer.this, getString(R.string.label_command_in_progress));
@@ -473,19 +469,15 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     private void quitSession() {
 		// Stop session
-        Thread thread = new Thread() {
-        	public void run() {
-            	try {
-                    if (fileTransfer != null) {
-                    	fileTransfer.removeEventListener(ftListener);
-                    	fileTransfer.abortTransfer();
-                    }
-            	} catch(Exception e) {
-            	}
-            	fileTransfer = null;
-        	}
-        };
-        thread.start();
+    	try {
+            if (fileTransfer != null) {
+            	fileTransfer.removeEventListener(ftListener);
+            	fileTransfer.abortTransfer();
+            }
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	fileTransfer = null;
     	
         // Exit activity
 		finish();

@@ -343,7 +343,6 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
         notifyPlayerEventStarted();
     }
 
-
 	/**
 	 * Stops the player
 	 */
@@ -611,10 +610,11 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
      * @param camera Camera
      */
     public void onPreviewFrame(byte[] data, Camera camera) {
-		if (!started) {
+    	if (!started) {
 			return;
 		}
-        frameBuffer.setData(data);
+		
+		frameBuffer.setData(data);
     };
 
     /**
