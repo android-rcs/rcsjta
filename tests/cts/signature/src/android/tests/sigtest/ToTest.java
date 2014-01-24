@@ -6,5 +6,5 @@ package android.tests.sigtest;
  * @author Jean-Marc AUFFRET
  */
 public class ToTest {
-	public static int VERSION = R.xml.crane;
+	public static int VERSION = R.xml.blackbird;
 }
