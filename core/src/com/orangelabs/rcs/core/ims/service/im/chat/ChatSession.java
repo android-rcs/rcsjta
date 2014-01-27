@@ -600,15 +600,18 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param date Date of the message
 	 */
 	private void receiveText(String contact, String txt, String msgId, boolean imdnDisplayedRequested, Date date) {
-        // TODO if (RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
-			// Is composing event is reset
-		    isComposingMgr.receiveIsComposingEvent(contact, false);
-	
-		    // Notify listeners
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleReceiveMessage(new InstantMessage(msgId, contact, txt, imdnDisplayedRequested, date));
-			}
-        // }
+		if (!RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
+			// Message already received
+			return;
+		}
+
+		// Is composing event is reset
+	    isComposingMgr.receiveIsComposingEvent(contact, false);
+
+	    // Notify listeners
+    	for(int i=0; i < getListeners().size(); i++) {
+    		((ChatSessionListener)getListeners().get(i)).handleReceiveMessage(new InstantMessage(msgId, contact, txt, imdnDisplayedRequested, date));
+		}
 	}
 	
 	/**
@@ -644,22 +647,30 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param date Date of the message
 	 */
 	private void receiveGeoloc(String contact, String geolocDoc, String msgId, boolean imdnDisplayedRequested, Date date) {
+		if (!RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
+			// Message already received
+			return;
+		}
+
 		// Is composing event is reset
 	    isComposingMgr.receiveIsComposingEvent(contact, false);
 	    
+		GeolocMessage geolocMsg = null;
 		try {				
 			GeolocPush geoloc = ChatUtils.parseGeolocDocument(geolocDoc);		
 			if (geoloc != null ) {				
-				// Notify listeners
-				GeolocMessage geolocMsg = new GeolocMessage(msgId, contact, geoloc, imdnDisplayedRequested, date);
-				for(int i=0; i < getListeners().size(); i++) {
-					((ChatSessionListener)getListeners().get(i)).handleReceiveGeoloc(geolocMsg);
-				}
+				geolocMsg = new GeolocMessage(msgId, contact, geoloc, imdnDisplayedRequested, date);
 			}		    
 		} catch (Exception e) {
             if (logger.isActivated()) {
-                logger.error("Problem while receiving geolocation", e);
+                logger.error("Can't parse received geolocation", e);
             }
+            return;
+		}
+
+		// Notify listeners
+		for(int i=0; i < getListeners().size(); i++) {
+			((ChatSessionListener)getListeners().get(i)).handleReceiveGeoloc(geolocMsg);
 		}
 	}
 	

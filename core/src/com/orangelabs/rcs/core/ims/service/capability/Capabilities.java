@@ -440,7 +440,7 @@ public class Capabilities {
             ", FT_http=" + fileTransferHttp +
             ", Geolocation_push=" + geolocationPush +
             ", FT_thumbnail=" + fileTransferThumbnail +
-            ", SipAutomata=" + sipAutomata +
+            ", Automata=" + sipAutomata +
 			", Timestamp=" + timestamp;
 	}
 }
