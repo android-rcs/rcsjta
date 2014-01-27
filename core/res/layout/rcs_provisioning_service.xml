@@ -115,7 +115,18 @@
 	 	android:layout_marginRight="5dip"
 	 	android:maxLength="4" android:inputType="number" android:lines="1"/>
 
-       	<TextView android:text="Max duration of a video share (seconds):"
+       	<TextView android:text="Threshold warning on image share size (kB):"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/WarnImageShareSize"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+		
+		<TextView android:text="Max duration of a video share (seconds):"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
