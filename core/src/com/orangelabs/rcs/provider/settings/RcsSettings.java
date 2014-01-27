@@ -1243,6 +1243,21 @@ public class RcsSettings {
 		return result;
 	}
 
+    /**
+     * Get warning threshold for max image sharing size
+     *
+     * @return Size in kilobytes
+     */
+	public int getWarningMaxImageSharingSize() {
+		int result = 2048;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.WARN_IMAGE_SHARE_SIZE));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+
 	/**
      * Get max image share size
      *

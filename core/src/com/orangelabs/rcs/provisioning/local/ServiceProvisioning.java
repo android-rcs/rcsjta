@@ -92,6 +92,9 @@ public class ServiceProvisioning extends Activity {
         txt = (EditText)this.findViewById(R.id.MaxImageShareSize);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_IMAGE_SHARE_SIZE));
 
+        txt = (EditText)this.findViewById(R.id.WarnImageShareSize);
+        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.WARN_IMAGE_SHARE_SIZE));
+        
         txt = (EditText)this.findViewById(R.id.MaxVideoShareDuration);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_VIDEO_SHARE_DURATION));
 
@@ -195,7 +198,10 @@ public class ServiceProvisioning extends Activity {
 		txt = (EditText)this.findViewById(R.id.MaxImageShareSize);
 		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_IMAGE_SHARE_SIZE, txt.getText().toString());
 
-        txt = (EditText)this.findViewById(R.id.MaxVideoShareDuration);
+        txt = (EditText)this.findViewById(R.id.WarnImageShareSize);
+		RcsSettings.getInstance().writeParameter(RcsSettingsData.WARN_IMAGE_SHARE_SIZE, txt.getText().toString());
+
+		txt = (EditText)this.findViewById(R.id.MaxVideoShareDuration);
 		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_VIDEO_SHARE_DURATION, txt.getText().toString());
 
         txt = (EditText)this.findViewById(R.id.MaxChatSessions);

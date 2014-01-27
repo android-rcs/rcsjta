@@ -231,7 +231,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     public ImageSharingServiceConfiguration getConfiguration() {
     	return new ImageSharingServiceConfiguration(
-    			0, // TODO RcsSettings.getInstance().getWarningMaxImageSharingSize(),
+    			RcsSettings.getInstance().getWarningMaxImageSharingSize(),
     			RcsSettings.getInstance().getMaxImageSharingSize());
 	}    
     

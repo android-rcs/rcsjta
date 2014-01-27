@@ -474,7 +474,27 @@ public class RichMessagingHistory {
     	}
 	}
     
-    /*--------------------- File transfer methods ----------------------*/
+    /**
+     * Check if it's a new message
+     * 
+     * @param chatId chat ID
+     * @param msgId message ID
+     * @return true if new message
+     */
+	public boolean isNewMessage(String chatId, String msgId) {
+		Cursor cursor = cr.query(msgDatabaseUri,
+				new String[] { MessageData.KEY_MSG_ID },
+				"(" + MessageData.KEY_CHAT_ID + " = '" + chatId + "') AND (" + MessageData.KEY_MSG_ID + " = \"" + msgId + "\")",
+				null, null);
+		if (cursor.moveToFirst()) {
+			cursor.close();
+			return false;
+		}
+		cursor.close();
+		return true;
+	}
+	
+	/*--------------------- File transfer methods ----------------------*/
 
 	/**
 	 * Add outgoing file transfer

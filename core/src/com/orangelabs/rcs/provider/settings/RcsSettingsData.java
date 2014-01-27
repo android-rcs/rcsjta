@@ -255,6 +255,11 @@ public class RcsSettingsData {
 	public static final String MAX_IMAGE_SHARE_SIZE = "MaxImageShareSize";
 
 	/**
+	 * Warning threshold for image share size
+	 */
+	public static final String WARN_IMAGE_SHARE_SIZE = "WarnImageShareSize";
+
+	/**
 	 * Max duration of a video share
 	 */
 	public static final String MAX_VIDEO_SHARE_DURATION = "MaxVideoShareDuration";
