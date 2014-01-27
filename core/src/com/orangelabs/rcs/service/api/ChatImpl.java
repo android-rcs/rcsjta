@@ -227,9 +227,18 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
 			}
-			
-			// Send MSRP delivery status
-			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+
+			// Send delivery status
+			if ((session != null) &&
+					(session.getDialogPath() != null) &&
+						(session.getDialogPath().isSessionEstablished())) { 
+				// Send via MSRP
+				session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+			} else {
+				// Send via SIP MESSAGE
+				Core.getInstance().getImService().getImdnManager().sendMessageDeliveryStatus(
+						session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+			}
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Could not send MSRP delivery status",e);
@@ -341,8 +350,6 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			if (logger.isActivated()) {
 				logger.info("New IM received");
 			}
-			
-			// TODO: bypass message if already received
 			
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);

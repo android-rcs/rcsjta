@@ -689,7 +689,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				logger.info("Add participant request is successful");
 			}
 	
-			// TODO: nothing send over API
+			// TODO: nothing send over API?
 	    }
     }
     
@@ -704,7 +704,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				logger.info("Add participant request has failed " + reason);
 			}
 	
-			// TODO: nothing send over API
+			// TODO: nothing send over API?
 	    }  
     }
 
