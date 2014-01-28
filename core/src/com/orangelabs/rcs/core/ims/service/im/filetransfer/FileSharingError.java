@@ -54,6 +54,16 @@ public class FileSharingError extends ImsSessionBasedServiceError {
     public final static int MEDIA_DOWNLOAD_FAILED = FT_ERROR_CODES + 5;
 
     /**
+     * Linked chat session doesn't exist anymore
+     */
+    public final static int NO_CHAT_SESSION = FT_ERROR_CODES + 6;
+
+    /**
+     * The storage capacity is too small
+     */
+    public final static int NOT_ENOUGH_STORAGE_SPACE = FT_ERROR_CODES + 7;
+
+    /**
      * Constructor
      *
      * @param error Error

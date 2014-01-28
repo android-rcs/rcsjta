@@ -156,8 +156,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 // File transfered
                 handleFileTransfered();
             } else {
-                // No chat error
-                // TODO handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
+                // No chat exists
+                handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
 			}
 		} else {
             if (logger.isActivated()) {

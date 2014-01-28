@@ -46,9 +46,9 @@ public class ChunkReceiver extends Thread {
 	private boolean terminated = false;
 
     /**
-     * maximum length of MSRP chunk buffer
+     * Maximum length of MSRP chunk buffer
      */
-    private int buffer_length = 0;
+    private int buffer_length = MsrpConstants.CHUNK_MAX_SIZE;
 
 	/**
 	 * The logger
@@ -219,7 +219,6 @@ public class ChunkReceiver extends Thread {
 								}								
 							}
 							data = buffer.toString().getBytes();
-							totalSize = data.length;
 							
 							if (MsrpConnection.MSRP_TRACE_ENABLED) {
 								trace.append(new String(data));

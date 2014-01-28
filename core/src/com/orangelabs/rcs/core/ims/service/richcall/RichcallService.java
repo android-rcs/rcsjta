@@ -290,21 +290,6 @@ public class RichcallService extends ImsService {
 		// Create a new session
     	ImageTransferSession session = new TerminatingImageTransferSession(this, invite);
 
-        // Auto reject if file too big
-        int maxSize = ImageTransferSession.getMaxImageSharingSize();
-        if (maxSize > 0 && session.getContent().getSize() > maxSize) {
-            if (logger.isActivated()) {
-                logger.debug("Auto reject image sharing invitation");
-            }
-
-            // Decline the invitation
-            session.sendErrorResponse(invite, session.getDialogPath().getLocalTag(), 603);
-
-            // File too big
-            session.handleError(new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG));
-            return;
-        }
-
 		// Start the session
 		session.startSession();
 

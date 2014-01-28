@@ -1225,16 +1225,9 @@ public class SipMessageFactory {
             SipUtils.buildAllowHeader(reInvite);    
             
             // Set the Route header  
-            Vector<String> route = dialog.getRoute();             
-            if (!route.isEmpty()) {
-            	for(int i=0; i < route.size(); i++) {
-            		Header routeHeader = SipUtils.HEADER_FACTORY.createHeader(RouteHeader.NAME, route.elementAt(i));   	
-            		reInvite.addHeader(routeHeader);
-            	}
-	        } else
-	        if (firstInvite.getHeader(RouteHeader.NAME) != null) {
-            	reInvite.addHeader(firstInvite.getHeader(RouteHeader.NAME));
-            }           	
+            if (reInvite.getHeader(RouteHeader.NAME) == null && firstInvite.getHeader(RouteHeader.NAME) != null) {
+                reInvite.addHeader(firstInvite.getHeader(RouteHeader.NAME));
+            }
                         
             // Set the P-Preferred-Identity header
             if (firstInvite.getHeader(SipUtils.HEADER_P_PREFERRED_IDENTITY) != null){
@@ -1244,11 +1237,9 @@ public class SipMessageFactory {
 	        	Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE.getPreferredUri());
 	        	reInvite.addHeader(prefHeader);
 	        } 
-	        
                         
             // Set User-Agent header
             reInvite.addHeader(firstInvite.getHeader(UserAgentHeader.NAME));
-	        //reInvite.addHeader(SipUtils.buildUserAgentHeader());
             
             // Add session timer management
             if (dialog.getSessionExpireTime() >= SessionTimerManager.MIN_EXPIRE_PERIOD) {

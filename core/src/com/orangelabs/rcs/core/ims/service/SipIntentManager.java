@@ -29,11 +29,9 @@ import android.content.pm.ResolveInfo;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.session.MultimediaMessageIntent;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
-import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

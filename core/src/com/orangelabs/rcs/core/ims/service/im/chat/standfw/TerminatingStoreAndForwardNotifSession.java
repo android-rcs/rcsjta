@@ -145,7 +145,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 	        getDialogPath().setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
-			if (isInterrupted()) {
+	        if (isSessionInterrupted() || isInterrupted()) {
 				if (logger.isActivated()) {
 					logger.debug("Session has been interrupted: end of processing");
 				}

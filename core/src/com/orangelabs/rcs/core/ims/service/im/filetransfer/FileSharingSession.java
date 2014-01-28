@@ -5,6 +5,8 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.StorageUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract file sharing session 
@@ -41,6 +43,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * File transfer paused
 	 */
 	private boolean fileTransferPaused = false;
+
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
 	 * Constructor
@@ -177,4 +184,29 @@ public abstract class FileSharingSession extends ImsServiceSession {
     public void setThumbnail(byte[] thumbnail) {
         this.thumbnail = thumbnail;
     }
+
+	/**
+	 * Check if file capacity is acceptable
+	 * 
+	 * @param fileSize File size in bytes
+	 * @return Error or null if file capacity is acceptable
+	 */
+	protected FileSharingError isFileCapacityAcceptable(long fileSize) {
+		boolean fileIsToBig = (FileSharingSession.getMaxFileSharingSize() > 0) ? fileSize > FileSharingSession.getMaxFileSharingSize() : false;
+		boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils.getExternalStorageFreeSpace() : false;
+		if (fileIsToBig) {
+			if (logger.isActivated()) {
+				logger.warn("File is too big, reject the file transfer");
+			}
+			return new FileSharingError(FileSharingError.MEDIA_SIZE_TOO_BIG);
+		} else {
+			if (storageIsTooSmall) {
+				if (logger.isActivated()) {
+					logger.warn("Not enough storage capacity, reject the file transfer");
+				}
+				return new FileSharingError(FileSharingError.NOT_ENOUGH_STORAGE_SPACE);
+			}
+		}
+		return null;
+	}    
 }

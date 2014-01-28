@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -57,7 +58,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	 * @param invite Initial INVITE request
 	 */
 	public TerminatingOne2OneChatSession(ImsService parent, SipRequest invite) {
-		super(parent, SipUtils.getAssertedIdentity(invite));
+		super(parent, PhoneUtils.extractNumberFromUri(SipUtils.getAssertedIdentity(invite)));
 
 		// Set first message
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
@@ -201,7 +202,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	        getDialogPath().setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
-			if (isInterrupted()) {
+	        if (isSessionInterrupted() || isInterrupted()) {
 				if (logger.isActivated()) {
 					logger.debug("Session has been interrupted: end of processing");
 				}

@@ -42,6 +42,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -108,6 +109,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 			// Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+            if (getImsService().getImsModule().isConnectedToWifiAccess()) {
+                msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
+            }
 
 			// Build SDP part
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());

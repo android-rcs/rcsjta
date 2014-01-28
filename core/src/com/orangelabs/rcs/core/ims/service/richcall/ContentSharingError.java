@@ -60,6 +60,11 @@ public class ContentSharingError extends ImsSessionBasedServiceError {
     public final static int MEDIA_SIZE_TOO_BIG = RICHCALL_ERROR_CODES + 6;
 
     /**
+	 * Not enough storage space
+	 */
+	public final static int NOT_ENOUGH_STORAGE_SPACE = RICHCALL_ERROR_CODES + 7;
+
+	/**
      * Constructor
      *
      * @param error Error

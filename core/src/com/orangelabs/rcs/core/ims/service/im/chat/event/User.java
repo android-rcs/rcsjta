@@ -97,10 +97,10 @@ public class User {
 	}
 
 	public static boolean isConnected(String state) {
-		return (state.equals(User.STATE_CONNECTED) || state.equals(User.STATE_BOOTED));
+		return (state.equals(User.STATE_CONNECTED) || state.equals(User.STATE_PENDING) || state.equals(User.STATE_BOOTED));
 	}
 	
 	public static boolean isDisconnected(String state) {
-		return (state.equals(User.STATE_DISCONNECTED) || state.equals(User.STATE_DEPARTED));
+		return !isConnected(state);
 	}
 }

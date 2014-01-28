@@ -108,7 +108,6 @@ public abstract class ImsServiceSession extends Thread {
 	/**
 	 * Update session manager
 	 */
-	//private UpdateSessionManager updateMgr = new UpdateSessionManager(this);
 	protected UpdateSessionManager updateMgr;
 	
     /**
@@ -120,6 +119,11 @@ public abstract class ImsServiceSession extends Thread {
      * Session interrupted flag 
      */
     private boolean sessionInterrupted = false;
+
+    /**
+     * Session terminated by remote flag
+     */
+    private boolean sessionTerminatedByRemote = false;
 
     /**
      * The logger
@@ -436,7 +440,8 @@ public abstract class ImsServiceSession extends Thread {
 			
 			if (!isSessionInterrupted()) {
 				// Interrupt thread
-				interrupt();
+                sessionInterrupted = true;
+                interrupt();
 			}
 		} catch (Exception e) {
         	if (logger.isActivated()) {
@@ -495,7 +500,6 @@ public abstract class ImsServiceSession extends Thread {
     	getSessionTimerManager().stop();		
 
 		// Update dialog path
-		dialogPath.sessionTerminated();
     	if (reason == ImsServiceSession.TERMINATION_BY_USER) {
     		dialogPath.sessionTerminated(200, "Call completed");
     	} else {
@@ -545,6 +549,7 @@ public abstract class ImsServiceSession extends Thread {
     	
         // Update the dialog path status
 		getDialogPath().sessionTerminated();
+        sessionTerminatedByRemote = true;
 	
     	// Remove the current session
     	getImsService().removeSession(this);
@@ -824,6 +829,15 @@ public abstract class ImsServiceSession extends Thread {
 	}
 
     /**
+     * Is session terminated by remote
+     * 
+     * @return Boolean
+     */
+    public boolean isSessionTerminatedByRemote() {
+        return sessionTerminatedByRemote;
+    }
+
+    /**
      * Create an INVITE request
      *
      * @return the INVITE request
@@ -931,13 +945,13 @@ public abstract class ImsServiceSession extends Thread {
             // The session is established
             getDialogPath().sessionEstablished();
 
+            // Start Media Session
+            startMediaSession();
+
             // Notify listeners
             for(int i=0; i < getListeners().size(); i++) {
                 getListeners().get(i).handleSessionStarted();
             }
-
-            // Start Media Session
-            startMediaSession();
 
             // Start session timer
             if (getSessionTimerManager().isSessionTimerActivated(resp)) {

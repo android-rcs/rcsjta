@@ -75,6 +75,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 chatSession.getContributionID());
 
         setRemoteDisplayName(chatSession.getRemoteDisplayName());
+        this.setDialogPath(chatSession.getDialogPath());
         ContactHeader inviteContactHeader = (ContactHeader)chatSession.getDialogPath().getInvite().getHeader(ContactHeader.NAME);
         if (inviteContactHeader != null) {
             this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);
@@ -158,6 +159,18 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                     }
                     return;
                 }
+            }
+
+            // Reject if file is too big or size exceeds device storage capacity. This control should be done
+            // on UI. It is done after end user accepts invitation to enable prior handling by the application.
+            FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
+            if (error != null) {
+                // Send a 603 Decline response
+                sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
+
+                // Close session
+                handleError(error);
+                return;
             }
 
             // Notify listeners

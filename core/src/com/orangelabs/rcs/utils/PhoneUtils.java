@@ -191,4 +191,22 @@ public class PhoneUtils {
 		}
 		return number1.equals(number2);
 	}
+
+	/**
+	 * Check if phone number is global
+	 * 
+	 * @param phone Phone numner
+	 * @return Boolean
+	 */
+	public static boolean isGlobalPhoneNumber(final String phone) {
+		if (phone == null) {
+			return false;
+		}
+		if (PhoneNumberUtils.isGlobalPhoneNumber(phone)) {
+			if (phone.length() > PhoneUtils.getCountryCode().length()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

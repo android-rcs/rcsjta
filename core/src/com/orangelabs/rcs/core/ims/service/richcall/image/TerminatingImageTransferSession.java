@@ -97,7 +97,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 				handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
         		return;
         	}
-
+	    	
 			// Wait invitation answer
 	    	int answer = waitInvitationAnswer();
 			if (answer == ImsServiceSession.INVITATION_REJECTED) {
@@ -138,7 +138,22 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 return;
             }
 
-	    	// Parse the remote SDP part
+			// Auto reject if file too big or if storage capacity is too small
+			ContentSharingError error = isImageCapacityAcceptable(getContent().getSize());
+			if (error != null) {
+				if (logger.isActivated()) {
+					logger.debug("Auto reject image sharing invitation");
+				}
+				
+				// Decline the invitation
+				sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
+				
+				// Close session
+				handleError(new ContentSharingError(error));
+				return;
+			}	
+			
+			// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
         	SdpParser parser = new SdpParser(remoteSdp.getBytes());
     		Vector<MediaDescription> media = parser.getMediaDescriptions();

@@ -201,13 +201,13 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	            "a=accept-wrapped-types:" + getWrappedTypes() + SipUtils.CRLF +
 	            "a=setup:" + localSetup + SipUtils.CRLF +
 	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
-
+	    		"a=recvonly" + SipUtils.CRLF;
+	    	
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
-			if (isInterrupted()) {
+	        if (isSessionInterrupted() || isInterrupted()) {
 				if (logger.isActivated()) {
 					logger.debug("Session has been interrupted: end of processing");
 				}

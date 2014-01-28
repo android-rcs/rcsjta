@@ -28,6 +28,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.StorageUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -171,4 +172,29 @@ public abstract class ImageTransferSession extends ContentSharingSession {
     public byte[] getThumbnail() {
     	return thumbnail;
     }
+
+	/**
+	 * Check if image capacity is acceptable
+	 * 
+	 * @param imageSize Image size in bytes
+	 * @return Error or null if image capacity is acceptable
+	 */
+	protected ContentSharingError isImageCapacityAcceptable(long imageSize) {
+		boolean fileIsToBig = (ImageTransferSession.getMaxImageSharingSize() > 0) ? imageSize > ImageTransferSession.getMaxImageSharingSize() : false;
+		boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils.getExternalStorageFreeSpace() : false;
+		if (fileIsToBig) {
+			if (logger.isActivated()) {
+				logger.warn("Image is too big, reject the image sharing");
+			}
+			return new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG);
+		} else {
+			if (storageIsTooSmall) {
+				if (logger.isActivated()) {
+					logger.warn("Not enough storage capacity, reject the image sharing");
+				}
+				return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
+			}
+		}
+		return null;
+	}
 }

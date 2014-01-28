@@ -141,7 +141,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
-        if (isInterrupted()) {
+        if (isSessionInterrupted() || isInterrupted()) {
             return;
         }
 
@@ -169,7 +169,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
+        if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
             return;
         }
         
@@ -196,7 +196,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         getImsService().removeSession(this);
 
         // Notify listeners
-        if (!isInterrupted()) {
+        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
             for(int j=0; j < getListeners().size(); j++) {
                 ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
             }

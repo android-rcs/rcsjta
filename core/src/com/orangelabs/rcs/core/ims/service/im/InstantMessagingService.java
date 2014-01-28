@@ -471,21 +471,6 @@ public class InstantMessagingService extends ImsService {
     	// Create a new session
 		FileSharingSession session = new TerminatingFileSharingSession(this, invite);
 
-        // Auto reject if file too big
-        int maxSize = FileSharingSession.getMaxFileSharingSize();
-        if (maxSize > 0 && session.getContent().getSize() > maxSize) {
-            if (logger.isActivated()) {
-                logger.debug("File is too big, reject file transfer invitation");
-            }
-
-            // Send a 603 Decline response
-            session.sendErrorResponse(invite, session.getDialogPath().getLocalTag(), 603);
-
-            // Close session
-            session.handleError(new FileSharingError(FileSharingError.MEDIA_SIZE_TOO_BIG));
-            return;
-        }
-
 		// Start the session
 		session.startSession();
 

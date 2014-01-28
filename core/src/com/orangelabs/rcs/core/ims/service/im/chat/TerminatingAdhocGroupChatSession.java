@@ -47,7 +47,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
-	/**
+    /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());

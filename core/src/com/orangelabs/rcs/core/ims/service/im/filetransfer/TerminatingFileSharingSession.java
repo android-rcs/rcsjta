@@ -76,7 +76,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);		
 	}
-	
+
 	/**
 	 * Background processing
 	 */
@@ -86,7 +86,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	    		logger.info("Initiate a new file transfer session as terminating");
 	    	}
 	
-    		if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
+            if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
     	    	if (logger.isActivated()) {
     	    		logger.debug("Auto accept file transfer invitation");
     	    	}
@@ -138,6 +138,18 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
                     return;
                 }
     		}
+            
+            // Reject if file is too big or size exceeds device storage capacity. This control should be done
+            // on UI. It is done after end user accepts invitation to enable prior handling by the application.
+            FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
+            if (error != null) {
+                // Send a 603 Decline response
+                sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
+
+                // Close session
+                handleError(error);
+                return;
+            }
 
 			// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
@@ -385,15 +397,17 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
      * @param data received data chunk
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
+        if (isSessionInterrupted() || isInterrupted()) {
+            return true;
+        }
+
         try {
-        	// Update content with received data
+            // Update content with received data
             getContent().writeData2File(data);
             
             // Notify listeners
-            if (!isInterrupted()) {
-                for(int j = 0; j < getListeners().size(); j++) {
-                    ((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(currentSize, totalSize);
-                }
+            for(int j = 0; j < getListeners().size(); j++) {
+                ((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(currentSize, totalSize);
             }
         } catch(Exception e) {
 	   		// Delete the temp file

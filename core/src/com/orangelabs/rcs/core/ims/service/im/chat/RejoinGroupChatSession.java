@@ -29,7 +29,6 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -144,8 +143,8 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	 */
 	private SipRequest createInviteRequest(String content) throws SipException {
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-        		InstantMessagingService.CHAT_FEATURE_TAGS,
-        		content);
+                getFeatureTags(),
+                content);
 
         // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());

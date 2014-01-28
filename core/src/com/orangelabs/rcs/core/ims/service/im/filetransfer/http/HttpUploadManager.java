@@ -85,11 +85,6 @@ public class HttpUploadManager extends HttpTransferManager {
     private byte[] thumbnail;
 
     /**
-     * Thumbnail flag
-     */
-    private boolean thumbnailFlag = true;
-
-    /**
      * TID of the upload
      */
     private String tid;
@@ -264,7 +259,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
         connection.setDoInput(true);
         connection.setDoOutput(true);
-        connection.setReadTimeout(2000); 
+        connection.setReadTimeout(5000); 
 
         // POST construction
         connection.setRequestMethod("POST");
@@ -317,7 +312,7 @@ public class HttpUploadManager extends HttpTransferManager {
         outputStream.writeBytes(body);
 
         // Add thumbnail
-        if (thumbnailFlag && thumbnail != null) {
+        if (thumbnail != null) {
             writeThumbnailMultipart(outputStream,filepath);
         }
 
@@ -421,7 +416,7 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param filepath File path
      */
     private void writeThumbnailMultipart(DataOutputStream outputStream, String filepath) throws IOException {
-    	if(thumbnail.length > 0) {
+    	if (thumbnail.length > 0) {
 	        String[] splittedPath = content.getUrl().split("/");
 	        String filename = splittedPath[splittedPath.length - 1];
 

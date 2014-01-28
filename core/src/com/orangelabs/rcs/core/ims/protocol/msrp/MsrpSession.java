@@ -682,7 +682,7 @@ public class MsrpSession {
 	public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag, byte[] data, long totalSize) throws IOException, MsrpException {
 		// Receive a SEND request
 		if (logger.isActivated()) {
-			logger.debug("SEND request received (flag=" + flag + ", transaction=" + txId + ")");
+			logger.debug("SEND request received (flag=" + flag + ", transaction=" + txId + ", totalSize="+totalSize+")");
 		}
 
 		// Read message-ID
