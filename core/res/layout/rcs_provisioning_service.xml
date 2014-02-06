@@ -181,39 +181,6 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-       	<TextView android:text="Max entries per contact for chat history:"
-	    android:paddingTop="5dip"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"/>
-		<EditText android:id="@+id/MaxChatLogEntries"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4" android:lines="1" android:inputType="numberSigned"/>
-
-       	<TextView android:text="Max entries per contact for richcall history:"
-	    android:paddingTop="5dip"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"/>
-		<EditText android:id="@+id/MaxRichcallLogEntries"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4" android:lines="1" android:inputType="numberSigned"/>
-	 	
-	    <TextView android:text="Max entries per contact for IP call history:"
-	    android:paddingTop="5dip"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"/>
-		<EditText android:id="@+id/MaxIpcallLogEntries"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4" android:lines="1" android:inputType="numberSigned"/>
-
 		<TextView android:text="Max length of a geolocation label:"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"

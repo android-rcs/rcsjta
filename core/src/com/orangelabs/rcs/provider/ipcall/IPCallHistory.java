@@ -8,7 +8,6 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -33,11 +32,6 @@ public class IPCallHistory {
 	 */
 	private Uri databaseUri = IPCallData.CONTENT_URI;
 
-	/**
-	 * Max log entries
-	 */
-	private int maxLogEntries;
-	
 	/**
 	 * The logger
 	 */
@@ -72,7 +66,6 @@ public class IPCallHistory {
 		super();
 		
         this.cr = ctx.getContentResolver();
-        this.maxLogEntries = RcsSettings.getInstance().getMaxIPCallLogEntriesPerContact();
     }
 	
 	/**

@@ -310,21 +310,6 @@ public class RcsSettingsData {
 	public static final String IM_SESSION_START = "ImSessionStart";
 
 	/**
-	 * Max entries for chat log
-	 */
-	public static final String MAX_CHAT_LOG_ENTRIES = "MaxChatLogEntries";
-
-	/**
-	 * Max entries for richcall log
-	 */
-	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";	
-	
-	/**
-	 * Max entries for IP call log
-	 */
-	public static final String MAX_IPCALL_LOG_ENTRIES = "MaxIpcallLogEntries";	
-	
-	/**
 	 * Max length of a geolocation label
 	 */
 	public static final String MAX_GEOLOC_LABEL_LENGTH = "MaxGeolocLabelLength";

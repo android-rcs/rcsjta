@@ -19,7 +19,7 @@ public class IPCallData {
 	 * Column name
 	 */
 	static final String KEY_ID = IPCallLog.ID;
-
+	
 	/**
 	 * Column name
 	 */

@@ -36,7 +36,7 @@ public class VideoSharingData {
 	 * Column name
 	 */
 	static final String KEY_ID = VideoSharingLog.ID;
-	
+
 	/**
 	 * Column name
 	 */

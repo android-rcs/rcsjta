@@ -276,7 +276,7 @@ public final class ContactsManager {
     /**
      * Account name for SIM contacts
      */
-    private static final String SIM_ACCOUNT_NAME = "com.anddroid.contacts.sim";
+    private static final String SIM_ACCOUNT_NAME = "com.android.contacts.sim";
     
     /**
      * Contact for "Me"

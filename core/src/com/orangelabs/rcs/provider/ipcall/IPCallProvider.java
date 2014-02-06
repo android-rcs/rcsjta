@@ -1,7 +1,5 @@
 package com.orangelabs.rcs.provider.ipcall;
 
-import com.gsma.services.rcs.ipcall.IPCallLog;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -14,6 +12,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
+import com.gsma.services.rcs.ipcall.IPCallLog;
 
 /**
  * IP call history provider
@@ -66,12 +66,12 @@ public class IPCallProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
         	db.execSQL("CREATE TABLE " + TABLE + " ("
-        			+ IPCallLog.ID + " integer primary key autoincrement,"
-        			+ IPCallLog.CALL_ID + " TEXT,"
-        			+ IPCallLog.CONTACT_NUMBER + " TEXT,"
-        			+ IPCallLog.STATE + " integer,"
-        			+ IPCallLog.DIRECTION + " integer,"
-        			+ IPCallLog.TIMESTAMP + " long);");
+        			+ IPCallData.KEY_ID + " integer primary key autoincrement,"
+        			+ IPCallData.KEY_SESSION_ID + " TEXT,"
+        			+ IPCallData.KEY_CONTACT + " TEXT,"
+        			+ IPCallData.KEY_STATUS + " integer,"
+        			+ IPCallData.KEY_DIRECTION + " integer,"
+        			+ IPCallData.KEY_TIMESTAMP + " long);");
         }
 
         @Override

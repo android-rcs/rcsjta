@@ -19,7 +19,7 @@ public class FileTransferData {
 	 * Column name
 	 */
 	static final String KEY_ID = FileTransferLog.ID;
-	
+
 	/**
 	 * Column name
 	 */

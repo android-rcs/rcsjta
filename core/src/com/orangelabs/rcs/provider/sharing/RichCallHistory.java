@@ -20,7 +20,6 @@ package com.orangelabs.rcs.provider.sharing;
 
 import java.util.Calendar;
 
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -28,7 +27,6 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -57,11 +55,6 @@ public class RichCallHistory {
 	 * Database URI for video sharing
 	 */
 	private Uri vshDatabaseUri = VideoSharingData.CONTENT_URI;
-
-	/**
-	 * Max log entries
-	 */
-	private int maxLogEntries;
 	
 	/**
 	 * The logger
@@ -97,7 +90,6 @@ public class RichCallHistory {
 		super();
 		
         this.cr = ctx.getContentResolver();
-        this.maxLogEntries = RcsSettings.getInstance().getMaxRichcallLogEntriesPerContact();
     }
 	
 	/*--------------------- Video sharing methods ----------------------*/

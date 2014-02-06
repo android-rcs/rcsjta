@@ -74,7 +74,7 @@ public class RcsSettingsProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 85;
+        private static final int DATABASE_VERSION = 86;
 
         private Context ctx;
 
@@ -212,9 +212,6 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,				"60");
             addParameter(db, RcsSettingsData.RCS_APN,							"");
             addParameter(db, RcsSettingsData.RCS_OPERATOR,						"");
-            addParameter(db, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,				"500");
-            addParameter(db, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,			"200");
-            addParameter(db, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,			"200"); 
             addParameter(db, RcsSettingsData.GRUU,								RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.USE_IMEI_AS_DEVICE_ID,             RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.CPU_ALWAYS_ON,                     RcsSettingsData.FALSE);

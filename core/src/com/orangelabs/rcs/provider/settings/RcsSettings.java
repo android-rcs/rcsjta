@@ -1414,52 +1414,6 @@ public class RcsSettings {
 		return result;
 	}
 
-	/**
-	 * Get max number of entries per contact in the chat log
-	 * 
-	 * @return Number
-	 */
-	public int getMaxChatLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-
-	/**
-	 * Get max number of entries per contact in the richcall log
-	 * 
-	 * @return Number
-	 */
-	public int getMaxRichcallLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-	
-	/**
-	 * Get max number of entries per contact in the IP call log
-	 * 
-	 * @return Number
-	 */
-	public int getMaxIPCallLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-	
-	
     /**
      * Get polling period used before each IMS service check (e.g. test subscription state for presence service)
      *

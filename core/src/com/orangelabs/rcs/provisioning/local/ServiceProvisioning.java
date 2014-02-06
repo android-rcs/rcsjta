@@ -107,15 +107,6 @@ public class ServiceProvisioning extends Activity {
         txt = (EditText)this.findViewById(R.id.MaxIpCallSessions);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_IP_CALL_SESSIONS));
 
-        txt = (EditText)this.findViewById(R.id.MaxChatLogEntries);
-        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_CHAT_LOG_ENTRIES));
-
-        txt = (EditText)this.findViewById(R.id.MaxRichcallLogEntries);
-        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES));
-        
-        txt = (EditText)this.findViewById(R.id.MaxIpcallLogEntries);
-        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES));
-
         txt = (EditText)this.findViewById(R.id.DirectoryPathPhotos);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.DIRECTORY_PATH_PHOTOS));
 
@@ -125,9 +116,6 @@ public class ServiceProvisioning extends Activity {
         txt = (EditText)this.findViewById(R.id.DirectoryPathFiles);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.DIRECTORY_PATH_FILES));
 
-        txt = (EditText)this.findViewById(R.id.MaxGeolocLabelLength);
-        txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH));
-        
         txt = (EditText)this.findViewById(R.id.GeolocExpirationTime);
         txt.setText(RcsSettings.getInstance().readParameter(RcsSettingsData.GEOLOC_EXPIRATION_TIME));
         
@@ -212,18 +200,6 @@ public class ServiceProvisioning extends Activity {
 
         txt = (EditText)this.findViewById(R.id.MaxIpCallSessions);
 		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_IP_CALL_SESSIONS, txt.getText().toString());
-
-		txt = (EditText)this.findViewById(R.id.MaxChatLogEntries);
-		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_CHAT_LOG_ENTRIES, txt.getText().toString());
-
-        txt = (EditText)this.findViewById(R.id.MaxRichcallLogEntries);
-		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, txt.getText().toString());
-		
-        txt = (EditText)this.findViewById(R.id.MaxIpcallLogEntries);
-		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, txt.getText().toString());
-		
-        txt = (EditText)this.findViewById(R.id.MaxGeolocLabelLength);
-		RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, txt.getText().toString());
 
         txt = (EditText)this.findViewById(R.id.GeolocExpirationTime);
 		RcsSettings.getInstance().writeParameter(RcsSettingsData.GEOLOC_EXPIRATION_TIME, txt.getText().toString());
