@@ -373,6 +373,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param error Error
 	 */
 	public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+        	return;
+        }
+
         // Error	
     	if (logger.isActivated()) {
     		logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
@@ -385,11 +389,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     	getImsService().removeSession(this);
 
 		// Notify listeners
-		if (!isInterrupted()) {
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleImError(new ChatError(error));
-	        }
-		}
+    	for(int i=0; i < getListeners().size(); i++) {
+    		((ChatSessionListener)getListeners().get(i)).handleImError(new ChatError(error));
+        }
 	}
 	
 	/**
@@ -570,9 +572,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-		if (isInterrupted()) {
+		if (isSessionInterrupted()) {
 			return;
 		}
+		
 		if (logger.isActivated()) {
             logger.info("Data transfer error " + error);
         }

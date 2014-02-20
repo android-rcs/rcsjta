@@ -246,5 +246,5 @@ public abstract class JoynService {
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-	}        
+	}
 }

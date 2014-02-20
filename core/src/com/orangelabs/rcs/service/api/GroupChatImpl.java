@@ -267,12 +267,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @param text Message
 	 * @return Message ID
 	 */
-	public String sendMessage(String text) {
+	public String sendMessage(final String text) {
 		// Generate a message Id
-		String msgId = ChatUtils.generateMessageId();
+		final String msgId = ChatUtils.generateMessageId();
 
 		// Send text message
-		session.sendTextMessage(msgId, text);
+        Thread t = new Thread() {
+    		public void run() {
+    			session.sendTextMessage(msgId, text);
+    		}
+    	};
+    	t.start();
 
 		return msgId;
 	}
@@ -285,13 +290,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
     public String sendGeoloc(Geoloc geoloc) {
 		// Generate a message Id
-		String msgId = ChatUtils.generateMessageId();
+		final String msgId = ChatUtils.generateMessageId();
 
 		// Send geoloc message
-		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
+		final GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
-				geoloc.getExpiration(), geoloc.getAccuracy()); 
-		session.sendGeolocMessage(msgId, geolocPush);
+				geoloc.getExpiration(), geoloc.getAccuracy());
+        Thread t = new Thread() {
+    		public void run() {
+    			session.sendGeolocMessage(msgId, geolocPush);
+    		}
+    	};
+    	t.start();
 		return msgId;
     }	
 
@@ -315,8 +325,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * 
 	 * @param status Is-composing status
 	 */
-	public void sendIsComposingEvent(boolean status) {
-		session.sendIsComposingStatus(status);
+	public void sendIsComposingEvent(final boolean status) {
+        Thread t = new Thread() {
+    		public void run() {
+    			session.sendIsComposingStatus(status);
+    		}
+    	};
+    	t.start();
 	}
 	
     /**
@@ -324,14 +339,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * 
      * @param msgId Message ID
      */
-    public void sendDisplayedDeliveryReport(String msgId) {
+    public void sendDisplayedDeliveryReport(final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
 			}
 			
 			// Send MSRP delivery status
-			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+	    		}
+	    	};
+	    	t.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Could not send MSRP delivery status",e);

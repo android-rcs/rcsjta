@@ -156,6 +156,10 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+
         // Error
         if (logger.isActivated()) {
             logger.info("Session error: " + error.getErrorCode() + ", reason="
@@ -172,11 +176,9 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
         // Notify listeners
-        if (!isInterrupted()) {
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((VideoStreamingSessionListener) getListeners().get(i))
-                        .handleSharingError(new ContentSharingError(error));
-            }
+        for (int i = 0; i < getListeners().size(); i++) {
+            ((VideoStreamingSessionListener) getListeners().get(i))
+                    .handleSharingError(new ContentSharingError(error));
         }
     }
 }

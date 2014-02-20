@@ -246,7 +246,7 @@
                 <data android:mimeType="com.gsma.services.rcs/sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
-		    	</intent-filter>
+	    	</intent-filter>
         </receiver>
 
         <activity android:name=".session.MultimediaSessionList"/>

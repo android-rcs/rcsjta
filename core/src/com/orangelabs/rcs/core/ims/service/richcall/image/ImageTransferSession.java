@@ -60,7 +60,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static Logger logger = Logger.getLogger(ImageTransferSession.class.getName());
 
     /**
 	 * Constructor
@@ -143,7 +143,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
-        if (isInterrupted()) {
+        if (isSessionInterrupted()) {
             return;
         }
 
@@ -179,7 +179,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	 * @param imageSize Image size in bytes
 	 * @return Error or null if image capacity is acceptable
 	 */
-	protected ContentSharingError isImageCapacityAcceptable(long imageSize) {
+	public static ContentSharingError isImageCapacityAcceptable(long imageSize) {
 		boolean fileIsToBig = (ImageTransferSession.getMaxImageSharingSize() > 0) ? imageSize > ImageTransferSession.getMaxImageSharingSize() : false;
 		boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils.getExternalStorageFreeSpace() : false;
 		if (fileIsToBig) {

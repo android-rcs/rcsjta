@@ -114,7 +114,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
 	
 	/**
-     * Sends a text message
+     * Sends a plain text message
      * 
      * @param message Text message
      * @return Unique message ID or null in case of error
@@ -162,7 +162,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @param msg Message
      * @return Unique message ID or null in case of error
      */
-    private String sendChatMessage(InstantMessage msg) {
+    private String sendChatMessage(final InstantMessage msg) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.debug("Send chat message");
@@ -204,14 +204,19 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				}
 	
 				// Generate a message Id
-				String msgId = ChatUtils.generateMessageId();
+				final String msgId = ChatUtils.generateMessageId();
 		
 				// Send message
-				if (msg instanceof GeolocMessage) {
-					session.sendGeolocMessage(msgId, ((GeolocMessage)msg).getGeoloc());
-				} else {
-					session.sendTextMessage(msgId, msg.getTextMessage());					
-				}
+		        Thread t = new Thread() {
+		    		public void run() {
+						if (msg instanceof GeolocMessage) {
+							session.sendGeolocMessage(msgId, ((GeolocMessage)msg).getGeoloc());
+						} else {
+							session.sendTextMessage(msgId, msg.getTextMessage());					
+						}
+		    		}
+		    	};
+		    	t.start();
 				return msgId;
 	    	}
 		}    	
@@ -222,7 +227,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * 
      * @param msgId Message ID
      */
-    public void sendDisplayedDeliveryReport(String msgId) {
+    public void sendDisplayedDeliveryReport(final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
@@ -233,7 +238,12 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 					(session.getDialogPath() != null) &&
 						(session.getDialogPath().isSessionEstablished())) { 
 				// Send via MSRP
-				session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+		        Thread t = new Thread() {
+		    		public void run() {
+						session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+		    		}
+		    	};
+		    	t.start();
 			} else {
 				// Send via SIP MESSAGE
 				Core.getInstance().getImService().getImdnManager().sendMessageDeliveryStatus(
@@ -252,9 +262,14 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * 
      * @param status Is-composing status
      */
-    public void sendIsComposingEvent(boolean status) {
+    public void sendIsComposingEvent(final boolean status) {
     	if (session != null) {
-    		session.sendIsComposingStatus(status);
+	        Thread t = new Thread() {
+	    		public void run() {
+	        		session.sendIsComposingStatus(status);
+	    		}
+	    	};
+	    	t.start();
     	}
     }
 	

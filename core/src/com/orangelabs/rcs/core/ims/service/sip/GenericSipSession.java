@@ -164,6 +164,10 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+        	return;
+        }
+        
         // Error
         if (logger.isActivated()) {
             logger.info("Session error: " + error.getErrorCode() + ", reason="
@@ -177,11 +181,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
         getImsService().removeSession(this);
 
         // Notify listeners
-        if (!isInterrupted()) {
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((SipSessionListener) getListeners().get(j))
-                        .handleSessionError(new SipSessionError(error));
-            }
+        for (int j = 0; j < getListeners().size(); j++) {
+            ((SipSessionListener) getListeners().get(j))
+                    .handleSessionError(new SipSessionError(error));
         }
     }
 }

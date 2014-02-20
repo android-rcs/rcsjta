@@ -141,7 +141,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
             
             // Reject if file is too big or size exceeds device storage capacity. This control should be done
             // on UI. It is done after end user accepts invitation to enable prior handling by the application.
-            FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
+            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(getContent().getSize());
             if (error != null) {
                 // Send a 603 Decline response
                 sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
@@ -223,7 +223,15 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
 
-    		// Create the MSRP server session
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Create the MSRP server session
             if (localSetup.equals("passive")) {
             	// Passive mode: client wait a connection
             	msrpMgr.createMsrpServerSession(remotePath, this);
@@ -397,10 +405,6 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
      * @param data received data chunk
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
-        if (isSessionInterrupted() || isInterrupted()) {
-            return true;
-        }
-
         try {
             // Update content with received data
             getContent().writeData2File(data);

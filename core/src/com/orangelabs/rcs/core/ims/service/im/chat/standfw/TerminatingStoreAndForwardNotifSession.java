@@ -145,14 +145,14 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 	        getDialogPath().setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
-	        if (isSessionInterrupted() || isInterrupted()) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been interrupted: end of processing");
-				}
-				return;
-			}
-	        
-    		// Create the MSRP server session
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Create the MSRP server session
             if (localSetup.equals("passive")) {
             	// Passive mode: client wait a connection
             	MsrpSession session = getMsrpMgr().createMsrpServerSession(remotePath, this);

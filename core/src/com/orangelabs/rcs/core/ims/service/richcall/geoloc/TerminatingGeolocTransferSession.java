@@ -200,7 +200,15 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
 
-    		// Create the MSRP server session
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Create the MSRP server session
             if (localSetup.equals("passive")) {
             	// Passive mode: client wait a connection
             	msrpMgr.createMsrpServerSession(remotePath, this);
@@ -386,9 +394,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-        if (isInterrupted() || getDialogPath().isSessionTerminated()) {
-			return;
-		}
+        if (isSessionInterrupted()) {
+            return;
+        }
 
 		if (logger.isActivated()) {
             logger.info("Data transfer error " + error);

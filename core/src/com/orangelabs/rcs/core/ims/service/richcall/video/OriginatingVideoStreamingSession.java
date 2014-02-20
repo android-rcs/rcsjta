@@ -252,6 +252,10 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     	 * @param error Error
     	 */
     	public void onPlayerError(int error) {
+            if (isSessionInterrupted()) {
+                return;
+            }
+
             if (logger.isActivated()) {
                 logger.error("Media player has failed: " + error);
             }
@@ -266,10 +270,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             getImsService().removeSession(session);
 
             // Notify listeners
-            if (!isInterrupted()) {
-                for(int i=0; i < getListeners().size(); i++) {
-                    ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
-                }
+            for(int i=0; i < getListeners().size(); i++) {
+                ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
             }
 
             // Request capabilities to the remote

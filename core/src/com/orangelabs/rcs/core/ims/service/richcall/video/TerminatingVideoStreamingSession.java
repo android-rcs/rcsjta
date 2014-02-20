@@ -178,6 +178,14 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Set the local SDP part in the dialog path
             getDialogPath().setLocalContent(sdp);
 
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
             // Create a 200 OK response
             if (logger.isActivated()) {
                 logger.info("Send 200 OK");
@@ -238,6 +246,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @param error Error
      */
     public void handleError(ContentSharingError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+
         // Error
         if (logger.isActivated()) {
             logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
@@ -250,10 +262,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         getImsService().removeSession(this);
 
         // Notify listener
-        if (!isInterrupted()) {
-            for(int i=0; i < getListeners().size(); i++) {
-                ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(error);
-            }
+        for(int i=0; i < getListeners().size(); i++) {
+            ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(error);
         }
     }
 
@@ -352,6 +362,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
     	 * @param error Error
     	 */
     	public void onRendererError(int error) {
+            if (isSessionInterrupted()) {
+                return;
+            }
+
             if (logger.isActivated()) {
                 logger.error("Media renderer has failed: " + error);
             }
@@ -366,10 +380,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             getImsService().removeSession(session);
 
             // Notify listeners
-            if (!isInterrupted()) {
-                for(int i=0; i < getListeners().size(); i++) {
-                    ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
-                }
+            for(int i=0; i < getListeners().size(); i++) {
+                ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
             }
 
             // Request capabilities to the remote

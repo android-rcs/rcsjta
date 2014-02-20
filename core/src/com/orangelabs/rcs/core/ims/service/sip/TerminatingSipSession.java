@@ -116,7 +116,15 @@ public class TerminatingSipSession extends GenericSipSession {
                 return;
             }			
 			
-			// Create a 200 OK response
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Create a 200 OK response
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
 			}

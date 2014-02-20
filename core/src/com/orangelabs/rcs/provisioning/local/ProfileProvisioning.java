@@ -362,7 +362,7 @@ public class ProfileProvisioning extends Activity {
 
         final String[] platforms = {
                 "NSN Brune", "NSN Lannion", "Margaux (albatros)", "Margaux (blackbird)", "VCOM1", "VCOM2",
-                "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini", "JibeNet"
+                "RCS", "Kamailio1", "MargauxIPv6", "Huawei", "Capgemini", "JibeNet", "Noiseau"
         };
         Spinner spinner = (Spinner)view.findViewById(R.id.ims);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -552,6 +552,18 @@ public class ProfileProvisioning extends Activity {
                             imsAddrForWifi = "goose.jibemobile.com";
                             imsPortForWifi = 5671;
                             confUri  = "sip:conference@" + homeDomain;
+                            break;
+                        case 12: // Noiseau
+                            homeDomain = "ims.pftest.net";
+                            sipUri = number + "@" + homeDomain;
+            				privateSipUri = sipUri;
+                            imsPwd = "";
+	            			imsRealm = "ims.pftest.net";
+                            imsAddrForMobile = "80.12.215.234";
+                            imsPortForMobile = 5060;
+                            imsAddrForWifi = "80.12.215.234";
+                            imsPortForWifi = 5060;
+                            confUri  = "sip:Conference-Factory@" + homeDomain;
                             break;
                     }
 

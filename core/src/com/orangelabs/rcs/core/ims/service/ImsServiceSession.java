@@ -825,7 +825,8 @@ public abstract class ImsServiceSession extends Thread {
 	 * @return Boolean
 	 */
 	public boolean isSessionInterrupted() {
-		return sessionInterrupted;
+		return sessionInterrupted || isInterrupted() ||
+				(getDialogPath() != null && getDialogPath().isSessionTerminated());
 	}
 
     /**

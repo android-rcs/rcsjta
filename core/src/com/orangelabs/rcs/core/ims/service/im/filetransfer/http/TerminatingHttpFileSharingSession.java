@@ -161,18 +161,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 }
             }
 
-            // Reject if file is too big or size exceeds device storage capacity. This control should be done
-            // on UI. It is done after end user accepts invitation to enable prior handling by the application.
-            FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
-            if (error != null) {
-                // Send a 603 Decline response
-                sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
-
-                // Close session
-                handleError(error);
-                return;
-            }
-
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
                 getListeners().get(j).handleSessionStarted();

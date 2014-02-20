@@ -922,18 +922,16 @@ public class InstantMessagingService extends ImsService {
 			return;
 		}
 
-        // Auto reject if file too big
-        if (isFileSizeExceeded(ftinfo.getFileSize())) {
-            if (logger.isActivated()) {
-                logger.debug("File is too big, reject the HTTP File transfer");
-            }
-
-			// Send a 603 Decline response
-			sendErrorResponse(invite, 603);
+        // Reject if file is too big or size exceeds device storage capacity. This control should be done
+        // on UI. It is done after end user accepts invitation to enable prior handling by the application.
+        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(ftinfo.getFileSize());
+        if (error != null) {
+            // Send a 603 Decline response
+            sendErrorResponse(invite, 603);
             return;
         }
 
-		// Create and start a chat session
+        // Create and start a chat session
         TerminatingOne2OneChatSession one2oneChatSession = new TerminatingOne2OneChatSession(this, invite);
         one2oneChatSession.startSession();
         

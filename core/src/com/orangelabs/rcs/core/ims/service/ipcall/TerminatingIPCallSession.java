@@ -137,13 +137,21 @@ public class TerminatingIPCallSession extends IPCallSession {
 				return;
 			}
 
-			// Build SDP response
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Build SDP response
 			String sdp = buildSdpAnswer();
 
 			// Set the local SDP in the dialog path
 			getDialogPath().setLocalContent(sdp);
 
-			 // Prepare media session			
+			// Prepare media session			
 			prepareMediaSession();
 			
 			// Create a 200 OK response
@@ -215,6 +223,10 @@ public class TerminatingIPCallSession extends IPCallSession {
      * @param error Error
      */
     public void handleError(IPCallError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+
         // Error
         if (logger.isActivated()) {
             logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
@@ -227,10 +239,8 @@ public class TerminatingIPCallSession extends IPCallSession {
         getImsService().removeSession(this);
         
         // Notify listener
-        if (!isInterrupted()) {
-            for(int i=0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(error);
-            }
+        for(int i=0; i < getListeners().size(); i++) {
+            ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(error);
         }
     }
 

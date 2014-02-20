@@ -104,7 +104,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted() || isInterrupted()) {
+        if (isSessionInterrupted()) {
             return;
         }
 

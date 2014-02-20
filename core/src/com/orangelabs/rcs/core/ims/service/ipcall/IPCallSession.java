@@ -389,13 +389,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 						.getHeight();
 				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleAddVideoInvitation(videoEncoding,
-										videoWidth, videoHeight);
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleAddVideoInvitation(videoEncoding, videoWidth, videoHeight);
 					}
-				}
 			}
 				break;
 			case (1): { // Case Remove Video
@@ -411,11 +408,8 @@ public abstract class IPCallSession extends ImsServiceSession {
 						IPCallSession.REMOVE_VIDEO);
 
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleRemoveVideo();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i)).handleRemoveVideo();
 				}
 			}
 				break;
@@ -425,31 +419,30 @@ public abstract class IPCallSession extends ImsServiceSession {
 				
 				// launhc callHold
 				holdMgr.setCallHold(true, reInvite);
+				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallHold();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallHold();
 				}
 			}
 				break;
+				
 			case (5): { // Case Set On Resume
 				// instanciate Hold Manager
 				holdMgr = new IPCall_RemoteHoldInactive(this);
 				
 				// launhc callHold
 				holdMgr.setCallHold(false, reInvite);
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallResume();
-					}
+				
+				// Notify listeners
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallResume();
 				}
 			}
 				break;
-			}
-			
+			}			
 		}
 	}
 
@@ -522,7 +515,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 *            Resume)
 	 */
 	public void handleReInviteResponse(int code, SipResponse response, int requestType) {
-		if (logger.isActivated()) {
+        if (logger.isActivated()) {
 			logger.info("handleReInviteResponse: " + code);
 		}
 
@@ -533,11 +526,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// TODO prepareVideoSession();
 				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleAddVideoAccepted();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleAddVideoAccepted();
 				}
 				
 				try {
@@ -552,11 +543,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 			} else if ((code == ImsServiceSession.INVITATION_REJECTED)
 					|| (code == ImsServiceSession.TERMINATION_BY_TIMEOUT)) {
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleAddVideoAborted(code);
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleAddVideoAborted(code);
 				}
 			}
 
@@ -570,19 +559,15 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// TODO
 				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleRemoveVideoAccepted();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleRemoveVideoAccepted();
 				}
 			} else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408 TimeOut response
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleRemoveVideoAborted(code);
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleRemoveVideoAborted(code);
 				}
 			}
 		}
@@ -591,21 +576,18 @@ public abstract class IPCallSession extends ImsServiceSession {
 				holdMgr.prepareSession();
 				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallHoldAccepted();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallHoldAccepted();
 				}
+
 				// release hold
 				holdMgr = null;
 			} else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408 TimeOut response
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallHoldAborted(code);
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallHoldAborted(code);
 				}
 			}
 		}
@@ -614,21 +596,17 @@ public abstract class IPCallSession extends ImsServiceSession {
 				holdMgr.prepareSession();
 				
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallResumeAccepted();
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallResumeAccepted();
 				}
 				// release hold
 				holdMgr = null;
 			} else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408 TimeOut response
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleCallResumeAborted(code);
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleCallResumeAborted(code);
 				}
 			}
 		}
@@ -644,7 +622,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 *            Resume)
 	 */
 	public void handleReInviteUserAnswer(int code, int requestType){
-		if (logger.isActivated()) {
+        if (logger.isActivated()) {
 			logger.info("handleReInviteUserAnswer: " + code);
 		}
 
@@ -657,11 +635,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 			} else if (code == ImsServiceSession.INVITATION_NOT_ANSWERED)
 					 {
 				// Notify listeners
-				if (!isInterrupted()) {
-					for (int i = 0; i < getListeners().size(); i++) {
-						((IPCallStreamingSessionListener) getListeners().get(i))
-								.handleAddVideoAborted(code);
-					}
+				for (int i = 0; i < getListeners().size(); i++) {
+					((IPCallStreamingSessionListener) getListeners().get(i))
+							.handleAddVideoAborted(code);
 				}
 			}		
 		} 		
@@ -677,7 +653,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 *            Resume)
 	 */
 	public void handleReInviteAck(int code, int requestType) {
-		if (logger.isActivated()) {
+        if (logger.isActivated()) {
 			logger.info("handleReInviteAckResponse: " + code);
 		}
 
@@ -695,12 +671,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 			
 			// Notify listeners
-			if (!isInterrupted()) {
-				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleAddVideoAccepted();
-				}
-			}			
+			for (int i = 0; i < getListeners().size(); i++) {
+				((IPCallStreamingSessionListener) getListeners().get(i))
+						.handleAddVideoAccepted();
+			}
 		} else if ((requestType == IPCallSession.REMOVE_VIDEO)&& (code == 200)) {// case Remove Video						
 			// close video media session
 			// TODO closeVideoSession();
@@ -709,21 +683,17 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// TODO
 
 			// Notify listeners
-			if (!isInterrupted()) {
-				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleRemoveVideoAccepted();
-				}
+			for (int i = 0; i < getListeners().size(); i++) {
+				((IPCallStreamingSessionListener) getListeners().get(i))
+						.handleRemoveVideoAccepted();
 			}
 		} else if ((requestType == IPCallSession.SET_ON_HOLD)&& (code == 200)) {// case On Hold						
 			holdMgr.prepareSession();
 
 			// Notify listeners
-			if (!isInterrupted()) {
-				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallHoldAccepted();
-				}
+			for (int i = 0; i < getListeners().size(); i++) {
+				((IPCallStreamingSessionListener) getListeners().get(i))
+						.handleCallHoldAccepted();
 			}
 			// release hold manager
 			holdMgr = null;
@@ -731,11 +701,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 			holdMgr.prepareSession();
 
 			// Notify listeners
-			if (!isInterrupted()) {
-				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallResumeAccepted();
-				}
+			for (int i = 0; i < getListeners().size(); i++) {
+				((IPCallStreamingSessionListener) getListeners().get(i))
+						.handleCallResumeAccepted();
 			}
 			// release hold manager
 			holdMgr = null;
@@ -765,11 +733,8 @@ public abstract class IPCallSession extends ImsServiceSession {
 				.requestContactCapabilities(getDialogPath().getRemoteParty());
 
 		// Notify listeners
-		if (!isInterrupted()) {
-			for (int i = 0; i < getListeners().size(); i++) {
-				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handle486Busy();
-			}
+		for (int i = 0; i < getListeners().size(); i++) {
+			((IPCallStreamingSessionListener) getListeners().get(i)).handle486Busy();
 		}
 	}
 
@@ -818,7 +783,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 * @param error Error
 	 */
 	public void handleError(ImsServiceError error) {
-		if (logger.isActivated()) {
+        if (isSessionInterrupted()) {
+        	return;
+        }
+
+        if (logger.isActivated()) {
 			logger.info("Session error: " + error.getErrorCode() + ", reason="
 					+ error.getMessage());
 		}
@@ -834,11 +803,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 				.requestContactCapabilities(getDialogPath().getRemoteParty());
 
 		// Notify listeners
-		if (!isInterrupted()) {
-			for (int i = 0; i < getListeners().size(); i++) {
-				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleCallError(new IPCallError(error));
-			}
+		for (int i = 0; i < getListeners().size(); i++) {
+			((IPCallStreamingSessionListener) getListeners().get(i))
+					.handleCallError(new IPCallError(error));
 		}
 	}
 	
@@ -1190,7 +1157,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 		 * @param error Error
 		 */
 		public void onPlayerError(int error) {
-			if (logger.isActivated()) {
+	        if (isSessionInterrupted()) {
+	        	return;
+	        }
+
+	        if (logger.isActivated()) {
 				logger.error("Audio player has failed: " + error);
 			}
 
@@ -1204,19 +1175,14 @@ public abstract class IPCallSession extends ImsServiceSession {
 			getImsService().removeSession(session);
 
 			// Notify listeners
-			if (!isInterrupted()) {
-				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallError(new IPCallError(IPCallError.PLAYER_FAILED));
-				}
+			for (int i = 0; i < getListeners().size(); i++) {
+				((IPCallStreamingSessionListener) getListeners().get(i))
+						.handleCallError(new IPCallError(IPCallError.PLAYER_FAILED));
 			}
 
 			// Request capabilities to the remote
-			getImsService()
-					.getImsModule()
-					.getCapabilityService()
-					.requestContactCapabilities(
-							getDialogPath().getRemoteParty());
+			getImsService().getImsModule().getCapabilityService()
+					.requestContactCapabilities(getDialogPath().getRemoteParty());
 		}
 	}
 	
@@ -1257,12 +1223,11 @@ public abstract class IPCallSession extends ImsServiceSession {
             if (logger.isActivated()) {
                 logger.debug("The size of media has changed " + width + "x" + height);
             }
+
             // Notify listeners
-            if (!isInterrupted()) {
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleVideoResized(width, height);
-                }
+            for (int i = 0; i < getListeners().size(); i++) {
+                ((IPCallStreamingSessionListener) getListeners().get(i))
+                        .handleVideoResized(width, height);
             }
         }
 
@@ -1299,6 +1264,10 @@ public abstract class IPCallSession extends ImsServiceSession {
     	 * @param error Error
     	 */
     	public void onRendererError(int error) {
+            if (isSessionInterrupted()) {
+            	return;
+            }
+
             if (logger.isActivated()) {
                 logger.error("Media renderer has failed: " + error);
             }
@@ -1313,10 +1282,8 @@ public abstract class IPCallSession extends ImsServiceSession {
             getImsService().removeSession(session);
 
             // Notify listeners
-            if (!isInterrupted()) {
-                for(int i=0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(new IPCallError(IPCallError.RENDERER_FAILED));
-                }
+            for(int i=0; i < getListeners().size(); i++) {
+                ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(new IPCallError(IPCallError.RENDERER_FAILED));
             }
 
             // Request capabilities to the remote
