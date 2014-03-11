@@ -33,7 +33,7 @@ public class PopupManager {
 	/**
 	 * Service ID for the service
 	 */
-	public static final String SERVICE_ID = "ext.popup";
+	public static final String SERVICE_ID = "mnc01.mcc208.popup";
 	
 	/**
 	 * Generate popup
