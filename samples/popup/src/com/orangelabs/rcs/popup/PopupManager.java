@@ -33,7 +33,7 @@ public class PopupManager {
 	/**
 	 * Service ID for the service
 	 */
-	public static final String SERVICE_ID = "orange.popup";
+	public static final String SERVICE_ID = "ext.popup";
 	
 	/**
 	 * Generate popup
@@ -43,13 +43,14 @@ public class PopupManager {
 	 * @param tts TTS
 	 * @return XML document
 	 */
-	public static String generatePopup(String message, String animation, boolean tts) {
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
+	public static byte[] generatePopup(String message, String animation, boolean tts) {
+		String popup = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
 				"<popup>" + CRLF +		
 				"<message>" + message + "</message>" + CRLF  +
 				"<animation>" + animation + "</animation>" + CRLF +
 				"<timeout>" + DateUtils.encodeDate(System.currentTimeMillis()) + "</timeout>" + CRLF +
 				"<tts>" + Boolean.toString(tts) + "</tts>" + CRLF +
 			 	"</popup>";
+		return popup.getBytes();
 	}
 }

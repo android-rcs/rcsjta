@@ -250,7 +250,7 @@ public class SipMessageFactory {
 	 * @throws SipException
 	 */
 	public static SipRequest createMessage(SipDialogPath dialog, String contentType, String content) throws SipException {
-		return createMessage(dialog, null, contentType, content);
+		return createMessage(dialog, null, contentType, content.getBytes());
 	}
 	
 	/**
@@ -263,7 +263,7 @@ public class SipMessageFactory {
 	 * @return SIP request
 	 * @throws SipException
 	 */
-	public static SipRequest createMessage(SipDialogPath dialog, String featureTag, String contentType, String content) throws SipException {
+	public static SipRequest createMessage(SipDialogPath dialog, String featureTag, String contentType, byte[] content) throws SipException {
 		try {			
 	        // Set request line header
 	        URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -322,7 +322,7 @@ public class SipMessageFactory {
 	        message.setContent(content, contentTypeHeader);
 	        
 	        // Set the message content length
-			ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY.createContentLengthHeader(content.getBytes().length);
+			ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY.createContentLengthHeader(content.length);
 			message.setContentLength(contentLengthHeader);
 			
 	        // Set "rport" (RFC3581)

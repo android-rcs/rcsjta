@@ -17,7 +17,7 @@
             <!-- Declare the joyn extension -->
            	<intent-filter>
                 <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
-                <data android:mimeType="com.gsma.services.rcs/game"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.game"/>
             </intent-filter>            
         </activity>
 

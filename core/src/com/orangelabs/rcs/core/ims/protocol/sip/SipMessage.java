@@ -240,6 +240,15 @@ public abstract class SipMessage {
 	}
 	
 	/**
+	 * Return the raw content part
+	 * 
+	 * @return Byte array or null
+	 */
+	public byte[] getRawContent() {
+		return stackMessage.getRawContent();
+	}
+
+	/**
 	 * Return the SDP content part
 	 * 
 	 * @return String or null
@@ -352,7 +361,7 @@ public abstract class SipMessage {
 	}
 	
 	/**
-	 * Get the features tags from Contact header
+	 * Get the features tags from Contact header and Accept-Contact header
 	 * 
 	 * @return Array of strings
 	 */

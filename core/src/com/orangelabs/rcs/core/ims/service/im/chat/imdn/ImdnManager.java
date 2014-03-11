@@ -186,7 +186,7 @@ public class ImdnManager extends Thread {
         		logger.info("Send first MESSAGE");
         	}
 	        SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim);
+	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes());
 	        
 	        // Send MESSAGE request
 	        SipTransactionContext ctx = imsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
@@ -209,7 +209,7 @@ public class ImdnManager extends Thread {
                 	logger.info("Send second MESSAGE");
                 }
     	        msg = SipMessageFactory.createMessage(dialogPath,
-    	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim);
+    	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes());
     	        
     	        // Set the Authorization header
     	        authenticationAgent.setProxyAuthorizationHeader(msg);

@@ -19,6 +19,8 @@
 package com.orangelabs.rcs.core.ims.service.sip;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -40,16 +42,12 @@ public class OriginatingSipSession extends GenericSipSession {
 	 * @param parent IMS service
 	 * @param contact Remote contact
 	 * @param featureTag Feature tag
-	 * @param sdp SDP
 	 */
-	public OriginatingSipSession(ImsService parent, String contact, String featureTag, String sdp) {
+	public OriginatingSipSession(ImsService parent, String contact, String featureTag) {
 		super(parent, contact, featureTag);
 		
 		// Create dialog path
 		createOriginatingDialogPath();
-		
-		// Set the local SDP
-		setLocalSdp(sdp);
 	}
 
 	/**
@@ -60,17 +58,44 @@ public class OriginatingSipSession extends GenericSipSession {
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new session as originating");
 	    	}
+	    	
+    		// Set setup mode
+	    	String localSetup = createMobileToMobileSetupOffer();
+            if (logger.isActivated()){
+				logger.debug("Local setup attribute is " + localSetup);
+			}
+
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
     	
-			// Set the local SDP part in the dialog path
-	        getDialogPath().setLocalContent(getLocalSdp());
+			// Set SDP offer
+	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+	    	String sdp =
+	    		"v=0" + SipUtils.CRLF +
+	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+	            "s=-" + SipUtils.CRLF +
+				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+	            "t=0 0" + SipUtils.CRLF +			
+	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
+	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
+	            "a=setup:" + localSetup + SipUtils.CRLF +
+	    		"a=sendrecv" + SipUtils.CRLF;
+
+	    	// Set the local SDP part in the dialog path
+	        getDialogPath().setLocalContent(sdp);
 
 	        // Create an INVITE request
 	        if (logger.isActivated()) {
 	        	logger.info("Send INVITE");
 	        }
 	        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-	        		new String [] { getFeatureTag() },
-	        		getLocalSdp());
+	        		new String [] { getFeatureTag() }, sdp);
 
 	        // Set the Authorization header
 	        getAuthenticationAgent().setAuthorizationHeader(invite);

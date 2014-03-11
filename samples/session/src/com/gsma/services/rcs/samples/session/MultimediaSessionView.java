@@ -17,16 +17,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs.samples.session;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Vector;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,7 +26,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,9 +36,6 @@ import android.widget.Toast;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.samples.session.sdp.MediaDescription;
-import com.gsma.services.rcs.samples.session.sdp.SdpParser;
-import com.gsma.services.rcs.samples.session.sdp.SdpUtils;
 import com.gsma.services.rcs.samples.session.utils.Utils;
 import com.gsma.services.rcs.session.MultimediaSession;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
@@ -111,19 +97,28 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     /**
      * MM session listener
      */
-    private MySessionListener sessionListener = new MySessionListener();    
+    private MySessionListener sessionListener = new MySessionListener();
+    
+    /**
+     * Data transfer status
+     */
+    private boolean dataTransferTerminated = false;
+    
+    /**
+     * Data sent
+     */
+    private long dataSent = 0;
 	
+    /**
+     * Data received
+     */
+    private long dataRecv = 0;
+
     /**
 	 * Progress dialog
 	 */
 	private Dialog progressDialog = null;
-
-	/**
-	 * Local TCP port
-	 */
-	private int localPort;
 	
-	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,9 +179,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
 		        
-				// Set local port
-				localPort = 9;
-				
 		        // Initiate session
     			startSession();
 			} else {
@@ -207,35 +199,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	// Get remote contact
 				contact = session.getRemoteContact();
 		
-				// Set local port
-				localPort = ServiceUtils.generateLocalTcpPort(5000);
-				
-        		// Start the TCP server
-		    	Thread t = new Thread() {
-		        	public void run() {
-		            	try {
-				    		// TCP connection
-		            		Log.d(TAG, "Start TCP server connection on " + localPort);
-		            		ServerSocket serverSocket = new ServerSocket(localPort);
-		            		Log.d(TAG, "Wait TCP connection");
-		            		Socket socket = serverSocket.accept();
-		            		Log.d(TAG, "TCP connected");
-		            		
-		            		// Read data
-		            		Log.d(TAG, "Read data over TCP");
-		            		InputStream inStream = socket.getInputStream();
-		            		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-		            		String line = null;
-		                    while ((line = reader.readLine()) != null) {
-		                        System.out.println(">" + line);
-		                    }
-		            	} catch(Exception e) {
-		            		e.printStackTrace();
-		            	}
-		        	}
-		        };
-		        t.start();
-
 		        // Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_session);
@@ -274,7 +237,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         	public void run() {
             	try {
             		// Accept the invitation
-        			session.acceptInvitation(ServiceUtils.getLocalSdp("passive", localPort));
+        			session.acceptInvitation();
             	} catch(Exception e) {
         			handler.post(new Runnable() { 
         				public void run() {
@@ -313,10 +276,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         	public void run() {
             	try {
 					// Initiate session
-					session = sessionApi.initiateSession(ServiceUtils.SERVICE_ID,
-							contact,
-							ServiceUtils.getLocalSdp("active", localPort),
-							sessionListener);
+					session = sessionApi.initiateSession(ServiceUtils.SERVICE_ID, contact, sessionListener);
             	} catch(Exception e) {
             		e.printStackTrace();
             		handler.post(new Runnable(){
@@ -387,34 +347,31 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					// Hide progress dialog
 					hideProgressDialog();
 					
-            		// Start the TCP client
+            		// Send data
 					if (mode == MultimediaSessionView.MODE_OUTGOING) {
 						// Originating
 			    		Thread t = new Thread() {
 			    			public void run() {
 			    				try  {
-									// Parse the remote SDP
-									String sdp = session.getRemoteSdp();
-									SdpParser parser = new SdpParser(sdp.getBytes());
-						    		Vector<MediaDescription> media = parser.getMediaDescriptions();
-									MediaDescription mediaDesc = media.elementAt(0);
-						    		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
-						    		int remotePort = mediaDesc.port;
-
-						    		// TCP connection
-						    		Log.d(TAG, "Start TCP client on " + remoteHost + ":" + remotePort);
-						    		Socket socket = new Socket(remoteHost, remotePort);
-				            		
-				            		// Send data
-				            		Log.d(TAG, "Send data over TCP");
-				            		OutputStream outStream = socket.getOutputStream();
-				            		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
-				            		for(int i=0; i < 1000; i++) {
-				            			String txt = "Blablablablablablablablablablablabla " + i + "\n";
-				            			writer.write(txt);
-				            			writer.flush();
+				            		while(!dataTransferTerminated) {
+					            		// Send data
+				            			String txt = "blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
+				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
+				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
+				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
+				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla";
+				            			byte[] data = txt.getBytes();
+				            			dataSent += data.length;
+				            			session.sendMessage(data);
+				            			
+				            			// Update UI
+				            			handler.post(new Runnable() {
+				            				public void run() {
+						            	    	TextView txtView = (TextView)findViewById(R.id.data);
+						            	    	txtView.setText(getString(R.string.label_data_sent, dataSent/1024));
+				            				}
+				            			});
 				            		}
-	            					outStream.close();
 			    				} catch(Exception e) {
 									e.printStackTrace();
 									// Can't connect media: abort the session
@@ -434,6 +391,9 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     	public void onSessionAborted() {
 			handler.post(new Runnable(){
 				public void run(){
+			    	// Stop data transfer
+					dataTransferTerminated = true;
+
 					// Hide progress dialog
 					hideProgressDialog();
 
@@ -447,6 +407,9 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     	public void onSessionError(final int error) {
 			handler.post(new Runnable() {
 				public void run() {
+			    	// Stop data transfer
+					dataTransferTerminated = true;
+
 					// Hide progress dialog
 					hideProgressDialog();
 					
@@ -459,12 +422,29 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 				}
 			});
     	}
+    	
+    	// Receive new message
+    	public void onNewMessage(byte[] content) {
+    		// Receive data
+    		dataRecv += content.length;
+    		
+			// Update UI
+			handler.post(new Runnable() {
+				public void run() {
+			    	TextView txtView = (TextView)findViewById(R.id.data);
+			    	txtView.setText(getString(R.string.label_data_recv, dataRecv/1024));
+				}
+			});
+    	}
     };
         
 	/**
      * Quit the session
      */
     private void quitSession() {
+    	// Stop data transfer
+		dataTransferTerminated = true;
+
 		// Stop session
         Thread thread = new Thread() {
         	public void run() {

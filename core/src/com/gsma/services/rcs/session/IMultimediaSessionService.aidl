@@ -8,7 +8,7 @@ import com.gsma.services.rcs.session.IMultimediaSessionListener;
  * Multimedia session service API
  */
 interface IMultimediaSessionService {
-    boolean isServiceRegistered();
+	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
 
@@ -18,9 +18,9 @@ interface IMultimediaSessionService {
 	
 	IMultimediaSession getSession(in String sessionId);
 	
-	IMultimediaSession initiateSession(in String serviceId, in String contact, in String sdp, in IMultimediaSessionListener listener);
+	IMultimediaSession initiateSession(in String serviceId, in String contact, in IMultimediaSessionListener listener);
 	
-	boolean sendMessage(in String serviceId, in String contact, in String content, in String contentType);
+	boolean sendMessage(in String serviceId, in String contact, in byte[] content);
 	
 	int getServiceVersion();
 }

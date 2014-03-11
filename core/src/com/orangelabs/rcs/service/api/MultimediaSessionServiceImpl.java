@@ -22,16 +22,15 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.session.IMultimediaSession;
-import com.gsma.services.rcs.session.IMultimediaSessionListener;
-import com.gsma.services.rcs.session.IMultimediaSessionService;
-
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.session.IMultimediaSession;
+import com.gsma.services.rcs.session.IMultimediaSessionListener;
+import com.gsma.services.rcs.session.IMultimediaSessionService;
 import com.gsma.services.rcs.session.MultimediaMessageIntent;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
 import com.orangelabs.rcs.core.Core;
@@ -204,20 +203,19 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 	
     /**
-     * Initiate a new multimedia session with a remote contact and for a given service.
-     * The SDP (Session Description Protocol) parameter is used to describe the supported
-     * media. The parameter contact supports the following formats: MSISDN in national or
-     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact
-     * is not supported an exception is thrown.
+     * Initiates a new multimedia session for real time messaging with a remote contact and
+     * for a given service. The messages exchanged in real time during the session may be from
+     * any type. The parameter contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
+     * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
      * @param contact Contact
-     * @param sdp Local SDP
      * @param listener Multimedia session event listener
      * @return Multimedia session
 	 * @throws ServerApiException
      */
-    public IMultimediaSession initiateSession(String serviceId, String contact, String sdp, IMultimediaSessionListener listener) throws ServerApiException {
+    public IMultimediaSession initiateSession(String serviceId, String contact, IMultimediaSessionListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia session with " + contact);
 		}
@@ -228,7 +226,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Initiate a new session
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			final GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact,	featureTag, sdp);
+			final GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact, featureTag);
 			
 			// Add session listener
 			MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
@@ -298,19 +296,18 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
     
     /**
-     * Sends an instant message to a contact and for a given service. The message may be any
-     * type of content. The parameter contact supports the following formats: MSISDN in
+     * Sends a message in pager mode to a contact and for a given service. The message may
+     * be any type of content. The parameter contact supports the following formats: MSISDN in
      * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
-     * contact is not supported an exception is thrown.
+     * contact is not supported an exception is thrown. 
      * 
      * @param serviceId Service ID
      * @param contact Contact
      * @param content Message content
-     * @param contentType Content type of the message
 	 * @return Returns true if sent successfully else returns false
 	 * @throws ServerApiException
      */
-    public boolean sendMessage(String serviceId, String contact, String content, String contentType) throws ServerApiException {
+    public boolean sendMessage(String serviceId, String contact, byte[] content) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Send instant message to " + contact);
 		}
@@ -321,7 +318,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Send instant message
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			return Core.getInstance().getSipService().sendInstantMessage(contact, featureTag, content, contentType);
+			return Core.getInstance().getSipService().sendInstantMessage(contact, featureTag, content);
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -343,8 +340,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		String displayName = SipUtils.getDisplayNameFromUri(message.getFrom());
 		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTACT, number);
 		intent.putExtra(MultimediaMessageIntent.EXTRA_DISPLAY_NAME, displayName);
-		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT, message.getContent());
-		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT_TYPE, message.getContentType());
+		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT, message.getRawContent());
 		
 		// Broadcast intent related to the received invitation
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	

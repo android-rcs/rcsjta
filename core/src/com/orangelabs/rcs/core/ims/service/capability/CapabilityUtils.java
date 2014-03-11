@@ -40,7 +40,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.NetworkUtils;
-import com.orangelabs.rcs.utils.StorageUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 
 /**

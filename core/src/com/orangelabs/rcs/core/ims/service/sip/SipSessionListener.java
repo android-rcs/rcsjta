@@ -31,5 +31,12 @@ public interface SipSessionListener extends ImsSessionListener  {
      * 
      * @param error Error
      */
-    public void handleSessionError(SipSessionError error);    
+    public void handleSessionError(SipSessionError error);
+    
+    /**
+     * Receive data
+     * 
+     * @param error Error
+     */
+    public void handleReceiveData(byte[] data);
 }

@@ -21,7 +21,8 @@ import com.gsma.services.rcs.JoynServiceException;
 
 /**
  * This class maintains the information related to a multimedia
- * session and offers methods to manage it. 
+ * session and offers methods to manage it and to send messages
+ * in real time. 
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -85,7 +86,7 @@ public class MultimediaSession {
     }     
     
     /**
-     * Image sharing error
+     * Session error
      */
     public static class Error {
     	/**
@@ -97,6 +98,11 @@ public class MultimediaSession {
     	 * Session has failed
     	 */
     	public final static int SESSION_FAILED = 1;
+
+    	/**
+    	 * Media has failed
+    	 */
+    	public final static int MEDIA_FAILED = 2;
 
     	private Error() {
         }    	
@@ -189,43 +195,13 @@ public class MultimediaSession {
 	}	
 	
 	/**
-	 * Returns the local SDP
+	 * Accepts session invitation.
 	 * 
-	 * @return SDP
 	 * @throws JoynServiceException
 	 */
-	public String getLocalSdp() throws JoynServiceException {
+	public void acceptInvitation() throws JoynServiceException {
 		try {
-			return sessionInf.getLocalSdp();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Returns the remote SDP
-	 * 
-	 * @return SDP
-	 * @throws JoynServiceException
-	 */
-	public String getRemoteSdp() throws JoynServiceException {
-		try {
-			return sessionInf.getRemoteSdp();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Accepts session invitation. The SDP (Session Description Protocol)
-	 * parameter is used to describe the supported media.
-	 * 
-	 * @param sdp SDP
-	 * @throws JoynServiceException
-	 */
-	public void acceptInvitation(String sdp) throws JoynServiceException {
-		try {
-			sessionInf.acceptInvitation(sdp);
+			sessionInf.acceptInvitation();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -284,4 +260,19 @@ public class MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+
+    /**
+     * Sends a message in real time
+     * 
+     * @param content Message content
+	 * @return Returns true if sent successfully else returns false
+     * @throws JoynServiceException
+     */
+    public boolean sendMessage(byte[] content) throws JoynServiceException {
+		try {
+			return sessionInf.sendMessage(content);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+    }    
 }

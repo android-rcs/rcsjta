@@ -18,6 +18,7 @@
 package com.gsma.services.rcs.session;
 
 
+
 /**
  * This class offers callback methods on multimedia session events
  * 
@@ -46,4 +47,11 @@ public abstract class MultimediaSessionListener extends IMultimediaSessionListen
 	 * @see MultimediaSession.Error
 	 */
 	public abstract void onSessionError(int error);
+	
+	/**
+	 * Callback called when a new message has been received
+	 * 
+	 * @param content Message content
+	 */
+	public abstract void onNewMessage(byte[] content);
 }

@@ -33,7 +33,6 @@ public class MultimediaMessageIntent {
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the message (extracted from the SIP address).
      * <li> {@link #EXTRA_CONTENT} containing the multimedia message content.
-     * <li> {@link #EXTRA_CONTENT_TYPE} containing the multimedia message content type.
      * <li> The service ID is read from the method Intent.getType() which returns the MIME type included
      *  in the intent and corresponding to the invoked service.
      * </ul>
@@ -54,9 +53,4 @@ public class MultimediaMessageIntent {
 	 * Multimedia message content
 	 */
 	public final static String EXTRA_CONTENT = "content";	
-
-	/**
-	 * Multimedia message content type
-	 */
-	public final static String EXTRA_CONTENT_TYPE = "contentType";	
 }

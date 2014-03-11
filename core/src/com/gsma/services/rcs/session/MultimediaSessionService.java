@@ -36,9 +36,9 @@ import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 
 /**
- * This class offers the main entry point to initiate and manage new
- * and existing multimedia sessions. Several applications may
- * connect/disconnect to the API.
+ * This class offers the main entry point to initiate and to manage
+ * multimedia sessions. Several applications may connect/disconnect
+ * to the API.
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -107,25 +107,23 @@ public class MultimediaSessionService extends JoynService {
     };
     
     /**
-     * Initiates a new multimedia session with a remote contact and for a given service.
-     * The SDP (Session Description Protocol) parameter is used to describe the supported
-     * media. The parameter contact supports the following formats: MSISDN in national or
-     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact
-     * is not supported an exception is thrown.
+     * Initiates a new multimedia session for real time messaging with a remote contact and
+     * for a given service. The messages exchanged in real time during the session may be from
+     * any type. The parameter contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
+     * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
      * @param contact Contact
-     * @param sdp Local SDP
      * @param listener Multimedia session event listener
      * @return Multimedia session
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public MultimediaSession initiateSession(String serviceId, String contact, String sdp,
-    		MultimediaSessionListener listener) throws JoynServiceException, JoynContactFormatException {
+    public MultimediaSession initiateSession(String serviceId, String contact, MultimediaSessionListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IMultimediaSession sessionIntf = api.initiateSession(serviceId, contact, sdp, listener);
+				IMultimediaSession sessionIntf = api.initiateSession(serviceId, contact, listener);
 				if (sessionIntf != null) {
 					return new MultimediaSession(sessionIntf);
 				} else {
@@ -212,23 +210,22 @@ public class MultimediaSessionService extends JoynService {
     }     
 
     /**
-     * Sends an instant message to a contact and for a given service. The message may be any
-     * type of content. The parameter contact supports the following formats: MSISDN in
+     * Sends a message in pager mode to a contact and for a given service. The message may
+     * be any type of content. The parameter contact supports the following formats: MSISDN in
      * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
      * contact is not supported an exception is thrown. 
      * 
      * @param serviceId Service ID
      * @param contact Contact
      * @param content Message content
-     * @param contentType Content type of the message
 	 * @return Returns true if sent successfully else returns false
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public boolean sendMessage(String serviceId, String contact, String content, String contentType) throws JoynServiceException, JoynContactFormatException {
+    public boolean sendMessage(String serviceId, String contact, byte[] content) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				return api.sendMessage(serviceId, contact, content, contentType);
+				return api.sendMessage(serviceId, contact, content);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

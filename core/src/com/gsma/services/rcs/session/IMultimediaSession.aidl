@@ -16,11 +16,7 @@ interface IMultimediaSession {
 	
 	int getDirection();
 	
-	String getLocalSdp();
-	
-	String getRemoteSdp();
-	
-	void acceptInvitation(in String sdp);
+	void acceptInvitation();
 	
 	void rejectInvitation();
 	
@@ -29,5 +25,7 @@ interface IMultimediaSession {
 	void addEventListener(in IMultimediaSessionListener listener);
 	
 	void removeEventListener(in IMultimediaSessionListener listener);
+
+	boolean sendMessage(in byte[] content);
 }
 

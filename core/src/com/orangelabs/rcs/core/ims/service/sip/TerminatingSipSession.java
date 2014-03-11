@@ -18,8 +18,16 @@
 
 package com.orangelabs.rcs.core.ims.service.sip;
 
+import java.io.IOException;
+import java.util.Vector;
+
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
+import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -61,12 +69,6 @@ public class TerminatingSipSession extends GenericSipSession {
 	    		logger.info("Initiate a new session as terminating");
 	    	}
 	
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(getLocalSdp());
-
-			// Set the SDP offer 
-			setRemoteSdp(getDialogPath().getInvite().getContent());
-
 			// Send a 180 Ringing response
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
         
@@ -109,12 +111,88 @@ public class TerminatingSipSession extends GenericSipSession {
                 }
                 return;
             }
+			
+        	// Parse the remote SDP part
+			String remoteSdp = getDialogPath().getInvite().getSdpContent();
+        	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+    		Vector<MediaDescription> media = parser.getMediaDescriptions();
+			MediaDescription mediaDesc = media.elementAt(0);
+			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
+            String remotePath = attr1.getValue();
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
+    		int remotePort = mediaDesc.port;
+			
+            // Extract the "setup" parameter
+            String remoteSetup = "passive";
+			MediaAttribute attr2 = mediaDesc.getMediaAttribute("setup");
+			if (attr2 != null) {
+				remoteSetup = attr2.getValue();
+			}
+            if (logger.isActivated()){
+				logger.debug("Remote setup attribute is " + remoteSetup);
+			}
+            
+    		// Set setup mode
+            String localSetup = createSetupAnswer(remoteSetup);
+            if (logger.isActivated()){
+				logger.debug("Local setup attribute is " + localSetup);
+			}
 
-            // Check if a local SDP has been set
-            if (getLocalSdp() == null) {
-                handleError(new SipSessionError(SipSessionError.SDP_NOT_INITIALIZED));
-                return;
-            }			
+    		// Set local port
+	    	int localMsrpPort;
+	    	if (localSetup.equals("active")) {
+		    	localMsrpPort = 9; // See RFC4145, Page 4
+	    	} else {
+	    		localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+	    	}            
+	    	
+			// Build SDP part
+	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+	    	String sdp =
+	    		"v=0" + SipUtils.CRLF +
+	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+	            "s=-" + SipUtils.CRLF +
+				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+	            "t=0 0" + SipUtils.CRLF +			
+	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
+	            "a=setup:" + localSetup + SipUtils.CRLF +
+	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
+	    		"a=sendrecv" + SipUtils.CRLF;
+
+	    	// Set the local SDP part in the dialog path
+	        getDialogPath().setLocalContent(sdp);
+
+	        // Test if the session should be interrupted
+            if (isInterrupted()) {
+            	if (logger.isActivated()) {
+            		logger.debug("Session has been interrupted: end of processing");
+            	}
+            	return;
+            }
+
+            // Create the MSRP server session
+            if (localSetup.equals("passive")) {
+            	// Passive mode: client wait a connection
+            	MsrpSession session = getMsrpMgr().createMsrpServerSession(remotePath, this);
+    			session.setFailureReportOption(false);
+    			session.setSuccessReportOption(false);
+    			
+    			// Open the connection
+    			Thread thread = new Thread(){
+    				public void run(){
+    					try {
+    						// Open the MSRP session
+    						getMsrpMgr().openMsrpSession();
+						} catch (IOException e) {
+							if (logger.isActivated()) {
+				        		logger.error("Can't create the MSRP server session", e);
+				        	}
+						}		
+    				}
+    			};
+    			thread.start();
+            }
 			
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
@@ -129,8 +207,7 @@ public class TerminatingSipSession extends GenericSipSession {
 				logger.info("Send 200 OK");
 			}
 			SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-	        		new String [] { getFeatureTag() },
-					getLocalSdp());
+	        		new String [] { getFeatureTag() }, sdp);
 
             // The signalisation is established
             getDialogPath().sigEstablished();
@@ -148,6 +225,17 @@ public class TerminatingSipSession extends GenericSipSession {
 				// The session is established
 				getDialogPath().sessionEstablished();
 
+        		// Create the MSRP client session
+                if (localSetup.equals("active")) {
+                	// Active mode: client should connect
+                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this);
+        			session.setFailureReportOption(false);
+        			session.setSuccessReportOption(false);
+        			
+        			// Open the MSRP session
+        			getMsrpMgr().openMsrpSession();
+                }
+				
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());

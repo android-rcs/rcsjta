@@ -17,8 +17,9 @@ public final class R {
     }
     public static final class id {
         public static final int contact=0x7f070000;
+        public static final int data=0x7f070002;
         public static final int initiate_btn=0x7f070001;
-        public static final int menu_close_session=0x7f070002;
+        public static final int menu_close_session=0x7f070003;
     }
     public static final class layout {
         public static final int session_initiate=0x7f030000;
@@ -37,6 +38,9 @@ public final class R {
         public static final int label_close_session=0x7f040010;
         public static final int label_command_in_progress=0x7f040008;
         public static final int label_confirm_close=0x7f040009;
+        public static final int label_data=0x7f04001b;
+        public static final int label_data_recv=0x7f04001c;
+        public static final int label_data_sent=0x7f04001d;
         public static final int label_decline=0x7f040003;
         public static final int label_from=0x7f040007;
         public static final int label_initiate_session=0x7f04000f;

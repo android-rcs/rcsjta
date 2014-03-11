@@ -30,6 +30,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,11 +91,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     private String serviceId = TestMultimediaSessionApi.SERVICE_ID;
 
     /**
-	 * Local SDP
-	 */
-    private String localSdp;
-
-    /**
 	 * MM session
 	 */
 	private MultimediaSession session = null;
@@ -119,10 +116,12 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         // Set title
         setTitle(R.string.title_mm_session);
     	
-    	// Set local SDP
-    	localSdp = MultimediaSessionSettings.getLocalSdp(MultimediaSessionView.this);
-    	
-    	// Instanciate API
+        // Set buttons callback
+		Button sendBtn = (Button)findViewById(R.id.send_btn);
+		sendBtn.setOnClickListener(btnSendListener);
+		sendBtn.setEnabled(false);
+
+		// Instanciate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
         
         // Connect API
@@ -151,7 +150,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	private void acceptInvitation() {
     	try {
     		// Accept the invitation
-			session.acceptInvitation(localSdp);
+			session.acceptInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));
@@ -221,10 +220,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 				
 		    	// Get remote contact
 				contact = session.getRemoteContact();
-		
-				// Display session info
-				TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
-				remoteSdpEdit.setText(session.getRemoteSdp());
 			} else {
 				// Incoming session from its Intent
 		        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
@@ -243,10 +238,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		    	// Get remote contact
 				contact = session.getRemoteContact();
 		
-				// Display session info
-				TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
-				remoteSdpEdit.setText(session.getRemoteSdp());
-
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_mm_session);
@@ -264,8 +255,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	    	featureTagEdit.setText(serviceId);
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
 	    	contactEdit.setText(contact);
-	    	TextView localSdpEdit = (TextView)findViewById(R.id.local_sdp);
-	    	localSdpEdit.setText(localSdp);
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
@@ -290,7 +279,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		// Initiate the chat session in background
     	try {
 			// Initiate session
-			session = sessionApi.initiateSession(serviceId, contact, localSdp, sessionListener);
+			session = sessionApi.initiateSession(serviceId, contact, sessionListener);
     	} catch(Exception e) {
     		e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));		
@@ -354,15 +343,10 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
-
-					// Display session info
-					try {
-						TextView remoteSdpEdit = (TextView)findViewById(R.id.remote_sdp);
-						remoteSdpEdit.setText(session.getRemoteSdp());
-            		} catch(JoynServiceException e) {
-            			e.printStackTrace();
-            			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
-                	}
+					
+					// Activate button
+					Button sendBtn = (Button)findViewById(R.id.send_btn);
+					sendBtn.setEnabled(true);
 				}
 			});
     	}
@@ -395,7 +379,19 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					}					
 				}
 			});
-			
+    	}
+    	
+    	// Receive new message
+    	public void onNewMessage(byte[] content) {
+    		final String data = new String(content);
+    		
+			handler.post(new Runnable() {
+				public void run() {
+					// Display received data
+					TextView txt = (TextView)MultimediaSessionView.this.findViewById(R.id.recv_data);
+			        txt.setText(data);					
+				}
+			});
     	}
     };
         
@@ -466,4 +462,20 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		}
 		return true;
 	}
+    
+	/**
+	 * Send button callback
+	 */
+	private android.view.View.OnClickListener btnSendListener = new android.view.View.OnClickListener() {
+		private int i = 0;
+		
+		public void onClick(View v) {
+			try {
+				String data = "data" + i++;
+				session.sendMessage(data.getBytes());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	};
 }

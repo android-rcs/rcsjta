@@ -144,36 +144,12 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	}	
 	
 	/**
-	 * Returns the local SDP
-	 * 
-	 * @return SDP
+	 * Accepts session invitation
 	 */
-	public String getLocalSdp() {
-    	return session.getLocalSdp();
-    }
-
-	/**
-	 * Returns the remote SDP
-	 * 
-	 * @return SDP
-	 */
-	public String getRemoteSdp() {
-    	return session.getRemoteSdp();
-    }
-	
-	/**
-	 * Accepts session invitation. The SDP (Session Description Protocol)
-	 * parameter is used to describe the supported media.
-	 * 
-	 * @param sdp SDP
-	 */
-	public void acceptInvitation(String sdp) {
+	public void acceptInvitation() {
 		if (logger.isActivated()) {
 			logger.info("Accept session invitation");
 		}
-
-		// Set local SDP
-		session.setLocalSdp(sdp);
 		
 		// Accept invitation
         Thread t = new Thread() {
@@ -248,6 +224,16 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
     	}
 	}
 
+    /**
+     * Sends a message in real time
+     * 
+     * @param content Message content
+	 * @return Returns true if sent successfully else returns false
+     */
+    public boolean sendMessage(byte[] content) {
+    	return session.sendMessage(content);
+    }	
+	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**
@@ -355,6 +341,9 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
             			case SipSessionError.SESSION_INITIATION_DECLINED:
 	            			code = MultimediaSession.Error.INVITATION_DECLINED;
 	            			break;
+            			case SipSessionError.MEDIA_TRANSFER_FAILED:
+	            			code = MultimediaSession.Error.MEDIA_FAILED;
+	            			break;
 	            		default:
 	            			code = MultimediaSession.Error.SESSION_FAILED;
 	            	}
@@ -370,5 +359,27 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	        // Remove session from the list
 	        MultimediaSessionServiceImpl.removeSipSession(session.getSessionID());
 	    }
+    }
+    
+    /**
+     * Receive data
+     * 
+     * @param data Data
+     */
+    public void handleReceiveData(byte[] data) {
+    	synchronized(lock) {
+	  		// Notify event listeners
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onNewMessage(data);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();
+	    }  	
     }
 }

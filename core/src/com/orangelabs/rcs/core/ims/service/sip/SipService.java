@@ -48,7 +48,12 @@ public class SipService extends ImsService {
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
+	 * MIME-type for multimedia services
+	 */
+	public final static String MIME_TYPE = "application/*";
+
+	/**
      * Constructor
      * 
      * @param parent IMS module
@@ -91,20 +96,18 @@ public class SipService extends ImsService {
      * 
      * @param contact Remote contact
      * @param featureTag Feature tag of the service
-     * @param offer SDP offer
      * @return SIP session
      */
-	public GenericSipSession initiateSession(String contact, String featureTag, String offer) {
+	public GenericSipSession initiateSession(String contact, String featureTag) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a session with contact " + contact);
 		}
-
+		
 		// Create a new session
 		OriginatingSipSession session = new OriginatingSipSession(
 				this,
 				PhoneUtils.formatNumberToSipUri(contact),
-				featureTag,
-				offer);
+				featureTag);
 		
 		return session;
 	}
@@ -173,10 +176,9 @@ public class SipService extends ImsService {
      * @param contact Contact
 	 * @param featureTag Feature tag of the service
      * @param content Content
-     * @param contentType Content type
 	 * @return True if successful else returns false
 	 */
-	public boolean sendInstantMessage(String contact, String featureTag, String content, String contentType) {
+	public boolean sendInstantMessage(String contact, String featureTag, byte[] content) {
 		boolean result = false;
 		try {
 			if (logger.isActivated()) {
@@ -202,7 +204,7 @@ public class SipService extends ImsService {
         		logger.info("Send first MESSAGE");
         	}
 	        SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-	        		featureTag,	contentType, content);
+	        		featureTag,	SipService.MIME_TYPE, content);
 	        
 	        // Send MESSAGE request
 	        SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
@@ -225,7 +227,7 @@ public class SipService extends ImsService {
                 	logger.info("Send second MESSAGE");
                 }
     	        msg = SipMessageFactory.createMessage(dialogPath,
-    	        		featureTag,	contentType, content);
+    	        		featureTag,	SipService.MIME_TYPE, content);
 
     	        // Set the Authorization header
     	        authenticationAgent.setProxyAuthorizationHeader(msg);

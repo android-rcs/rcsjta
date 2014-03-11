@@ -37,7 +37,7 @@ public class TestMultimediaSessionApi extends ListActivity {
 	/**
 	 * Service ID constant
 	 */
-	public final static String SERVICE_ID = "sipdemo";
+	public final static String SERVICE_ID = "ext.sipdemo";
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,6 @@ public class TestMultimediaSessionApi extends ListActivity {
         String[] items = {
     		getString(R.string.menu_initiate_mm_session),
     		getString(R.string.menu_mm_sessions_list),
-    		getString(R.string.menu_mm_session_settings),
     		getString(R.string.menu_send_mm_message)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -68,10 +67,6 @@ public class TestMultimediaSessionApi extends ListActivity {
 	            break;
 
 	        case 2:
-            	startActivity(new Intent(this, MultimediaSessionSettings.class));
-	            break;
-
-	        case 3:
             	startActivity(new Intent(this, SendMultimediaMessage.class));
 	            break;
         }

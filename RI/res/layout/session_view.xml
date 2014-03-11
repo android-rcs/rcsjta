@@ -33,22 +33,19 @@
 				android:layout_marginRight="5dip"
 				android:textStyle="bold" />
 		</TableRow>
-
-		<TableRow android:paddingTop="5dip">
-			<TextView android:text="@string/label_local_sdp"
-				android:layout_marginLeft="5dip"
-				android:gravity="right" />
-			<TextView android:id="@+id/local_sdp"
-				android:layout_marginLeft="5dip"
-				android:layout_marginRight="5dip"
-				android:textStyle="bold" />
-		</TableRow>
 		
-		<TableRow android:paddingTop="5dip" >
-			<TextView android:text="@string/label_remote_sdp"
+		<TableRow android:paddingTop="5dip">
+			<Button android:text="@string/label_send_mm_data"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"
+			 android:id="@+id/send_btn"/>
+		</TableRow>
+						
+		<TableRow android:paddingTop="5dip">
+			<TextView android:text="@string/label_recv_mm_data"
 				android:layout_marginLeft="5dip"
 				android:gravity="right" />
-			<TextView android:id="@+id/remote_sdp"
+			<TextView android:id="@+id/recv_data"
 				android:layout_marginLeft="5dip"
 				android:layout_marginRight="5dip"
 				android:textStyle="bold" />

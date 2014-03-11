@@ -30,11 +30,11 @@ public class SipSessionError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;
 
 	/**
-	 * SDP not initialized
+	 * Media transfer has failed (e.g. MSRP failure)
 	 */
-	public final static int SDP_NOT_INITIALIZED = SIP_ERROR_CODES + 1;	
-
-    /**
+	public final static int MEDIA_TRANSFER_FAILED = SESSION_ERROR_CODES + 1;
+	
+	/**
      * Constructor
      *
      * @param error Error

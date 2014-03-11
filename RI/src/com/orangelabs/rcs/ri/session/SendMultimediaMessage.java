@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.session.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
@@ -41,14 +42,14 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SendMultimediaMessage extends Activity implements JoynServiceListener {
 	/**
+     * UI handler
+     */
+    private final Handler handler = new Handler();
+
+    /**
 	 * MM session API
 	 */
 	private MultimediaSessionService sessionApi;
-
-	/**
-	 * UI handler
-	 */
-	private final Handler handler = new Handler();
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -126,23 +127,27 @@ public class SendMultimediaMessage extends Activity implements JoynServiceListen
 			TextView contentView = (TextView)findViewById(R.id.content);
 			final String content = contentView.getText().toString();
 			
-			// Get content type
-			TextView typeView = (TextView)findViewById(R.id.type);
-			final String contentType = typeView.getText().toString();
-
 			// Initiate session in background
 			Thread thread = new Thread() {
 				public void run() {
 					try {
 						// Initiate session
-						boolean result = sessionApi.sendMessage(TestMultimediaSessionApi.SERVICE_ID, contact, content, contentType);
-						if (result) {
-							Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_success));
-						} else {
-							Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
-						}
+						final boolean result = sessionApi.sendMessage(TestMultimediaSessionApi.SERVICE_ID, contact, content.getBytes());
+						handler.post(new Runnable(){
+							public void run(){
+								if (result) {
+									Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_success));
+								} else {
+									Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
+								}
+							}
+						});
 					} catch (Exception e) {
-						Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
+						handler.post(new Runnable(){
+							public void run(){
+								Utils.displayToast(SendMultimediaMessage.this, getString(R.string.label_mm_msg_failed));
+							}
+						});
 					}
 				}
 			};

@@ -11,4 +11,6 @@ interface IMultimediaSessionListener {
 	void onSessionAborted();
 
 	void onSessionError(in int error);
+
+	void onNewMessage(in byte[] content);
 }

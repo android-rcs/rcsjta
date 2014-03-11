@@ -19,8 +19,6 @@ package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
 
-import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
-
 /**
  * Capabilities
  * 

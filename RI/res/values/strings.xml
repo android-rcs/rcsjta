@@ -245,7 +245,6 @@
 <!--  MM session menu -->
 <string name="menu_mm_sessions">Multimedia session</string>
 <string name="menu_initiate_mm_session">Initiate session</string>
-<string name="menu_mm_session_settings">Session settings</string>
 <string name="menu_mm_sessions_list">Current sessions</string>
 <string name="menu_send_mm_message">Send message</string>
 <string name="label_initiate_mm_session">Initiate session</string>
@@ -272,9 +271,11 @@
 <string name="label_mm_session_failed">Session has failed (error code %d)</string>
 <string name="title_mm_session">Multimedia session</string>
 <string name="label_mm_session_has_expired">Session has expired</string>
-<string name="title_recv_mm_session">Multimedia Session invitation</string>
+<string name="title_recv_mm_session">Multimedia session invitation</string>
 <string name="label_session">Session %s</string>
 <string name="label_session_from">from %s</string>
+<string name="label_send_mm_data">Send data</string>
+<string name="label_recv_mm_data">Receive data:</string>
 
 <!-- Geolocation push -->
 <string name="label_select_geoloc">Select from a map</string>
