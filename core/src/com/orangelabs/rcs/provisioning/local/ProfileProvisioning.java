@@ -557,7 +557,7 @@ public class ProfileProvisioning extends Activity {
                             homeDomain = "ims.pftest.net";
                             sipUri = number + "@" + homeDomain;
             				privateSipUri = sipUri;
-                            imsPwd = "";
+                            imsPwd = number;
 	            			imsRealm = "ims.pftest.net";
                             imsAddrForMobile = "80.12.215.234";
                             imsPortForMobile = 5060;

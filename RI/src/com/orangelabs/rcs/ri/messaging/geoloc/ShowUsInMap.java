@@ -131,9 +131,9 @@ public class ShowUsInMap extends MapActivity {
 				sortOrder);
 
 		if (cursor.moveToFirst()) {
-			result = GeolocMessage.stringToGeoloc(cursor.getString(0));
+    		byte[] content = cursor.getBlob(0);	
+			result = ChatLog.getGeolocFromBlob(content);
 		}
-		cursor.close();
 
 		return result;
 	}
@@ -155,7 +155,8 @@ public class ShowUsInMap extends MapActivity {
 				sortOrder);
 
 		if (cursor.moveToFirst()) {
-			result = GeolocMessage.stringToGeoloc(cursor.getString(0));
+    		byte[] content = cursor.getBlob(0);		
+			result = ChatLog.getGeolocFromBlob(content);
 		}
 		cursor.close();
 

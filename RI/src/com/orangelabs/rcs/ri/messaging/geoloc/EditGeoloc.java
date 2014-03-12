@@ -24,6 +24,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.InputFilter;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -218,7 +219,7 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
     				expiration,
     				Float.parseFloat(acc));
     		Intent in = new Intent();
-    		in.putExtra(EXTRA_GEOLOC, geoloc);
+    		in.putExtra(EXTRA_GEOLOC, (Parcelable)geoloc);
     		setResult(-1, in);
     		finish();
         }

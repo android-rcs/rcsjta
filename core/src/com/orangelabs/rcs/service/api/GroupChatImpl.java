@@ -753,7 +753,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
 	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
-	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
+	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);

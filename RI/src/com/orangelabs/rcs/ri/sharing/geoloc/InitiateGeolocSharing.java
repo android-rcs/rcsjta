@@ -28,6 +28,7 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -369,7 +370,7 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
 			        // Show the shared geoloc
 					Intent intent = new Intent(InitiateGeolocSharing.this, DisplayGeoloc.class);
 			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, contact);
-			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, geoloc);
+			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)geoloc);
 					startActivity(intent);
 				}
 			});

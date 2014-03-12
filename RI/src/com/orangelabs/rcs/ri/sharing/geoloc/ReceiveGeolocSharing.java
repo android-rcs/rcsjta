@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -275,7 +276,7 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 			        // Show the shared geoloc
 					Intent intent = new Intent(ReceiveGeolocSharing.this, DisplayGeoloc.class);
 			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, remoteContact);
-			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, geoloc);
+			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)geoloc);
 					startActivity(intent);
 				}
 			});

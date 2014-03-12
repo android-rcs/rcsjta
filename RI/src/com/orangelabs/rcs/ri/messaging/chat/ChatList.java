@@ -37,9 +37,13 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -111,6 +115,7 @@ public class ChatList extends Activity implements JoynServiceListener {
 	    		ChatLog.Message.CHAT_ID,
 	    		ChatLog.Message.CONTACT_NUMBER,
 	    		ChatLog.Message.BODY,
+	    		ChatLog.Message.MIME_TYPE,
 	    		ChatLog.Message.TIMESTAMP
 	    };
         String sortOrder = ChatLog.Message.TIMESTAMP + " DESC";
@@ -145,8 +150,23 @@ public class ChatList extends Activity implements JoynServiceListener {
             
     		ChatListItemCache cache = new ChatListItemCache();
     		cache.contact = cursor.getString(2);
-    		cache.msg = cursor.getString(3);
-    		cache.date = cursor.getLong(4);
+    		
+    		byte[] content = cursor.getBlob(3);
+    		String contentType = cursor.getString(4);
+    		
+        	String text = "";
+        	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
+    			Geoloc geoloc = ChatLog.getGeolocFromBlob(content);
+    			if (geoloc != null) {
+        	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
+        		}
+        	} else
+        	if (contentType.equals(ChatMessage.MIME_TYPE)) {
+        		text = ChatLog.getTextFromBlob(content);
+        	}
+    		cache.msg = text;
+    		
+    		cache.date = cursor.getLong(5);
             view.setTag(cache);
             return view;
         }

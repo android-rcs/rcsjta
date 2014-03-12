@@ -18,8 +18,6 @@
 package com.gsma.services.rcs.chat;
 
 import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,7 +31,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	/**
 	 * MIME type
 	 */
-	public final static String MIME_TYPE = "text/geoloc"; 
+	public final static String MIME_TYPE = "application/geoloc"; 
 
 	/**
 	 * Geoloc info
@@ -53,7 +51,7 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
      * @hide
 	 */
 	public GeolocMessage(String messageId, String remote, Geoloc geoloc, Date receiptAt, boolean imdnDisplayedRequested) {
-		super(messageId, remote, GeolocMessage.geolocToString(geoloc), receiptAt, imdnDisplayedRequested);
+		super(messageId, remote, null, receiptAt, imdnDisplayedRequested);
 		
 		this.geoloc = geoloc;
 	}
@@ -119,50 +117,4 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	public Geoloc getGeoloc() {
 		return geoloc;
 	}
-	
-	/** 
-     * Format a geoloc object to a string
-     * 
-     * @param geoloc Geoloc object
-     * @return String
-	 * @see Geoloc
-     */
-    public static String geolocToString(Geoloc geoloc) {
-    	String label = geoloc.getLabel();
-    	if (label == null) {
-    		label = "";
-    	}
-    	return label + "," +
-    		geoloc.getLatitude() + "," +
-    		geoloc.getLongitude() + "," +
-    		geoloc.getAltitude() + "," +
-    		geoloc.getExpiration() + "," +
-    		geoloc.getAccuracy();
-    }
-
-    /** 
-     * Format a string to a geoloc object
-     * 
-     * @param str String
-     * @return Geoloc object
-     */
-    public static Geoloc stringToGeoloc(String str) {
-    	try {
-	    	StringTokenizer items = new StringTokenizer(str, ",");
-	    	String label = null;
-	    	if (items.countTokens() > 5) {
-	    		label = items.nextToken();
-	    	}
-			double latitude = Double.valueOf(items.nextToken());					
-			double longitude = Double.valueOf(items.nextToken());
-			double altitude = Double.valueOf(items.nextToken());
-			long expiration = Long.valueOf(items.nextToken());
-			float accuracy =  Float.valueOf(items.nextToken());
-			return new Geoloc(label, latitude, longitude, altitude, expiration, accuracy);
-    	} catch(NoSuchElementException e) {
-    		return null;
-    	} catch(NumberFormatException e) {
-    		return null;
-    	}
-    }		
 }

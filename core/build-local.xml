@@ -34,6 +34,7 @@
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/popup/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
 	<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
+	<copy file="${terminal.api}" todir="${terminal.root}/../samples/whiteboard/libs"/>
     </target>
 
     <!-- Merge stack from SVN -->

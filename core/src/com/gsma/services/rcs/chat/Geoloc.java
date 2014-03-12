@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import java.io.Serializable;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,7 +27,8 @@ import android.os.Parcelable;
  * 
  * @author Jean-Marc AUFFRET 
  */
-public class Geoloc implements Parcelable {
+public class Geoloc implements Parcelable, Serializable {
+	private static final long serialVersionUID = 0L;
     
     /**
      * Label associated to the geolocation

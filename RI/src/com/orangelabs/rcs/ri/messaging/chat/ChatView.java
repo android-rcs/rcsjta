@@ -201,13 +201,48 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     }        
     
     /**
-     * Add a message in the message history
+     * Add a message from database in the message history
      * 
-     * @param direction Direction
      * @param contact Contact
-     * @param text Text message
+     * @param message Text message
+     */
+    protected void addMessageHistory(int direction, String contact, byte[] content, String contentType) {
+    	String text = null;
+    	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
+			Geoloc geoloc = ChatLog.getGeolocFromBlob(content);
+			if (geoloc != null) {
+    	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
+    		}
+    	} else
+    	if (contentType.equals(ChatMessage.MIME_TYPE)) {
+    		text = ChatLog.getTextFromBlob(content);
+    	}
+    	
+    	if (text != null) {
+			TextMessageItem item = new TextMessageItem(direction, contact, text);
+			msgListAdapter.add(item);
+    	}
+    }
+    
+    /**
+     * Add a text message in the message history
+     * 
+     * @param contact Contact
+     * @param message Text message
      */
     protected void addMessageHistory(int direction, String contact, String text) {
+		TextMessageItem item = new TextMessageItem(direction, contact, text);
+		msgListAdapter.add(item);
+    }
+    
+    /**
+     * Add a geoloc message in the message history
+     * 
+     * @param contact Contact
+     * @param geoloc Geoloc message
+     */
+    protected void addGeolocHistory(int direction, String contact, Geoloc geoloc) {
+    	String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
 		TextMessageItem item = new TextMessageItem(direction, contact, text);
 		msgListAdapter.add(item);
     }
@@ -279,9 +314,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         // Send text message
         String msgId = sendGeolocMessage(geoloc);
     	if (msgId != null) {
-	    	// Add text to the message history
-    		String txt = GeolocMessage.geolocToString(geoloc);
-	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me),	txt);
+	    	// Add geoloc to the message history
+    		addGeolocHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), geoloc);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
     	}
@@ -304,9 +338,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 * @param geoloc Geoloc message
 	 */
     protected void displayReceivedGeoloc(GeolocMessage msg) {
-    	// Add text to the message history
-		String txt = GeolocMessage.geolocToString(msg.getGeoloc());
-		addMessageHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), txt);
+    	// Add geoloc to the message history
+		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), msg.getGeoloc());
     }
 
     /**

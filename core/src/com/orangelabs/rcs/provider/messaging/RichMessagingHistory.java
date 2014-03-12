@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -310,17 +312,20 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, type);
 
+		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
-			String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
-			values.put(MessageData.KEY_CONTENT, content);
-			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+			blob = serializeGeoloc(geolocApi);
 		} else {
-			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+			blob = serializePlainText(msg.getTextMessage()); 
+		}
+		if (blob != null) {
+			values.put(MessageData.KEY_CONTENT, blob);
 		}
 		
 		if (direction == ChatLog.Message.Direction.INCOMING) {
@@ -364,17 +369,20 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		
+		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
+			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
-			String content = com.gsma.services.rcs.chat.GeolocMessage.geolocToString(geolocApi);		
-			values.put(MessageData.KEY_CONTENT, content);
-			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+			blob = serializeGeoloc(geolocApi);
 		} else {
-			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+			blob = serializePlainText(msg.getTextMessage()); 
+		}
+		if (blob != null) {
+			values.put(MessageData.KEY_CONTENT, blob);
 		}
 
 		if (direction == ChatLog.Message.Direction.INCOMING) {
@@ -643,5 +651,40 @@ public class RichMessagingHistory {
                 values, 
                 RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
                 null);*/
-    }    
+    }
+    
+    /**
+     * Serialize a geoloc to bytes array
+     * 
+     * @param geoloc Geoloc info
+     * @return Byte array
+     */
+    private byte[] serializeGeoloc(Geoloc geoloc) {
+		byte[] blob = null;
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream os = new ObjectOutputStream(bos);
+			os.writeObject(geoloc);
+			blob = bos.toByteArray();
+			bos.close();
+			os.close();
+		} catch(Exception e) {
+			blob = null;
+		}
+		return blob;
+    }	    
+
+    /**
+     * Serialize a text message to bytes array
+     * 
+     * @param msg Message
+     * @return Byte array
+     */
+    private byte[] serializePlainText(String msg) {
+    	if (msg != null) {
+    		return msg.getBytes();
+    	} else {
+    		return null;
+    	}
+    }	
 }

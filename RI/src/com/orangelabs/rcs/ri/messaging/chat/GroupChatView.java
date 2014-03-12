@@ -325,7 +325,7 @@ public class GroupChatView extends ChatView {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
 	    				ChatLog.Message.BODY,
-	    				ChatLog.Message.TIMESTAMP,
+	    				ChatLog.Message.MIME_TYPE,
 	    				ChatLog.Message.MESSAGE_STATUS,
 	    				ChatLog.Message.MESSAGE_TYPE,
 	    				ChatLog.Message.MESSAGE_ID
@@ -336,12 +336,13 @@ public class GroupChatView extends ChatView {
 	    	while(cursor.moveToNext()) {
 	    		int direction = cursor.getInt(0);
 	    		String contact = cursor.getString(1);
-	    		String msg = cursor.getString(2);
+	    		byte[] content = cursor.getBlob(2);
+	    		String contentType = cursor.getString(3);
 	    		int type = cursor.getInt(5);
 
 	    		// Add only messages to the history
 	    		if (type != ChatLog.Message.Type.SYSTEM) {
-	        		addMessageHistory(direction, contact, msg);
+	        		addMessageHistory(direction, contact, content, contentType);	        		
 	    		}	    			
 	    	}
     	} catch(Exception e) {

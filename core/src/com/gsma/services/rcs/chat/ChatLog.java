@@ -17,6 +17,9 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+
 import android.net.Uri;
 
 /**
@@ -134,7 +137,7 @@ public class ChatLog {
         
         /**
          * The name of the column containing the message body.
-         * <P>Type: TEXT</P>
+         * <P>Type: BLOB</P>
          */
         public static final String BODY = "body";
      
@@ -304,5 +307,38 @@ public class ChatLog {
 		        public static final int BUSY = 7;
             }
         }
+    }
+    
+    /**
+     * Get plain text message from a BLOB
+     * 
+     * @param content BLOB content
+     * @return Text message or null in case of error
+     */
+    public static String getTextFromBlob(byte[] content) {
+    	try {
+	    	return new String(content);
+		} catch(Exception e) {
+			return null;
+		}
+    }
+
+    /**
+     * Get geoloc object from a BLOB
+     * 
+     * @param content BLOB content
+     * @return Geoloc object or null in case of error
+     * @see Geoloc 
+     */
+    public static Geoloc getGeolocFromBlob(byte[] content) {
+		try {
+    		ByteArrayInputStream bis = new ByteArrayInputStream(content);
+			ObjectInputStream is = new ObjectInputStream(bis);
+			Geoloc geoloc = (Geoloc)is.readObject();
+			is.close();
+			return geoloc;
+		} catch(Exception e) {
+			return null;
+		}
     }
 }
