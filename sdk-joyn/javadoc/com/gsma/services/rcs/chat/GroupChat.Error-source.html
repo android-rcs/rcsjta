@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -722,6 +722,20 @@ public class GroupChat {
 			throw new JoynServiceException(e.getMessage());
 		}		
 	}
+	
+    /**
+     * Sends a displayed delivery report for a given message ID
+     * 
+     * @param msgId Message ID
+	 * @throws JoynServiceException
+     */
+    public void sendDisplayedDeliveryReport(String msgId) throws JoynServiceException {
+		try {
+			chatInf.sendDisplayedDeliveryReport(msgId);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}    	
+    }	
 	
 	/**
 	 * Adds participants to a group chat

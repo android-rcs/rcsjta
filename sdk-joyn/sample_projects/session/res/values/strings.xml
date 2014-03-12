@@ -28,6 +28,9 @@
 <string name="title_recv_invitation">New session invitation</string>
 <string name="label_recv_invitation">from %s</string>
 <string name="label_remote">Contact:</string>
+<string name="label_data">Data:</string>
+<string name="label_data_recv">%d Kb received</string>
+<string name="label_data_sent">%d Kb sent</string>
 
 </resources>
 

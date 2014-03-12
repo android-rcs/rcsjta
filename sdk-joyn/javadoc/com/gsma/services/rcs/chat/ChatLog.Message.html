@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -619,7 +619,7 @@ Summary:
     <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/chat/ChatLog.Message.html#MIME_TYPE">MIME_TYPE</a></td>
-        <td class="jd-descrcol" width="100%">The name of the column containing the MIME-TYPE of the message.</td>
+        <td class="jd-descrcol" width="100%">The name of the column containing the MIME-TYPE of the message body.</td>
     </tr>
     
     
@@ -960,7 +960,7 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the message body.
- <P>Type: TEXT</P>
+ <P>Type: BLOB</P>
 </p></div>
 
     
@@ -1307,7 +1307,7 @@ From class
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the MIME-TYPE of the message.
+  <div class="jd-tagdata jd-tagdescr"><p>The name of the column containing the MIME-TYPE of the message body.
  <P>Type: TEXT</P>
 </p></div>
 

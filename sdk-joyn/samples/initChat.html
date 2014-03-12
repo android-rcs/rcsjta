@@ -307,6 +307,7 @@
 				<div class="code-block">
 					<tt class="java"><span class="java3">// Open chat<br />
 						</span><span class="java10">Chat chat = chatApi.openSingleChat</span><span class="java8">(</span><span class="java10">contact, chatListener</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java10">chat.sendMessage("Bla bla bla");</span><span class="java10">;<br />
 						<br />
 						</span><span class="java14">/**<br />
 						 * Chat event listener<br />
@@ -314,6 +315,10 @@
 						</span><span class="java4">private class </span><span class="java10">MyChatListener </span><span class="java4">extends </span><span class="java10">ChatListener </span><span class="java8">{<br />
 						&#xA0;&#xA0; </span><span class="java3">// Callback called when a new message has been received<br />
 						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewMessage</span><span class="java8">(</span><span class="java4">final </span><span class="java10">ChatMessage message</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a new geoloc has been received<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewGeoloc</span><span class="java8">(</span><span class="java4">final </span><span class="java10">GeolocMessage message</span><span class="java8">) {<br />
 						&#xA0;&#xA0; }<br />
 						<br />
 						&#xA0;&#xA0; </span><span class="java3">// Callback called when a message has been delivered to the remote<br />

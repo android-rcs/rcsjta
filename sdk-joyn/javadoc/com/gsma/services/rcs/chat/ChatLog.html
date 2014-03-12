@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -382,6 +382,9 @@ Summary:
   
 
 
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
 
 
 
@@ -572,6 +575,51 @@ Summary:
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            static
+            
+            <a href="../../../../../com/gsma/services/rcs/chat/Geoloc.html">Geoloc</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/chat/ChatLog.html#getGeolocFromBlob(byte[])">getGeolocFromBlob</a></span>(byte[] content)
+        
+        <div class="jd-descrdiv">Get geoloc object from a BLOB</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            static
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/chat/ChatLog.html#getTextFromBlob(byte[])">getTextFromBlob</a></span>(byte[] content)
+        
+        <div class="jd-descrdiv">Get plain text message from a BLOB</div>
+  
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -831,6 +879,109 @@ From class
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<a id="getGeolocFromBlob(byte[])"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../../com/gsma/services/rcs/chat/Geoloc.html">Geoloc</a>
+      </span>
+      <span class="sympad">getGeolocFromBlob</span>
+      <span class="normal">(byte[] content)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Get geoloc object from a BLOB</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>content</th>
+          <td>BLOB content</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Geoloc object or null in case of error</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../../com/gsma/services/rcs/chat/Geoloc.html">Geoloc</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getTextFromBlob(byte[])"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getTextFromBlob</span>
+      <span class="normal">(byte[] content)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Get plain text message from a BLOB</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>content</th>
+          <td>BLOB content</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Text message or null in case of error
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 
 
 

@@ -281,7 +281,7 @@
 					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.MyApp&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
 						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
-						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/my.new.extension&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/your_new_extension&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;/intent-filter&gt; <br />
 						&lt;/activity&gt;<br />
 						<br />
@@ -289,9 +289,37 @@
 					</tt>
 				</div>
 				<p></p>
-				<p>An extension should have the following syntax (case sensitive):</p>
-				<p>"com.gsma.services.rcs/XXXX", where XXXX is your service ID.</p>
+				<p>An extension may have two different syntaxes (case sensitive):</p>
+				<ul>
+				<p><li> For a third-party service, the extension should start with the prefix "ext." followed by the unique service ID:</p>
 				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.MyApp&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/ext.your_service_id&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt; <br />
+						&lt;/activity&gt;<br />
+						<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>				
+				<p><li> For a service provider service, the extension should start with the prefix "mnc&#60mnc&#62.mcc&#60mcc&#62." followed by the unique service ID, where &#60mnc&#62 is the Mobile Network Code and where &#60mcc&#62 is the Mobile Country Code:</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.MyApp&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/mnc01.mcc208.your_service_id&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt; <br />
+						&lt;/activity&gt;<br />
+						<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>				
+				</ul>
 			</div>
 			</br>
 			<div class="guide-block">

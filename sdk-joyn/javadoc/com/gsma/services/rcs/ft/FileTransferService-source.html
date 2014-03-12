@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -430,6 +430,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
@@ -543,6 +544,7 @@ public class FileTransferService extends JoynService {
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
+	 * @deprecated
 	 */
     public FileTransfer transferFile(String contact, String filename, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	return transferFile(contact, filename, null, listener);
@@ -561,6 +563,7 @@ public class FileTransferService extends JoynService {
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
+	 * @deprecated
      */
     public FileTransfer transferFile(String contact, String filename, String fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	if (api != null) {
@@ -578,6 +581,54 @@ public class FileTransferService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
+    
+    /**
+     * Transfers a file to a contact. The file to be transfered is accessible from its URI.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     * 
+     * @param contact 
+     * @param file URI to transfer
+     * @param listener File transfer event listener
+     * @return File transfer
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+	 */
+    public FileTransfer transferFile(String contact, Uri file, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    	return transferFile(contact, file, null, listener);
+    }    
+    
+    /**
+     * Transfers a file to a contact. The file to be transfered is accessible from its URI.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     * 
+     * @param contact 
+     * @param file URI to transfer
+     * @param icon URI of the icon associated to the file to be transfered
+     * @param listener File transfer event listener
+     * @return File transfer
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+     */
+    public FileTransfer transferFile(String contact, Uri file, Uri icon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    	if (api != null) {
+    		try {
+				IFileTransfer ftIntf = api.transferFile(contact, file.getPath(), icon.getPath(), listener);
+				if (ftIntf != null) {
+					return new FileTransfer(ftIntf);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}    
     
     /**
      * Returns the list of file transfers in progress

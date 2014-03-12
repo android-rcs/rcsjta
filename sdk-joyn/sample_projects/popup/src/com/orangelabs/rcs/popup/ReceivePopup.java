@@ -78,8 +78,8 @@ public class ReceivePopup extends Activity implements View.OnClickListener, Shak
 
         try {
 			// Parse received popup
-			String content = getIntent().getStringExtra("content");
-			InputSource input = new InputSource(new ByteArrayInputStream(content.getBytes()));
+			byte[] content = getIntent().getByteArrayExtra("content");
+			InputSource input = new InputSource(new ByteArrayInputStream(content));
 			PopupParser parser = new PopupParser(input);
 			Log.d(TAG, "Popup:\n" + content);
 

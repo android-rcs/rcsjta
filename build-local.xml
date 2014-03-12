@@ -8,7 +8,7 @@
 	<property name="terminal.core" 		value="${terminal.root}/core/bin/RCSJTA_core.apk"/>
 	<property name="terminal.build"		value="${terminal.root}/core/bin"/>
 	<property name="src.path" 		value="${terminal.root}/core/src"/>
-	<property name="sdk.version" 		value="3.2.1"/>
+	<property name="sdk.version" 		value="3.2.3"/>
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
@@ -90,7 +90,8 @@
 		        <param name="-assetsdir"/> <param name="assets" />
 				
 			<param name="-since"/><param name="${terminal.root}/SDK/releases/albatros.xml"/><param name="Albatros"/>
-			<param name="-since"/><param name="${terminal.root}/SDK/releases/current.xml"/><param name="Blackbird"/>
+			<param name="-since"/><param name="${terminal.root}/SDK/releases/blackbird.xml"/><param name="Blackbird"/>
+			<param name="-since"/><param name="${terminal.root}/SDK/releases/current.xml"/><param name="Crane"/>
 				
 		        <param name="-federate" /><param name="android"/><param name="http://developer.android.com/reference/"/>
 				<param name="-federationxml" /><param name="android"/><param name="${terminal.root}/doclava-1.0.6/android-10.xml"/>

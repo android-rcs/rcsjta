@@ -158,7 +158,7 @@
 </head>
 
 
-<body class="Albatros">
+<body class="Crane">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="selected api apilevel-Albatros">
+    <li class="selected api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -292,14 +292,14 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.html">MultimediaSession</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
-          <li class="selected api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.html">MultimediaSession</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
+          <li class="selected api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
       </ul>
     </li>
               
@@ -354,7 +354,7 @@
 <div class="api-level">
   
 
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
 
 
   
@@ -413,7 +413,8 @@ import com.gsma.services.rcs.JoynServiceException;
 
 /**
  * This class maintains the information related to a multimedia
- * session and offers methods to manage it. 
+ * session and offers methods to manage it and to send messages
+ * in real time. 
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -477,7 +478,7 @@ public class MultimediaSession {
     }     
     
     /**
-     * Image sharing error
+     * Session error
      */
     public static class Error {
     	/**
@@ -489,6 +490,11 @@ public class MultimediaSession {
     	 * Session has failed
     	 */
     	public final static int SESSION_FAILED = 1;
+
+    	/**
+    	 * Media has failed
+    	 */
+    	public final static int MEDIA_FAILED = 2;
 
     	private Error() {
         }    	
@@ -581,43 +587,13 @@ public class MultimediaSession {
 	}	
 	
 	/**
-	 * Returns the local SDP
+	 * Accepts session invitation.
 	 * 
-	 * @return SDP
 	 * @throws JoynServiceException
 	 */
-	public String getLocalSdp() throws JoynServiceException {
+	public void acceptInvitation() throws JoynServiceException {
 		try {
-			return sessionInf.getLocalSdp();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Returns the remote SDP
-	 * 
-	 * @return SDP
-	 * @throws JoynServiceException
-	 */
-	public String getRemoteSdp() throws JoynServiceException {
-		try {
-			return sessionInf.getRemoteSdp();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Accepts session invitation. The SDP (Session Description Protocol)
-	 * parameter is used to describe the supported media.
-	 * 
-	 * @param sdp SDP
-	 * @throws JoynServiceException
-	 */
-	public void acceptInvitation(String sdp) throws JoynServiceException {
-		try {
-			sessionInf.acceptInvitation(sdp);
+			sessionInf.acceptInvitation();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -676,6 +652,21 @@ public class MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+
+    /**
+     * Sends a message in real time
+     * 
+     * @param content Message content
+	 * @return Returns true if sent successfully else returns false
+     * @throws JoynServiceException
+     */
+    public boolean sendMessage(byte[] content) throws JoynServiceException {
+		try {
+			return sessionInf.sendMessage(content);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+    }    
 }
 
   </pre>

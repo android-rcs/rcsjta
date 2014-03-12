@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -731,7 +731,25 @@ android.os.IBinder
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class=" api apilevel-Crane" >
+        <td class="jd-typecol">
+            abstract
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/chat/GroupChatListener.html#onNewGeoloc(com.gsma.services.rcs.chat.GeolocMessage)">onNewGeoloc</a></span>(<a href="../../../../../com/gsma/services/rcs/chat/GeolocMessage.html">GeolocMessage</a> message)
+        
+        <div class="jd-descrdiv">Callback called when a new geoloc has been received</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -749,7 +767,7 @@ android.os.IBinder
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -767,7 +785,7 @@ android.os.IBinder
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -785,7 +803,7 @@ android.os.IBinder
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -803,7 +821,7 @@ android.os.IBinder
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -821,7 +839,7 @@ android.os.IBinder
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -839,7 +857,7 @@ android.os.IBinder
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -857,7 +875,7 @@ android.os.IBinder
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -876,7 +894,7 @@ android.os.IBinder
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -894,7 +912,7 @@ android.os.IBinder
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             abstract
             
@@ -1728,13 +1746,29 @@ From interface
             void
         </td>
         <td class="jd-linkcol" width="100%">
-        <span class="sympad">onNewMessage</span>(<a href="../../../../../com/gsma/services/rcs/chat/ChatMessage.html">ChatMessage</a> arg0)
+        <span class="sympad">onNewGeoloc</span>(<a href="../../../../../com/gsma/services/rcs/chat/GeolocMessage.html">GeolocMessage</a> arg0)
         
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            abstract
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">onNewMessage</span>(<a href="../../../../../com/gsma/services/rcs/chat/ChatMessage.html">ChatMessage</a> arg0)
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1750,7 +1784,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1766,7 +1800,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1782,7 +1816,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1798,7 +1832,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1814,7 +1848,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1830,7 +1864,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1846,7 +1880,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -1862,7 +1896,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">
             abstract
             
@@ -2013,6 +2047,53 @@ From interface
 </div>
 
 
+<a id="onNewGeoloc(com.gsma.services.rcs.chat.GeolocMessage)"></a>
+
+<div class="jd-details api apilevel-Crane"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onNewGeoloc</span>
+      <span class="normal">(<a href="../../../../../com/gsma/services/rcs/chat/GeolocMessage.html">GeolocMessage</a> message)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Callback called when a new geoloc has been received</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>message</th>
+          <td>Geoloc message</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../../com/gsma/services/rcs/chat/GeolocMessage.html">GeolocMessage</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
 <a id="onNewMessage(com.gsma.services.rcs.chat.ChatMessage)"></a>
 
 <div class="jd-details api apilevel-Albatros"> 
@@ -2052,7 +2133,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="../../../../../com/gsma/services/rcs/chat/ChatMessage.html">ChatMessage</a></code></li><li><code><a href="../../../../../com/gsma/services/rcs/chat/GeolocMessage.html">GeolocMessage</a></code></li>
+      <ul class="nolist"><li><code><a href="../../../../../com/gsma/services/rcs/chat/ChatMessage.html">ChatMessage</a></code></li>
       </ul>
   </div>
 

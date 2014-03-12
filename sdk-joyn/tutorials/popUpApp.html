@@ -317,16 +317,13 @@
 					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.SendPopup&#34;</span><span class="java10">&gt;<br />
 						&#xA0; &lt;intent-filter&gt;<br />
 						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
-						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/orange.popup&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/mnc01.mcc208.popup&#34;</span><span class="java10">/&gt;<br />
 						&#xA0; &lt;/intent-filter&gt; <br />
 						&lt;/activity&gt;<br />
 						<br />
 						</span>
 					</tt>
 				</div>
-				<p></p>
-				<p>An extension should have the following syntax :</p>
-				<p>"com.gsma.services.rcs/XXXX", where XXXX is your service ID.</p>
 				<p></p>
 			</div>
 			</br>
@@ -338,7 +335,7 @@
 				<div class="code-block">
 					<tt class="java">
 						</span><span class="java3">// Service ID for the service<br />
-						</span><span class="java4">public static final </span><span class="java10">String SERVICE_ID = </span><span class="java5">&#34;orange.popup&#34;</span><span class="java10">;<br />
+						</span><span class="java4">public static final </span><span class="java10">String SERVICE_ID = </span><span class="java5">&#34;mnc01.mcc208.popup&#34;</span><span class="java10">;<br />
 						<br />
 						Set&lt;JoynContact&gt; supportedContacts = contactsApi.getJoynContactsSupporting</span><span class="java8">(</span><span class="java10">PopupManager.SERVICE_ID</span><span class="java8">)</span><span class="java10">;<br />
 						</span><span class="java4">for </span><span class="java8">(</span><span class="java10">JoynContact contact : supportedContacts</span><span class="java8">) {<br />
@@ -419,10 +416,9 @@
 					<tt class="java"><span class="java4">for</span><span class="java8">(</span><span class="java9">int </span><span class="java10">i=</span><span class="java7">0</span><span class="java10">; i &lt; selectedContacts.size</span><span class="java8">()</span><span class="java10">; i++</span><span class="java8">) {<br />
 						&#xA0; </span><span class="java10">...<br />
 						&#xA0; ContactItem contact = selectedContacts.get</span><span class="java8">(</span><span class="java10">i</span><span class="java8">)</span><span class="java10">;<br />
-						&#xA0; </span><span class="java9">boolean </span><span class="java10">result = sessionApi.sendMessage</span><span class="java8">(&#xA0; </span><span class="java10">PopupManager.SERVICE_ID,<br />
-						&#xA0; contact.number,<br />
-						&#xA0; PopupManager.generatePopup</span><span class="java8">(</span><span class="java10">message, animation, tts</span><span class="java8">)</span><span class="java10">,<br />
-						&#xA0; </span><span class="java5">&#34;application/xml&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; </span><span class="java9">boolean </span><span class="java10">result = sessionApi.sendMessage</span><span class="java8">(<span class="java10">PopupManager.SERVICE_ID,<br />
+						&#xA0;&#xA0;&#xA0; contact.number,<br />
+						&#xA0;&#xA0;&#xA0; PopupManager.generatePopup</span><span class="java8">(</span><span class="java10">message, animation, tts</span><span class="java8">)</span><span class="java8">)</span><span class="java10">;<br />
 						&#xA0; ...<br />
 						</span><span class="java8">}</span>
 					</tt>

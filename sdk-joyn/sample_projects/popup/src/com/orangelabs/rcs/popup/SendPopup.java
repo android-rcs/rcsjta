@@ -490,8 +490,7 @@ public class SendPopup extends ListActivity implements OnItemClickListener {
 							final boolean result = sessionApi.sendMessage(
 									PopupManager.SERVICE_ID,
 									contact.number,
-									PopupManager.generatePopup(message, animation, tts),
-									"application/xml");
+									PopupManager.generatePopup(message, animation, tts));
 							handler.post(new Runnable() {
 								public void run() {
 									if (result) {

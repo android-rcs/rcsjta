@@ -1,0 +1,77 @@
+README - joyn SDK
+
+
+News v3.2.3:
+------------
+
+- Update extensions with new RCS 5.2 syntax.
+- Add new MM session API (internalization of the SDP negociation and media protocol).
+- Add new methods with an URI for FT and ISh to be compliant with Android KitKat and its new storage access framework.
+- Add parameter max image share warn threshold.
+- Issue RCSJTA #20: Displayed report not sent on first message.
+
+
+News v3.2.2:
+------------
+
+- Add automata support.
+- Split the generic method onNewMessage into 2 methods: onNewMessage and onNewGeoloc.
+- Add TIMESTAMP_SEND, TIMESTAMP_DELIVERED & TIMESTAMP_DISPLAYED in FT database.
+- Internalize threading in the server part of the API.
+- Issue RCSJTA #19: It's not possible to send a geoloc message as a first message in a 1-1 chat conversation.
+- Add method GroupChat.sendDisplayedDeliveryReport.
+- Add status DELIVERED & DISPLAYED for file transfer.
+- Add CTS tests for API (signature tests, providers tests).
+- Add a type for spam messages in chat log.
+- The type of content message is identified by its MIME type.
+
+
+News v3.2.1:
+------------
+
+- Simplify the service ID syntax used by Capability and MM session APIs.
+
+
+News v3.2.0:
+------------
+
+- Rename all packages to "com.gsma.services.rcs".
+
+
+News v3.1.0:
+------------
+
+- Blackbird release.
+
+
+News v3.0.2:
+------------
+
+- Bug fix on single chat (joyn servcei + RI).
+
+
+News v3.0.1:
+------------
+
+- See complete API javadoc:
+	https://rcsjta.googlecode.com/git/sdk-joyn/javadoc/packages.html.
+
+- See API samples:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
+
+- See API tutorials:
+	https://rcsjta.googlecode.com/git/sdk-joyn/samples/index.html.
+
+
+
+Bugs fixed:
+-----------
+
+Concerning the open source stack and RI application, see details at http://code.google.com/p/android-rcs-ims-stack/issues/list.
+
+
+
+Contact:
+--------
+Orange Labs
+jeanmarc.auffret@orange.com

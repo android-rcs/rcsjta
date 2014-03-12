@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -301,10 +301,9 @@
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/Intents.Chat.html">Intents.Chat</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/Intents.Client.html">Intents.Client</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/Intents.FileTransfer.html">Intents.FileTransfer</a></li>
-          <li class="api apilevel-"><a href="../../../../com/gsma/services/rcs/Intents.IPCall.html">Intents.IPCall</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../com/gsma/services/rcs/Intents.IPCall.html">Intents.IPCall</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynService.html">JoynService</a></li>
           <li class="selected api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynService.Build.html">JoynService.Build</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynService.Build.GSMA_CODES.html">JoynService.Build.GSMA_CODES</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynService.Build.VERSION_CODES.html">JoynService.Build.VERSION_CODES</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynService.Error.html">JoynService.Error</a></li>
           <li class="api apilevel-Albatros"><a href="../../../../com/gsma/services/rcs/JoynServiceConfiguration.html">JoynServiceConfiguration</a></li>
@@ -444,21 +443,6 @@ public abstract class JoynService {
 	 */
 	public static class Build {
 		/**
-		 * List of GSMA versions
-		 */
-		public static class GSMA_CODES {
-			/**
-			 * GSMA RCS-e hotfixes version
-			 */
-			public final static int RCSE_HOTFIXES_1_2 = 0;
-
-			/**
-			 * GSMA RCS-e Blackbird version
-			 */
-			public final static int RCSE_BLACKBIRD = 1;
-		}
-
-		/**
 		 * List of version codes
 		 */
 		public static class VERSION_CODES {
@@ -471,14 +455,12 @@ public abstract class JoynService {
 			 * Blackbird version of joyn API
 			 */
 			public final static int BLACKBIRD = 2;
-		}
 
-		/**
-		 * GSMA version number
-		 * 
-		 * @see Build.GSMA_CODES
-		 */
-		public static final int GSMA_VERSION = GSMA_CODES.RCSE_BLACKBIRD;
+			/**
+			 * Crane version of joyn API
+			 */
+			public final static int CRANE = 3;
+		}
 
 		/**
 		 * API release implementor name
@@ -490,7 +472,7 @@ public abstract class JoynService {
 		 * 
 		 * @see Build.VERSION_CODES
 		 */
-		public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
+		public static final int API_VERSION = VERSION_CODES.CRANE;
 
 		/**
 		 * Internal number used by the underlying source control to represent
@@ -673,7 +655,7 @@ public abstract class JoynService {
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-	}        
+	}
 }
 
   </pre>

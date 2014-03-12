@@ -49,8 +49,6 @@ import com.gsma.services.rcs.session.MultimediaSessionService;
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaSessionView extends Activity implements JoynServiceListener {
-	private static final String TAG = "JoynSession";
-
 	/**
 	 * View modes
 	 */

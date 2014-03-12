@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -366,6 +366,11 @@
   
   
 
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
 
@@ -412,6 +417,8 @@
       
         Parcelable 
       
+        Serializable 
+      
   
   
 
@@ -438,6 +445,8 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import java.io.Serializable;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -446,7 +455,8 @@ import android.os.Parcelable;
  * 
  * @author Jean-Marc AUFFRET 
  */
-public class Geoloc implements Parcelable {
+public class Geoloc implements Parcelable, Serializable {
+	private static final long serialVersionUID = 0L;
     
     /**
      * Label associated to the geolocation

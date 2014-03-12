@@ -22,14 +22,14 @@
             <!-- Declare the RCS extension -->
            	<intent-filter>
                 <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
-                <data android:mimeType="com.gsma.services.rcs/orange.popup"/>
+                <data android:mimeType="com.gsma.services.rcs/mnc01.mcc208.popup"/>
             </intent-filter>            
 		</activity>
 		
         <receiver android:name=".PopupReceiver">
 	        <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE" />
-                <data android:mimeType="com.gsma.services.rcs/orange.popup" />
+                <data android:mimeType="com.gsma.services.rcs/mnc01.mcc208.popup" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 	        </intent-filter>

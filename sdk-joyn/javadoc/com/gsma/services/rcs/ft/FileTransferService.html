@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -706,7 +706,25 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Blackbird" >
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="../../../../../com/gsma/services/rcs/ft/FileTransfer.html">FileTransfer</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/ft/FileTransferService.html#transferFile(java.lang.String, android.net.Uri, android.net.Uri, com.gsma.services.rcs.ft.FileTransferListener)">transferFile</a></span>(String contact, Uri file, Uri icon, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)
+        
+        <div class="jd-descrdiv">Transfers a file to a contact.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
@@ -718,13 +736,16 @@ Summary:
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../../com/gsma/services/rcs/ft/FileTransferService.html#transferFile(java.lang.String, java.lang.String, java.lang.String, com.gsma.services.rcs.ft.FileTransferListener)">transferFile</a></span>(String contact, String filename, String fileicon, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)
         
-        <div class="jd-descrdiv">Transfers a file to a contact.</div>
+        <div class="jd-descrdiv">
+      <em>
+  This method is deprecated.
+      No replacement.</em></div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -735,6 +756,27 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%">
         <span class="sympad"><a href="../../../../../com/gsma/services/rcs/ft/FileTransferService.html#transferFile(java.lang.String, java.lang.String, com.gsma.services.rcs.ft.FileTransferListener)">transferFile</a></span>(String contact, String filename, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)
+        
+        <div class="jd-descrdiv">
+      <em>
+  This method is deprecated.
+      No replacement.</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="../../../../../com/gsma/services/rcs/ft/FileTransfer.html">FileTransfer</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/ft/FileTransferService.html#transferFile(java.lang.String, android.net.Uri, com.gsma.services.rcs.ft.FileTransferListener)">transferFile</a></span>(String contact, Uri file, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)
         
         <div class="jd-descrdiv">Transfers a file to a contact.</div>
   
@@ -832,7 +874,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class=" api apilevel-Crane" >
         <td class="jd-typecol">
             
             
@@ -1539,6 +1581,80 @@ From class
 </div>
 
 
+<a id="transferFile(java.lang.String, android.net.Uri, android.net.Uri, com.gsma.services.rcs.ft.FileTransferListener)"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../../com/gsma/services/rcs/ft/FileTransfer.html">FileTransfer</a>
+      </span>
+      <span class="sympad">transferFile</span>
+      <span class="normal">(String contact, Uri file, Uri icon, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Transfers a file to a contact. The file to be transfered is accessible from its URI.
+ The parameter contact supports the following formats: MSISDN in national or international
+ format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+ exception is thrown.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>file</th>
+          <td>URI to transfer</td>
+        </tr>
+        <tr>
+          <th>icon</th>
+          <td>URI of the icon associated to the file to be transfered</td>
+        </tr>
+        <tr>
+          <th>listener</th>
+          <td>File transfer event listener</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>File transfer</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>JoynServiceException</td>
+        </tr>  
+        <tr>
+            <th><a href="../../../../../com/gsma/services/rcs/JoynContactFormatException.html">JoynContactFormatException</a></td>
+            <td></td>
+        </tr>  
+        <tr>
+            <th><a href="../../../../../com/gsma/services/rcs/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <a id="transferFile(java.lang.String, java.lang.String, java.lang.String, com.gsma.services.rcs.ft.FileTransferListener)"></a>
 
 <div class="jd-details api apilevel-Blackbird"> 
@@ -1565,7 +1681,11 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution">
+      <strong>
+  This method is deprecated.</strong><br/> No replacement.
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Transfers a file to a contact. The parameter filename contains the complete
  path of the file to be transferred. The parameter contact supports the following
  formats: MSISDN in national or international format, SIP address, SIP-URI or
@@ -1597,6 +1717,10 @@ From class
         <tr>
             <th></td>
             <td>JoynServiceException</td>
+        </tr>  
+        <tr>
+            <th></td>
+            <td>JoynContactFormatException</td>
         </tr>  
         <tr>
             <th><a href="../../../../../com/gsma/services/rcs/JoynContactFormatException.html">JoynContactFormatException</a></td>
@@ -1639,7 +1763,11 @@ From class
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution">
+      <strong>
+  This method is deprecated.</strong><br/> No replacement.
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Transfers a file to a contact. The parameter filename contains the complete
  path of the file to be transferred. The parameter contact supports the following
  formats: MSISDN in national or international format, SIP address, SIP-URI or
@@ -1650,6 +1778,80 @@ From class
         <tr>
           <th>filename</th>
           <td>Filename to transfer</td>
+        </tr>
+        <tr>
+          <th>listener</th>
+          <td>File transfer event listener</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>File transfer</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>JoynServiceException</td>
+        </tr>  
+        <tr>
+            <th></td>
+            <td>JoynContactFormatException</td>
+        </tr>  
+        <tr>
+            <th><a href="../../../../../com/gsma/services/rcs/JoynContactFormatException.html">JoynContactFormatException</a></td>
+            <td></td>
+        </tr>  
+        <tr>
+            <th><a href="../../../../../com/gsma/services/rcs/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="transferFile(java.lang.String, android.net.Uri, com.gsma.services.rcs.ft.FileTransferListener)"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../../com/gsma/services/rcs/ft/FileTransfer.html">FileTransfer</a>
+      </span>
+      <span class="sympad">transferFile</span>
+      <span class="normal">(String contact, Uri file, <a href="../../../../../com/gsma/services/rcs/ft/FileTransferListener.html">FileTransferListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Transfers a file to a contact. The file to be transfered is accessible from its URI.
+ The parameter contact supports the following formats: MSISDN in national or international
+ format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+ exception is thrown.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>file</th>
+          <td>URI to transfer</td>
         </tr>
         <tr>
           <th>listener</th>

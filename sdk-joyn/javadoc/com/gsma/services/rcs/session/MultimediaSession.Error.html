@@ -158,7 +158,7 @@
 </head>
 
 
-<body class="Albatros">
+<body class="Crane">
 
 
 <div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="selected api apilevel-Albatros">
+    <li class="selected api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -292,14 +292,14 @@
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.html">MultimediaSession</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
-          <li class="selected api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
-          <li class="api apilevel-Albatros"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.html">MultimediaSession</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
+          <li class="selected api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
       </ul>
     </li>
               
@@ -375,7 +375,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
 
 
   
@@ -412,7 +412,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-Albatros">
+<div id="jd-content" class="api apilevel-Crane">
 <table class="jd-inheritance-table">
 
 
@@ -442,7 +442,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p>Image sharing error
+<p>Session error
 </p>
 
 
@@ -488,7 +488,7 @@ Summary:
 
 
     
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Crane" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html#INVITATION_DECLINED">INVITATION_DECLINED</a></td>
         <td class="jd-descrcol" width="100%">Session invitation has been declined by remote
@@ -496,7 +496,15 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-Albatros" >
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html#MEDIA_FAILED">MEDIA_FAILED</a></td>
+        <td class="jd-descrcol" width="100%">Media has failed
+</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-Crane" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html#SESSION_FAILED">SESSION_FAILED</a></td>
         <td class="jd-descrcol" width="100%">Session has failed
@@ -733,7 +741,7 @@ From class
 
 <a id="INVITATION_DECLINED"></a>
 
-<div class="jd-details api apilevel-Albatros"> 
+<div class="jd-details api apilevel-Crane"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -746,7 +754,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
 
 
         
@@ -774,9 +782,52 @@ From class
 
 
 
+<a id="MEDIA_FAILED"></a>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        MEDIA_FAILED
+    </h4>
+      <div class="api-level">
+        
+
+  Since: <a href="./../../../../../../releases/.html">API Level </a>
+
+
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Media has failed
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                2
+                (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 <a id="SESSION_FAILED"></a>
 
-<div class="jd-details api apilevel-Albatros"> 
+<div class="jd-details api apilevel-Crane"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -789,7 +840,7 @@ From class
       <div class="api-level">
         
 
-  Since: <a href="./../../../../../../releases/Albatros.html">API Level Albatros</a>
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
 
 
         

@@ -176,9 +176,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Albatros', 'Blackbird' ];
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
     
-    var SINCE_LABELS = [ 'Albatros', 'Blackbird' ];
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -279,7 +279,7 @@
   <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
-    <li class="api apilevel-Albatros">
+    <li class="api apilevel-Crane">
   <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
     <li class="api apilevel-Albatros">
   <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
@@ -640,7 +640,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class="alt-color api apilevel-Crane" >
         <td class="jd-typecol">
             
             
@@ -802,7 +802,25 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-Blackbird" >
+    <tr class=" api apilevel-Crane" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="../../../../../com/gsma/services/rcs/chat/GroupChat.html#sendDisplayedDeliveryReport(java.lang.String)">sendDisplayedDeliveryReport</a></span>(String msgId)
+        
+        <div class="jd-descrdiv">Sends a displayed delivery report for a given message ID</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
@@ -820,7 +838,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Blackbird" >
+    <tr class=" api apilevel-Blackbird" >
         <td class="jd-typecol">
             
             
@@ -838,7 +856,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-Albatros" >
+    <tr class="alt-color api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -856,7 +874,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Albatros" >
+    <tr class=" api apilevel-Albatros" >
         <td class="jd-typecol">
             
             
@@ -1291,7 +1309,7 @@ From class
 
 <a id="getDirection()"></a>
 
-<div class="jd-details api apilevel-"> 
+<div class="jd-details api apilevel-Crane"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -1307,7 +1325,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="./../../../../../../releases/.html">API Level </a>
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
 
 </div>
         
@@ -1697,6 +1715,57 @@ From class
         <tr>
           <th>listener</th>
           <td>Group chat event listener </td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../../../com/gsma/services/rcs/JoynServiceException.html">JoynServiceException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="sendDisplayedDeliveryReport(java.lang.String)"></a>
+
+<div class="jd-details api apilevel-Crane"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">sendDisplayedDeliveryReport</span>
+      <span class="normal">(String msgId)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sends a displayed delivery report for a given message ID</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>msgId</th>
+          <td>Message ID</td>
         </tr>
       </table>
   </div>

@@ -347,57 +347,7 @@
  type="int"
  transient="false"
  volatile="false"
- value="2"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="GSMA_VERSION"
- type="int"
- transient="false"
- volatile="false"
- value="1"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
-<class name="JoynService.Build.GSMA_CODES"
- extends="java.lang.Object"
- abstract="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="JoynService.Build.GSMA_CODES"
- type="com.gsma.services.rcs.JoynService.Build.GSMA_CODES"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<field name="RCSE_BLACKBIRD"
- type="int"
- transient="false"
- volatile="false"
- value="1"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="RCSE_HOTFIXES_1_2"
- type="int"
- transient="false"
- volatile="false"
- value="0"
+ value="3"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -437,6 +387,17 @@
  transient="false"
  volatile="false"
  value="2"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CRANE"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="3"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -730,6 +691,17 @@
 </implements>
 <method name="getSupportedExtensions"
  return="java.util.Set&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isAutomata"
+ return="boolean"
  abstract="false"
  native="false"
  synchronized="false"
@@ -1436,6 +1408,19 @@
 <parameter name="status" type="boolean">
 </parameter>
 </method>
+<method name="onNewGeoloc"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="com.gsma.services.rcs.chat.GeolocMessage">
+</parameter>
+</method>
 <method name="onNewMessage"
  return="void"
  abstract="true"
@@ -1505,6 +1490,32 @@
  visibility="public"
 >
 </constructor>
+<method name="getGeolocFromBlob"
+ return="com.gsma.services.rcs.chat.Geoloc"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="content" type="byte[]">
+</parameter>
+</method>
+<method name="getTextFromBlob"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="content" type="byte[]">
+</parameter>
+</method>
 </class>
 <class name="ChatLog.GroupChat"
  extends="java.lang.Object"
@@ -2083,22 +2094,11 @@
  visibility="public"
 >
 </field>
-<field name="FILE_TRANSFER"
+<field name="SPAM"
  type="int"
  transient="false"
  volatile="false"
  value="2"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="GEOLOC"
- type="int"
- transient="false"
- volatile="false"
- value="3"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2182,6 +2182,17 @@
  visibility="public"
 >
 </method>
+<field name="MIME_TYPE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;text/plain&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 </class>
 <class name="ChatService"
  extends="com.gsma.services.rcs.JoynService"
@@ -2600,6 +2611,8 @@
 >
 <implements name="android.os.Parcelable">
 </implements>
+<implements name="java.io.Serializable">
+</implements>
 <method name="getAccuracy"
  return="float"
  abstract="false"
@@ -2755,19 +2768,6 @@
 >
 <implements name="android.os.Parcelable">
 </implements>
-<method name="geolocToString"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="geoloc" type="com.gsma.services.rcs.chat.Geoloc">
-</parameter>
-</method>
 <method name="getGeoloc"
  return="com.gsma.services.rcs.chat.Geoloc"
  abstract="false"
@@ -2779,19 +2779,17 @@
  visibility="public"
 >
 </method>
-<method name="stringToGeoloc"
- return="com.gsma.services.rcs.chat.Geoloc"
- abstract="false"
- native="false"
- synchronized="false"
+<field name="MIME_TYPE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;application/geoloc&quot;"
  static="true"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="str" type="java.lang.String">
-</parameter>
-</method>
+</field>
 </class>
 <class name="GroupChat"
  extends="java.lang.Object"
@@ -2972,6 +2970,21 @@
  visibility="public"
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
+</parameter>
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
+</exception>
+</method>
+<method name="sendDisplayedDeliveryReport"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="msgId" type="java.lang.String">
 </parameter>
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
@@ -3320,6 +3333,19 @@
 <parameter name="contact" type="java.lang.String">
 </parameter>
 <parameter name="status" type="boolean">
+</parameter>
+</method>
+<method name="onNewGeoloc"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="com.gsma.services.rcs.chat.GeolocMessage">
 </parameter>
 </method>
 <method name="onNewMessage"
@@ -4097,6 +4123,28 @@
  visibility="public"
 >
 </field>
+<field name="DELIVERED"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="7"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="DISPLAYED"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="8"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="FAILED"
  type="int"
  transient="false"
@@ -4665,7 +4713,7 @@
  synchronized="false"
  static="false"
  final="false"
- deprecated="not deprecated"
+ deprecated="deprecated"
  visibility="public"
 >
 <parameter name="contact" type="java.lang.String">
@@ -4686,7 +4734,7 @@
  synchronized="false"
  static="false"
  final="false"
- deprecated="not deprecated"
+ deprecated="deprecated"
  visibility="public"
 >
 <parameter name="contact" type="java.lang.String">
@@ -4694,6 +4742,50 @@
 <parameter name="filename" type="java.lang.String">
 </parameter>
 <parameter name="fileicon" type="java.lang.String">
+</parameter>
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
+</parameter>
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
+</exception>
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
+</exception>
+</method>
+<method name="transferFile"
+ return="com.gsma.services.rcs.ft.FileTransfer"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contact" type="java.lang.String">
+</parameter>
+<parameter name="file" type="android.net.Uri">
+</parameter>
+<parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
+</parameter>
+<exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
+</exception>
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
+</exception>
+</method>
+<method name="transferFile"
+ return="com.gsma.services.rcs.ft.FileTransfer"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contact" type="java.lang.String">
+</parameter>
+<parameter name="file" type="android.net.Uri">
+</parameter>
+<parameter name="icon" type="android.net.Uri">
 </parameter>
 <parameter name="listener" type="com.gsma.services.rcs.ft.FileTransferListener">
 </parameter>
@@ -7989,17 +8081,6 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_CONTENT_TYPE"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;contentType&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
 <field name="EXTRA_DISPLAY_NAME"
  type="java.lang.String"
  transient="false"
@@ -8043,8 +8124,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="sdp" type="java.lang.String">
-</parameter>
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
@@ -8076,33 +8155,7 @@
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
-<method name="getLocalSdp"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
-</exception>
-</method>
 <method name="getRemoteContact"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
-</exception>
-</method>
-<method name="getRemoteSdp"
  return="java.lang.String"
  abstract="false"
  native="false"
@@ -8182,6 +8235,21 @@
 <exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
 </exception>
 </method>
+<method name="sendMessage"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="content" type="byte[]">
+</parameter>
+<exception name="JoynServiceException" type="com.gsma.services.rcs.JoynServiceException">
+</exception>
+</method>
 </class>
 <class name="MultimediaSession.Direction"
  extends="java.lang.Object"
@@ -8235,6 +8303,17 @@
  transient="false"
  volatile="false"
  value="0"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="MEDIA_FAILED"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="2"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -8416,6 +8495,19 @@
  visibility="public"
 >
 </constructor>
+<method name="onNewMessage"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="content" type="byte[]">
+</parameter>
+</method>
 <method name="onSessionAborted"
  return="void"
  abstract="true"
@@ -8564,8 +8656,6 @@
 </parameter>
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="sdp" type="java.lang.String">
-</parameter>
 <parameter name="listener" type="com.gsma.services.rcs.session.MultimediaSessionListener">
 </parameter>
 <exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
@@ -8587,9 +8677,7 @@
 </parameter>
 <parameter name="contact" type="java.lang.String">
 </parameter>
-<parameter name="content" type="java.lang.String">
-</parameter>
-<parameter name="contentType" type="java.lang.String">
+<parameter name="content" type="byte[]">
 </parameter>
 <exception name="JoynContactFormatException" type="com.gsma.services.rcs.JoynContactFormatException">
 </exception>
