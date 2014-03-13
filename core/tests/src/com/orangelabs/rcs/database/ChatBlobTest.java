@@ -73,7 +73,7 @@ public class ChatBlobTest extends AndroidTestCase {
 	public void testGeolocMessage() {
 		String remote = "+339000000";
 		String msgId = "" + System.currentTimeMillis();
-		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 12.0, 2000);
+		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 2000);
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true);
 		
 		// Add entry
@@ -118,7 +118,6 @@ public class ChatBlobTest extends AndroidTestCase {
     		assertEquals(direction, ChatLog.Message.Direction.OUTGOING);
     		assertEquals(contact, remote);
     		assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
-    		assertEquals(readGeoloc.getAltitude(), geoloc.getAltitude());
     		assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
     		assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
     		assertEquals(readGeoloc.getExpiration(), geoloc.getExpiration());

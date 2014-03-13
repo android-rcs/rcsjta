@@ -64,19 +64,6 @@
 		
 		<TableRow android:padding="5dip"></TableRow>
 		
-		<TextView android:text="@string/label_altitude"
-		    android:paddingTop="5dip"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"/>
-		<EditText android:id="@+id/altitude"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		 	android:layout_marginLeft="5dip"
-		 	android:layout_marginRight="5dip"
-		 	android:text="0.0"
-		 	android:inputType="numberDecimal"
-		 	android:maxLength="8" android:lines="1"/>
-			
 		<TextView android:text="@string/label_accuracy"
 		    android:paddingTop="5dip"
 		    android:layout_width="fill_parent"

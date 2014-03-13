@@ -317,7 +317,7 @@ public class RichMessagingHistory {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			blob = serializeGeoloc(geolocApi);
 		} else {
@@ -374,7 +374,7 @@ public class RichMessagingHistory {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			blob = serializeGeoloc(geolocApi);
 		} else {

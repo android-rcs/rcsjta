@@ -189,7 +189,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     		GeolocMessage geoloc = (GeolocMessage)msg;
         	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
         			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-        			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+        			geoloc.getGeoloc().getExpiration());
         	msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
         			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
         			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
@@ -737,7 +737,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
+	 * @see JoynService.Build.VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {

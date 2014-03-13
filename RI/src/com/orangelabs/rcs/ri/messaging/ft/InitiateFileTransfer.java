@@ -345,8 +345,8 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	    				uriEdit.setText(filename);
 	    			}
 	    			
-	    			// Show invite button
-	    			Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+					// Enable invite button
+					Button inviteBtn = (Button)findViewById(R.id.invite_btn);
 	    			inviteBtn.setEnabled(true);
 	    		}
 	    	}             

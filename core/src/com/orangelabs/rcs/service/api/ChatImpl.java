@@ -145,7 +145,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			
 		// Create a geoloc message
 		GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
-				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getLatitude(), geoloc.getLongitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
 
 		// Create a geoloc message
@@ -415,7 +415,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			// Create a geoloc message
         	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
         			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-        			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+        			geoloc.getGeoloc().getExpiration());
         	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
         			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
         			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());

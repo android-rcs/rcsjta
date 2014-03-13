@@ -63,6 +63,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	public final static String EXTRA_CONTACT = "contact";
 
 	/**
+	 * Exchanged data
+	 */
+	private static byte[] data = new byte[2048];
+
+	/**
      * UI handler
      */
     private final Handler handler = new Handler();
@@ -127,7 +132,12 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 
         // Set title
         setTitle(R.string.title_session);
-    	    	
+
+        // Init data
+    	for(int i=0; i < data.length; i++) {
+        	data[i] = 0x00;
+    	}
+        
     	// Instanciate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
         
@@ -330,12 +340,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 			    				try  {
 				            		while(!dataTransferTerminated) {
 					            		// Send data
-				            			String txt = "blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
-				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
-				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
-				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla" +
-				            					"blablablablablablablablablablablablablablablablablablablablablablablablablabla";
-				            			byte[] data = txt.getBytes();
 				            			dataSent += data.length;
 				            			session.sendMessage(data);
 				            			

@@ -25,7 +25,6 @@ import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
-import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -46,7 +45,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
+public class TerminatingAdhocGroupChatSession extends GroupChatSession {
     /**
      * The logger
      */
@@ -90,6 +89,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                 if (logger.isActivated()) {
                     logger.debug("Accept manually group chat invitation");
                 }
+                
     	    	// Send a 180 Ringing response
     			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
     			

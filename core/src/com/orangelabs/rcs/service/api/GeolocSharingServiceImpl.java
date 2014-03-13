@@ -253,7 +253,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			// Create a geoloc content
 			String msgId = ChatUtils.generateMessageId();
 			GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			String geolocDoc = ChatUtils.buildGeolocDocument(geolocPush, ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
 			MmContent content = new GeolocContent("geoloc.xml", geolocDoc.getBytes().length, geolocDoc.getBytes());
@@ -356,7 +356,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
+	 * @see JoynService.Build.VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {

@@ -28,7 +28,6 @@ import android.media.RingtoneManager;
 import com.gsma.services.rcs.samples.session.utils.Utils;
 import com.gsma.services.rcs.session.MultimediaSessionIntent;
 
-
 /**
  * Multimedia session invitation receiver
  *  

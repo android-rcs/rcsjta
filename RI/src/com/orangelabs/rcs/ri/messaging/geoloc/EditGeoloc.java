@@ -65,11 +65,6 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 	private EditText longitudeEdit;
 	
 	/**
-	 * Altitude editor
-	 */
-	private EditText altitudeEdit;
-
-	/**
 	 * Accuracy editor
 	 */
 	private EditText accuracyEdit;
@@ -98,7 +93,6 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 		locationEdit = (EditText)findViewById(R.id.location);
 		latitudeEdit = (EditText)findViewById(R.id.latitude);
 		longitudeEdit = (EditText)findViewById(R.id.longitude);
-		altitudeEdit = (EditText)findViewById(R.id.altitude);
 		accuracyEdit = (EditText)findViewById(R.id.accuracy);
 		
         // Set button callback
@@ -177,7 +171,6 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 		if (lastKnownLoc!= null) {
 			latitudeEdit.setText(String.valueOf(lastKnownLoc.getLatitude()));
 			longitudeEdit.setText(String.valueOf(lastKnownLoc.getLongitude()));
-			altitudeEdit.setText(String.valueOf(lastKnownLoc.getAltitude()));
 			accuracyEdit.setText(String.valueOf(lastKnownLoc.getAccuracy()));
 		}
 		super.onResume();
@@ -198,11 +191,6 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
     			longitudeEdit.setText("0.0");
     		}
     		
-        	String alt = altitudeEdit.getText().toString().trim();
-    		if (alt.length() == 0) { 	
-    			altitudeEdit.setText("0.0");
-    		}
-    		
         	String acc = accuracyEdit.getText().toString().trim();
     		if (acc.length() == 0) { 	
     			accuracyEdit.setText("0");
@@ -215,7 +203,7 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 				e.printStackTrace();
 			}
     		Geoloc geoloc = new Geoloc(locationEdit.getText().toString(),
-    				Double.parseDouble(lat), Double.parseDouble(lon), Double.parseDouble(alt),
+    				Double.parseDouble(lat), Double.parseDouble(lon),
     				expiration,
     				Float.parseFloat(acc));
     		Intent in = new Intent();

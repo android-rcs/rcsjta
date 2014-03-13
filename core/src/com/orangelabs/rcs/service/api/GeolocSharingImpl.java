@@ -94,7 +94,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		GeolocPush geoloc = session.getGeoloc();
 		if (geoloc != null) {
 			com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 	    	return geolocApi;
 		} else {
@@ -406,7 +406,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	        for (int i=0; i < N; i++) {
 	            try {
 	            	com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(geoloc.getLabel(),
-	        				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+	        				geoloc.getLatitude(), geoloc.getLongitude(),
 	        				geoloc.getExpiration(), geoloc.getAccuracy());
 	            	listeners.getBroadcastItem(i).onGeolocShared(geolocApi);
 	            } catch(Exception e) {

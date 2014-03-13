@@ -46,11 +46,6 @@ public class Geoloc implements Parcelable, Serializable {
     private double longitude;
 
     /**
-     * Altitude
-     */
-    private double altitude;
-
-    /**
      * Expiration date of the geolocation
      */
     private long expiration = 0L;
@@ -66,15 +61,13 @@ public class Geoloc implements Parcelable, Serializable {
      * @param label Label
      * @param latitude Latitude
      * @param longitude Longitude
-     * @param altitude Altitude
      * @param expiration Expiration time
      * @hide
      */
-    public Geoloc(String label, double latitude, double longitude, double altitude, long expiration) {
+    public Geoloc(String label, double latitude, double longitude, long expiration) {
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.altitude = altitude;
         this.expiration = expiration;
     }
 
@@ -84,13 +77,12 @@ public class Geoloc implements Parcelable, Serializable {
      * @param label Label
      * @param latitude Latitude
      * @param longitude Longitude
-     * @param altitude Altitude
      * @param expiration Expiration date
      * @param accuracy Accuracy 
      * @hide
      */
-    public Geoloc(String label, double latitude, double longitude, double altitude, long expiration, float accuracy) {
-    	this(label, latitude, longitude, altitude, expiration);
+    public Geoloc(String label, double latitude, double longitude, long expiration, float accuracy) {
+    	this(label, latitude, longitude, expiration);
     	
         this.accuracy = accuracy;
     }
@@ -105,7 +97,6 @@ public class Geoloc implements Parcelable, Serializable {
     	this.label = source.readString();
     	this.latitude = source.readDouble(); 
     	this.longitude = source.readDouble();     	    	                                              
-    	this.altitude = source.readDouble(); 
     	this.expiration = source.readLong(); 
     	this.accuracy = source.readFloat(); 
     }
@@ -132,7 +123,6 @@ public class Geoloc implements Parcelable, Serializable {
     	dest.writeString(label);
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
-    	dest.writeDouble(altitude);
     	dest.writeLong(expiration);
     	dest.writeFloat(accuracy);
     }
@@ -206,24 +196,6 @@ public class Geoloc implements Parcelable, Serializable {
         this.longitude = longitude;
     }
 
-    /**
-     * Returns the altitude
-     *
-     * @return Altitude
-     */
-    public double getAltitude() {
-        return altitude;
-    }
-
-    /**
-     * Set the altitude
-     *
-     * @param altitude Altitude
-     */
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
-    
     /**
      * Returns the expiration date of the geolocation
      *

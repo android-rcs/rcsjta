@@ -60,11 +60,6 @@ public class InitiateMultimediaSession extends Activity {
         	initiateBtn.setEnabled(false);
         }
 	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-	}
 
 	/**
 	 * Initiate button callback

@@ -287,7 +287,6 @@
 <string name="label_location">Label:</string>
 <string name="label_latitude">Latitude:</string>
 <string name="label_longitude">Longitude:</string>
-<string name="label_altitude">Altitude:</string>
 <string name="label_accuracy">Accuracy:</string>
 <string name="label_select_geoloc_map">Use a long click to select a location on the map.</string>
 <string name="label_geoloc_not_found">No geoloc info to display!</string>

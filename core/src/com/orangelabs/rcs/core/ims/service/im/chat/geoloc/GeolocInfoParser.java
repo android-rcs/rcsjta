@@ -132,9 +132,6 @@ public class GeolocInfoParser extends DefaultHandler {
 					if (st.hasMoreTokens()) {
 						geoloc.setLongitude(Double.parseDouble(st.nextToken()));
 					}
-					if (st.hasMoreTokens()) {
-						geoloc.setAltitude(Double.parseDouble(st.nextToken()));
-					}
 				} catch(Exception e) {
 					if (logger.isActivated()) {
 						logger.error("Can't parse geoloc value", e);

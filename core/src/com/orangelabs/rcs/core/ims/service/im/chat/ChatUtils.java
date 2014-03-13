@@ -645,7 +645,7 @@ public class ChatUtils {
 				"<gp:geopriv>" + CRLF + 
 				"<gp:location-info>" + CRLF +
 				"<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">" + CRLF +
-				"<gml:pos>"+ geoloc.getLatitude()+" "+geoloc.getLongitude()+" "+geoloc.getAltitude() +"</gml:pos>" + CRLF +
+				"<gml:pos>"+ geoloc.getLatitude()+" "+geoloc.getLongitude() +"</gml:pos>" + CRLF +
 				"<gs:radius uom=\"urn:ogc:def:uom:EPSG::9001\">" + geoloc.getAccuracy() + "</gs:radius>" + CRLF +
 				"</gs:Circle>" + CRLF +
 				"</gp:location-info>" + CRLF + 
@@ -674,7 +674,6 @@ public class ChatUtils {
 			    GeolocPush geoloc = new GeolocPush(geolocDocument.getLabel(),
 			    		geolocDocument.getLatitude(),
 			    		geolocDocument.getLongitude(),
-			    		geolocDocument.getAltitude(),
 			    		geolocDocument.getExpiration(),
 			    		geolocDocument.getRadius());
 			    return geoloc;

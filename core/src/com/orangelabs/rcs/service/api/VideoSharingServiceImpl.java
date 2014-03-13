@@ -405,7 +405,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
+	 * @see JoynService.Build.VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {

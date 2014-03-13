@@ -294,7 +294,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 		// Send geoloc message
 		final GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
-				geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAltitude(),
+				geoloc.getLatitude(), geoloc.getLongitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
         Thread t = new Thread() {
     		public void run() {
@@ -749,7 +749,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            try {
 	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
 	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-	            			geoloc.getGeoloc().getAltitude(), geoloc.getGeoloc().getExpiration());
+	            			geoloc.getGeoloc().getExpiration());
 	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
 	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());

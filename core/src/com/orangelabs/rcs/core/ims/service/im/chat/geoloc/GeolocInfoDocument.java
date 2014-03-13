@@ -49,11 +49,6 @@ public class GeolocInfoDocument {
 	private double longitude = 0;
 	
 	/**
-	 * Altitude
-	 */
-	private double altitude = 0;
-
-	/**
 	 * Expiration date
 	 */
 	private long expiration = 0;
@@ -110,14 +105,6 @@ public class GeolocInfoDocument {
 
 	public void setLongitude(double l) {
 		longitude = l;
-	}
-
-	public double getAltitude() {
-		return altitude;
-	}	
-
-	public void setAltitude(double a) {
-		altitude = a;
 	}
 
 	public float getRadius() {

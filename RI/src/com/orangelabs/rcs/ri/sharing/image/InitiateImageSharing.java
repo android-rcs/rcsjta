@@ -285,17 +285,18 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
                     
                     // Display the selected filename attribute
                     TextView uriEdit = (TextView)findViewById(R.id.uri);
-                    try {
-	    				File file = new File(filename);
-	    				filesize = file.length()/1024;
-	    				uriEdit.setText(filesize + " KB");
-                    } catch(Exception e) {
-	                    uriEdit.setText(filename);
-                    }
-
-                    // Enable invite button
-                    Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-                	inviteBtn.setEnabled(true);            
+					try {
+						File file = new File(filename);
+						filesize = file.length()/1024;
+						uriEdit.setText(filesize + " KB");
+					} catch(Exception e) {
+						filesize = -1;
+					    uriEdit.setText(filename);
+					}
+					
+					// Enable invite button
+					Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+					inviteBtn.setEnabled(true);            
             	}
 	    	}             
             break;

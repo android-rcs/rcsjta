@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
 
 /**
  * Geolocation push info
@@ -44,11 +42,6 @@ public class GeolocPush {
     private double longitude;
 
     /**
-     * Altitude
-     */
-    private double altitude;
-
-    /**
      * Expiration date
      */
     private long expiration;
@@ -64,14 +57,12 @@ public class GeolocPush {
      * @param label Label
      * @param latitude Latitude
      * @param longitude Longitude
-     * @param altitude Altitude
      * @param expiration Expiration date
      */
-    public GeolocPush(String label, double latitude, double longitude, double altitude, long expiration) {
+    public GeolocPush(String label, double latitude, double longitude, long expiration) {
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.altitude = altitude;
         this.expiration = expiration;
     }
 
@@ -81,12 +72,11 @@ public class GeolocPush {
      * @param label Label
      * @param latitude Latitude
      * @param longitude Longitude
-     * @param altitude Altitude
      * @param expiration Expiration date
      * @param accuracy Accuracy 
      */
-    public GeolocPush(String label, double latitude, double longitude, double altitude, long expiration, float accuracy) {
-    	this(label, latitude, longitude, altitude, expiration);
+    public GeolocPush(String label, double latitude, double longitude, long expiration, float accuracy) {
+    	this(label, latitude, longitude, expiration);
     	
         this.accuracy = accuracy;
     }
@@ -144,24 +134,6 @@ public class GeolocPush {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
-    /**
-     * Returns the altitude
-     *
-     * @return Altitude
-     */
-    public double getAltitude() {
-        return altitude;
-    }
-
-    /**
-     * Set the altitude
-     *
-     * @param altitude Altitude
-     */
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
     
     /**
      * Returns the expiration date
@@ -208,53 +180,7 @@ public class GeolocPush {
         return "Label=" + label +
                 ", Latitude=" + latitude +
                 ", Longitude=" + longitude +
-                ", Altitude=" + altitude +
         		", Expiration=" + expiration +
         		", Accuracy=" + accuracy;
     }
-
-	/** 
-     * Format geoloc object to string
-     * 
-     * @param geoloc Geoloc object
-     * @return String
-     */
-    public static String formatGeolocToStr(GeolocPush geoloc) {
-    	String label = geoloc.getLabel();
-    	if (label == null) {
-    		label = "";
-    	}
-    	return label + "," +
-    		geoloc.getLatitude() + "," +
-    		geoloc.getLongitude() + "," +
-    		geoloc.getAltitude() + "," +
-    		geoloc.getExpiration() + "," +
-    		geoloc.getAccuracy();
-    }
-
-    /** 
-     * Format string to geoloc object
-     * 
-     * @param str String
-     * @return Geoloc object
-     */
-    public static GeolocPush formatStrToGeoloc(String str) {
-    	try {
-	    	StringTokenizer items = new StringTokenizer(str, ",");
-	    	String label = null;
-	    	if (items.countTokens() > 5) {
-	    		label = items.nextToken();
-	    	}
-			double latitude = Double.valueOf(items.nextToken());					
-			double longitude = Double.valueOf(items.nextToken());
-			double altitude = Double.valueOf(items.nextToken());
-			long expiration = Long.valueOf(items.nextToken());
-			float accuracy =  Float.valueOf(items.nextToken());
-			return new GeolocPush(label, latitude, longitude, altitude, expiration, accuracy);
-    	} catch(NoSuchElementException e) {
-    		return null;
-    	} catch(NumberFormatException e) {
-    		return null;
-    	}
-    }	
 }
