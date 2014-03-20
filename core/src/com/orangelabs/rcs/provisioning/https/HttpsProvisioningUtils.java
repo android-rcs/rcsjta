@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.https;
@@ -26,6 +30,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 
 import com.orangelabs.rcs.R;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.HttpUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 
@@ -116,9 +121,16 @@ public class HttpsProvisioningUtils {
      */
     protected static String getClientVendorFromContext(Context context) {
         String result = HttpsProvisioningUtils.UNKNOWN;
-        String version = context.getString(R.string.rcs_client_vendor);
-        if (version != null && version.length() > 0) {
-            result = version;
+        String vendor = RcsSettings.getInstance().getVendor();
+
+        if (vendor != null && vendor.length() > 0) {
+            result = vendor;
+        } else {
+            vendor = context.getString(R.string.rcs_client_vendor);
+            if (vendor != null && vendor.length() > 0) {
+                result = vendor;
+            }
+
         }
         return StringUtils.truncate(result, 4);
     }
@@ -131,14 +143,23 @@ public class HttpsProvisioningUtils {
      */
     protected static String getClientVersionFromContext(Context context) {
         String result = HttpsProvisioningUtils.UNKNOWN;
-        try {
-            PackageInfo pinfo = context.getPackageManager().getPackageInfo(
-                    context.getPackageName(), 0);
-            result = new StringTokenizer(pinfo.versionName, " ").nextToken();
-        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            result = HttpsProvisioningUtils.UNKNOWN;
-        } catch (java.util.NoSuchElementException e) {
-            result = HttpsProvisioningUtils.UNKNOWN;
+        String vendor = RcsSettings.getInstance().getVendor();
+
+        if (vendor != null && vendor.length() > 0) {
+            if (vendor.equals(context.getString(R.string.rcs_client_vendor))) {
+                try {
+                    PackageInfo pinfo = context.getPackageManager().getPackageInfo(
+                            context.getPackageName(), 0);
+                    result = new StringTokenizer(pinfo.versionName, " ").nextToken();
+                } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+                    result = HttpsProvisioningUtils.UNKNOWN;
+                } catch (java.util.NoSuchElementException e) {
+                    result = HttpsProvisioningUtils.UNKNOWN;
+                }
+            } else if (vendor.equals(context.getString(R.string.sony_client_vendor))) {
+                result = context.getString(R.string.sony_client_version);
+            }
+
         }
         return HttpUtils.encodeURL(StringUtils.truncate(result, 15));
     }
