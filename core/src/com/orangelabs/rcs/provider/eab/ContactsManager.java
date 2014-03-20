@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provider.eab;
@@ -4224,7 +4228,95 @@ public final class ContactsManager {
         // Delete presence data
         ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI, null, null);
     }
-    
+
+    /**
+     * Delete all RCS raw contacts
+     */
+    public void removeRcseRawContacts() {
+        String selection = "(" + RawContacts.ACCOUNT_TYPE + " =?) ";
+        String[] selectionArgs = {
+            AuthenticationService.ACCOUNT_MANAGER_TYPE
+        };
+        ctx.getContentResolver().delete(RawContacts.CONTENT_URI, selection, selectionArgs);
+    }
+
+    /**
+     * Remove RCSe icon from contact during Airplane mode
+     */
+    public void disableRcseContactIcon() {
+        List<String> rcseContacts = getRcsContacts();
+        for (String contact : rcseContacts) {
+            List<Long> rawContactIds = getRawContactIdsFromPhoneNumber(contact);
+            for (int i = 0; i < rawContactIds.size(); i++) {
+                long rawContactId = rawContactIds.get(i);
+                try {
+                    setStatusUpdateTable(rawContactId, 0);
+                } catch (OperationApplicationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Method for updating status icon
+     *
+     * @param rawContactId RawContactId
+     * @param availability Presence
+     */
+    public void setStatusUpdateTable(long rawContactId, int availability)
+            throws OperationApplicationException {
+
+        String[] projection = {
+            Data._ID, Data.RAW_CONTACT_ID
+        };
+        String selection = Data.RAW_CONTACT_ID + "=?";
+        String[] selectionArgs = {
+            Long.toString(rawContactId)
+        };
+        Cursor cur = ctx.getContentResolver().query(Data.CONTENT_URI, projection, selection,
+                selectionArgs, null);
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
+
+        if (cur != null) {
+            try {
+                if (cur.moveToNext()) {
+                    operations.add(ContentProviderOperation
+                            .newInsert(StatusUpdates.CONTENT_URI)
+                            .withValue(StatusUpdates.DATA_ID, cur.getLong(0))
+                            .withValue(StatusUpdates.STATUS, " " /*
+                                                                  * Intentional
+                                                                  * left blank
+                                                                  * for updating
+                                                                  * status_updates
+                                                                  * table
+                                                                  */)
+                            .withValue(StatusUpdates.STATUS_RES_PACKAGE, ctx.getPackageName())
+                            .withValue(StatusUpdates.STATUS_LABEL, R.string.rcs_core_account_id)
+                            .withValue(StatusUpdates.PRESENCE, availability)
+                            // Needed for inserting PRESENCE
+                            .withValue(StatusUpdates.PROTOCOL, Im.PROTOCOL_CUSTOM)
+                            .withValue(StatusUpdates.CUSTOM_PROTOCOL, " " /*
+                                                                           * Intentional
+                                                                           * left
+                                                                           * blank
+                                                                           */)
+                            .withValue(StatusUpdates.STATUS_TIMESTAMP, System.currentTimeMillis())
+                            .build());
+                    try {
+                        ctx.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
+                    } catch (RemoteException e) {
+                        if (logger.isActivated()) {
+                            logger.error("Error while updating status icon", e);
+                        }
+                    }
+                }
+            } finally {
+                cur.close();
+            }
+        }
+    }
+
     /**
      * Get the vCard file associated to a contact
      *
