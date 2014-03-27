@@ -60,7 +60,7 @@
 		 android:layout_marginLeft="5dip"
 		 android:layout_marginRight="5dip"
 		 android:id="@+id/select_btn"/>
-
+		
 		<Button android:text="@string/label_initiate_sharing"
 		 android:layout_marginLeft="5dip"
 		 android:layout_marginRight="5dip"

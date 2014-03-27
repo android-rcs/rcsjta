@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.ft;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -30,10 +28,10 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract.Data;
-import android.provider.MediaStore;
 import android.telephony.PhoneNumberUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -54,6 +52,7 @@ import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.MediaUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -179,8 +178,8 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     public void onServiceConnected() {
         // Disable button if no contact available
         Spinner spinner = (Spinner)findViewById(R.id.contact);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
         if (spinner.getAdapter().getCount() != 0) {
+            Button selectBtn = (Button)findViewById(R.id.select_btn);
         	selectBtn.setEnabled(true);
         }
         
@@ -261,42 +260,44 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         final String remote = cursor.getString(1);
 
         // Get thumbnail option
-    	String tumbnail = null; 
+        Uri fileicon = null;
+        String tumbnail = null;
         CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
         if (ftThumb.isChecked()) {
         	// Create a tumbnail
         	tumbnail = Utils.createPictureThumbnail(getApplicationContext(), filename, 50 * 1024);
+        	fileicon = Uri.parse(tumbnail); 
         }
-    	final String fileicon = tumbnail; 
         
         // Initiate session in background
     	try {
     		// Initiate transfer
-    		fileTransfer = ftApi.transferFile(remote, filename, fileicon, ftListener);
+    		fileTransfer = ftApi.transferFile(remote, filename, tumbnail, ftListener);
+    		// fileTransfer = ftApi.transferFile(remote, filename, ftListener);
+    		
+            // Display a progress dialog
+            progressDialog = Utils.showProgressDialog(InitiateFileTransfer.this, getString(R.string.label_command_in_progress));
+            progressDialog.setOnCancelListener(new OnCancelListener() {
+    			public void onCancel(DialogInterface dialog) {
+    				Toast.makeText(InitiateFileTransfer.this, getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT).show();
+    				quitSession();
+    			}
+    		});
+            
+            // Disable UI
+            spinner.setEnabled(false);
+
+            // Hide buttons
+            Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        	inviteBtn.setVisibility(View.INVISIBLE);
+            Button selectBtn = (Button)findViewById(R.id.select_btn);
+            selectBtn.setVisibility(View.INVISIBLE);
+            ftThumb.setVisibility(View.INVISIBLE);
     	} catch(Exception e) {
     		e.printStackTrace();
 			hideProgressDialog();
 			Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed));
     	}
-        
-        // Display a progress dialog
-        progressDialog = Utils.showProgressDialog(InitiateFileTransfer.this, getString(R.string.label_command_in_progress));
-        progressDialog.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-				Toast.makeText(InitiateFileTransfer.this, getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT).show();
-				quitSession();
-			}
-		});            
-
-        // Disable UI
-        spinner.setEnabled(false);
-
-        // Hide buttons
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-    	inviteBtn.setVisibility(View.INVISIBLE);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
-        selectBtn.setVisibility(View.INVISIBLE);
-        ftThumb.setVisibility(View.INVISIBLE);
     }
        
     /**
@@ -304,7 +305,13 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     private OnClickListener btnSelectListener = new OnClickListener() {
         public void onClick(View v) {
-			Intent pictureShareIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
+        	Intent pictureShareIntent;
+        	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        		pictureShareIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
+        	} else {
+        		pictureShareIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        	}
+			pictureShareIntent.addCategory(Intent.CATEGORY_OPENABLE);
 			pictureShareIntent.setType("image/*");
 			startActivityForResult(pictureShareIntent, SELECT_IMAGE);
         }
@@ -327,23 +334,13 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	    		if ((data != null) && (data.getData() != null)) {
 	    			// Get selected photo URI
 	    			Uri uri = data.getData();
-	
-	    			// Get image filename
-	    			Cursor cursor = getContentResolver().query(uri, new String[] {MediaStore.Images.ImageColumns.DATA}, null, null, null); 
-	    			cursor.moveToFirst();
-	    			filename = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-	    			cursor.close();     	    		
 	    			
-	    			// Display the selected filename attribute
+	    			// Get image filename
+	    			filename = MediaUtils.getFilePath(this, uri);
+
+	    			// Display file info
 	    			TextView uriEdit = (TextView)findViewById(R.id.uri);
-	    			try {
-	    				File file = new File(filename);
-	    				filesize = file.length()/1024;
-	    				uriEdit.setText(filesize + " KB");
-	    			} catch(Exception e) {
-	    				filesize = -1;
-	    				uriEdit.setText(filename);
-	    			}
+					uriEdit.setText(filename);
 	    			
 					// Enable invite button
 					Button inviteBtn = (Button)findViewById(R.id.invite_btn);

@@ -58,6 +58,7 @@
 <string name="label_file">Selected file:</string>
 <string name="label_receive_image">Received image %s</string>
 <string name="label_remote">Remote contact:</string>
+<string name="label_select_file">Select file</string>
 
 <!-- About menu -->
 <string name="label_about_title">Reference Implementation</string>
@@ -203,7 +204,6 @@
 <string name="menu_image_sharing_log">Image sharing log</string>
 <string name="label_select_picture">Select picture</string>
 <string name="label_selected_img">Selected picture:</string>
-<string name="label_select_file">Select file</string>
 <string name="title_recv_image_sharing">Image sharing from %s</string>
 <string name="title_image_sharing">Image sharing</string>
 <string name="label_out_of_memory">No enough memory to display the image</string>
@@ -329,6 +329,10 @@
 <string name="label_intent_failed">Intent not found</string>
 <string name="label_load_ipcall">Load an IP call</string>
 <string name="label_initiate_ipcall">Start an IP call</string>
+
+<!--  Event log -->
+<string name="menu_eventlog">Event log</string>
+<string name="label_eventlog_empty">No log</string>
 
 </resources>
 
