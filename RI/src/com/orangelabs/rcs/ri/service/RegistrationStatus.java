@@ -44,7 +44,7 @@ public class RegistrationStatus extends Activity implements JoynServiceListener 
         setContentView(R.layout.service_registration);
         
         // Set title
-        setTitle(R.string.menu_registration);
+        setTitle(R.string.menu_registration_status);
         
     	// Display registration status by default
     	displayRegistrationStatus(false);        
@@ -55,7 +55,7 @@ public class RegistrationStatus extends Activity implements JoynServiceListener 
         // Connect API
         serviceApi.connect();
     }
-
+    
     @Override
     public void onDestroy() {
     	super.onDestroy();

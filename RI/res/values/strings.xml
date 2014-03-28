@@ -331,8 +331,9 @@
 <string name="label_initiate_ipcall">Start an IP call</string>
 
 <!-- Service menu -->
-<string name="menu_service">Service</string>
-<string name="menu_registration">Registration status</string>
+<string name="menu_service">joyn service</string>
+<string name="menu_service_status">Service status</string>
+<string name="menu_registration_status">Registration status</string>
 <string name="label_service_status">Service enabled:</string>
 <string name="label_registration_status">Service registered:</string>
 

@@ -18,7 +18,7 @@
 package com.gsma.services.rcs;
 
 /**
- * Intents related to joyn services
+ * Intents related to joyn service activities 
  * 
  * @author Jean-Marc AUFFRET
  */

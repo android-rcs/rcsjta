@@ -45,6 +45,8 @@
         
         <activity android:name=".service.TestServiceApi"/>
 
+        <activity android:name=".service.ServiceStatus"/>
+        
         <activity android:name=".service.RegistrationStatus"/>
         
         <!-- Contacts API -->

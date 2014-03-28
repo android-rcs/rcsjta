@@ -28,6 +28,10 @@ import android.os.IInterface;
  * @author Jean-Marc AUFFRET
  */
 public abstract class JoynService {
+    /**
+     * Action to broadcast when joyn service is up.
+     */
+    public static final String ACTION_RCS_SERVICE_UP = "com.gsma.services.rcs.action.RCS_SERVICE_UP";
 
 	/**
 	 * Information about the current build

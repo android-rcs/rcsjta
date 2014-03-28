@@ -1,9 +1,12 @@
 package com.orangelabs.rcs.ri.service;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynService;
@@ -18,11 +21,6 @@ import com.orangelabs.rcs.ri.R;
  */
 public class ServiceStatus extends Activity implements JoynServiceListener {
 	/**
-	 * UI handler
-	 */
-	private final Handler handler = new Handler();
-
-	/**
 	 * Service API
 	 */
     private JoynService serviceApi;
@@ -33,7 +31,7 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
         
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.service_registration);
+        setContentView(R.layout.service_status);
         
         // Set title
         setTitle(R.string.menu_service);
@@ -41,7 +39,12 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
     	// Display service status by default
     	displayServiceStatus(false);
 
-        // Instanciate API
+        // Register service up event listener
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(JoynService.ACTION_RCS_SERVICE_UP);
+        registerReceiver(serviceUpListener, intentFilter);
+    	
+    	// Instanciate API
         serviceApi = new CapabilityService(getApplicationContext(), this);
                 
         // Connect API
@@ -51,6 +54,13 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
     @Override
     public void onDestroy() {
     	super.onDestroy();
+    	
+        // Unregister service up event listener
+    	try {
+            unregisterReceiver(serviceUpListener);
+        } catch (IllegalArgumentException e) {
+        	// Nothing to do
+        }    	
     	
         // Disconnect API
         serviceApi.disconnect();
@@ -87,4 +97,15 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
     	TextView statusTxt = (TextView)findViewById(R.id.service_status);			
     	statusTxt.setText("" + status);
     }
+    
+    /**
+     * Joyn service up event listener
+     */
+    private BroadcastReceiver serviceUpListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+        	// Retry a connection to the service
+            serviceApi.connect();
+        }
+    };    
 }

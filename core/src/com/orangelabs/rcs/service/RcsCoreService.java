@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.Intents;
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contacts.IContactsService;
@@ -452,6 +453,10 @@ public class RcsCoreService extends Service implements CoreListener {
 
 		// Display a notification
 		addRcsServiceNotification(false, getString(R.string.rcs_core_started));
+		
+		// Send service up intent
+		Intent intent = new Intent(JoynService.ACTION_RCS_SERVICE_UP);
+		getApplicationContext().sendBroadcast(intent);
     }
 
     /**
