@@ -41,7 +41,13 @@
 
         <activity android:name=".intents.IntentApps"/>
         
-		<!-- Contacts API -->
+		<!-- Service API -->
+        
+        <activity android:name=".service.TestServiceApi"/>
+
+        <activity android:name=".service.RegistrationStatus"/>
+        
+        <!-- Contacts API -->
         
         <activity android:name=".contacts.TestContactsApi"/>
         

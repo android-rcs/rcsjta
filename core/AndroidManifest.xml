@@ -4,8 +4,7 @@
  android:versionName="3.1.0"
  package="com.orangelabs.rcs">
       
-	<uses-sdk android:minSdkVersion="9"
-		android:targetSdkVersion="15"/>
+	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="19"/>
 
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -27,7 +26,8 @@
 	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
-	 
+	<uses-permission android:name="android.permission.MANAGE_DOCUMENTS"/>
+	
 	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
 		
 		<!-- RCS service -->	
@@ -110,24 +110,31 @@
 		<!-- RCS data providers -->	
 
 		<provider android:authorities="com.orangelabs.rcs.settings"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 
 		<provider android:authorities="com.orangelabs.rcs.eab;com.gsma.services.rcs.provider.capabilities"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
 
 		<provider android:authorities="com.orangelabs.rcs.ft;com.gsma.services.rcs.provider.ft"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.messaging.FileTransferProvider"/>
 		
 		<provider android:authorities="com.orangelabs.rcs.ish;com.gsma.services.rcs.provider.ish"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.sharing.ImageSharingProvider"/>
 	
 		<provider android:authorities="com.orangelabs.rcs.vsh;com.gsma.services.rcs.provider.vsh"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.sharing.VideoSharingProvider"/>
 		
 		<provider android:authorities="com.orangelabs.rcs.chat;com.gsma.services.rcs.provider.chat"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
 			
 		<provider android:authorities="com.orangelabs.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
+		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.ipcall.IPCallProvider"/>
 		
 		<!-- Device events receiver -->	

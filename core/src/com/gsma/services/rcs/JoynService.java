@@ -46,7 +46,7 @@ public abstract class JoynService {
 			 * Blackbird version of joyn API
 			 */
 			public final static int BLACKBIRD = 2;
-
+			
 			/**
 			 * Crane version of joyn API
 			 */
@@ -134,18 +134,20 @@ public abstract class JoynService {
 	 * 
 	 * @param method Method to be called
 	 * @param param Parameters of the method
+	 * @param paramClass Class of the parameter passed
 	 * @return Object
 	 * @throws JoynServiceException
 	 */
-	private Object callApiMethod(String method, Object param) throws JoynServiceException {
+	private Object callApiMethod(String method, Object param, Class paramClass) throws JoynServiceException {
 		if (api != null) {
 			Class c = api.getClass();
 			try {
-				Method m = c.getDeclaredMethod(method, null);
 				if (param != null) {
+					Method m = c.getDeclaredMethod(method, paramClass);
 					return m.invoke(api, param);
 				} else {
-					return m.invoke(api);					
+					Method m = c.getDeclaredMethod(method, null);
+					return m.invoke(api);
 				}
 			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
@@ -187,14 +189,14 @@ public abstract class JoynService {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.GSMA_VERSION
+	 * @see JoynService.Build.VERSION_CODES
 	 * @throws JoynServiceException
 	 */
 	public int getServiceVersion() throws JoynServiceException {
 		if (api != null) {
 			if (version == null) {
 				try {
-					version = (Integer)callApiMethod("getServiceVersion", null);
+					version = (Integer)callApiMethod("getServiceVersion", null, null);
 				} catch (Exception e) {
 					throw new JoynServiceException(e.getMessage());
 				}
@@ -214,7 +216,7 @@ public abstract class JoynService {
 	 */
 	public boolean isServiceRegistered() throws JoynServiceException {
 		if (api != null) {
-			return (Boolean)callApiMethod("isServiceRegistered", null);
+			return (Boolean)callApiMethod("isServiceRegistered", null, null);
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
@@ -228,7 +230,7 @@ public abstract class JoynService {
 	 */
 	public void addServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
 		if (api != null) {
-			callApiMethod("addServiceRegistrationListener", listener);
+			callApiMethod("addServiceRegistrationListener", listener, IJoynServiceRegistrationListener.class);
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
@@ -242,7 +244,7 @@ public abstract class JoynService {
 	 */
 	public void removeServiceRegistrationListener(JoynServiceRegistrationListener listener) throws JoynServiceException {
 		if (api != null) {
-			callApiMethod("removeServiceRegistrationListener", listener);
+			callApiMethod("removeServiceRegistrationListener", listener, IJoynServiceRegistrationListener.class);
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}

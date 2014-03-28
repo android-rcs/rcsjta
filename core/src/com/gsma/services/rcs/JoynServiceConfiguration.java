@@ -35,7 +35,7 @@ public class JoynServiceConfiguration {
 	 * @param ctx Context
 	 * @return Boolean
 	 */
-	public boolean isServiceActivated(Context ctx) {
+	public static boolean isServiceActivated(Context ctx) {
 		// TODO: to be changed
 		boolean result = false;
 		Uri databaseUri = Uri.parse("content://com.orangelabs.rcs.settings/settings");

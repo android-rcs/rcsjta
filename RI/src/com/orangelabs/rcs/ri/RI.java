@@ -31,6 +31,7 @@ import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.intents.TestIntentsApi;
 import com.orangelabs.rcs.ri.ipcall.TestIPCallApi;
 import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.session.TestMultimediaSessionApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 
@@ -59,6 +60,7 @@ public class RI extends ListActivity {
     		getString(R.string.menu_mm_sessions),
     		getString(R.string.menu_ipcall),
     		getString(R.string.menu_intents),
+    		getString(R.string.menu_service),
     		getString(R.string.menu_about)
         };
     	setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -96,6 +98,10 @@ public class RI extends ListActivity {
         		break;
 
         	case 7:
+        		startActivity(new Intent(this, TestServiceApi.class));
+        		break;
+
+        	case 8:
         		startActivity(new Intent(this, AboutRI.class));
         		break;
     	}
