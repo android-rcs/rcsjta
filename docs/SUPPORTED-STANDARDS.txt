@@ -1,0 +1,94 @@
+-----------------------------------
+ Supported standards at 07/09/2012
+-----------------------------------
+
+
+
+
+IETF:
+-----
+
+RFC 1321 - The MD5 Message-Digest Algorithm
+RFC 2327 - SDP: Session Description Protocol
+RFC 2373 - IP Version 6 Addressing Architecture
+RFC 2392 - Content-ID and Message-ID Uniform Resource Locators
+RFC 2617 - HTTP Authentication: Basic and Digest Access Authentication
+RFC 3261 - SIP: Session Initiation Protocol
+RFC 3263 - Session Initiation Protocol (SIP): Locating SIP Servers
+RFC 3264 - An Offer/Answer Model with the Session Description Protocol (SDP)
+RFC 3265 - Session Initiation Protocol (SIP) Specific Event Notification
+RFC 3325 - Private Extensions to the Session Initiation Protocol (SIP) forAsserted Identity within Trusted Networks
+RFC 3339 - Date and Time on the Internet
+RFC 3455 - Private Header (P-Header) Extensions to the Session Initiation Protocol (SIP) for the 3rd-Generation Partnership Project (3GPP)
+RFC 3515 - The Session Initiation Protocol (SIP) Refer Method
+RFC 3550 - RTP: A Transport Protocol for Real-Time Applications
+RFC 3608 - Session Initiation Protocol (SIP) Extension Header Field for Service Route Discovery During Registration
+RFC 3840 - Indicating User Agent Capabilities in the Session Initiation Protocol (SIP)
+RFC 3856 - A Presence Event Package for the Session Initiation Protocol (SIP)
+RFC 3857 - A Watcher Information Event Template-Package for the Session Initiation Protocol (SIP)
+RFC 3858 - An Extensible Markup Language (XML) Based Format for Watcher Information
+RFC 3862 - Common Presence and Instant Messaging (CPIM): Message Format
+RFC 3863 - Presence Information Data Format (PIDF)
+RFC 3891 - The Session Initiation Protocol (SIP) "Replaces" Header
+RFC 3903 - Session Initiation Protocol (SIP) Extension for Event State Publication
+RFC 3966 - The tel URI for Telephone Numbers
+RFC 3994 - Indication of Message Composition for Instant Messaging
+RFC 4007 - IPv6 Scoped Address Architecture
+RFC 4028 - The Session Timers in the Session Initiation Protocol (SIP)
+RFC 4145 - TCP-Based Media Transport in the Session Description Protocol (SDP)
+RFC 4566 - SDP: Session Description Protocol
+RFC 4662 - A Session Initiation Protocol (SIP) Event Notification Extension for Resource Lists
+RFC 4480 - RPID: Rich Presence Extensions to the Presence Information Data Format (PIDF)
+RFC 4481 - Timed Presence Extensions to the Presence Information Data Format (PIDF) to Indicate Status Information for Past and Future Time Intervals
+RFC 4961 - Symmetric RTP / RTP Control Protocol (RTCP)
+RFC 4975 - The Message Session Relay Protocol (MSRP)
+RFC 5262 - Presence Information Data Format (PIDF) Extension for Partial Presence
+RFC 5438 - Instant Message Disposition Notification (IMDN)
+RFC 5547 - A Session Description Protocol (SDP) Offer/Answer Mechanism to Enable File Transfer
+RFC 5626 - Managing Client-Initiated Connection in the Session Initiation Protocol
+RFC 5627 - Obtaining and Using Globally Routable User Agent URIs (GRUUs) in the Session Initiation Protocol (SIP)
+RFC 5839 - An Extension to Session Initiation Protocol (SIP) Events for Conditional Event Notification"
+RFC 6135 - An Alternative Connection Model for the Message Session Relay Protocol (MSRP)
+RFC 6223 - Indication of Support for Keep-Alive
+
+draft-ietf-sip-uri-list-conferencing-01	 - Conference Establishment Using Request-Contained Lists in the Session Initiation Protocol (SIP)
+draft-ietf-sip-multiple-refer-01	 - Referring to Multiple Resources in the Session Initiation Protocol (SIP)
+draft-ietf-simple-imdn-04		 - Instant Message Disposition Notification
+draft-ietf-mmusic-file-transfer-mech-03	 - A Session Description Protocol (SDP) Offer/Answer Mechanism to Enable File Transfer
+draft-ietf-simple-msrp-sessmatch-10	 - Session Matching Update for the Message Session Relay Protocol (MSRP)
+draft-kaplan-dispatch-session-id-03	 - A Session Identifier for the Session Initiation Protocol (SIP)
+
+
+3GPP:
+-----
+TS 24.229 - IP multimedia call control protocol based on Session Initiation Protocol (SIP) and Session Description Protocol (SDP), Stage 3
+TS 24.279 - Combining Circuit Switched (CS) and IP Multimedia Subsystem (IMS) services, Stage 3
+
+
+OMA:
+----
+
+Instant Messaging using SIMPLE Architecture, v1.0
+Instant Messaging Requirements, v1.0
+Instant Messaging using SIMPLE, v1.0
+Presence SIMPLE Architecture, v2.0
+Resource List Server (RLS) XDM Specification, v2.0
+
+
+GSMA:
+-----
+
+RCS Release 1 - Functional Description
+RCS Release 1 - Technical Realization
+RCS Release 2 - Functional Description
+RCS Release 2 - Technical Realization
+RCS Release 2 - Endorsement of OMA SIP/SIMPLE IM 1.0
+RCS Release 2 - Management Objects
+RCS-e Version 1.1 - Services and Client Specification
+RCS-e Version 1.2.1 - Services and Client Specification
+RCS-e GSMA RCS IOT RCS-e Implementation Guidelines 2.1
+RCS-e GSMA RCS IOT RCS-e Implementation Guidelines 3.1
+
+IR74 - Video Share Interoper ability Specification
+IR79 - Image Share Interoperability Specification
+
