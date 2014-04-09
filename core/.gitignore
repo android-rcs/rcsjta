@@ -1,0 +1,8 @@
+/libs
+/bin
+/gen
+
+.classpath
+.settings
+assets
+rcs_api.jar
