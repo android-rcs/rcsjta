@@ -1338,8 +1338,6 @@ public class ProvisioningParser {
                     	String username = extractUserNamePart(publicUserIdentity);
                     	RcsSettings.getInstance().writeParameter(
                                 RcsSettingsData.USERPROFILE_IMS_USERNAME, username);
-                        RcsSettings.getInstance().writeParameter(
-                                RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, username);
                         continue;
                     }
                 }
