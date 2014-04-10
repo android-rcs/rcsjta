@@ -571,7 +571,7 @@ public class ProfileProvisioning extends Activity {
     				EditText txt = (EditText)ProfileProvisioning.this.findViewById(R.id.ImsUsername);
     				txt.setText(number);
     		        txt = (EditText)ProfileProvisioning.this.findViewById(R.id.ImsDisplayName);
-    				txt.setText(number);
+    				txt.setText("");
     		        txt = (EditText)ProfileProvisioning.this.findViewById(R.id.ImsHomeDomain);
     		        txt.setText(homeDomain);
     		        txt = (EditText)ProfileProvisioning.this.findViewById(R.id.ImsPrivateId);

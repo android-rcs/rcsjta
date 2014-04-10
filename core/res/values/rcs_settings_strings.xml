@@ -92,5 +92,6 @@
 	<string name="rcs_settings_summary_userprofile_settings">Manage user profile settings</string>
 	<string name="rcs_settings_title_caller_id">Caller identity</string>
 	<string name="rcs_settings_title_displayname">Display name</string>
-	<string name="rcs_settings_summary_edit_displayname">Display name associated to my phone number in outgoing calls</string>
+	<string name="rcs_settings_no_displayname">no displayname defined</string>
+	<string name="rcs_settings_summary_edit_displayname">Display name associated to my phone number during communications</string>
 </resources>

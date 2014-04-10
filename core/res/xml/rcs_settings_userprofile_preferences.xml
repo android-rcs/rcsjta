@@ -5,6 +5,7 @@
             android:key="edit_displayname"
             android:summary="@string/rcs_settings_summary_edit_displayname"
             android:dialogTitle="@string/rcs_settings_title_displayname"
+            android:hint="@string/rcs_settings_no_displayname"
 	    	android:maxLength="25"/>
 	</PreferenceCategory>
 
