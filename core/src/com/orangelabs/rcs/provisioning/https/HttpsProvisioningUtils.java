@@ -35,10 +35,6 @@ import com.orangelabs.rcs.utils.StringUtils;
  * @author Orange
  */
 public class HttpsProvisioningUtils {
-    /**
-     * Intent key
-     */
-    public static final String FIRST_KEY = "first";
 
     /**
      * Input MSISDN timeout
@@ -67,7 +63,7 @@ public class HttpsProvisioningUtils {
     public static final String ACTION_BINARY_SMS_RECEIVED = "android.intent.action.DATA_SMS_RECEIVED";
 
     /**
-     * char sequence in a binary sms to indicate a network initiated configuration
+     * Char sequence in a binary SMS to indicate a network initiated configuration
      */
     public static final String RESET_CONFIG_SUFFIX = "-rcscfg";
 
@@ -81,7 +77,6 @@ public class HttpsProvisioningUtils {
      */
     protected static final int RETRY_AFTER_511_ERROR_MAX_COUNT = 5;
 
-
     /**
      * Default SMS port
      */
@@ -90,7 +85,7 @@ public class HttpsProvisioningUtils {
     /**
      * Get the current device language
      * 
-     * @return device language (like fr-FR)
+     * @return Device language (like fr-FR)
      */
     protected static String getUserLanguage() {
         return Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();

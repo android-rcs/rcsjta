@@ -66,24 +66,24 @@ public class DateUtils {
 	public static long decodeDate(String date) {
 	    long millis = -1;
 	    
-	    // try to use ISO8601
-	    // SimpleDateFormat does not support 'Z' literal
+	    // Try to use ISO8601
 	    String normalizedDate = date.replaceAll("Z$", "+0000");
 	    for(int i = 0; millis == -1 && i < ISO8601DATEFORMAT.length; i++) {
     	    try {
     	        Date iso8601 = ISO8601DATEFORMAT[i].parse(normalizedDate);
     	        millis = iso8601.getTime();
     	    } catch (ParseException ex) {
-    	        // try next format
+    	        // Try next format
     	    }
 	    }
 	    
-	    // if still not valid format is found let's try RFC3339
+	    // If still not valid format is found let's try RFC3339
 	    if (millis == -1) {
 	        Time t = new Time(UTC.getID());
 	        t.parse3339(date);
 	        millis = t.toMillis(false);
 	    }
+	    
 		return millis;
 	}
 }

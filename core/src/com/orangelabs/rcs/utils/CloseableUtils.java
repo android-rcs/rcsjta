@@ -15,27 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.orangelabs.rcs.utils;
 
-package com.orangelabs.rcs.service;
+import java.io.Closeable;
+import java.io.IOException;
 
-import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-/**
- * Device boot event receiver: automatically starts the RCS service
- * 
- * @author jexa7410
- */
-public class DeviceBoot extends BroadcastReceiver {
-	private static Logger logger = Logger.getLogger(DeviceBoot.class.getSimpleName());
+public class CloseableUtils {
 	
-    @Override
-    public void onReceive(Context context, Intent intent) {
-    	if (logger.isActivated())
-    		logger.debug("Start RCS service after boot");
-        LauncherUtils.launchRcsService(context, true, false);
-    }
+	/**
+	 * Closes properly objects implementing Closeable (input stream, output stream...)
+	 * 
+	 * @param c
+	 *            object to close or null
+	 * @return IOException or null
+	 * 
+	 *         <p>
+	 *         <b>Be Careful:</b><br />
+	 *         In Android SDK 15 and earlier Cursor does not implement Closeable. So do not use with cursor.
+	 *         </p>
+	 */
+	public static IOException close(Closeable c) {
+		if (c != null) {
+			try {
+				c.close();
+			} catch (IOException e) {
+				return e;
+			}
+		}
+		return null;
+	}
 }

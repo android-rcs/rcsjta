@@ -228,7 +228,7 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
     	
 		@Override
 		protected Void doInBackground(Void... params) {
-            LauncherUtils.launchRcsService(getApplicationContext(), false);
+			LauncherUtils.launchRcsService(getApplicationContext(), false, true);
 			return null;
 		}
     	

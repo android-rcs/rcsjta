@@ -255,11 +255,6 @@ public class RcsSettingsData {
 	public static final String MAX_IMAGE_SHARE_SIZE = "MaxImageShareSize";
 
 	/**
-	 * Warning threshold for image share size
-	 */
-	public static final String WARN_IMAGE_SHARE_SIZE = "WarnImageShareSize";
-
-	/**
 	 * Max duration of a video share
 	 */
 	public static final String MAX_VIDEO_SHARE_DURATION = "MaxVideoShareDuration";
@@ -309,6 +304,21 @@ public class RcsSettingsData {
 	 */
 	public static final String IM_SESSION_START = "ImSessionStart";
 
+	/**
+	 * Max entries for chat log
+	 */
+	public static final String MAX_CHAT_LOG_ENTRIES = "MaxChatLogEntries";
+
+	/**
+	 * Max entries for richcall log
+	 */
+	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";	
+	
+	/**
+	 * Max entries for IP call log
+	 */
+	public static final String MAX_IPCALL_LOG_ENTRIES = "MaxIpcallLogEntries";	
+	
 	/**
 	 * Max length of a geolocation label
 	 */
@@ -816,5 +826,68 @@ public class RcsSettingsData {
      * Secured RTP over Wi-Fi
      */
     public static final String SECURE_RTP_OVER_WIFI = "SecureRtpOverWifi";
+
+    /**
+     * Key and associated values for GSMA release of the device as provisioned by the network
+     */
+    public static final String KEY_GSMA_RELEASE = "GsmaRelease";
+    public static final String VALUE_GSMA_REL_ALBATROS = "0";
+    public static final String VALUE_GSMA_REL_BLACKBIRD = "1";
+    public static final String VALUE_GSMA_REL_CRANE = "2";
+    
+    /**
+     * Authorization for user to use best effort IP Voice Call service /depending on network 
+     */
+	public static final String BE_IPVOICECALL_AUTH = "beIPVoiceCallAuth";
+	
+	/**
+     * Authorization for user to use best effort IP Video Call service /depending on network 
+     */
+	public static final String BE_IPVIDEOCALL_AUTH = "beIPVideoCallAuth";
+	
+	/**
+     *  Authorization for device in RCS-AA mode to initiate IP Voice Call even if remote doesn't show its voice service capabilities
+     */
+	public static final String IPVOICECALL_BREAKOUT ="beIPCallBreakOut";
+	
+	/**
+     *  Authorization for device in RCS-CS mode to initiate IP Voice Call even if remote doesn't show its voice service capabilities
+     */
+	public static final String IPVOICECALL_BREAKOUT_CS ="beIPCallBreakOutCS";
+	
+	/**
+     *  Authorization for device in RCS-CS mode to upgrade to video a CS call
+     */
+	public static final String IPVIDEOCALL_UPGRADE_FROM_CS="beIPVideoCallUpgradeFromCS";
+	
+	/** 
+     *  Authorization for device in RCS-AA or RCS-CS mode to upgrade to video even if no answer to capability request (fails with 480 or 408 error)
+     */
+	public static final String IPVIDEOCALL_UPGRADE_ON_CAPERROR = "beIPVideoCallUpgradeOnCapError";
+	
+	/**
+     *  Authorization for device in RCS-CS mode to upgrade to video without first tearing down CS call
+     */
+	public static final String IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = "beIPVideoCallUpgradeAttemptEarly";
+	
+	/**
+     *  label to be used when presenting to user the option for initiating an end-to-end ip call 
+     */
+	public static final String IPCALL_E2E_LABEL = "e2eIPCallLabel";
+	
+	/**
+     *  label to be used when presenting to user the option for initiating a breakout ip call 
+     */
+	public static final String IPCALL_BREAKOUT_LABEL = "breakoutIPCallLabel";
+	
+	/**
+     *  parameter to control whether "end-to-end ip call" button is presented to user (case false) or breakout button (case true)
+     */
+	public static final String IPCALL_E2E_VOICECAPABILITYHANDLING = "e2eVoiceCapabilityHandling";
+	
+	/**
+     * Key to enable TCP fallback according to RFC3261 chapter 18.1.1
+    */
+    public static final String KEY_TCP_FALLBACK = "TcpFallback";
 
 }

@@ -15,7 +15,6 @@
 			android:showSilent="true"
 			android:summary="@string/rcs_settings_summary_filetransfer_ringtone"
 		/>
-		
 	</PreferenceCategory>
 	
 	<PreferenceCategory android:title="@string/rcs_settings_title_chat_invitation">
@@ -26,13 +25,16 @@
 			android:showDefault="true"/>
 
 		<com.orangelabs.rcs.settings.ChatInvitationRingtone
-			android:showSilent="true" android:summary="@string/rcs_settings_summary_chat_ringtone" android:title="@string/rcs_settings_label_ringtone" android:showDefault="true" android:key="chat_invitation_ringtone"/>
-	
+		    android:key="chat_invitation_ringtone"
+		    android:showDefault="true"
+		    android:showSilent="true"
+		    android:summary="@string/rcs_settings_summary_chat_ringtone"
+		    android:title="@string/rcs_settings_label_ringtone" />
+
         <CheckBoxPreference
             android:key="chat_displayed_notification"
             android:title="@string/rcs_settings_label_displayed_notification"
             android:summary="@string/rcs_settings_summary_chat_displayed_notification"
             android:showDefault="true"/>
-				
-	</PreferenceCategory>
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -1243,21 +1243,6 @@ public class RcsSettings {
 		return result;
 	}
 
-    /**
-     * Get warning threshold for max image sharing size
-     *
-     * @return Size in kilobytes
-     */
-	public int getWarningMaxImageSharingSize() {
-		int result = 2048;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.WARN_IMAGE_SHARE_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-
 	/**
      * Get max image share size
      *
@@ -1399,16 +1384,70 @@ public class RcsSettings {
 	}
 
 	/**
-     * Get IM session start mode
-     *
-     * @return Integer (1: The 200 OK is sent when the receiver starts to type a message back
-     * in the chat window. 2: The 200 OK is sent when the receiver sends a message)
-     */
+	 * Get IM session start mode
+	 * 
+	 * @return the IM session start mode
+	 *         <p>
+	 *         <ul>
+	 *         <li>0 (RCS-e default): The 200 OK is sent when the receiver consumes the notification opening the chat window.
+	 *         <li>1 (RCS default): The 200 OK is sent when the receiver starts to type a message back in the chat window.
+	 *         <li>2: The 200 OK is sent when the receiver presses the button to send a message (that is the message will be
+	 *         buffered in the client until the MSRP session is established). Note: as described in section 3.2, the parameter only
+	 *         affects the behavior for 1-to-1 sessions in case no session between the parties has been established yet.
+	 *         </ul>
+	 * 
+	 */
 	public int getImSessionStartMode() {
 		int result = 1;
 		if (instance != null) {
 			try {
 				result = Integer.parseInt(readParameter(RcsSettingsData.IM_SESSION_START));
+			} catch (Exception e) {
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Get max number of entries per contact in the chat log
+	 * 
+	 * @return Number
+	 */
+	public int getMaxChatLogEntriesPerContact() {
+		int result = 200;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_LOG_ENTRIES));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+
+	/**
+	 * Get max number of entries per contact in the richcall log
+	 * 
+	 * @return Number
+	 */
+	public int getMaxRichcallLogEntriesPerContact() {
+		int result = 200;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+	
+	/**
+	 * Get max number of entries per contact in the IP call log
+	 * 
+	 * @return Number
+	 */
+	public int getMaxIPCallLogEntriesPerContact() {
+		int result = 200;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES));
 			} catch(Exception e) {}
 		}
 		return result;
@@ -2695,4 +2734,178 @@ public class RcsSettings {
         }
         return result;
 	}
+	
+	/**
+     * Get beIPVoiceCallAuth provisioning parameter (authorized networks for ip voice call feature)
+     *
+     * @return int value
+     */
+	public int getIPVoiceCall_Auth() {
+		int result = 15;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.BE_IPVOICECALL_AUTH));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+
+	/**
+	 * Get the GSMA release
+	 * 
+	 * @return the GSMA release
+	 */
+	public int getGsmaRelease() {
+		int result = 1; // Blackbird
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.KEY_GSMA_RELEASE));
+			} catch (Exception e) {
+			}
+		}
+		return result;
+	}
+
+	/**
+     * Get beIPVideoCallAuth provisioning parameter (authorized networks for ip video call feature)
+     *
+     * @return int value
+     */
+	public int getIPVideoCall_Auth() {
+		int result = 15;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.BE_IPVIDEOCALL_AUTH));
+			} catch(Exception e) {}
+		}
+		return result;
+	}
+	
+	/**
+     * Is device in RCS-AA mode authorized to initiate IP Voice Call even if remote doesn't show its voice service capabilities?
+     *
+     * @return Boolean
+     */
+	public boolean isIPVoiceCallBreakout() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT));
+		}
+		return result;
+	}
+	
+	/**
+     * is device in RCS-CS mode authorized to initiate IP Voice Call even if remote doesn't show its voice service capabilities?
+     *
+     * @return Boolean
+     */
+	public boolean isIPVoiceCallBreakoutCS() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_CS));
+		}
+		return result;
+	}
+	
+	/**
+     * is device in RCS-CS mode authorized to upgrade to video a CS call?
+     *
+     * @return Boolean
+     */
+	public boolean isIPVideoCallUpgradeFromCS() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS));
+		}
+		return result;
+	}
+	
+	
+	/**
+     * Is device in RCS-AA or RCS-CS mode authorized to upgrade to video even if no answer to capability request (fails with 480 or 408 error)?
+     *
+     * @return Boolean
+     */
+	public boolean isIPVideoCallUpgradeOnCapError() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR));
+		}
+		return result;
+	}
+	
+	/**
+     * Is device in RCS-CS mode authorized to upgrade to video without first tearing down CS call?
+     *
+     * @return Boolean
+     */
+	public boolean isIPVideoCallAttemptEarly() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY));
+		}
+		return result;
+	}
+	
+	/**
+     * get label to use when presenting to user the option for sending end-to-end ip call
+     *
+     * @return Boolean
+     */
+	public String getIPCallE2ELabel() {
+		String result = "";
+        if (instance != null) {
+            result = readParameter(RcsSettingsData.IPCALL_E2E_LABEL);
+        }
+        return result;
+	}
+
+	/**
+     * get label to be use when presenting to user the option for initiating a breakout ip call
+     *
+     * @return Boolean
+     */
+	public String getIPCallBreakoutLabel() {
+		String result = "";
+        if (instance != null) {
+            result = readParameter(RcsSettingsData.IPCALL_BREAKOUT_LABEL);
+        }
+        return result;          
+	}
+	
+	/**
+     * Is "E2E" button (case false) or "Breakout" button (case true) presented to user ?
+     *
+     * @return Boolean
+     */
+	public boolean isIPCallE2EVoiceCapabilityHandling() {
+		boolean result = false;
+		if (instance != null) {
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPCALL_E2E_VOICECAPABILITYHANDLING));
+		}
+		return result;
+	}
+
+	/**
+	 * Set the GSMA release
+	 */
+	public void setGsmaRelease(String gsmaRelease) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.KEY_GSMA_RELEASE, gsmaRelease);
+		}
+	}
+	
+    /**
+     * Is TCP fallback enabled according to RFC3261 chapter 18.1.1
+     * 
+     * @return Boolean
+     */
+    public boolean isTcpFallback() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.KEY_TCP_FALLBACK));
+        }
+        return result;
+    }
+
 }

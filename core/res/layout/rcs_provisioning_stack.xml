@@ -99,6 +99,13 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
+		
+		 <CheckBox android:id="@+id/TcpFallback"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:text="Enable TCP fallback"/>
 
 		<TextView android:text="TLS root or self-signed certificate from /sdcard:"
 	    android:paddingTop="5dip"

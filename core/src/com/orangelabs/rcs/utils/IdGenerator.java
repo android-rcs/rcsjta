@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.utils;
 
+import java.util.UUID;
+
 /**
  * Unique identifier generator
  *
@@ -115,5 +117,20 @@ public class IdGenerator {
 			counter = increment();
 
 		return encode64(time, counter);
+	}
+	
+	/**
+	 * Generate a new unique and random message ID (eg. for SIP or MSRP)
+	 * 
+	 * @return the messageID
+	 * 
+	 *         <p>
+	 *         <b>Note:</b><br />
+	 *         The message ID is a string of 32 characters in the range [a-f0-9] in compliance with RFC 4975
+	 *         </p>
+	 */
+	public static synchronized String generateMessageID() {
+		UUID id = UUID.randomUUID();
+		return Long.toHexString(id.getMostSignificantBits()) + Long.toHexString(id.getLeastSignificantBits());
 	}
 }

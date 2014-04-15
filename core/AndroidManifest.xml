@@ -26,8 +26,20 @@
 	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 	<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
-	<uses-permission android:name="android.permission.MANAGE_DOCUMENTS"/>
-	
+	<uses-permission android:name="android.permission.RECEIVE_SMS"/>	 
+	 
+	<uses-permission android:name="com.orangelabs.rcs.permission.RCS"/>	
+	 
+	<permission android:name="com.orangelabs.rcs.permission.RCS"
+        android:label="@string/rcs_core_permission"
+        android:description="@string/rcs_core_permission_desc"
+        android:protectionLevel="normal" />	 
+ 
+	<permission android:name="com.orangelabs.rcs.permission.RCS_EXTENSION"
+        android:label="@string/rcs_core_permission_ext"
+        android:description="@string/rcs_core_permission_ext_desc"
+        android:protectionLevel="normal" />
+
 	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
 		
 		<!-- RCS service -->	
@@ -70,6 +82,9 @@
 
 		<activity android:name="com.orangelabs.rcs.settings.AboutDisplay"
 		  	android:process=":settings" />
+		
+		<activity android:name="com.orangelabs.rcs.provisioning.https.HttpsProvisioningAlertDialog"
+		    />
 
 		<activity android:name="com.orangelabs.rcs.settings.UserprofileSettingsDisplay"
 		  	android:process=":settings" />
@@ -176,18 +191,16 @@
  			</intent-filter>  
 		</receiver>
 		
+		<!-- SMS for Provisioning -->	
+        <receiver android:name="com.orangelabs.rcs.provisioning.https.HttpsProvisioningSMS">
+        </receiver>
+        
 		<!-- HTTPS provisioning service -->
-		<service android:name="com.orangelabs.rcs.provisioning.https.HttpsProvisioningService">  
-	        <intent-filter>
-	            <action android:name="com.orangelabs.rcs.PROVISIONING"/>
-	        </intent-filter>
+		<service android:name="com.orangelabs.rcs.provisioning.https.HttpsProvisioningService">
 	    </service>
 
         <!-- Startup service -->
-        <service android:name="com.orangelabs.rcs.service.StartService">  
-            <intent-filter>
-                <action android:name="com.orangelabs.rcs.STARTUP"/>
-            </intent-filter>
+        <service android:name="com.orangelabs.rcs.service.StartService">
         </service>
 
         <!-- Provisioning - Terms and conditions activity -->
@@ -220,7 +233,7 @@
         <activity android:name=".provisioning.local.StackProvisioning"/>
         <activity android:name=".provisioning.local.ServiceProvisioning"/>
 		<activity android:name=".provisioning.local.LoggerProvisioning"/>
-   		
+		
 	</application> 
 
 </manifest>

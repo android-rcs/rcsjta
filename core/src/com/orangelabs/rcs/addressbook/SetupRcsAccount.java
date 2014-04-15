@@ -45,7 +45,7 @@ public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivi
 			response.onResult(result);
 
 			// Start the service
-            LauncherUtils.launchRcsService(getApplicationContext(), false);
+            LauncherUtils.launchRcsService(getApplicationContext(), false, false);
 		}
 		finish();
 	}

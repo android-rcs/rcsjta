@@ -663,17 +663,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			GeolocPush geoloc = ChatUtils.parseGeolocDocument(geolocDoc);		
 			if (geoloc != null ) {				
 				geolocMsg = new GeolocMessage(msgId, contact, geoloc, imdnDisplayedRequested, date);
+				// Notify listeners
+				for(int i=0; i < getListeners().size(); i++) {
+					((ChatSessionListener)getListeners().get(i)).handleReceiveGeoloc(geolocMsg);
+				}
 			}		    
 		} catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Can't parse received geolocation", e);
             }
             return;
-		}
-
-		// Notify listeners
-		for(int i=0; i < getListeners().size(); i++) {
-			((ChatSessionListener)getListeners().get(i)).handleReceiveGeoloc(geolocMsg);
 		}
 	}
 	

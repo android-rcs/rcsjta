@@ -5,7 +5,7 @@
 		android:title="@string/rcs_settings_label_rcs_service"
 		android:summaryOn="@string/rcs_settings_summary_rcs_service_on"
 		android:summaryOff="@string/rcs_settings_summary_rcs_service_off"/>
-		
+
     <ListPreference
         android:key="min_battery_level"
         android:title="@string/rcs_settings_label_min_battery_level"

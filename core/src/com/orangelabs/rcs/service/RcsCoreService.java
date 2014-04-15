@@ -837,7 +837,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
 		// Restart the RCS service
         LauncherUtils.stopRcsService(getApplicationContext());
-        LauncherUtils.launchRcsService(getApplicationContext(), true);
+        LauncherUtils.launchRcsService(getApplicationContext(), true, false);
     }
 
     /**

@@ -51,6 +51,7 @@ import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Chat utility functions
@@ -73,6 +74,11 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
+	 /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+    
 	/**
 	 * Get supported feature tags for a group chat
 	 *
@@ -679,6 +685,9 @@ public class ChatUtils {
 			    return geoloc;
 		    }
 		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(),e);
+			}
 			return null;
 		}
 	    return null;
