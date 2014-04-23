@@ -169,7 +169,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
                 // Update rich messaging history
                 // TODO: should be done in API server part
-                RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(), FileTransfer.Direction.OUTGOING, getContent());
+                //RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(), FileTransfer.Direction.OUTGOING, getContent());
     			
     			// Add session in the list
 				ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);

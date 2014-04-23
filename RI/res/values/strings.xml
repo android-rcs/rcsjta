@@ -48,6 +48,7 @@
 <string name="label_state_started">started</string>
 <string name="label_state_transferred">transferred</string>
 <string name="label_state_terminated">terminated</string>
+<string name="label_state_displayed">displayed</string>
 <string name="label_session_state">State: %s</string>
 <string name="label_session_date">Date: %s</string>
 <string name="label_direction">Direction: %s</string>

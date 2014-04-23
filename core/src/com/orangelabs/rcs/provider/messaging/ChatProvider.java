@@ -99,7 +99,7 @@ public class ChatProvider extends ContentProvider {
         			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
         			+ ChatData.KEY_STATUS + " integer,"
         			+ ChatData.KEY_DIRECTION + " integer,"
-        			+ ChatData.KEY_TIMESTAMP + " long),"
+        			+ ChatData.KEY_TIMESTAMP + " long,"
         			+ ChatData.KEY_REJECT_GC + " integer DEFAULT 0);");
         	db.execSQL("CREATE TABLE " + TABLE_MESSAGE + " ("
         			+ MessageData.KEY_ID + " integer primary key autoincrement,"

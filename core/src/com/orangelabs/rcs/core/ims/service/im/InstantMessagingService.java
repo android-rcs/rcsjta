@@ -521,12 +521,13 @@ public class InstantMessagingService extends ImsService {
 			logger.info("Receive a 1-1 chat session invitation");
 		}
 
-		// Discard invitation if message ID is already received 
+		String remote = ChatUtils.getReferredIdentity(invite);
+		// Discard invitation if message ID is already received
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (RichMessagingHistory.getInstance().doesMessageIdAlreadyExist(msgId)) {
+				if (RichMessagingHistory.getInstance().isNewMessage(remote, msgId) == false) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;
@@ -535,7 +536,6 @@ public class InstantMessagingService extends ImsService {
 		}
 		
 		// Test if the contact is blocked
-		String remote = ChatUtils.getReferredIdentity(invite);
 	    if (ContactsManager.getInstance().isImBlockedForContact(remote)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + remote + " is blocked: automatically reject the chat invitation");
@@ -884,12 +884,13 @@ public class InstantMessagingService extends ImsService {
 			logger.debug("Receive S&F push messages invitation");
 		}
 
-		// Discard invitation if message ID is already received 
+		String remote = ChatUtils.getReferredIdentity(invite);
+		// Discard invitation if message ID is already received
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (RichMessagingHistory.getInstance().doesMessageIdAlreadyExist(msgId)) {
+				if (RichMessagingHistory.getInstance().isNewMessage(remote, msgId) == false) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;
@@ -898,7 +899,6 @@ public class InstantMessagingService extends ImsService {
 		}
 		
     	// Test if the contact is blocked
-    	String remote = ChatUtils.getReferredIdentity(invite);
 	    if (ContactsManager.getInstance().isImBlockedForContact(remote)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + remote + " is blocked: automatically reject the S&F invitation");

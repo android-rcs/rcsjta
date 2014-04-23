@@ -29,6 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -327,6 +328,18 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 					statusView.setText("started");
 				}
 			});
+		}
+
+		@Override
+		public void onFileTransferPaused() throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onFileTransferResumed() throws RemoteException {
+			// TODO Auto-generated method stub
+			
 		}
     };
 
