@@ -24,6 +24,7 @@ package com.orangelabs.rcs.core.access;
  * @author jexa7410
  */
 public abstract class NetworkAccess {
+	
     /**
      * Local IP address given to the network access
      */
@@ -74,4 +75,5 @@ public abstract class NetworkAccess {
      * Disconnect from the network access
      */
     public abstract void disconnect();
+    
 }

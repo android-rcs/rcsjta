@@ -25,7 +25,6 @@ import java.net.UnknownHostException;
 
 import javax2.sip.ListeningPoint;
 
-import org.apache.http.conn.util.InetAddressUtils;
 import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.NAPTRRecord;
@@ -58,6 +57,24 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public abstract class ImsNetworkInterface {
+	
+	// Changed by Deutsche Telekom
+	private static final String REGEX_IPV4 = "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b";
+    
+    // Changed by Deutsche Telekom
+    /**
+     * Class containing the resolved fields
+     */
+    public class DnsResolvedFields {
+        public String ipAddress = null;
+        public int port = -1;
+
+        public DnsResolvedFields(String ipAddress, int port) {
+            this.ipAddress = ipAddress;
+            this.port = port;
+        }
+    }
+    
 	/**
 	 * IMS module
 	 */
@@ -121,7 +138,13 @@ public abstract class ImsNetworkInterface {
 	/**
 	 * NAT public UDP port
 	 */
-	private int natPublicPort = -1;	
+	private int natPublicPort = -1;
+	
+	
+	/**
+	 * TCP fallback according to RFC3261 chapter 18.1.1
+	 */
+	private boolean tcpFallback = false;
 
 	/**
      * The logger
@@ -148,6 +171,8 @@ public abstract class ImsNetworkInterface {
         this.imsProxyPort = proxyPort;
         this.imsProxyProtocol = proxyProtocol;
 		this.imsAuthentMode = authentMode;
+		if (proxyProtocol.equalsIgnoreCase(ListeningPoint.UDP))
+			this.tcpFallback = RcsSettings.getInstance().isTcpFallback();
 		
         // Instantiates the SIP manager
         sip = new SipManager(this);
@@ -421,116 +446,150 @@ public abstract class ImsNetworkInterface {
         return result;
 	}
 	
+	// Changed by Deutsche Telekom
+	/**
+	 * Get the DNS resolved fields.
+	 * 
+	 * @return The {@link DnsResolvedFields} object containing the DNS resolved fields.  
+	 */
+	protected DnsResolvedFields getDnsResolvedFields() throws Exception {
+        // Changed by Deutsche Telekom
+		DnsResolvedFields dnsResolvedFields;
+		boolean useDns = true;
+		if (imsProxyAddr.matches(REGEX_IPV4)) {
+        	useDns = false;
+        	dnsResolvedFields = new DnsResolvedFields(imsProxyAddr, imsProxyPort);
+        
+        	  if (logger.isActivated()) {
+                  logger.warn("IP address found instead of FQDN!");
+              }
+        }
+		else {
+			dnsResolvedFields = new DnsResolvedFields(null, imsProxyPort);
+		}
+          
+        if (useDns) {
+            // Set DNS resolver
+            ResolverConfig.refresh();
+            ExtendedResolver resolver = new ExtendedResolver(); 
+
+            // Resolve the IMS proxy configuration: first try to resolve via
+            // a NAPTR query, then a SRV query and finally via A query
+            if (logger.isActivated()) {
+                logger.debug("Resolve IMS proxy address " + imsProxyAddr);
+            }
+            
+            // DNS NAPTR lookup
+            String service;
+            if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
+                service = "SIP+D2U";
+            } else
+            if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
+                service = "SIP+D2T";
+            } else
+            if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
+                service = "SIPS+D2T";
+            } else {
+                throw new SipException("Unkown SIP protocol");
+            }
+
+            boolean resolved = false;
+            Record[] naptrRecords = getDnsRequest(imsProxyAddr, resolver, Type.NAPTR);
+            if ((naptrRecords != null) && (naptrRecords.length > 0)) {
+                // First try with NAPTR
+                if (logger.isActivated()) {
+                    logger.debug("NAPTR records found: " + naptrRecords.length);
+                }
+                for (int i = 0; i < naptrRecords.length; i++) {
+                    NAPTRRecord naptr = (NAPTRRecord)naptrRecords[i];
+                    if (logger.isActivated()) {
+                        logger.debug("NAPTR record: " + naptr.toString());
+                    }
+                    if ((naptr != null) && naptr.getService().equalsIgnoreCase(service)) {
+                        // DNS SRV lookup
+						Record[] srvRecords = getDnsRequest(naptr.getReplacement().toString(), resolver, Type.SRV);
+                        if ((srvRecords != null) && (srvRecords.length > 0)) {
+                            SRVRecord srvRecord = getBestDnsSRV(srvRecords);
+                            dnsResolvedFields.ipAddress = getDnsA(srvRecord.getTarget().toString());
+                            dnsResolvedFields.port = srvRecord.getPort();
+                        } else {
+                            // Direct DNS A lookup
+                            dnsResolvedFields.ipAddress = getDnsA(imsProxyAddr);
+                        }
+                        resolved = true;
+                    }
+                }
+            }
+
+            if (!resolved) {
+                // If no NAPTR: direct DNS SRV lookup
+                if (logger.isActivated()) {
+                    logger.debug("No NAPTR record found: use DNS SRV instead");
+                }
+                String query;
+                if (imsProxyAddr.startsWith("_sip.")) {
+                    query = imsProxyAddr;
+                } else {
+                    query = "_sip._" + imsProxyProtocol.toLowerCase() + "." + imsProxyAddr;
+                }
+				Record[] srvRecords = getDnsRequest(query, resolver, Type.SRV);
+                if ((srvRecords != null) && (srvRecords.length > 0)) {
+                    SRVRecord srvRecord = getBestDnsSRV(srvRecords);
+                    dnsResolvedFields.ipAddress = getDnsA(srvRecord.getTarget().toString());
+                    dnsResolvedFields.port = srvRecord.getPort();
+                    resolved = true;
+                }
+
+                if (!resolved) {
+                    // If not resolved: direct DNS A lookup
+                    if (logger.isActivated()) {
+                        logger.debug("No SRV record found: use DNS A instead");
+                    }
+                    dnsResolvedFields.ipAddress = getDnsA(imsProxyAddr);
+                }
+            }       
+        }
+        
+        if (dnsResolvedFields.ipAddress == null) {
+            // Changed by Deutsche Telekom
+            // Try to use IMS proxy address as a fallback
+            String imsProxyAddrResolved = getDnsA(imsProxyAddr);
+            if (imsProxyAddrResolved != null){
+                dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, imsProxyPort);
+            } else {
+                throw new SipException("Proxy IP address not found");
+            }
+        }
+        
+        if (logger.isActivated()) {
+            logger.debug("SIP outbound proxy configuration: " +
+                    dnsResolvedFields.ipAddress + ":" + dnsResolvedFields.port + ";" + imsProxyProtocol);
+        }
+        
+        return dnsResolvedFields;
+	}
+	
 	/**
      * Register to the IMS
      *
+     * @param dnsResolvedFields The {@link DnsResolvedFields} object containing the DNS resolved fields.
      * @return Registration result
      */
-    public boolean register() {
+	// Changed by Deutsche Telekom
+    public boolean register(DnsResolvedFields dnsResolvedFields) {
 		if (logger.isActivated()) {
 			logger.debug("Register to IMS");
 		}
-
+				
 		try {
-			// Use IMS proxy address by default
-			String resolvedIpAddress = imsProxyAddr;
-
-			// Use default port by default
-			int resolvedPort = imsProxyPort;
-
-            if (!InetAddressUtils.isIPv4Address(imsProxyAddr) && !InetAddressUtils.isIPv6Address(imsProxyAddr)) {
-				// Set DNS resolver
-				ResolverConfig.refresh();
-				ExtendedResolver resolver = new ExtendedResolver(); 
-
-				// Resolve the IMS proxy configuration: first try to resolve via
-				// a NAPTR query, then a SRV query and finally via A query
-				if (logger.isActivated()) {
-					logger.debug("Resolve IMS proxy address " + imsProxyAddr);
-				}
-				
-		        // DNS NAPTR lookup
-		    	String service;
-		    	if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
-		    		service = "SIP+D2U";
-		    	} else
-		    	if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
-		    		service = "SIP+D2T";
-		    	} else
-		    	if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
-		    		service = "SIPS+D2T";
-		    	} else {
-					throw new SipException("Unkown SIP protocol");
-		    	}
-		    	
-		    	boolean resolved = false;
-				Record[] naptrRecords = getDnsRequest(imsProxyAddr, resolver, Type.NAPTR);
-				if ((naptrRecords != null) && (naptrRecords.length > 0)) {
-					// First try with NAPTR
-					if (logger.isActivated()) {
-						logger.debug("NAPTR records found: " + naptrRecords.length);
-					}
-			        for (int i = 0; i < naptrRecords.length; i++) {
-			        	NAPTRRecord naptr = (NAPTRRecord)naptrRecords[i];
-						if (logger.isActivated()) {
-							logger.debug("NAPTR record: " + naptr.toString());
-						}
-						if ((naptr != null) && naptr.getService().equalsIgnoreCase(service)) {
-					    	// DNS SRV lookup
-						    Record[] srvRecords = getDnsRequest(naptr.getReplacement().toString(), resolver, Type.SRV);
-							if ((srvRecords != null) && (srvRecords.length > 0)) {
-								SRVRecord srvRecord = getBestDnsSRV(srvRecords);
-								resolvedIpAddress = getDnsA(srvRecord.getTarget().toString());
-								resolvedPort = srvRecord.getPort();
-							} else {
-								// Direct DNS A lookup
-								resolvedIpAddress = getDnsA(imsProxyAddr);
-							}
-					    	resolved = true;
-						}
-			        }
-				}
-				
-				if (!resolved) {
-					// If no NAPTR: direct DNS SRV lookup
-					if (logger.isActivated()) {
-						logger.debug("No NAPTR record found: use DNS SRV instead");
-					}
-				    String query;
-				    if (imsProxyAddr.startsWith("_sip.")) {
-				    	query = imsProxyAddr;
-				    } else {
-				    	query = "_sip._" + imsProxyProtocol.toLowerCase() + "." + imsProxyAddr;
-				    }
-				    Record[] srvRecords = getDnsRequest(query, resolver, Type.SRV);
-					if ((srvRecords != null) && (srvRecords.length > 0)) {
-						SRVRecord srvRecord = getBestDnsSRV(srvRecords);
-						resolvedIpAddress = getDnsA(srvRecord.getTarget().toString());
-						resolvedPort = srvRecord.getPort();
-				    	resolved = true;
-					}
-				}
-				
-				if (!resolved) {
-					// If not resolved: direct DNS A lookup
-					if (logger.isActivated()) {
-						logger.debug("No SRV record found: use DNS A instead");
-					}
-					resolvedIpAddress = getDnsA(imsProxyAddr);
-				}
-			}
-			
-	        if (resolvedIpAddress == null) {
-		        throw new SipException("Proxy IP address not found");        	
-	        }
-	        
-			if (logger.isActivated()) {
-				logger.debug("SIP outbound proxy configuration: " +
-						resolvedIpAddress + ":" + resolvedPort + ";" + imsProxyProtocol);
-			}
+		    // Changed by Deutsche Telekom
+		    if (dnsResolvedFields == null) {
+		        dnsResolvedFields = getDnsResolvedFields();
+		    }
 			
 			// Initialize the SIP stack
-            sip.initStack(access.getIpAddress(), resolvedIpAddress, resolvedPort, imsProxyProtocol, getType());
+			// Changed by Deutsche Telekom
+            sip.initStack(access.getIpAddress(), dnsResolvedFields.ipAddress, dnsResolvedFields.port, imsProxyProtocol, tcpFallback, getType());
 	    	sip.getSipStack().addSipEventListener(imsModule);
 		} catch(Exception e) {
 			if (logger.isActivated()) {
@@ -557,6 +616,48 @@ public abstract class ImsNetworkInterface {
 		}
 
     	return registered;
+    }
+
+    // Changed by Deutsche Telekom
+    /**
+     * Register to the IMS
+     *
+     * @return Registration result
+     */    
+    public boolean register() {
+        return register(null);
+    }
+
+    // Changed by Deutsche Telekom
+    /**
+     * Check if the DNS fields has changed. If it has, return them. Otherwise, return <code>null</code>.
+     * 
+     * @return The {@link DnsResolvedFields} object containing the new DNS resolved fields, otherwise <code>null</code>.
+     */
+    public DnsResolvedFields checkDnsResolvedFieldsChanged() throws Exception {
+        // Check DNS resolved fields
+        DnsResolvedFields dnsResolvedFields = getDnsResolvedFields();
+
+        if (sip.getSipStack() == null) {
+            if (logger.isActivated()) {
+                logger.debug("Registration state has changed: sip stack not initialized yet.");
+            }
+            return dnsResolvedFields;
+        } else if (!sip.getSipStack().getOutboundProxyAddr().equals(dnsResolvedFields.ipAddress)) {
+            if (logger.isActivated()) {
+                logger.debug("Registration state has changed: proxy ip address has changed (old: " + sip.getSipStack().getOutboundProxyAddr()
+                        + " - new: " + dnsResolvedFields.ipAddress + ").");
+            }
+            return dnsResolvedFields;
+        } else if (sip.getSipStack().getOutboundProxyPort() != dnsResolvedFields.port) {
+            if (logger.isActivated()) {
+                logger.debug("Registration state has changed: proxy port has changed (old: " + sip.getSipStack().getOutboundProxyPort() + " - new: "
+                        + dnsResolvedFields.port + ").");
+            }
+            return dnsResolvedFields;
+        }
+
+        return null;
     }
 
 	/**

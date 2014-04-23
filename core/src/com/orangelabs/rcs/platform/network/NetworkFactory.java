@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.platform.network;
 
+import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.orangelabs.rcs.platform.FactoryException;
 
 /**
@@ -61,10 +62,13 @@ public abstract class NetworkFactory {
 	/**
 	 * Returns the local IP address of a given network interface
 	 * 
-	 * @param type Network interface type
+	 * @param dnsEntry address to be connected to
+     * @param type the type of the network interface, should be either
+     *        {@link android.net.ConnectivityManager#TYPE_WIFI} or {@link android.net.ConnectivityManager#TYPE_MOBILE}
 	 * @return Address
 	 */
-	public abstract String getLocalIpAddress(int type);
+	// Changed by Deutsche Telekom
+	public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type);
 	
 	/**
 	 * Create a datagram connection
@@ -94,6 +98,15 @@ public abstract class NetworkFactory {
 	 * @return Socket connection
 	 */
 	public abstract SocketConnection createSecureSocketClientConnection();
+
+	// Changed By Deutsche Telekom
+	/**
+	 * Create a secure socket client connection w/o checking certificates
+	 * 
+	 * @param fingerprint
+	 * @return Socket connection
+	 */
+	public abstract SocketConnection createSimpleSecureSocketClientConnection(String fingerprint);
 
 	/**
 	 * Create a socket server connection

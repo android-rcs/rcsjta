@@ -23,6 +23,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 import com.orangelabs.rcs.core.CoreException;
+import com.orangelabs.rcs.core.ims.security.cert.KeyStoreManager;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -68,6 +69,9 @@ public class WifiNetworkAccess extends NetworkAccess {
     		logger.info("Network access connected (" + ipAddress + ")");
     	}
 		this.ipAddress = ipAddress;
+		
+		// Changed by Deutsche Telekom
+		KeyStoreManager.updateClientCertificate(ipAddress);
     }
     
 	/**

@@ -83,7 +83,7 @@ public class ChatProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -99,7 +99,8 @@ public class ChatProvider extends ContentProvider {
         			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
         			+ ChatData.KEY_STATUS + " integer,"
         			+ ChatData.KEY_DIRECTION + " integer,"
-        			+ ChatData.KEY_TIMESTAMP + " long);");
+        			+ ChatData.KEY_TIMESTAMP + " long),"
+        			+ ChatData.KEY_REJECT_GC + " integer DEFAULT 0);");
         	db.execSQL("CREATE TABLE " + TABLE_MESSAGE + " ("
         			+ MessageData.KEY_ID + " integer primary key autoincrement,"
         			+ MessageData.KEY_CHAT_ID + " TEXT,"

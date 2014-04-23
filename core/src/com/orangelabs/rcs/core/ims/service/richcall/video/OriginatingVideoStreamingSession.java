@@ -25,7 +25,6 @@ import com.gsma.services.rcs.vsh.IVideoPlayerListener;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
-import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
@@ -58,7 +57,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
             MmContent content, String contact) {
         super(parent, content, contact);
-        
+
         // Create dialog path
         createOriginatingDialogPath();
 
@@ -76,17 +75,9 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             }
 
             // Build SDP part
-            String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(getVideoPlayer().getSupportedCodecs(), getVideoPlayer().getLocalRtpPort());
-	    	String sdp =
-            	"v=0" + SipUtils.CRLF +
-            	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-            	"s=-" + SipUtils.CRLF +
-            	"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-            	"t=0 0" + SipUtils.CRLF +
-            	videoSdp +
-            	"a=sendonly" + SipUtils.CRLF;
+            String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_SENDONLY);
 
             // Set the local SDP part in the dialog path
             getDialogPath().setLocalContent(sdp);

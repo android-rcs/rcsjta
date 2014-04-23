@@ -50,6 +50,11 @@ public class ChatError extends ImsSessionBasedServiceError {
 	public final static int SESSION_RESTART_FAILED = CHAT_ERROR_CODES + 4;
 
     /**
+     * Media session can't be used for sending any longer (e.g. MSRP error report received)
+     */
+    public final static int MEDIA_SESSION_BROKEN = CHAT_ERROR_CODES + 5;
+    
+    /**
      * Constructor
      *
      * @param error Error code

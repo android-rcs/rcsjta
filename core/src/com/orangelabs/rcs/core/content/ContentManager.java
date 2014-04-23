@@ -30,6 +30,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.MimeManager;
+import com.orangelabs.rcs.utils.StringUtils;
 
 /**
  * Multimedia content manager
@@ -155,6 +156,27 @@ public class ContentManager{
 		// File content
 		return new FileContent(url, size);
 	}
+
+    /**
+     * Create a content object from MIME type. In case of mime-type not present, the creation of content is based on
+     * file name.
+     *
+     * @param filename Name of the file
+     * @param url Content URL
+     * @param mime MIME type
+     * @param size Content size
+     * @return Content instance
+     */
+    public static MmContent createMmContentFromMime(String filename, String url, String mime, long size) {
+        MmContent content;
+        if (!StringUtils.isEmpty(mime)) {
+            content = createMmContentFromMime(url, mime, size);
+        } else {
+            content = createMmContentFromFilename(filename, url, size);
+        }
+        content.setName(filename);
+        return content;
+    }
 
     /**
      * Create a live video content object

@@ -40,6 +40,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.platform.registry.RegistryFactory;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PeriodicRefresher;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -168,7 +169,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 				    	}
                         session.setMaxParticipants(maxParticipants);
                     }
-                    
+                    // Changed by Deutsche Telekom
+			    	// reset list of participants if conference event state is full
+					if (ConferenceInfoDocument.STATE_FULL.equalsIgnoreCase(conference.getState())) {
+						connectedParticipants.removeAllParticipant();
+					}
+                    ListOfParticipant disconnectedParticipants = new ListOfParticipant();
 			    	Vector<User> users = conference.getUsers();
 			    	for(int i=0; i < users.size(); i++) {
 			    		User user = (User)users.elementAt(i);
@@ -182,7 +188,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 				    		logger.debug("Conference info notification for " + entity);
 				    	}
 				    	
-				    	String me = ImsModule.IMS_USER_PROFILE.getPublicUri();
+				    	String me = ImsModule.IMS_USER_PROFILE.getUsername();
 				    	if (user.isMe() || PhoneUtils.compareNumbers(entity, me)) {
 			    			// By-pass me
 			    			continue;
@@ -207,6 +213,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 				    		}
 				    	}
 
+						// Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575 dialing-in: Endpoint is
+						// dialing into the conference, not yet in the roster (probably being authenticated). dialing-out: Focus has
+						// dialed out to connect the endpoint to the conference, but the endpoint is not yet in the roster (probably
+						// being authenticated).
+                        if ((state.equalsIgnoreCase("dialing-out")) || (state.equalsIgnoreCase("dialing-in"))) {
+                            state = User.STATE_PENDING;
+                        }
 			    		// Update the participants list
 			    		if (User.isConnected(state)) {
 			    			// A participant has joined the session
@@ -215,20 +228,41 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 			    		if (User.isDisconnected(state)) {
 			    			// A participant has quit the session
 			    			connectedParticipants.removeParticipant(entity);
+			    			disconnectedParticipants.addParticipant(entity);
 			    		}
 			    		
+						// There are some states that we do not want to notify to listeners. These are all the states that have not
+						// changed since last notification. It is important to bypass them, else they will produce noise in the
+						// notification behavior (for example we will see "participant has departed" once again, even if he departed
+						// during the last session and was not reinvited this time).
+						if (!RichMessagingHistory.getInstance().hasLastKnownStateForParticipantChanged(session.getContributionID(),
+								entity, state)) {
+							if (logger.isActivated()) {
+								logger.debug("State for " + entity + " was already " + state + ", do not notify listeners");
+							}
+							continue;
+						} else {
+							if (logger.isActivated()) {
+								logger.debug("State for " + entity + " has changed and is now " + state + ", notify listeners");
+							}
+						}
+						
 			    		// Notify session listeners
 		    	    	for(int j=0; j < session.getListeners().size(); j++) {
 		    	    		((ChatSessionListener)session.getListeners().get(j)).handleConferenceEvent(entity,
 		    	    				user.getDisplayName(), state);
 				        }
 			    	}
+			    	if (session instanceof GroupChatSession) {
+			    		// Update the list of participants of the terminating group chat session
+			    		UpdateSessionParticipantList(connectedParticipants, disconnectedParticipants, ((GroupChatSession)session).getParticipants());
+					}
 		    	}
 	    	} catch(Exception e) {
 	    		if (logger.isActivated()) {
 	    			logger.error("Can't parse XML notification", e);
 	    		}
-	    	}    	
+	    	}
 		}
 		
 		// Check subscription state
@@ -240,8 +274,28 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 			terminatedByServer();
 		}    	
     }
+	
+	/**
+	 * Update the list of participants of the group chat session to be aligned with the provider content
+	 * 
+	 * @param connectedUsers
+	 *            the list of connected users to add to the session list if not already present
+	 * @param disconnectedUsers
+	 *            the list of connected users to remove from the session list if present
+	 * @param sessionUsers
+	 *            the list of participants of the group chat session
+	 */
+	private static void UpdateSessionParticipantList(final ListOfParticipant connectedUsers,
+			final ListOfParticipant disconnectedUsers, ListOfParticipant sessionUsers) {
+		for (String user : connectedUsers.getList()) {
+			sessionUsers.addParticipant(user);
+		}
+		for (String user : disconnectedUsers.getList()) {
+			sessionUsers.removeParticipant(user);
+		}
+	}
 
-    /**
+	/**
      * Check if the received notification if for this subscriber
      * 
      * @param SipRequest notify
@@ -341,59 +395,55 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Subscribe
      * 
-     * @return Boolean
      */
-    public synchronized boolean subscribe() {
-    	if (logger.isActivated()) {
-    		logger.info("Subscribe to " + getPresentity());
-    	}
+	public synchronized void subscribe() {
+		new Thread() {
+			public void run() {
+				if (logger.isActivated()) {
+					logger.info("Subscribe to " + getPresentity());
+				}
 
-    	try {
-            // Create a dialog path if necessary
-            if (dialogPath == null) {
-	            // Set Call-Id
-	        	String callId = imsModule.getSipManager().getSipStack().generateCallId();
-	
-	        	// Set target
-	        	String target = getPresentity();
-	
-	            // Set local party
-	        	String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
-	
-	            // Set remote party
-	        	String remoteParty = getPresentity();
-	
-	        	// Set the route path
-	        	Vector<String> route = imsModule.getSipManager().getSipStack().getServiceRoutePath();
-	
-	        	// Create a dialog path
-	            dialogPath = new SipDialogPath(
-	            		imsModule.getSipManager().getSipStack(),
-	            		callId,
-	            		1,
-	            		target,
-	            		localParty,
-	            		remoteParty,
-	            		route);
-            } else {
-    	    	// Increment the Cseq number of the dialog path
-    	        dialogPath.incrementCseq();
-            }
-            
-            // Create a SUBSCRIBE request
-	        SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
-	        
-            // Send SUBSCRIBE request
-	        sendSubscribe(subscribe);
-	        
-        } catch (Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Subscribe has failed", e);
-        	}
-        	handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }        
-        return subscribed;
-    }
+				try {
+					// Create a dialog path if necessary
+					if (dialogPath == null) {
+						// Set Call-Id
+						String callId = imsModule.getSipManager().getSipStack().generateCallId();
+
+						// Set target
+						String target = getPresentity();
+
+						// Set local party
+						String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+
+						// Set remote party
+						String remoteParty = getPresentity();
+
+						// Set the route path
+						Vector<String> route = imsModule.getSipManager().getSipStack().getServiceRoutePath();
+
+						// Create a dialog path
+						dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(), callId, 1, target, localParty,
+								remoteParty, route);
+					} else {
+						// Increment the Cseq number of the dialog path
+						dialogPath.incrementCseq();
+					}
+
+					// Create a SUBSCRIBE request
+					SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+
+					// Send SUBSCRIBE request
+					sendSubscribe(subscribe);
+
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Subscribe has failed", e);
+					}
+					handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+				}
+			}
+		}.start();
+	}
 
 	/**
      * Unsubscribe
@@ -545,7 +595,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         
         // Start the periodic subscribe
         startTimer(expirePeriod, 0.5);
-	}	
+	}
 	
 	/**
 	 * Handle 200 0K response of UNSUBSCRIBE

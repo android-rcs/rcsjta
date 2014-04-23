@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
+import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
@@ -59,6 +60,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
@@ -107,6 +109,7 @@ public class InstantMessagingService extends ImsService {
 	 */
 	private ImdnManager imdnMgr = null;	
 	
+	private FtHttpResumeManager resumeManager = null;
 	/**
 	 * Store & Forward manager
 	 */
@@ -144,6 +147,8 @@ public class InstantMessagingService extends ImsService {
 		// Start IMDN manager
         imdnMgr = new ImdnManager(this);
 		imdnMgr.start();
+		// Start resuming FT HTTP
+		resumeManager = new FtHttpResumeManager(this);
 	}
 
     /**
@@ -159,6 +164,8 @@ public class InstantMessagingService extends ImsService {
 		// Stop IMDN manager
 		imdnMgr.terminate();
         imdnMgr.interrupt();
+        if (resumeManager != null)
+        	resumeManager.terminate();
 	}
 
 	/**
@@ -453,7 +460,7 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 603 Decline response
-			sendErrorResponse(invite, 603);
+			sendErrorResponse(invite, Response.DECLINE);
 			return;
 	    }
 
@@ -464,7 +471,7 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 603 Decline response
-			sendErrorResponse(invite, 603);
+			sendErrorResponse(invite, Response.DECLINE);
 			return;
 		}
 
@@ -486,27 +493,23 @@ public class InstantMessagingService extends ImsService {
      * @return IM session
      * @throws CoreException
      */
-    public ChatSession initiateOne2OneChatSession(String contact, InstantMessage firstMsg) throws CoreException {
-        if (logger.isActivated()) {
-            logger.info("Initiate 1-1 chat session with " + contact);
-        }
-
-        // Test number of sessions
-        if ((maxChatSessions != 0) && (getImSessions().size() >= maxChatSessions)) {
-            if (logger.isActivated()) {
-                logger.debug("The max number of chat sessions is achieved: cancel the initiation");
-            }
-            throw new CoreException("Max chat sessions achieved");
-        }
-
-        // Create a new session
-        OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(
-                this,
-                PhoneUtils.formatNumberToSipUri(contact),
-                firstMsg);
-
-        return session;
-    }	
+	public ChatSession initiateOne2OneChatSession(String contact, InstantMessage firstMsg)
+			throws CoreException {
+		if (logger.isActivated()) {
+			logger.info("Initiate 1-1 chat session with " + contact);
+		}
+		// Test number of sessions
+		if ((maxChatSessions != 0) && (getImSessions().size() >= maxChatSessions)) {
+			if (logger.isActivated()) {
+				logger.debug("The max number of chat sessions is achieved: cancel the initiation");
+			}
+			throw new CoreException("Max chat sessions achieved");
+		}
+		String number = PhoneUtils.formatNumberToSipUri(contact);
+		// Create a new session
+		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, number, firstMsg);
+		return session;
+	}
 
     /**
      * Receive a one-to-one chat session invitation
@@ -518,6 +521,19 @@ public class InstantMessagingService extends ImsService {
 			logger.info("Receive a 1-1 chat session invitation");
 		}
 
+		// Discard invitation if message ID is already received 
+		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
+		if (firstMsg != null) {
+			String msgId = ChatUtils.getMessageId(invite);
+			if (msgId != null) {
+				if (RichMessagingHistory.getInstance().doesMessageIdAlreadyExist(msgId)) {
+					// Send a 603 Decline response
+					sendErrorResponse(invite, Response.DECLINE);
+					return;
+				}
+			}
+		}
+		
 		// Test if the contact is blocked
 		String remote = ChatUtils.getReferredIdentity(invite);
 	    if (ContactsManager.getInstance().isImBlockedForContact(remote)) {
@@ -526,7 +542,6 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Save the message in the spam folder
-			InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 			if (firstMsg != null) {
 				RichMessagingHistory.getInstance().addSpamMessage(firstMsg);
 			}
@@ -548,12 +563,11 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 486 Busy response
-			sendErrorResponse(invite, 486);
+			sendErrorResponse(invite, Response.BUSY_HERE);
 			return;
 	    }
 
 		// Save the message
-		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 		if (firstMsg != null) {
 			RichMessagingHistory.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
 		}
@@ -565,7 +579,7 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 486 Busy response
-			sendErrorResponse(invite, 486);
+			sendErrorResponse(invite, Response.BUSY_HERE);
 			return;
 		}
 
@@ -628,7 +642,7 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 486 Busy response
-			sendErrorResponse(invite, 486);
+			sendErrorResponse(invite, Response.BUSY_HERE);
 			return;
 	    }
 
@@ -639,13 +653,32 @@ public class InstantMessagingService extends ImsService {
 			}
 			
 			// Send a 486 Busy response
-			sendErrorResponse(invite, 486);
+			sendErrorResponse(invite, Response.BUSY_HERE);
 			return;
 		}
 
 		// Create a new session
 		TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this, invite);
 
+		/*--
+		 * 6.3.3.1 Leaving a Group Chat that is idle
+		 * In case the user expresses their desire to leave the Group Chat while it is inactive, the device will not offer the user
+		 * the possibility any more to enter new messages and restart the chat and automatically decline the first incoming INVITE 
+		 * request for the chat with a SIP 603 DECLINE response. Subsequent INVITE requests should not be rejected as they may be
+		 * received when the user is added again to the Chat by one of the participants.
+		 */
+		boolean reject = RichMessagingHistory.getInstance().isGroupChatNextInviteRejected(session.getContributionID());
+		if (reject) {
+			if (logger.isActivated()) {
+				logger.debug("Chat Id " + session.getContributionID() + " is declined since previously terminated by user while disconnected");
+			}
+			// Send a 603 Decline response
+			sendErrorResponse(invite, Response.DECLINE);
+			RichMessagingHistory.getInstance().acceptGroupChatNextInvitation(session.getContributionID());
+			return;
+		}
+
+		
 		// Start the session
 		session.startSession();
 
@@ -813,7 +846,7 @@ public class InstantMessagingService extends ImsService {
             String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(msgId);
             if (!StringUtils.isEmpty(ftSessionId)) {
                 // Notify the file delivery outside of the chat session
-                receiveFileDeliveryStatus(ftSessionId, status);
+                receiveFileDeliveryStatus(ftSessionId, status, contact);
             } else {
     			// Get session associated to the contact
     			Vector<ChatSession> sessions = Core.getInstance().getImService().getImSessionsWith(contact);
@@ -821,7 +854,7 @@ public class InstantMessagingService extends ImsService {
     				// Notify the message delivery from the chat session
     				for(int i=0; i < sessions.size(); i++) {
     					ChatSession session = sessions.elementAt(i);
-    			 	    session.handleMessageDeliveryStatus(msgId, status);
+    			 	    session.handleMessageDeliveryStatus(msgId, status, contact);
     				}
     			} else {
     				// Notify the message delivery outside of the chat session
@@ -831,9 +864,14 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void receiveFileDeliveryStatus(String ftSessionId, String status) {
+    /**
+     * @param ftSessionId
+     * @param status
+     * @param contact
+     */
+    public void receiveFileDeliveryStatus(String ftSessionId, String status, String contact) {
         // Notify the file delivery outside of the chat session
-        getImsModule().getCore().getListener().handleFileDeliveryStatus(ftSessionId, status);
+        getImsModule().getCore().getListener().handleFileDeliveryStatus(ftSessionId, status, contact);
     }
 
     /**
@@ -846,6 +884,19 @@ public class InstantMessagingService extends ImsService {
 			logger.debug("Receive S&F push messages invitation");
 		}
 
+		// Discard invitation if message ID is already received 
+		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
+		if (firstMsg != null) {
+			String msgId = ChatUtils.getMessageId(invite);
+			if (msgId != null) {
+				if (RichMessagingHistory.getInstance().doesMessageIdAlreadyExist(msgId)) {
+					// Send a 603 Decline response
+					sendErrorResponse(invite, Response.DECLINE);
+					return;
+				}
+			}
+		}
+		
     	// Test if the contact is blocked
     	String remote = ChatUtils.getReferredIdentity(invite);
 	    if (ContactsManager.getInstance().isImBlockedForContact(remote)) {
@@ -907,7 +958,7 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Send a 603 Decline response
-			sendErrorResponse(invite, 603);
+			sendErrorResponse(invite, Response.DECLINE);
 			return;
 	    }
 
@@ -936,8 +987,8 @@ public class InstantMessagingService extends ImsService {
         one2oneChatSession.startSession();
         
 		// Create and start a new HTTP file transfer session
-        TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this,
-                one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite));
+		TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this, one2oneChatSession,
+				ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact());
         httpFiletransferSession.startSession();
         
         // Notify listener
@@ -975,8 +1026,8 @@ public class InstantMessagingService extends ImsService {
         }
         
         // Create and start a new HTTP file transfer session
-        TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this,
-                one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite));
+		TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this, one2oneChatSession,
+				ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact());
         httpFiletransferSession.startSession();
         
         // Notify listener

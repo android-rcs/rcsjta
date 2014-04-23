@@ -263,6 +263,15 @@ public class SipDialogPath {
 		return callId;
 	}
 
+    /**
+     * Set the call-id of the dialog path
+     *
+     * @return String
+     */
+    public void setCallId(String callId) {
+        this.callId = callId;
+    }
+
 	/**
 	 * Return the Cseq number of the dialog path
 	 * 

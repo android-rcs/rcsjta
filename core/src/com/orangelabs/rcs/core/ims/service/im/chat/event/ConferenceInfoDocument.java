@@ -25,7 +25,9 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class ConferenceInfoDocument {
-    /** STATE values*/ 
+    /**
+     * State values
+     */ 
     public final static String STATE_PARTIAL = "partial";
     public final static String STATE_FULL = "full";
     public final static String STATE_DELETED = "deleted";
@@ -58,8 +60,8 @@ public class ConferenceInfoDocument {
     /**
      * Constructor
      * 
-     * @param entity conference URI
-     * @param state state attribute
+     * @param entity Conference URI
+     * @param state State attribute
      */
     public ConferenceInfoDocument(String entity, String state) {
         this.entity = entity;
@@ -69,7 +71,7 @@ public class ConferenceInfoDocument {
     /**
      * Return the conference URI
      *
-     * @return conference URI
+     * @return Conference URI
      */
     public String getEntity() {
         return entity;
@@ -78,7 +80,7 @@ public class ConferenceInfoDocument {
     /**
      * Reeturn the state
      *
-     * @return state
+     * @return State
      */
     public String getState() {
         return state;
@@ -87,7 +89,7 @@ public class ConferenceInfoDocument {
     /**
      * Add a user
      *
-     * @param user
+     * @param user User
      */
     public void addUser(User user) {
         users.addElement(user);
@@ -96,16 +98,16 @@ public class ConferenceInfoDocument {
     /**
      * Get the list of users
      *
-     * @return list of users
+     * @return List of users
      */
     public Vector<User> getUsers() {
         return users;
     }
 
     /**
-     * Get the maximum user count. 0 if not contained in the conference info
+     * Get the maximum user count
      *
-     * @return the maxUserCount
+     * @return Max user count or 0 if not contained in the conference info
      */
     public int getMaxUserCount() {
         return maxUserCount;
@@ -114,16 +116,16 @@ public class ConferenceInfoDocument {
     /**
      * Set the maximum user count
      *
-     * @param maxUserCount the maxUserCount to set
+     * @param maxUserCount Max user to set
      */
     public void setMaxUserCount(int maxUserCount) {
         this.maxUserCount = maxUserCount;
     }
 
     /**
-     * Get the user count. 0 if not contained in the conference info
+     * Get the user count
      *
-     * @return the userCount
+     * @return User count or 0 if not contained in the conference info
      */
     public int getUserCount() {
         return userCount;
@@ -132,10 +134,9 @@ public class ConferenceInfoDocument {
     /**
      * Set the user count
      *
-     * @param userCount the userCount to set
+     * @param userCount User count
      */
     public void setUserCount(int userCount) {
         this.userCount = userCount;
     }
-
 }

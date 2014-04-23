@@ -25,6 +25,7 @@ import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
@@ -134,8 +135,8 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
-        // Create the MSRP session
-        MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
+        // Create the MSRP session (without MSRPs)
+        MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this, null);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
 
@@ -203,7 +204,7 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
 		try {
 			ByteArrayInputStream stream = new ByteArrayInputStream(content); 
 	    	String msgId = IdGenerator.getIdentifier().replace('_', '-');
-			msrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length);
+			msrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length, TypeMsrpChunk.Unknown);
 			return true;
 		} catch(Exception e) {
 			// Error
@@ -251,42 +252,33 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
         }
 	}
     
-	/**
-	 * Data transfer in progress
-	 * 
-	 * @param currentSize Current transfered size in bytes
-	 * @param totalSize Total size in bytes
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferProgress(long, long)
 	 */
 	public void msrpTransferProgress(long currentSize, long totalSize) {
 		// Not used here
 	}
 
-    /**
-     * Data transfer in progress
-     *
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferProgress(long, long, byte[])
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
 		// Not used here
         return false;
     }
 
-	/**
-	 * Data transfer has been aborted
+
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferAborted()
 	 */
 	public void msrpTransferAborted() {
 		// Not used here
 	}	
 
-    /**
-     * Data transfer error
-     *
-     * @param msgId Message ID
-     * @param error Error code
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferError(java.lang.String, java.lang.String, com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
      */
-    public void msrpTransferError(String msgId, String error) {
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
 		if (isSessionInterrupted()) {
 			return;
 		}

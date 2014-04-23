@@ -36,6 +36,12 @@ public class MsrpTransaction extends Object {
      */
     private int waitingCount = 0;
 
+    // Changed by Deutsche Telekom
+    /**
+     * Count the total number of request received 200OK
+     */
+    private int totalReceivedResponses = 0;
+
     /**
      * Count number of sent requests without response 
      */
@@ -79,14 +85,24 @@ public class MsrpTransaction extends Object {
      * Handle new request
      */
     public void handleRequest() {
-        waitingCount++;
+        // Changed by Deutsche Telekom
+        // requests and responses are handled in different threads which need to be synchronized
+        synchronized(this){
+            waitingCount++;
+        }
     }
 
     /**
      * Handle new response
      */
     public synchronized void handleResponse() {
-        waitingCount--;
+        // Changed by Deutsche Telekom
+        // requests and responses are handled in different threads which need to be synchronized
+        synchronized(this){
+            waitingCount--;
+        }
+        // Changed by Deutsche Telekom
+        totalReceivedResponses++;
         if (isWaiting) {
             if (waitingCount == 0) {
                 // Unblock semaphore
@@ -155,5 +171,13 @@ public class MsrpTransaction extends Object {
     private synchronized void timerExpire() {
         // Unblock semaphore
         super.notify();
+    }
+
+    // Changed by Deutsche Telekom
+    /**
+     * @return totalReceivedResponses - number of received reports
+     */
+    public int getNumberReceivedOk() {
+        return totalReceivedResponses;
     }
 }

@@ -41,6 +41,12 @@ public class FileTransferLog {
      * <P>Type: TEXT</P>
      */
     public static final String FT_ID = "ft_id";
+    
+    /**
+     * The name of the column containing the chat ID used for the file transfer in Group Chat.
+     * <P>Type: TEXT</P>
+     */
+    public static final String CHAT_ID = "chat_id";
 
     /**
      * The name of the column containing the MSISDN of the sender.

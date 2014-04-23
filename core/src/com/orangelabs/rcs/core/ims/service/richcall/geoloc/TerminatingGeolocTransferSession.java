@@ -26,6 +26,7 @@ import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
@@ -259,8 +260,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
     	        // Create the MSRP client session
                 if (localSetup.equals("active")) {
+                	String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
                 	// Active mode: client should connect
-                	msrpMgr.createMsrpClientSession(remoteHost, remotePort, remotePath, this);
+                	msrpMgr.createMsrpClientSession(remoteHost, remotePort, remotePath, this, fingerprint);
 
 					// Open the MSRP session
 					msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
@@ -392,8 +394,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      *
      * @param msgId Message ID
      * @param error Error code
+     * @param typeMsrpChunk Type of MSRP chunk
      */
-    public void msrpTransferError(String msgId, String error) {
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
         if (isSessionInterrupted()) {
             return;
         }

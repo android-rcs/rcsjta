@@ -23,6 +23,7 @@ import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.PhoneUtils;
 
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
@@ -120,7 +121,10 @@ public class UserProfile {
 		this.xdmServerLogin = xdmServerLogin;
 		this.xdmServerPassword = xdmServerPassword;
 		this.imConferenceUri = imConferenceUri;
-		this.preferredUri = "sip:" + username + "@" + homeDomain;
+		// Changed by Deutsche Telekom
+		// Continuation from the changes done by "AS" on "2012-09-01"
+		// this.preferredUri = "sip:" + username + "@" + homeDomain;
+		this.preferredUri = getPublicUriForRegistration();
 	}
 
 	/**
@@ -157,22 +161,50 @@ public class UserProfile {
 	 */
 	public String getPublicUri() {
 		if (preferredUri == null) { 
-			return "sip:" + username + "@" + homeDomain;
+			// Changed by Deutsche Telekom
+		    // Continuation from the changes done by "AS" on "2012-09-01"
+		    return getPublicUriForRegistration();
 		} else {
 			return preferredUri;
 		}
 	}
 	
+	// Changed by Deutsche Telekom
+    /**
+     * Get the user public URI for registration
+     * 
+     * @return Public URI
+     */
+    public String getPublicUriForRegistration() {
+		//***###***AS 2012-09-01: added; only add schema and domain if public_user_identity didn't already contain these
+        // Changed by Deutsche Telekom
+        if (username == null) {
+        	return null;
+        }
+		int index1 = username.indexOf("sip:");
+		int index2 = username.indexOf("@");
+		if ((index1 == -1) && (index2 == -1)) {
+			return "sip:" + username + "@" + homeDomain;
+		} else {
+			return username;
+		}
+    }
+    
 	/**
 	 * Get the user public address
 	 * 
 	 * @return Public address
 	 */
 	public String getPublicAddress() {
-		String addr = getPublicUri();	 
+		String addr = getPublicUri();
 		String displayName = RcsSettings.getInstance().getUserProfileImsDisplayName();
 		if ((displayName != null) && (displayName.length() > 0)) {
-			addr = "\"" + displayName + "\" <" + addr + ">"; 
+			String number = PhoneUtils.extractNumberFromUri(addr);
+			if (number != null && number.equals(displayName)) {
+				// Do no insert display name if it is equal to the international number
+				return addr;
+			}
+			addr = "\"" + displayName + "\" <" + addr + ">";
 		}
 		return addr;
 	}

@@ -44,7 +44,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 */
 	private boolean fileTransferPaused = false;
 
-    /**
+	/**
      * The logger
      */
     private static Logger logger = Logger.getLogger(FileSharingSession.class.getName());
@@ -184,7 +184,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     public void setThumbnail(byte[] thumbnail) {
         this.thumbnail = thumbnail;
     }
-
+    
 	/**
 	 * Check if file capacity is acceptable
 	 * 

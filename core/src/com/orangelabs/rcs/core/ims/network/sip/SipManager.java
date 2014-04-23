@@ -119,17 +119,18 @@ public class SipManager {
      * @param proxyAddr Outbound proxy address
      * @param proxyPort Outbound proxy port
      * @param isSecure Need secure connection or not
+     * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
      * @return SIP stack
      * @throws SipException
      */
     public synchronized void initStack(String localAddr, String proxyAddr,
-    		int proxyPort, String protocol, int networkType) throws SipException {
+    		int proxyPort, String protocol, boolean tcpFallback, int networkType) throws SipException {
 		// Close the stack if necessary
 		closeStack();
 
 		// Create the SIP stack
-        sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, networkType);
+        sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback, networkType);
     }
 
 	/**
@@ -179,8 +180,8 @@ public class SipManager {
             ctx.waitResponse(timeout);
 
             // Analyze the received response
-            if (    message instanceof SipRequest
-                    && !((SipRequest)message).getMethod().equals(Request.REGISTER)
+            if (message instanceof SipRequest
+                && !((SipRequest)message).getMethod().equals(Request.REGISTER)
                     && ctx.isSipResponse()) {
                 // Check if not registered and warning header
                 WarningHeader warn = (WarningHeader)ctx.getSipResponse().getHeader(WarningHeader.NAME);

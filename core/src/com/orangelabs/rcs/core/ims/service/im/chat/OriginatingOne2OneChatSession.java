@@ -54,17 +54,14 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
 	 * @param msg First message of the session
 	 */
 	public OriginatingOne2OneChatSession(ImsService parent, String contact, InstantMessage msg) {
-        super(parent, contact);
-
-        // Set first message
-        setFirstMesssage(msg);
-
-        // Create dialog path
-        createOriginatingDialogPath();
-
-        // Set contribution ID
-        String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
-        setContributionID(id);
+		super(parent, contact);
+		// Set first message
+		setFirstMesssage(msg);
+		// Create dialog path
+		createOriginatingDialogPath();
+		// Set contribution ID
+		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
+		setContributionID(id);
 	}
 
 	/**
@@ -91,20 +88,11 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
             }
 
 	    	// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+	    	//String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	    		"a=accept-types:" + getAcceptTypes() + SipUtils.CRLF +
-	            "a=accept-wrapped-types:" + getWrappedTypes() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
+	    	String sdp = SdpUtils.buildChatSDP(ipAddress, localMsrpPort, getMsrpMgr().getLocalSocketProtocol(),
+	                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(),
+	                    getDirection());
 	    	
 	    	// If there is a first message then builds a multipart content else builds a SDP content
 	    	if (getFirstMessage() != null) {
@@ -188,4 +176,10 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
 			handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
 		}
 	}
+	
+    // Changed by Deutsche Telekom
+    @Override
+    public String getDirection() {
+        return SdpUtils.DIRECTION_SENDRECV;
+    }
 }

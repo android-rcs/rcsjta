@@ -20,7 +20,6 @@ package com.orangelabs.rcs.core.ims.service.richcall.image;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Vector;
 
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
@@ -32,9 +31,7 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
-import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
-import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -108,37 +105,21 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
 			// Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
-			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
             if (getImsService().getImsModule().isConnectedToWifiAccess()) {
                 msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
             }
 
 			// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-				"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + msrpMgr.getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + msrpMgr.getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	    		"a=accept-types:" + getContent().getEncoding() + SipUtils.CRLF +
-	    		"a=file-transfer-id:" + getFileTransferId() + SipUtils.CRLF +
-	    		"a=file-disposition:render" + SipUtils.CRLF +
-	    		"a=sendonly" + SipUtils.CRLF;
+	    	String encoding = getContent().getEncoding();
 	    	int maxSize = ImageTransferSession.getMaxImageSharingSize();
-	    	if (maxSize > 0) {
-	    		sdp += "a=max-size:" + maxSize + SipUtils.CRLF;
-	    	}
-
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
-	    	if (selector != null) {
-	    		sdp += "a=file-selector:" + selector + SipUtils.CRLF;
-	    	}
+	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
+	                    msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferId(), selector,
+	                    "render", localSetup, msrpMgr.getLocalMsrpPath(), SdpUtils.DIRECTION_SENDONLY,
+	                    maxSize);
 
 	    	// Set File-location attribute
 	    	String location = getFileLocationAttribute();
@@ -211,19 +192,19 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @throws Exception 
      */
     public void prepareMediaSession() throws Exception {
-        // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
-        Vector<MediaDescription> media = parser.getMediaDescriptions();
-        MediaDescription mediaDesc = media.elementAt(0);
-        MediaAttribute attr = mediaDesc.getMediaAttribute("path");
-        String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-        int remotePort = mediaDesc.port;
+        // Changed by Deutsche Telekom
+        // Get the remote SDP part
+        byte[] sdp = getDialogPath().getRemoteContent().getBytes();
 
+        // Changed by Deutsche Telekom
         // Create the MSRP session
-        MsrpSession session = msrpMgr.createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
+        MsrpSession session = msrpMgr.createMsrpSession(sdp, this);
+
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
+        // Changed by Deutsche Telekom
+        // Do not use right now the mapping to do not increase memory and cpu consumption
+        session.setMapMsgIdFromTransationId(false);
     }
 
     /**
@@ -247,7 +228,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 stream = new ByteArrayInputStream(data);
             }
             
-            msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize());
+            msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
         } catch(Exception e) {
             // Unexpected error
             if (logger.isActivated()) {
@@ -349,9 +330,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      *
      * @param msgId Message ID
      * @param error Error code
+     * @param typeMsrpChunk Type of MSRP chunk
      */
-    public void msrpTransferError(String msgId, String error) {
-        if (isSessionInterrupted()) {
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
+        if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
 			return;
 		}
 
@@ -359,12 +341,12 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             logger.info("Data transfer error " + error);
     	}
 
-        // Close the media session
-        closeMediaSession();
-
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
+        // Close the media session
+        closeMediaSession();
+        
         // Request capabilities
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
 
@@ -372,8 +354,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     	getImsService().removeSession(this);
     	
     	// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+            for(int j=0; j < getListeners().size(); j++) {
+                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+            }
         }
 	}
 }

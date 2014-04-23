@@ -50,6 +50,7 @@ import gov2.nist.javax2.sip.message.SIPResponse;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -227,6 +228,18 @@ public abstract class SIPTransactionStack implements SIPTransactionEventListener
      * @deprecated
      */
     protected InetAddress stackInetAddress;
+
+    // Changed by Deutsche Telekom
+    /**
+     * Default SIP port
+     */
+    public final static int DEFAULT_MTU_SIZE = 1500;
+
+    // Changed by Deutsche Telekom
+    /**
+     * MTU size
+     */
+    private int mtuSize = DEFAULT_MTU_SIZE;
 
     /*
      * Request factory interface (to be provided by the application)
@@ -1830,6 +1843,22 @@ public abstract class SIPTransactionStack implements SIPTransactionEventListener
         else
             this.stackAddress = stackAddress;
         this.stackInetAddress = InetAddress.getByName(stackAddress);
+        
+        // Changed by Deutsche Telekom
+        try{
+            this.mtuSize = NetworkInterface.getByInetAddress(stackInetAddress).getMTU();
+            if (stackLogger.isLoggingEnabled()) {
+                stackLogger.logInfo("MTU size: "+ this.mtuSize);
+            } 
+        } catch (Exception e) {
+            this.mtuSize = DEFAULT_MTU_SIZE;
+            if (stackLogger.isLoggingEnabled()) {
+                stackLogger.logError("Unable to determine MTU size: ", e);
+            }            
+        }
+        if (stackLogger.isLoggingEnabled()) {
+            stackLogger.logDebug("Current MTU size: " + this.mtuSize);
+        }            
     }
 
     /**
@@ -1842,6 +1871,16 @@ public abstract class SIPTransactionStack implements SIPTransactionEventListener
 
         // JvB: for 1.2 this may return null...
         return this.stackAddress;
+    }
+
+    // Changed by Deutsche Telekom
+    /**
+     * Return the MTU size
+     *
+     * @return MTU size
+     */
+    public int getMtuSize() {
+        return mtuSize;
     }
 
     /**

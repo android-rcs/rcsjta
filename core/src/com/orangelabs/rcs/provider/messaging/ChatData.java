@@ -72,4 +72,9 @@ public class ChatData {
 	 * Column name
 	 */
 	static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
+
+	/**
+	 * Column name : reject next Group Chat
+	 */
+	public static final String KEY_REJECT_GC = "reject_gc";
 }

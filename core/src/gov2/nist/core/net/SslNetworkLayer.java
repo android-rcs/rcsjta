@@ -38,6 +38,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
@@ -45,6 +46,8 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
+
+import com.orangelabs.rcs.core.ims.security.cert.KeyStoreManager;
 
 /**
  * extended implementation of a network layer that allows to define a private java
@@ -61,29 +64,42 @@ public class SslNetworkLayer implements NetworkLayer {
 
     private SSLServerSocketFactory sslServerSocketFactory;
 
-    public SslNetworkLayer(
-            String trustStoreFile,
-            String keyStoreFile,
-            char[] keyStorePassword,
-            String keyStoreType) throws GeneralSecurityException, FileNotFoundException, IOException
-    {
-        SSLContext sslContext;
-        sslContext = SSLContext.getInstance("TLS");
-        String algorithm = KeyManagerFactory.getDefaultAlgorithm();
-        TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(algorithm);
-        KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(algorithm);
-        SecureRandom secureRandom   = new SecureRandom();
-        secureRandom.nextInt();
-        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        KeyStore trustStore = KeyStore.getInstance(keyStoreType);
-        keyStore.load(new FileInputStream(keyStoreFile), keyStorePassword);
-        trustStore.load(new FileInputStream(trustStoreFile), keyStorePassword);
-        tmFactory.init(trustStore);
-        kmFactory.init(keyStore, keyStorePassword);
-        sslContext.init(kmFactory.getKeyManagers(), tmFactory.getTrustManagers(), secureRandom);
-        sslServerSocketFactory = sslContext.getServerSocketFactory();
-        sslSocketFactory = sslContext.getSocketFactory();
-    }
+	public SslNetworkLayer(String trustStoreFile, String keyStoreFile,
+			char[] keyStorePassword, String keyStoreType)
+			throws GeneralSecurityException, FileNotFoundException, IOException {
+		SSLContext sslContext;
+		sslContext = SSLContext.getInstance("TLS");
+		String algorithm = KeyManagerFactory.getDefaultAlgorithm();
+		TrustManagerFactory tmFactory = TrustManagerFactory
+				.getInstance(algorithm);
+		SecureRandom secureRandom = new SecureRandom();
+		secureRandom.nextInt();
+		KeyManagerFactory kmFactory = null;
+		KeyStore keyStore = null;
+		KeyStore trustStore = null;
+		KeyManager[] km = null;
+		if (KeyStoreManager.isOwnCertificateUsed()) {
+			// use specific keystore with own certificate
+			trustStore = KeyStore.getInstance(keyStoreType);
+			trustStore.load(new FileInputStream(trustStoreFile),
+					keyStorePassword);
+			tmFactory.init(trustStore);
+
+			keyStore = KeyStore.getInstance(keyStoreType);
+			keyStore.load(new FileInputStream(keyStoreFile), keyStorePassword);
+
+			kmFactory = KeyManagerFactory.getInstance(algorithm);
+			kmFactory.init(keyStore, keyStorePassword);
+
+			km = kmFactory.getKeyManagers();
+		} else {
+			// use default keystore with built-in certificates
+			tmFactory.init((KeyStore) null);
+		}
+		sslContext.init(km, tmFactory.getTrustManagers(), secureRandom);
+		sslServerSocketFactory = sslContext.getServerSocketFactory();
+		sslSocketFactory = sslContext.getSocketFactory();
+	}
 
     public ServerSocket createServerSocket(int port, int backlog,
             InetAddress bindAddress) throws IOException {

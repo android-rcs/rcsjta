@@ -189,6 +189,12 @@ public class ChatLog {
 	         * Spam message
 	         */
 	        public static final int SPAM = 2;
+	        
+	        /**
+	         * File Transfer message
+	         */
+	        public static final int FILE_TRANSFER = 3;
+	        
         }
         	
         /**

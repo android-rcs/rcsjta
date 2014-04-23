@@ -184,7 +184,6 @@ public class LauncherUtils {
 
         // Remove the RCS account 
         AuthenticationService.removeRcsAccount(context, null);
-        
         // Ensure that factory is set up properly to avoid NullPointerException in AccountChangedReceiver.setAccountResetByEndUser
         AndroidFactory.setApplicationContext(context);
         AccountChangedReceiver.setAccountResetByEndUser(false);

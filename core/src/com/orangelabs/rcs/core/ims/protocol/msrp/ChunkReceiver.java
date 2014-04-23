@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -46,7 +47,7 @@ public class ChunkReceiver extends Thread {
 	private boolean terminated = false;
 
     /**
-     * Maximum length of MSRP chunk buffer
+     * maximum length of MSRP chunk buffer
      */
     private int buffer_length = MsrpConstants.CHUNK_MAX_SIZE;
 
@@ -98,18 +99,19 @@ public class ChunkReceiver extends Thread {
 			}
 
 			// Background processing
-			while(!terminated) {
+			while (!terminated) {
 				StringBuffer trace = new StringBuffer();
 
 				// Read first line of a new data chunk
 				StringBuffer line = readLine();
+
 				if (line.length() == 0) {
 					if (logger.isActivated()) {
 						logger.debug("End of stream");
-					}					
+					}
 					return;
 				}
-				
+
 				if (MsrpConnection.MSRP_TRACE_ENABLED) {
 					trace.append(line);
 					trace.append(MsrpConstants.NEW_LINE);
@@ -118,7 +120,7 @@ public class ChunkReceiver extends Thread {
 				if (logger.isActivated()) {
 					logger.debug("Read a new chunk");
 				}
-				
+
 				// Check the MSRP tag
 				String[] firstLineTags = line.toString().split(" ");
 				if ((firstLineTags.length < 3) || !firstLineTags[0].equals(MsrpConstants.MSRP_HEADER)) {
@@ -132,7 +134,7 @@ public class ChunkReceiver extends Thread {
 				String txId = firstLineTags[1];
 				if (logger.isActivated()) {
 					logger.debug("Transaction-ID: " + txId);
-				}	
+				}
 				String end = MsrpConstants.END_MSRP_MSG + txId;
 
 				// Get response code or method name from the first line
@@ -142,12 +144,12 @@ public class ChunkReceiver extends Thread {
 					responseCode = Integer.parseInt(firstLineTags[2]);
 					if (logger.isActivated()) {
 						logger.debug("Response: " + responseCode);
-					}	
-				} catch(NumberFormatException e) {
+					}
+				} catch (NumberFormatException e) {
 					method = firstLineTags[2];
 					if (logger.isActivated()) {
 						logger.debug("Method: " + method);
-					}	
+					}
 				}
 
 				// Data chunk
@@ -156,14 +158,14 @@ public class ChunkReceiver extends Thread {
 				// Read next lines
 				Hashtable<String, String> headers = new Hashtable<String, String>();
 				char continuationFlag = '\0';
-				long totalSize = 0;
-				while(continuationFlag == '\0' && !terminated) {
+				int totalSize = 0;
+				while (continuationFlag == '\0' && !terminated) {
 					line = readLine();
 					if (MsrpConnection.MSRP_TRACE_ENABLED) {
 						trace.append(line);
 						trace.append(MsrpConstants.NEW_LINE);
 					}
-					
+
 					// Test if there is a new line separating headers from the data
 					if (line.length() == 0) {
 						// Read data
@@ -172,27 +174,33 @@ public class ChunkReceiver extends Thread {
 						if (byteRange != null) {
 							chunkSize = MsrpUtils.getChunkSize(byteRange);
 							totalSize = MsrpUtils.getTotalSize(byteRange);
+
+							// Changed by Deutsche Telekom
+							if (chunkSize == 0) {
+								this.buffer_length = totalSize;
+							}
 						}
-							
+
 						if (logger.isActivated()) {
 							logger.debug("Read data (" + chunkSize + ")");
-						}	
-						
+						}
+
 						if (chunkSize >= 0) {
 							// Use Byte-Range value to read directly the block of data
-                            byte[] buffer = readChunkedData(chunkSize, end);
+							byte[] buffer = readChunkedData(chunkSize, end);
 
-                            if (chunkSize > 0) {
-                                data = buffer;
-                            } else {
-                                // Cut off continuation flag
-                                data = new byte[buffer.length - 1];
-                                System.arraycopy(buffer, 0, data, 0, buffer.length - 1);
-                                continuationFlag = (char) buffer[buffer.length - 1];
-                                if (logger.isActivated()) {
-                                    logger.debug("Continuous flag: " + continuationFlag);
-                                }
-                            }
+							if (chunkSize > 0) {
+								data = buffer;
+								// TODO: we could harden the code by checking whether the chunk was shorter than expected
+							} else {
+								// Cut off continuation flag
+								data = new byte[buffer.length - 1];
+								System.arraycopy(buffer, 0, data, 0, buffer.length - 1);
+								continuationFlag = (char) buffer[buffer.length - 1];
+								if (logger.isActivated()) {
+									logger.debug("Continuous flag: " + continuationFlag);
+								}
+							}
 
 							if (MsrpConnection.MSRP_TRACE_ENABLED) {
 								trace.append(new String(data));
@@ -202,11 +210,11 @@ public class ChunkReceiver extends Thread {
 							// Read until terminating header is found
 							StringBuffer buffer = new StringBuffer();
 							StringBuffer dataline;
-							boolean endchunk = false; 
-							while((!endchunk) && (buffer.length() < MsrpConstants.CHUNK_MAX_SIZE)) {
+							boolean endchunk = false;
+							while ((!endchunk) && (buffer.length() < MsrpConstants.CHUNK_MAX_SIZE)) {
 								dataline = readLine();
-								if ((dataline.length()-1 == end.length()) && (dataline.toString().startsWith(end))) {
-									continuationFlag = dataline.charAt(dataline.length()-1);
+								if ((dataline.length() - 1 == end.length()) && (dataline.toString().startsWith(end))) {
+									continuationFlag = dataline.charAt(dataline.length() - 1);
 									if (logger.isActivated()) {
 										logger.debug("Continuous flag: " + continuationFlag);
 									}
@@ -216,10 +224,11 @@ public class ChunkReceiver extends Thread {
 										buffer.append(MsrpConstants.NEW_LINE);
 									}
 									buffer.append(dataline);
-								}								
+								}
 							}
 							data = buffer.toString().getBytes();
-							
+							totalSize = data.length;
+
 							if (MsrpConnection.MSRP_TRACE_ENABLED) {
 								trace.append(new String(data));
 								trace.append(MsrpConstants.NEW_LINE);
@@ -229,32 +238,32 @@ public class ChunkReceiver extends Thread {
 						}
 						if (logger.isActivated()) {
 							logger.debug("Data: " + data.length);
-						}						
-					} else
-					if (line.toString().startsWith(end)) {
-						continuationFlag = line.charAt(line.length()-1);
+						}
+					} else if (line.toString().startsWith(end)) {
+						continuationFlag = line.charAt(line.length() - 1);
 						if (logger.isActivated()) {
 							logger.debug("Continuous flag: " + continuationFlag);
-						}						
+						}
 					} else {
 						// It's an header
 						int index = line.indexOf(":");
 						String headerName = line.substring(0, index).trim();
-						String headerValue = line.substring(index+1).trim();
-						
+						String headerValue = line.substring(index + 1).trim();
+
 						// Add the header in the list
 						headers.put(headerName, headerValue);
 						if (logger.isActivated()) {
-							logger.debug("Header: " + headerName);
-						}						
+							// Changed by Deutsche Telekom
+							logger.debug("Header: " + headerName + " - Value: " + headerValue);
+						}
 					}
 				}
-				
+
 				// Process the received MSRP message
 				if (responseCode != -1) {
 					// Process MSRP response
 					if (MsrpConnection.MSRP_TRACE_ENABLED) {
-						System.out.println("<<< Receive MSRP response:\n" +  trace);
+						System.out.println("<<< Receive MSRP response:\n" + trace);
 					}
 					connection.getSession().receiveMsrpResponse(responseCode, txId, headers);
 				} else {
@@ -262,26 +271,33 @@ public class ChunkReceiver extends Thread {
 					if (method.toString().equals(MsrpConstants.METHOD_SEND)) {
 						// Process a SEND request
 						if (MsrpConnection.MSRP_TRACE_ENABLED) {
-							System.out.println("<<< Receive MSRP SEND request:\n" +  trace);
+							System.out.println("<<< Receive MSRP SEND request:\n" + trace);
 						}
 						connection.getSession().receiveMsrpSend(txId, headers, continuationFlag, data, totalSize);
-					} else 
-					if (method.toString().equals(MsrpConstants.METHOD_REPORT)) {
+					} else if (method.toString().equals(MsrpConstants.METHOD_REPORT)) {
 						// Process a REPORT request
 						if (MsrpConnection.MSRP_TRACE_ENABLED) {
-							System.out.println("<<< Receive MSRP REPORT request:\n" +  trace);
+							System.out.println("<<< Receive MSRP REPORT request:\n" + trace);
 						}
-						connection.getSession().receiveMsrpReport(txId, headers);					
+						connection.getSession().receiveMsrpReport(txId, headers);
 					} else {
 						// Unknown request
 						if (logger.isActivated()) {
 							logger.debug("Unknown request received: " + method);
 						}
+
+						// Remove transaction info from list
+						// Changed by Deutsche Telekom
+						connection.getSession().removeMsrpTransactionInfo(txId);
 					}
 				}
+
+				// Check transaction info data
+				// Changed by Deutsche Telekom
+				connection.getSession().checkMsrpTransactionInfo();
 			}
-		} catch(Exception e) {
-			if (terminated) { 
+		} catch (Exception e) {
+			if (terminated) {
 				if (logger.isActivated()) {
 					logger.debug("Chunk receiver thread terminated");
 				}
@@ -289,9 +305,14 @@ public class ChunkReceiver extends Thread {
 				if (logger.isActivated()) {
 					logger.error("Chunk receiver has failed", e);
 				}
-				
+
 				// Notify the session listener that an error has occured
-				connection.getSession().getMsrpEventListener().msrpTransferError(null, e.getMessage());
+				// Changed by Deutsche Telekom
+				connection.getSession().getMsrpEventListener().msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
+
+				// Check transaction info data
+				// Changed by Deutsche Telekom
+				connection.getSession().checkMsrpTransactionInfo();
 			}
 			terminated = true;
 		}
@@ -325,58 +346,58 @@ public class ChunkReceiver extends Thread {
 	 * @throws IOException
 	 */
 	private byte[] readChunkedData(int chunkSize, String endTag) throws IOException {
-        // Read data until chunk size is reached
-        byte[] result = null;
-        if (chunkSize != 0) {
-            result = new byte[chunkSize];
-            int nbRead = 0;
-            int nbData = -1;
-            while ((nbRead < chunkSize) && ((nbData = stream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
-                nbRead += nbData;
-            }
-        } else {
-            int b;
-            int tagLength = endTag.length();
-            int[] tail = new int[tagLength];
-            byte[] buffer = new byte[this.buffer_length + tagLength + 2];
+		// Read data until chunk size is reached
+		byte[] result = null;
+		if (chunkSize != 0) {
+			result = new byte[chunkSize];
+			int nbRead = 0;
+			int nbData = -1;
+			while ((nbRead < chunkSize) && ((nbData = stream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
+				nbRead += nbData;
+			}
+		} else {
+			int b;
+			int tagLength = endTag.length();
+			int[] tail = new int[tagLength];
+			byte[] buffer = new byte[this.buffer_length + tagLength + 2];
 
-            // MSRP end tag in reverse order
-            int[] match = new int[tagLength];
-            for (int i = 0; i < tagLength; i++) {
-                match[i] = (int) endTag.charAt(tagLength - i - 1);
-            }
+			// MSRP end tag in reverse order
+			int[] match = new int[tagLength];
+			for (int i = 0; i < tagLength; i++) {
+				match[i] = (int) endTag.charAt(tagLength - i - 1);
+			}
 
-            // Read stream byte by byte
-            for (int j = 0; (b = stream.read()) != -1; j++) {
-                // Sliding window over last received bytes
-                System.arraycopy(tail, 0, tail, 1, tagLength - 1);
-                tail[0] = b;
+			// Read stream byte by byte
+			for (int j = 0; (b = stream.read()) != -1; j++) {
+				// Sliding window over last received bytes
+				System.arraycopy(tail, 0, tail, 1, tagLength - 1);
+				tail[0] = b;
 
-                if (b != match[0]) {
-                    buffer[j] = (byte) b;
-                } else {
-                    // First char matches; let's check for the others
-                    boolean tagFound = true;
-                    for (int k = 1; k < tagLength - 1; k++) {
-                        if (tail[k] != match[k]) {
-                            buffer[j] = (byte) b;
-                            tagFound = false;
-                            break;
-                        }
-                    }
-                    if (tagFound) {
-                        // Strip off MSRP end tag
-                        // j+1 characters read; remove tagLength characters and CR/LF plus one extra character for continuation flag
-                        result = new byte[j - tagLength]; 
-                        System.arraycopy(buffer, 0, result, 0, j - tagLength - 1); // remove tag and CR/LF
+				if (b != match[0]) {
+					buffer[j] = (byte) b;
+				} else {
+					// First char matches; let's check for the others
+					boolean tagFound = true;
+					for (int k = 1; k < tagLength - 1; k++) {
+						if (tail[k] != match[k]) {
+							buffer[j] = (byte) b;
+							tagFound = false;
+							break;
+						}
+					}
+					if (tagFound) {
+						// Strip off MSRP end tag
+						// j+1 characters read; remove tagLength characters and CR/LF plus one extra character for continuation flag
+						result = new byte[j - tagLength];
+						System.arraycopy(buffer, 0, result, 0, j - tagLength - 1); // remove tag and CR/LF
 
-                        // read continuation flag
-                        result[j - tagLength - 1] = (byte) stream.read();
-                        break;
-                    }
-                }
-            }
-        }
+						// read continuation flag
+						result[j - tagLength - 1] = (byte) stream.read();
+						break;
+					}
+				}
+			}
+		}
 		stream.read(); // Read LF
 		stream.read(); // Read CR
 		return result;

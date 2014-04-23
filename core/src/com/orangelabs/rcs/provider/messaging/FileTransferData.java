@@ -24,6 +24,11 @@ public class FileTransferData {
 	 * Column name
 	 */
 	static final String KEY_SESSION_ID = FileTransferLog.FT_ID;
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
 
 	/**
 	 * Column name

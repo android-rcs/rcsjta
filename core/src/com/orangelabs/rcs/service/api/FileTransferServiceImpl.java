@@ -254,7 +254,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
 		// Display invitation
-/* TODO		receiveFileTransferInvitation(session, chatSession.isGroupChat());
+/* TODO	FUSION	receiveFileTransferInvitation(session, chatSession.isGroupChat());
 		
 		// Update rich messaging history
 		RichMessaging.getInstance().addIncomingChatSessionByFtHttp(chatSession);
@@ -408,11 +408,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      *
      * @param ftSessionId File transfer session Id
      * @param status status of File transfer
+     * @param contact contact who received file
      */
-    public void handleFileDeliveryStatus(String ftSessionId, String status) {
+    public void handleFileDeliveryStatus(String ftSessionId, String status, String contact) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
             // Update rich messaging history
-        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED, contact);
             
             // Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -429,7 +430,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
             // Update rich messaging history
-        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED, contact);
             
             // Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -455,5 +456,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
+	}
+
+	public void resumeOutgoingFileTransfer(FileSharingSession session, boolean isGroup) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

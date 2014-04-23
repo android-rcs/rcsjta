@@ -21,6 +21,10 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.util.List;
 
 
+
+
+import javax2.sip.header.SubjectHeader;
+
 import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -30,6 +34,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -91,20 +96,10 @@ public class RejoinGroupChatSession extends GroupChatSession {
             }
 
 	    	// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	    		"a=accept-types:" + getAcceptTypes() + SipUtils.CRLF +
-	            "a=accept-wrapped-types:" + getWrappedTypes() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
+	    	String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr().getLocalSocketProtocol(),
+                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(),
+                    SdpUtils.DIRECTION_SENDRECV);
 
 			// Set the local SDP part in the dialog path
 	    	getDialogPath().setLocalContent(sdp);
@@ -144,7 +139,14 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	private SipRequest createInviteRequest(String content) throws SipException {
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
                 getFeatureTags(),
-                content);
+                getAcceptContactTags(),
+        		content);
+
+        // Test if there is a subject
+        if (getSubject() != null) {
+            // Add a subject header
+            invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(getSubject()));
+        }
 
         // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());

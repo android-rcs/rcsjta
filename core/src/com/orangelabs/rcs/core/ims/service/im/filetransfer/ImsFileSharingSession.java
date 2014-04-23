@@ -19,6 +19,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -168,9 +169,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @param msgId Message ID
      * @param error Error code
      */
-    public void msrpTransferError(String msgId, String error) {
-        if (isSessionInterrupted()) {
-        	return;
+    public void msrpTransferError(String msgId, String error, MsrpSession.TypeMsrpChunk typeMsrpChunk) {
+        if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
+            return;
         }
         
         if (logger.isActivated()) {
@@ -178,10 +179,10 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         }
 
         try {
-            // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+			// Terminate session
+			terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
-            // Close the media session
+			// Close the media session
             closeMediaSession();
         } catch(Exception e) {
             if (logger.isActivated()) {
@@ -196,8 +197,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         getImsService().removeSession(this);
 
         // Notify listeners
-        for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
+        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+            for(int j=0; j < getListeners().size(); j++) {
+                ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
+            }
         }
     }
+
 }

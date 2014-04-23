@@ -163,17 +163,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             getVideoRenderer().open(selectedVideoCodec, remoteHost, remotePort);
 
             // Build SDP part
-            String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, getVideoRenderer().getLocalRtpPort(), mediaVideo); 
-            String sdp =
-            	"v=0" + SipUtils.CRLF +
-            	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-            	"s=-" + SipUtils.CRLF +
-            	"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-                "t=0 0" + SipUtils.CRLF +
-                videoSdp +
-                "a=recvonly" + SipUtils.CRLF;
+            String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_RECVONLY);
 
             // Set the local SDP part in the dialog path
             getDialogPath().setLocalContent(sdp);

@@ -2,22 +2,23 @@ package com.orangelabs.rcs.service.api;
 
 import java.util.List;
 
-import com.gsma.services.rcs.chat.IGroupChat;
-import com.gsma.services.rcs.chat.IGroupChatListener;
-import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
-
+import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.IGroupChat;
+import com.gsma.services.rcs.chat.IGroupChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
@@ -28,6 +29,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -269,7 +271,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 */
 	public String sendMessage(final String text) {
 		// Generate a message Id
-		final String msgId = ChatUtils.generateMessageId();
+		final String msgId = IdGenerator.generateMessageID();
 
 		// Send text message
         Thread t = new Thread() {
@@ -290,7 +292,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
     public String sendGeoloc(Geoloc geoloc) {
 		// Generate a message Id
-		final String msgId = ChatUtils.generateMessageId();
+		final String msgId = IdGenerator.generateMessageID();
 
 		// Send geoloc message
 		final GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
@@ -391,9 +393,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 	
-	/**
-	 * Session is started
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
+     */
     public void handleSessionStarted() {
     	synchronized(lock) {
 	    	if (logger.isActivated()) {
@@ -419,11 +421,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-     * Session has been aborted
-     * 
-	 * @param reason Termination reason
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted(int)
+     */
     public void handleSessionAborted(int reason) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -459,8 +459,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-     * Session has been terminated by remote
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
     public void handleSessionTerminatedByRemote() {
     	synchronized(lock) {
@@ -493,11 +493,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-	/**
-	 * New text message received
-	 * 
-	 * @param text Text message
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
+     */
     public void handleReceiveMessage(InstantMessage message) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -527,10 +525,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-     * IM session error
-     * 
-     * @param error Error
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError(com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
      */
     public void handleImError(ChatError error) {
     	synchronized(lock) {
@@ -583,11 +579,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-	 * Is composing event
-	 * 
-	 * @param contact Contact
-	 * @param status Status
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)
 	 */
 	public void handleIsComposingEvent(String contact, boolean status) {
     	synchronized(lock) {
@@ -612,12 +605,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
 	
-    /**
-     * Conference event
-     * 
-	 * @param contact Contact
-	 * @param contactDisplayname Contact display name
-     * @param state State associated to the contact
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleConferenceEvent(java.lang.String, java.lang.String, java.lang.String)
      */
     public void handleConferenceEvent(String contact, String contactDisplayname, String state) {
     	synchronized(lock) {
@@ -662,20 +651,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-     * New message delivery status
-     * 
-	 * @param msgId Message ID
-     * @param status Delivery status
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleMessageDeliveryStatus(String msgId, String status) {
+    public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status, contact);
         	
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -700,8 +686,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-    /**
-     * Request to add participant is successful
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful()
      */
     public void handleAddParticipantSuccessful() {
     	synchronized(lock) {
@@ -763,4 +749,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	        listeners.finishBroadcast();		
 	    }
     }
+
+	/* (non-Javadoc)
+	 * @see com.gsma.services.rcs.chat.IGroupChat#getParticipantInfo()
+	 */
+	@Override
+	public List<ParticipantInfo> getParticipantInfo() throws RemoteException {
+		if (logger.isActivated()) {
+			logger.info("Get list of participant information");
+		}
+		// TODO FUSION return List<ParticipantInfo> from session
+		return null;
+	}
 }

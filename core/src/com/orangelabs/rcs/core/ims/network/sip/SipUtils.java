@@ -18,9 +18,9 @@
 
 package com.orangelabs.rcs.core.ims.network.sip;
 
+import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
@@ -43,6 +43,7 @@ import javax2.sip.message.Request;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipMessage;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.utils.PhoneUtils;
 
 /**
  * SIP utility functions
@@ -188,6 +189,16 @@ public class SipUtils {
 		return String.valueOf(startTime);
 	}
 
+	/**
+     * Build User Agent value
+     *
+     * @return UA value
+     */
+    public static String userAgentString() {
+        String userAgent = "IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
+        return userAgent;
+    }
+
     /**
      * Build User-Agent header
      * 
@@ -195,8 +206,7 @@ public class SipUtils {
      * @throws Exception
      */
 	public static Header buildUserAgentHeader() throws Exception {
-	    String value = "IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
-        Header userAgentHeader = HEADER_FACTORY.createHeader(UserAgentHeader.NAME, value);
+        Header userAgentHeader = HEADER_FACTORY.createHeader(UserAgentHeader.NAME, userAgentString());
 	    return userAgentHeader;
     }
 	
@@ -207,8 +217,7 @@ public class SipUtils {
      * @throws Exception
      */
 	public static Header buildServerHeader() throws Exception {
-	    String value = "IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
-		return HEADER_FACTORY.createHeader(ServerHeader.NAME, value);
+		return HEADER_FACTORY.createHeader(ServerHeader.NAME, userAgentString());
     }
     
 	/**
@@ -320,12 +329,32 @@ public class SipUtils {
 	 * @return SIP URI
 	 */
 	public static String getAssertedIdentity(SipRequest request) {
-		ExtensionHeader assertedHeader = (ExtensionHeader)request.getHeader(SipUtils.HEADER_P_ASSERTED_IDENTITY);
-		if (assertedHeader != null) {
-			return assertedHeader.getValue();
-		} else {
-			return request.getFromUri();
+		ListIterator<Header> list = request
+				.getHeaders(SipUtils.HEADER_P_ASSERTED_IDENTITY);
+		if (list != null) {
+			// There is at most 2 P-Asserted-Identity headers, one with tel uri and one with sip uri
+			// We give preference to the tel uri if both are present, if not we return the first one
+			String assertedHeader1 = null;
+			if (list.hasNext()) {
+				// Get value of the first header
+				assertedHeader1 = ((ExtensionHeader) list.next()).getValue();
+				if (assertedHeader1.contains("tel:")) {
+					return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader1);
+				}
+				if (list.hasNext()) {
+					// Get value of the second header (it may not be present)
+					String assertedHeader2 = ((ExtensionHeader) list.next())
+							.getValue();
+					if (assertedHeader2.contains("tel:")) {
+						return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader2);
+					}
+				}
+				// In case there is no tel uri, return the value of the first header
+				return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader1);
+			}
 		}
+		// No P-AssertedIdentity header, we take the value in the FROM uri
+		return PhoneUtils.cleanUriHeadingTrailingChar(request.getFromUri());
 	}
 	
     /**
@@ -335,7 +364,6 @@ public class SipUtils {
 	 * @param msg SIP message
 	 * @param invert Invert or not the route list
 	 * @return List of route headers as string
-	 * @throws Exception
 	 */
 	public static Vector<String> routeProcessing(SipMessage msg, boolean invert) {
 		Vector<String> result = new Vector<String>(); 
@@ -396,20 +424,20 @@ public class SipUtils {
      * @throws Exception
      */
     public static void setFeatureTags(Message message, String[] tags) throws Exception {
-    	List<String> list = Arrays.asList(tags);  
-    	setFeatureTags(message, list);
+    	setFeatureTags(message, tags, tags);
     }
     
     /**
      * Set feature tags to a message
      * 
      * @param message SIP stack message
-     * @param tags List of tags
+     * @param contactTags List of tags for Contact header
+     * @param acceptContactTags List of tags for Accept-Contact header
      * @throws Exception
      */
-    public static void setFeatureTags(Message message, List<String> tags) throws Exception {
-    	setContactFeatureTags(message, tags);
-    	setAcceptContactFeatureTags(message, tags);
+    public static void setFeatureTags(Message message, String[] contactTags, String[] acceptContactTags) throws Exception {
+        setContactFeatureTags(message, contactTags);
+        setAcceptContactFeatureTags(message, acceptContactTags);
     }
     
     /**
@@ -419,15 +447,15 @@ public class SipUtils {
      * @param tags List of tags
      * @throws Exception
      */
-    public static void setAcceptContactFeatureTags(Message message, List<String> tags) throws Exception {
-    	if ((tags == null) || (tags.size() == 0)) {
+    public static void setAcceptContactFeatureTags(Message message, String[] tags) throws Exception {
+    	if ((tags == null) || (tags.length == 0)) {
     		return;
     	}
     	
     	// Update Contact header
-    	StringBuffer acceptTags = new StringBuffer("*");
-    	for(int i=0; i < tags.size(); i++) {
-    		acceptTags.append(";" + tags.get(i));
+    	StringBuilder acceptTags = new StringBuilder("*");
+    	for(int i=0; i < tags.length; i++) {
+            acceptTags.append(";" + tags[i]);
     	}
     	
     	// Update Accept-Contact header
@@ -442,25 +470,68 @@ public class SipUtils {
      * @param tags List of tags
      * @throws Exception
      */
-    public static void setContactFeatureTags(Message message, List<String> tags) throws Exception {
-        if ((tags == null) || (tags.size() == 0)) {
+    public static void setContactFeatureTags(Message message, String[] tags) throws Exception {
+        if ((tags == null) || (tags.length == 0)) {
             return;
         }
         
         // Update Contact header
         ContactHeader contact = (ContactHeader)message.getHeader(ContactHeader.NAME);
-        for(int i=0; i < tags.size(); i++) {
+        for(int i=0; i < tags.length; i++) {
             if (contact != null) {
-                contact.setParameter(tags.get(i), null);
+                contact.setParameter(tags[i], null);
             }
         }
+    }
+    
+    /**
+     * Set the P-Preferred-Service header 
+     * 
+     * @param message SIP stack message
+     * @param value header's value
+     * @throws Exception
+     */
+    public static void setPPreferredService(SipMessage message, String value) throws Exception {
+    	ExtensionHeader header =  (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(PPreferredServiceHeader.NAME, value);
+		message.getStackMessage().addHeader(header);
+    }
+    
+    /**
+     * Get the P-Preferred-Service header 
+     * 
+     * @param message SIP stack message
+     * @return header's value or null if not exist
+     */
+    public static String getPPreferredService(SipMessage message)  {   	
+    	String pPreferredService = null;
+    	ExtensionHeader header =  (ExtensionHeader) message.getHeader(PPreferredServiceHeader.NAME);
+		if (header != null) {
+			pPreferredService = header.getValue();
+		}
+		return pPreferredService;
+    }
+    
+    /**
+     * Is P-Preferred-Service header set with right value or not in SIP message
+     * 
+     * @param message SIP message
+     * @param value  P-Preferred-Service header's value to be checked
+     * @return Boolean
+     */
+    public static boolean isPPReferredServicePresent(SipMessage message, String value){
+    	boolean result = false;
+    	if (getPPreferredService(message) != null) {
+    		result = getPPreferredService(message).equals(value);		
+    	}
+    	
+    	return result;
     }
 
     /**
      * Get the Referred-By header
      * 
 	 * @param message SIP message
-     * @return Strong or null if not exist
+     * @return String value or null if not exist
      */
     public static String getReferredByHeader(SipMessage message) {
 		// Read Referred-By header
@@ -511,7 +582,7 @@ public class SipUtils {
     /**
      * Get SIP instance ID of an incoming message
      * 
-	 * @param request SIP message
+	 * @param message SIP message
      * @return ID or null
      */
     public static String getInstanceID(SipMessage message) {
@@ -539,7 +610,7 @@ public class SipUtils {
     /**
      * Get public GRUU
      * 
-	 * @param request SIP message
+	 * @param message SIP message
      * @return GRUU or null
      */
     public static String getPublicGruu(SipMessage message) {

@@ -53,7 +53,7 @@ public class FileTransferProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 4;
+        private static final int DATABASE_VERSION = 5;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -66,6 +66,7 @@ public class FileTransferProvider extends ContentProvider {
         			+ FileTransferData.KEY_SESSION_ID + " TEXT,"
         			+ FileTransferData.KEY_CONTACT + " TEXT,"
         			+ FileTransferData.KEY_NAME + " TEXT,"
+        			+ FileTransferData.KEY_CHAT_ID + " TEXT,"
         			+ FileTransferData.KEY_MIME_TYPE + " TEXT,"
         			+ FileTransferData.KEY_STATUS + " integer,"
         			+ FileTransferData.KEY_DIRECTION + " integer,"

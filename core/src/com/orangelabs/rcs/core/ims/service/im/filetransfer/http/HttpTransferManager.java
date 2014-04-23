@@ -74,7 +74,7 @@ public abstract class HttpTransferManager {
 	/**
      * HTTP server address
      */
-    private static String serverAddr = RcsSettings.getInstance().getFtHttpServer();
+    private String serverAddr = RcsSettings.getInstance().getFtHttpServer();
 
 	/**
      * HTTP server login
@@ -120,7 +120,7 @@ public abstract class HttpTransferManager {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(HttpTransferManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -128,7 +128,9 @@ public abstract class HttpTransferManager {
      * @param listener HTTP event listener
      */
     public HttpTransferManager(HttpTransferEventListener listener) {
-        this(listener, serverAddr);
+        this.listener = listener;
+
+        initServerAddress(serverAddr);
     }
 
     /**
@@ -149,7 +151,7 @@ public abstract class HttpTransferManager {
      *
      * @param address server address
      */
-    public void initServerAddress(String address) {
+    private void initServerAddress(String address) {
         try {
             // Extract protocol and port
             URL url = new URL(address);
@@ -291,6 +293,7 @@ public abstract class HttpTransferManager {
     		logger.error("Pausing transfer");
     	}
 		isPaused = true;
+		getListener().httpTransferPaused();
 	}
 	
 	/**

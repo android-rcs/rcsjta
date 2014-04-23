@@ -32,12 +32,15 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -459,11 +462,13 @@ public class RichMessagingHistory {
 	 * 
 	 * @param msgId Message ID
 	 * @param status Delivery status
+	 * @param contact the remote contact
 	 */
-	public void updateChatMessageDeliveryStatus(String msgId, String status) {
+	public void updateChatMessageDeliveryStatus(String msgId, String status, String contact) {
 		if (logger.isActivated()) {
-			logger.debug("Update chat delivery status: msgID=" + msgId + ", status=" + status);
+			logger.debug("Update chat delivery status: msgID=" + msgId + ", status=" + status+ ", contact="+contact);
 		}
+		// TODO contact is not managed !
     	if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
     		RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.UNREAD);
     	} else
@@ -483,18 +488,21 @@ public class RichMessagingHistory {
      * @return true if new message
      */
 	public boolean isNewMessage(String chatId, String msgId) {
-		boolean result = true;
-		Cursor cursor = cr.query(msgDatabaseUri,
-				new String[] { MessageData.KEY_MSG_ID },
-				"(" + MessageData.KEY_CHAT_ID + " = '" + chatId + "') AND (" + MessageData.KEY_MSG_ID + " = '" + msgId + "')",
-				null, null);
-		if (cursor.moveToFirst()) {
-			result = false;
-		} else {
-			result = true;
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(msgDatabaseUri, new String[] { MessageData.KEY_MSG_ID }, "(" + MessageData.KEY_CHAT_ID + " = '"
+					+ chatId + "') AND (" + MessageData.KEY_MSG_ID + " = '" + msgId + "')", null, null);
+			if (cursor.moveToFirst()) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
-		cursor.close();
-		return result;
 	}
 	
 	/*--------------------- File transfer methods ----------------------*/
@@ -517,6 +525,8 @@ public class RichMessagingHistory {
 					", MIME=" + content.getEncoding());
 		}
 		ContentValues values = new ContentValues();
+		// FUSION : add KEY_TYPE ?
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
 		values.put(FileTransferData.KEY_SESSION_ID, sessionId);
 		values.put(FileTransferData.KEY_CONTACT, contact);
 		values.put(FileTransferData.KEY_NAME, content.getUrl());
@@ -541,9 +551,6 @@ public class RichMessagingHistory {
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);		
 			values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
 		}
-		
-		
-		
 		cr.insert(ftDatabaseUri, values);
 	}
 
@@ -552,25 +559,31 @@ public class RichMessagingHistory {
 	 * 
 	 * @param sessionId Session ID
 	 * @param status New status
+	 * @param contact the contact
 	 */
-	public void updateFileTransferStatus(String sessionId, int status) {
+	public void updateFileTransferStatus(String sessionId, int status, String contact) {
 		if (logger.isActivated()) {
-			logger.debug("Update file transfer status to " + status);
+			if (contact == null) {
+				logger.debug("Update file transfer status to " + status);
+			} else {
+				logger.debug("Update file transfer status to " + status + " for contact " + contact);
+			}
 		}
+		// TODO FUSION to check
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_STATUS, status);
+		if (contact != null) {
+			// Add contact if relevant
+			values.put(FileTransferData.KEY_CONTACT, contact);
+		}
 		if (status == FileTransfer.State.DELIVERED) {
 			// Delivered
 			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance().getTimeInMillis());
-		} else
-		if (status == FileTransfer.State.DISPLAYED) {
+		} else if (status == FileTransfer.State.DISPLAYED) {
 			// Displayed
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 		}
-		cr.update(ftDatabaseUri, 
-				values, 
-				FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", 
-				null);
+		cr.update(ftDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 	
 	/**
@@ -588,10 +601,7 @@ public class RichMessagingHistory {
 		values.put(FileTransferData.KEY_SIZE, size);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.STARTED);
-		cr.update(ftDatabaseUri, 
-				values, 
-				FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", 
-				null);
+		cr.update(ftDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 
 	/**
@@ -607,10 +617,7 @@ public class RichMessagingHistory {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_NAME, url);
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERRED);
-		cr.update(ftDatabaseUri, 
-				values, 
-				FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", 
-				null);
+		cr.update(ftDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 	
     /**
@@ -619,22 +626,22 @@ public class RichMessagingHistory {
      * @param msgId Message ID
      * @return Chat session ID of the file transfer
      */
-    public String getFileTransferId(String msgId) {
-        String result = null;
-/* TODO       Cursor cursor = cr.query(msgDatabaseUri, 
-                new String[] {
-        		ChatData.KEY_CHAT_ID
-                },
-                "(" + ChatData.KEY_ID + "='" + msgId + "') AND (" + 
-                		MessageData.KEY_TYPE + "=" + ChatLog.Message.Type.FILE_TRANSFER + ")",
-                null, 
-                FileTransferData.KEY_TIMESTAMP + " DESC");
-        if (cursor.moveToFirst()) {
-            result = cursor.getString(0);
-        }
-        cursor.close();*/
-        return result;
-    }
+	public String getFileTransferId(String msgId) {
+		// TODO FUSION to check
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(msgDatabaseUri, new String[] { FileTransferData.KEY_CHAT_ID }, "(" + FileTransferData.KEY_SESSION_ID
+					+ "='" + msgId + "' AND "+MessageData.KEY_TYPE+"='"+ChatLog.Message.Type.FILE_TRANSFER+"')", null, null);
+			if (cursor.moveToFirst()) {
+				return cursor.getString(0);
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return null;
+	}
     
     /**
      * Update file transfer ChatId
@@ -643,15 +650,16 @@ public class RichMessagingHistory {
      * @param chatId chat Id
      * @param msgId msgId of the corresponding chat
      */
-    public void updateFileTransferChatId(String sessionId, String chatId, String msgId) {
- /* TODO       ContentValues values = new ContentValues();
-        values.put(RichMessagingData.KEY_CHAT_ID, chatId);
-        values.put(RichMessagingData.KEY_MESSAGE_ID , msgId);
-        cr.update(databaseUri, 
-                values, 
-                RichMessagingData.KEY_CHAT_SESSION_ID + " = " + sessionId, 
-                null);*/
-    }
+	public void updateFileTransferChatId(String sessionId, String chatId, String msgId) {
+		// TODO FUSION check if sessionId required ?
+		if (logger.isActivated()) {
+			logger.debug("Update file transfer chat ID to " + chatId);
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_CHAT_ID, chatId);
+		// values.put(RichMessagingData.KEY_MESSAGE_ID , msgId);
+		cr.update(msgDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = " + sessionId, null);
+	}
     
     /**
      * Serialize a geoloc to bytes array
@@ -686,5 +694,152 @@ public class RichMessagingHistory {
     	} else {
     		return null;
     	}
-    }	
+    }
+    
+    /**
+     * Is next group chat Invitation rejected
+     * 
+     * @param chatId Chat ID
+     * @return true if next GC invitation should be rejected
+     */
+	public boolean isGroupChatNextInviteRejected(String chatId) {
+		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
+				+ MessageData.KEY_TYPE + " = ? AND "//
+				+ ChatData.KEY_STATUS + " = ? AND "//
+				+ ChatData.KEY_REJECT_GC + " = 1";
+		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(chatDatabaseUri, null, selection, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			if (cursor.getCount() != 0) {
+				return true;
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return false;
+	}
+	
+	/**
+	 * Accept next Group Chat invitation
+	 * @param chatId
+	 */
+	public void acceptGroupChatNextInvitation(String chatId) {
+		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_REJECT_GC, "0");
+		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
+				+ MessageData.KEY_TYPE + " = ? AND "//
+				+ ChatData.KEY_STATUS + " = ? AND "//
+				+ ChatData.KEY_REJECT_GC + " = 1";
+		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		cr.update(chatDatabaseUri, values, selection, selectionArgs);
+		if (logger.isActivated()) {
+			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
+		}
+	}
+	
+    /**
+     * A delivery report "displayed" is requested for a given chat message
+     * 
+     * @param msgId Message ID
+     */
+	public void setChatMessageDeliveryRequested(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug("Set chat delivery requested: msgID=" + msgId);
+		}
+		// TODO FUSION will be changed with CR013 read/displayed/delivered ?
+		//setChatMessageDeliveryStatus(msgId, ChatLog.Message.Status.Content.REPORT_REQUESTED);
+	}
+	
+	/**
+	 * Get state event log value from conference state name
+	 * 
+	 * @param state
+	 *            Conference state
+	 * @return event log value
+	 * 
+	 */
+	private int getEventLogValue(String state) {
+		int event = ParticipantInfo.Status.UNKNOWN;
+		if (state.equals(User.STATE_BOOTED)) {
+			// Contact has lost the session and may rejoin the session after
+			event = ParticipantInfo.Status.BOOTED;
+		} else if (state.equals(User.STATE_DEPARTED)) {
+			// Contact has left voluntary the session
+			event = ParticipantInfo.Status.DEPARTED;
+		} else if (state.equals(User.STATE_DISCONNECTED)) {
+			// Contact has left voluntary the session
+			event = ParticipantInfo.Status.DISCONNECTED;
+		} else if (state.equals(User.STATE_CONNECTED)) {
+			// Contact has joined the session
+			event = ParticipantInfo.Status.CONNECTED;
+		} else if (state.equals(User.STATE_BUSY)) {
+			// Contact is busy
+			event = ParticipantInfo.Status.BUSY;
+		} else if (state.equals(User.STATE_PENDING)) {
+			// Contact is busy
+			event = ParticipantInfo.Status.PENDING;
+		} else if (state.equals(User.STATE_DECLINED)) {
+			// Contact has declined the invitation
+			event = ParticipantInfo.Status.DECLINED;
+		} else if (state.equals(User.STATE_FAILED)) {
+			// Any SIP error related to the contact invitation
+			event = ParticipantInfo.Status.FAILED;
+		}
+		return event;
+	}
+	
+	/**
+	 * Has the last known state changed for a participant
+	 * 
+	 * @param chatId
+	 * @param participant
+	 * @param lastState
+	 * @return true if the state has changed for the participant since the last time
+	 */
+	public boolean hasLastKnownStateForParticipantChanged(String chatId, String participant, String lastState) {
+		int lastKnownState = -1;
+		String selection = MessageData.KEY_CHAT_ID + " = ? AND " //
+				+ MessageData.KEY_TYPE + " = ? AND "//
+				+ MessageData.KEY_CONTACT + " = ? ";
+		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, participant };
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(msgDatabaseUri, new String[] { MessageData.KEY_STATUS }, selection, selectionArgs,
+					MessageData.KEY_TIMESTAMP + " DESC");
+			if (cursor.moveToNext()) {
+				lastKnownState = cursor.getInt(0);
+			}
+		} catch (Exception e) {
+			return true;
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return (lastKnownState == -1 // There was no known state yet
+		|| getEventLogValue(lastState) != lastKnownState); // Or the state has changed
+	}
+
+    /**
+     * doesMessageIdAlreadyExist
+     * 
+     * @param msgId message ID
+     * @return true if the message ID already exists
+     */
+	public boolean doesMessageIdAlreadyExist(String msgId) {
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(msgDatabaseUri, new String[] { MessageData.KEY_MSG_ID }, "(" + MessageData.KEY_MSG_ID + " = \""
+					+ msgId + "\")", null, null);
+			int messagesNumber = cursor.getCount();
+			return messagesNumber != 0;
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+	}
 }

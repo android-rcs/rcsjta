@@ -33,7 +33,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * Content to be shared
 	 */
 	private MmContent content;
-
+    
     /**
 	 * Constructor
 	 * 
@@ -95,6 +95,6 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * @return String
 	 */
 	public String getFileTransferId() {
-		return "CSh" + IdGenerator.getIdentifier().replace('_', '-');
+		return "CSh" + IdGenerator.generateMessageID();
 	}
 }

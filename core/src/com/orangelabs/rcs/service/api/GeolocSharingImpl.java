@@ -17,17 +17,15 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import com.gsma.services.rcs.gsh.IGeolocSharing;
-import com.gsma.services.rcs.gsh.IGeolocSharingListener;
-
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.IGeolocSharing;
+import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
@@ -35,6 +33,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -393,8 +392,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			}
 			
 			// Update rich messaging history
-			String msgId = ChatUtils.generateMessageId();
-			GeolocMessage geolocMsg = new GeolocMessage(msgId, session.getRemoteContact(), geoloc, false);
+			String msgId = IdGenerator.generateMessageID();
+			// TODO FUSION check display name parameter
+			GeolocMessage geolocMsg = new GeolocMessage(msgId, session.getRemoteContact(), geoloc, false, null);
 			if (session instanceof OriginatingGeolocTransferSession) { 
 				RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 			} else {

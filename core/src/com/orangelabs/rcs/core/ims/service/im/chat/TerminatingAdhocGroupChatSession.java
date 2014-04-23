@@ -20,11 +20,12 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
-import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -45,12 +46,13 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class TerminatingAdhocGroupChatSession extends GroupChatSession {
+public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
+
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
-
+    
     /**
      * Constructor
      * 
@@ -60,6 +62,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
 	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite) {
 		super(parent, ChatUtils.getReferredIdentity(invite), ChatUtils.getListOfParticipants(invite));
 
+		// Detect if it's a rejoin
+		if (getParticipants().getList().size() == 0) {
+			if (logger.isActivated()) {
+	    		logger.info("Invite to join a group chat");
+	    	}
+		}
+		
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);
 		setSubject(subject);
@@ -89,7 +98,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                 if (logger.isActivated()) {
                     logger.debug("Accept manually group chat invitation");
                 }
-                
     	    	// Send a 180 Ringing response
     			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
     			
@@ -144,6 +152,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
+    		// Changed by Deutsche Telekom
+    		String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
+
             // Extract the "setup" parameter
             String remoteSetup = "passive";
 			MediaAttribute attr2 = mediaDesc.getMediaAttribute("setup");
@@ -169,33 +180,23 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
 	    	}            
 	    	
 			// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	    		"a=accept-types:" + getAcceptTypes() + SipUtils.CRLF +
-	            "a=accept-wrapped-types:" + getWrappedTypes() + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
+	    	String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr().getLocalSocketProtocol(),
+                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(),
+                    SdpUtils.DIRECTION_SENDRECV);
 
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
-            	if (logger.isActivated()) {
-            		logger.debug("Session has been interrupted: end of processing");
-            	}
-            	return;
-            }
-
-            // Create the MSRP server session
+				if (logger.isActivated()) {
+					logger.debug("Session has been interrupted: end of processing");
+				}
+				return;
+			}
+	        
+    		// Create the MSRP server session
             if (localSetup.equals("passive")) {
             	// Passive mode: client wait a connection
             	MsrpSession session = getMsrpMgr().createMsrpServerSession(remotePath, this);
@@ -209,7 +210,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
     						// Open the MSRP session
     						getMsrpMgr().openMsrpSession();
     						
-    		    	        // Send an empty packet
+    						// Even if local setup is passive, an empty packet must be sent to open the NAT
+							// and so enable the active endpoint to initiate a MSRP connection.
     		            	sendEmptyDataChunk();    						
 						} catch (IOException e) {
 							if (logger.isActivated()) {
@@ -226,7 +228,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
         		logger.info("Send 200 OK");
         	}
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-            		getFeatureTags(), sdp);
+            		getFeatureTags(), getAcceptContactTags(), sdp);
 
             // The signalisation is established
             getDialogPath().sigEstablished();
@@ -247,7 +249,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
         		// Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	// Active mode: client should connect
-                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this);
+                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this, fingerprint);
         			session.setFailureReportOption(false);
         			session.setSuccessReportOption(false);
         			
@@ -263,12 +265,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
     	    		getListeners().get(i).handleSessionStarted();
     	        }
 
+				// Invite missing participant
+				inviteMissingParticipants(getParticipants());
+				
     	    	// Subscribe to event package
             	getConferenceEventSubscriber().subscribe();
 
-            	// Invite missing participant
-            	inviteMissingParticipants();
-            	
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
@@ -287,43 +289,41 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
         	}
 
         	// Unexpected error
-			handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION,
-					e.getMessage()));
+			handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
 		}		
 	}
 	
-	/***
-	 * Invite missing participants in background
+	/**
+	 * Invite missing participants.
+	 * <p>
+	 * This method is executed once upon reception of the first conference event notification after invite.
+	 * 
+	 * @param invitedParticipants
+	 *            the list of invited participants contained in the notify with full state
 	 */
-	private void inviteMissingParticipants() {
-		Thread t = new Thread() {
+	private void inviteMissingParticipants(final ListOfParticipant invitedParticipants) {
+		new Thread() {
 			public void run() {
 				try {
-		        	if (logger.isActivated()) {
-		        		logger.debug("Check if participants are missing in the conference");
-		        	}
-					List<String> connected = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(getContributionID());
-					List<String> invited = getParticipants().getList();
-					List<String> missing = new ArrayList<String>();
-					for(int i= 0; i < connected.size(); i++) {
-						String contact = connected.get(i);
-						if (!invited.contains(contact)) {
-							missing.add(contact);
-						}
+					if (logger.isActivated()) {
+						logger.debug("Check if participants are missing in the conference");
 					}
-					if (missing.size() > 0) {
-			        	if (logger.isActivated()) {
-			        		logger.debug("Add " + missing.size() + " missing participants in the conference");
-			        	}
-						addParticipants(missing);
+					Set<String> connectedProvider = new HashSet<String>(RichMessagingHistory.getInstance()
+							.getGroupChatConnectedParticipants(getContributionID()));
+					Set<String> invitedSet = new HashSet<String>(invitedParticipants.getList());
+					// Only keep participants who are not invited by the AS
+					connectedProvider.removeAll(invitedSet);
+					if (!connectedProvider.isEmpty()) {
+						if (logger.isActivated())
+							logger.debug("Add " + connectedProvider.size() + " missing participants in the conference");
+						addParticipants(new ArrayList<String>(connectedProvider));
 					}
-				} catch(Exception e) {
-		        	if (logger.isActivated()) {
-		        		logger.error("Session initiation has failed", e);
-		        	}
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Session initiation has failed", e);
+					}
 				}
 			}
-		};
-		t.start();
+		}.start();
 	}
 }

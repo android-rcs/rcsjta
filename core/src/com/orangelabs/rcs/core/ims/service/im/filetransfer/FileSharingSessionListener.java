@@ -55,9 +55,9 @@ public interface FileSharingSessionListener extends ImsSessionListener  {
      * File transfer has been paused
      */
     public void handleFileTransferPaused();
-
+    
     /**
      * File transfer has been resumed
      */
-    public void handleFileTransferResumed();    
+    public void handleFileTransferResumed();
 }
