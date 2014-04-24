@@ -84,6 +84,12 @@ public class FileTransferLog {
      * <P>Type: LONG</P>
      */
     public static final String TRANSFERRED = "transferred";
+    
+    /**
+     * The name of the column containing the identity of the chat message.
+     * <P>Type: LONG</P>
+     */
+    public static final String MESSAGE_ID = "msg_id";
 
     /**
      * The name of the column containing the time when transfer is initiated.

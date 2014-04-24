@@ -508,6 +508,10 @@ public class InstantMessagingService extends ImsService {
 		String number = PhoneUtils.formatNumberToSipUri(contact);
 		// Create a new session
 		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, number, firstMsg);
+		// Save the message
+		if (firstMsg != null) {
+			RichMessagingHistory.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
+		}
 		return session;
 	}
 

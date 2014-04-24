@@ -234,7 +234,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		}
 		
 		// Update rich messaging history
-  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED, null);
+  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
 
   		// Reject invitation
         Thread t = new Thread() {
@@ -321,9 +321,9 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			if (logger.isActivated()) {
 				logger.info("Session started");
 			}
-	
+
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED, null);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -350,11 +350,11 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			if (logger.isActivated()) {
 				logger.info("Session aborted (reason " + reason + ")");
 			}
-	
+
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED, null);
-			
-	  		// Notify event listeners
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -387,9 +387,9 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	  		} else {
 				// Update rich messaging history
-		  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED, null);
-		
-		  		// Notify event listeners
+				RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+
+				// Notify event listeners
 				final int N = listeners.beginBroadcast();
 		        for (int i=0; i < N; i++) {
 		            try {
@@ -425,9 +425,9 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-	  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED, null);
-			
-	  		// Notify event listeners
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -529,8 +529,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.PAUSED,
-					this.getRemoteContact());
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.PAUSED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -557,8 +556,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED,
-					this.getRemoteContact());
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();

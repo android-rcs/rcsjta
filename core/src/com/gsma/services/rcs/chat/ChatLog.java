@@ -172,6 +172,12 @@ public class ChatLog {
         public static final String MIME_TYPE = "mime_type";
         
         /**
+         * The name of the column containing the identify of the file transfer .
+         * <P>Type: TEXT</P>
+         */
+        public static final String FT_ID = "ft_id";
+        
+        /**
          * Type of the message
          */
         public static class Type {

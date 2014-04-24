@@ -412,10 +412,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public void handleFileDeliveryStatus(String ftSessionId, String status, String contact) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-            // Update rich messaging history
-        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED, contact);
-            
-            // Notify File transfer delivery listeners
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+
+			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
             for (int i=0; i < N; i++) {
                 try {
@@ -429,10 +429,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             listeners.finishBroadcast();
         } else
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-            // Update rich messaging history
-        	RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED, contact);
-            
-            // Notify File transfer delivery listeners
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+
+			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
             for (int i=0; i < N; i++) {
                 try {

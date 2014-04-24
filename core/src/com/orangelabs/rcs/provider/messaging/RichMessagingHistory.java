@@ -36,6 +36,7 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -293,7 +294,10 @@ public class RichMessagingHistory {
 	 * @param direction Direction
 	 */
 	public void addChatMessage(InstantMessage msg, int direction) {
-		addChatMessage(msg, ChatLog.Message.Type.CONTENT, direction);
+		if (msg instanceof FileTransferMessage)
+			addChatMessage(msg, ChatLog.Message.Type.FILE_TRANSFER, direction);
+		else
+			addChatMessage(msg, ChatLog.Message.Type.CONTENT, direction);
 	}
 	
 	/**
@@ -323,6 +327,9 @@ public class RichMessagingHistory {
 					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			blob = serializeGeoloc(geolocApi);
+		} else if (msg instanceof FileTransferMessage) {
+			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+			blob = serializePlainText(((FileTransferMessage)msg).getFileInfo()); 
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
 			blob = serializePlainText(msg.getTextMessage()); 
@@ -501,6 +508,26 @@ public class RichMessagingHistory {
 		}
 	}
 	
+
+	/**
+	 * Update message with identity of File Transfer
+	 * 
+	 * @param msgId
+	 *            the message identity
+	 * @param ftID
+	 *            the identify of the File Transfer
+	 */
+	public void updateMessageFileTansferId(String msgId, String ftID) {
+		if (logger.isActivated()) {
+			logger.debug("updateMessageFileTansferId (msgId=" + msgId + ") (ftID=" + ftID + ")");
+		}
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_FT_ID, ftID);
+		String selection = MessageData.KEY_MSG_ID + " = ? AND " + MessageData.KEY_TYPE + " = ?";
+		String[] selectionArgs = { msgId, "" + ChatLog.Message.Type.FILE_TRANSFER };
+		cr.update(msgDatabaseUri, values, selection, selectionArgs);
+	}
+	
 	/*--------------------- File transfer methods ----------------------*/
 
 	/**
@@ -555,17 +582,13 @@ public class RichMessagingHistory {
 	 * @param status New status
 	 * @param contact the contact
 	 */
-	public void updateFileTransferStatus(String sessionId, int status, String contact) {
+	public void updateFileTransferStatus(String sessionId, int status) {
 		if (logger.isActivated()) {
-			logger.debug("updateFileTransferStatus (status=" + status + ") (sessionId=" + sessionId + ") (contact=" + contact + ")");
+			logger.debug("updateFileTransferStatus (status=" + status + ") (sessionId=" + sessionId + ")");
 		}
 		// TODO FUSION to check
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_STATUS, status);
-		if (contact != null) {
-			// Add contact if relevant
-			values.put(FileTransferData.KEY_CONTACT, contact);
-		}
 		if (status == FileTransfer.State.DELIVERED) {
 			// Delivered
 			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance().getTimeInMillis());
@@ -617,7 +640,6 @@ public class RichMessagingHistory {
      * @return Chat session ID of the file transfer
      */
 	public String getFileTransferId(String msgId) {
-		// TODO FUSION to check
 		if (logger.isActivated()) {
 			logger.debug("getFileTransferId (msgId=" + msgId + ")");
 		}
@@ -644,13 +666,13 @@ public class RichMessagingHistory {
      * @param msgId msgId of the corresponding chat
      */
 	public void updateFileTransferChatId(String sessionId, String chatId, String msgId) {
-		// TODO FUSION check if sessionId required ?
+		// TODO FUSION
 		if (logger.isActivated()) {
 			logger.debug("updateFileTransferChatId (chatId=" + chatId + ") (sessionId=" + sessionId + ") (msgId=" + msgId + ")");
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		// values.put(RichMessagingData.KEY_MESSAGE_ID , msgId);
+		values.put(FileTransferData.KEY_MSG_ID , msgId);
 		cr.update(ftDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = " + sessionId, null);
 	}
     
@@ -723,12 +745,15 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
 		}
+		// TODO FUSION cannot mix chatData and messageData
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJECT_GC, "0");
-		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
-				+ MessageData.KEY_TYPE + " = ? AND "//
-				+ ChatData.KEY_STATUS + " = ? AND "//
-				+ ChatData.KEY_REJECT_GC + " = 1";
+		// @formatter:off
+		String selection = ChatData.KEY_CHAT_ID + " = ? AND " 
+							+ MessageData.KEY_TYPE + " = ? AND "
+							+ ChatData.KEY_STATUS + " = ? AND "
+							+ ChatData.KEY_REJECT_GC + " = 1";
+		// @formatter:on
 		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
 		cr.update(chatDatabaseUri, values, selection, selectionArgs);
 		if (logger.isActivated()) {

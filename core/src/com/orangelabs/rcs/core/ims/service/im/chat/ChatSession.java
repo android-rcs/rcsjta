@@ -992,32 +992,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 } else {
                     ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, imdn.getStatus(), contact);
                 }
-            	/* TODO FUSION check if above code is equivalent ?
-				// Check message in RichMessaging
-				MessageInfo msgInfo = RichMessaging.getInstance().getMessageInfo(imdn.getMsgId());
-				if (msgInfo == null) {
-					return;
-				}
-				switch (msgInfo.getType()) {
-				case EventsLogApi.TYPE_OUTGOING_GROUP_CHAT_MESSAGE:
-				case EventsLogApi.TYPE_OUTGOING_GROUP_GEOLOC:
-					// Do not handle Message Delivery Status in Albatros for group chat and geo-localization
-					if (RcsSettingsData.VALUE_GSMA_REL_ALBATROS.equals("" + RcsSettings.getInstance().getGsmaRelease())) {
-						break;
-					}
-					// Notify listeners
-					handleMessageDeliveryStatus(imdn.getMsgId(), imdn.getStatus(), contact);
-					break;
-				case EventsLogApi.TYPE_OUTGOING_CHAT_MESSAGE:
-				case EventsLogApi.TYPE_OUTGOING_GEOLOC:
-					// Notify listeners
-					handleMessageDeliveryStatus(imdn.getMsgId(), imdn.getStatus(), contact);
-					break;
-				case EventsLogApi.TYPE_OUTGOING_FILE_TRANSFER:
-					// Notify the file delivery
-					((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(msgInfo.getSessionId(), imdn.getStatus(), contact);
-					break;
-				}*/
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {

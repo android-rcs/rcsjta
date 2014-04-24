@@ -378,24 +378,19 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
     public void receiveMessageDeliveryStatus(String contact, String xml) {
     	try {
 	    	// Parse the IMDN document
-    		ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-			/* TODO FUSION is it equivalent ? */
-			 if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
+			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
+			if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
 				// Check message in RichMessagingHistory
 				String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
 				if (ftSessionId != null) {
 					// Notify the file delivery
 					((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, imdn.getStatus(), contact);
 				} else {
-					// Do not handle Message Delivery Status in Albatros for group chat and geo-localization
-					if (RcsSettingsData.VALUE_GSMA_REL_ALBATROS.equals("" + RcsSettings.getInstance().getGsmaRelease())) {
-						// TODO
-					}
 					// Notify the message delivery outside of the chat session
-					getImsService().getImsModule().getCore().getListener().handleMessageDeliveryStatus(contact, imdn.getMsgId(), imdn.getStatus());
+					getImsService().getImsModule().getCore().getListener()
+							.handleMessageDeliveryStatus(contact, imdn.getMsgId(), imdn.getStatus());
 				}
-			} 
-			 
+			}			 
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't parse IMDN document", e);

@@ -21,7 +21,6 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -150,10 +149,9 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via a new chat session");
                 }
-
+            	FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false);
                 // Initiate a new chat session to send file transfer info in the first message, session does not need to be retrieved since it is not used
                 try {
-                	FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false);
 					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), firstMsg);
 				} catch (CoreException e) {
 					if (logger.isActivated()) {
@@ -163,17 +161,16 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
 					return;
 				}
-                setChatSessionID(chatSession.getSessionID());
-                setContributionID(chatSession.getContributionID());
-                RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), chatSession.getFirstMessage().getMessageId());
-
-                // Update rich messaging history
-                // TODO: should be done in API server part
-                //RichMessagingHistory.getInstance().addFileTransfer(getRemoteContact(), getSessionID(), FileTransfer.Direction.OUTGOING, getContent());
-    			
-    			// Add session in the list
-				ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);
-				ChatServiceImpl.addChatSession(getRemoteContact(), sessionApi); // TODO: method is normally protected, use a callback event instead to separate layers
+                String msgId = firstMsg.getMessageId();
+				setChatSessionID(chatSession.getSessionID());
+				setContributionID(chatSession.getContributionID());
+				RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
+				RichMessagingHistory.getInstance().updateMessageFileTansferId(msgId, getSessionID());
+   			
+                chatSession.startSession();
+                // Add session in the list
+				//ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);
+				//ChatServiceImpl.addChatSession(getRemoteContact(), sessionApi); // TODO: method is normally protected, use a callback event instead to separate layers
                 // TODO : Check session response ?
 			}
 

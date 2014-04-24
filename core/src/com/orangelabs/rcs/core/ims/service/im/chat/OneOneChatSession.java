@@ -229,38 +229,6 @@ public abstract class OneOneChatSession extends ChatSession {
 		String msgId = IdGenerator.generateMessageID();
 		sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE, MsrpSession.TypeMsrpChunk.IsComposing);
 	}
-	
-//	/**
-//	 * Add a participant to the session
-//	 * 
-//	 * @param participant Participant
-//	 */
-//	public void addParticipant(String participant) {
-//		ArrayList<String> participants = new ArrayList<String>();
-//		participants.add(participant);
-//		addParticipants(participants);
-//	}
-//
-//	/**
-//	 * Add a list of participants to the session
-//	 * 
-//	 * @param participants List of participants
-//	 */
-//	public void addParticipants(List<String> participants) {
-//		// Build the list of participants
-//    	String existingParticipant = getParticipants().getList().get(0);
-//    	participants.add(existingParticipant);
-//		// TODO FUSION review no more class ExtendOneOneChatSession
-////		// Create a new session
-//		ExtendOneOneChatSession session = new ExtendOneOneChatSession(
-//			getImsService(),
-//			ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-//			this,
-//			new ListOfParticipant(participants));
-//		
-////		// Start the session
-////		session.startSession();
-//	}
 
 	/**
 	 * Reject the session invitation

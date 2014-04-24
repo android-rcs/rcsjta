@@ -88,7 +88,7 @@ public class FtHttpResumeManager {
 				// status before device switch off.
 				for (FtHttpResume ftHttpResume : listFile2resume) {
 					RichMessagingHistory.getInstance().updateFileTransferStatus(ftHttpResume.getSessionId(),
-							FileTransfer.State.PAUSED, null);
+							FileTransfer.State.PAUSED);
 				}
 				listOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);
 				processNext();

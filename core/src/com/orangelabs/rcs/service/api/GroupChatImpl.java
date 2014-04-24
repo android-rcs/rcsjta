@@ -2,7 +2,6 @@ package com.orangelabs.rcs.service.api;
 
 import java.util.List;
 
-import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 

@@ -2,6 +2,7 @@ package com.orangelabs.rcs.provider.messaging;
 
 import android.net.Uri;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.ft.FileTransferLog;
 
 /**
@@ -83,5 +84,10 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;	
+	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
+
+	/**
+	 * Column name KEY_MSG_ID : the reference to the Chat message
+	 */
+	public static final String KEY_MSG_ID =  FileTransferLog.MESSAGE_ID;	
 }
