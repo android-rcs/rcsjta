@@ -36,6 +36,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -116,6 +117,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		if (fileTransferInfo.getFileThumbnail() != null) {
 			setThumbnail(downloadManager.downloadThumbnail(fileTransferInfo.getFileThumbnail()));
 		}
+		
+		RichMessagingHistory.getInstance().updateMessageFileTansferId(msgId, getSessionID());
 	}
 
 	/**
@@ -215,6 +218,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 handleError(error);
                 return;
             }
+            
+            // TODO FUSION is it the appropriate place to update db ?
+            RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), getChatSessionID(), msgId);
             
 			// Notify listeners
 			for (int j = 0; j < getListeners().size(); j++) {

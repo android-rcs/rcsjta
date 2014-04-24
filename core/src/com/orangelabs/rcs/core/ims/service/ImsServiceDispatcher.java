@@ -24,7 +24,7 @@ import javax2.sip.address.SipURI;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.message.Request;
-
+import javax2.sip.message.Response;
 import android.content.Intent;
 
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -245,7 +245,7 @@ public class ImsServiceDispatcher extends Thread {
 				if (logger.isActivated()) {
 					logger.debug("No SDP found: automatically reject");
 				}
-				sendFinalResponse(request, 606);
+				sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
 				return;
 			}
 			sdp = sdp.toLowerCase();
@@ -266,7 +266,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("Image share service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 	    		}
 	    	} else
 	    	if (isTagPresent(sdp, "msrp") &&
@@ -283,7 +283,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("File transfer service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 	    		}
 	    	} else
 	    	if (isTagPresent(sdp, "msrp") &&
@@ -294,7 +294,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("IM service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 					return;
 	    		}
 	    		
@@ -319,7 +319,7 @@ public class ImsServiceDispatcher extends Thread {
                         if (logger.isActivated()) {
                             logger.debug("Malformed xml for FToHTTP: automatically reject");
                         }
-                        sendFinalResponse(request, 606);
+                        sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
                     }
                 } else {
 	    			if (SipUtils.getAssertedIdentity(request).contains(StoreAndForwardManager.SERVICE_URI) &&
@@ -365,7 +365,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("Video share service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 	    		}
 	    	} else
 		    if (isTagPresent(sdp, "msrp") &&
@@ -382,7 +382,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("Geoloc share service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 	    		}		
 		    } else 
 			if (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
@@ -398,7 +398,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("IP Voice call service not supported: automatically reject");
 					}
-					sendFinalResponse(request, 603);
+					sendFinalResponse(request, Response.DECLINE);
 	    		}	    	
 	    	} else 
 	    	if (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
@@ -415,7 +415,7 @@ public class ImsServiceDispatcher extends Thread {
 						if (logger.isActivated()) {
 							logger.debug("IP video call service not supported: automatically reject");
 						}
-						sendFinalResponse(request, 603);
+						sendFinalResponse(request, Response.DECLINE);
 		    		}	    		    		
     		} else {
     			Intent intent = intentMgr.isSipRequestResolved(request);
@@ -430,7 +430,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("Unknown IMS service: automatically reject");
 					}
-					sendFinalResponse(request, 606);
+					sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
 		    	}
     		}
 		} else
@@ -456,7 +456,7 @@ public class ImsServiceDispatcher extends Thread {
 					if (logger.isActivated()) {
 						logger.debug("Unknown IMS service: automatically reject");
 					}
-					sendFinalResponse(request, 606);
+					sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
 		    	}
 	    	}
 		} else

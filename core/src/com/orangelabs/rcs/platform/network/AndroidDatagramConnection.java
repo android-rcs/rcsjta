@@ -111,7 +111,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
             System.arraycopy(packet.getData(), 0, data, 0, packetLength);
 			return data;
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 
@@ -133,7 +133,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 			DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
 			connection.send(packet);
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -147,7 +147,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 		if ((connection != null) && (connection.getLocalAddress() != null)) {
 			return connection.getLocalAddress().getHostAddress();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 
@@ -161,7 +161,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 		if (connection != null) {
 			return connection.getLocalPort();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 }

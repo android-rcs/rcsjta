@@ -377,7 +377,10 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
 		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
+		if (msg instanceof FileTransferMessage)
+			values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
+		else
+			values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		
 		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
@@ -387,6 +390,9 @@ public class RichMessagingHistory {
 					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			blob = serializeGeoloc(geolocApi);
+		}  else if (msg instanceof FileTransferMessage) {
+			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+			blob = serializePlainText(((FileTransferMessage)msg).getFileInfo()); 
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
 			blob = serializePlainText(msg.getTextMessage()); 

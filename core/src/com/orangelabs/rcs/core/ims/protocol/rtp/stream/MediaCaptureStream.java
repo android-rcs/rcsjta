@@ -76,7 +76,7 @@ public class MediaCaptureStream implements ProcessorInputStream {
     	try {
 	    	player.open();
 			if (logger.isActivated()) {
-				logger.debug("Media capture stream openned");
+				logger.debug("Media capture stream opened");
 			}
     	} catch(Exception e) {
 			if (logger.isActivated()) {

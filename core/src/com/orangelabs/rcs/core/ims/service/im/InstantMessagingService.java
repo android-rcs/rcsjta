@@ -986,6 +986,9 @@ public class InstantMessagingService extends ImsService {
             return;
         }
 
+		// Save the first message
+		RichMessagingHistory.getInstance().addChatMessage(ChatUtils.getFirstMessage(invite), ChatLog.Message.Direction.INCOMING);
+
         // Create and start a chat session
         TerminatingOne2OneChatSession one2oneChatSession = new TerminatingOne2OneChatSession(this, invite);
         one2oneChatSession.startSession();

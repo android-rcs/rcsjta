@@ -111,7 +111,7 @@ public abstract class MsrpConnection {
 		sender.start();
 
 		if (logger.isActivated()) {
-			logger.debug("Connection has been openned");
+			logger.debug("Connection has been opened");
 		}
 	}
 	
@@ -141,7 +141,7 @@ public abstract class MsrpConnection {
 		sender.start();
 
 		if (logger.isActivated()) {
-			logger.debug("Connection has been openned");
+			logger.debug("Connection has been opened");
 		}
 	}
 

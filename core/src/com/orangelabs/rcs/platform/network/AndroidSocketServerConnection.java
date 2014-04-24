@@ -83,7 +83,7 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
 			Socket socket = acceptSocket.accept();		
 			return new AndroidSocketConnection(socket);
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 }

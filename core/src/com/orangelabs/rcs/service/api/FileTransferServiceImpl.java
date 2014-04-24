@@ -254,14 +254,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
 		// Display invitation
-/* TODO	FUSION	receiveFileTransferInvitation(session, chatSession.isGroupChat());
+		receiveFileTransferInvitation(session, chatSession.isGroupChat());
 		
 		// Update rich messaging history
-		RichMessaging.getInstance().addIncomingChatSessionByFtHttp(chatSession);
-		
+		RichMessagingHistory.getInstance().updateFileTransferChatId(session.getSessionID(), chatSession.getContributionID(),
+				chatSession.getFirstMessage().getMessageId());
+
 		// Add session in the list
-		ImSession sessionApi = new ImSession(chatSession);
-		MessagingApiService.addChatSession(sessionApi); */
+		FileTransferImpl sessionApi = new FileTransferImpl(session);
+		addFileTransferSession(sessionApi);
 	}    
 	
     /**

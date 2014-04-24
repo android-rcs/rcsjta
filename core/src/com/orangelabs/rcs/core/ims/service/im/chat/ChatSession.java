@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -813,6 +814,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			// TODO : reject (SIP MESSAGE ?)
 			return;
 		}
+		
+		// Update rich messaging history
+		// TODO FUSION imdn + display name ?
+		FileTransferMessage msg = new FileTransferMessage(msgId, contact, fileTransferInfo.getFilename(), false, null);
+		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg, ChatLog.Message.Direction.INCOMING);
 
 		// Create a new session
 		FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId, contact);
