@@ -424,6 +424,42 @@ public class RichMessagingHistory {
 	}
 	
 	/**
+	 * Insert a chat message for an outgoing file transfer to Group Chat
+	 * 
+	 * @param msg
+	 *            the chat message
+	 * @param chatId
+	 *            the Identity of the Group Chat
+	 * @param ftId
+	 *            the identity of the File Transfer
+	 */
+	public void addGroupChatMsgOutgoingFileTransfer(FileTransferMessage msg, String chatId, String ftId) {
+		if (logger.isActivated()) {
+			logger.debug("Add group chat message: ftId=" + ftId + ", msgId=" + msg.getMessageId() + ", chatId=" + chatId);
+		}
+
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_FT_ID, ftId);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.OUTGOING);
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
+
+		values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+		byte[] blob = serializePlainText(((FileTransferMessage) msg).getFileInfo());
+
+		values.put(MessageData.KEY_CONTENT, blob);
+
+		// Send message
+		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+		values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
+		values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
+		values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		cr.insert(msgDatabaseUri, values);
+	}
+	
+	/**
 	 * Add group chat system message
 	 * 
 	 * @param chatId Chat ID
@@ -581,6 +617,39 @@ public class RichMessagingHistory {
 		cr.insert(ftDatabaseUri, values);
 	}
 
+	/**
+	 * Add an outgoing File Transfer supported by Group Chat
+	 * 
+	 * @param chatSessionId
+	 *            the identity of the group chat
+	 * @param ftID
+	 *            the identity of the file transfer
+	 * @param content
+	 *            the File content
+	 */
+	public void addOutgoingGroupFileTransfer(String chatId, String ftId, MmContent content) {
+		if (logger.isActivated()) {
+			logger.debug("addOutgoingGroupFileTransfer: ftId=" + ftId + ", chatId=" + chatId + " filename=" + content.getName()
+					+ ", size=" + content.getSize() + ", MIME=" + content.getEncoding());
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_SESSION_ID, ftId);
+		values.put(FileTransferData.KEY_CHAT_ID, chatId);
+		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
+		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.OUTGOING);
+		values.put(FileTransferData.KEY_SIZE, 0);
+		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
+		long date = Calendar.getInstance().getTimeInMillis();
+		// Send file
+		values.put(FileTransferData.KEY_TIMESTAMP, date);
+		values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
+		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
+		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
+		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
+		cr.insert(ftDatabaseUri, values);
+	}
+	
 	/**
 	 * Update file transfer status
 	 * 

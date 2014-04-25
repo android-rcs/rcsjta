@@ -14,6 +14,9 @@ import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
@@ -27,6 +30,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.platform.file.FileDescription;
+import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -314,11 +320,48 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @param fileicon Filename of the file icon associated to the file to be transfered
      * @param listener File transfer event listener
      * @return File transfer
+     * @throws ServerApiException 
      */
-    public IFileTransfer sendFile(String filename, String fileicon, IFileTransferListener listener) {
-    	// TODO
-    	return null;
-    }
+	public IFileTransfer sendFile(String filename, String fileicon, IFileTransferListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("sendFile (filename=" + filename + ") (fileicon=" + fileicon + ")");
+		}
+		try {
+			// Initiate the session
+			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
+			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
+
+			String chatSessionId = session.getSessionID();
+			String chatId = session.getContributionID();
+			final FileSharingSession fileSharingsession = Core.getInstance().getImService()
+					.initiateGroupFileTransferSession(getParticipants(), content, fileicon, chatSessionId, chatId);
+
+			// Add session listener
+			FileTransferImpl sessionApi = new FileTransferImpl(fileSharingsession);
+			sessionApi.addEventListener(listener);
+
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().addOutgoingGroupFileTransfer(chatSessionId, fileSharingsession.getSessionID(),
+					fileSharingsession.getContent());
+
+			// Start the session
+			new Thread() {
+				public void run() {
+					// Start the session
+					fileSharingsession.startSession();
+				}
+			}.start();
+
+			// Add session in the list
+			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			return sessionApi;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e.getMessage());
+		}
+	}
 
     /**
 	 * Sends a “is-composing” event. The status is set to true when typing

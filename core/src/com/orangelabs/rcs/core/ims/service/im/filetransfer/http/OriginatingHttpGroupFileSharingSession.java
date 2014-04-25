@@ -19,6 +19,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -27,6 +28,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -150,8 +152,14 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
         
         // Send content
-        chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
-        RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
+		chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
+		// Insert chat message into database
+		FileTransferMessage msg = new FileTransferMessage(msgId, null, fileInfo, false, null);
+		RichMessagingHistory.getInstance()
+				.addGroupChatMsgOutgoingFileTransfer(msg, chatSession.getContributionID(), getSessionID());
+
+		// Update File Transfer raw with chat message ID
+		RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
     }
     
     

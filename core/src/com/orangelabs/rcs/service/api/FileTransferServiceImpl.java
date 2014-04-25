@@ -106,7 +106,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * 
 	 * @param session File transfer session
 	 */
-	protected static void addFileTransferSession(FileTransferImpl session) {
+	public static void addFileTransferSession(FileTransferImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a file transfer session in the list (size=" + ftSessions.size() + ")");
 		}
