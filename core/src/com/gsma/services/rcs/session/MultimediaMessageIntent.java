@@ -28,7 +28,7 @@ public class MultimediaMessageIntent {
      * Broadcast action: a new multimedia message has been received.
      * <p>Intent includes the following extras:
      * <ul>
-     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the contact
+     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
      *  sending the message.
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the message (extracted from the SIP address).
@@ -47,7 +47,7 @@ public class MultimediaMessageIntent {
 	/**
 	 * Display name of the contact sending the message
 	 */
-	public final static String EXTRA_DISPLAY_NAME = "contactDisplayname";
+	public final static String EXTRA_DISPLAY_NAME = "displayname";
 
 	/**
 	 * Multimedia message content

@@ -22,7 +22,6 @@ import java.util.Date;
 import android.content.ContentResolver;
 import android.net.Uri;
 
-import com.orangelabs.rcs.provider.base.AbstractContentValues;
 
 /**
  * Content values wrapper for the {@code fthttp} table.

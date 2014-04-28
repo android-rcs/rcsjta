@@ -155,6 +155,7 @@
 		<provider android:authorities="com.orangelabs.rcs.fthttp"
 			android:exported="true"
 			android:name="com.orangelabs.rcs.provider.fthttp.FtHttpProvider"/>
+		
 		<!-- Device events receiver -->	
 
 		<receiver android:name="com.orangelabs.rcs.service.DeviceBoot">

@@ -21,7 +21,6 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 
-import com.orangelabs.rcs.provider.base.AbstractSelection;
 
 /**
  * Selection for the {@code fthttp} table.
