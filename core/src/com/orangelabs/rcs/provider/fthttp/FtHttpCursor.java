@@ -21,7 +21,6 @@ import java.util.Date;
 
 import android.database.Cursor;
 
-import com.orangelabs.rcs.provider.base.AbstractCursor;
 
 /**
  * Cursor wrapper for the {@code fthttp} table.

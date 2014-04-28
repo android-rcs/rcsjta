@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.provider.base;
+package com.orangelabs.rcs.provider.fthttp;
 
 import java.util.ArrayList;
 import java.util.Date;
