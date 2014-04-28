@@ -842,59 +842,33 @@ public class RcsSettingsData {
      */
     public static final int VALUE_GSMA_REL_BLACKBIRD = 1;
     
-    /**
-     * Authorization for user to use best effort IP Voice Call service /depending on network 
+	/**
+     * IP voice call breakout capabilities in RCS-AA mode
      */
-	public static final String BE_IPVOICECALL_AUTH = "beIPVoiceCallAuth";
+	public static final String IPVOICECALL_BREAKOUT_AA ="IPCallBreakOutAA";
 	
 	/**
-     * Authorization for user to use best effort IP Video Call service /depending on network 
+     * IP voice call breakout capabilities in RCS-CS mode
      */
-	public static final String BE_IPVIDEOCALL_AUTH = "beIPVideoCallAuth";
+	public static final String IPVOICECALL_BREAKOUT_CS ="IPCallBreakOutCS";
 	
 	/**
-     *  Authorization for device in RCS-AA mode to initiate IP Voice Call even if remote doesn't show its voice service capabilities
+     * CS call upgrade to IP Video Call in RCS-CS mode
      */
-	public static final String IPVOICECALL_BREAKOUT ="beIPCallBreakOut";
-	
-	/**
-     *  Authorization for device in RCS-CS mode to initiate IP Voice Call even if remote doesn't show its voice service capabilities
-     */
-	public static final String IPVOICECALL_BREAKOUT_CS ="beIPCallBreakOutCS";
-	
-	/**
-     *  Authorization for device in RCS-CS mode to upgrade to video a CS call
-     */
-	public static final String IPVIDEOCALL_UPGRADE_FROM_CS="beIPVideoCallUpgradeFromCS";
+	public static final String IPVIDEOCALL_UPGRADE_FROM_CS = "rcsIPVideoCallUpgradeFromCS";
 	
 	/** 
-     *  Authorization for device in RCS-AA or RCS-CS mode to upgrade to video even if no answer to capability request (fails with 480 or 408 error)
+     * CS call upgrade to IP Video Call in case of capability error
      */
-	public static final String IPVIDEOCALL_UPGRADE_ON_CAPERROR = "beIPVideoCallUpgradeOnCapError";
+	public static final String IPVIDEOCALL_UPGRADE_ON_CAPERROR = "rcsIPVideoCallUpgradeOnCapError";
 	
 	/**
-     *  Authorization for device in RCS-CS mode to upgrade to video without first tearing down CS call
+     * Leaf node that tells an RCS-CS device whether it can initiate an RCS IP Video Call upgrade without first tearing down the CS voice call
      */
-	public static final String IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = "beIPVideoCallUpgradeAttemptEarly";
+	public static final String IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = "rcsIPVideoCallUpgradeAttemptEarly";
 	
 	/**
-     *  label to be used when presenting to user the option for initiating an end-to-end ip call 
+     * TCP fallback option
      */
-	public static final String IPCALL_E2E_LABEL = "e2eIPCallLabel";
-	
-	/**
-     *  label to be used when presenting to user the option for initiating a breakout ip call 
-     */
-	public static final String IPCALL_BREAKOUT_LABEL = "breakoutIPCallLabel";
-	
-	/**
-     *  parameter to control whether "end-to-end ip call" button is presented to user (case false) or breakout button (case true)
-     */
-	public static final String IPCALL_E2E_VOICECAPABILITYHANDLING = "e2eVoiceCapabilityHandling";
-	
-	/**
-     * Key to enable TCP fallback according to RFC3261 chapter 18.1.1
-    */
-    public static final String KEY_TCP_FALLBACK = "TcpFallback";
-
+    public static final String TCP_FALLBACK = "TcpFallback";
 }

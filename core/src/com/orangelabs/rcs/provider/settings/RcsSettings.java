@@ -2736,21 +2736,6 @@ public class RcsSettings {
 	}
 	
 	/**
-     * Get beIPVoiceCallAuth provisioning parameter (authorized networks for ip voice call feature)
-     *
-     * @return int value
-     */
-	public int getIPVoiceCall_Auth() {
-		int result = 15;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.BE_IPVOICECALL_AUTH));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-
-	/**
 	 * Get the GSMA release
 	 * 
 	 * @return the GSMA release
@@ -2796,35 +2781,20 @@ public class RcsSettings {
 	}		
 	
 	/**
-     * Get beIPVideoCallAuth provisioning parameter (authorized networks for ip video call feature)
-     *
-     * @return int value
-     */
-	public int getIPVideoCall_Auth() {
-		int result = 15;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.BE_IPVIDEOCALL_AUTH));
-			} catch(Exception e) {}
-		}
-		return result;
-	}
-	
-	/**
-     * Is device in RCS-AA mode authorized to initiate IP Voice Call even if remote doesn't show its voice service capabilities?
+     * Is IP voice call breakout supported in RCS-AA mode
      *
      * @return Boolean
      */
-	public boolean isIPVoiceCallBreakout() {
+	public boolean isIPVoiceCallBreakoutAA() {
 		boolean result = false;
 		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT));
+			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_AA));
 		}
 		return result;
 	}
 	
 	/**
-     * is device in RCS-CS mode authorized to initiate IP Voice Call even if remote doesn't show its voice service capabilities?
+     * Is IP voice call breakout supported in RCS-CS mode
      *
      * @return Boolean
      */
@@ -2837,7 +2807,7 @@ public class RcsSettings {
 	}
 	
 	/**
-     * is device in RCS-CS mode authorized to upgrade to video a CS call?
+     * Is IP Video Call upgrade without first tearing down the CS voice call authorized
      *
      * @return Boolean
      */
@@ -2851,7 +2821,7 @@ public class RcsSettings {
 	
 	
 	/**
-     * Is device in RCS-AA or RCS-CS mode authorized to upgrade to video even if no answer to capability request (fails with 480 or 408 error)?
+     * Is IP Video Call upgrade on capability error
      *
      * @return Boolean
      */
@@ -2876,45 +2846,6 @@ public class RcsSettings {
 		return result;
 	}
 	
-	/**
-     * get label to use when presenting to user the option for sending end-to-end ip call
-     *
-     * @return Boolean
-     */
-	public String getIPCallE2ELabel() {
-		String result = "";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.IPCALL_E2E_LABEL);
-        }
-        return result;
-	}
-
-	/**
-     * get label to be use when presenting to user the option for initiating a breakout ip call
-     *
-     * @return Boolean
-     */
-	public String getIPCallBreakoutLabel() {
-		String result = "";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.IPCALL_BREAKOUT_LABEL);
-        }
-        return result;          
-	}
-	
-	/**
-     * Is "E2E" button (case false) or "Breakout" button (case true) presented to user ?
-     *
-     * @return Boolean
-     */
-	public boolean isIPCallE2EVoiceCapabilityHandling() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPCALL_E2E_VOICECAPABILITYHANDLING));
-		}
-		return result;
-	}
-	
     /**
      * Is TCP fallback enabled according to RFC3261 chapter 18.1.1
      * 
@@ -2923,9 +2854,8 @@ public class RcsSettings {
     public boolean isTcpFallback() {
         boolean result = false;
         if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.KEY_TCP_FALLBACK));
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.TCP_FALLBACK));
         }
         return result;
     }
-
 }

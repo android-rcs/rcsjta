@@ -329,25 +329,16 @@ public class ProvisioningParser {
             do {
                 if (appId == null) {
                     if ((appId = getValueByParamName("AppID", childnode, TYPE_TXT)) != null) {
-                        if (logger.isActivated()) {
-                            logger.debug("App ID: " + appId);
-                        }
                         continue;
                     }
                 }
                 if (name == null) {
                     if ((name = getValueByParamName("Name", childnode, TYPE_TXT)) != null) {
-                        if (logger.isActivated()) {
-                            logger.debug("App name: " + name);
-                        }
                         continue;
                     }
                 }
                 if (appRef == null) {
                     if ((appRef = getValueByParamName("AppRef", childnode, TYPE_TXT)) != null) {
-                        if (logger.isActivated()) {
-                            logger.debug("App ref: " + appRef);
-                        }
                         continue;
                     }
                 }
@@ -414,10 +405,6 @@ public class ProvisioningParser {
                     if (childnode.getAttributes().getLength() > 0) {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
-                            if (logger.isActivated()) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
-                                        + typenode.getNodeValue());
-                            }
                             if (typenode.getNodeValue().equalsIgnoreCase("FAVLINK")) {
                                 parseFavoriteLink(childnode);
                             } else
@@ -510,8 +497,8 @@ public class ProvisioningParser {
         String geolocPushAuth = null;
         String vsAuth = null;
         String isAuth = null;
-        String beIPVoiceCallAuth = null;
-        String beIPVideoCallAuth = null;
+        String rcsIPVoiceCallAuth = null;
+        String rcsIPVideoCallAuth = null;
         if (node == null) {
             return;
         }
@@ -615,46 +602,30 @@ public class ProvisioningParser {
                     }
                 }
                 
-                if (beIPVoiceCallAuth == null) {
-                    if ((beIPVoiceCallAuth = getValueByParamName("beIPVoiceCallAuth", childnode, TYPE_INT)) != null) {
-                    	if (logger.isActivated()) {
-                            logger.debug("node name = beIPVoiceCallAuth");                   
-                        }
-                    	int value =Integer.decode(beIPVoiceCallAuth);
+                if (rcsIPVoiceCallAuth == null) {
+                    if ((rcsIPVoiceCallAuth = getValueByParamName("rcsIPVoiceCallAuth", childnode, TYPE_INT)) != null) {
+                    	int value =Integer.decode(rcsIPVoiceCallAuth);
                         if ((value % 16) == 0){
                         	RcsSettings.getInstance().writeParameter(
                                   RcsSettingsData.CAPABILITY_IP_VOICE_CALL, RcsSettingsData.FALSE);
-                        }
-                        else {
+                        } else {
                         	RcsSettings.getInstance().writeParameter(
                                     RcsSettingsData.CAPABILITY_IP_VOICE_CALL, RcsSettingsData.TRUE);
                         }
-
-                        RcsSettings.getInstance().writeParameter(
-                                RcsSettingsData.BE_IPVOICECALL_AUTH, String.valueOf(value));
-                        
                         continue;
                     }
                 }
                 
-                if (beIPVideoCallAuth == null) {
-                    if ((beIPVideoCallAuth = getValueByParamName("beIPVideoCallAuth", childnode, TYPE_INT)) != null) {
-                    	if (logger.isActivated()) {
-                            logger.debug("node name = beIPVideoCallAuth");                   
-                        }
-                        int value =Integer.decode(beIPVoiceCallAuth);
+                if (rcsIPVideoCallAuth == null) {
+                    if ((rcsIPVideoCallAuth = getValueByParamName("rcsIPVideoCallAuth", childnode, TYPE_INT)) != null) {
+                        int value =Integer.decode(rcsIPVoiceCallAuth);
                         if ((value % 16) == 0){
                         	RcsSettings.getInstance().writeParameter(
                                   RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, RcsSettingsData.FALSE);
-                        }
-                        else {
+                        } else {
                         	RcsSettings.getInstance().writeParameter(
                                     RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, RcsSettingsData.TRUE);
                         }
-                        
-                      RcsSettings.getInstance().writeParameter(
-                      RcsSettingsData.BE_IPVIDEOCALL_AUTH, String.valueOf(value));
-                        
                         continue;
                     }
                 }
@@ -823,9 +794,6 @@ public class ProvisioningParser {
      */
     private void parseUx(Node node) {
         String messagingUX = null;
-        String e2eIPCallLabel = null;
-        String breakoutIPCallLabel = null;
-        String e2eVoiceCapabilityHandling = null;
         
         if (node == null) {
             return;
@@ -846,33 +814,6 @@ public class ProvisioningParser {
                         }
                         continue;
                     }
-                }
-                
-                if (e2eIPCallLabel == null) {
-                    if ((e2eIPCallLabel = getValueByParamName("e2eIPCallLabel", childnode, TYPE_TXT)) != null) {                       
-                        RcsSettings.getInstance().writeParameter(
-                        		RcsSettingsData.IPCALL_E2E_LABEL, e2eIPCallLabel);
-                        continue;
-                    }
-                }
-                
-                if (breakoutIPCallLabel == null) {
-                    if ((breakoutIPCallLabel = getValueByParamName("breakoutIPCallLabel", childnode, TYPE_TXT)) != null) {                       
-                        RcsSettings.getInstance().writeParameter(
-                        		RcsSettingsData.IPCALL_BREAKOUT_LABEL, breakoutIPCallLabel);
-                        continue;
-                    }
-                }
-                
-                if ((e2eVoiceCapabilityHandling = getValueByParamName(")", childnode, TYPE_INT)) != null) {
-                	if (e2eVoiceCapabilityHandling.equals("0")) {
-                    	RcsSettings.getInstance().writeParameter(
-                            RcsSettingsData.IPCALL_E2E_VOICECAPABILITYHANDLING, RcsSettingsData.FALSE);
-                    } else {
-                        RcsSettings.getInstance().writeParameter(
-                    		RcsSettingsData.IPCALL_E2E_VOICECAPABILITYHANDLING, RcsSettingsData.TRUE);
-                    }
-                    continue;
                 }
 
             } while((childnode = childnode.getNextSibling()) != null);
@@ -1346,10 +1287,10 @@ public class ProvisioningParser {
     private void parseOther(Node node) {
         String endUserConfReqId = null;
         String deviceID = null;
-        String beIPCallBreakOut = null;
-        String beIPCallBreakOutCS = null;
-        String beIPVideoCallUpgradeFromCS = null;
-        String beIPVideoCallUpgradeOnCapError = null;
+        String aaIPCallBreakOut = null;
+        String csIPCallBreakOut = null;
+        String rcsIPVideoCallUpgradeFromCS = null;
+        String rcsIPVideoCallUpgradeOnCapError = null;
         String beIPVideoCallUpgradeAttemptEarly = null;
         
         Node typenode = null;
@@ -1364,10 +1305,6 @@ public class ProvisioningParser {
                     if (childnode.getAttributes().getLength() > 0) {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
-                            if (logger.isActivated()) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
-                                        + typenode.getNodeValue());
-                            }
                             if (typenode.getNodeValue().equalsIgnoreCase("transportProto")) {
                                 parseTransportProtocol(childnode);
                             }
@@ -1394,20 +1331,20 @@ public class ProvisioningParser {
                     }
                 }
                 
-                if (beIPCallBreakOut == null) {
-                    if ((beIPCallBreakOut = getValueByParamName("beIPCallBreakOut", childnode, TYPE_INT)) != null) {
-                    	if (beIPCallBreakOut.equals("1")) {
-                            RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT, RcsSettingsData.TRUE);
+                if (aaIPCallBreakOut == null) {
+                    if ((aaIPCallBreakOut = getValueByParamName("IPCallBreakOut", childnode, TYPE_INT)) != null) {
+                    	if (aaIPCallBreakOut.equals("1")) {
+                            RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_AA, RcsSettingsData.TRUE);
                     	} else {
-                            RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT, RcsSettingsData.FALSE);
+                            RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_AA, RcsSettingsData.FALSE);
                     	}
                         continue;
                     }
                 }
                 
-                if (beIPCallBreakOutCS == null) {
-                    if ((beIPCallBreakOutCS = getValueByParamName("beIPCallBreakOutCS", childnode, TYPE_INT)) != null) {
-                    	if (beIPCallBreakOutCS.equals("1")) {
+                if (csIPCallBreakOut == null) {
+                    if ((csIPCallBreakOut = getValueByParamName("IPCallBreakOutCS", childnode, TYPE_INT)) != null) {
+                    	if (csIPCallBreakOut.equals("1")) {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_CS, RcsSettingsData.TRUE);
                     	} else {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_CS, RcsSettingsData.FALSE);
@@ -1416,9 +1353,9 @@ public class ProvisioningParser {
                     }
                 }
                 
-                if (beIPVideoCallUpgradeFromCS == null) {
-                	if ((beIPVideoCallUpgradeFromCS = getValueByParamName("beIPVideoCallUpgradeFromCS", childnode, TYPE_INT)) != null) {
-                    	if (beIPVideoCallUpgradeFromCS.equals("1")) {
+                if (rcsIPVideoCallUpgradeFromCS == null) {
+                	if ((rcsIPVideoCallUpgradeFromCS = getValueByParamName("rcsIPVideoCallUpgradeFromCS", childnode, TYPE_INT)) != null) {
+                    	if (rcsIPVideoCallUpgradeFromCS.equals("1")) {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS, RcsSettingsData.TRUE);
                     	} else {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS, RcsSettingsData.FALSE);
@@ -1427,9 +1364,9 @@ public class ProvisioningParser {
                     }
                 }
                 
-                if (beIPVideoCallUpgradeOnCapError == null) {
-                	if ((beIPVideoCallUpgradeOnCapError = getValueByParamName("beIPVideoCallUpgradeOnCapError", childnode, TYPE_INT)) != null) {
-                    	if (beIPVideoCallUpgradeOnCapError.equals("1")) {
+                if (rcsIPVideoCallUpgradeOnCapError == null) {
+                	if ((rcsIPVideoCallUpgradeOnCapError = getValueByParamName("rcsIPVideoCallUpgradeOnCapError", childnode, TYPE_INT)) != null) {
+                    	if (rcsIPVideoCallUpgradeOnCapError.equals("1")) {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR, RcsSettingsData.TRUE);
                     	} else {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR, RcsSettingsData.FALSE);
@@ -1439,7 +1376,7 @@ public class ProvisioningParser {
                 }
                 
                 if (beIPVideoCallUpgradeAttemptEarly == null) {
-                	if ((beIPVideoCallUpgradeAttemptEarly = getValueByParamName("beIPVideoCallUpgradeAttemptEarly", childnode, TYPE_INT)) != null) {
+                	if ((beIPVideoCallUpgradeAttemptEarly = getValueByParamName("rcsIPVideoCallUpgradeAttemptEarly", childnode, TYPE_INT)) != null) {
                     	if (beIPVideoCallUpgradeAttemptEarly.equals("1")) {
                             RcsSettings.getInstance().writeParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY, RcsSettingsData.TRUE);
                     	} else {
@@ -1620,10 +1557,6 @@ public class ProvisioningParser {
                     if (childnode.getAttributes().getLength() > 0) {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
-                            if (logger.isActivated()) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
-                                        + typenode.getNodeValue());
-                            }
                             if (typenode.getNodeValue().equalsIgnoreCase("SecondaryDevicePar")) {
                                 parseSecondaryDevicePar(childnode);
                             }
@@ -1803,10 +1736,6 @@ public class ProvisioningParser {
                     if (childnode.getAttributes().getLength() > 0) {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
-                            if (logger.isActivated()) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
-                                        + typenode.getNodeValue());
-                            }
                             if (typenode.getNodeValue().equalsIgnoreCase("IMS")) {
                                 parseIMS(childnode);
                             } else
@@ -1867,10 +1796,6 @@ public class ProvisioningParser {
                     if (childnode.getAttributes().getLength() > 0) {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
-                            if (logger.isActivated()) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
-                                        + typenode.getNodeValue());
-                            }
                             if (typenode.getNodeValue().equalsIgnoreCase("ConRefs")) {
                                 parseConRefs(childnode);
                             } else
@@ -1989,6 +1914,10 @@ public class ProvisioningParser {
         Node nameNode = null;
         Node valueNode = null;
         
+        if (logger.isActivated()) {
+            logger.debug("Get parameter " + paramName + ", node " + node);
+        }
+
         if ((node == null) ||
         		!(node.getNodeName().equals("parm") ||
         				node.getNodeName().equals("param"))) {
