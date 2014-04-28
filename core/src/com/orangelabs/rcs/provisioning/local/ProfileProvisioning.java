@@ -379,10 +379,12 @@ public class ProfileProvisioning extends Activity {
 		 *            the user phone number
 		 * @return true if loading the provisioning is successful
 		 */
-		private Boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
+		private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
 			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent);
+			
 			// Save GSMA release set into the provider
 			int gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+			
 			// Before parsing the provisioning, the GSMA release is set to Albatros
 			RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
 			if (parser.parse(gsmaRelease)) {
@@ -439,14 +441,10 @@ public class ProfileProvisioning extends Activity {
 		} catch (SecurityException e) {
 			// intentionally blank
 		}
-		if (files == null) {
+		if ((files == null) || (files.length == 0)) {
 			// No provisioning file
 			return new String[] { getString(R.string.label_no_xml_file) };
 		} else {
-			if (files.length == 0) {
-				// No provisioning file
-				return new String[] { getString(R.string.label_no_xml_file) };
-			}
 			return files;
 		}
 	}

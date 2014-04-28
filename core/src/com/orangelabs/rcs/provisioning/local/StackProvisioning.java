@@ -39,7 +39,6 @@ import android.widget.Toast;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
-import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Stack parameters provisioning File
