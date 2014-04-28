@@ -509,8 +509,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	            	} else
 	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 	            		listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-	            	} else
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
+	            	} else {
 	            		listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
 	            	}
 	            } catch(Exception e) {

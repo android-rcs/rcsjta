@@ -458,14 +458,75 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
 	}
-
+	
+	 /**
+     * Resume an outgoing HTTP file transfer
+     *
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     */
 	public void resumeOutgoingFileTransfer(FileSharingSession session, boolean isGroup) {
-		// TODO Auto-generated method stub
-		
+		if (logger.isActivated()) {
+			logger.info("Resume outgoing file transfer from " + session.getRemoteContact());
+		}
+//		// Extract number from contact
+//		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+//
+//		// Add session in the list
+//		FileTransferImpl sessionApi = new FileTransferImpl(session);
+//		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+//
+//		// Broadcast intent related to the received invitation
+//		Intent intent = new Intent(MessagingApiIntents.FILE_TRANSFER_OUTGOING_RESUMING);
+//		intent.putExtra("contact", number);
+//		intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
+//		intent.putExtra("sessionId", session.getSessionID());
+//		if (session instanceof HttpFileTransferSession) {
+//			intent.putExtra("isGroupTransfer", isGroup);
+//		}
+//		intent.putExtra("filename", session.getContent().getName());
+//		intent.putExtra("filesize", session.getContent().getSize());
+//		intent.putExtra("filetype", session.getContent().getEncoding());
+//		intent.putExtra("thumbnail", session.getThumbnail());
+//		AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	}
 
-	public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId) {
-		// TODO Auto-generated method stub
-		
-	}
+	
+	/**
+     * Resume an incoming HTTP file transfer
+     *
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     * @param chatSessionId corresponding chatSessionId
+     * @param chatId corresponding chatId
+     */
+    public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId) {
+        if (logger.isActivated()) {
+            logger.info("Resume incoming file transfer from " + session.getRemoteContact());
+        }
+//        // Extract number from contact 
+//        String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+//
+//		// Add session in the list
+//		FileTransferImpl sessionApi = new FileTransferImpl(session);
+//		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+//
+//        // Broadcast intent, we reuse the File transfer invitation intent
+//        Intent intent = new Intent(MessagingApiIntents.FILE_TRANSFER_INVITATION);
+//        intent.putExtra("contact", number);
+//        intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
+//        intent.putExtra("sessionId", session.getSessionID());
+//        intent.putExtra("chatSessionId", chatSessionId);
+//        if (isGroup) {
+//            intent.putExtra("chatId", chatId);
+//        }
+//        intent.putExtra("isGroupTransfer", isGroup);
+//        intent.putExtra("filename", session.getContent().getName());
+//        intent.putExtra("filesize", session.getContent().getSize());
+//        intent.putExtra("filetype", session.getContent().getEncoding());
+//        intent.putExtra("thumbnail", session.getThumbnail());
+//        intent.putExtra("autoAccept", true);
+//        AndroidFactory.getApplicationContext().sendBroadcast(intent);
+    }
+
 }

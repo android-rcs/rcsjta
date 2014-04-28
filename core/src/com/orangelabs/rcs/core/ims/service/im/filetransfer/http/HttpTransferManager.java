@@ -280,7 +280,7 @@ public abstract class HttpTransferManager {
      */
 	public void interrupt() {
     	if (logger.isActivated()) {
-    		logger.error("interrupting transfer");
+    		logger.warn("interrupting transfer");
     	}
 		isCancelled = true;
 	}
@@ -290,7 +290,7 @@ public abstract class HttpTransferManager {
      */
 	public void pauseTransfer() {
     	if (logger.isActivated()) {
-    		logger.error("Pausing transfer");
+    		logger.warn("Pausing transfer");
     	}
 		isPaused = true;
 		getListener().httpTransferPaused();

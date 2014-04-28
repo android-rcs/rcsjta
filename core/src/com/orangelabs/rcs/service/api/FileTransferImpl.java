@@ -267,19 +267,62 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     	t.start();
 	}
 
+    /**
+     * Is HTTP transfer
+     *
+     * @return Boolean
+     */
+    public boolean isHttpTransfer() {
+        return (session instanceof HttpFileTransferSession);
+    }
+    
 	/**
-	 * Pauses the file transfer
+	 * Pauses the file transfer (only for HTTP transfer)
 	 */
 	public void pauseTransfer() {
-		// TODO
+		if (logger.isActivated()) {
+			logger.info("Pause session");
+		}
+
+		if (isHttpTransfer()) {
+			((HttpFileTransferSession) session).pauseFileTransfer();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Pause available only for HTTP transfer");
+			}
+		}
 	}
-	
+
 	/**
-	 * Resumes the file transfer
+	 * Pause the session (only for HTTP transfer)
+	 */
+	public boolean isSessionPaused() {
+		if (isHttpTransfer()) {
+			return ((HttpFileTransferSession) session).isFileTransferPaused();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Pause available only for HTTP transfer");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Resume the session (only for HTTP transfer)
 	 */
 	public void resumeTransfer() {
-		// TODO
-	}	
+		if (logger.isActivated()) {
+			logger.info("Resuming session paused=" + isSessionPaused() + " http=" + isHttpTransfer());
+		}
+
+		if (isHttpTransfer() && isSessionPaused()) {
+			((HttpFileTransferSession) session).resumeFileTransfer();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Resuming can only be used on a paused HTTP transfer");
+			}
+		}
+	}
 	
 	/**
 	 * Adds a listener on file transfer events
@@ -468,10 +511,6 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 */
     public void handleTransferProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.debug("Sharing progress");
-			}
-			
 			// Update rich messaging history
 	  		RichMessagingHistory.getInstance().updateFileTransferProgress(session.getSessionID(), currentSize, totalSize);
 			
@@ -572,4 +611,5 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			listeners.finishBroadcast();
 		}
 	}
+
 }

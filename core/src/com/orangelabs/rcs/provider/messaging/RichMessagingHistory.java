@@ -682,9 +682,6 @@ public class RichMessagingHistory {
 	 * @param totalSize Total size to download 
 	 */
 	public void updateFileTransferProgress(String sessionId, long size, long totalSize) {
-		if (logger.isActivated()) {
-			logger.debug("Update file transfer progress");
-		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_SIZE, size);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
@@ -785,7 +782,7 @@ public class RichMessagingHistory {
     		return null;
     	}
     }
-    
+	
     /**
      * Is next group chat Invitation rejected
      * 
@@ -794,10 +791,9 @@ public class RichMessagingHistory {
      */
 	public boolean isGroupChatNextInviteRejected(String chatId) {
 		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
-				+ MessageData.KEY_TYPE + " = ? AND "//
 				+ ChatData.KEY_STATUS + " = ? AND "//
 				+ ChatData.KEY_REJECT_GC + " = 1";
-		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(chatDatabaseUri, null, selection, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");
@@ -820,16 +816,14 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
 		}
-		// TODO FUSION cannot mix chatData and messageData
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJECT_GC, "0");
 		// @formatter:off
 		String selection = ChatData.KEY_CHAT_ID + " = ? AND " 
-							+ MessageData.KEY_TYPE + " = ? AND "
 							+ ChatData.KEY_STATUS + " = ? AND "
 							+ ChatData.KEY_REJECT_GC + " = 1";
 		// @formatter:on
-		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
 		cr.update(chatDatabaseUri, values, selection, selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
