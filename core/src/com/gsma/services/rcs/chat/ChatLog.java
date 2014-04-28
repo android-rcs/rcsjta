@@ -130,10 +130,10 @@ public class ChatLog {
         public static final String MESSAGE_TYPE = "msg_type";
 
         /**
-         * The name of the column containing the identity of the sender of the message.
+         * The name of the column containing the MSISDN of the remote contact.
          * <P>Type: TEXT</P>
          */
-        public static final String CONTACT_NUMBER = "sender";
+        public static final String CONTACT_NUMBER = "contact_number";
         
         /**
          * The name of the column containing the message body.

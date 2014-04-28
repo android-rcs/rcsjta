@@ -43,7 +43,7 @@ public class VideoSharingLog {
     public static final String SHARING_ID = "sharing_id";
 
     /**
-     * The name of the column containing the MSISDN of the sender.
+     * The name of the column containing the MSISDN of the remote contact.
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";

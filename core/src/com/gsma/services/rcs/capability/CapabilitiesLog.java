@@ -47,7 +47,7 @@ public class CapabilitiesLog {
     public static final String ID = "_id";
 
     /**
-     * The name of the column containing the MSISDN of the contact associated to the capabilities.
+     * The name of the column containing the MSISDN of the remote contact associated to the capabilities.
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";

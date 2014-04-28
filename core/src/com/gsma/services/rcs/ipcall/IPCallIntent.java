@@ -27,7 +27,7 @@ public class IPCallIntent {
      * Broadcast action: a new IP call invitation has been received.
      * <p>Intent includes the following extras:
      * <ul>
-     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the contact
+     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
      *  sending the invitation.
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
@@ -47,7 +47,7 @@ public class IPCallIntent {
 	/**
 	 * Display name of the contact sending the invitation
 	 */
-	public final static String EXTRA_DISPLAY_NAME = "contactDisplayname";
+	public final static String EXTRA_DISPLAY_NAME = "displayname";
 
 	/**
 	 * Unique ID of the call

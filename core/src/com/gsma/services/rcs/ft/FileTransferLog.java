@@ -43,7 +43,7 @@ public class FileTransferLog {
     public static final String FT_ID = "ft_id";
     
     /**
-     * The name of the column containing the MSISDN of the sender.
+     * The name of the column containing the identity of the remote contact.
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";
