@@ -71,11 +71,9 @@ public class AboutRI extends Activity {
 	private static String getGsmaVersion() {
 		switch(Build.API_VERSION) {
 			case Build.VERSION_CODES.BASE:
-				return "Albatros hotfixes";
+				return "Albatros";
 			case Build.VERSION_CODES.BLACKBIRD:
 				return "Blackbird";
-			case Build.VERSION_CODES.CRANE:
-				return "Crane";
 			default:
 				return "Unknown";
 		}

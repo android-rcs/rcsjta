@@ -50,11 +50,6 @@ public abstract class JoynService {
 			 * Blackbird version of joyn API
 			 */
 			public final static int BLACKBIRD = 2;
-			
-			/**
-			 * Crane version of joyn API
-			 */
-			public final static int CRANE = 3;
 		}
 
 		/**
@@ -67,7 +62,7 @@ public abstract class JoynService {
 		 * 
 		 * @see Build.VERSION_CODES
 		 */
-		public static final int API_VERSION = VERSION_CODES.CRANE;
+		public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
 
 		/**
 		 * Internal number used by the underlying source control to represent

@@ -194,8 +194,11 @@ public class GroupChat {
 	}
 	
 	/**
-	 * @return
+	 * Returns the list of participants in the group conversation
+	 * 
+	 * @return List of participants
 	 * @throws JoynServiceException
+     * @see ParticipantInfo
 	 */
 	public List<ParticipantInfo> getParticipantInfo() throws JoynServiceException {
 		try {

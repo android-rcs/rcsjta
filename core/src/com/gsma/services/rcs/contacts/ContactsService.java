@@ -122,6 +122,7 @@ public class ContactsService extends JoynService {
      * @param contactId Contact ID
      * @return Contact
      * @throws JoynServiceException
+     * @see JoynContact
      */
 	public JoynContact getJoynContact(String contactId) throws JoynServiceException {
 		if (api != null) {
@@ -140,6 +141,7 @@ public class ContactsService extends JoynService {
      * 
      * @return List of contacts
      * @throws JoynServiceException
+     * @see JoynContact
      */
     public Set<JoynContact> getJoynContacts() throws JoynServiceException {
 		if (api != null) {
@@ -164,6 +166,7 @@ public class ContactsService extends JoynService {
      * 
      * @return List of contacts
      * @throws JoynServiceException
+     * @see JoynContact
      */
     public Set<JoynContact> getJoynContactsOnline() throws JoynServiceException {
 		if (api != null) {
@@ -185,6 +188,7 @@ public class ContactsService extends JoynService {
      * @param serviceId Service ID
      * @return List of contacts
      * @throws JoynServiceException
+     * @see JoynContact
      */
     public Set<JoynContact> getJoynContactsSupporting(String serviceId) throws JoynServiceException {
 		if (api != null) {

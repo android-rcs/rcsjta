@@ -27,21 +27,20 @@ import android.os.Parcelable;
  * Participant information
  * 
  * @author YPLO6403
- * 
  */
 public class ParticipantInfo implements Parcelable, Serializable {
 
 	private static final long serialVersionUID = 0L;
 
 	/**
-	 * The status
+	 * Status
 	 */
-	private int status;
+	private int status = Status.UNKNOWN;
 
 	/**
-	 * The contact number
+	 * Contact
 	 */
-	private String contact;
+	private String contact = null;
 
 	/**
 	 * Participant status
@@ -99,10 +98,8 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	/**
 	 * Constructor
 	 * 
-	 * @param status
-	 *            the status
-	 * @param contact
-	 *            the contact number
+	 * @param status Status
+	 * @param contact Contact
 	 * @hide
 	 */
 	public ParticipantInfo(int status, String contact) {
@@ -114,8 +111,7 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	/**
 	 * Constructor
 	 * 
-	 * @param in
-	 *            Parcelable source
+	 * @param in Parcelable source
 	 */
 	public ParticipantInfo(Parcel in) {
 		this.contact = in.readString();
@@ -147,34 +143,12 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	}
 
 	/**
-	 * Set the participant status
+	 * Returns the contact
 	 * 
-	 * @param status
-	 *            the participant status
-	 * @hide
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	/**
-	 * Returns the contact number
-	 * 
-	 * @return
+	 * @return Contact
 	 */
 	public String getContact() {
 		return contact;
-	}
-
-	/**
-	 * Set the participant contact number
-	 * 
-	 * @param contact
-	 *            the participant contact number
-	 * @hide
-	 */
-	public void setContact(String contact) {
-		this.contact = contact;
 	}
 
 	/**
@@ -191,10 +165,8 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	/**
 	 * Write parcelable object
 	 * 
-	 * @param dest
-	 *            The Parcel in which the object should be written
-	 * @param flags
-	 *            Additional flags about how the object should be written
+	 * @param dest The Parcel in which the object should be written
+	 * @param flags Additional flags about how the object should be written
 	 * @hide
 	 */
 	@Override
@@ -206,13 +178,11 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	/**
 	 * Read parcelable object
 	 * 
-	 * @param in
-	 *            Parcelable source
+	 * @param in Parcelable source
 	 * @hide
 	 */
 	public void readFromParcel(Parcel in) {
 		this.contact = in.readString();
 		this.status = in.readInt();
 	}
-
 }

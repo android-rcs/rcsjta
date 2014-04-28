@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.chat;
 
 /**
- * ParticipantInfo object
+ * Participant info object
  */
 parcelable ParticipantInfo;

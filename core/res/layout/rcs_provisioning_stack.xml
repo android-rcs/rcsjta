@@ -65,7 +65,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Default protocol for file transfer:"
 	    android:paddingTop="5dip"
@@ -99,14 +101,7 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
-		
-		 <CheckBox android:id="@+id/TcpFallback"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_marginLeft="5dip"
-		android:layout_marginRight="5dip"
-        android:text="Enable TCP fallback"/>
-
+			 
 		<TextView android:text="TLS root or self-signed certificate from /sdcard:"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
@@ -138,7 +133,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="SIP timer base T1 (milliseconds):"
 	    android:paddingTop="5dip"
@@ -149,7 +146,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
         <TextView
             android:layout_width="fill_parent"
@@ -190,7 +189,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="SIP transaction timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -201,7 +202,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Default TCP port for MSRP session:"
 	    android:paddingTop="5dip"
@@ -212,7 +215,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Default UDP port for RTP session:"
 	    android:paddingTop="5dip"
@@ -223,7 +228,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="MSRP transaction timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -234,7 +241,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Registration expire period (seconds):"
 	    android:paddingTop="5dip"
@@ -245,7 +254,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Registration retry base time (seconds):"
 	    android:paddingTop="5dip"
@@ -256,7 +267,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Registration retry max time (seconds):"
 	    android:paddingTop="5dip"
@@ -267,7 +280,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Publish expire period (seconds):"
 	    android:paddingTop="5dip"
@@ -278,7 +293,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Revoke timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -289,7 +306,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Ringing session period (seconds):"
 	    android:paddingTop="5dip"
@@ -300,7 +319,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Subscribe expiration timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -311,7 +332,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Is-composing timeout for chat (seconds):"
 	    android:paddingTop="5dip"
@@ -322,7 +345,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Session refresh expire period (seconds):"
 	    android:paddingTop="5dip"
@@ -333,7 +358,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="10"
+	 	android:inputType="number"
+	 	android:lines="1"/>
 
        	<TextView android:text="Capability refresh timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -344,7 +371,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:lines="1" android:inputType="numberSigned"/>
+	 	android:maxLength="10"
+	 	android:lines="1"
+	 	android:inputType="numberSigned"/>
 
        	<TextView android:text="Capability expiry timeout (seconds):"
 	    android:paddingTop="5dip"
@@ -355,7 +384,9 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:lines="1" android:inputType="numberSigned"/>
+	 	android:maxLength="10"
+	 	android:lines="1"
+	 	android:inputType="numberSigned"/>
 
        	<TextView android:text="Capability polling period (seconds):"
 	    android:paddingTop="5dip"
@@ -366,9 +397,19 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="10" android:lines="1" android:inputType="numberSigned"/>
+	 	android:maxLength="10"
+	 	android:lines="1"
+	 	android:inputType="numberSigned"/>
 
-        <CheckBox android:id="@+id/SipKeepAlive"
+		 <CheckBox android:id="@+id/TcpFallback"
+	    android:paddingTop="5dip"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:text="Enable SIP TCP fallback"/>
+		
+		<CheckBox android:id="@+id/SipKeepAlive"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
