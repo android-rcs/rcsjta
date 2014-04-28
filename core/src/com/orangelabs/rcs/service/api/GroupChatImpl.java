@@ -5,6 +5,7 @@ import java.util.List;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
+import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -749,11 +750,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
 
-	/* (non-Javadoc)
-	 * @see com.gsma.services.rcs.chat.IGroupChat#getParticipantInfo()
+	/**
+	 * Returns the list of participants in the group conversation
+	 * 
+	 * @return List of participants
+	 * @throws JoynServiceException
+     * @see ParticipantInfo
 	 */
-	@Override
-	public List<ParticipantInfo> getParticipantInfo() throws RemoteException {
+    public List<ParticipantInfo> getParticipantInfo() throws RemoteException {
 		if (logger.isActivated()) {
 			logger.info("Get list of participant information");
 		}
