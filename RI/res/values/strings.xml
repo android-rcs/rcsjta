@@ -57,6 +57,7 @@
 <string name="label_progress_status">Status:</string>
 <string name="label_progress_bar">Progress:</string>
 <string name="label_file">Selected file:</string>
+<string name="label_size">Size:</string>
 <string name="label_receive_image">Received image %s</string>
 <string name="label_remote">Remote contact:</string>
 <string name="label_select_file">Select file</string>
@@ -124,6 +125,12 @@
 <string name="label_transfer_too_big">Transfer is aborted because file is too big</string>
 <string name="label_transfer_cancelled">File transfer session has been cancelled</string>
 <string name="label_transfer_declined">Transfer invitation has been declined</string>
+<string name="label_pause_transfer">Pause</string>
+<string name="label_resume_transfer">Resume</string>
+<string name="label_pause_failed">Pause of File Transfer has failed</string>
+<string name="label_resume_failed">Resume of File Transfer has failed</string>
+<string name="label_transfer_failed_too_big">Transfer is aborted because file is too big</string>
+<string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>

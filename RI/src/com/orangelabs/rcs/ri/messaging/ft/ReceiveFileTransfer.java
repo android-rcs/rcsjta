@@ -28,15 +28,21 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.StatFs;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
@@ -45,6 +51,7 @@ import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -93,6 +100,11 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      */
     private FileTransferListener ftListener = new MyFileTransferListener();
     
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,17 +116,31 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
         // Set title
 		setTitle(R.string.title_file_transfer);
         
+		// Set pause and resume button
+		Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+		pauseBtn.setOnClickListener(btnPauseListener);
+		pauseBtn.setEnabled(true);
+		Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+		resumeBtn.setOnClickListener(btnResumeListener);
+		resumeBtn.setEnabled(false);
+		
         // Get invitation info
         transferId = getIntent().getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
 		remoteContact = getIntent().getStringExtra(FileTransferIntent.EXTRA_CONTACT);
 		fileSize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, -1);
 		fileType = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILETYPE);
+		String filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
 		
-        // Instanciate API
+        // Instantiate API
         ftApi = new FileTransferService(getApplicationContext(), this);
         
         // Connect API
         ftApi.connect();
+        
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate contact=" + remoteContact + " file=" + filename + " size=" + fileSize + " transferId="
+					+ transferId);
+		}
 	}
 
 	@Override
@@ -164,7 +190,21 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	sizeTxt.setText(size);
 
 			// Display accept/reject dialog
-	    	if (!ftApi.getConfiguration().isAutoAcceptMode()) {
+	    	if (ftApi.getConfiguration().isAutoAcceptMode()) {
+	    		// Auto accept. Check capacity
+				isCapacityOk(fileSize);
+	    	} else {
+	    		// @formatter:off
+
+	    		// The following code is intentionally commented to test the CORE.
+	    		// UI should check the file size to cancel if it is too big.
+//	    						if (isCapacityOk(fileSize) == false) {
+//	    							rejectInvitation();
+//	    							return;
+//	    						}
+
+	    		// @formatter:on
+
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_file_transfer);
@@ -176,10 +216,14 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				builder.show();
 			}
 	    } catch(JoynServiceNotAvailableException e) {
-	    	e.printStackTrace();
+	    	if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
 			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled));
 	    } catch(JoynServiceException e) {
-	    	e.printStackTrace();
+	    	if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
 			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_failed));
 		}
     }
@@ -203,7 +247,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     		// Accept the invitation
 			fileTransfer.acceptInvitation();
     	} catch(Exception e) {
-    		e.printStackTrace();
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
 			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_invitation_failed));
     	}
 	}
@@ -217,7 +263,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     		fileTransfer.removeEventListener(ftListener);
 			fileTransfer.rejectInvitation();
     	} catch(Exception e) {
-    		e.printStackTrace();
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
     	}
 	}	
 
@@ -262,6 +310,13 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 					// Make sure progress bar is at the end
 			        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
 			        progressBar.setProgress(progressBar.getMax());
+			        
+			        // Disable pause button
+			        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+					pauseBtn.setEnabled(false);
+					// Disable resume button
+					Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+					resumeBtn.setEnabled(false);
 
 			        if (fileType.equals("text/vcard")) {
 			        	// Show the transferred vCard
@@ -415,5 +470,132 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				break;
 		}
 		return true;
-	}     
+	}
+    
+	/**
+	 * Pause button listener
+	 */
+	private android.view.View.OnClickListener btnPauseListener = new android.view.View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+			resumeBtn.setEnabled(true);
+			Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+			pauseBtn.setEnabled(false);
+
+			try {
+				fileTransfer.pauseTransfer();
+			} catch (JoynServiceException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, e.getMessage(), e);
+				}
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_pause_failed));
+			}
+		}
+	};
+
+	/**
+	 * Resume button listener
+	 */
+	private android.view.View.OnClickListener btnResumeListener = new android.view.View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+			resumeBtn.setEnabled(false);
+			Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+			pauseBtn.setEnabled(true);
+
+			try {
+				fileTransfer.resumeTransfer();
+			} catch (JoynServiceException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, e.getMessage(), e);
+				}
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_resume_failed));
+			}
+		}
+	};
+	
+	/**
+	 * Check whether file size exceeds the limit
+	 * 
+	 * @param size
+	 *           Size of file
+	 * @return {@code true} if file size limit is exceeded, otherwise {@code false}
+	 */
+	private boolean isFileSizeExceeded(long size) {
+		try {
+			long maxSize = ftApi.getConfiguration().getMaxSize() * 1024;
+			return (maxSize > 0 && size > maxSize);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}	
+	}
+	
+    /**
+     * Get available space in external storage, only if external storage is
+     * ready to write
+     *
+     * @return Available space in bytes, otherwise <code>-1</code>
+     */
+    private static long getExternalStorageFreeSpace() {
+        long freeSpace = -1;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long blockSize = stat.getBlockSize();
+            long availableBlocks = stat.getAvailableBlocks();
+            freeSpace = blockSize * availableBlocks;
+        }
+        return freeSpace;
+    }
+    
+	private static enum FileCapacity {
+		OK, FILE_TOO_BIG, STORAGE_TOO_SMALL;
+	}
+
+	/**
+	 * Check if file capacity is acceptable
+	 * 
+	 * @param fileSize
+	 * @return FileSharingError or null if file capacity is acceptable
+	 */
+	private FileCapacity isFileCapacityAcceptable(long fileSize) {
+		if (isFileSizeExceeded(fileSize)) {
+			return FileCapacity.FILE_TOO_BIG;
+		}
+		long freeSpage = getExternalStorageFreeSpace();
+		boolean storageIsTooSmall = (freeSpage > 0) ? fileSize > freeSpage : false;
+		if (storageIsTooSmall) {
+			return FileCapacity.STORAGE_TOO_SMALL;
+		}
+		return FileCapacity.OK;
+	}
+	
+	/**
+	 * Check if file size is less than maximum or then free space on disk
+	 * 
+	 * @param fileSize
+	 * @return boolean
+	 */
+	private boolean isCapacityOk(long fileSize) {
+		FileCapacity capacity = isFileCapacityAcceptable(fileSize);
+		switch (capacity) {
+		case FILE_TOO_BIG:
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, "File is too big, reject the File Transfer");
+			}
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_too_big));
+			return false;
+		case STORAGE_TOO_SMALL:
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, "Not enough storage capacity, reject the File Transfer");
+			}
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_capacity_too_small));
+			return false;
+		default:
+			return true;
+		}
+	}
+
 }
