@@ -185,7 +185,7 @@ public class ProvisioningParser {
 				// We received a single node (the version one) !
 				// This is the case if the version number is negative or in order to extend the validity of the provisioning.
 				// In that case we restore the relevant GSMA release saved before parsing.
-				RcsSettings.getInstance().setGsmaRelease("" + gsmaRelease);
+				RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
             }
             return true;
         } catch (Exception e) {

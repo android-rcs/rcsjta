@@ -315,8 +315,6 @@ public class StackProvisioning extends Activity {
 			spinner.setSelection(2);
 		}
 
-		setCheckBoxParameter(this, R.id.TcpFallback, RcsSettingsData.KEY_TCP_FALLBACK, bundle);
-
 		String[] certificates = loadCertificatesList();
 		spinner = (Spinner) findViewById(R.id.TlsCertificateRoot);
 		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, certificates);
@@ -401,6 +399,7 @@ public class StackProvisioning extends Activity {
 		setEditTextParameter(this, R.id.CapabilityRefreshTimeout, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, bundle);
 		setEditTextParameter(this, R.id.CapabilityExpiryTimeout, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, bundle);
 		setEditTextParameter(this, R.id.CapabilityPollingPeriod, RcsSettingsData.CAPABILITY_POLLING_PERIOD, bundle);
+		setCheckBoxParameter(this, R.id.TcpFallback, RcsSettingsData.KEY_TCP_FALLBACK, bundle);
 		setCheckBoxParameter(this, R.id.SipKeepAlive, RcsSettingsData.SIP_KEEP_ALIVE, bundle);
 		setCheckBoxParameter(this, R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE, bundle);
 		setCheckBoxParameter(this, R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, bundle);

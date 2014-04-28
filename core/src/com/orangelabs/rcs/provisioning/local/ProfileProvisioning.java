@@ -401,7 +401,7 @@ public class ProfileProvisioning extends Activity {
 					logger.error("Can't parse provisioning document");
 				}
 				// Restore GSMA release saved before parsing of the provisioning
-				RcsSettings.getInstance().setGsmaRelease("" + gsmaRelease);
+				RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
 				return false;
 			}
 		}

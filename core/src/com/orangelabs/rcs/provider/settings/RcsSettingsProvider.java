@@ -230,9 +230,9 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CONVERGENT_MESSAGING_UX,			RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, 			RcsSettingsData.FALSE);
-            addParameter(db, RcsSettingsData.KEY_GSMA_RELEASE, 					RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
-            addParameter(db, RcsSettingsData.BE_IPVOICECALL_AUTH,					"15");
-            addParameter(db, RcsSettingsData.BE_IPVIDEOCALL_AUTH,					"15");
+            addParameter(db, RcsSettingsData.KEY_GSMA_RELEASE, 					""+RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
+            addParameter(db, RcsSettingsData.BE_IPVOICECALL_AUTH,				"15");
+            addParameter(db, RcsSettingsData.BE_IPVIDEOCALL_AUTH,				"15");
             addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT,				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_CS,			RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS,		RcsSettingsData.FALSE);

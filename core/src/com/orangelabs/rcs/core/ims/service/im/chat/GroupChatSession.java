@@ -41,7 +41,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
@@ -300,7 +299,7 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendMsrpMessageDeliveryStatus(String contact, String msgId, String status) {
         // Do not perform Message Delivery Status in Albatros for group chat 
-        if (RcsSettingsData.VALUE_GSMA_REL_ALBATROS.equals(""+RcsSettings.getInstance().getGsmaRelease())) {
+        if (RcsSettings.getInstance().isAlbatrosRelease()) {
             return;
         }
       

@@ -831,9 +831,16 @@ public class RcsSettingsData {
      * Key and associated values for GSMA release of the device as provisioned by the network
      */
     public static final String KEY_GSMA_RELEASE = "GsmaRelease";
-    public static final String VALUE_GSMA_REL_ALBATROS = "0";
-    public static final String VALUE_GSMA_REL_BLACKBIRD = "1";
-    public static final String VALUE_GSMA_REL_CRANE = "2";
+    
+    /**
+     * Albatros release
+     */
+    public static final int VALUE_GSMA_REL_ALBATROS = 0;
+
+    /**
+     * Blackbird release
+     */
+    public static final int VALUE_GSMA_REL_BLACKBIRD = 1;
     
     /**
      * Authorization for user to use best effort IP Voice Call service /depending on network 

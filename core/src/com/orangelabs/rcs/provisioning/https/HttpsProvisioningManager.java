@@ -693,8 +693,10 @@ public class HttpsProvisioningManager {
 
 				// Parse the received content
 				ProvisioningParser parser = new ProvisioningParser(result.content);
+				
 				// Save GSMA release set into the provider
 				int gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+				
 				// Before parsing the provisioning, the GSMA release is set to Albatros
 				RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
 				if (parser.parse(gsmaRelease)) {
@@ -716,16 +718,18 @@ public class HttpsProvisioningManager {
 					// Save token
 					String token = info.getToken();
 					long tokenValidity = info.getTokenValidity();
-					if (logger.isActivated())
+					if (logger.isActivated()) {
 						logger.debug("Provisioning Token=" + token + ", validity=" + tokenValidity);
+					}
 
 					RcsSettings.getInstance().setProvisioningToken(token);
 					// Reset retry alarm counter
 			        retryCount = 0;
 					if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version)) {
 						// -3 : Put RCS client in dormant state
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("Provisioning: RCS client in dormant state");
+						}
 						// Start retry alarm
 						if (validity > 0) {
 							HttpsProvisioningService.startRetryAlarm(context, retryIntent, validity * 1000);
@@ -734,15 +738,17 @@ public class HttpsProvisioningManager {
 						LauncherUtils.stopRcsCoreService(context);
 					} else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
 						// -2 : Disable RCS client and stop configuration query
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("Provisioning: disable RCS client");
+						}
 						// Disable and stop RCS service
 						RcsSettings.getInstance().setServiceActivationState(false);
 						LauncherUtils.stopRcsService(context);
 					} else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
 						// -1 Forbidden: reset account + version = 0-1 (doesn't restart)
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("Provisioning forbidden: reset account");
+						}
 						// Reset config
 						LauncherUtils.resetRcsConfig(context);
 						// Force version to "-1" (resetRcs set version to "0")
@@ -750,8 +756,9 @@ public class HttpsProvisioningManager {
 						// Disable the RCS service
 						RcsSettings.getInstance().setServiceActivationState(false);
 					} else if (ProvisioningInfo.Version.RESETED.equals(version)) {
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("Provisioning forbidden: no account");
+						}
 						// Reset config
 						LauncherUtils.resetRcsConfig(context);
 					} else {
@@ -767,26 +774,30 @@ public class HttpsProvisioningManager {
 						LauncherUtils.launchRcsCoreService(context);
 					}
 				} else {
-					if (logger.isActivated())
+					if (logger.isActivated()) {
 						logger.debug("Can't parse provisioning document");
+					}
 					// Restore GSMA release saved before parsing of the provisioning
-					RcsSettings.getInstance().setGsmaRelease("" + gsmaRelease);
+					RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
 					if (first) {
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("As this is first launch and we do not have a valid configuration yet, retry later");
+						}
 						// Reason: Invalid configuration
 						provisioningFails(ProvisioningFailureReasons.INVALID_CONFIGURATION);
 						retry();
 					} else {
-						if (logger.isActivated())
+						if (logger.isActivated()) {
 							logger.debug("This is not first launch, use old configuration to register");
+						}
 						tryLaunchRcsCoreService(context, -1);
 					}
 				}
 			} else if (result.code == 503) {
 				// Server Unavailable
-				if (logger.isActivated())
+				if (logger.isActivated()) {
 					logger.debug("Server Unavailable. Retry after: " + result.retryAfter);
+				}
 				if (first) {
 					// Reason: Unable to get configuration
 					provisioningFails(ProvisioningFailureReasons.UNABLE_TO_GET_CONFIGURATION);
@@ -798,8 +809,9 @@ public class HttpsProvisioningManager {
 				}
 			} else if (result.code == 403) {
 				// Forbidden: reset account + version = 0
-				if (logger.isActivated())
+				if (logger.isActivated()) {
 					logger.debug("Provisioning forbidden: reset account");
+				}
 				// Reset version to "0"
 				RcsSettings.getInstance().setProvisioningVersion(Version.RESETED.toString());
 				// Reset config
@@ -808,8 +820,9 @@ public class HttpsProvisioningManager {
 				provisioningFails(ProvisioningFailureReasons.PROVISIONING_FORBIDDEN);
 			} else if (result.code == 511) {
 				// Provisioning authentication required
-				if (logger.isActivated())
+				if (logger.isActivated()) {
 					logger.debug("Provisioning authentication required");
+				}
 				// Reset provisioning token
 				RcsSettings.getInstance().setProvisioningToken("");
 				// Retry after reseting provisioning token
@@ -819,8 +832,9 @@ public class HttpsProvisioningManager {
 				}
 			} else {
 				// Other error
-				if (logger.isActivated())
+				if (logger.isActivated()) {
 					logger.debug("Provisioning error " + result.code);
+				}
 				// Start the RCS service
 				if (first) {
 					// Reason: No configuration present
@@ -834,8 +848,9 @@ public class HttpsProvisioningManager {
 			// Start the RCS service
 			if (first) {
 				// Reason: No configuration present
-				if (logger.isActivated())
+				if (logger.isActivated()) {
 					logger.error("### Provisioning fails and first = true!");
+				}
 				provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
 				retry();
 			} else {

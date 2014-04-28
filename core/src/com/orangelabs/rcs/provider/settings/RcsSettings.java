@@ -2765,7 +2765,36 @@ public class RcsSettings {
 		}
 		return result;
 	}
+	
+	/**
+	 * Set the GSMA release
+	 * 
+	 * @param release Release
+	 */
+	public void setGsmaRelease(int release) {
+		if (instance != null) {
+			writeParameter(RcsSettingsData.KEY_GSMA_RELEASE, ""+release);
+		}
+	}
+	
+	/**
+	 * Is Albatros GSMA release
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isAlbatrosRelease() {
+		return (RcsSettings.getInstance().getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
+	}	
 
+	/**
+	 * Is Blackbird GSMA release
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isBlackbirdRelease() {
+		return (RcsSettings.getInstance().getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
+	}		
+	
 	/**
      * Get beIPVideoCallAuth provisioning parameter (authorized networks for ip video call feature)
      *
@@ -2884,15 +2913,6 @@ public class RcsSettings {
 			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPCALL_E2E_VOICECAPABILITYHANDLING));
 		}
 		return result;
-	}
-
-	/**
-	 * Set the GSMA release
-	 */
-	public void setGsmaRelease(String gsmaRelease) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.KEY_GSMA_RELEASE, gsmaRelease);
-		}
 	}
 	
     /**
