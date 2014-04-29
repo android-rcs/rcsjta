@@ -339,10 +339,6 @@ public class RcsSettingsData {
      */
     public static final String CONVERGENT_MESSAGING_UX = "ConvergentMessagingUx";
 
-    /**
-     * Voice breakout option
-     */
-    public static final String VOICE_BREAKOUT = "VoiceBreakout";
     
     // ---------------------------------------------------------------------------
 	// User profile settings

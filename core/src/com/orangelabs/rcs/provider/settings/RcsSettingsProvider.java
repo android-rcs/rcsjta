@@ -74,7 +74,7 @@ public class RcsSettingsProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 86;
+        private static final int DATABASE_VERSION = 100;
 
         private Context ctx;
 
