@@ -602,9 +602,11 @@ public class ImsServiceDispatcher extends Thread {
     	for(int i=0; i< list.length; i++) {
     		for(Enumeration<ImsServiceSession> e = list[i].getSessions(); e.hasMoreElements();) {
 	    		ImsServiceSession session = (ImsServiceSession)e.nextElement();
-	    		if ((session != null) && session.getDialogPath().getCallId().equals(callId)) {
-	    			return session;
-	    		}
+	    		if (session != null && session.getDialogPath() != null) {
+					if (session.getDialogPath().getCallId().equals(callId)) {
+						return session;
+					}
+				}
     		}
     	}    	
     	return null;

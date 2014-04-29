@@ -18,13 +18,16 @@
 package com.orangelabs.rcs.provider.fthttp;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 
+import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -79,54 +82,79 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 
 	@Override
 	public List<FtHttpResume> queryAll() {
-		FtHttpSelection where = new FtHttpSelection();
 		ArrayList<FtHttpResume> result = new ArrayList<FtHttpResume>();
-		FtHttpCursor cursor = where.query(cr);
-		if (cursor != null) {
-			while (cursor.moveToNext()) {
-				if (cursor.getDirection() == FtHttpDirection.INCOMING) {
-					result.add(new FtHttpResumeDownload(cursor));
-				} else {
-					result.add(new FtHttpResumeUpload(cursor));
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, null, null, null);
+			if (cursor != null) {
+				while (cursor.moveToNext()) {
+					String url = cursor.getString(2);
+					long size = cursor.getLong(3);
+					String mimeType = cursor.getString(4);
+					String contact = cursor.getString(5);
+					String chatId = cursor.getString(6);
+					String file = cursor.getString(7);
+					int direction = cursor.getInt(8);
+					String displayName = cursor.getString(10);
+					String sessionId = cursor.getString(11);
+					byte[] thumbnail = cursor.getBlob(12);
+					boolean isGroup = cursor.getInt(14) != 0;
+					String chatSessionId = cursor.getString(15);
+					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
+					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
+						String messageId = cursor.getString(13);
+						result.add(new FtHttpResumeDownload(file, thumbnail, content, messageId, contact, displayName, chatId,
+								sessionId, chatSessionId, isGroup));
+					} else {
+						String tid = cursor.getString(1);
+						result.add(new FtHttpResumeUpload(file, thumbnail, content, tid, contact, displayName, chatId, sessionId,
+								chatSessionId, isGroup));
+					}
 				}
 			}
-			cursor.close();
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(), e);
+			}
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
 		return result;
 	}
 
 	@Override
 	public Uri insert(FtHttpResume ftHttpResume) {
-		FtHttpContentValues values = new FtHttpContentValues();
-		values.putDate(new Date(System.currentTimeMillis()));
-		values.putDirection(ftHttpResume.getDirection());
-		values.putFilename(ftHttpResume.getFilename());
-        values.putType(ftHttpResume.getMimetype());
-        values.putSize(ftHttpResume.getSize());
-		values.putThumbnail(ftHttpResume.getThumbnail());
-		values.putContact(ftHttpResume.getContact());
-		values.putDisplayName(ftHttpResume.getDisplayName());
-		values.putChatid(ftHttpResume.getChatId());
-		values.putSessionId(ftHttpResume.getSessionId());
-		values.putChatSessionId(ftHttpResume.getChatSessionId());
-		values.putIsGroup(ftHttpResume.isGroup());
+		ContentValues values = new ContentValues();
+		values.put(FtHttpColumns.DATE, System.currentTimeMillis());
+		values.put(FtHttpColumns.DIRECTION, ftHttpResume.getDirection().ordinal());
+		values.put(FtHttpColumns.FILENAME, ftHttpResume.getFilename());
+		values.put(FtHttpColumns.TYPE, ftHttpResume.getMimetype());
+		values.put(FtHttpColumns.SIZE, ftHttpResume.getSize());
+		values.put(FtHttpColumns.THUMBNAIL, ftHttpResume.getThumbnail());
+		values.put(FtHttpColumns.CONTACT, ftHttpResume.getContact());
+		values.put(FtHttpColumns.DISPLAY_NAME, ftHttpResume.getDisplayName());
+		values.put(FtHttpColumns.CHATID, ftHttpResume.getChatId());
+		values.put(FtHttpColumns.SESSION_ID, ftHttpResume.getSessionId());
+		values.put(FtHttpColumns.CHAT_SESSION_ID, ftHttpResume.getChatSessionId());
+		values.put(FtHttpColumns.IS_GROUP, ftHttpResume.isGroup());
 		if (ftHttpResume instanceof FtHttpResumeDownload) {
 			FtHttpResumeDownload download = (FtHttpResumeDownload) ftHttpResume;
-			values.putInUrl(download.getUrl());
-			values.putMessageId(download.getMessageId());
+			values.put(FtHttpColumns.IN_URL, download.getUrl());
+			values.put(FtHttpColumns.MESSAGE_ID, download.getMessageId());
 			if (logger.isActivated()) {
 				logger.debug("insert " + download + ")");
 			}
 		} else if (ftHttpResume instanceof FtHttpResumeUpload) {
 			FtHttpResumeUpload upload = (FtHttpResumeUpload) ftHttpResume;
-			values.putOuTid(upload.getTid());
+			values.put(FtHttpColumns.OU_TID, upload.getTid());
 			if (logger.isActivated()) {
-			    logger.debug("insert " + upload + ")");
+				logger.debug("insert " + upload + ")");
 			}
 		} else {
 			return null;
 		}
-		return cr.insert(FtHttpColumns.CONTENT_URI, values.values());
+		return cr.insert(FtHttpColumns.CONTENT_URI, values);
 	}
 
 	@Override
@@ -139,38 +167,78 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		if (logger.isActivated()) {
 			logger.debug("delete " + ftHttpResume);
 		}
-		FtHttpSelection where = new FtHttpSelection();
-		where.sessionId(ftHttpResume.getSessionId());
-		return where.delete(cr);
+		return cr.delete(FtHttpColumns.CONTENT_URI, FtHttpColumns.SESSION_ID + " = " + ftHttpResume.getSessionId(), null);
 	}
 
 	@Override
 	public FtHttpResumeUpload queryUpload(String tid) {
-		FtHttpSelection where = new FtHttpSelection();
-		FtHttpResumeUpload result = null;
-		where.ouTid(tid).and().direction(FtHttpDirection.OUTGOING);
-		FtHttpCursor cursor = where.query(cr, null, "_ID LIMIT 1");
-		if (cursor != null) {
-			if (cursor.moveToNext()) {
-				result = new FtHttpResumeUpload(cursor);
+		String selection = FtHttpColumns.OU_TID + " = ? AND " + FtHttpColumns.DIRECTION + " = ?";
+		String[] selectionArgs = { tid, "" + FtHttpDirection.OUTGOING.ordinal() };
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
+			if (cursor != null) {
+				if (cursor.moveToNext()) {
+					String url = cursor.getString(2);
+					long size = cursor.getLong(3);
+					String mimeType = cursor.getString(4);
+					String contact = cursor.getString(5);
+					String chatId = cursor.getString(6);
+					String file = cursor.getString(7);
+					String displayName = cursor.getString(10);
+					String sessionId = cursor.getString(11);
+					byte[] thumbnail = cursor.getBlob(12);
+					boolean isGroup = cursor.getInt(14) != 0;
+					String chatSessionId = cursor.getString(15);
+					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
+					return new FtHttpResumeUpload(file, thumbnail, content, tid, contact, displayName, chatId, sessionId,
+							chatSessionId, isGroup);
+				}
 			}
-			cursor.close();
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(), e);
+			}
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
-		return result;
+		return null;
 	}
 
 	@Override
 	public FtHttpResumeDownload queryDownload(String url) {
-		FtHttpSelection where = new FtHttpSelection();
-		FtHttpResumeDownload result = null;
-		where.inUrl(url).and().direction(FtHttpDirection.INCOMING);
-		FtHttpCursor cursor = where.query(cr, null, "_ID LIMIT 1");
-		if (cursor != null) {
-			if (cursor.moveToNext()) {
-				result = new FtHttpResumeDownload(cursor);
+		String selection = FtHttpColumns.IN_URL + " = ? AND " + FtHttpColumns.DIRECTION + " = ?";
+		String[] selectionArgs = { url, "" + FtHttpDirection.INCOMING.ordinal() };
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
+			if (cursor != null) {
+				if (cursor.moveToNext()) {
+					long size = cursor.getLong(3);
+					String mimeType = cursor.getString(4);
+					String contact = cursor.getString(5);
+					String chatId = cursor.getString(6);
+					String file = cursor.getString(7);
+					String displayName = cursor.getString(10);
+					String sessionId = cursor.getString(11);
+					byte[] thumbnail = cursor.getBlob(12);
+					String messageId = cursor.getString(13);
+					boolean isGroup = cursor.getInt(14) != 0;
+					String chatSessionId = cursor.getString(15);
+					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
+					return new FtHttpResumeDownload(file, thumbnail, content, messageId, contact, displayName, chatId, sessionId,
+							chatSessionId, isGroup);
+				}
 			}
-			cursor.close();
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(), e);
+			}
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
-		return result;
+		return null;
 	}
 }

@@ -437,8 +437,6 @@ public class InstantMessagingService extends ImsService {
 				chatSessionId,
 				chatContributionId);
 
-		// Start the session
-		session.startSession();
 		return session;
 	}
 

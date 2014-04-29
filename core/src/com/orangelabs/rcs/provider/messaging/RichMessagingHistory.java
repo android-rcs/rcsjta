@@ -424,6 +424,42 @@ public class RichMessagingHistory {
 	}
 	
 	/**
+	 * Insert a chat message for an outgoing file transfer to Group Chat
+	 * 
+	 * @param msg
+	 *            the chat message
+	 * @param chatId
+	 *            the Identity of the Group Chat
+	 * @param ftId
+	 *            the identity of the File Transfer
+	 */
+	public void addGroupChatMsgOutgoingFileTransfer(FileTransferMessage msg, String chatId, String ftId) {
+		if (logger.isActivated()) {
+			logger.debug("Add group chat message: ftId=" + ftId + ", msgId=" + msg.getMessageId() + ", chatId=" + chatId);
+		}
+
+		ContentValues values = new ContentValues();
+		values.put(MessageData.KEY_CHAT_ID, chatId);
+		values.put(MessageData.KEY_FT_ID, ftId);
+		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
+		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.OUTGOING);
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
+
+		values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+		byte[] blob = serializePlainText(((FileTransferMessage) msg).getFileInfo());
+
+		values.put(MessageData.KEY_CONTENT, blob);
+
+		// Send message
+		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
+		values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
+		values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
+		values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.SENT);
+		cr.insert(msgDatabaseUri, values);
+	}
+	
+	/**
 	 * Add group chat system message
 	 * 
 	 * @param chatId Chat ID
@@ -582,6 +618,39 @@ public class RichMessagingHistory {
 	}
 
 	/**
+	 * Add an outgoing File Transfer supported by Group Chat
+	 * 
+	 * @param chatSessionId
+	 *            the identity of the group chat
+	 * @param ftID
+	 *            the identity of the file transfer
+	 * @param content
+	 *            the File content
+	 */
+	public void addOutgoingGroupFileTransfer(String chatId, String ftId, MmContent content) {
+		if (logger.isActivated()) {
+			logger.debug("addOutgoingGroupFileTransfer: ftId=" + ftId + ", chatId=" + chatId + " filename=" + content.getName()
+					+ ", size=" + content.getSize() + ", MIME=" + content.getEncoding());
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_SESSION_ID, ftId);
+		values.put(FileTransferData.KEY_CHAT_ID, chatId);
+		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
+		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.OUTGOING);
+		values.put(FileTransferData.KEY_SIZE, 0);
+		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
+		long date = Calendar.getInstance().getTimeInMillis();
+		// Send file
+		values.put(FileTransferData.KEY_TIMESTAMP, date);
+		values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
+		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
+		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
+		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
+		cr.insert(ftDatabaseUri, values);
+	}
+	
+	/**
 	 * Update file transfer status
 	 * 
 	 * @param sessionId Session ID
@@ -613,9 +682,6 @@ public class RichMessagingHistory {
 	 * @param totalSize Total size to download 
 	 */
 	public void updateFileTransferProgress(String sessionId, long size, long totalSize) {
-		if (logger.isActivated()) {
-			logger.debug("Update file transfer progress");
-		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_SIZE, size);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
@@ -716,7 +782,7 @@ public class RichMessagingHistory {
     		return null;
     	}
     }
-    
+	
     /**
      * Is next group chat Invitation rejected
      * 
@@ -725,10 +791,9 @@ public class RichMessagingHistory {
      */
 	public boolean isGroupChatNextInviteRejected(String chatId) {
 		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
-				+ MessageData.KEY_TYPE + " = ? AND "//
 				+ ChatData.KEY_STATUS + " = ? AND "//
 				+ ChatData.KEY_REJECT_GC + " = 1";
-		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(chatDatabaseUri, null, selection, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");
@@ -751,16 +816,14 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
 		}
-		// TODO FUSION cannot mix chatData and messageData
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJECT_GC, "0");
 		// @formatter:off
 		String selection = ChatData.KEY_CHAT_ID + " = ? AND " 
-							+ MessageData.KEY_TYPE + " = ? AND "
 							+ ChatData.KEY_STATUS + " = ? AND "
 							+ ChatData.KEY_REJECT_GC + " = 1";
 		// @formatter:on
-		String[] selectionArgs = { chatId, "" + ChatLog.Message.Type.SYSTEM, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
 		cr.update(chatDatabaseUri, values, selection, selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");

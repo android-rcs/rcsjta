@@ -117,6 +117,12 @@
             </intent-filter>
         </receiver>
 
+		<receiver android:name="com.orangelabs.rcs.ri.messaging.ft.FileTransferResumeReceiver">
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.ft.action.RESUME_FILE_TRANSFER"/>
+            </intent-filter>
+        </receiver>
+        
         <activity android:name=".messaging.ft.ReceiveFileTransfer"/>
 
         <activity android:name=".messaging.ft.FileTransferList"/>

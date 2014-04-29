@@ -106,7 +106,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * 
 	 * @param session File transfer session
 	 */
-	protected static void addFileTransferSession(FileTransferImpl session) {
+	public static void addFileTransferSession(FileTransferImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a file transfer session in the list (size=" + ftSessions.size() + ")");
 		}
@@ -458,14 +458,81 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
 	}
-
+	
+	 /**
+     * Resume an outgoing HTTP file transfer
+     *
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     */
 	public void resumeOutgoingFileTransfer(FileSharingSession session, boolean isGroup) {
-		// TODO Auto-generated method stub
-		
+		if (logger.isActivated()) {
+			logger.info("Resume outgoing file transfer from " + session.getRemoteContact());
+		}
+		// Extract number from contact
+		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+
+		// Add session in the list
+		FileTransferImpl sessionApi = new FileTransferImpl(session);
+		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+
+		// Broadcast intent related to the received invitation
+		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
+		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+		if (isGroup) {
+			intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, session.getContributionID());
+		}
+		intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
+		intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
+		intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+		// TODO FUSION change thumbnail byte array to filename
+		// intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
+		intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.OUTGOING);
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	}
 
-	public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId) {
-		// TODO Auto-generated method stub
-		
-	}
+	
+	/**
+     * Resume an incoming HTTP file transfer
+     *
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     * @param chatSessionId corresponding chatSessionId
+     * @param chatId corresponding chatId
+     */
+    public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId) {
+        if (logger.isActivated()) {
+            logger.info("Resume incoming file transfer from " + session.getRemoteContact());
+        }
+        // TODO FUSION remove chatSessionId
+        
+        // Extract number from contact 
+        String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+
+		// Add session in the list
+		FileTransferImpl sessionApi = new FileTransferImpl(session);
+		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+
+        // Broadcast intent, we reuse the File transfer invitation intent
+        Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+
+        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+        intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+        intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+        if (isGroup) {
+            intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, chatId);
+        }
+        intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
+        intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
+        intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+        // TODO FUSION change thumbnail byte array to filename 
+        //intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
+        intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.INCOMING);
+
+        AndroidFactory.getApplicationContext().sendBroadcast(intent);
+    }
+
 }
