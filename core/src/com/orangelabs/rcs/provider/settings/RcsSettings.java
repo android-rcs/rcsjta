@@ -2723,19 +2723,6 @@ public class RcsSettings {
 	}
 	
 	/**
-	 * Is voice breakout supported
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isVoiceBreakoutSupported() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.VOICE_BREAKOUT));
-        }
-        return result;
-	}
-	
-	/**
 	 * Get the GSMA release
 	 * 
 	 * @return the GSMA release
