@@ -46,4 +46,24 @@ public interface FtHttpColumns extends BaseColumns {
 	
     String DEFAULT_ORDER = _ID;
 
+	// @formatter:off
+    String[] FULL_PROJECTION = new String[] {
+            _ID,
+            OU_TID,
+            IN_URL,
+            SIZE,
+            TYPE,
+            CONTACT,
+            CHATID,
+            FILENAME,
+            DIRECTION,
+            DATE,
+            DISPLAY_NAME,
+            SESSION_ID,
+            THUMBNAIL,
+            MESSAGE_ID,
+            IS_GROUP,
+            CHAT_SESSION_ID
+    };
+    // @formatter:on
 }

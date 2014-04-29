@@ -469,26 +469,28 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Resume outgoing file transfer from " + session.getRemoteContact());
 		}
-//		// Extract number from contact
-//		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-//
-//		// Add session in the list
-//		FileTransferImpl sessionApi = new FileTransferImpl(session);
-//		FileTransferServiceImpl.addFileTransferSession(sessionApi);
-//
-//		// Broadcast intent related to the received invitation
-//		Intent intent = new Intent(MessagingApiIntents.FILE_TRANSFER_OUTGOING_RESUMING);
-//		intent.putExtra("contact", number);
-//		intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
-//		intent.putExtra("sessionId", session.getSessionID());
-//		if (session instanceof HttpFileTransferSession) {
-//			intent.putExtra("isGroupTransfer", isGroup);
-//		}
-//		intent.putExtra("filename", session.getContent().getName());
-//		intent.putExtra("filesize", session.getContent().getSize());
-//		intent.putExtra("filetype", session.getContent().getEncoding());
-//		intent.putExtra("thumbnail", session.getThumbnail());
-//		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		// Extract number from contact
+		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+
+		// Add session in the list
+		FileTransferImpl sessionApi = new FileTransferImpl(session);
+		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+
+		// Broadcast intent related to the received invitation
+		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
+		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+		if (isGroup) {
+			intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, session.getContributionID());
+		}
+		intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
+		intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
+		intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+		// TODO FUSION change thumbnail byte array to filename
+		// intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
+		intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.OUTGOING);
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	}
 
 	
@@ -504,29 +506,33 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (logger.isActivated()) {
             logger.info("Resume incoming file transfer from " + session.getRemoteContact());
         }
-//        // Extract number from contact 
-//        String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-//
-//		// Add session in the list
-//		FileTransferImpl sessionApi = new FileTransferImpl(session);
-//		FileTransferServiceImpl.addFileTransferSession(sessionApi);
-//
-//        // Broadcast intent, we reuse the File transfer invitation intent
-//        Intent intent = new Intent(MessagingApiIntents.FILE_TRANSFER_INVITATION);
-//        intent.putExtra("contact", number);
-//        intent.putExtra("contactDisplayname", session.getRemoteDisplayName());
-//        intent.putExtra("sessionId", session.getSessionID());
-//        intent.putExtra("chatSessionId", chatSessionId);
-//        if (isGroup) {
-//            intent.putExtra("chatId", chatId);
-//        }
-//        intent.putExtra("isGroupTransfer", isGroup);
-//        intent.putExtra("filename", session.getContent().getName());
-//        intent.putExtra("filesize", session.getContent().getSize());
-//        intent.putExtra("filetype", session.getContent().getEncoding());
-//        intent.putExtra("thumbnail", session.getThumbnail());
-//        intent.putExtra("autoAccept", true);
-//        AndroidFactory.getApplicationContext().sendBroadcast(intent);
+        // TODO FUSION remove chatSessionId
+        
+        // Extract number from contact 
+        String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+
+		// Add session in the list
+		FileTransferImpl sessionApi = new FileTransferImpl(session);
+		FileTransferServiceImpl.addFileTransferSession(sessionApi);
+
+        // Broadcast intent, we reuse the File transfer invitation intent
+        Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+
+        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+        intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+        intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+        if (isGroup) {
+            intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, chatId);
+        }
+        intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
+        intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
+        intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
+        // TODO FUSION change thumbnail byte array to filename 
+        //intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
+        intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.INCOMING);
+
+        AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 
 }

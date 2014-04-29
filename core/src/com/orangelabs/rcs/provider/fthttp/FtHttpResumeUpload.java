@@ -84,19 +84,6 @@ public class FtHttpResumeUpload extends FtHttpResume {
 		this.tid = tid;
 	}
 
-	/**
-	 * Creates a FT HTTP resume upload data object
-	 * 
-	 * @param cursor
-	 *            the {@code cursor} value.
-	 */
-	public FtHttpResumeUpload(FtHttpCursor cursor) {
-		super(cursor);
-		this.tid = cursor.getOuTid();
-		if (this.tid == null)
-			throw new IllegalArgumentException("Null TID");
-	}
-
 	public String getTid() {
 		return tid;
 	}

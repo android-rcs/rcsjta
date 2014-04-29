@@ -101,6 +101,11 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     private FileTransferListener ftListener = new MyFileTransferListener();
     
     /**
+     * File transfer is resuming
+     */
+    private boolean resuming = false;
+    
+    /**
 	 * The log tag for this class
 	 */
 	private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
@@ -130,6 +135,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		fileSize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, -1);
 		fileType = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILETYPE);
 		String filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
+		resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
 		
         // Instantiate API
         ftApi = new FileTransferService(getApplicationContext(), this);
@@ -139,7 +145,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
         
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onCreate contact=" + remoteContact + " file=" + filename + " size=" + fileSize + " transferId="
-					+ transferId);
+					+ transferId+ " resume="+resuming);
 		}
 	}
 
@@ -190,7 +196,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	sizeTxt.setText(size);
 
 			// Display accept/reject dialog
-	    	if (ftApi.getConfiguration().isAutoAcceptMode()) {
+	    	if (resuming || ftApi.getConfiguration().isAutoAcceptMode()) {
 	    		// Auto accept. Check capacity
 				isCapacityOk(fileSize);
 	    	} else {

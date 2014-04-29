@@ -146,29 +146,6 @@ public abstract class FtHttpResume {
 		this.isGroup = isGroup;
 	}
 
-	/**
-	 * Creates a FtHttpResumeUploadGc data object
-	 * 
-	 * @param cursor
-	 *            the {@code cursor} value.
-	 */
-	public FtHttpResume(FtHttpCursor cursor) {
-		if (cursor.getSize() <= 0 || cursor.getDirection() == null || cursor.getFilename() == null || cursor.getType() == null)
-			throw new IllegalArgumentException("Null argument");
-		this.date = cursor.getDate();
-		this.ftHttpDirection = cursor.getDirection();
-		this.filename = cursor.getFilename();
-        this.mimeType = cursor.getType();
-        this.size = cursor.getSize();
-		this.thumbnail = cursor.getThumbnail();
-		this.contact = cursor.getContact();
-		this.displayName = cursor.getDisplayName();
-		this.chatId = cursor.getChatid();
-		this.sessionId = cursor.getSessionId();
-		this.chatSessionId = cursor.getChatSessionId();
-		this.isGroup = cursor.isGroup();
-	}
-
 	public Date getDate() {
 		return date;
 	}

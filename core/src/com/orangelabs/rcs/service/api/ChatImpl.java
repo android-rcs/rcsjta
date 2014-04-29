@@ -441,28 +441,38 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError(com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
      */
-    public void handleImError(ChatError error) {
-    	synchronized(lock) {
+	public void handleImError(ChatError error) {
+		synchronized (lock) {
 			if (logger.isActivated()) {
 				logger.info("IM error " + error.getErrorCode());
 			}
-			
+
 			// Update rich messaging history
-	    	switch(error.getErrorCode()){
-		    	case ChatError.SESSION_INITIATION_FAILED:
-		    	case ChatError.SESSION_INITIATION_CANCELLED:
-					RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
-							ChatLog.Message.Status.Content.FAILED);
-					// TODO: notify listener
-		    		break;
-		    	default:
-		    		break;
-	    	}
-	    	
-	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getContributionID());
-	    }
-    }
+			switch (error.getErrorCode()) {
+			case ChatError.SESSION_INITIATION_FAILED:
+			case ChatError.SESSION_INITIATION_CANCELLED:
+				RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
+						ChatLog.Message.Status.Content.FAILED);
+				// notify listener
+				final int N = listeners.beginBroadcast();
+				for (int i = 0; i < N; i++) {
+					try {
+						listeners.getBroadcastItem(i).onReportMessageFailed(session.getFirstMessage().getMessageId());
+					} catch (Exception e) {
+						if (logger.isActivated()) {
+							logger.error("Can't notify listener", e);
+						}
+					}
+				}
+				listeners.finishBroadcast();
+				break;
+			default:
+				break;
+			}
+			// Remove session from the list
+			ChatServiceImpl.removeChatSession(session.getContributionID());
+		}
+	}
     
 	/* (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)

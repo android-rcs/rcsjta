@@ -91,20 +91,6 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 			throw new IllegalArgumentException("Invalid argument");
 	}
 
-	/**
-	 * Creates a FT HTTP resume download data object
-	 * 
-	 * @param cursor
-	 *            the {@code cursor} value.
-	 */
-	public FtHttpResumeDownload(FtHttpCursor cursor) {
-		super(cursor);
-		this.url = cursor.getInUrl();
-		this.messageId = cursor.getMessageId();
-		if (this.url == null || messageId == null)
-			throw new IllegalArgumentException("Null argument");
-	}
-
 	public String getUrl() {
 		return url;
 	}
@@ -116,7 +102,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	@Override
 	public String toString() {
 		return "FtHttpResumeDownload [file=" + getFilename() + ", mimeType=" + getMimetype() + ", size=" + getSize() + ", messageId=" + messageId
-				+ "]";
+				+ " contact="+getContact()+"]";
 	}
 
 }
