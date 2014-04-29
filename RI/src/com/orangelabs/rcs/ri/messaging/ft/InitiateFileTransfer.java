@@ -43,6 +43,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
@@ -54,6 +55,7 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
@@ -112,68 +114,103 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
    	 */
    	private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getSimpleName());
 
+    /**
+     * File transfer is resuming
+     */
+    private boolean resuming = false;
+    
+    private String ftId = null;
+    
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.filetransfer_initiate);
-        
-        // Set title
-        setTitle(R.string.menu_transfer_file);
-        
-        // Set contact selector
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        spinner.setAdapter(Utils.createRcsContactListAdapter(this));
-
-        // Set buttons callback
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-        inviteBtn.setOnClickListener(btnInviteListener);
-    	inviteBtn.setEnabled(false);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
-        selectBtn.setOnClickListener(btnSelectListener);
-        selectBtn.setEnabled(false);
-        
-        Button pauseBtn = (Button)findViewById(R.id.pause_btn);
-        pauseBtn.setOnClickListener(btnPauseListener);
-        pauseBtn.setEnabled(false);
-        
-        Button resumeBtn = (Button)findViewById(R.id.resume_btn);
-        resumeBtn.setOnClickListener(btnResumeListener);
-        resumeBtn.setEnabled(false);
-        
-        // Instantiate API
-        ftApi = new FileTransferService(getApplicationContext(), this);
-        
-        // Connect API
-        ftApi.connect();
-        
-        // Select the corresponding contact from the intent
-        Intent intent = getIntent();
-        Uri contactUri = intent.getData();
-    	if (contactUri != null) {
-			Cursor cursor = managedQuery(contactUri, null, null, null, null);
-	        if (cursor.moveToNext()) {
-	        	String selectedContact = cursor.getString(cursor.getColumnIndex(Data.DATA1));
-	            if (selectedContact != null) {
-	    	        for (int i=0;i<spinner.getAdapter().getCount();i++) {
-	    	        	MatrixCursor cursor2 = (MatrixCursor)spinner.getAdapter().getItem(i);
-						if (PhoneNumberUtils.compare(selectedContact, cursor2.getString(1))) {
-	    	        		// Select contact
-	    	                spinner.setSelection(i);
-	    	                spinner.setEnabled(false);
-	    	                break;
-	    	        	}
-	    	        }
-	            }
-	        }
-	        cursor.close();
-        }
-    	if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate");
+		String remoteContact = null;
+		if (getIntent().getAction() != null) {
+			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
+			if (resuming) {
+				remoteContact = getIntent().getStringExtra(FileTransferIntent.EXTRA_CONTACT);
+				ftId = getIntent().getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
+				filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
+				filesize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, 0L);
+			}
 		}
-    }
+
+		// Set layout
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setContentView(R.layout.filetransfer_initiate);
+
+		// Set title
+		setTitle(R.string.menu_transfer_file);
+
+		// Set contact selector
+		Spinner spinner = (Spinner) findViewById(R.id.contact);
+		spinner.setAdapter(Utils.createRcsContactListAdapter(this));
+
+		// Set buttons callback
+		Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+		inviteBtn.setOnClickListener(btnInviteListener);
+		inviteBtn.setEnabled(false);
+		Button selectBtn = (Button) findViewById(R.id.select_btn);
+		selectBtn.setOnClickListener(btnSelectListener);
+		selectBtn.setEnabled(false);
+
+		Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+		pauseBtn.setOnClickListener(btnPauseListener);
+		pauseBtn.setEnabled(false);
+
+		Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+		resumeBtn.setOnClickListener(btnResumeListener);
+		resumeBtn.setEnabled(false);
+
+		// Instantiate API
+		ftApi = new FileTransferService(getApplicationContext(), this);
+
+		// Connect API
+		ftApi.connect();
+
+		if (resuming) {
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+					new String[] { remoteContact });
+			spinner.setAdapter(adapter);
+			TextView uriEdit = (TextView) findViewById(R.id.uri);
+			TextView sizeEdit = (TextView) findViewById(R.id.size);
+			sizeEdit.setText((filesize / 1024) + " KB");
+			uriEdit.setText(filename);
+
+			
+		} else {
+			// Select the corresponding contact from the intent
+			Intent intent = getIntent();
+			Uri contactUri = intent.getData();
+			if (contactUri != null) {
+				Cursor cursor = managedQuery(contactUri, null, null, null, null);
+				if (cursor.moveToNext()) {
+					String selectedContact = cursor.getString(cursor.getColumnIndex(Data.DATA1));
+					if (selectedContact != null) {
+						for (int i = 0; i < spinner.getAdapter().getCount(); i++) {
+							MatrixCursor cursor2 = (MatrixCursor) spinner.getAdapter().getItem(i);
+							if (PhoneNumberUtils.compare(selectedContact, cursor2.getString(1))) {
+								// Select contact
+								spinner.setSelection(i);
+								spinner.setEnabled(false);
+								break;
+							}
+						}
+					}
+				}
+				cursor.close();
+			}
+		}
+		if (LogUtils.isActive) {
+			if (resuming) {
+				Log.d(LOGTAG, "onCreate (filename=" + filename + ") (filesize=" + filesize + ") (remoteContact=" + remoteContact
+						+ ")");
+			} else {
+				Log.d(LOGTAG, "onCreate");
+			}
+		}
+	}
     
     @Override
     public void onDestroy() {
@@ -201,22 +238,45 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
-        // Disable button if no contact available
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        if (spinner.getAdapter().getCount() != 0) {
-            Button selectBtn = (Button)findViewById(R.id.select_btn);
-        	selectBtn.setEnabled(true);
-        }
-        
-        // Enable thumbnail option if supported
-        try {
-            CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
-	        if (ftApi.getConfiguration().isFileIconSupported()) {
-	        	ftThumb.setEnabled(true);
-	        }
-        } catch(Exception e) {
-        	e.printStackTrace();
-        }
+		if (resuming) {
+			try {
+				// Get the file transfer session
+				fileTransfer = ftApi.getFileTransfer(ftId);
+				if (fileTransfer == null) {
+					if (LogUtils.isActive) {
+						Log.d(LOGTAG, "FT Session not found or expired");
+					}
+					// Session not found or expired
+					Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_session_has_expired));
+					return;
+				}
+				fileTransfer.addEventListener(ftListener);
+				Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+				pauseBtn.setEnabled(true);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Exception occurred", e);
+				}
+				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_failed));
+			}
+		} else  {
+			// Enable button if contact available
+			Spinner spinner = (Spinner) findViewById(R.id.contact);
+			if (spinner.getAdapter().getCount() != 0) {
+				Button selectBtn = (Button) findViewById(R.id.select_btn);
+				selectBtn.setEnabled(true);
+			}
+
+			// Enable thumbnail option if supported
+			try {
+				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
+				if (ftApi.getConfiguration().isFileIconSupported()) {
+					ftThumb.setEnabled(true);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
     }
     
     /**

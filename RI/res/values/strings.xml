@@ -131,6 +131,7 @@
 <string name="label_resume_failed">Resume of File Transfer has failed</string>
 <string name="label_transfer_failed_too_big">Transfer is aborted because file is too big</string>
 <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
+<string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>

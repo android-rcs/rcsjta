@@ -88,7 +88,6 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, null, null, null);
 			if (cursor != null) {
 				while (cursor.moveToNext()) {
-					String url = cursor.getString(2);
 					long size = cursor.getLong(3);
 					String mimeType = cursor.getString(4);
 					String contact = cursor.getString(5);
@@ -100,13 +99,15 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					byte[] thumbnail = cursor.getBlob(12);
 					boolean isGroup = cursor.getInt(14) != 0;
 					String chatSessionId = cursor.getString(15);
-					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
 					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
+						String url = cursor.getString(2);
+						MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
 						String messageId = cursor.getString(13);
 						result.add(new FtHttpResumeDownload(file, thumbnail, content, messageId, contact, displayName, chatId,
 								sessionId, chatSessionId, isGroup));
 					} else {
 						String tid = cursor.getString(1);
+						MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
 						result.add(new FtHttpResumeUpload(file, thumbnail, content, tid, contact, displayName, chatId, sessionId,
 								chatSessionId, isGroup));
 					}

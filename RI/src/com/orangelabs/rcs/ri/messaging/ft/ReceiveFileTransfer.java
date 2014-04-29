@@ -135,8 +135,10 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		fileSize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, -1);
 		fileType = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILETYPE);
 		String filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
-		resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
-		
+		if (getIntent().getAction() != null) {
+			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
+		}
+
         // Instantiate API
         ftApi = new FileTransferService(getApplicationContext(), this);
         
