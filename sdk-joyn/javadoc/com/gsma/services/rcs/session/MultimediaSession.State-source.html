@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../../favicon.ico" />
+<title>MultimediaSession.State | joyn SDK</title>
+
+
+</script>
+
+
+
+<script src="../../../../../../assets/android-developer-reference.js" type="text/javascript"></script>
+
+
+<link href="../../../../../../assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../../assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../../assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../../assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../../assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../../assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../../../../../../assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../../assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../../assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../../assets/prettify.js" type="text/javascript"></script>
+<script src="../../../../../../assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="../../../../../../assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../../../../../assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="../../../../../../assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("../../../../../../");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="Crane">
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+	</br>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Albatros', 'Blackbird', 'Crane' ];
+    
+    var SINCE_LABELS = [ 'Albatros', 'Blackbird', 'Crane' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, '../../../../../')"
+							  onkeyup="return search_changed(event, false, '../../../../../')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+		
+		
+          <a style="text-decoration:none;" href="../../../../../../index.html" tabindex="-1"><img
+              src="../../../../../../assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="source">
+              <li id="home-link"><a href="../../../../../../index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="../../../../../../javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="../../../../../../samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="../../../../../../tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="../../../../../../tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="../../../../../../FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="../../../../../../download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="../../../../../../support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+
+  
+
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links">
+                <a href="../../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../../classes.html" >Class Index</a>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/package-summary.html">com.gsma.services.rcs</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/capability/package-summary.html">com.gsma.services.rcs.capability</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/chat/package-summary.html">com.gsma.services.rcs.chat</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/contacts/package-summary.html">com.gsma.services.rcs.contacts</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/ft/package-summary.html">com.gsma.services.rcs.ft</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../../com/gsma/services/rcs/gsh/package-summary.html">com.gsma.services.rcs.gsh</a></li>
+    <li class="api apilevel-Blackbird">
+  <a href="../../../../../com/gsma/services/rcs/ipcall/package-summary.html">com.gsma.services.rcs.ipcall</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/ish/package-summary.html">com.gsma.services.rcs.ish</a></li>
+    <li class="selected api apilevel-Crane">
+  <a href="../../../../../com/gsma/services/rcs/session/package-summary.html">com.gsma.services.rcs.session</a></li>
+    <li class="api apilevel-Albatros">
+  <a href="../../../../../com/gsma/services/rcs/vsh/package-summary.html">com.gsma.services.rcs.vsh</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaMessageIntent.html">MultimediaMessageIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.html">MultimediaSession</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Direction.html">MultimediaSession.Direction</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.Error.html">MultimediaSession.Error</a></li>
+          <li class="selected api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSession.State.html">MultimediaSession.State</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionIntent.html">MultimediaSessionIntent</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionListener.html">MultimediaSessionListener</a></li>
+          <li class="api apilevel-Crane"><a href="../../../../../com/gsma/services/rcs/session/MultimediaSessionService.html">MultimediaSessionService</a></li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links">
+            <a href="../../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../../classes.html" >Class Index</a>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+     
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        
+      
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+<div>
+<a href="MultimediaSession.State.html">View Documentation</a>
+</div>
+
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="./../../../../../../releases/Crane.html">API Level Crane</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+    static 
+     
+    
+    class
+<h1>MultimediaSession.State</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+<div id="jd-content">
+  <pre class="prettyprint">
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+package com.gsma.services.rcs.session;
+
+import com.gsma.services.rcs.JoynServiceException;
+
+/**
+ * This class maintains the information related to a multimedia
+ * session and offers methods to manage it and to send messages
+ * in real time. 
+ * 
+ * @author Jean-Marc AUFFRET
+ */
+public class MultimediaSession {
+    /**
+     * Multimedia session state
+     */
+    public static class State {
+    	/**
+    	 * Unknown state
+    	 */
+    	public final static int UNKNOWN = 0;
+
+    	/**
+    	 * Session invitation received
+    	 */
+    	public final static int INVITED = 1;
+    	
+    	/**
+    	 * Session invitation sent
+    	 */
+    	public final static int INITIATED = 2;
+    	
+    	/**
+    	 * Session is started
+    	 */
+    	public final static int STARTED = 3;
+    	
+    	/**
+    	 * Session has been aborted or 
+    	 */
+    	public final static int ABORTED = 5;
+    	
+        /**
+         * Session has been terminated
+         */
+        public static final int TERMINATED = 6;
+
+        /**
+    	 * Session has failed 
+    	 */
+    	public final static int FAILED = 7;
+    	
+        private State() {
+        }    	
+    }
+    
+    /**
+     * Direction of the session
+     */
+    public static class Direction {
+        /**
+         * Incoming session
+         */
+        public static final int INCOMING = 0;
+        
+        /**
+         * Outgoing session
+         */
+        public static final int OUTGOING = 1;
+    }     
+    
+    /**
+     * Session error
+     */
+    public static class Error {
+    	/**
+    	 * Session invitation has been declined by remote
+    	 */
+    	public final static int INVITATION_DECLINED = 0;
+
+    	/**
+    	 * Session has failed
+    	 */
+    	public final static int SESSION_FAILED = 1;
+
+    	/**
+    	 * Media has failed
+    	 */
+    	public final static int MEDIA_FAILED = 2;
+
+    	private Error() {
+        }    	
+    }
+    
+    /**
+     * Multimedia session interface
+     */
+    private IMultimediaSession sessionInf;
+
+    /**
+     * Constructor
+     * 
+     * @param sessionInf Multimedia session interface
+     */
+    MultimediaSession(IMultimediaSession sessionInf) {
+    	this.sessionInf = sessionInf;
+    }
+
+    /**
+	 * Returns the session ID of the multimedia session
+	 * 
+	 * @return Session ID
+	 * @throws JoynServiceException
+	 */
+	public String getSessionId() throws JoynServiceException {
+		try {
+			return sessionInf.getSessionId();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns the remote contact
+	 * 
+	 * @return Contact
+	 * @throws JoynServiceException
+	 */
+	public String getRemoteContact() throws JoynServiceException {
+		try {
+			return sessionInf.getRemoteContact();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns the service ID
+	 * 
+	 * @return Service ID
+	 * @throws JoynServiceException
+	 */
+	public String getServiceId() throws JoynServiceException {
+		try {
+			return sessionInf.getServiceId();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns the state of the session
+	 * 
+	 * @return State
+	 * @see MultimediaSession.State
+	 * @throws JoynServiceException
+	 */
+	public int getState() throws JoynServiceException {
+		try {
+			return sessionInf.getState();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns the direction of the session (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see MultimediaSession.Direction
+	 * @throws JoynServiceException
+	 */
+	public int getDirection() throws JoynServiceException {
+		try {
+			return sessionInf.getDirection();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}	
+	
+	/**
+	 * Accepts session invitation.
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void acceptInvitation() throws JoynServiceException {
+		try {
+			sessionInf.acceptInvitation();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Rejects session invitation
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void rejectInvitation() throws JoynServiceException {
+		try {
+			sessionInf.rejectInvitation();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Aborts the session
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public void abortSession() throws JoynServiceException {
+		try {
+			sessionInf.abortSession();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Adds a listener on session events
+	 * 
+	 * @param listener Session event listener
+	 * @throws JoynServiceException
+	 */
+	public void addEventListener(MultimediaSessionListener listener) throws JoynServiceException {
+		try {
+			sessionInf.addEventListener(listener);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Removes a listener on session events
+	 * 
+	 * @param listener Session event listener
+	 * @throws JoynServiceException
+	 */
+	public void removeEventListener(MultimediaSessionListener listener) throws JoynServiceException {
+		try {
+			sessionInf.removeEventListener(listener);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+    /**
+     * Sends a message in real time
+     * 
+     * @param content Message content
+	 * @return Returns true if sent successfully else returns false
+     * @throws JoynServiceException
+     */
+    public boolean sendMessage(byte[] content) throws JoynServiceException {
+		try {
+			return sessionInf.sendMessage(content);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+    }    
+}
+
+  </pre>
+</div>
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+<resources>
+    <application name="WatchConsumer" >
+        <serviceProfile
+            id="/system/watch"
+            name="smartview"
+            role="consumer"
+            serviceImpl="com.orangelabs.rcs.watch.WatchConsumerService"
+            version="1.0" >
+            <supportedTransports>
+                <transport type="TRANSPORT_BT" />
+            </supportedTransports>
+
+            <serviceChannel
+                id="104"
+                qosDataRate="low"
+                qosPriority="low"
+                qosType="unrestrictedDatagramUnOrder" >
+            </serviceChannel>
+        </serviceProfile>
+    </application>
+
+</resources>

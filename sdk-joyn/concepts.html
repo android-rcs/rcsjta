@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
+<title>Concepts | joyn SDK</title>
+
+
+</script>
+<link href="./assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="./assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="./assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="./assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="./assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="./assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="./assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="./assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="./assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="./assets/prettify.js" type="text/javascript"></script>
+<script src="./assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="./assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="./assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="./assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("./");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, './javadoc/')"
+							  onkeyup="return search_changed(event, false, './javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a style="text-decoration:none;" href="./index.html" tabindex="-1"><img
+              src="./assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="home">
+              <li id="home-link"><a href="./index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="./javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="./samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="./tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="./tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="./FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="./download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="./support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Concepts</h1></p>
+			<p><span>The joyn API permits to build new joyn applications on top of the native ones. The joyn API for Android terminal uses the Android concepts.</span></p>
+			<p><span>The joyn API offers the following features:</span></p>
+			<p></p>
+			<ul class="list-concepts-1">
+				<li>
+					<p><span>Core joyn features:</span></p>
+					<ul class="list-concepts-2">
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability API:</a></span> <span>this API exposes classes/methods to manage the supported capabilities of the contacts of the native address book and the capabilities locally supported by the device.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/contacts/package-summary.html">Contacts API:</a></span> <span>this API exposes classes/methods to read joyn infos (presence, capabilities) of the contacts of the native address book.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat API:</a></span> <span>this API exposes classes/methods for using the single chat and the group chat services.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/ft/package-summary.html">File transfer API :</a></span> <span>this API exposes classes/methods to transfer files in real time.</span></p>
+						</li>
+						<li>
+							<p><span><a href="./javadoc/com/gsma/services/rcs/ish/package-summary.html">Image sharing API :</a></span> <span>this API exposes classes/methods to share an image (pre-recorded or live) during a CS call.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/vsh/package-summary.html">Video sharing API:</a></span> <span>this API exposes all classes/methods to share a live video stream during a CS call.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/Intents.html">Intents API:</a></span> <span>this API exposes Intents which permits to link your application with native joyn applications.</span></p>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<p><span>Extended joyn features: this API permits to build new services on top of core joyn services.</span></p>
+					<ul class="list-concepts-2">
+						<li>
+							<p><span><a href="./javadoc/com/gsma/services/rcs/capability/package-summary.html">New capability API :</a></span> <span>this API exposes methods to define and to discover dynamically new capabilities.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="./javadoc/com/gsma/services/rcs/session/package-summary.html">MultiMedia session API :</a></span> <span>this API exposes classes/methods to create new multimedia application. The media is implemented in the application side and is independant from the joyn API.</span></p>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<p></p>
+			</br>
+			
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">	
+				<h2>Architecture</h2>
+				<p><span>The joyn services are implemented via an Android service which runs in background on the device and which offers a joyn API interface for third party applications. Several applications may be connected at the same time to the the single joyn service by using a local client/server model. Several services may be used at a time.</span></p>
+				<p><span>The joyn API uses the following Android concepts:</span></p>
+				<ul >
+					<li>
+						<p><span>Android <a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> </span></p>
+					</li>
+					<li>
+						<p><span>Android <a href="http://developer.android.com/guide/topics/providers/content-providers.html">Content Providers</a></span></p>
+					</li>
+					<li>
+						<p><span><a href="http://developer.android.com/guide/components/aidl.html">AIDL</a> interfaces</span></p>
+					</li>
+				</ul>
+				<p></p>
+				<div style="width:700px;margin:auto;">
+					<img src="./assets-sdk/images/concepts_1.png" width="100%"/>
+				</div>
+				<p></p>			
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Intents</h2>
+				<p><a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> are used to broadcast incoming invitations to applications (eg. file transfer invitation, multimedia session invitation, new chat message, .etc). Then it’s up to the application to catch the Intent and to display a popup or any UI associated to the incoming event.</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Content providers</h2>
+				<p><a href="http://developer.android.com/guide/topics/providers/content-providers.html">Content providers</a> are used to store logs persistently (eg. chat history, rich call log).</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>AIDL interfaces</h2>
+				<p><a href="http://developer.android.com/guide/components/aidl.html">AIDL interfaces</a> are used to implement the entry point of each service API and to manage sessions dynamically (initiate, accept/reject, terminate). An AIDL interface permits also to receive session events thanks to callback methods.</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>API connection</h2>
+				<p>Prior to requesting a service API, an application should connect to the service API : this is the binding procedure between the client side and the server side of the API.</p>
+				<p>When the binding has been done with success then the application can use API methods. Under Android, the binding procedure is asynchronous, so the API connection events are send to the application via callback method (see listener JoynServiceListener).</p>	
+				<p>See the following sequence diagram :</p>		
+				<p></p>
+				<div style="width:700px;margin:auto;">
+					<img src="./assets-sdk/images/concepts_2.png" width="100%"/>
+				</div>
+				<p></p>			
+			</div>
+			</br>
+		</div>
+		</br>
+	</div>
+</div>
+
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+

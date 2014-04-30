@@ -1,0 +1,11 @@
+com.gsma.services.rcs
+com.gsma.services.rcs.capability
+com.gsma.services.rcs.chat
+com.gsma.services.rcs.contacts
+com.gsma.services.rcs.ft
+com.gsma.services.rcs.gsh
+com.gsma.services.rcs.ipcall
+com.gsma.services.rcs.ish
+com.gsma.services.rcs.session
+com.gsma.services.rcs.vsh
+

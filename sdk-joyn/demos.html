@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
+<title>Home | joyn SDK</title>
+
+
+</script>
+<link href="./assets/android-developer-docs-devguide.css" rel="stylesheet" type="text/css" />
+<link href="./assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="./assets/joyn-sdk.css" rel="stylesheet" type="text/css" />
+<link href="./assets/skin-carousel-ri.css" rel="stylesheet" type="text/css" />
+<link href="./assets/skin-carousel-home.css" rel="stylesheet" type="text/css" />
+<script src="./assets/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="./assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="./assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="./assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="./assets/prettify.js" type="text/javascript"></script>
+<script src="./assets/joyn-sdk.js" type="text/javascript"></script>
+<script src="./assets/carousel.js" type="text/javascript"></script>
+<script type="text/javascript" src="./assets/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="./assets/widget.js"></script>
+<script type="text/javascript">
+  setToRoot("./");
+</script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+<script type="text/javascript">
+	function mycarousel_initCallback(carousel) {
+		jQuery('.jcarousel-control a').bind('click', function() {
+			if(jQuery(this).attr('id') != ''){
+				carousel.scroll(jQuery.jcarousel.intval(jQuery(this).attr('id')));
+				return false;
+			}
+		});
+		 // Disable autoscrolling if the user clicks the prev or next button.
+		carousel.buttonNext.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		carousel.buttonPrev.bind('click', function() {
+			carousel.startAuto(0);
+		});
+
+		// Pause autoscrolling if the user moves with the cursor over the clip.
+		carousel.clip.hover(function() {
+			carousel.stopAuto();
+		}, function() {
+			carousel.startAuto();
+		});
+	 };
+	 
+	 function mycarousel_itemVisibleInCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color','#ff6600');
+	 };
+	 
+	 function mycarousel_itemVisibleOutCallback(a1,a2,index,a4) {
+		$('#' + index).find(">:first-child").css('background-color',null);
+	 };
+	jQuery(document).ready(function() {
+		jQuery('#mycarousel').jcarousel({
+			scroll: 1,
+			initCallback: mycarousel_initCallback,
+			itemVisibleInCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleInCallback			  
+			},
+			itemVisibleOutCallback: {
+			  onBeforeAnimation: mycarousel_itemVisibleOutCallback			  
+			},
+			auto: 5,
+			wrap: 'last'
+			
+		});
+	});
+	
+	jQuery(document).ready(function() {
+		jQuery('#carousel-home').jcarousel({
+			scroll: 3,
+			vertical:true
+		});
+	});
+
+</script>
+</head>
+
+
+<body class="gc-documentation">
+<a id="top"></a>
+
+
+<div style="min-width: 1402px;width:100%;border-bottom:2px solid #ff6600;">
+<div style="width:1402px;margin:auto;">
+  <div id="header">
+  
+      <div id="headerRight">
+         
+
+    	 
+
+		
+		
+		
+		
+		  <div id="search" >
+			  <div id="searchForm">
+				  <form accept-charset="utf-8" class="gsc-search-box" 
+						>
+					
+							<input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+							  title="search javadoc" name="q"
+							  value="search javadoc"
+							  onFocus="search_focus_changed(this, true)"
+							  onBlur="search_focus_changed(this, false)"
+							  onkeydown="return search_changed(event, true, './javadoc/')"
+							  onkeyup="return search_changed(event, false, './javadoc/')" />
+						  <div id="search_filtered_div" class="no-display">
+							  <table id="search_filtered" cellspacing=0>
+							  </table>
+						  </div>
+						  
+				  </form>
+			  </div><!-- searchForm -->
+		  </div><!-- search -->
+		  
+		  
+
+      </div><!-- headerRight -->
+      <div id="headerLeft">
+		
+		
+          <a style="text-decoration:none;" href="./index.html" tabindex="-1"><img
+              src="./assets/images/joyn_logo_sdk.png" alt="joyn SDK" />SDK for Android</a>
+          <ul class="home">
+              <li id="home-link"><a href="./index.html"><span>Home</span></a></li>
+              <li id="source-link"><a href="./javadoc/index.html"
+                                  onClick="return loadLast('source')"><span>Javadoc</span></a></li>
+              <li id="samples-link"><a href="./samples/index.html"
+                                  onClick="return loadLast('samples')"><span>Samples</span></a></li>
+			  <li id="tutorials-link"><a href="./tutorials/index.html"
+                                  onClick="return loadLast('tutorials')"><span>Tutorials</span></a></li>
+              <li id="tools-link"><a href="./tools/index.html"
+                                  onClick="return loadLast('tools')"><span>Tools</span></a></li>
+              <!--<li id="faq-link"><a href="./FAQ/index.html"
+                                  onClick="return loadLast('faq')"><span>FAQ</span></a></li>-->
+              <li id="download-link"><a href="./download/index.html"
+                                  onClick="return loadLast('download')"><span>Downloads</span></a></li>
+			  <li id="faq-link"><a href="./support.html"
+                                  onClick="return loadLast('faq')"><span>Support</span></a></li>
+          </ul> 
+		  
+      </div>
+      
+  </div><!-- header -->
+  </div>
+  </div>
+  
+	
+
+  
+
+
+
+<div id="body-content">
+<div id="doc-content" style="position:relative;">
+
+<script type="text/javascript">
+    $('.slideshow-container').dacSlideshow({
+        auto: true,
+        btnPrev: '.slideshow-prev',
+        btnNext: '.slideshow-next'
+    });
+</script>
+<div class="background-sdk">
+
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">	
+			<div style="display:inline-block">
+				<div style="display:inline-block;float:left;"><h1 style="border:0;">Applications demonstrating joyn APIs</h1></div>
+				<a  class="dl-btn" href="./index.html">Home</a>
+			</div>
+			<div id="mycarousel" class="jcarousel-skin-tango">	
+				<div class="jcarousel-control" >					
+					<ul >	
+
+						<li>
+							<h2 class="demo-title">Chat Application</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k2EOEbeoEPZ87k3SqZZ" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This chat application demonstrates instant messaging and file transfer using joyn APIs.</br></br>Take a look at the <a href="./javadoc/com/gsma/services/rcs/chat/package-summary.html">chat API</a> documentation and see how you can further enhance your instant messaging experience.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Deezer App</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k65awxJFmFbghS3SoSq" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This application demonstrates how you can integrate share functionalities with your existing application.</br></br> Using joyn <a href="./javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> you can send custom messages to any of your contacts.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Popup Application</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k5YBvROqkbZH0O3Sp38" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This applications shows how to use real time messaging in a fun and useful way.</br></br>Popup application uses <a href="./javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> custom messaging to send text and image so you never miss that coffee break you've been waiting for.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Whiteboard App</h2>
+							<iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x15d0cz" class="video-frame-carousel"></iframe>
+							<div class="demo-text">Whiteboard application demonstrates real time communications with joyn APIs.</br></br>Make cooperative drawings with contacts from your address book using <a href="./javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a>.</div>
+						</li>
+
+						<li>
+							<h2 class="demo-title">LiveSharing App</h2>
+							<iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x15d0aj" class="video-frame-carousel"></iframe>
+							<div class="demo-text">Live browsing shows how you can share your browsing experience in real time with one of your contacts.</br></br>Using <a href="./javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> browser events are sent in real time to your contacts and replicated on their application.</div>
+						</li>						
+					</ul>
+					<a href="#" class="slide-btn left" id="1"><div></div></a>
+					<a href="#" class="slide-btn" id="2"><div></div></a>
+					<a href="#" class="slide-btn" id="3"><div></div></a>
+					<a href="#" class="slide-btn" id="4"><div></div></a>
+					<a href="#" class="slide-btn right" id="5"><div></div></a>
+				</div>
+			</div>
+		</div>
+		</br>
+		
+		<div class="content-body " style="display:inline-block;margin:30px 5%;width:90%">
+			<div class="demo_box" style="float:left">
+				<div>
+					<p><b><a href="./getStarted.html">Get Started</a></b></p>
+				</div>	
+				<div>
+					<p>Learn how to get joyn up and running on an Android device.
+					</p>
+				</div>
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="https://rcsjta.googlecode.com/git/joyn-sdk-3.2.3.zip">Get latest SDK</a></b></p>
+				</div>
+				<div>
+					<p>
+						The latest version is 3.2.3	</br>				
+						<a style="color:#006699;text-decoration:underline;font-size:14px"href="./releases/joyn-sdk-3.2.3.txt">release note</a>.
+					</p>	
+					
+				</div>	
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="./javadoc/index.html">SDK Reference</a></b></p>
+				</div>
+				<div>
+					<p>
+						Full documentation for joyn terminal APIs.
+					</p>
+					
+				</div>	
+			</div>
+			<div  style="float:right" class="demo_box">
+				<div>
+					<p><b><a href="./concepts.html">Concepts</a></b></p>
+				</div>
+				<div>
+					<p>
+					Discover the concepts used in the joyn APIs.
+					</p>
+				</div>	
+			</div>
+		</div>
+	</div>	
+</div>	
+
+
+<div id="footer">
+<div class="footer">
+<div style="margin:0 0 10px 200px;">Copyright (C) 2013 Orange S.A.,</br> Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.</div>
+</div>
+</div> <!-- end footer -->
+
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize doclava-developer-docs.js */
+</script>
+
+</body>
+</html>
+
+
+

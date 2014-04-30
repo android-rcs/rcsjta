@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name="app_name">Popup</string>
+<string name="title_info">Information</string>
+<string name="label_ok">OK</string>
+<string name="label_api_disconnected">joyn service has been stopped</string>
+<string name="label_api_disabled">joyn service is not started</string>
+<string name="label_service_disabled">joyn service not available</string>
+<string name="title_popup">Send an instant Popup</string>
+<string name="label_popup_failed">Popup has failed</string>
+<string name="label_send">Send</string>
+<string name="label_remote">Message from %s</string>
+<string name="label_message">Type a short message:</string>
+<string name="label_contacts">Select connected contacts:</string>
+<string name="label_animation">Select an animation:</string>
+<string name="label_tts">Request a Text-To-Speech</string>
+<string name="label_no_contact">No contact available</string>
+<string name="label_hint_message">no message</string>
+<string name="label_send_success">Popup sent with success to %s</string>
+<string name="label_send_failed">Error while sending a Popup to %s</string>
+
+</resources>
+

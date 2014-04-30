@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name="app_name">Whiteboard</string>
+
+<string name="title_msg">Information</string>
+<string name="label_accept">Accept</string>
+<string name="label_decline">Decline</string>
+<string name="label_ok">OK</string>
+<string name="label_cancel">Cancel</string>
+
+<string name="menu_close_session">Quit</string>
+<string name="label_from">From:</string>
+<string name="label_command_in_progress">Sharing invitation in progress...</string>
+<string name="label_confirm_close">Do you want to stop the sharing?</string>
+<string name="label_invitation_failed">Invitation has failed</string>
+<string name="label_service_not_available">The service is not available. Please retry later.</string>
+<string name="label_initiate_session">Initiate sharing</string>
+
+<string name="label_close_session">Stop sharing</string>
+<string name="label_session_canceled">Invitation has been canceled</string>
+<string name="label_session_aborted">Sharing aborted</string>
+<string name="label_session_declined">Invitation has been declined</string>
+<string name="label_session_failed">Sharing has failed (error code %d)</string>
+<string name="label_session_has_expired">Sharing session has expired</string>
+<string name="title_recv_invitation">Whiteboard sharing invitation</string>
+<string name="label_recv_invitation">from %s</string>
+<string name="label_invitation">Do you want to share with %s?</string>
+
+<string name="label_shake_to_erase">Tips: Shake to erase the whiteboard</string>
+
+</resources>
+

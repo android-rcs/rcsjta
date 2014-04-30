@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="animations">
+        <item>Android</item>
+        <item>Broken</item>
+        <item>Coffee</item>
+        <item>Drink</item>
+        <item>Garfield</item>
+        <item>Joyn</item>
+        <item>Newyear</item>
+        <item>Smiley</item>
+    </string-array>
+</resources>

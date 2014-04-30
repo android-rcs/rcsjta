@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Watch</string>
+    <string name="menu_settings">Settings</string>
+    <string name="label_connection_established">Connected to phone</string>
+    <string name="label_connection_not_established">Unable to connect phone</string>
+    <string name="label_no_peers_found">No phone found!</string>
+    <string name="label_no_activity">No activity registered as a receiver!</string>
+    <string name="label_no_bluetooth">"Please check bluetooth connection!</string>
+    	
+</resources>

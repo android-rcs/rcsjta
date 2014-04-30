@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+		<TextView android:id="@+id/label1"
+		    android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dip"
+			android:layout_marginBottom="10dip"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="@android:color/black"
+			android:text="Select a contact to initiate a whiteboard sharing:"/>
+		
+        <Spinner android:id="@+id/contact"
+		    android:layout_below="@+id/label1"
+			android:layout_marginBottom="10dip"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			android:textColor="@android:color/black"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+		
+   		<Button android:id="@+id/initiate_btn"
+		    android:layout_below="@+id/contact"
+		 	android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			android:layout_marginBottom="20dip"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+	 		android:textColor="@android:color/black"
+		    android:text="Share"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
+	
+		<TextView android:id="@+id/label2"
+		    android:layout_below="@+id/initiate_btn"
+		    android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dip"
+			android:layout_marginBottom="10dip"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:textColor="@android:color/black"
+			android:text="Powered by:"/>
+</RelativeLayout>
