@@ -18,12 +18,6 @@
 
 package com.orangelabs.rcs.provider.settings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -41,6 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class RcsSettings {
+
 	/**
 	 * Current instance
 	 */
@@ -55,7 +50,7 @@ public class RcsSettings {
 	 * Database URI
 	 */
 	private Uri databaseUri = RcsSettingsData.CONTENT_URI;
-
+	
     /**
      * Create instance
      *
@@ -1407,7 +1402,7 @@ public class RcsSettings {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Get max number of entries per contact in the chat log
 	 * 
@@ -1452,7 +1447,8 @@ public class RcsSettings {
 		}
 		return result;
 	}
-
+	
+	
     /**
      * Get polling period used before each IMS service check (e.g. test subscription state for presence service)
      *
@@ -2493,64 +2489,7 @@ public class RcsSettings {
 			}
 		}
 		return result;
-	}    
-    
-    /**
-     * Backup account settings
-     * 
-     * @param account Account
-     */
-    public void backupAccountSettings(String account) {
-    	try {
-	    	String packageName = "com.orangelabs.rcs";
-	    	String dbFile = Environment.getDataDirectory() + "/data/" + packageName + "/databases/" + RcsSettingsProvider.DATABASE_NAME;
-	    	String backupFile = Environment.getDataDirectory() + "/data/" + packageName + "/databases/" + account + ".db";
-	    	
-	    	OutputStream outStream = new FileOutputStream(backupFile);
-	    	InputStream inStream = new FileInputStream(dbFile);
- 		    byte[] buffer = new byte[1024];
-		    int length;
-		    while ((length = inStream.read(buffer))>0) {
-				outStream.write(buffer, 0, length);
-		    }
-		    outStream.flush();
-		    outStream.close();
-		    inStream.close();		    	
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    }
-
-    /**
-     * Restore account settings
-     * 
-     * @param account Account
-     */
-    public void restoreAccountSettings(String account) {
-    	try {
-	    	String packageName = "com.orangelabs.rcs";
-	    	String dbFile = Environment.getDataDirectory() + "/data/" + packageName + "/databases/" + RcsSettingsProvider.DATABASE_NAME;
-	    	String restoreFile = Environment.getDataDirectory() + "/data/" + packageName + "/databases/" + account + ".db";
-	    	
-	    	File file = new File(restoreFile);
-	    	if (!file.exists()) {
-	    		return;
-	    	}
-	    	
-	    	OutputStream outStream = new FileOutputStream(dbFile);
-	    	InputStream inStream = new FileInputStream(file);
- 		    byte[] buffer = new byte[1024];
-		    int length;
-		    while ((length = inStream.read(buffer))>0) {
-				outStream.write(buffer, 0, length);
-		    }
-		    outStream.flush();
-		    outStream.close();
-		    inStream.close();		    	
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    }
+	}
     
 	/**
 	 * Get the root directory for photos

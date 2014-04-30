@@ -42,6 +42,7 @@ import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
+import com.orangelabs.rcs.provider.BackupRestoreDb;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
@@ -327,12 +328,14 @@ public class StartService extends Service {
             setNewUserAccount(true);
         } else
         if (hasChangedAccount()) {
+        	// keep a maximum of saved accounts
+    		BackupRestoreDb.cleanBackups(currentUserAccount);
         	// Backup last account settings
         	if (lastUserAccount != null) {
         		if (logger.isActivated()) {
         			logger.info("Backup " + lastUserAccount);
         		}
-        		RcsSettings.getInstance().backupAccountSettings(lastUserAccount);
+        		BackupRestoreDb.backupAccount(lastUserAccount);
         	}
         	
             // Set the country code
@@ -349,7 +352,7 @@ public class StartService extends Service {
     		if (logger.isActivated()) {
     			logger.info("Restore " + currentUserAccount);
     		}
-            RcsSettings.getInstance().restoreAccountSettings(currentUserAccount);
+    		BackupRestoreDb.restoreAccount(currentUserAccount);
             
             // Activate service if new account
             RcsSettings.getInstance().setServiceActivationState(true);

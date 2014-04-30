@@ -31,7 +31,7 @@ public class ChatData {
 	/**
 	 * Database URIs
 	 */
-	static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/chat");
+	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/chat");
 	
 	/**
 	 * Column name

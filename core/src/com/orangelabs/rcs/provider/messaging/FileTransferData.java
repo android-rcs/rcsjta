@@ -13,7 +13,7 @@ public class FileTransferData {
 	/**
 	 * Database URI
 	 */
-	static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ft/ft");
+	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ft/ft");
 	
 	/**
 	 * Column name

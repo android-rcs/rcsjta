@@ -31,7 +31,7 @@ public class ImageSharingData {
 	/**
 	 * Database URI
 	 */
-	static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ish/ish");
+	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ish/ish");
 	
 	/**
 	 * Column name
