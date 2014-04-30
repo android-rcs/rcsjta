@@ -4,4 +4,5 @@
 /core/rcs_api.jar
 /RI/.classpath
 /RI/lint.xml
+*.bak
 ~*.doc

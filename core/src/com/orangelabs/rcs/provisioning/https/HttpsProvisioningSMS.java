@@ -171,7 +171,7 @@ public class HttpsProvisioningSMS {
                                     	RcsSettings.getInstance().setProvisioningVersion("0");
                                     	LauncherUtils.stopRcsService(context);
                                     	LauncherUtils.resetRcsConfig(context);
-                                    	LauncherUtils.launchRcsService(context, true);
+                                    	LauncherUtils.launchRcsService(context, true, false);
                                     }
                                 };
                                 t.start();

@@ -59,15 +59,16 @@ public class ContactUtils {
         		null, 
      		    null, 
      		    null);
-        while(cursor.moveToNext()){
-    		String databaseNumber = PhoneUtils.extractNumberFromUri(cursor.getString(1));
-    		if (databaseNumber.equals(number)) {
-    			id = cursor.getInt(0);
-    			break;
-    		}
-        }
-        cursor.close();
-	       	
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				String databaseNumber = PhoneUtils.extractNumberFromUri(cursor.getString(1));
+				if (databaseNumber.equals(number)) {
+					id = cursor.getInt(0);
+					break;
+				}
+			}
+			cursor.close();
+		}       	
         return id;
 	}
 	
@@ -144,11 +145,12 @@ public class ContactUtils {
 				Data._ID + "=?",          
 				new String[] {String.valueOf(rawContactId)}, 
 				null);
-		if (c.moveToFirst()){
-			contactId = c.getLong(0);
-		}
-		c.close();
-		
+		if (c != null) {
+			if (c.moveToFirst()) {
+				contactId = c.getLong(0);
+			}
+			c.close();
+		}		
 		// Return the resulting contact uri
 		Uri resultUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId); 
 		return resultUri;

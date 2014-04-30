@@ -17,12 +17,11 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
-
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.IFileTransfer;
+import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -268,19 +267,62 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     	t.start();
 	}
 
+    /**
+     * Is HTTP transfer
+     *
+     * @return Boolean
+     */
+    public boolean isHttpTransfer() {
+        return (session instanceof HttpFileTransferSession);
+    }
+    
 	/**
-	 * Pauses the file transfer
+	 * Pauses the file transfer (only for HTTP transfer)
 	 */
 	public void pauseTransfer() {
-		// TODO
+		if (logger.isActivated()) {
+			logger.info("Pause session");
+		}
+
+		if (isHttpTransfer()) {
+			((HttpFileTransferSession) session).pauseFileTransfer();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Pause available only for HTTP transfer");
+			}
+		}
 	}
-	
+
 	/**
-	 * Resumes the file transfer
+	 * Pause the session (only for HTTP transfer)
+	 */
+	public boolean isSessionPaused() {
+		if (isHttpTransfer()) {
+			return ((HttpFileTransferSession) session).isFileTransferPaused();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Pause available only for HTTP transfer");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Resume the session (only for HTTP transfer)
 	 */
 	public void resumeTransfer() {
-		// TODO
-	}	
+		if (logger.isActivated()) {
+			logger.info("Resuming session paused=" + isSessionPaused() + " http=" + isHttpTransfer());
+		}
+
+		if (isHttpTransfer() && isSessionPaused()) {
+			((HttpFileTransferSession) session).resumeFileTransfer();
+		} else {
+			if (logger.isActivated()) {
+				logger.info("Resuming can only be used on a paused HTTP transfer");
+			}
+		}
+	}
 	
 	/**
 	 * Adds a listener on file transfer events
@@ -322,7 +364,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			if (logger.isActivated()) {
 				logger.info("Session started");
 			}
-	
+
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
 
@@ -351,11 +393,11 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			if (logger.isActivated()) {
 				logger.info("Session aborted (reason " + reason + ")");
 			}
-	
+
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
-			
-	  		// Notify event listeners
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -388,9 +430,9 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	  		} else {
 				// Update rich messaging history
-		  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
-		
-		  		// Notify event listeners
+				RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+
+				// Notify event listeners
 				final int N = listeners.beginBroadcast();
 		        for (int i=0; i < N; i++) {
 		            try {
@@ -426,9 +468,9 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-	  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
-			
-	  		// Notify event listeners
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
+
+			// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
@@ -469,10 +511,6 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 */
     public void handleTransferProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.debug("Sharing progress");
-			}
-			
 			// Update rich messaging history
 	  		RichMessagingHistory.getInstance().updateFileTransferProgress(session.getSessionID(), currentSize, totalSize);
 			
@@ -523,14 +561,55 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     /**
      * File transfer has been paused
      */
-    public void handleFileTransferPaused() {
-    	// TODO
-    }
+	public void handleFileTransferPaused() {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.info("Transfer paused");
+			}
 
-    /**
-     * File transfer has been resumed
-     */
-    public void handleFileTransferResumed() {
-    	// TODO
-    }
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.PAUSED);
+
+			// Notify event listeners
+			final int N = listeners.beginBroadcast();
+			for (int i = 0; i < N; i++) {
+				try {
+					listeners.getBroadcastItem(i).onFileTransferPaused();
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
+	/**
+	 * File transfer has been resumed
+	 */
+	public void handleFileTransferResumed() {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.info("Transfer resumed");
+			}
+
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
+
+			// Notify event listeners
+			final int N = listeners.beginBroadcast();
+			for (int i = 0; i < N; i++) {
+				try {
+					listeners.getBroadcastItem(i).onFileTransferResumed();
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
 }

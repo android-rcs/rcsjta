@@ -26,6 +26,18 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent">
 
+		<TextView
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+		android:text="GSMA release:" />
+		<EditText android:id="@+id/release"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:enabled="false"/>
+        
        	<TextView android:text="IMS authentication procedure for Mobile access:"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
@@ -57,7 +69,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="IMS display name:"
 	    android:paddingTop="5dip"
@@ -68,7 +80,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="IMS home domain:"
 	    android:paddingTop="5dip"
@@ -79,7 +91,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="IMS private URI for HTTP Digest:"
 	    android:paddingTop="5dip"
@@ -90,7 +102,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="IMS password for HTTP Digest:"
 	    android:paddingTop="5dip"
@@ -101,7 +113,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="IMS realm for HTTP Digest:"
 	    android:paddingTop="5dip"
@@ -112,7 +124,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="P-CSCF address for Mobile access:"
 	    android:paddingTop="5dip"
@@ -122,8 +134,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:layout_marginRight="5dip"/>
 
        	<TextView android:text="P-CSCF port for Mobile access:"
 	    android:paddingTop="5dip"
@@ -134,7 +145,8 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"/>
 
 	 	<TextView android:text="P-CSCF address for Wi-Fi access:"
 	    android:paddingTop="5dip"
@@ -144,8 +156,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:layout_marginRight="5dip"/>
 
 	 	<TextView android:text="P-CSCF port for Wi-Fi access:"
 	    android:paddingTop="5dip"
@@ -156,7 +167,8 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5" android:inputType="number" android:lines="1"/>
+	 	android:maxLength="5"
+	 	android:inputType="number"/>
 
 	 	<TextView android:text="XDM server address:"
 	    android:paddingTop="5dip"
@@ -166,8 +178,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:layout_marginRight="5dip"/>
 
        	<TextView android:text="XDM server login:"
 	    android:paddingTop="5dip"
@@ -178,7 +189,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="XDM server password:"
 	    android:paddingTop="5dip"
@@ -189,7 +200,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
 		<TextView android:text="FT HTTP server address:"
 	    android:paddingTop="5dip"
@@ -199,8 +210,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:layout_marginRight="5dip"/>
 
        	<TextView android:text="FT HTTP server login:"
 	    android:paddingTop="5dip"
@@ -211,7 +221,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="FT HTTP server password:"
 	    android:paddingTop="5dip"
@@ -222,7 +232,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 		
        	<TextView android:text="IM conference URI:"
 	    android:paddingTop="5dip"
@@ -233,7 +243,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="End user confirmation URI:"
 	    android:paddingTop="5dip"
@@ -244,7 +254,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="100" android:lines="1"/>
+	 	android:maxLength="100"/>
 
        	<TextView android:text="APN:"
 	    android:paddingTop="5dip"
@@ -254,8 +264,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
-	 	android:layout_marginRight="5dip"
-	 	android:lines="1"/>
+	 	android:layout_marginRight="5dip"/>
 
        	<TextView android:text="Country code:"
 	    android:paddingTop="5dip"
@@ -266,8 +275,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4"
-	 	android:lines="1"/>
+	 	android:maxLength="4"/>
 
        	<TextView android:text="Country area code:"
 	    android:paddingTop="5dip"
@@ -278,8 +286,7 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4"
-	 	android:lines="1"/>
+	 	android:maxLength="4"/>
 
 	 	<TextView android:text="Capabilities:"
 	    android:paddingTop="5dip"
@@ -326,14 +333,14 @@
         android:textStyle="bold"
         android:text="IM Group session" />
         
-        <CheckBox android:id="@+id/ip_voice_call"
+        <CheckBox android:id="@+id/ipvoicecall"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
         android:textStyle="bold"
         android:enabled="true"
         android:text="IP Voice call" />
         
-        <CheckBox android:id="@+id/ip_video_call"
+        <CheckBox android:id="@+id/ipvideocall"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
         android:textStyle="bold"
@@ -395,7 +402,7 @@
         android:textStyle="bold"
 		android:enabled="true"
         android:text="SIP automata" />
-		
+
 	</LinearLayout>
 	</ScrollView>
 	

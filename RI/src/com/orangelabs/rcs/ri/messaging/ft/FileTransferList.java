@@ -186,6 +186,9 @@ public class FileTransferList extends Activity {
 		} else
 		if (state == FileTransfer.State.TRANSFERRED) {
 			return getString(R.string.label_state_transferred);
+		} else 
+		if (state == FileTransfer.State.DISPLAYED) {
+			return getString(R.string.label_state_displayed);
 		} else {
 			return getString(R.string.label_state_unknown);
 		}

@@ -408,7 +408,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
     public IPCallServiceConfiguration getConfiguration() {
     	return new IPCallServiceConfiguration(
-    			RcsSettings.getInstance().isVoiceBreakoutSupported());    	
+    			RcsSettings.getInstance().isIPVoiceCallBreakoutAA() || RcsSettings.getInstance().isIPVoiceCallBreakoutAA());    	
 	}
     
     /**

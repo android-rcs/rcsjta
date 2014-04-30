@@ -31,6 +31,14 @@ public class MediaDescription {
 	 */
 	public String name;
 
+	@Override
+	public String toString() {
+		return "MediaDescription [name=" + name + ", port=" + port + ", protocol=" + protocol + ", payloadType=" + payloadType
+				+ ", payload=" + payload + ", mediaTitle=" + mediaTitle + ", connectionInfo=" + connectionInfo + ", bandwidthInfo="
+				+ bandwidthInfo + ", senderBandwidthInfo=" + senderBandwidthInfo + ", receiverBandwidthInfo=" + receiverBandwidthInfo
+				+ ", encryptionKey=" + encryptionKey + ", mediaAttributes=" + mediaAttributes + "]";
+	}
+
 	/**
 	 * Media port
 	 */

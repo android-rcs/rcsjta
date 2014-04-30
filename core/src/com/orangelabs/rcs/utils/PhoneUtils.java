@@ -44,7 +44,7 @@ public class PhoneUtils {
 	 * Country area code
 	 */
 	private static String COUNTRY_AREA_CODE = "0";
-
+	
 	/**
 	 * Set the country code
 	 * 
@@ -191,12 +191,20 @@ public class PhoneUtils {
 		}
 		return number1.equals(number2);
 	}
-
+	
 	/**
-	 * Check if phone number is global
+	 * Check if phone number is valid
 	 * 
-	 * @param phone Phone numner
-	 * @return Boolean
+	 * <pre>
+	 * <br>
+	 * It is not valid if : 
+	 * <li>well formatted (not digits only or '+') 
+	 * <li>minimum length
+	 * </pre>
+	 * 
+	 * @param phone
+	 *            Phone number
+	 * @return Boolean true if it is a phone valid number
 	 */
 	public static boolean isGlobalPhoneNumber(final String phone) {
 		if (phone == null) {
@@ -208,5 +216,18 @@ public class PhoneUtils {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Clean URI from '<' heading character or '>' trailing character
+	 * 
+	 * @param uri
+	 *            the identity
+	 * @return the cleaned Uri
+	 */
+	public static String cleanUriHeadingTrailingChar(String uri) {
+		if (uri == null)
+			return uri;
+		return uri.replaceAll("^<|>$", "");
 	}
 }

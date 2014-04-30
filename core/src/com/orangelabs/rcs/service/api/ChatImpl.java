@@ -20,6 +20,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -204,7 +205,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				}
 	
 				// Generate a message Id
-				final String msgId = ChatUtils.generateMessageId();
+				final String msgId = IdGenerator.generateMessageID();
 		
 				// Send message
 		        Thread t = new Thread() {
@@ -305,9 +306,9 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    /**
-	 * Session is started
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
+     */
     public void handleSessionStarted() {
     	synchronized(lock) {
 	    	if (logger.isActivated()) {
@@ -319,11 +320,9 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /**
-     * Session has been aborted
-     * 
-	 * @param reason Termination reason
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted(int)
+     */
     public void handleSessionAborted(int reason) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -338,8 +337,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /**
-     * Session has been terminated by remote
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
     public void handleSessionTerminatedByRemote() {
     	synchronized(lock) {
@@ -355,11 +354,9 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-	/**
-	 * New text message received
-	 * 
-	 * @param text Text message
-	 */
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
+     */
     public void handleReceiveMessage(InstantMessage message) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -398,10 +395,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /**
-     * New geoloc message received
-     * 
-     * @param geoloc Geoloc message
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveGeoloc(com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage)
      */
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
     	synchronized(lock) {
@@ -443,39 +438,44 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /**
-     * IM session error
-     * 
-     * @param error Error
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError(com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
      */
-    public void handleImError(ChatError error) {
-    	synchronized(lock) {
+	public void handleImError(ChatError error) {
+		synchronized (lock) {
 			if (logger.isActivated()) {
 				logger.info("IM error " + error.getErrorCode());
 			}
-			
+
 			// Update rich messaging history
-	    	switch(error.getErrorCode()){
-		    	case ChatError.SESSION_INITIATION_FAILED:
-		    	case ChatError.SESSION_INITIATION_CANCELLED:
-					RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
-							ChatLog.Message.Status.Content.FAILED);
-					// TODO: notify listener
-		    		break;
-		    	default:
-		    		break;
-	    	}
-	    	
-	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getContributionID());
-	    }
-    }
+			switch (error.getErrorCode()) {
+			case ChatError.SESSION_INITIATION_FAILED:
+			case ChatError.SESSION_INITIATION_CANCELLED:
+				RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
+						ChatLog.Message.Status.Content.FAILED);
+				// notify listener
+				final int N = listeners.beginBroadcast();
+				for (int i = 0; i < N; i++) {
+					try {
+						listeners.getBroadcastItem(i).onReportMessageFailed(session.getFirstMessage().getMessageId());
+					} catch (Exception e) {
+						if (logger.isActivated()) {
+							logger.error("Can't notify listener", e);
+						}
+					}
+				}
+				listeners.finishBroadcast();
+				break;
+			default:
+				break;
+			}
+			// Remove session from the list
+			ChatServiceImpl.removeChatSession(session.getContributionID());
+		}
+	}
     
-    /**
-	 * Is composing event
-	 * 
-	 * @param contact Contact
-	 * @param status Status
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)
 	 */
 	public void handleIsComposingEvent(String contact, boolean status) {
     	synchronized(lock) {
@@ -498,20 +498,17 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		}
 	}
     
-    /**
-     * New message delivery status
-     * 
-	 * @param msgId Message ID
-     * @param status Delivery status
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleMessageDeliveryStatus(String msgId, String status) {
+    public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status);
+			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status, contact);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -522,8 +519,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	            	} else
 	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 	            		listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-	            	} else
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
+	            	} else {
 	            		listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
 	            	}
 	            } catch(Exception e) {

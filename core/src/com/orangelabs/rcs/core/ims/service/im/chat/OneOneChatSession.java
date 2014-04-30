@@ -18,11 +18,14 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import java.util.List;
+
 import javax2.sip.header.SubjectHeader;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -35,6 +38,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.StringUtils;
 
 /**
@@ -58,8 +62,12 @@ public abstract class OneOneChatSession extends ChatSession {
 		super(parent, contact, OneOneChatSession.generateOneOneParticipants(contact));
 		
 		// Set feature tags
-        setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());
+        List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
+        setFeatureTags(featureTags);
 		
+        // Set Accept-Contact header
+        setAcceptContactTags(featureTags);
+
 		// Set accept-types
 		String acceptTypes = CpimMessage.MIME_TYPE + " " + IsComposingInfo.MIME_TYPE;
         setAcceptTypes(acceptTypes);
@@ -123,25 +131,32 @@ public abstract class OneOneChatSession extends ChatSession {
 	 * @param txt Text message
 	 */
 	public void sendTextMessage(String msgId, String txt) {
-		boolean useImdn = getImdnManager().isImdnActivated();
-		String mime = CpimMessage.MIME_TYPE;
+        boolean useImdn = getImdnManager().isImdnActivated();
+        String imdnMsgId = null;
+        String mime = CpimMessage.MIME_TYPE;
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
 
 		String content;
 		if (useImdn) {
-			// Send message in CPIM + IMDN
-			content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
+            // Send message in CPIM + IMDN
+            imdnMsgId = IdGenerator.generateMessageID();
+			content = ChatUtils.buildCpimMessageWithImdn(from, to, imdnMsgId, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		} else {
 			// Send message in CPIM
 			content = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
 		}
 
 		// Send content
-		boolean result = sendDataChunks(msgId, content, mime);
+		boolean result = sendDataChunks(msgId, content, mime, MsrpSession.TypeMsrpChunk.TextMessage);
+
+        // Use IMDN MessageID as reference if existing
+        if (useImdn) {
+            msgId = imdnMsgId;
+        }
 
 		// Update rich messaging history
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn);
+		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
 		RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
@@ -151,7 +166,7 @@ public abstract class OneOneChatSession extends ChatSession {
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, ImdnDocument.DELIVERY_STATUS_FAILED);
+	    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, ImdnDocument.DELIVERY_STATUS_FAILED, null);
 			}
 		}
 	}
@@ -164,6 +179,7 @@ public abstract class OneOneChatSession extends ChatSession {
 	 */
 	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
 		boolean useImdn = getImdnManager().isImdnActivated();
+        String imdnMsgId = null;
 		String mime = CpimMessage.MIME_TYPE;
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
@@ -172,17 +188,23 @@ public abstract class OneOneChatSession extends ChatSession {
 		String content;
 		if (useImdn) {
 			// Send message in CPIM + IMDN
-			content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, geoDoc, GeolocInfoDocument.MIME_TYPE);
+            imdnMsgId = IdGenerator.generateMessageID();
+			content = ChatUtils.buildCpimMessageWithImdn(from, to, imdnMsgId, geoDoc, GeolocInfoDocument.MIME_TYPE);
 		} else {
 			// Send message in CPIM
 			content = ChatUtils.buildCpimMessage(from, to, geoDoc, GeolocInfoDocument.MIME_TYPE);
 		}
 
 		// Send content
-		boolean result = sendDataChunks(msgId, content, mime);
+		boolean result = sendDataChunks(msgId, content, mime, MsrpSession.TypeMsrpChunk.GeoLocation);
+
+        // Use IMDN MessageID as reference if existing
+        if (useImdn) {
+            msgId = imdnMsgId;
+        }
 
 		// Update rich messaging history
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn);
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
 		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
@@ -192,7 +214,7 @@ public abstract class OneOneChatSession extends ChatSession {
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, ImdnDocument.DELIVERY_STATUS_FAILED);
+	    		((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(msgId, ImdnDocument.DELIVERY_STATUS_FAILED, null);
 			}
 		}
 	}
@@ -204,10 +226,10 @@ public abstract class OneOneChatSession extends ChatSession {
 	 */
 	public void sendIsComposingStatus(boolean status) {
 		String content = IsComposingInfo.buildIsComposingInfo(status);
-		String msgId = ChatUtils.generateMessageId();
-		sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE);
+		String msgId = IdGenerator.generateMessageID();
+		sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE, MsrpSession.TypeMsrpChunk.IsComposing);
 	}
-	
+
 	/**
 	 * Reject the session invitation
 	 */
@@ -288,15 +310,26 @@ public abstract class OneOneChatSession extends ChatSession {
     }
 
     /**
-     * Data transfer error
+     * Get SDP direction
      *
-     * @param msgId Message ID
-     * @param error Error code
+     * @return Direction
+     *
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_RECVONLY
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDONLY
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDRECV
      */
-    public void msrpTransferError(String msgId, String error) {
-    	super.msrpTransferError(msgId, error);
-
+    public abstract String getDirection();
+    
+    // Changed by Deutsche Telekom
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError(java.lang.String, java.lang.String, com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
+     */
+    @Override
+    public void msrpTransferError(String msgId, String error, MsrpSession.TypeMsrpChunk typeMsrpChunk) {
+    	super.msrpTransferError(msgId, error, typeMsrpChunk);
+    	
         // Request capabilities
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
     }
+
 }

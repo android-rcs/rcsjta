@@ -75,6 +75,11 @@ public class FileTransfer {
     	 */
     	public final static int DISPLAYED = 8;
 
+    	/**
+    	 * File transfer is paused 
+    	 */
+    	public final static int PAUSED = 9;
+    	
     	private State() {
         }    	
     }

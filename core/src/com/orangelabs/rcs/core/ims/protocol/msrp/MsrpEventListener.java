@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.core.ims.protocol.msrp;
 
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+
 /**
  * MSRP event listener
  * 
@@ -65,11 +67,13 @@ public interface MsrpEventListener {
 	 */
 	public void msrpTransferAborted();
 
+	// Changed by Deutsche Telekom
     /**
      * Data transfer error
      *
      * @param msgId Message ID
      * @param error Error code
+     * @param typeMsrpChunk Type of MSRP chunk
      */
-    public void msrpTransferError(String msgId, String error);
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk);
 }

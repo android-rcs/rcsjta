@@ -24,6 +24,11 @@ public class FileTransferData {
 	 * Column name
 	 */
 	static final String KEY_SESSION_ID = FileTransferLog.FT_ID;
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
 
 	/**
 	 * Column name
@@ -78,5 +83,10 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;	
+	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
+
+	/**
+	 * Column name KEY_MSG_ID : the reference to the Chat message
+	 */
+	static final String KEY_MSG_ID =  FileTransferLog.MESSAGE_ID;	
 }

@@ -38,7 +38,7 @@ public class GeolocInfoParser extends DefaultHandler {
 	
 	/* Geoloc-Info SAMPLE:
 	<?xml version="1.0" encoding="UTF-8"?>
-	<rcsenveloppe xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation" xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid" xmlns:gp="urn:ietf:params:xml:ns:pidf:geopriv10" xmlns:gml="http://www.opengis.net/gml" xmlns:gs="http://www.opengis.net/pidflo/1.0" entity="tel:+12345678901">
+	<rcsenvelope xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation" xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid" xmlns:gp="urn:ietf:params:xml:ns:pidf:geopriv10" xmlns:gml="http://www.opengis.net/gml" xmlns:gs="http://www.opengis.net/pidflo/1.0" entity="tel:+12345678901">
 	<rcspushlocation id="a123" label ="meeting location" >
 	<rpid:place-type rpid:until="2012-03-15T21:00:00-05:00">
 	</rpid:place-type>
@@ -56,7 +56,7 @@ public class GeolocInfoParser extends DefaultHandler {
 	</gp:geopriv>
 	<timestamp>2012-03-15T16:09:44-05:00</timestamp>
 	</rcspushlocation>
-	</rcsenveloppe>
+	</rcsenvelope>
    */
 	
 	private StringBuffer accumulator;
@@ -96,7 +96,7 @@ public class GeolocInfoParser extends DefaultHandler {
 
 	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
 		accumulator.setLength(0);
-		if (localName.equals("rcsenveloppe")) {
+		if (localName.equals("rcsenvelope")) {
 			String entity = attr.getValue("entity").trim();			
 			geoloc = new GeolocInfoDocument(entity);
 		} else

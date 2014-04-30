@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.service;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -43,35 +45,50 @@ public class LauncherUtils {
      * Last user account used
      */
     public static final String REGISTRY_LAST_USER_ACCOUNT = "LastUserAccount";
+    
+    /**
+     * Key for storing the latest positive provisioning version
+     */
+    private static final String REGISTRY_PROVISIONING_VERSION = "ProvisioningVersion";
+    
+    /**
+     * Key for storing the latest positive provisioning validity
+     */
+    private static final String REGISTRY_PROVISIONING_VALIDITY = "ProvisioningValidity";
+    
+    /**
+     * Key for storing the expiration date of the provisioning
+     */
+    private static final String REGISTRY_PROVISIONING_EXPIRATION = "ProvisioningExpiration";
+
 
     /**
      * Logger
      */
     private static Logger logger = Logger.getLogger(LauncherUtils.class.getName());
 
-    /**
-     * Launch the RCS service
-     *
-     * @param context application context
-     * @param boot Boot flag
-     */
-    public static void launchRcsService(Context context, boolean boot) {
-        // Instantiate the settings manager
-        RcsSettings.createInstance(context);
+	/**
+	 * Launch the RCS service
+	 * 
+	 * @param context
+	 *            application context
+	 * @param boot
+	 *            Boot flag
+	 * @param user
+	 *            restart is required by user
+	 */
+	public static void launchRcsService(Context context, boolean boot, boolean user) {
+		// Instantiate the settings manager
+		RcsSettings.createInstance(context);
 
-        // Set the logger properties
+		// Set the logger properties
 		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
 		Logger.traceLevel = RcsSettings.getInstance().getTraceLevel();
 
 		if (RcsSettings.getInstance().isServiceActivated()) {
-			if (logger.isActivated()) {
-	            logger.debug("Launch RCS service (boot=" + boot + ")");
-	        }
-	        Intent intent = new Intent(context, StartService.class);
-	        intent.putExtra("boot", boot);
-	        context.startService(intent);
+			StartService.LaunchRcsStartService(context, boot, user);
 		}
-    }    
+	}
     
     /**
      * Launch the RCS core service
@@ -102,6 +119,7 @@ public class LauncherUtils {
      *
      * @param context Application context
      */
+    // TODO: not used.
     public static void forceLaunchRcsCoreService(Context context) {
         if (logger.isActivated()) {
             logger.debug("Force launch core service");
@@ -129,6 +147,19 @@ public class LauncherUtils {
         context.stopService(new Intent(context, HttpsProvisioningService.class));
         context.stopService(new Intent(context, RcsCoreService.class));
     }
+    
+    /**
+     * Stop the RCS core service (but keep provisioning)
+     *
+     * @param context Application context
+     */
+    public static void stopRcsCoreService( Context context) {
+        if (logger.isActivated()) {
+            logger.debug("Stop RCS core service");
+        }
+        context.stopService(new Intent(context, StartService.class));
+        context.stopService(new Intent(context, RcsCoreService.class));
+    }
 
     /**
      * Reset RCS config
@@ -153,7 +184,6 @@ public class LauncherUtils {
 
         // Remove the RCS account 
         AuthenticationService.removeRcsAccount(context, null);
-        
         // Ensure that factory is set up properly to avoid NullPointerException in AccountChangedReceiver.setAccountResetByEndUser
         AndroidFactory.setApplicationContext(context);
         AccountChangedReceiver.setAccountResetByEndUser(false);
@@ -199,4 +229,86 @@ public class LauncherUtils {
         return currentUserAccount;
     }
 
+	/**
+	 * Get the latest positive provisioning version
+	 * 
+	 * @param context
+	 *            Application context
+	 * @return the latest positive provisioning version
+	 */
+	public static String getProvisioningVersion(Context context) {
+		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		return preferences.getString(REGISTRY_PROVISIONING_VERSION, "0");
+	}
+    
+	/**
+	 * Save the latest positive provisioning version in shared preferences
+	 * 
+	 * @param context
+	 *            Application context
+	 * @param value
+	 *            the latest positive provisioning version
+	 */
+	public static void saveProvisioningVersion(Context context, String value) {
+		try {
+			int vers = Integer.parseInt(value);
+			if (vers > 0) {
+				SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+				SharedPreferences.Editor editor = preferences.edit();
+				editor.putString(REGISTRY_PROVISIONING_VERSION, value);
+				editor.commit();
+			}
+		} catch (NumberFormatException e) {
+		}
+	}
+	
+	/**
+	 * Get the expiration date of the provisioning
+	 * 
+	 * @param context
+	 *            Application context
+	 * @return the expiration date
+	 */
+	public static Date getProvisioningExpirationDate(Context context) {
+		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		Long expiration = preferences.getLong(REGISTRY_PROVISIONING_EXPIRATION, 0L);
+		if (expiration > 0L) {
+			return new Date(expiration);
+		}
+		return null;
+	}
+	
+	/**
+	 * Get the expiration date of the provisioning
+	 * 
+	 * @param context
+	 *            Application context
+	 * @return the expiration date in seconds
+	 */
+	public static Long getProvisioningValidity(Context context) {
+		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		Long validity = preferences.getLong(REGISTRY_PROVISIONING_VALIDITY, 24*3600L);
+		if (validity > 0L) {
+			return validity;
+		}
+		return null;
+	}
+	/**
+	 * Save the provisioning validity in shared preferences
+	 * 
+	 * @param context
+	 * @param validity
+	 *            validity of the provisioning expressed in seconds
+	 */
+	public static void saveProvisioningValidity(Context context, long validity) {			
+		if (validity > 0L) {
+			// Calculate next expiration date in msec
+			long next = System.currentTimeMillis() + validity * 1000L;
+			SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+			SharedPreferences.Editor editor = preferences.edit();
+			editor.putLong(REGISTRY_PROVISIONING_VALIDITY, validity);
+			editor.putLong(REGISTRY_PROVISIONING_EXPIRATION, next);
+			editor.commit();
+		}
+	}
 }

@@ -27,6 +27,8 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
@@ -136,7 +138,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     logger.debug("Session has been canceled");
                 }
                 return;
-            }
+            }			
 
 			// Auto reject if file too big or if storage capacity is too small
 			ContentSharingError error = isImageCapacityAcceptable(getContent().getSize());
@@ -151,9 +153,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 				// Close session
 				handleError(new ContentSharingError(error));
 				return;
-			}	
+			}
 			
-			// Parse the remote SDP part
+	    	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
         	SdpParser parser = new SdpParser(remoteSdp.getBytes());
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
@@ -163,15 +165,18 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             if (protocol != null) {
                 isSecured = protocol.equalsIgnoreCase(MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL);
             }
-			MediaAttribute attr1 = mediaDesc.getMediaAttribute("file-selector");
-            String fileSelector = attr1.getName() + ":" + attr1.getValue();
-			MediaAttribute attr2 = mediaDesc.getMediaAttribute("file-transfer-id");
-            String fileTransferId = attr2.getName() + ":" + attr2.getValue();
+        	// Changed by Deutsche Telekom
+            String fileSelector = mediaDesc.getMediaAttribute("file-selector").getValue();
+			// Changed by Deutsche Telekom
+            String fileTransferId = mediaDesc.getMediaAttribute("file-transfer-id").getValue();
 			MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
     		int remotePort = mediaDesc.port;
 			
+    		// Changed by Deutsche Telekom
+    		String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
+    		
             // Extract the "setup" parameter
             String remoteSetup = "passive";
 			MediaAttribute attr4 = mediaDesc.getMediaAttribute("setup");
@@ -198,29 +203,16 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	    	
             // Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
-			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
             msrpMgr.setSecured(isSecured);
 
 			// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + msrpMgr.getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=" + fileSelector + SipUtils.CRLF +
-	    		"a=" + fileTransferId + SipUtils.CRLF +
-	            "a=accept-types:" + getContent().getEncoding() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	            "a=path:" + msrpMgr.getLocalMsrpPath() + SipUtils.CRLF +
-	    		"a=recvonly" + SipUtils.CRLF;
-            int maxSize = ImageTransferSession.getMaxImageSharingSize();
-	    	if (maxSize > 0) {
-	    		sdp += "a=max-size:" + maxSize + SipUtils.CRLF;
-	    	}
+	    	int maxSize = ImageTransferSession.getMaxImageSharingSize();
+	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
+                    msrpMgr.getLocalSocketProtocol(), getContent().getEncoding(), fileTransferId,
+                    fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),
+                    SdpUtils.DIRECTION_RECVONLY, maxSize);
 
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
@@ -236,7 +228,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             // Create the MSRP server session
             if (localSetup.equals("passive")) {
             	// Passive mode: client wait a connection
-            	msrpMgr.createMsrpServerSession(remotePath, this);
+            	// Changed by Deutsche Telekom
+                MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
+                // Do not use right now the mapping to do not increase memory and cpu consumption
+                session.setMapMsgIdFromTransationId(false);
             	
     			// Open the connection
     			Thread thread = new Thread(){
@@ -285,13 +280,26 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     	        // Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	// Active mode: client should connect
-                	msrpMgr.createMsrpClientSession(remoteHost, remotePort, remotePath, this);
+                	// Changed by Deutsche Telekom
+                	MsrpSession session = msrpMgr.createMsrpClientSession(remoteHost, remotePort, remotePath, this, fingerprint);
+                    session.setMapMsgIdFromTransationId(false);
+					// Open the connection
+					Thread thread = new Thread() {
+						public void run() {
+							try {
+								// Open the MSRP session
+								msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
 
-					// Open the MSRP session
-					msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
-					
-	    	        // Send an empty packet
-	            	sendEmptyDataChunk();
+								// Send an empty packet
+								sendEmptyDataChunk();
+							} catch (IOException e) {
+								if (logger.isActivated()) {
+									logger.error("Can't create the MSRP server session", e);
+								}
+							}
+						}
+					};
+					thread.start();
                 }
 
                 // The session is established
@@ -447,22 +455,22 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      *
      * @param msgId Message ID
      * @param error Error code
+     * @param typeMsrpChunk Type of MSRP chunk
      */
-    public void msrpTransferError(String msgId, String error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
+        if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
+			return;
+		}
 
 		if (logger.isActivated()) {
             logger.info("Data transfer error " + error);
     	}
 		
-		try {
+		try {        
 			// Terminate session
 			terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-
-			// Close the media session
-	        closeMediaSession();	        
+	        // Close the media session
+	        closeMediaSession();
 	   	} catch(Exception e) {
 	   		if (logger.isActivated()) {
 	   			logger.error("Can't close correctly the image sharing session", e);
@@ -475,10 +483,15 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     	// Remove the current session
     	getImsService().removeSession(this);
 
-    	// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
-        }
+		// Changed by Deutsche Telekom
+		if (!isImageTransfered()) {
+			// Notify listeners
+        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+            for(int j=0; j < getListeners().size(); j++) {
+                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+            }
+			}
+		}
 	}
 
     /**

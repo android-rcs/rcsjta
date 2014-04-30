@@ -63,7 +63,7 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Supported feature tags
      */
-    private List<String> featureTags;
+    private String[] featureTags;
     
     /**
      * IMS network interface

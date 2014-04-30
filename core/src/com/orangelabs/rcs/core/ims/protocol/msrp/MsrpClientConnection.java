@@ -38,12 +38,18 @@ public class MsrpClientConnection extends MsrpConnection {
 	/**
 	 * Remote TCP port number
 	 */
-	private int remotePort; 
+	private int remotePort;
 	
     /**
      * Secured connection
      */
     private boolean secured = false;
+
+    // Changed by Deutsche Telekom
+    /**
+     * Secured connection
+     */
+    private String announcedFingerprint = null;
 
 	/**
 	 * The logger
@@ -76,7 +82,24 @@ public class MsrpClientConnection extends MsrpConnection {
 		this(session, remoteAddress, remotePort);
 		
 		this.secured = secured;
-	}	
+	}
+	
+	// Changed by Deutsche Telekom
+	/**
+	 * Constructor
+	 * 
+	 * @param session MSRP session
+	 * @param remoteAddress Remote IP address
+	 * @param remotePort Remote port number
+	 * @param secured Secured media flag
+	 * @param fingerprint fingerprint announced in SDP
+	 */
+	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort, boolean secured, String fingerprint) {
+		this(session, remoteAddress, remotePort);
+		
+		this.secured = secured;
+		this.announcedFingerprint = fingerprint;
+	}
 	
 	/**
 	 * Is secured connection
@@ -96,10 +119,17 @@ public class MsrpClientConnection extends MsrpConnection {
 	public SocketConnection getSocketConnection() throws IOException {
 		if (logger.isActivated()) {
 			logger.debug("Open client socket to " + remoteAddress + ":" + remotePort);
-		}		
+		}
 		SocketConnection socket;
 		if (secured) {
-			socket = NetworkFactory.getFactory().createSecureSocketClientConnection();
+			// Changed by Deutsche Telekom
+			if (this.announcedFingerprint != null) {
+				// follow RFC 4572
+				// use self-signed certificates
+				socket = NetworkFactory.getFactory().createSimpleSecureSocketClientConnection(this.announcedFingerprint);
+			} else {
+				socket = NetworkFactory.getFactory().createSecureSocketClientConnection();
+			}
 		} else {
 			socket = NetworkFactory.getFactory().createSocketClientConnection();
 		}

@@ -62,8 +62,9 @@ public interface ChatSessionListener extends ImsSessionListener {
      * 
 	 * @param msgId Message ID
      * @param status Delivery status
+     * @param contact the remote contact
      */
-    public void handleMessageDeliveryStatus(String msgId, String status);
+    public void handleMessageDeliveryStatus(String msgId, String status, String contact);
     
     /**
      * Request to add participant is successful

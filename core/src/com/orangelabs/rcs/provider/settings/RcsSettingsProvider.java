@@ -74,7 +74,7 @@ public class RcsSettingsProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 86;
+        private static final int DATABASE_VERSION = 100;
 
         private Context ctx;
 
@@ -121,7 +121,6 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, 			"3072");
             addParameter(db, RcsSettingsData.WARN_FILE_TRANSFER_SIZE, 			"2048");
             addParameter(db, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, 				"3072");
-            addParameter(db, RcsSettingsData.WARN_IMAGE_SHARE_SIZE, 			"0");
             addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, 			"54000");
             addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS, 				"20");
             addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, 		"10");
@@ -166,9 +165,9 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,		RcsSettingsData.TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,RcsSettingsData.TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,			RcsSettingsData.TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,		RcsSettingsData.TRUE);
+            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,			RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,		RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,			"");
             addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, 		"300");
             addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT, 					"5060");
@@ -195,14 +194,14 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.PERMANENT_STATE_MODE,	 			RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.TRACE_ACTIVATED,			 		RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.TRACE_LEVEL,	 					"" + Logger.DEBUG_LEVEL);
-            addParameter(db, RcsSettingsData.SIP_TRACE_ACTIVATED, 				RcsSettingsData.TRUE);
+            addParameter(db, RcsSettingsData.SIP_TRACE_ACTIVATED, 				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.SIP_TRACE_FILE,                    Environment.getExternalStorageDirectory() + "/sip.txt");
             addParameter(db, RcsSettingsData.MEDIA_TRACE_ACTIVATED,				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, 		"1");
             addParameter(db, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, 		"86400");
             addParameter(db, RcsSettingsData.CAPABILITY_POLLING_PERIOD,			"3600");
             addParameter(db, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,			RcsSettingsData.TRUE);
-            addParameter(db, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,			RcsSettingsData.TRUE);
+            addParameter(db, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,			RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.IM_USE_REPORTS,					RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.NETWORK_ACCESS,					""+RcsSettingsData.ANY_ACCESS);
             addParameter(db, RcsSettingsData.SIP_TIMER_T1,						"2000");
@@ -212,10 +211,13 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,				"60");
             addParameter(db, RcsSettingsData.RCS_APN,							"");
             addParameter(db, RcsSettingsData.RCS_OPERATOR,						"");
+            addParameter(db, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,				"500");
+            addParameter(db, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,			"200");
+            addParameter(db, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,			"200"); 
             addParameter(db, RcsSettingsData.GRUU,								RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.USE_IMEI_AS_DEVICE_ID,             RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.CPU_ALWAYS_ON,                     RcsSettingsData.FALSE);
-            addParameter(db, RcsSettingsData.AUTO_CONFIG_MODE,					""+RcsSettingsData.NO_AUTO_CONFIG);
+            addParameter(db, RcsSettingsData.AUTO_CONFIG_MODE,					""+RcsSettingsData.HTTPS_AUTO_CONFIG);
             addParameter(db, RcsSettingsData.PROVISIONING_TERMS_ACCEPTED,       RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.PROVISIONING_VERSION,				"0");
             addParameter(db, RcsSettingsData.PROVISIONING_TOKEN,				"");
@@ -228,7 +230,13 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,				RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.CONVERGENT_MESSAGING_UX,			RcsSettingsData.TRUE);
             addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, 			RcsSettingsData.FALSE);
-            addParameter(db, RcsSettingsData.VOICE_BREAKOUT,		 			RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.KEY_GSMA_RELEASE, 					""+RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
+            addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_AA,			RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_CS,			RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS,		RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR,	RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY,	RcsSettingsData.FALSE);
+            addParameter(db, RcsSettingsData.TCP_FALLBACK,						RcsSettingsData.FALSE);            
         }
 
         /**

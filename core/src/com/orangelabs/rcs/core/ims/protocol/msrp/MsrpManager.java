@@ -20,7 +20,15 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Vector;
 
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
+import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IpAddressUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -70,6 +78,21 @@ public class MsrpManager {
     	this.localMsrpAddress = localMsrpAddress;
     	this.localMsrpPort = localMsrpPort;
     	this.sessionId = System.currentTimeMillis();
+    }
+
+	// Changed by Deutsche Telekom
+    /**
+     * Constructor
+     * 
+     * @param localIpAddress Local MSRP address
+     * @param localMsrpPort Local MSRP port
+     * @param service ImsService
+     */    
+    public MsrpManager(String localMsrpAddress, int localMsrpPort, ImsService service) {
+    	this(localMsrpAddress, localMsrpPort);
+		if (service.getImsModule().isConnectedToWifiAccess()) {
+			this.secured =RcsSettings.getInstance().isSecureMsrpOverWifi();
+		}
     }
 
 	/**
@@ -174,6 +197,53 @@ public class MsrpManager {
 		msrpSession.getConnection().open(timeout);
 	}
 	
+    /**
+     * Create either an MSRP client or server connection depending on media attribute "setup" in the
+     * remote SDP answer.
+     * 
+     * @param sdp remote SDP answer
+     * @param listener MsrpEventListener
+     * @return MsrpSession
+     * @throws MsrpException
+     */
+    public MsrpSession createMsrpSession(byte[] sdp, MsrpEventListener listener)
+            throws MsrpException {
+        SdpParser parser = new SdpParser(sdp);
+
+        Vector<MediaDescription> media = parser.getMediaDescriptions();
+        MediaDescription mediaDesc = media.elementAt(0);
+        MediaAttribute pathAttribute = mediaDesc.getMediaAttribute("path");
+        String remoteMsrpPath = pathAttribute.getValue();
+
+        // Create the MSRP session
+        MsrpSession session = null;
+        MediaAttribute setupAttribute = mediaDesc.getMediaAttribute("setup");
+        String setup = null;
+        if (setupAttribute != null) {
+            setup = setupAttribute.getValue();
+        } else {
+            logger.error("Media attribute \"setup\" is missing!");
+            logger.warn("media="+mediaDesc.toString());
+            if (mediaDesc.mediaAttributes != null)
+            for (MediaAttribute attribute :  mediaDesc.mediaAttributes) {
+            	 logger.warn("attribute key="+attribute.getName()+" value="+attribute.getValue());
+			}
+			
+        }
+        // if remote peer is active this client needs to be passive (i.e. act as server)
+        if ("active".equalsIgnoreCase(setup)) {
+            session = createMsrpServerSession(remoteMsrpPath, listener);
+        } else {
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
+            int remotePort = mediaDesc.port;
+            String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
+            session = createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, listener,
+                    fingerprint);
+        }
+
+        return session;
+    }
+    
 	/**
 	 * Create a MSRP client session
 	 * 
@@ -184,7 +254,7 @@ public class MsrpManager {
      * @return Created session
 	 * @throws MsrpException
 	 */
-	public MsrpSession createMsrpClientSession(String remoteHost, int remotePort, String remoteMsrpPath, MsrpEventListener listener) throws MsrpException {
+	public MsrpSession createMsrpClientSession(String remoteHost, int remotePort, String remoteMsrpPath, MsrpEventListener listener, String fingerprint) throws MsrpException {
         try {
 	        if (logger.isActivated()) {
 				logger.info("Create MSRP client end point at " + remoteHost + ":" + remotePort);
@@ -196,7 +266,8 @@ public class MsrpManager {
 			msrpSession.setTo(remoteMsrpPath);
 
 			// Create a MSRP client connection
-			MsrpConnection connection = new MsrpClientConnection(msrpSession, remoteHost, remotePort, secured);
+			// Changed by Deutsche Telekom
+			MsrpConnection connection = new MsrpClientConnection(msrpSession, remoteHost, remotePort, secured, fingerprint);
 
 			// Associate the connection to the session
 			msrpSession.setConnection(connection);
@@ -245,6 +316,7 @@ public class MsrpManager {
     	return msrpSession;
 	}
 
+	// Changed by Deutsche Telekom
 	/**
      * Send data chunks
      * 
@@ -252,14 +324,15 @@ public class MsrpManager {
      * @param msgId Message ID
      * @param contentType Content type
      * @param contentSize Content size
+     * @param typeMsrpChunk Type of MSRP chunk
      * @throws MsrpException
      */
-    public void sendChunks(InputStream inputStream, String msgId, String contentType, long contentSize) throws MsrpException {
+    public void sendChunks(InputStream inputStream, String msgId, String contentType, long contentSize, TypeMsrpChunk typeMsrpChunk) throws MsrpException {
         if (msrpSession == null) {
         	throw new MsrpException("MSRP session is null");
         }
 
-        msrpSession.sendChunks(inputStream, msgId, contentType, contentSize);
+        msrpSession.sendChunks(inputStream, msgId, contentType, contentSize, typeMsrpChunk);
     }
     
     /**

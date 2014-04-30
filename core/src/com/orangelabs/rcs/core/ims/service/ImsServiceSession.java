@@ -303,6 +303,19 @@ public abstract class ImsServiceSession extends Thread {
 	}
 
 	/**
+	 * Set the session ID
+	 * 
+	 * @param sessionId
+	 *            <p>
+	 *            <b>Be Careful:</b><br />
+	 *            Should only be called to resume session (like for FT HTTP).
+	 *            </p>
+	 */
+	public void setSessionID(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	/**
 	 * Returns the remote contact
 	 * 
 	 * @return String
@@ -550,7 +563,7 @@ public abstract class ImsServiceSession extends Thread {
         // Update the dialog path status
 		getDialogPath().sessionTerminated();
         sessionTerminatedByRemote = true;
-	
+
     	// Remove the current session
     	getImsService().removeSession(this);
 	
@@ -715,6 +728,31 @@ public abstract class ImsServiceSession extends Thread {
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't send 603 Decline response", e);
+			}
+		}
+	}
+	
+	/**
+	 * Send a 403 "Forbidden" to the remote party
+	 * 
+	 * @param request
+	 *            SIP request
+	 * @param localTag
+	 *            Local tag
+	 * @param warning
+	 *            the warning message
+	 */
+	public void send403Forbidden(SipRequest request, String localTag, String warning) {
+		try {
+			// Send a 403 Forbidden
+			if (logger.isActivated()) {
+				logger.info("Send 403 Forbidden (warning=" + warning + ")");
+			}
+			SipResponse resp = SipMessageFactory.createResponse(request, localTag, 403, warning);
+			getImsService().getImsModule().getSipManager().sendSipResponse(resp);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send 403 Forbidden response", e);
 			}
 		}
 	}
@@ -1182,5 +1220,5 @@ public abstract class ImsServiceSession extends Thread {
     public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext){
     	return null;
     }
-    
+  
 }

@@ -83,12 +83,13 @@ public class ChatProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 9;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
+        // @formatter:off
         @Override
         public void onCreate(SQLiteDatabase db) {
         	db.execSQL("CREATE TABLE " + TABLE_CHAT + " ("
@@ -99,7 +100,8 @@ public class ChatProvider extends ContentProvider {
         			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
         			+ ChatData.KEY_STATUS + " integer,"
         			+ ChatData.KEY_DIRECTION + " integer,"
-        			+ ChatData.KEY_TIMESTAMP + " long);");
+        			+ ChatData.KEY_TIMESTAMP + " long,"
+        			+ ChatData.KEY_REJECT_GC + " integer DEFAULT 0);");
         	db.execSQL("CREATE TABLE " + TABLE_MESSAGE + " ("
         			+ MessageData.KEY_ID + " integer primary key autoincrement,"
         			+ MessageData.KEY_CHAT_ID + " TEXT,"
@@ -113,9 +115,11 @@ public class ChatProvider extends ContentProvider {
         			+ MessageData.KEY_TIMESTAMP + " long,"
         			+ MessageData.KEY_TIMESTAMP_SENT + " long,"
         			+ MessageData.KEY_TIMESTAMP_DELIVERED + " long,"
-        			+ MessageData.KEY_TIMESTAMP_DISPLAYED + " long);");
+        			+ MessageData.KEY_TIMESTAMP_DISPLAYED + " long,"
+        			+ MessageData.KEY_FT_ID + " TEXT);");
         }
-
+        // @formatter:on
+        
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAT);
@@ -201,10 +205,10 @@ public class ChatProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch(match) {
 	        case CHATS:
-	            count = db.update(TABLE_CHAT, values, where, null);
+	            count = db.update(TABLE_CHAT, values, where, whereArgs);
 		        break;
 			case MESSAGES:
-	            count = db.update(TABLE_MESSAGE, values, where, null);
+	            count = db.update(TABLE_MESSAGE, values, where, whereArgs);
 	            break;
 			case CHAT_ID:
                 count = db.update(TABLE_CHAT, values,

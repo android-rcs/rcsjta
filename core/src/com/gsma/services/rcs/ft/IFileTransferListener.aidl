@@ -13,4 +13,10 @@ interface IFileTransferListener {
 	void onTransferProgress(in long currentSize, in long totalSize);
 
 	void onFileTransferred(in String filename);
+	
+	// File transfer has been paused
+	void onFileTransferPaused();
+	
+	// File transfer has been resumed
+	void onFileTransferResumed();
 }

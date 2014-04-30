@@ -101,7 +101,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getInputStream();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getOutputStream();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -129,7 +129,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getInetAddress().getHostAddress();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -143,7 +143,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getPort();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 
@@ -157,7 +157,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getLocalAddress().getHostAddress();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 
@@ -171,7 +171,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getLocalPort();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -186,7 +186,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			return socket.getSoTimeout();
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 
@@ -201,7 +201,7 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			socket.setSoTimeout(timeout);
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 }

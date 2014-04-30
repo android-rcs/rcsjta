@@ -26,10 +26,6 @@ import android.os.Parcelable;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingServiceConfiguration {
-	/**
-	 * Image size threshold
-	 */
-	private long warnSize;
 		
 	/**
 	 * Image size limit
@@ -39,12 +35,10 @@ public class ImageSharingServiceConfiguration {
 	/**
 	 * Constructor
 	 * 
-	 * @param warnSize Image size threshold
 	 * @param maxSize Image size limit
      * @hide
 	 */
-	public ImageSharingServiceConfiguration(long warnSize, long maxSize) {
-		this.warnSize = warnSize;
+	public ImageSharingServiceConfiguration(long maxSize) {
 		this.maxSize = maxSize;
     }	
 	
@@ -55,7 +49,6 @@ public class ImageSharingServiceConfiguration {
      * @hide
 	 */
 	public ImageSharingServiceConfiguration(Parcel source) {
-		this.warnSize = source.readLong();
 		this.maxSize = source.readLong();
     }
 
@@ -78,7 +71,6 @@ public class ImageSharingServiceConfiguration {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeLong(warnSize);
     	dest.writeLong(maxSize);
     }
 
@@ -97,18 +89,7 @@ public class ImageSharingServiceConfiguration {
             return new ImageSharingServiceConfiguration[size];
         }
     };	
-
-    /**
-	 * Returns the image size threshold when the user should be warned about the
-	 * potential charges associated to the transfer of a large file. It returns 0
-	 * if there no need to warn.
-	 * 
-	 * @return Size in kilobytes 
-	 */
-	public long getWarnSize() {
-		return warnSize;
-	}
-			
+		
 	/**
 	 * Returns the maximum authorized size of the image that can be sent. It
 	 * returns 0 if there is no limitation.

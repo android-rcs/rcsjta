@@ -43,11 +43,11 @@ public class IPCallLog {
     public static final String CALL_ID = "call_id";
 
     /**
-     * The name of the column containing the MSISDN of the remote party.
+     * The name of the column containing the MSISDN of the remote contact.
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";
-
+    
     /**
      * The name of the column containing the direction of the call.
      * <P>Type: INTEGER</P>

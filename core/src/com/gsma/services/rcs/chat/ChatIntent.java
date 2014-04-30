@@ -43,7 +43,7 @@ public class ChatIntent {
 	/**
 	 * Display name of the contact sending the invitation (extracted from the SIP address)
 	 */
-	public final static String EXTRA_DISPLAY_NAME = "contactDisplayname";
+	public final static String EXTRA_DISPLAY_NAME = "displayname";
 
 	/**
 	 * Received message

@@ -22,6 +22,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.util.Log;
+
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,6 +68,11 @@ public class SingleChatView extends ChatView {
 	private static boolean activityDisplayed = false;
 	
 	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
+	
+	/**
 	 * Remote contact
 	 */
 	private String contact = null;
@@ -96,6 +105,10 @@ public class SingleChatView extends ChatView {
 		
 		// Load history
 		loadHistory();
+		
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate contact=" + contact);
+		}
     }
     
     @Override
@@ -437,6 +450,9 @@ public class SingleChatView extends ChatView {
 
     	// Callback called when a message has failed to be delivered to the remote
     	public void onReportMessageFailed(String msgId) {
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, "onReportMessageFailed msgId=" + msgId);
+			}
 			handler.post(new Runnable(){
 				public void run(){
 					// Display a notification

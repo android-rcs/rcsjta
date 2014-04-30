@@ -1,5 +1,8 @@
 package javax2.sip;
 
+import gov2.nist.javax2.sip.ListeningPointImpl;
+import gov2.nist.javax2.sip.SipProviderImpl;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -22,13 +25,16 @@ public interface SipStack {
             throws ObjectInUseException;
     void deleteSipProvider(SipProvider sipProvider) throws ObjectInUseException;
 
-    Collection getDialogs();
+    Collection<Dialog> getDialogs();
     String getIPAddress();
-    Iterator getListeningPoints();
+    Iterator<ListeningPointImpl> getListeningPoints();
     Router getRouter();
-    Iterator getSipProviders();
+    Iterator<SipProviderImpl> getSipProviders();
     String getStackName();
-
+    
+    // Changed by Deutsche Telekom
+     int getMtuSize();
+     
     /**
      * @deprecated
      * Use {@link ServerTransaction#enableRetransmissionAlerts()} to enable

@@ -1,5 +1,7 @@
 package com.orangelabs.rcs.core.ims.network.registration;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class RegistrationUtils {
 	 *
 	 * @return List of tags
 	 */
-	public static List<String> getSupportedFeatureTags() {
+ 	public static String[] getSupportedFeatureTags() {
 		List<String> tags = new ArrayList<String>();
 		
 		// IM support
@@ -44,32 +46,28 @@ public class RegistrationUtils {
 			tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
 		}
 		
-		String additionalTags = "";
+		List<String> additionalTags = new ArrayList<String>();
 
 		// Image share support
 		if (RcsSettings.getInstance().isImageSharingSupported()) {
-			additionalTags += FeatureTags.FEATURE_RCSE_IMAGE_SHARE + ",";
+			additionalTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
 		}
 		
 		// Geoloc push support
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-			additionalTags += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+			additionalTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
 		}
 
 		// File transfer HTTP support
 		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-			additionalTags += FeatureTags.FEATURE_RCSE_FT_HTTP;
+			additionalTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
 		}
 		
 		// Add RCS-e prefix
-		if (additionalTags.length() != 0) {
-        	if (additionalTags.endsWith(",")) {
-        		additionalTags = additionalTags.substring(0, additionalTags.length()-1);
-        	}
-			additionalTags = FeatureTags.FEATURE_RCSE + "=\"" + additionalTags + "\"";
-			tags.add(additionalTags);
+		if (!additionalTags.isEmpty()) {
+            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalTags) + "\"");
 		}
 		
-		return tags;
+		return tags.toArray(new String[tags.size()]);
 	}
 }

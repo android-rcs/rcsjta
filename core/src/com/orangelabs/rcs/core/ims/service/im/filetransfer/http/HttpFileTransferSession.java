@@ -18,14 +18,19 @@
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import java.util.List;
+
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
+import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -44,6 +49,11 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Session state
      */
     private int sessionState;
+
+    /**
+     * Data object to access the resume FT instance in DB
+     */
+    protected FtHttpResume resumeFT = null;
 
     /**
      * The logger
@@ -96,6 +106,55 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public SipRequest createInvite() throws SipException {
     	// Not used here
     	return null;
+    }
+
+    @Override
+    public void abortSession(int reason) {
+        FtHttpResumeDaoImpl dao = FtHttpResumeDaoImpl.getInstance();
+
+        // If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause
+        if (reason == ImsServiceSession.TERMINATION_BY_SYSTEM) {
+            // Check if the session is not in created status. In this status,
+            // the thumbnail is not yet sent and the resume is not possible.
+            if (dao != null) {
+                boolean found = false;
+                List<FtHttpResume> createdFileTransfers = dao.queryAll();
+                for (FtHttpResume ftHttpResume : createdFileTransfers) {
+                    if (ftHttpResume.getSessionId().equals(getSessionID())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    // If the session has been terminated by system and already started, then
+                    // Pause the session
+                    if (logger.isActivated()) {
+                        logger.info("Pause the session (session terminated, but can be resumed)");
+                    }
+
+                    // Interrupt the session
+                    interruptSession();
+
+                    // Terminate session
+                    terminateSession(reason);
+
+                    // Remove the current session
+                    getImsService().removeSession(this);
+
+                    // Notify listeners
+                    for(int i=0; i < getListeners().size(); i++) {
+                        ((FileSharingSessionListener)getListeners().get(i)).handleFileTransferPaused();
+                    }
+                    return;
+                }
+            }
+        }
+        
+        // in others case, call the normal abortSession and remove session from resumable sessions
+        if (dao != null) {
+            dao.delete(resumeFT);
+        }
+        super.abortSession(reason);
     }
 
     /**
@@ -201,7 +260,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferPaused() {
     	// Notify listeners
         for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleFileTransferPaused();
+            ((FileSharingSessionListener) getListeners().get(j))
+                    .handleFileTransferPaused();
         }
     }
     
@@ -211,7 +271,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferResumed() {
     	// Notify listeners
         for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleFileTransferResumed();
+            ((FileSharingSessionListener) getListeners().get(j))
+                    .handleFileTransferResumed();
         }
     }
     

@@ -17,8 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.capability;
 
-import java.util.List;
-
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -50,7 +48,7 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Feature tags
      */
-    private List<String> featureTags;
+    private String[] featureTags;
     
     /**
      * Dialog path
@@ -74,7 +72,7 @@ public class OptionsRequestTask implements Runnable {
    	 * @param contact Remote contact
    	 * @param featureTags Feature tags
 	 */
-	public OptionsRequestTask(ImsModule parent, String contact, List<String> featureTags) {
+	public OptionsRequestTask(ImsModule parent, String contact, String[] featureTags) {
         this.imsModule = parent;
         this.contact = contact;
         this.featureTags = featureTags;
@@ -166,7 +164,7 @@ public class OptionsRequestTask implements Runnable {
             } else {
             	// Other error response
     			handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
-    					ctx.getStatusCode() + " " + ctx.getReasonPhrase()));    					
+    					ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
             }
         } else {
     		if (logger.isActivated()) {
@@ -174,7 +172,8 @@ public class OptionsRequestTask implements Runnable {
         	}
 
     		// No response received: timeout
-        	handleUserNotRegistered(ctx);
+            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
+                    ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
         }
 	}       
     

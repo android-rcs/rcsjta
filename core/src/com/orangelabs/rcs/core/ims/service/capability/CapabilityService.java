@@ -187,6 +187,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
     	// Extract contact phone number
 		contact = PhoneUtils.extractNumberFromUri(contact);
 
+		// Do not request capabilities for oneself
+		if (contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+			return null;
+		}
+		
         // Check if if it is a valid RCS number
         if (!ContactsManager.getInstance().isRcsValidNumber(contact)) {
             if (logger.isActivated()) {
@@ -287,7 +292,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 		ArrayList<String> alreadyInEabOrInvalidNumbers = new ArrayList<String>();
 
 		// We add "My number" to the numbers that are already RCS, so we don't query it if it is present in the address book
-        alreadyInEabOrInvalidNumbers.add(PhoneUtils.extractNumberFromUri(ImsModule.IMS_USER_PROFILE.getPublicUri()));
+        alreadyInEabOrInvalidNumbers.add(ImsModule.IMS_USER_PROFILE.getUsername());
 
 		while(phonesCursor.moveToNext()) {
 			// Keep a trace of already treated row. Key is (phone number in international format)

@@ -255,11 +255,6 @@ public class RcsSettingsData {
 	public static final String MAX_IMAGE_SHARE_SIZE = "MaxImageShareSize";
 
 	/**
-	 * Warning threshold for image share size
-	 */
-	public static final String WARN_IMAGE_SHARE_SIZE = "WarnImageShareSize";
-
-	/**
 	 * Max duration of a video share
 	 */
 	public static final String MAX_VIDEO_SHARE_DURATION = "MaxVideoShareDuration";
@@ -310,6 +305,21 @@ public class RcsSettingsData {
 	public static final String IM_SESSION_START = "ImSessionStart";
 
 	/**
+	 * Max entries for chat log
+	 */
+	public static final String MAX_CHAT_LOG_ENTRIES = "MaxChatLogEntries";
+
+	/**
+	 * Max entries for richcall log
+	 */
+	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";	
+	
+	/**
+	 * Max entries for IP call log
+	 */
+	public static final String MAX_IPCALL_LOG_ENTRIES = "MaxIpcallLogEntries";	
+	
+	/**
 	 * Max length of a geolocation label
 	 */
 	public static final String MAX_GEOLOC_LABEL_LENGTH = "MaxGeolocLabelLength";
@@ -329,10 +339,6 @@ public class RcsSettingsData {
      */
     public static final String CONVERGENT_MESSAGING_UX = "ConvergentMessagingUx";
 
-    /**
-     * Voice breakout option
-     */
-    public static final String VOICE_BREAKOUT = "VoiceBreakout";
     
     // ---------------------------------------------------------------------------
 	// User profile settings
@@ -817,4 +823,48 @@ public class RcsSettingsData {
      */
     public static final String SECURE_RTP_OVER_WIFI = "SecureRtpOverWifi";
 
+    /**
+     * Key and associated values for GSMA release of the device as provisioned by the network
+     */
+    public static final String KEY_GSMA_RELEASE = "GsmaRelease";
+    
+    /**
+     * Albatros release
+     */
+    public static final int VALUE_GSMA_REL_ALBATROS = 0;
+
+    /**
+     * Blackbird release
+     */
+    public static final int VALUE_GSMA_REL_BLACKBIRD = 1;
+    
+	/**
+     * IP voice call breakout capabilities in RCS-AA mode
+     */
+	public static final String IPVOICECALL_BREAKOUT_AA ="IPCallBreakOutAA";
+	
+	/**
+     * IP voice call breakout capabilities in RCS-CS mode
+     */
+	public static final String IPVOICECALL_BREAKOUT_CS ="IPCallBreakOutCS";
+	
+	/**
+     * CS call upgrade to IP Video Call in RCS-CS mode
+     */
+	public static final String IPVIDEOCALL_UPGRADE_FROM_CS = "rcsIPVideoCallUpgradeFromCS";
+	
+	/** 
+     * CS call upgrade to IP Video Call in case of capability error
+     */
+	public static final String IPVIDEOCALL_UPGRADE_ON_CAPERROR = "rcsIPVideoCallUpgradeOnCapError";
+	
+	/**
+     * Leaf node that tells an RCS-CS device whether it can initiate an RCS IP Video Call upgrade without first tearing down the CS voice call
+     */
+	public static final String IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = "rcsIPVideoCallUpgradeAttemptEarly";
+	
+	/**
+     * TCP fallback option
+     */
+    public static final String TCP_FALLBACK = "TcpFallback";
 }

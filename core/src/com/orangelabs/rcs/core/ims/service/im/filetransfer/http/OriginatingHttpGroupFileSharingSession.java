@@ -17,15 +17,23 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -35,7 +43,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  * @author vfml3370
  */
-public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements HttpTransferEventListener {
+public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener {
 
     /**
      * HTTP upload manager
@@ -52,6 +60,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      */
     private ChatSession chatSession= null;
 
+    /**
+     * fired a boolean value updated atomically to notify only once
+     */
+	private AtomicBoolean fired = new AtomicBoolean(false);
+	
     /**
      * The logger
      */
@@ -86,9 +99,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new HTTP group file transfer session as originating");
 	    	}
-
-	    	// Upload the file to the HTTP server 
-            byte[] result = uploadManager.uploadFile();
+			// Upload the file to the HTTP server
+			byte[] result = uploadManager.uploadFile();
             sendResultToContact(result);
 		} catch(Exception e) {
         	if (logger.isActivated()) {
@@ -100,6 +112,26 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		}
 	}
 	
+	@Override
+	public void handleError(ImsServiceError error) {
+		super.handleError(error);
+		if (fired.compareAndSet(false, true)) {
+            if (resumeFT != null) {
+                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
+            }
+		}
+	}
+
+	@Override
+	public void handleFileTransfered() {
+		super.handleFileTransfered();
+		if (fired.compareAndSet(false, true)) {
+            if (resumeFT != null) {
+                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
+            }
+		}
+	}
+
 	@Override
 	public void interrupt() {
 		super.interrupt();
@@ -114,14 +146,20 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String mime = CpimMessage.MIME_TYPE;
         String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
         String to = ChatUtils.ANOMYNOUS_URI;
-        String msgId = IdGenerator.getIdentifier();
+        String msgId = IdGenerator.generateMessageID();
 
         // Send file info in CPIM message
         String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
-
+        
         // Send content
-        chatSession.sendDataChunks(ChatUtils.generateMessageId(), content, mime);
-        RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
+		chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
+		// Insert chat message into database
+		FileTransferMessage msg = new FileTransferMessage(msgId, null, fileInfo, false, null);
+		RichMessagingHistory.getInstance()
+				.addGroupChatMsgOutgoingFileTransfer(msg, chatSession.getContributionID(), getSessionID());
+
+		// Update File Transfer raw with chat message ID
+		RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
     }
     
     
@@ -156,7 +194,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 // File transfered
                 handleFileTransfered();
             } else {
-                // No chat exists
+                // No chat error
                 handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
 			}
 		} else {
@@ -168,31 +206,44 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 			handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
 		}
 	}
-	
+
 	/**
 	 * Pausing the transfer
 	 */
 	@Override
 	public void pauseFileTransfer() {
+        fileTransferPaused();
 		interruptSession();
-		uploadManager.getListener().httpTransferPaused();
+		uploadManager.pauseTransfer();
 	}
-	
+
 	/**
 	 * Resuming the transfer
 	 */
 	@Override
 	public void resumeFileTransfer() {
 		new Thread(new Runnable() {
-		    public void run() {
+			public void run() {
 				try {
-					byte[] result = uploadManager.resumeUpload();
-					sendResultToContact(result);
+					FtHttpResumeUpload upload = FtHttpResumeDaoImpl.getInstance().queryUpload(uploadManager.getTid());
+					if (upload != null) {
+						sendResultToContact(uploadManager.resumeUpload());
+					} else {
+						sendResultToContact(null);
+					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-		    }
-		  }).start();
+			}
+		}).start();
+	}
+
+	@Override
+	public void uploadStarted() {
+		// TODO restriction : FT HTTP upload resume is not managed
+//        // Create upload entry in fthttp table
+//        resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail(),false);
+//        FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 	}
 }

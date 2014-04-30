@@ -89,7 +89,7 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
     public void open() {
     	start();
 		if (logger.isActivated()) {
-			logger.debug("Dummy source stream openned");
+			logger.debug("Dummy source stream opened");
 		}
 	}    	
 	

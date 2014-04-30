@@ -228,7 +228,8 @@ public class TerminatingSipSession extends GenericSipSession {
         		// Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	// Active mode: client should connect
-                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this);
+                	// MSRP session without TLS 
+                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this, null);
         			session.setFailureReportOption(false);
         			session.setSuccessReportOption(false);
         			

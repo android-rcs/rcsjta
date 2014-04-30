@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -117,7 +118,8 @@ public class ChunkSender extends Thread {
 				}
 				
 				// Notify the msrp session listener that an error has occured
-				connection.getSession().getMsrpEventListener().msrpTransferError(null, e.getMessage());
+				// Changed by Deutsche Telekom
+				connection.getSession().getMsrpEventListener().msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
 			}
 		}
 	}
@@ -134,7 +136,7 @@ public class ChunkSender extends Thread {
 		} else {
 			sendChunkImmediately(chunk);
 		}
-	}	
+	}
 
 	/**
 	 * Send a chunk immediately
@@ -152,7 +154,7 @@ public class ChunkSender extends Thread {
 	/**
 	 * Write data to the stream
 	 * 
-	 * @param chunk Data chunck
+	 * @param chunk Data chunk
 	 * @throws IOException
 	 */
 	private synchronized void writeData(byte chunk[]) throws IOException {

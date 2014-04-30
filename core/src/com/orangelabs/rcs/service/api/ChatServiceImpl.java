@@ -324,7 +324,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 	  		// Notify message delivery listeners
 			ChatImpl chat = (ChatImpl)ChatServiceImpl.getChatSession(contact);
 			if (chat != null) {
-            	chat.handleMessageDeliveryStatus(msgId, status);
+				// TODO FUSION check if correct ?
+            	chat.handleMessageDeliveryStatus(msgId, status, contact);
 	    	}
     	}
     }

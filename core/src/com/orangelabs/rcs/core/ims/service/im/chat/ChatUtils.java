@@ -29,6 +29,8 @@ import javax2.sip.header.ExtensionHeader;
 
 import org.xml.sax.InputSource;
 
+import android.text.TextUtils;
+
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -51,6 +53,7 @@ import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Chat utility functions
@@ -73,6 +76,11 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
+	 /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+    
 	/**
 	 * Get supported feature tags for a group chat
 	 *
@@ -81,27 +89,35 @@ public class ChatUtils {
 	public static List<String> getSupportedFeatureTagsForGroupChat() {
 		List<String> tags = new ArrayList<String>(); 
 		tags.add(FeatureTags.FEATURE_OMA_IM);
-		
-		String additionalRcseTags = "";
+
+        List<String> additionalRcseTags = new ArrayList<String>();
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
         if (RcsSettings.getInstance().isFileTransferSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
         if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_HTTP + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
         if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_SF;
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
-        if (additionalRcseTags.length() > 0) {
-        	if (additionalRcseTags.endsWith(",")) {
-        		additionalRcseTags = additionalRcseTags.substring(0, additionalRcseTags.length()-1);
-        	}
-        	tags.add(FeatureTags.FEATURE_RCSE + "=\"" + additionalRcseTags + "\"");
+        if (!additionalRcseTags.isEmpty()) {
+            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags) + "\"");
         }
-        
+
+        return tags;
+    }
+
+    /**
+     * Get Accept-Contact tags for a group chat
+     *
+     * @return List of tags
+     */
+    public static List<String> getAcceptContactTagsForGroupChat() {
+        List<String> tags = new ArrayList<String>();
+        tags.add(FeatureTags.FEATURE_OMA_IM);
         return tags;
 	}	
 	
@@ -113,25 +129,22 @@ public class ChatUtils {
 	public static List<String> getSupportedFeatureTagsForChat() {
 		List<String> tags = new ArrayList<String>(); 
 		tags.add(FeatureTags.FEATURE_OMA_IM);
-		
-		String additionalRcseTags = "";
+
+        List<String> additionalRcseTags = new ArrayList<String>();
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
         if (RcsSettings.getInstance().isFileTransferSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
         if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_HTTP + ",";
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
         if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-        	additionalRcseTags += FeatureTags.FEATURE_RCSE_FT_SF;
+        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
-        if (additionalRcseTags.length() > 0) {
-        	if (additionalRcseTags.endsWith(",")) {
-        		additionalRcseTags = additionalRcseTags.substring(0, additionalRcseTags.length()-1);
-        	}
-        	tags.add(FeatureTags.FEATURE_RCSE + "=\"" + additionalRcseTags + "\"");
+        if (!additionalRcseTags.isEmpty()) {
+            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags) + "\"");
         }
 		
 	    return tags;
@@ -266,15 +279,6 @@ public class ChatUtils {
     	} else {
     		return false;
     	}
-    }
-    
-    /**
-     * Generate a unique message ID
-     * 
-     * @return Message ID
-     */
-    public static String generateMessageId() {
-    	return "Msg" + IdGenerator.getIdentifier().replace('_', '-');
     }
 
     /**
@@ -537,20 +541,21 @@ public class ChatUtils {
 	 * @return String
 	 */
 	public static String buildCpimDeliveryReport(String from, String to, String imdn) {
+		// @formatter:off
 		String cpim =
 			CpimMessage.HEADER_FROM + ": " + ChatUtils.formatCpimSipUri(from) + CRLF + 
 			CpimMessage.HEADER_TO + ": " + ChatUtils.formatCpimSipUri(to) + CRLF + 
 			CpimMessage.HEADER_NS + ": " + ImdnDocument.IMDN_NAMESPACE + CRLF +
-			ImdnUtils.HEADER_IMDN_MSG_ID + ": " + IdGenerator.getIdentifier() + CRLF +
+			ImdnUtils.HEADER_IMDN_MSG_ID + ": " + IdGenerator.generateMessageID() + CRLF +
 			CpimMessage.HEADER_DATETIME + ": " + DateUtils.encodeDate(System.currentTimeMillis()) + CRLF + 
-			CpimMessage.HEADER_CONTENT_DISPOSITION + ": " + ImdnDocument.NOTIFICATION + CRLF +
-			CRLF +  
+			CRLF + 			
 			CpimMessage.HEADER_CONTENT_TYPE + ": " + ImdnDocument.MIME_TYPE + CRLF +
+			CpimMessage.HEADER_CONTENT_DISPOSITION + ": " + ImdnDocument.NOTIFICATION + CRLF +
 			CpimMessage.HEADER_CONTENT_LENGTH + ": " + imdn.getBytes().length + CRLF + 
 			CRLF + 
 			imdn;	
-		   
 		return cpim;
+		// @formatter:on
 	}
 	
 	/**
@@ -631,7 +636,7 @@ public class ChatUtils {
 	*/
 	public static String buildGeolocDocument(GeolocPush geoloc, String contact, String msgId) {		
 		String document= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
-				"<rcsenveloppe xmlns=\"urn:gsma:params:xml:ns:rcs:rcs:geolocation\"" +
+				"<rcsenvelope xmlns=\"urn:gsma:params:xml:ns:rcs:rcs:geolocation\"" +
 				" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"" +
 				" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"" +
 				" xmlns:gml=\"http://www.opengis.net/gml\"" +
@@ -655,7 +660,7 @@ public class ChatUtils {
 				"</gp:geopriv>" + CRLF + 
 				"<timestamp>"+ DateUtils.encodeDate(System.currentTimeMillis()) +"</timestamp>" + CRLF + 
 				"</rcspushlocation>" + CRLF;
-		document += "</rcsenveloppe>" + CRLF;
+		document += "</rcsenvelope>" + CRLF;
 		return document;
 	}
 	
@@ -679,6 +684,9 @@ public class ChatUtils {
 			    return geoloc;
 		    }
 		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(),e);
+			}
 			return null;
 		}
 	    return null;
@@ -718,6 +726,23 @@ public class ChatUtils {
 	}
 	
 	/**
+	 * Create a first message
+	 * 
+	 * @param remote Remote contact
+	 * @param msg Text message
+	 * @param imdn IMDN flag
+	 * @return First message
+	 */
+	public static InstantMessage createFirstMessage(String remote, String msg, boolean imdn) {
+		if ((msg != null) && (msg.length() > 0)) {
+			String msgId = IdGenerator.generateMessageID();
+			return new InstantMessage(msgId, remote, StringUtils.encodeUTF8(msg), imdn, null);
+		} else {
+			return null;
+		}	
+	}
+	
+	/**
 	 * Create a text message
 	 * 
 	 * @param remote Remote contact
@@ -726,27 +751,22 @@ public class ChatUtils {
 	 * @return Text message
 	 */
 	public static InstantMessage createTextMessage(String remote, String msg, boolean imdn) {
-		String msgId = ChatUtils.generateMessageId();
-		return new InstantMessage(msgId,
-				remote,
-				StringUtils.encodeUTF8(msg),
-				imdn);
+		String msgId = IdGenerator.generateMessageID();
+		return new InstantMessage(msgId, remote, StringUtils.encodeUTF8(msg), imdn, null);
 	}
-	
+
 	/**
 	 * Create a file transfer message
 	 * 
 	 * @param remote Remote contact
 	 * @param file File info
 	 * @param imdn IMDN flag
+	 * @param displayName the display name
 	 * @return File message
 	 */
 	public static FileTransferMessage createFileTransferMessage(String remote, String file, boolean imdn) {
-		String msgId = ChatUtils.generateMessageId();
-		return new FileTransferMessage(msgId,
-				remote,
-				file,
-				imdn);
+		String msgId = IdGenerator.generateMessageID();
+		return new FileTransferMessage(msgId, remote, file, imdn, null);
 	}
 	
 	/**
@@ -755,14 +775,12 @@ public class ChatUtils {
 	 * @param remote Remote contact
 	 * @param geoloc Geoloc info
 	 * @param imdn IMDN flag
+	 * @param displayName the display name
 	 * @return Geoloc message
 	 */
 	public static GeolocMessage createGeolocMessage(String remote, GeolocPush geoloc, boolean imdn) {
-		String msgId = ChatUtils.generateMessageId();
-		return new GeolocMessage(msgId,
-				remote,
-				geoloc,
-				imdn);
+		String msgId = IdGenerator.generateMessageID();
+		return new GeolocMessage(msgId, remote, geoloc, imdn, null);
 	}
 	
 	/**
@@ -810,20 +828,20 @@ public class ChatUtils {
 							remote,
 							ChatUtils.parseGeolocDocument(content),
 							ChatUtils.isImdnDisplayedRequested(invite),
-							date);
+							date,null);
 				} else
 				if (mime.contains(FileTransferMessage.MIME_TYPE)) {
 					return new FileTransferMessage(msgId,
 							remote,
 							StringUtils.decodeUTF8(content),
 							ChatUtils.isImdnDisplayedRequested(invite),
-							date);
+							date, null);
 				} else {
 					return new InstantMessage(msgId,
 							remote,
 							StringUtils.decodeUTF8(content),
 							ChatUtils.isImdnDisplayedRequested(invite),
-							date);
+							date, null);
 				}
 			} else {
 				return null;
@@ -844,11 +862,12 @@ public class ChatUtils {
 		if ((subject != null) && (subject.length() > 0)) {
 			String remote = ChatUtils.getReferredIdentity(invite);
 			if ((remote != null) && (subject != null)) {
-				return new InstantMessage(ChatUtils.generateMessageId(),
+				return new InstantMessage(IdGenerator.generateMessageID(),
 						remote,
 						StringUtils.decodeUTF8(subject),
 						ChatUtils.isImdnDisplayedRequested(invite),
-						new Date());
+						new Date(),
+						null);
 			} else {
 				return null;
 			}

@@ -19,7 +19,6 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Vector;
 
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
@@ -31,21 +30,19 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
-import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
-import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -114,38 +111,21 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 
 			// Create the MSRP manager
 			String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
-			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+			msrpMgr = new MsrpManager(localIpAddress, localMsrpPort,  getImsService());
             if (getImsService().getImsModule().isConnectedToWifiAccess()) {
                 msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
             }
 
 			// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 	    	String encoding = getContent().getEncoding();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + msrpMgr.getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + msrpMgr.getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	            "a=accept-types: " + encoding + SipUtils.CRLF +
-	    		"a=file-transfer-id:" + getFileTransferId() + SipUtils.CRLF +
-	    		"a=file-disposition:attachment" + SipUtils.CRLF +
-	    		"a=sendonly" + SipUtils.CRLF;
 	    	int maxSize = FileSharingSession.getMaxFileSharingSize();
-	    	if (maxSize > 0) {
-	    		sdp += "a=max-size:" + maxSize + SipUtils.CRLF;
-	    	}
-	    	
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
-	    	if (selector != null) {
-	    		sdp += "a=file-selector:" + selector + SipUtils.CRLF;
-	    	}
+	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
+                    msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferId(), selector,
+                    "attachment", localSetup, msrpMgr.getLocalMsrpPath(),
+                    SdpUtils.DIRECTION_SENDONLY, maxSize);
 
 	    	// Set File-location attribute
 	    	String location = getFileLocationAttribute();
@@ -218,19 +198,19 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
      * @throws Exception 
      */
     public void prepareMediaSession() throws Exception {
-        // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
-        Vector<MediaDescription> media = parser.getMediaDescriptions();
-        MediaDescription mediaDesc = media.elementAt(0);
-        MediaAttribute attr = mediaDesc.getMediaAttribute("path");
-        String remoteMsrpPath = attr.getValue();
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-        int remotePort = mediaDesc.port;
+        // Changed by Deutsche Telekom
+        // Get the remote SDP part
+        byte[] sdp = getDialogPath().getRemoteContent().getBytes();
 
-        // Create the MSRP client session
-        MsrpSession session = msrpMgr.createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this);
+        // Changed by Deutsche Telekom
+        // Create the MSRP session
+        MsrpSession session = msrpMgr.createMsrpSession(sdp, this);
+
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
+        // Changed by Deutsche Telekom
+        // Do not use right now the mapping to do not increase memory and cpu consumption
+        session.setMapMsgIdFromTransationId(false);
     }
 
     /**
@@ -242,26 +222,31 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
         // Open the MSRP session
         msrpMgr.openMsrpSession();
 
-        try {
-            // Start sending data chunks
-            byte[] data = getContent().getData();
-            InputStream stream; 
-            if (data == null) {
-                // Load data from URL
-                stream = FileFactory.getFactory().openFileInputStream(getContent().getUrl());
-            } else {
-                // Load data from memory
-                stream = new ByteArrayInputStream(data);
+        Thread thread = new Thread() {
+            public void run() {
+                try {
+                    // Start sending data chunks
+                    byte[] data = getContent().getData();
+                    InputStream stream; 
+                    if (data == null) {
+                        // Load data from URL
+                        stream = FileFactory.getFactory().openFileInputStream(getContent().getUrl());
+                    } else {
+                        // Load data from memory
+                        stream = new ByteArrayInputStream(data);
+                    }
+                    msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
+                } catch(Exception e) {
+                    // Unexpected error
+                    if (logger.isActivated()) {
+                        logger.error("Session initiation has failed", e);
+                    }
+                    handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
+                            e.getMessage()));
+                }
             }
-            msrpMgr.sendChunks(stream, ChatUtils.generateMessageId(), getContent().getEncoding(), getContent().getSize());
-        } catch(Exception e) {
-            // Unexpected error
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-            handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
-        }
+        };
+        thread.start();
     }
 
 	/**
@@ -292,8 +277,8 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
         }
 
         // Notify delivery
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DELIVERED);
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
 	}
 	
 	/**
@@ -353,4 +338,5 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
             logger.debug("MSRP session has been closed");
         }
     }
+
 }

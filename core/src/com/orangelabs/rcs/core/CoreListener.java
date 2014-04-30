@@ -129,10 +129,10 @@ public interface CoreListener {
     public void handleContentSharingStreamingInvitation(VideoStreamingSession session);
     
 	/**
-	 * A new file transfer invitation has been received
+	 * A new file transfer invitation has been received when already in a chat session
 	 * 
 	 * @param fileSharingSession File transfer session
-	 * @param isGroup Is group file transfer
+	 * @param isGroup is Group file transfer
 	 */
 	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup);
 
@@ -148,8 +148,27 @@ public interface CoreListener {
 	 * A new file transfer invitation has been received and creating a chat session
 	 * 
 	 * @param session File transfer session
+	 * @param chatSession Group chat session
 	 */
-	public void handleGroupFileTransferInvitation(FileSharingSession fileSharingSession, TerminatingAdhocGroupChatSession groupChatSession);
+	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession chatSession);
+
+    /**
+     * An incoming file transfer has been resumed
+     * 
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     * @param chatSessionId corresponding chatSessionId
+     * @param chatId corresponding chatId
+     */
+    public void handleIncomingFileTransferResuming(FileSharingSession session, boolean isGroup, String chatSessionId, String chatId);
+
+    /**
+     * An outgoing file transfer has been resumed
+     * 
+     * @param session File transfer session
+     * @param isGroup is group file transfer
+     */
+    public void handleOutgoingFileTransferResuming(FileSharingSession session, boolean isGroup);
 
     /**
      * New one-to-one chat session invitation
@@ -166,6 +185,7 @@ public interface CoreListener {
     public void handleAdhocGroupChatSessionInvitation(TerminatingAdhocGroupChatSession session);
 
     /**
+ 
      * Store and Forward messages session invitation
      * 
      * @param session Chat session
@@ -186,8 +206,9 @@ public interface CoreListener {
      *
      * @param ftSessionId File transfer session Id
      * @param status Delivery status
+     * @param contact who notified status
      */
-    public void handleFileDeliveryStatus(String ftSessionId, String status); 
+    public void handleFileDeliveryStatus(String ftSessionId, String status, String contact); 
 
     /**
      * New SIP session invitation

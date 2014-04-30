@@ -27,11 +27,12 @@ public class FileTransferIntent {
      * Broadcast action: a new file transfer has been received.
      * <p>Intent includes the following extras:
      * <ul>
-     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the contact
+     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
      *  sending the invitation.
      * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
      *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+     * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the Group Chat if any.
      * <li> {@link #EXTRA_FILENAME} containing the filename of file to be transferred.
      * <li> {@link #EXTRA_FILESIZE} containing the size of the file to be transferred.
      * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the file to be transferred.
@@ -39,6 +40,25 @@ public class FileTransferIntent {
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER";
+	
+	/**
+     * Broadcast action: a file transfer is resuming.
+     * <p>Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
+     *  sending the invitation.
+     * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
+     *  contact sending the invitation (extracted from the SIP address).
+     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+     * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the Group Chat if any.
+     * <li> {@link #EXTRA_FILENAME} containing the filename of file to be transferred.
+     * <li> {@link #EXTRA_FILESIZE} containing the size of the file to be transferred.
+     * <li> {@link #EXTRA_FILETYPE} containing the MIME type of the file to be transferred.
+     * <li> {@link #EXTRA_FILEICON} containing the filename of the file icon associated to the file to be transferred.
+     * <li> {@link #EXTRA_DIRECTION} containing the direction of the File Transfer. 
+     * </ul>
+     */
+	public final static String ACTION_RESUME = "com.gsma.services.rcs.ft.action.RESUME_FILE_TRANSFER";
 
 	/**
 	 * MSISDN of the contact sending the invitation
@@ -48,7 +68,7 @@ public class FileTransferIntent {
 	/**
 	 * Display name of the contact sending the invitation (extracted from the SIP address)
 	 */
-	public final static String EXTRA_DISPLAY_NAME = "contactDisplayname";
+	public final static String EXTRA_DISPLAY_NAME = "displayname";
 
 	/**
 	 * Unique ID of the file transfer
@@ -74,4 +94,14 @@ public class FileTransferIntent {
 	 * Name of the file icon
 	 */
 	public final static String EXTRA_FILEICON = "fileicon";
+
+	/**
+	 * Identity of the chat group
+	 */
+	public static final String EXTRA_CHAT_ID = "chatId";
+	
+	/**
+	 * The direction of the File Transfer
+	 */
+	public static final String EXTRA_DIRECTION = "direction";
 }

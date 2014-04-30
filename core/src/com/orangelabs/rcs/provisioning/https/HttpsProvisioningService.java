@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.provisioning.https;
 
+import java.util.Date;
+
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -28,6 +31,8 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provisioning.ProvisioningInfo;
+import com.orangelabs.rcs.service.LauncherUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -38,73 +43,176 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Deutsche Telekom AG
  */
 public class HttpsProvisioningService extends Service {
+    /**
+     * Intent key - Provisioning requested after (re)boot
+     */
+    private static final String FIRST_KEY = "first";
+
+    /**
+     * Intent key - Provisioning requested by user
+     */
+    private static final String USER_KEY = "user";
+
+    /**
+     * Retry Intent
+     */
+    private PendingIntent retryIntent = null;
 
     /**
      * Provisioning manager
      */
     HttpsProvisioningManager httpsProvisioningMng;
-    
+
     /**
 	 * Retry action for provisioning failure
 	 */
-    protected String ACTION_RETRY = "com.orangelabs.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
+    private static final String ACTION_RETRY = "com.orangelabs.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
 
 	/**
 	 * The logger
 	 */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static Logger logger = Logger.getLogger(HttpsProvisioningService.class.getSimpleName());
 
-    @Override
-    public void onCreate() {
-        // Instantiate RcsSettings and Provisioning manager
-        RcsSettings.createInstance(getApplicationContext());
-        
-        PendingIntent retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_RETRY), 0);
-        registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
-        httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(), retryIntent);
+	@Override
+	public void onCreate() {
+		if (logger.isActivated()) {
+			logger.debug("onCreate");
+		}
+		// Instantiate RcsSettings
+		RcsSettings.createInstance(getApplicationContext());
+		this.retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_RETRY), 0);
 	}
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (logger.isActivated()) {
 			logger.debug("Start HTTPS provisioning");
 		}
 
-        String version = RcsSettings.getInstance().getProvisioningVersion();
-        if (logger.isActivated()) {
-        	logger.debug("Provisioning parameter: first=" + httpsProvisioningMng.setIsFirstLaunchFromIntent(intent) + ", version= " + version);
-        }
-        
-        // it makes no sense to start service if version is 0 (unconfigured)
-        // if version = 0, then (re)set first to true
-        int ver = Integer.parseInt(version);
-        if (ver == 0) {
-        	httpsProvisioningMng.setIsFirstLaunch(true);
+		boolean first = false;
+		boolean user = false;
+		if (intent != null) {
+			first = intent.getBooleanExtra(FIRST_KEY, false);
+			user = intent.getBooleanExtra(USER_KEY, false);
+		}
+		String version = RcsSettings.getInstance().getProvisioningVersion();
+		// It makes no sense to start service if version is 0 (unconfigured)
+		// if version = 0, then (re)set first to true
+		try {
+			int ver = Integer.parseInt(version);
+            if (ver == 0) {
+                first = true;
+            }
+		} catch (NumberFormatException e) {
+            // Nothing to do
+		}
+		registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
+
+		httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(), retryIntent, first, user);
+		if (logger.isActivated()) {
+			logger.debug("Provisioning parameter: boot=" + first + ", user=" + user + ", version=" + version);
+		}
+
+		boolean requestConfig = false;
+        if (first) {
+            requestConfig = true;
+        } else {
+            if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+                // Nothing to do
+            } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+                if (user == true) {
+                    requestConfig = true;
+                }
+            } else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
+                requestConfig = true;
+            } else { // version > 0
+                Date expiration = LauncherUtils.getProvisioningExpirationDate(this);
+                if (expiration == null) {
+                    requestConfig = true;
+                } else {
+                    Date now = new Date();
+                    if (expiration.before(now)) {
+                        if (logger.isActivated())
+                            logger.debug("Configuration validity expired at " + expiration);
+                        requestConfig = true;
+                    } else {
+                        long delay = (expiration.getTime() - now.getTime());
+                        if (delay <= 0L) {
+                            requestConfig = true;
+                        } else {
+                            Long validity = LauncherUtils.getProvisioningValidity(this) * 1000L;
+                            if (validity != null && delay > validity) {
+                                delay = validity;
+                            }
+                            if (logger.isActivated())
+                                logger.debug("Configuration will expire in " + (delay / 1000)
+                                        + " secs at " + expiration);
+                            startRetryAlarm(this, retryIntent, delay);
+                        }
+                    }
+                }
+            }
         }
 
-        // Send default connection event
-        if (!httpsProvisioningMng.connectionEvent(ConnectivityManager.CONNECTIVITY_ACTION)) {
-            // If the UpdateConfig has NOT been done:
-        	httpsProvisioningMng.registerNetworkStateListener();
-        }
-		
-    	// We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
-    }
+		if (requestConfig) {
+			if (logger.isActivated())
+				logger.debug("Request HTTP configuration update");
+			// Send default connection event
+			if (!httpsProvisioningMng.connectionEvent(ConnectivityManager.CONNECTIVITY_ACTION)) {
+				// If the UpdateConfig has NOT been done:
+				httpsProvisioningMng.registerNetworkStateListener();
+			}
+		}
+		// We want this service to continue running until it is explicitly
+		// stopped, so return sticky.
+		return START_STICKY;
+	}
     
 
+	/**
+	 * Start retry alarm
+	 * 
+	 * @param context
+	 * @param intent
+	 * @param delay
+	 *            delay in milli seconds
+	 */
+	public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
+		if (logger.isActivated()) {
+			logger.debug( "Retry HTTP configuration update in "+(delay/1000)+" secs");
+		}
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, intent);
+	}
+
+	/**
+	 * Cancel retry alarm
+	 * 
+	 * @param context
+	 * @param intent
+	 */
+	public static void cancelRetryAlarm(Context context, PendingIntent intent) {
+		if (logger.isActivated()) {
+			logger.debug( "Stop retry configuration update");
+		}
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.cancel(intent);
+	}
+    
     @Override
     public void onDestroy() {
-		// Unregister network state listener
-        httpsProvisioningMng.unregisterNetworkStateListener();
+		if (httpsProvisioningMng != null) {
+			// Unregister network state listener
+			httpsProvisioningMng.unregisterNetworkStateListener();
 
-        // Unregister wifi disabling listener
-        httpsProvisioningMng.unregisterWifiDisablingListener();
-        
-        // Unregister SMS provisioning receiver
-        httpsProvisioningMng.unregisterSmsProvisioningReceiver();
+			// Unregister wifi disabling listener
+			httpsProvisioningMng.unregisterWifiDisablingListener();
 
+			// Unregister SMS provisioning receiver
+			httpsProvisioningMng.unregisterSmsProvisioningReceiver();
+		}
+
+		cancelRetryAlarm(this, retryIntent);
         // Unregister retry receiver
         try {
 	        unregisterReceiver(retryReceiver);
@@ -132,4 +240,21 @@ public class HttpsProvisioningService extends Service {
             t.start();
         }
     };
+    
+	/**
+	 * Start the HTTPs provisioning service
+	 * 
+	 * @param context
+	 * @param firstLaunch
+	 *            first launch after (re)boot
+	 * @param userLaunch
+	 *            launch is requested by user action
+	 */
+	public static void startHttpsProvisioningService(Context context , boolean firstLaunch, boolean userLaunch) {
+		// Start Https provisioning service
+		Intent provisioningIntent = new Intent(context, HttpsProvisioningService.class);
+		provisioningIntent.putExtra(FIRST_KEY, firstLaunch);
+		provisioningIntent.putExtra(USER_KEY, userLaunch);
+		context.startService(provisioningIntent);
+	}
 }

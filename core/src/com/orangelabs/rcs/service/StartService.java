@@ -45,8 +45,8 @@ import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.provisioning.https.HttpsProvisioningService;
-import com.orangelabs.rcs.provisioning.https.HttpsProvisioningUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -84,42 +84,33 @@ public class StartService extends Service {
     /**
      * Launch boot flag
      */
-    private boolean boot = false;
-
+	boolean boot = false;
+	
+	 /**
+     * Launch user flag
+     */
+	boolean user = false;
+	
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static Logger logger = Logger.getLogger(StartService.class.getSimpleName());
+    
+    private static final String INTENT_KEY_BOOT = "boot";
+    private static final String INTENT_KEY_USER = "user";
+
 
     @Override
     public void onCreate() {
         // Instantiate RcsSettings
         RcsSettings.createInstance(getApplicationContext());
-
-        // Use a network listener to start RCS core when the data will be ON 
-        if (RcsSettings.getInstance().getAutoConfigMode() == RcsSettingsData.NO_AUTO_CONFIG) {
-            // Get connectivity manager
-            if (connMgr == null) {
-                connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            }
-            
-            // Instantiate the network listener
-	        networkStateListener = new BroadcastReceiver() {
-	            @Override
-	            public void onReceive(Context context, final Intent intent) {
-	                Thread t = new Thread() {
-	                    public void run() {
-	                        connectionEvent(intent.getAction());
-	                    }
-	                };
-	                t.start();
-	            }
-	        };
-	
-	        // Register network state listener
-	        IntentFilter intentFilter = new IntentFilter();
-	        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-	        registerReceiver(networkStateListener, intentFilter);
+        int autoConfigMode = RcsSettings.getInstance().getAutoConfigMode();
+    	if (logger.isActivated()) {
+            logger.debug("onCreate AutoConfigMode="+autoConfigMode);
+        }
+        // In manual configuration, use a network listener to start RCS core when the data will be ON 
+        if (autoConfigMode == RcsSettingsData.NO_AUTO_CONFIG) {
+        	registerNetworkStateListener();
         }
     }
 
@@ -141,31 +132,60 @@ public class StartService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (logger.isActivated()) {
-            logger.debug("Start RCS service");
+	public int onStartCommand(final Intent intent, final int flags, final int startId) {
+		if (logger.isActivated()) {
+			logger.debug("Start RCS service");
+		}
+		new Thread() {
+			@Override
+			public void run() {
+				// Check boot
+				if (intent != null) {
+					boot = intent.getBooleanExtra(INTENT_KEY_BOOT, false);
+					user = intent.getBooleanExtra(INTENT_KEY_USER, false);
+				}
+				if (checkAccount()) {
+					launchRcsService(boot, user);
+				} else {
+					// User account can't be initialized (no radio to read IMSI, .etc)
+					if (logger.isActivated()) {
+						logger.error("Can't create the user account");
+					}
+					// Exit service
+					stopSelf();
+				}
+			}
+		}.start();
+
+		// We want this service to continue running until it is explicitly
+		// stopped, so return sticky.
+		return START_STICKY;
+	}
+
+    /**
+     * Register a broadcast receiver for network state changes
+     */
+    private void registerNetworkStateListener() {
+        // Get connectivity manager
+        if (connMgr == null) {
+            connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         }
 
-        // Check boot
-        if (intent != null) {
-            boot = intent.getBooleanExtra("boot", false);
-        }
-
-        if (checkAccount()) {
-            launchRcsService(boot);
-        } else {
-            // User account can't be initialized (no radio to read IMSI, .etc)
-            if (logger.isActivated()) {
-                logger.error("Can't create the user account");
+        // Instantiate the network listener
+        networkStateListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, final Intent intent) {
+                new Thread() {
+                    public void run() {
+                        connectionEvent(intent.getAction());
+                    }
+                }.start();
             }
-
-            // Exit service
-            stopSelf();
-        }
-
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
+        };
+        // Register network state listener
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkStateListener, intentFilter);
     }
 
     /**
@@ -391,53 +411,56 @@ public class StartService extends Service {
      * Launch the RCS service.
      *
      * @param boot indicates if RCS is launched from the device boot
+     * @param user indicates if RCS is launched from the user interface
      */
-    private void launchRcsService(boolean boot) {
-        int mode = RcsSettings.getInstance().getAutoConfigMode();
+	private void launchRcsService(boolean boot, boolean user) {
+		int mode = RcsSettings.getInstance().getAutoConfigMode();
 
-        if (logger.isActivated()) {
-            logger.debug("Launch RCS service: HTTPS="
-                + (mode == RcsSettingsData.HTTPS_AUTO_CONFIG)
-                + ", boot=" + boot);
-        }
+		if (logger.isActivated())
+			logger.debug("Launch RCS service: HTTPS=" + (mode == RcsSettingsData.HTTPS_AUTO_CONFIG) + ", boot=" + boot + ", user=" + user);
 
-        if (mode == RcsSettingsData.HTTPS_AUTO_CONFIG) {
-            // HTTPS auto config
-
-        	// Check the last provisioning version
-            if (RcsSettings.getInstance().getProvisioningVersion().equals("-1")) {
-                if (hasChangedAccount()) {
-                    // Start provisioning as a first launch
-                    Intent provisioningIntent = new Intent(getApplicationContext(), HttpsProvisioningService.class);
-                    provisioningIntent.putExtra(HttpsProvisioningUtils.FIRST_KEY, true);
-                    startService(provisioningIntent);
-                } else {
-                    if (logger.isActivated()) {
-                        logger.debug("Provisioning is blocked with this account");
-                    }
-                }
-            } else {
-                if (isFirstLaunch() || hasChangedAccount()) {
-                    // First launch: start the auto config service with special tag
-                    Intent provisioningIntent = new Intent(getApplicationContext(), HttpsProvisioningService.class);
-                    provisioningIntent.putExtra(HttpsProvisioningUtils.FIRST_KEY, true);
-                    startService(provisioningIntent);
-                } else
-                if (boot) {
-                    // Boot: start the auto config service
-                    Intent provisioningIntent = new Intent(getApplicationContext(), HttpsProvisioningService.class);
-                    provisioningIntent.putExtra(HttpsProvisioningUtils.FIRST_KEY, false);
-                    startService(provisioningIntent);
-                } else {
-                    // Start the RCS core service
-                    LauncherUtils.launchRcsCoreService(getApplicationContext());
-                }
-            }
-        } else {
-            // No auto config: directly start the RCS core service
-            LauncherUtils.launchRcsCoreService(getApplicationContext());
-        }
-    }
+		if (mode == RcsSettingsData.HTTPS_AUTO_CONFIG) {
+			// HTTPS auto config
+			String version = RcsSettings.getInstance().getProvisioningVersion();
+			// Check the last provisioning version
+			if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+				// (-1) : RCS service is permanently disabled. SIM change is required
+				if (hasChangedAccount()) {
+					// Start provisioning as a first launch
+					HttpsProvisioningService.startHttpsProvisioningService(getApplicationContext(), true, user);
+				} else {
+					if (logger.isActivated()) {
+						logger.debug("Provisioning is blocked with this account");
+					}
+				}
+			} else {
+				if (isFirstLaunch() || hasChangedAccount()) {
+					// First launch: start the auto config service with special tag
+					HttpsProvisioningService.startHttpsProvisioningService(getApplicationContext(), true, user);
+				} else {
+					if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+						// -2 : RCS client and configuration query is disabled
+						if (user) {
+							// Only start query if requested by user action
+							HttpsProvisioningService.startHttpsProvisioningService(getApplicationContext(), false, user);
+						}
+					} else {
+						// Start or restart the HTTP provisioning service
+						HttpsProvisioningService.startHttpsProvisioningService(getApplicationContext(), false, user);
+						if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version)) {
+							// -3 : RCS client is disabled but configuration query is not
+						} else {
+							// Start the RCS core service
+							LauncherUtils.launchRcsCoreService(getApplicationContext());
+						}
+					}
+				}
+			}
+		} else {
+			// No auto config: directly start the RCS core service
+			LauncherUtils.launchRcsCoreService(getApplicationContext());
+		}
+	}
 
     /**
      * Is the first RCs is launched ?
@@ -486,4 +509,22 @@ public class StartService extends Service {
         SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
         return preferences.getBoolean(REGISTRY_NEW_USER_ACCOUNT, false);
     }
+    
+	/**
+	 * Launch the RCS start service
+	 * 
+	 * @param context
+	 * @param boot
+	 *            start RCS service upon boot
+	 * @param user
+	 *            start RCS service upon user action
+	 */
+	static void LaunchRcsStartService(Context context, boolean boot, boolean user) {
+		if (logger.isActivated())
+			logger.debug("Launch RCS service (boot=" + boot + ") (user="+user+")");
+		Intent intent = new Intent(context, StartService.class);
+		intent.putExtra(INTENT_KEY_BOOT, boot);
+		intent.putExtra(INTENT_KEY_USER, user);
+		context.startService(intent);
+	}
 }

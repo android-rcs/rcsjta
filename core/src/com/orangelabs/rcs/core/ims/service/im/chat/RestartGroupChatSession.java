@@ -30,7 +30,6 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -98,20 +97,10 @@ public class RestartGroupChatSession extends GroupChatSession {
             }
 
 	    	// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	    		"a=accept-types:" + getAcceptTypes() + SipUtils.CRLF +
-	            "a=accept-wrapped-types:" + getWrappedTypes() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
+	    	String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr().getLocalSocketProtocol(),
+                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(),
+                    SdpUtils.DIRECTION_SENDRECV);
 
 	        // Generate the resource list for given participants
 	        String resourceList = ChatUtils.generateChatResourceList(getParticipants().getList());
@@ -168,7 +157,8 @@ public class RestartGroupChatSession extends GroupChatSession {
 	 */
 	private SipRequest createInviteRequest(String content) throws SipException {
         SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-        		InstantMessagingService.CHAT_FEATURE_TAGS,
+        		getFeatureTags(),
+                getAcceptContactTags(),
         		content, BOUNDARY_TAG);
 
     	// Test if there is a subject

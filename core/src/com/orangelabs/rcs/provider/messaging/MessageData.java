@@ -1,6 +1,7 @@
 package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.ft.FileTransferLog;
 
 import android.net.Uri;
 
@@ -79,4 +80,9 @@ public class MessageData {
 	 * Column name
 	 */
     static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
+
+    /**
+	 * Column name KEY_FT_ID : the reference to the File Transfer ID
+	 */
+	public static final String KEY_FT_ID = ChatLog.Message.FT_ID;
 }

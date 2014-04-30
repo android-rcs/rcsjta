@@ -1090,7 +1090,7 @@ public class SipStackImpl extends SIPTransactionStack implements
 
 		String key = ListeningPointImpl.makeKey(address, port, transport);
 
-		ListeningPointImpl lip = (ListeningPointImpl) listeningPoints.get(key);
+		ListeningPointImpl lip = listeningPoints.get(key);
 		if (lip != null) {
 			return lip;
 		} else {
@@ -1208,7 +1208,7 @@ public class SipStackImpl extends SIPTransactionStack implements
 	 * 
 	 * @see javax2.sip.SipStack#getListeningPoints()
 	 */
-	public java.util.Iterator getListeningPoints() {
+	public java.util.Iterator<ListeningPointImpl> getListeningPoints() {
 		return this.listeningPoints.values().iterator();
 	}
 

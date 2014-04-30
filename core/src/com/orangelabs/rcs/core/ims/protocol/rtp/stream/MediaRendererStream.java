@@ -66,7 +66,7 @@ public class MediaRendererStream implements ProcessorOutputStream {
     	try {
 	    	renderer.open();
 			if (logger.isActivated()) {
-				logger.debug("Media renderer stream openned");
+				logger.debug("Media renderer stream opened");
 			}
 		} catch(Exception e) {
 			if (logger.isActivated()) {

@@ -42,6 +42,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -251,7 +252,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 		try {
 			// Create a geoloc content
-			String msgId = ChatUtils.generateMessageId();
+			String msgId = IdGenerator.generateMessageID();
 			GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());

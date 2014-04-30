@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -424,6 +425,18 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 				}
 			});
     	}
+
+		@Override
+		public void onFileTransferPaused() throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onFileTransferResumed() throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
     };
     
     /**

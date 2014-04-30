@@ -41,9 +41,9 @@ public class FileTransferLog {
      * <P>Type: TEXT</P>
      */
     public static final String FT_ID = "ft_id";
-
+    
     /**
-     * The name of the column containing the MSISDN of the sender.
+     * The name of the column containing the identity of the remote contact.
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";
@@ -78,7 +78,7 @@ public class FileTransferLog {
      * <P>Type: LONG</P>
      */
     public static final String TRANSFERRED = "transferred";
-
+    
     /**
      * The name of the column containing the time when transfer is initiated.
      * <P>Type: LONG</P>
@@ -114,5 +114,17 @@ public class FileTransferLog {
      * The name of the column containing the file icon (absolute path).
      * <P>Type: TEXT</P>
      */
-    public static final String FILEICON = "fileicon";    
+    public static final String FILEICON = "fileicon";
+    
+    /**
+     * The name of the column containing the chat ID used for the file transfer in group chat.
+     * <P>Type: TEXT</P>
+     */
+    public static final String CHAT_ID = "chat_id";
+    
+    /**
+     * The name of the column containing the identity of the chat message.
+     * <P>Type: LONG</P>
+     */
+    public static final String MESSAGE_ID = "msg_id";
 }

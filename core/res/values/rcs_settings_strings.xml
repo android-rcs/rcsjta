@@ -33,6 +33,7 @@
 	<string name="rcs_settings_summary_chat_ringtone">Ringtone for incoming chat invitation</string>
 	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the joyn service</string>
 	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the joyn service</string>
+	<string name="rcs_settings_summary_rcs_roaming">Connect to joyn service when roaming</string>
 	<string name="rcs_settings_summary_edit_freetext">Edit your predefined free text</string>
 	<string name="rcs_settings_summary_csh_available">Beep when a content sharing may be initiated during the voice call</string>
 	<string name="rcs_settings_summary_video_format">Select the video codec</string>

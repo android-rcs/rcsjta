@@ -69,7 +69,7 @@ public class AndroidHttpConnection implements HttpConnection {
 		if (connection != null) {
 			return sendHttpRequest(HttpConnection.GET_METHOD);
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class AndroidHttpConnection implements HttpConnection {
 		if (connection != null) {
 			return sendHttpRequest(HttpConnection.POST_METHOD);
 		} else {
-			throw new IOException("Connection not openned");
+			throw new IOException("Connection not opened");
 		}
 	}
 	

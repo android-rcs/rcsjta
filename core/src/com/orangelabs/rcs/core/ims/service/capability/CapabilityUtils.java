@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.text.TextUtils;
 
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -56,99 +57,93 @@ public class CapabilityUtils {
 	 * @param ipcall IP call supported
 	 * @return List of tags
 	 */
-	public static List<String> getSupportedFeatureTags(boolean richcall, boolean ipcall) {
+ 	public static String[] getSupportedFeatureTags(boolean richcall, boolean ipcall) {
 		List<String> tags = new ArrayList<String>();
 
 		// Video share support
-        if (RcsSettings.getInstance().isVideoSharingSupported() && richcall
-                && NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G) {
+		if (RcsSettings.getInstance().isVideoSharingSupported() && richcall
+				&& NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G) {
 			tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
 		}
 
-		String supported = "";
+		// Changed by Deutsche Telekom
+		List<String> supportedTagList = new ArrayList<String>();
 
 		// Chat support
 		if (RcsSettings.getInstance().isImSessionSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_CHAT + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_CHAT);
 		}
-		
+
 		// FT support
 		if (RcsSettings.getInstance().isFileTransferSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_FT + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT);
 		}
-		
+
 		// FT over HTTP support
 		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_FT_HTTP + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
 		}
 
 		// Image share support
 		if (RcsSettings.getInstance().isImageSharingSupported() && (richcall || ipcall)) {
-			supported += FeatureTags.FEATURE_RCSE_IMAGE_SHARE + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
 		}
 
 		// Presence discovery support
 		if (RcsSettings.getInstance().isPresenceDiscoverySupported()) {
-			supported += FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
 		}
-		
+
 		// Social presence support
 		if (RcsSettings.getInstance().isSocialPresenceSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
 		}
 
 		// Geolocation push support
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
 		}
-		
+
 		// FT thumbnail support
 		if (RcsSettings.getInstance().isFileTransferThumbnailSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_FT_THUMBNAIL + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
 		}
-		
+
 		// FT S&F support
 		if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_FT_SF + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_SF);
 		}
 
 		// Group chat S&F support
 		if (RcsSettings.getInstance().isGroupChatStoreForwardSupported()) {
-			supported += FeatureTags.FEATURE_RCSE_GC_SF + ",";
+			supportedTagList.add(FeatureTags.FEATURE_RCSE_GC_SF);
 		}
 
-        // IP call support
-        if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
-            tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
-            tags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
-        }
-        if (RcsSettings.getInstance().isIPVideoCallSupported()) {
-            tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
-        }
-        if (RcsSettings.getInstance().isSipAutomata()) {
-            tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
-        }
+		// IP call support
+		if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
+			tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
+			tags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
+		}
+		if (RcsSettings.getInstance().isIPVideoCallSupported()) {
+			tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
+		}
+		if (RcsSettings.getInstance().isSipAutomata()) {
+			tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
+		}
 
 		// RCS extensions support
 		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-		if ((exts != null) && (exts.length() > 0)) {
-			String[] values = exts.split(",");
-			for(int i=0; i < values.length; i++) {
-				supported += FeatureTags.FEATURE_RCSE_EXTENSION + "." + values[i] + ",";
-			}
+		if (!TextUtils.isEmpty(exts)) {
+			supportedTagList.add(exts);
 		}
 
 		// Add RCS-e prefix
-		if (supported.length() != 0) {
-			if (supported.endsWith(",")) {
-				supported = supported.substring(0, supported.length()-1);
-			}
-			supported = FeatureTags.FEATURE_RCSE + "=\"" + supported + "\"";		
-			tags.add(supported);
+		if (!supportedTagList.isEmpty()) {
+			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", supportedTagList) + "\"");
 		}
 
-		return tags;
-	}	
+ 		return tags.toArray(new String[tags.size()]);
+	}
 
     /**
      * Extract features tags
@@ -236,12 +231,9 @@ public class CapabilityUtils {
         	} else
     		if (tag.startsWith(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION)) {
     			// Support a RCS extension
-    			String[] values = tag.split("=");
-    			String value =  StringUtils.removeQuotes(values[1]);
-    			String serviceId = value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length()+1, value.length());
-				capabilities.addSupportedExtension(serviceId);
-			} else
-			if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
+    			String[] value = tag.split("=");
+				capabilities.addSupportedExtension(StringUtils.removeQuotes(value[1]));
+			} else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
 				capabilities.setSipAutomata(true);
 			}
     	}
@@ -345,16 +337,15 @@ public class CapabilityUtils {
 		if (richcall) {
 	        boolean video = RcsSettings.getInstance().isVideoSharingSupported() && NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G;
 	        boolean image = RcsSettings.getInstance().isImageSharingSupported();
-	        boolean geoloc = RcsSettings.getInstance().isGeoLocationPushSupported();
+	        boolean geoloc =  RcsSettings.getInstance().isGeoLocationPushSupported();
 	        if (video | image) {
-				// Build the local SDP
-		    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-		    	sdp = "v=0" + SipUtils.CRLF +
-			        	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-			            "s=-" + SipUtils.CRLF +
-			            "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-			            "t=0 0" + SipUtils.CRLF;
-
+				// Changed by Deutsche Telekom
+	        	String mimeTypes = null;
+	        	String protocol = null;
+	        	String selector = null;
+	        	int maxSize = 0;
+	        	String media = null;
+	        	
 		    	// Add video config
 		        if (video) {
 		        	// Get supported video formats
@@ -364,10 +355,11 @@ public class CapabilityUtils {
 						VideoFormat fmt = videoFormats.elementAt(i);
 						videoSharingConfig.append("m=video 0 RTP/AVP " + fmt.getPayload() + SipUtils.CRLF);
 						videoSharingConfig.append("a=rtpmap:" + fmt.getPayload() + " " + fmt.getCodec() + SipUtils.CRLF);
+
 					}
 					
-					// Update SDP
-			    	sdp += videoSharingConfig.toString();
+	                // Changed by Deutsche Telekom
+			    	media = videoSharingConfig.toString();
 		        }
 	        
 				// Add image and geoloc config
@@ -375,26 +367,26 @@ public class CapabilityUtils {
 					StringBuffer supportedTransferFormats = new StringBuffer();
 
 					// Get supported image formats
-		        	Vector<String> mimeTypes = MimeManager.getSupportedImageMimeTypes();
-					for(int i=0; i < mimeTypes.size(); i++) {
-						supportedTransferFormats.append(mimeTypes.elementAt(i) + " ");
+		        	// Changed by Deutsche Telekom
+					Vector<String> mimeTypesVector = MimeManager.getSupportedImageMimeTypes();
+					for(int i=0; i < mimeTypesVector.size(); i++) {
+						supportedTransferFormats.append(mimeTypesVector.elementAt(i) + " ");
 				    }
-		        	
-		        	// Get supported geoloc
+					
+					// Get supported geoloc
 		        	if (geoloc) {
 		        		supportedTransferFormats.append(GeolocContent.ENCODING);		        		
 		        	}
-				
-					// Update SDP
-					String imageSharingConfig = "m=message 0 TCP/MSRP *"  + SipUtils.CRLF +
-						"a=accept-types:" + supportedTransferFormats.toString().trim() + SipUtils.CRLF +
-						"a=file-selector" + SipUtils.CRLF;
-			    	int maxSize = ImageTransferSession.getMaxImageSharingSize();
-			    	if (maxSize > 0) {
-			    		imageSharingConfig += "a=max-size:" + maxSize + SipUtils.CRLF;
-			    	}
-			    	sdp += imageSharingConfig;
+ 	
+					// Changed by Deutsche Telekom
+					mimeTypes = supportedTransferFormats.toString().trim();
+					protocol = SdpUtils.MSRP_PROTOCOL;
+					selector = "";
+			    	maxSize = ImageTransferSession.getMaxImageSharingSize();
 		        }
+
+		        // Changed by Deutsche Telekom
+		        sdp = SdpUtils.buildCapabilitySDP(ipAddress, protocol, mimeTypes, selector, media, maxSize);
 	        }
 		}
 		return sdp;

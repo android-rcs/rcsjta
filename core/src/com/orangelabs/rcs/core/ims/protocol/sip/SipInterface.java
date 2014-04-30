@@ -18,7 +18,10 @@
 
 package com.orangelabs.rcs.core.ims.protocol.sip;
 
+import gov2.nist.javax2.sip.address.AddressImpl;
+import gov2.nist.javax2.sip.message.SIPMessage;
 import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Properties;
@@ -39,9 +42,11 @@ import javax2.sip.TimeoutEvent;
 import javax2.sip.TransactionTerminatedEvent;
 import javax2.sip.address.Address;
 import javax2.sip.address.SipURI;
+import javax2.sip.address.URI;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
+import javax2.sip.header.RouteHeader;
 import javax2.sip.header.ViaHeader;
 
 import android.net.ConnectivityManager;
@@ -118,6 +123,11 @@ public class SipInterface implements SipListener {
      * SIP default protocol
      */
     private String defaultProtocol;
+    
+    /*
+     * TCP fallback according to RFC3261 chapter 18.1.1
+     */
+    private boolean tcpFallback;
 
     /**
      *  List of current SIP transactions
@@ -191,13 +201,15 @@ public class SipInterface implements SipListener {
      * @param proxyAddr Outbound proxy address
      * @param proxyPort Outbound proxy port
      * @param defaultProtocol Default protocol
+     * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType Type of network 
      * @throws SipException
      */
     public SipInterface(String localIpAddress, String proxyAddr,
-    		int proxyPort, String defaultProtocol, int networkType) throws SipException {
+    		int proxyPort, String defaultProtocol, boolean tcpFallback, int networkType) throws SipException {
         this.localIpAddress = localIpAddress;
         this.defaultProtocol = defaultProtocol;
+        this.tcpFallback = tcpFallback;
         this.listeningPort = NetworkRessourceManager.generateLocalSipPort();
         this.outboundProxyAddr = proxyAddr;
         this.outboundProxyPort = proxyPort;
@@ -285,16 +297,28 @@ public class SipInterface implements SipListener {
             } else {
                 // Create TCP provider
                 ListeningPoint tcp = sipStack.createListeningPoint(localIpAddress, listeningPort, ListeningPoint.TCP);
-                SipProvider tcpSipProvider = sipStack.createSipProvider(tcp);
-                tcpSipProvider.addSipListener(this);
-                sipProviders.addElement(tcpSipProvider);
+				// Changed by Deutsche Telekom
+				if (this.tcpFallback == false) {
+					SipProvider tcpSipProvider = sipStack.createSipProvider(tcp);
+					tcpSipProvider.addSipListener(this);
+					sipProviders.addElement(tcpSipProvider);
+				}
 
                 // UDP protocol used by default
                 defaultSipProvider = udpSipProvider;
+				
+				// Changed by Deutsche Telekom
+				if (this.tcpFallback) {
+					// prepare 2nd listening point for TCP fallback
+					defaultSipProvider.addListeningPoint(tcp);
+				}
             }
 
             if (logger.isActivated()) {
-                logger.debug("Default SIP provider is " + defaultProtocol);
+            	if (defaultProtocol.equals(ListeningPoint.UDP))
+            		logger.debug("Default SIP provider is UDP (TCP fallback=" + this.tcpFallback+")");
+            	else
+            		logger.debug("Default SIP provider is " + defaultProtocol);
             }
 
             // Start the stack
@@ -348,6 +372,70 @@ public class SipInterface implements SipListener {
      */
     public SipProvider getDefaultSipProvider() {
         return defaultSipProvider;
+    }
+
+     // Changed by Deutsche Telekom
+     /**
+     * Create a transaction; either default or fallback provider is used (depending on request size)
+     *  
+     * @param request
+     * @return
+     * @throws ParseException 
+     * @throws javax2.sip.SipException 
+     * @throws NullPointerException 
+     */
+    private ClientTransaction createNewTransaction(SipRequest request) throws ParseException, NullPointerException, javax2.sip.SipException {
+        // fall back to TCP if channel is UDP and request size exceeds the limit
+        // according to RFC3261, chapter 18.1.1:
+        //      If a request is within 200 bytes of the path MTU, or if it is larger
+        //      than 1300 bytes and the path MTU is unknown, the request MUST be sent
+        //      using an RFC 2914 [43] congestion controlled transport protocol, such
+        //      as TCP. If this causes a change in the transport protocol from the
+        //      one indicated in the top Via, the value in the top Via MUST be
+        //      changed.
+        if (ListeningPoint.UDP.equals(defaultProtocol) && this.tcpFallback
+                && (request.getStackMessage().toString().length() > (sipStack.getMtuSize() - 200))) {
+            if (logger.isActivated()) {
+                logger.debug("Transaction falls back to TCP as request size is "
+                        + request.getStackMessage().toString().length() + " and MTU size is "
+                        + sipStack.getMtuSize());
+            }
+            
+            // Change Via header
+            ViaHeader topViaHeader = ((SIPMessage) request.getStackMessage()).getTopmostViaHeader();
+            if (topViaHeader != null) {
+                topViaHeader.setTransport("TCP");
+            } else {
+                topViaHeader = SipUtils.HEADER_FACTORY.createViaHeader(localIpAddress,
+                        listeningPort, "TCP", null);
+            }
+            request.getStackMessage().removeFirst(ViaHeader.NAME);
+            request.getStackMessage().addFirst(topViaHeader);
+
+            // Change Route header
+            RouteHeader topRouteHeader = (RouteHeader) request.getStackMessage().getHeader(
+                    RouteHeader.NAME);
+            if (topRouteHeader != null) {
+                URI uri = topRouteHeader.getAddress().getURI();
+                if (uri.isSipURI()) {
+                    SipURI sipUri = (SipURI) uri;
+                    sipUri.setTransportParam("tcp");
+                    AddressImpl address = new AddressImpl();
+                    address.setURI(sipUri);
+                    topRouteHeader = SipUtils.HEADER_FACTORY.createRouteHeader(address);
+                } else {
+                    // TODO
+                    // check whether this could happen anyhow and if so whether this would be valid
+                    logger.error("Update of route header due to TCP fallback failed due to wrong address format!");
+                }
+                request.getStackMessage().removeFirst(RouteHeader.NAME);
+                request.getStackMessage().addFirst(topRouteHeader);
+            }            
+        }
+
+        ClientTransaction transaction = defaultSipProvider.getNewClientTransaction(request.getStackMessage());
+        transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+        return transaction;
     }
 
     /**
@@ -480,6 +568,7 @@ public class SipInterface implements SipListener {
      * @return Call-Id
      */
     public String generateCallId() {
+		// Call-ID value follows RFC 3261, section 25.1
         return IdGenerator.getIdentifier() + "@" + localIpAddress;
     }
 
@@ -514,6 +603,8 @@ public class SipInterface implements SipListener {
         if (publicGruu != null) {
             // Create a contact with GRUU
             SipURI contactURI = (SipURI)SipUtils.ADDR_FACTORY.createSipURI(publicGruu);
+            // Changed by Deutsche Telekom
+            contactURI.setTransportParam(defaultProtocol);
             Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
             contactHeader = SipUtils.HEADER_FACTORY.createContactHeader(contactAddress);
         } else
@@ -653,8 +744,8 @@ public class SipInterface implements SipListener {
                 ClientTransaction transaction = (ClientTransaction)req.getStackTransaction();
                 if (transaction == null) {
                     // Create a new transaction
-                    transaction = getDefaultSipProvider().getNewClientTransaction(req.getStackMessage());
-                    transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+					// Changed by Deutsche Telekom
+                    transaction = createNewTransaction(req);
                     req.setStackTransaction(transaction);
                 }
 
@@ -808,8 +899,8 @@ public class SipInterface implements SipListener {
             }
 
             // Create a new transaction
-            ClientTransaction transaction = defaultSipProvider.getNewClientTransaction(cancel.getStackMessage());
-            transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+            // Changed by Deutsche Telekom
+            ClientTransaction transaction = createNewTransaction(cancel);
             
             // Send the SIP message to the network
             if (logger.isActivated()) {
@@ -845,8 +936,8 @@ public class SipInterface implements SipListener {
             }
 
             // Create a new transaction
-            ClientTransaction transaction = defaultSipProvider.getNewClientTransaction(bye.getStackMessage());
-            transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+            // Changed by Deutsche Telekom
+            ClientTransaction transaction = createNewTransaction(bye);
 
             // Send the SIP message to the network
             if (logger.isActivated()) {
@@ -883,8 +974,8 @@ public class SipInterface implements SipListener {
             }
 
             // Get stack transaction
-            ClientTransaction transaction = defaultSipProvider.getNewClientTransaction(update.getStackMessage());
-            transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+            // Changed by Deutsche Telekom
+            ClientTransaction transaction = createNewTransaction(update);
 
             // Create a transaction context
             SipTransactionContext ctx = new SipTransactionContext(transaction);
@@ -929,8 +1020,8 @@ public class SipInterface implements SipListener {
             }
 
             // Get stack transaction
-            ClientTransaction transaction = defaultSipProvider.getNewClientTransaction(request.getStackMessage());
-            transaction.setRetransmitTimers(timerT1, timerT2, timerT4);
+            // Changed by Deutsche Telekom
+            ClientTransaction transaction = createNewTransaction(request);
 
             // Send the SIP message to the network
             if (logger.isActivated()) {
