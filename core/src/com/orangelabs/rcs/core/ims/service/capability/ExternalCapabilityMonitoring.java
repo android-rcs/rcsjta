@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.core.ims.service.capability;
 
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 
 import android.content.BroadcastReceiver;
@@ -36,6 +38,6 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     	RcsSettings.createInstance(context);
     	
     	// Check if there are new RCS extensions installed or removed
-		CapabilityUtils.updateExternalSupportedFeatures(context);
+    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext());
     }
 }

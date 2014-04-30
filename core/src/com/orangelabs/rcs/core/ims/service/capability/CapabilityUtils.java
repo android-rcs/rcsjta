@@ -21,10 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
 
 import com.orangelabs.rcs.core.content.GeolocContent;
@@ -291,40 +287,7 @@ public class CapabilityUtils {
         
     	return capabilities;
     }
-    
-	/**
-	 * Update external supported features
-	 * 
-	 * @param context Context
-	 */
-	public static void updateExternalSupportedFeatures(Context context) {
-		try {
-			// Intent query on current installed activities
-			PackageManager packageManager = context.getPackageManager();
-			Intent intent = new Intent(com.gsma.services.rcs.capability.CapabilityService.INTENT_EXTENSIONS);
-			String mime = com.gsma.services.rcs.capability.CapabilityService.EXTENSION_MIME_TYPE + "/*"; 
-			intent.setType(mime);			
-			List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
-			StringBuffer extensions = new StringBuffer();
-			for(int i=0; i < list.size(); i++) {
-				ResolveInfo info = list.get(i);
-				for(int j =0; j < info.filter.countDataTypes(); j++) {
-					String tag = info.filter.getDataType(j);
-					String[] value = tag.split("/");
-					extensions.append("," + value[1]);
-				}
-			}
-			if ((extensions.length() > 0) && (extensions.charAt(0) == ',')) {
-				extensions.deleteCharAt(0);
-			}
-	
-			// Save extensions in database
-			RcsSettings.getInstance().setSupportedRcsExtensions(extensions.toString());
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-    
+       
     /**
      * Build supported SDP part
      * 
