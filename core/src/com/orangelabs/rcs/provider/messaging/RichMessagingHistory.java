@@ -294,10 +294,7 @@ public class RichMessagingHistory {
 	 * @param direction Direction
 	 */
 	public void addChatMessage(InstantMessage msg, int direction) {
-		if (msg instanceof FileTransferMessage)
-			addChatMessage(msg, ChatLog.Message.Type.FILE_TRANSFER, direction);
-		else
-			addChatMessage(msg, ChatLog.Message.Type.CONTENT, direction);
+		addChatMessage(msg, ChatLog.Message.Type.CONTENT, direction);
 	}
 	
 	/**
@@ -319,23 +316,18 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, type);
 
-		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
-			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
-			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(),
-					geoloc.getExpiration(), geoloc.getAccuracy());
-			blob = serializeGeoloc(geolocApi);
+			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
+			Geoloc geolocApi = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
+					geoloc.getAccuracy());
+			values.put(MessageData.KEY_CONTENT, geolocApi.writeJSON());
 		} else if (msg instanceof FileTransferMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
-			blob = serializePlainText(((FileTransferMessage)msg).getFileInfo()); 
+			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
-			blob = serializePlainText(msg.getTextMessage()); 
-		}
-		if (blob != null) {
-			values.put(MessageData.KEY_CONTENT, blob);
+			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 		
 		if (direction == ChatLog.Message.Direction.INCOMING) {
@@ -377,10 +369,7 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
 		values.put(MessageData.KEY_DIRECTION, direction);
-		if (msg instanceof FileTransferMessage)
-			values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
-		else
-			values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		
 		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
@@ -443,7 +432,7 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_FT_ID, ftId);
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.OUTGOING);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.FILE_TRANSFER);
+		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 
 		values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
 		byte[] blob = serializePlainText(((FileTransferMessage) msg).getFileInfo());
@@ -566,7 +555,7 @@ public class RichMessagingHistory {
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_FT_ID, ftID);
 		String selection = MessageData.KEY_MSG_ID + " = ? AND " + MessageData.KEY_TYPE + " = ?";
-		String[] selectionArgs = { msgId, "" + ChatLog.Message.Type.FILE_TRANSFER };
+		String[] selectionArgs = { msgId, "" + ChatLog.Message.Type.CONTENT };
 		cr.update(msgDatabaseUri, values, selection, selectionArgs);
 	}
 	
@@ -718,7 +707,7 @@ public class RichMessagingHistory {
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(msgDatabaseUri, new String[] { MessageData.KEY_CHAT_ID }, "(" + MessageData.KEY_MSG_ID
-					+ "='" + msgId + "' AND "+MessageData.KEY_TYPE+"='"+ChatLog.Message.Type.FILE_TRANSFER+"')", null, null);
+					+ "='" + msgId + "' AND "+MessageData.KEY_TYPE+"='"+ChatLog.Message.Type.CONTENT+"')", null, null);
 			if (cursor.moveToFirst()) {
 				return cursor.getString(0);
 			}

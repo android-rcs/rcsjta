@@ -151,18 +151,18 @@ public class ChatList extends Activity implements JoynServiceListener {
     		ChatListItemCache cache = new ChatListItemCache();
     		cache.contact = cursor.getString(2);
     		
-    		byte[] content = cursor.getBlob(3);
+    		String content = cursor.getString(3);
     		String contentType = cursor.getString(4);
     		
         	String text = "";
         	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
-    			Geoloc geoloc = ChatLog.getGeolocFromBlob(content);
+    			Geoloc geoloc = ChatLog.getGeoloc(content);
     			if (geoloc != null) {
         	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
         		}
         	} else
         	if (contentType.equals(ChatMessage.MIME_TYPE)) {
-        		text = ChatLog.getTextFromBlob(content);
+        		text = content;
         	}
     		cache.msg = text;
     		

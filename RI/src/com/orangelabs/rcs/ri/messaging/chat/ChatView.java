@@ -206,16 +206,16 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * @param contact Contact
      * @param message Text message
      */
-    protected void addMessageHistory(int direction, String contact, byte[] content, String contentType) {
+    protected void addMessageHistory(int direction, String contact, String content, String contentType) {
     	String text = null;
     	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
-			Geoloc geoloc = ChatLog.getGeolocFromBlob(content);
+			Geoloc geoloc = ChatLog.getGeoloc(content);
 			if (geoloc != null) {
     	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
     		}
     	} else
     	if (contentType.equals(ChatMessage.MIME_TYPE)) {
-    		text = ChatLog.getTextFromBlob(content);
+    		text = content;
     	}
     	
     	if (text != null) {

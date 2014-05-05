@@ -17,8 +17,9 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.net.Uri;
 
@@ -196,11 +197,6 @@ public class ChatLog {
 	         */
 	        public static final int SPAM = 2;
 	        
-	        /**
-	         * File Transfer message
-	         */
-	        public static final int FILE_TRANSFER = 3;
-	        
         }
         	
         /**
@@ -321,36 +317,20 @@ public class ChatLog {
         }
     }
     
-    /**
-     * Get plain text message from a BLOB
-     * 
-     * @param content BLOB content
-     * @return Text message or null in case of error
-     */
-    public static String getTextFromBlob(byte[] content) {
-    	try {
-	    	return new String(content);
+	/**
+	 * Utility method to get a Geoloc object from its string representation in the BODY field of the ChatLog provider
+	 * 
+	 * @param body
+	 *            the string representation in the BODY field of the ChatLog provider
+	 * @return Geoloc object or null in case of error
+	 * @see Geoloc
+	 */
+    public static Geoloc getGeoloc(String body) {
+		try {
+    		return Geoloc.readJSON(body);
 		} catch(Exception e) {
 			return null;
 		}
     }
 
-    /**
-     * Get geoloc object from a BLOB
-     * 
-     * @param content BLOB content
-     * @return Geoloc object or null in case of error
-     * @see Geoloc 
-     */
-    public static Geoloc getGeolocFromBlob(byte[] content) {
-		try {
-    		ByteArrayInputStream bis = new ByteArrayInputStream(content);
-			ObjectInputStream is = new ObjectInputStream(bis);
-			Geoloc geoloc = (Geoloc)is.readObject();
-			is.close();
-			return geoloc;
-		} catch(Exception e) {
-			return null;
-		}
-    }
 }
