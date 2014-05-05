@@ -5,3 +5,4 @@
 /RI/.classpath
 /RI/lint.xml
 *.bak
+/core/tests/*.classpath

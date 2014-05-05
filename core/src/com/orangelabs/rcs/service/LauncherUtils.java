@@ -35,6 +35,7 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpColumns;
 import com.orangelabs.rcs.provider.ipcall.IPCallData;
 import com.orangelabs.rcs.provider.messaging.ChatData;
 import com.orangelabs.rcs.provider.messaging.FileTransferData;
+import com.orangelabs.rcs.provider.messaging.MessageData;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.ImageSharingData;
 import com.orangelabs.rcs.provider.sharing.VideoSharingData;
@@ -186,6 +187,7 @@ public class LauncherUtils {
         // Clear entries in all tables
 		context.getContentResolver().delete(FtHttpColumns.CONTENT_URI, null, null);
 		context.getContentResolver().delete(ChatData.CONTENT_URI, null, null);
+		context.getContentResolver().delete(MessageData.CONTENT_URI, null, null);
 		context.getContentResolver().delete(FileTransferData.CONTENT_URI, null, null);
 		context.getContentResolver().delete(IPCallData.CONTENT_URI, null, null);
 		context.getContentResolver().delete(ImageSharingData.CONTENT_URI, null, null);

@@ -1,10 +1,5 @@
 package com.orangelabs.rcs.database;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
@@ -16,7 +11,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 
-public class ChatBlobTest extends AndroidTestCase {
+public class ChatMessageTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -31,7 +26,7 @@ public class ChatBlobTest extends AndroidTestCase {
 		String remote = "+339000000";
 		String msgId = "" + System.currentTimeMillis();
 		String txt = "Hello";
-		InstantMessage msg = new InstantMessage(msgId, remote, txt, true);
+		InstantMessage msg = new InstantMessage(msgId, remote, txt, true, "display");
 		
 		// Add entry
 		RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
@@ -54,7 +49,7 @@ public class ChatBlobTest extends AndroidTestCase {
     	while(cursor.moveToNext()) {
     		int direction = cursor.getInt(0);
     		String contact = cursor.getString(1);
-    		byte[] content = cursor.getBlob(2);
+    		String content = cursor.getString(2);
     		assertNotNull(content);
     		String readTxt = new String(content);
     		String contentType = cursor.getString(3);
@@ -74,7 +69,7 @@ public class ChatBlobTest extends AndroidTestCase {
 		String remote = "+339000000";
 		String msgId = "" + System.currentTimeMillis();
 		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 2000);
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true);
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true,"display");
 		
 		// Add entry
 		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
@@ -97,18 +92,9 @@ public class ChatBlobTest extends AndroidTestCase {
     	while(cursor.moveToNext()) {
     		int direction = cursor.getInt(0);
     		String contact = cursor.getString(1);
-    		byte[] content = cursor.getBlob(2);
+    		String content = cursor.getString(2);
     		assertNotNull(content);
-			Geoloc readGeoloc = null;
-			try {
-	    		ByteArrayInputStream bis = new ByteArrayInputStream(content);
-				ObjectInputStream is = new ObjectInputStream(bis);
-				readGeoloc = (Geoloc)is.readObject();
-				is.close();
-			} catch(Exception e) {
-				e.printStackTrace();
-				readGeoloc = null;
-			}
+			Geoloc readGeoloc = Geoloc.readJSON(content);
     		assertNotNull(readGeoloc);
 			
     		String contentType = cursor.getString(3);

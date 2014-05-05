@@ -1,9 +1,8 @@
 package com.orangelabs.rcs.provider.messaging;
 
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.ft.FileTransferLog;
-
 import android.net.Uri;
+
+import com.gsma.services.rcs.chat.ChatLog;
 
 /**
  * Message data constants
@@ -14,7 +13,7 @@ public class MessageData {
 	/**
 	 * Database URI
 	 */
-	static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/message");
+	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/message");
 	
 	/**
 	 * Column name
