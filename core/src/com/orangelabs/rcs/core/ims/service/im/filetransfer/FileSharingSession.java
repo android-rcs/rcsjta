@@ -176,11 +176,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
     	return thumbnail;
     }
 
-    /**
-     * Set the thumbnail
-     *
-     * @param Thumbnail
-     */
+	/**
+	 * Set the thumbnail
+	 * 
+	 * @param thumbnail
+	 *            the thumbnail byte array
+	 */
     public void setThumbnail(byte[] thumbnail) {
         this.thumbnail = thumbnail;
     }

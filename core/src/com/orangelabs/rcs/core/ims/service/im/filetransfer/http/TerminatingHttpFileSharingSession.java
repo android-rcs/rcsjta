@@ -243,7 +243,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				handleFileTransfered();
 
 				// Send delivery report "displayed"
-				sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+				// According to BB PDD section 6.1.4 there should be no display for GC messages.
+				if (!isGroup) {
+					sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+				}
 			} else {
                 // Don't call handleError in case of Pause or Cancel
 				if (downloadManager.isCancelled() || downloadManager.isPaused()) {

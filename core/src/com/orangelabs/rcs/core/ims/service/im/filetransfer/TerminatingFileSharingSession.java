@@ -65,7 +65,6 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-	 * @param thumbnail Thumbnail
 	 */
 	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {		
 		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), ChatUtils.extractFileThumbnail(invite));
