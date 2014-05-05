@@ -31,6 +31,7 @@ import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -98,7 +99,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
     	anonymousFetchManager = new AnonymousFetchManager(parent);
 
     	// Get capability extensions
-    	CapabilityUtils.updateExternalSupportedFeatures(AndroidFactory.getApplicationContext());
+    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext());
 	}
 
 	/**
