@@ -307,10 +307,6 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 */
 	public void receiveBye(SipRequest bye) {
 		super.receiveBye(bye);
-
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getDialogPath().getRemoteParty());
 	}
 
 	/**
