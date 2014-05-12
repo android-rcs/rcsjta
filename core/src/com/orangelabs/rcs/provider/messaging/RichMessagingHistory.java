@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -371,23 +369,19 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		
-		byte[] blob = null;
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
-			blob = serializeGeoloc(geolocApi);
-		}  else if (msg instanceof FileTransferMessage) {
+			values.put(MessageData.KEY_CONTENT, geolocApi.writeJSON());
+		} else if (msg instanceof FileTransferMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
-			blob = serializePlainText(((FileTransferMessage)msg).getFileInfo()); 
+			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo()); 
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
-			blob = serializePlainText(msg.getTextMessage()); 
-		}
-		if (blob != null) {
-			values.put(MessageData.KEY_CONTENT, blob);
+			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
 		if (direction == ChatLog.Message.Direction.INCOMING) {
@@ -433,11 +427,8 @@ public class RichMessagingHistory {
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
 		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.OUTGOING);
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
-
 		values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
-		byte[] blob = serializePlainText(((FileTransferMessage) msg).getFileInfo());
-
-		values.put(MessageData.KEY_CONTENT, blob);
+		values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 
 		// Send message
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
@@ -736,42 +727,7 @@ public class RichMessagingHistory {
 		values.put(FileTransferData.KEY_MSG_ID , msgId);
 		cr.update(ftDatabaseUri, values, FileTransferData.KEY_SESSION_ID + " = " + sessionId, null);
 	}
-    
-    /**
-     * Serialize a geoloc to bytes array
-     * 
-     * @param geoloc Geoloc info
-     * @return Byte array
-     */
-    private byte[] serializeGeoloc(Geoloc geoloc) {
-		byte[] blob = null;
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream os = new ObjectOutputStream(bos);
-			os.writeObject(geoloc);
-			blob = bos.toByteArray();
-			bos.close();
-			os.close();
-		} catch(Exception e) {
-			blob = null;
-		}
-		return blob;
-    }	    
 
-    /**
-     * Serialize a text message to bytes array
-     * 
-     * @param msg Message
-     * @return Byte array
-     */
-    private byte[] serializePlainText(String msg) {
-    	if (msg != null) {
-    		return msg.getBytes();
-    	} else {
-    		return null;
-    	}
-    }
-	
     /**
      * Is next group chat Invitation rejected
      * 
