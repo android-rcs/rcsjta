@@ -65,7 +65,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingFileSharingSession.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -147,7 +147,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    				SipUtils.CRLF +
 	    				sdp + SipUtils.CRLF + 
 	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": " + encoding + SipUtils.CRLF +
+	    				ContentTypeHeader.NAME + ": image/jpeg" + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_TRANSFER_ENCODING + ": base64" + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_ID + ": <image@joyn.com>" + SipUtils.CRLF +
 	    				ContentLengthHeader.NAME + ": "+ imageEncoded.length() + SipUtils.CRLF +
