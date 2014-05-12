@@ -94,7 +94,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String contact = cursor.getString(1);
     		String content = cursor.getString(2);
     		assertNotNull(content);
-			Geoloc readGeoloc = Geoloc.readJSON(content);
+			Geoloc readGeoloc = ChatLog.getGeoloc(content);
     		assertNotNull(readGeoloc);
 			
     		String contentType = cursor.getString(3);

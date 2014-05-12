@@ -17,6 +17,9 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
 import android.net.Uri;
 
 /**
@@ -314,17 +317,28 @@ public class ChatLog {
     }
     
 	/**
-	 * Utility method to get a Geoloc object from its string representation in the BODY field of the ChatLog provider
+	 * Utility method to get a Geoloc object from its string representation in the ChatLog provider
 	 * 
 	 * @param body
-	 *            the string representation in the BODY field of the ChatLog provider
+	 *            the string representation in the ChatLog provider
 	 * @return Geoloc object or null in case of error
 	 * @see Geoloc
 	 */
-    public static Geoloc getGeoloc(String body) {
+	public static Geoloc getGeoloc(String body) {
 		try {
-    		return Geoloc.readJSON(body);
-		} catch(Exception e) {
+			StringTokenizer items = new StringTokenizer(body, ",");
+			String label = null;
+			if (items.countTokens() > 4) {
+				label = items.nextToken();
+			}
+			double latitude = Double.valueOf(items.nextToken());
+			double longitude = Double.valueOf(items.nextToken());
+			long expiration = Long.valueOf(items.nextToken());
+			float accuracy = Float.valueOf(items.nextToken());
+			return new Geoloc(label, latitude, longitude, expiration, accuracy);
+		} catch (NoSuchElementException e) {
+			return null;
+		} catch (NumberFormatException e) {
 			return null;
 		}
     }

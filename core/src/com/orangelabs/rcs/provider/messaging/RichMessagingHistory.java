@@ -317,9 +317,9 @@ public class RichMessagingHistory {
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
-			Geoloc geolocApi = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
+			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
 					geoloc.getAccuracy());
-			values.put(MessageData.KEY_CONTENT, geolocApi.writeJSON());
+			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else if (msg instanceof FileTransferMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
 			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
@@ -350,6 +350,21 @@ public class RichMessagingHistory {
 		cr.insert(msgDatabaseUri, values);
 	}
 	
+	/** 
+     * Format geoloc object to string
+     * 
+     * @param geoloc Geoloc object
+     * @return String
+     */
+	private static String geolocToString(Geoloc geoloc) {
+		String label = geoloc.getLabel();
+		if (label == null) {
+			label = "";
+		}
+		return label + "," + geoloc.getLatitude() + "," + geoloc.getLongitude() + "," + geoloc.getExpiration() + ","
+				+ geoloc.getAccuracy();
+	}
+
 	/**
 	 * Add a group chat message
 	 * 
@@ -372,10 +387,10 @@ public class RichMessagingHistory {
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
-			Geoloc geolocApi = new Geoloc(geoloc.getLabel(),
+			Geoloc geolocData = new Geoloc(geoloc.getLabel(),
 					geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
-			values.put(MessageData.KEY_CONTENT, geolocApi.writeJSON());
+			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else if (msg instanceof FileTransferMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
 			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo()); 
