@@ -31,14 +31,11 @@ import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.fthttp.FtHttpColumns;
-import com.orangelabs.rcs.provider.ipcall.IPCallData;
-import com.orangelabs.rcs.provider.messaging.ChatData;
-import com.orangelabs.rcs.provider.messaging.FileTransferData;
-import com.orangelabs.rcs.provider.messaging.MessageData;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
+import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
+import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.sharing.ImageSharingData;
-import com.orangelabs.rcs.provider.sharing.VideoSharingData;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.provisioning.https.HttpsProvisioningService;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -184,15 +181,22 @@ public class LauncherUtils {
         RcsSettings.createInstance(context);
         RcsSettings.getInstance().resetUserProfile();
 
-        // Clear entries in all tables
-		context.getContentResolver().delete(FtHttpColumns.CONTENT_URI, null, null);
-		context.getContentResolver().delete(ChatData.CONTENT_URI, null, null);
-		context.getContentResolver().delete(MessageData.CONTENT_URI, null, null);
-		context.getContentResolver().delete(FileTransferData.CONTENT_URI, null, null);
-		context.getContentResolver().delete(IPCallData.CONTENT_URI, null, null);
-		context.getContentResolver().delete(ImageSharingData.CONTENT_URI, null, null);
-		context.getContentResolver().delete(VideoSharingData.CONTENT_URI, null, null);
+        // Clear all entries in FtHttp table
+        FtHttpResumeDaoImpl.createInstance(context);
+        FtHttpResumeDaoImpl.getInstance().deleteAll();
+        
+        // Clear all entries in chat, message and file transfer tables
+        RichMessagingHistory.createInstance(context);
+        RichMessagingHistory.getInstance().deleteAllEntries();
 
+        // Clear all entries in IP call table 
+        IPCallHistory.createInstance(context);
+        IPCallHistory.getInstance().deleteAllEntries();
+        
+        // Clear all entries in Rich Call tables (image and video)
+        RichCallHistory.createInstance(context);
+        RichCallHistory.getInstance().deleteAllEntries();
+        
 		// Clean the previous account RCS databases : because
 		// they may not be overwritten in the case of a very new account
 		// or if the back-up files of an older one have been destroyed

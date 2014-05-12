@@ -872,4 +872,13 @@ public class RichMessagingHistory {
 		|| getEventLogValue(lastState) != lastKnownState); // Or the state has changed
 	}
 
+	/**
+	 * Delete all entries in Chat, Message and FileTransfer Logs
+	 */
+	public void deleteAllEntries() {
+		cr.delete(ChatData.CONTENT_URI, null, null);
+		cr.delete(MessageData.CONTENT_URI, null, null);
+		cr.delete(FileTransferData.CONTENT_URI, null, null);
+	}
+
 }

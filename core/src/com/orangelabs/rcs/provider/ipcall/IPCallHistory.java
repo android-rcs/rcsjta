@@ -109,4 +109,11 @@ public class IPCallHistory {
 		values.put(IPCallData.KEY_STATUS, status);
 		cr.update(databaseUri, values, IPCallData.KEY_SESSION_ID + " = " + sessionId, null);
 	}
+
+	/**
+	 * Delete all entries in IP call history
+	 */
+	public void deleteAllEntries() {
+		cr.delete(IPCallData.CONTENT_URI, null, null);
+	}
 }
