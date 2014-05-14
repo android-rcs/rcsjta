@@ -37,12 +37,14 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -66,6 +68,11 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+    
+    /**
+     * Thumbnail type 
+     */
+    private String thumbnailEncoding = null;
 
 	/**
 	 * Constructor
@@ -73,17 +80,20 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	 * @param parent IMS service
 	 * @param content Content to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
+	 * @param thumbnail Thumbnail filename
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, byte[] thumbnail) {
-		super(parent, content, contact, thumbnail);
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, String thumbnail) {
+		super(parent, content, contact, ChatUtils.getFileThumbnail(thumbnail));
 		
 		// Create dialog path
 		createOriginatingDialogPath();
 		
 		// Set contribution ID
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
-		setContributionID(id);		
+		setContributionID(id);	
+		
+		// Save the thumbnail mime type
+		thumbnailEncoding = MimeManager.getMimeType(MimeManager.getMimeExtension(thumbnail));
 	}
 
 	/**
@@ -133,7 +143,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    		sdp += "a=file-location:" + location + SipUtils.CRLF;
 	    	}
 
-	    	if (getThumbnail() != null) {
+	    	if (getThumbnail() != null && thumbnailEncoding != null) {
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 
 	    		// Encode the thumbnail file
@@ -147,7 +157,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    				SipUtils.CRLF +
 	    				sdp + SipUtils.CRLF + 
 	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": image/jpeg" + SipUtils.CRLF +
+	    				ContentTypeHeader.NAME + ": " + thumbnailEncoding + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_TRANSFER_ENCODING + ": base64" + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_ID + ": <image@joyn.com>" + SipUtils.CRLF +
 	    				ContentLengthHeader.NAME + ": "+ imageEncoded.length() + SipUtils.CRLF +

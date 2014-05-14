@@ -13,7 +13,7 @@ public class MessageData {
 	/**
 	 * Database URI
 	 */
-	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/message");
+	protected static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/message");
 	
 	/**
 	 * Column name

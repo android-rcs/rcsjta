@@ -941,6 +941,9 @@ public class ChatUtils {
      * @return Bytes or null in case of error
      */
     public static byte[] getFileThumbnail(String filename) {
+    	if (filename == null) {
+    		return null;
+    	}
     	try {
 	    	File file = new File(filename);
 	    	byte [] data = new byte[(int)file.length()];

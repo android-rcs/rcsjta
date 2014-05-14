@@ -344,8 +344,8 @@ public class InstantMessagingService extends ImsService {
         if (thumbnail != null) {
 			// Create the thumbnail
         	thumbnailData = ChatUtils.getFileThumbnail(thumbnail);
-		}		
-
+		}
+        
 		// Select default protocol
 		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
 		boolean isHttpProtocol = false;
@@ -372,7 +372,7 @@ public class InstantMessagingService extends ImsService {
 					this,
 					content,
 					PhoneUtils.formatNumberToSipUri(contact),
-					thumbnailData);
+					thumbnail);
 		}
 		
 		return session;

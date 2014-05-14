@@ -211,5 +211,13 @@ public class RichCallHistory {
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);
 		values.put(ImageSharingData.KEY_STATUS, ImageSharing.State.STARTED);
 		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
+	}
+
+	/**
+	 * Delete all entries in Rich Call history
+	 */
+	public void deleteAllEntries() {
+		cr.delete(ImageSharingData.CONTENT_URI, null, null);
+		cr.delete(VideoSharingData.CONTENT_URI, null, null);
 	}	
 }

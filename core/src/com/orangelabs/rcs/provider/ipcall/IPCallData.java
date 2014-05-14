@@ -13,7 +13,7 @@ public class IPCallData {
 	/**
 	 * Database URI
 	 */
-	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ipcall/ipcall");
+	protected static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ipcall/ipcall");
 		
 	/**
 	 * Column name

@@ -19,9 +19,6 @@ package com.gsma.services.rcs.chat;
 
 import java.io.Serializable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -58,12 +55,6 @@ public class Geoloc implements Parcelable, Serializable {
      */
     private float accuracy = 0.0f;
     
-    private static final String JSON_LABEL = "m";
-	private static final String JSON_LATITUDE = "l";
-	private static final String JSON_LONGITUDE = "L";
-	private static final String JSON_EXPIRATION = "e";
-	private static final String JSON_ACCURACY = "a";
-
     /**
      * Constructor
      *
@@ -240,53 +231,5 @@ public class Geoloc implements Parcelable, Serializable {
     public void setAcuracy(float accuracy) {
         this.accuracy = accuracy;
     }
-    
-	/**
-	 * Write geolocation to JSON
-	 * 
-	 * @return the geolocation serialized in JSON
-	 * @hide
-	 */
-	public String writeJSON() {
-		JSONObject object = new JSONObject();
-		try {
-			object.put(JSON_LABEL, this.label);
-			object.put(JSON_LATITUDE,this.latitude );
-			object.put(JSON_LONGITUDE, this.longitude);
-			object.put(JSON_EXPIRATION, this.expiration);
-			object.put(JSON_ACCURACY, Float.toString(this.accuracy));
-			return object.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
-	/**
-	 * Read geolocation from JSON
-	 * 
-	 * @param data
-	 *            the geolocation serialized in JSON
-	 * @return the geolocation
-	 * @hide
-	 */
-	public static Geoloc readJSON(String data) {
-		try {
-			JSONObject jsonObject = new JSONObject(data);
-			String label = jsonObject.getString(JSON_LABEL);
-			double latitude = jsonObject.getDouble(JSON_LATITUDE);
-			double longitude = jsonObject.getDouble(JSON_LONGITUDE);
-			long expiration = jsonObject.getLong(JSON_EXPIRATION);
-			String jsonAccuracy = jsonObject.getString(JSON_ACCURACY);
-			Float accuracy = 0f;
-			try {
-				accuracy = Float.parseFloat(jsonAccuracy);
-			} catch (Exception e) {
-			}
-			return new Geoloc(label, latitude, longitude, expiration, accuracy);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 }

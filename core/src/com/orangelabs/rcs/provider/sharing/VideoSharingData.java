@@ -30,7 +30,7 @@ public class VideoSharingData {
 	/**
 	 * Database URI
 	 */
-	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.vsh/vsh");
+	protected static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.vsh/vsh");
 	
 	/**
 	 * Column name
