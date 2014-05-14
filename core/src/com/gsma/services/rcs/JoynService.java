@@ -31,9 +31,14 @@ public abstract class JoynService {
     /**
      * Action to broadcast when joyn service is up.
      */
-    public static final String ACTION_RCS_SERVICE_UP = "com.gsma.services.rcs.action.RCS_SERVICE_UP";
+    public static final String ACTION_SERVICE_UP = "com.gsma.services.rcs.action.SERVICE_UP";
 
-	/**
+    /**
+     * Action to broadcast when joyn service is provisioned.
+     */
+    public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
+
+    /**
 	 * Information about the current build
 	 */
 	public static class Build {
@@ -183,7 +188,7 @@ public abstract class JoynService {
 	public boolean isServiceConnected() {
 		return (api != null);
 	}
-
+	
 	/**
 	 * Returns service version
 	 * 
@@ -205,7 +210,7 @@ public abstract class JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
-
+	
 	/**
 	 * Returns true if the service is registered to the platform, else returns
 	 * false

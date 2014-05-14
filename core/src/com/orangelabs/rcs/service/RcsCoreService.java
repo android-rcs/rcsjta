@@ -459,7 +459,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		addRcsServiceNotification(false, getString(R.string.rcs_core_started));
 		
 		// Send service up intent
-		Intent intent = new Intent(JoynService.ACTION_RCS_SERVICE_UP);
+		Intent intent = new Intent(JoynService.ACTION_SERVICE_UP);
 		getApplicationContext().sendBroadcast(intent);
     }
 

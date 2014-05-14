@@ -65,6 +65,7 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.JoynService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provisioning.ProvisioningFailureReasons;
@@ -703,14 +704,17 @@ public class HttpsProvisioningManager {
 					// Successfully provisioned, 1st time reg finalized
 					first = false;
 					ProvisioningInfo info = parser.getProvisioningInfo();
+					
 					// Save version
 					String version = info.getVersion();
 					long validity = info.getValidity();
 					if (logger.isActivated()) {
 						logger.debug("Provisioning version=" + version + ", validity=" + validity);
 					}
+					
 					// Save the latest positive version of the configuration
 					LauncherUtils.saveProvisioningVersion(context, version);
+					
 					// Save the validity of the configuration
 					LauncherUtils.saveProvisioningValidity(context, validity);
 					RcsSettings.getInstance().setProvisioningVersion(version);
@@ -721,8 +725,8 @@ public class HttpsProvisioningManager {
 					if (logger.isActivated()) {
 						logger.debug("Provisioning Token=" + token + ", validity=" + tokenValidity);
 					}
-
 					RcsSettings.getInstance().setProvisioningToken(token);
+					
 					// Reset retry alarm counter
 			        retryCount = 0;
 					if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version)) {
@@ -773,6 +777,10 @@ public class HttpsProvisioningManager {
 						// Start the RCS core service
 						LauncherUtils.launchRcsCoreService(context);
 					}
+					
+					// Send service provisioning intent
+					Intent intent = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
+					context.sendBroadcast(intent);					
 				} else {
 					if (logger.isActivated()) {
 						logger.debug("Can't parse provisioning document");

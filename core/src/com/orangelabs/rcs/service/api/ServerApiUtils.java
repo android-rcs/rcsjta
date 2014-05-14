@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.service.api;
 
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 
 /**
  * Server API utils
@@ -49,9 +50,9 @@ public class ServerApiUtils {
 	}
 	
 	/**
-	 * Is IMS connected
+	 * Is connected to IMS
 	 * 
-	 * @return IMS connection state
+	 * @return Boolean
 	 */
 	public static boolean isImsConnected(){
 		return ((Core.getInstance() != null) &&

@@ -41,7 +41,7 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
 
         // Register service up event listener
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(JoynService.ACTION_RCS_SERVICE_UP);
+        intentFilter.addAction(JoynService.ACTION_SERVICE_UP);
         registerReceiver(serviceUpListener, intentFilter);
     	
     	// Instanciate API

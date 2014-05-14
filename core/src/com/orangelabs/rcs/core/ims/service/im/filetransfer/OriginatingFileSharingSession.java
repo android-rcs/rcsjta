@@ -65,7 +65,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingFileSharingSession.class.getSimpleName());
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * Constructor
