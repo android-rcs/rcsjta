@@ -6,3 +6,5 @@
 /RI/lint.xml
 *.bak
 ~*.doc
+**/.classpath
+**/project.properties
