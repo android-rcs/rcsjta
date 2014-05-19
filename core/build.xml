@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="RCS_Core" default="help">
 
-    <!-- The local.properties file is created and updated by the 'android' tool.
+	<!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked into
          Version Control Systems. -->
-    <property file="local.properties" />
+	<property file="local.properties" />
 
-    <!-- The ant.properties file can be created by you. It is only edited by the
+	<!-- The ant.properties file can be created by you. It is only edited by the
          'android' tool to add properties to it.
          This is the place to change some Ant specific build properties.
          Here are some properties you may want to change/update:
@@ -26,18 +26,18 @@
          application and should be checked into Version Control Systems.
 
          -->
-    <property file="ant.properties" />
+	<property file="ant.properties" />
 
-    <!-- if sdk.dir was not set from one of the property file, then
+	<!-- if sdk.dir was not set from one of the property file, then
          get it from the ANDROID_HOME env var.
          This must be done before we load project.properties since
          the proguard config can use sdk.dir -->
-    <property environment="env" />
-    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
-        <isset property="env.ANDROID_HOME" />
-    </condition>
+	<property environment="env" />
+	<condition property="sdk.dir" value="${env.ANDROID_HOME}">
+		<isset property="env.ANDROID_HOME" />
+	</condition>
 
-    <!-- The project.properties file is created and updated by the 'android'
+	<!-- The project.properties file is created and updated by the 'android'
          tool, as well as ADT.
 
          This contains project specific properties such as project target, and library
@@ -46,15 +46,15 @@
 
          This file is an integral part of the build system for your
          application and should be checked into Version Control Systems. -->
-    <loadproperties srcFile="project.properties" />
+	<loadproperties srcFile="project.properties" />
 
-    <!-- quick check on sdk.dir -->
-    <fail
-            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable."
-            unless="sdk.dir"
-    />
+	<!-- quick check on sdk.dir -->
+	<fail
+			message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable."
+			unless="sdk.dir"
+			/>
 
-    <!--
+	<!--
         Import per project custom build rules if present at the root of the project.
         This is the place to put custom intermediary targets such as:
             -pre-build
@@ -66,9 +66,90 @@
             -post-build
             -pre-clean
     -->
-    <import file="custom_rules.xml" optional="true" />
+	<import file="custom_rules.xml" optional="true" />
+	<property name="android.root" 		value="${env.ANDROID_SDK}"/>
+	<property name="terminal.root" 		value="."/>
+	<property name="terminal.api" 		value="${terminal.root}/rcs_api.jar"/>
+	<property name="terminal.build"		value="${terminal.root}/build"/>
+	<property name="src.path" 		value="${terminal.root}/src"/>
 
-    <!-- Import the actual build file.
+	<path id="j2se.lib">
+		<fileset dir="${env.JAVA_HOME}/lib/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="j2se.classpath" refid="j2se.lib"/>
+
+	<path id="terminal.classpath">
+		<pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
+	</path>
+
+	<!-- Generate RCS API JAR -->
+	<target name="api">
+		<echo>Generate ${terminal.api} file</echo>
+		<delete file="${terminal.api}"/>
+		<jar destfile="${terminal.api}" basedir="${terminal.root}/bin/classes"
+				includesfile="${terminal.root}/jarfiles.txt">
+		</jar>
+		<copy file="${terminal.api}" todir="${terminal.root}/../ri/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/contacts/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/popup/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../samples/whiteboard/libs"/>
+	</target>
+
+	<!-- Merge stack from SVN -->
+	<target name="merge">
+		<echo>Merge stack from SVN repositiry</echo>
+		<copy file="${terminal.api}" todir="${terminal.root}/../ri/libs"/>
+	</target>
+	
+	   <!-- ******************************************************* -->
+   <!-- ************************* Help ************************ -->
+   <!-- ******************************************************* -->
+
+   <target name="help">
+       <echo>Android Ant Build. Available targets:</echo>
+       <echo>   help:      Displays this help.</echo>
+       <echo>   clean:     Removes output files created by other targets.</echo>
+       <echo>              This calls the same target on all dependent projects.</echo>
+       <echo>              Use 'ant nodeps clean' to only clean the local project</echo>
+       <echo>   debug:     Builds the application and signs it with a debug key.</echo>
+       <echo>              The 'nodeps' target can be used to only build the</echo>
+       <echo>              current project and ignore the libraries using:</echo>
+       <echo>              'ant nodeps debug'</echo>
+       <echo>   release:   Builds the application. The generated apk file must be</echo>
+       <echo>              signed before it is published.</echo>
+       <echo>              The 'nodeps' target can be used to only build the</echo>
+       <echo>              current project and ignore the libraries using:</echo>
+       <echo>              'ant nodeps release'</echo>
+       <echo>   instrument:Builds an instrumented package and signs it with a</echo>
+       <echo>              debug key.</echo>
+       <echo>   test:      Runs the tests. Project must be a test project and</echo>
+       <echo>              must have been built. Typical usage would be:</echo>
+       <echo>                  ant [emma] debug install test</echo>
+       <echo>   emma:      Transiently enables code coverage for subsequent</echo>
+       <echo>              targets.</echo>
+       <echo>   install:   Installs the newly build package. Must either be used</echo>
+       <echo>              in conjunction with a build target (debug/release/</echo>
+       <echo>              instrument) or with the proper suffix indicating</echo>
+       <echo>              which package to install (see below).</echo>
+       <echo>              If the application was previously installed, the</echo>
+       <echo>              application is reinstalled if the signature matches.</echo>
+       <echo>   installd:  Installs (only) the debug package.</echo>
+       <echo>   installr:  Installs (only) the release package.</echo>
+       <echo>   installi:  Installs (only) the instrumented package.</echo>
+       <echo>   installt:  Installs (only) the test and tested packages (unless</echo>
+       <echo>              nodeps is used as well.</echo>
+       <echo>   uninstall: Uninstalls the application from a running emulator or</echo>
+       <echo>              device. Also uninstall tested package if applicable</echo>
+       <echo>              unless 'nodeps' is used as well.</echo>
+	   <echo>   api:       Generate Terminal API</echo>
+	   <echo>   merge:     Copy rcsapi.jar in RI and sample projects</echo>
+   </target>
+	<!-- Import the actual build file.
 
          To customize existing targets, there are two options:
          - Customize only one target:
@@ -86,6 +167,6 @@
          In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
          in order to avoid having your file be overridden by tools such as "android update project"
     -->
-    <!-- version-tag: 1 -->
-    <import file="${sdk.dir}/tools/ant/build.xml" />
+	<!-- version-tag: custom -->
+	<import file="${sdk.dir}/tools/ant/build.xml" />
 </project>
