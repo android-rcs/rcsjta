@@ -32,6 +32,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
@@ -48,7 +49,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
     /**
      * HTTP upload manager
      */
-    protected HttpUploadManager uploadManager;
+    protected HttpUploadManager uploadManager = null;
 
 	/**
      * The logger
@@ -64,16 +65,37 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 * Constructor
 	 *
 	 * @param parent IMS service
-	 * @param content Content to be shared
+	 * @param content Content of file to share
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
-	 * @param chatSessionId Chat session ID
-	 * @param chatContributionId Chat contribution Id
+	 * @param fileIcon Thumbnail option
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, byte[] thumbnail, String chatSessionId, String chatContributionId) {
-		super(parent, content, contact, thumbnail, chatSessionId, chatContributionId);
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileIcon) {
+		super(parent, content, contact, null, null, null);
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact="+contact+" chatSessionId="+chatSessionId+" chatContributionId="+chatContributionId );
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
+		}
+		MmContent thumbnail = null;
+		if (fileIcon) {
+			// Create the thumbnail
+			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
+			setThumbnail(thumbnail);
+		}
+		// Instantiate the upload manager
+		uploadManager = new HttpUploadManager(getContent(), thumbnail, this);
+	}
+	
+	/**
+	 * Constructor
+	 *
+	 * @param parent IMS service
+	 * @param content Content of file to share
+	 * @param contact Remote contact
+	 * @param thumbnail Content of thumbnail
+	 */
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
+		super(parent, content, contact, thumbnail, null, null);
+		if (logger.isActivated()) {
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}
 		// Instantiate the upload manager
 		uploadManager = new HttpUploadManager(getContent(), getThumbnail(), this);
@@ -105,7 +127,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         	return;
         }
 
-        if ((result != null) && (ChatUtils.parseFileTransferHttpDocument(result) != null)) {
+        if ((result != null) && (FileTransferUtils.parseFileTransferHttpDocument(result) != null)) {
         	String fileInfo = new String(result);
             if (logger.isActivated()) {
                 logger.debug("Upload done with success: " + fileInfo);
@@ -253,7 +275,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	@Override
 	public void uploadStarted() {
         // Create upload entry in fthttp table
-	    resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail(),false);
+	    resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail().getUrl(),false);
         FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 	}
 

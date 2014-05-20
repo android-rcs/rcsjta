@@ -46,8 +46,8 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, byte[] thumbnail, boolean isGroup) {
-		this(session.getContent().getUrl(), thumbnail, session.getContent(), tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
+	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, String thumbnail, boolean isGroup) {
+		this(session.getContent(), thumbnail, tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
 				.getContributionID(), session.getSessionID(), session.getChatSessionID(), isGroup);
 	}
 
@@ -75,9 +75,9 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(String file, byte[] thumbnail, MmContent content, String tid, String contact,
+	public FtHttpResumeUpload(MmContent file, String thumbnail, String tid, String contact,
             String displayName, String chatId, String sessionId, String chatSessionId, boolean isGroup) {
-        super(FtHttpDirection.OUTGOING, file, content.getEncoding(), content.getSize(), thumbnail, contact,
+        super(FtHttpDirection.OUTGOING, file.getUrl(), file.getEncoding(), file.getSize(), thumbnail, contact,
                displayName, chatId, sessionId, chatSessionId, isGroup);
 		if (tid == null)
 			throw new IllegalArgumentException("Null tid");
@@ -90,7 +90,10 @@ public class FtHttpResumeUpload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeUpload [tid=" + tid + " file="+ getFilename() + "]";
+		return "FtHttpResumeUpload [tid=" + tid + ", getFilename()=" + getFilename() + ", getSize()=" + getSize()
+				+ ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
+				+ ", getSessionId()=" + getSessionId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
+				+ "]";
 	}
 
 }

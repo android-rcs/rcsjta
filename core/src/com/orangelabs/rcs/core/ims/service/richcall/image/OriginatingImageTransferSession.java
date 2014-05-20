@@ -63,7 +63,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingImageTransferSession.class.getName());
 
 	/**
 	 * Constructor
@@ -71,9 +71,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	 * @param parent IMS service
 	 * @param content Content to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail option
+	 * @param thumbnail Thumbnail content option
 	 */
-	public OriginatingImageTransferSession(ImsService parent, MmContent content, String contact, byte[] thumbnail) {
+	public OriginatingImageTransferSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
 		super(parent, content, contact, thumbnail);
 
 		// Create dialog path
@@ -131,7 +131,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 	    		
 	    		// Encode the thumbnail file
-	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail());
+	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail().getData());
 
 	    		// Build multipart
 	    		String multipart = 

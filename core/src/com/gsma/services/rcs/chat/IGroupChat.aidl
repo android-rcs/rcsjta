@@ -46,5 +46,5 @@ interface IGroupChat {
 
 	List<ParticipantInfo> getParticipantInfo();
 	
-	IFileTransfer sendFile(in String filename, in String fileicon, in IFileTransferListener listener);
+	IFileTransfer sendFile(in String filename, in boolean fileicon, in IFileTransferListener listener);
 }

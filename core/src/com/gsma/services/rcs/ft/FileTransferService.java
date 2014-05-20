@@ -140,7 +140,7 @@ public class FileTransferService extends JoynService {
 	 * @throws JoynContactFormatException
 	 */
     public FileTransfer transferFile(String contact, String filename, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
-    	return transferFile(contact, filename, null, listener);
+    	return transferFile(contact, filename, false, listener);
     }    
     
     /**
@@ -151,13 +151,13 @@ public class FileTransferService extends JoynService {
      * 
      * @param contact 
      * @param filename Filename to transfer
-     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param fileicon the icon option
      * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public FileTransfer transferFile(String contact, String filename, String fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    public FileTransfer transferFile(String contact, String filename, boolean fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	if (api != null) {
     		try {
 				IFileTransfer ftIntf = api.transferFile(contact, filename, fileicon, listener);

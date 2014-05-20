@@ -34,6 +34,7 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
@@ -115,7 +116,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
 		// Download thumbnail
 		if (fileTransferInfo.getFileThumbnail() != null) {
-			setThumbnail(downloadManager.downloadThumbnail(fileTransferInfo.getFileThumbnail()));
+			FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
+			String iconName = FileTransferUtils.builThumbnaiUrl(msgId,thumbnailInfo.getThumbnailType());
+			setThumbnail(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
 		
 		RichMessagingHistory.getInstance().updateMessageFileTansferId(msgId, getSessionID());
@@ -132,7 +135,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the Data Object to access FT HTTP table in DB
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
-		super(parent, content, resume.getContact(), resume.getThumbnail(), resume.getChatSessionId(), resume.getChatId());
+		super(parent, content, resume.getContact(), FileTransferUtils.createMmContentFromUrl(resume.getThumbnail()), resume
+				.getChatSessionId(), resume.getChatId());
 		setRemoteDisplayName(resume.getDisplayName());
 		this.isGroup = resume.isGroup();
 		this.msgId = resume.getMessageId();
@@ -228,7 +232,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			}
 			// Create download entry in fthttp table
             resumeFT = new FtHttpResumeDownload(this, downloadManager.getLocalUrl(), msgId,
-                    getThumbnail(), isGroup);
+                    getThumbnail().getUrl(), isGroup);
             FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 			// Download file from the HTTP server
 			if (downloadManager.downloadFile()) {
@@ -379,5 +383,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		interruptSession();
 		downloadManager.pauseTransfer();
 	}
+
 
 }

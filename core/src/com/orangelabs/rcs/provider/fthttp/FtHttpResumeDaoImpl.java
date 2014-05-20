@@ -96,7 +96,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					int direction = cursor.getInt(8);
 					String displayName = cursor.getString(10);
 					String sessionId = cursor.getString(11);
-					byte[] thumbnail = cursor.getBlob(12);
+					String thumbnail = cursor.getString(12);
 					boolean isGroup = cursor.getInt(14) != 0;
 					String chatSessionId = cursor.getString(15);
 					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
@@ -108,7 +108,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					} else {
 						String tid = cursor.getString(1);
 						MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
-						result.add(new FtHttpResumeUpload(file, thumbnail, content, tid, contact, displayName, chatId, sessionId,
+						result.add(new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, sessionId,
 								chatSessionId, isGroup));
 					}
 				}
@@ -185,14 +185,13 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String mimeType = cursor.getString(4);
 					String contact = cursor.getString(5);
 					String chatId = cursor.getString(6);
-					String file = cursor.getString(7);
 					String displayName = cursor.getString(10);
 					String sessionId = cursor.getString(11);
-					byte[] thumbnail = cursor.getBlob(12);
+					String thumbnail = cursor.getString(12);
 					boolean isGroup = cursor.getInt(14) != 0;
 					String chatSessionId = cursor.getString(15);
-					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
-					return new FtHttpResumeUpload(file, thumbnail, content, tid, contact, displayName, chatId, sessionId,
+					MmContent fileContent = ContentManager.createMmContentFromMime(url, mimeType, size);
+					return new FtHttpResumeUpload(fileContent, thumbnail, tid, contact, displayName, chatId, sessionId,
 							chatSessionId, isGroup);
 				}
 			}
@@ -223,7 +222,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String file = cursor.getString(7);
 					String displayName = cursor.getString(10);
 					String sessionId = cursor.getString(11);
-					byte[] thumbnail = cursor.getBlob(12);
+					String thumbnail = cursor.getString(12);
 					String messageId = cursor.getString(13);
 					boolean isGroup = cursor.getInt(14) != 0;
 					String chatSessionId = cursor.getString(15);

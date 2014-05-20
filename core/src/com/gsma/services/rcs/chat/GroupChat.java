@@ -298,13 +298,13 @@ public class GroupChat {
      * path of the file to be transferred.
      * 
      * @param filename Filename to transfer
-     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param fileicon the file icon option
      * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public FileTransfer sendFile(String filename, String fileicon, FileTransferListener listener) throws JoynServiceException {
+    public FileTransfer sendFile(String filename, boolean fileicon, FileTransferListener listener) throws JoynServiceException {
     	try {
 			IFileTransfer ftIntf = chatInf.sendFile(filename, fileicon, listener);
 			if (ftIntf != null) {

@@ -345,20 +345,12 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         final String remote = cursor.getString(1);
 
         // Get thumbnail option
-        Uri fileicon = null;
-        String tumbnail = null;
         CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
-        if (ftThumb.isChecked()) {
-        	// Create a tumbnail
-        	tumbnail = Utils.createPictureThumbnail(getApplicationContext(), filename, 50 * 1024);
-        	fileicon = Uri.parse(tumbnail); 
-        }
         
         // Initiate session in background
     	try {
     		// Initiate transfer
-    		fileTransfer = ftApi.transferFile(remote, filename, tumbnail, ftListener);
-    		// fileTransfer = ftApi.transferFile(remote, filename, ftListener);
+    		fileTransfer = ftApi.transferFile(remote, filename, ftThumb.isChecked(), ftListener);
     		
             Button pauseBtn = (Button)findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);

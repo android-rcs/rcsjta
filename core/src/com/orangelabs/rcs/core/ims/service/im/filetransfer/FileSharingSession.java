@@ -37,7 +37,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
 	 * Thumbnail
 	 */
-	private byte[] thumbnail = null;
+	private MmContent thumbnail = null;
 	
 	/**
 	 * File transfer paused
@@ -47,7 +47,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	/**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(FileSharingSession.class.getName());
+    private static final Logger logger = Logger.getLogger(FileSharingSession.class.getName());
 
     /**
 	 * Constructor
@@ -57,7 +57,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param contact Remote contact
 	 * @param thumbnail Thumbnail
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, String contact, byte[] thumbnail) {
+	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
 		super(parent, contact);
 		
 		this.content = content;
@@ -168,20 +168,20 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	}
 
     /**
-     * Returns the thumbnail
+     * Returns the thumbnail content
      * 
      * @return Thumbnail
      */
-    public byte[] getThumbnail() {
+    public MmContent getThumbnail() {
     	return thumbnail;
     }
 
 	/**
 	 * Set the thumbnail
 	 * 
-	 * @param thumbnail Thumbnail byte array
+	 * @param thumbnail Thumbnail content
 	 */
-    public void setThumbnail(byte[] thumbnail) {
+    public void setThumbnail(MmContent thumbnail) {
         this.thumbnail = thumbnail;
     }
     

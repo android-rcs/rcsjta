@@ -36,14 +36,12 @@ import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.ft.INewFileTransferListener;
 import com.orangelabs.rcs.core.Core;
-import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.platform.file.FileDescription;
-import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -73,7 +71,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	/**
 	 * The logger
 	 */
-	private static Logger logger = Logger.getLogger(FileTransferServiceImpl.class.getName());
+	private static final Logger logger = Logger.getLogger(FileTransferServiceImpl.class.getName());
 
 	/**
 	 * Lock used for synchronization
@@ -207,7 +205,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-    	RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING, session.getContent());
+		RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING,
+				session.getContent(), session.getThumbnail());
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -287,14 +286,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param contact Contact
      * @param filename Filename to transfer
-     * @param fileicon Filename of the file icon associated to the file to be transfered
+     * @param fileicon The file icon option
      * @param listenet File transfer event listener
      * @return File transfer
      * @throws ServerApiException
      */
-    public IFileTransfer transferFile(String contact, String filename, String fileicon, IFileTransferListener listener) throws ServerApiException {
+    public IFileTransfer transferFile(String contact, String filename, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Transfer file " + filename + " to " + contact);
+			logger.info("Transfer file " + filename + " to " + contact + " (fileicon=" + fileicon + ")");
 		}
 
 		// Test IMS connection
@@ -302,24 +301,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		try {
 			// Initiate the session
-			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
-			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon, null, null); // TODO
+			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
+			
+			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon);
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING, session.getContent());
+			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING,
+					session.getContent(), session.getThumbnail());
 
 			// Start the session
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 						
 			// Add session in the list
 			addFileTransferSession(sessionApi);

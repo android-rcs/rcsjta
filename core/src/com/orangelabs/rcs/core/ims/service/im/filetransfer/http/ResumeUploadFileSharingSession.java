@@ -20,6 +20,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -43,14 +44,13 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param content the content (url, mime-type and size)
      * @param resumeUpload the data object in DB
      */
-    public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeUpload resumeUpload) {
-        super(parent, content, resumeUpload.getContact(), resumeUpload.getThumbnail(), null, null);
-        // Session ID must be equal to the FT HTTP initial one
-     	setSessionID(resumeUpload.getSessionId());
-     	getUploadManager().setTid( resumeUpload.getTid() );
-     	this.resumeFT = resumeUpload;
-    }
+	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
+		super(parent, content, resumeUpload.getContact(), FileTransferUtils.createMmContentFromUrl(resumeUpload.getThumbnail()));
+		// Session ID must be equal to the FT HTTP initial one
+		setSessionID(resumeUpload.getSessionId());
+		getUploadManager().setTid(resumeUpload.getTid());
+		this.resumeFT = resumeUpload;
+	}
 
     /**
      * Background processing

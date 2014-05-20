@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -299,7 +300,7 @@ public class ImsServiceDispatcher extends Thread {
 	    		}
 	    		
                 if (ChatUtils.isFileTransferOverHttp(request)) {
-                    FileTransferHttpInfoDocument ftHttpInfo = ChatUtils.getHttpFTInfo(request);
+                    FileTransferHttpInfoDocument ftHttpInfo = FileTransferUtils.getHttpFTInfo(request);
                     if (ftHttpInfo != null) {
                     	// HTTP file transfer invitation
                         if (SipUtils.getReferredByHeader(request) != null) {
