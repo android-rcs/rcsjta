@@ -55,12 +55,12 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	/**
 	 * Thumbnail
 	 */
-	private byte[] thumbnail = null;
+	MmContent thumbnail = null;
     
     /**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(ImageTransferSession.class.getName());
+    private static final Logger logger = Logger.getLogger(ImageTransferSession.class.getName());
 
     /**
 	 * Constructor
@@ -68,9 +68,9 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	 * @param parent IMS service
 	 * @param content Content to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
+	 * @param thumbnail The thumbnail content
 	 */
-	public ImageTransferSession(ImsService parent, MmContent content, String contact, byte[] thumbnail) {
+	public ImageTransferSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
 		super(parent, content, contact);
 		
 		this.thumbnail = thumbnail;
@@ -165,11 +165,11 @@ public abstract class ImageTransferSession extends ContentSharingSession {
     }
 
     /**
-     * Returns the thumbnail
+     * Returns the thumbnail content
      * 
      * @return Thumbnail
      */
-    public byte[] getThumbnail() {
+    public MmContent getThumbnail() {
     	return thumbnail;
     }
 

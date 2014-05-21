@@ -52,7 +52,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(HttpFileTransferSession session, String filename, String messageId, byte[] thumbnail,
+	public FtHttpResumeDownload(HttpFileTransferSession session, String filename, String messageId, String thumbnail,
 			boolean isGroup) {
 		this(filename, thumbnail, session.getContent(), messageId, session.getRemoteContact(), session.getRemoteDisplayName(),
 				session.getContributionID(), session.getSessionID(), session.getChatSessionID(), isGroup);
@@ -82,7 +82,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(String file, byte[] thumbnail, MmContent content, String messageId, String contact,
+	public FtHttpResumeDownload(String file, String thumbnail, MmContent content, String messageId, String contact,
 			String displayName, String chatId, String sessionId, String chatSessionId, boolean isGroup) {
 		super(FtHttpDirection.INCOMING, file, content.getEncoding(), content.getSize(), thumbnail, contact, displayName, chatId, sessionId, chatSessionId, isGroup);
 		this.url = content.getUrl();
@@ -101,8 +101,10 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [file=" + getFilename() + ", mimeType=" + getMimetype() + ", size=" + getSize() + ", messageId=" + messageId
-				+ " contact="+getContact()+"]";
+		return "FtHttpResumeDownload [url=" + url + ", messageId=" + messageId + ", getFilepath()=" + getFilepath()
+				+ ", getSize()=" + getSize() + ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact()
+				+ ", getChatId()=" + getChatId() + ", getSessionId()=" + getSessionId() + ", getChatSessionId()="
+				+ getChatSessionId() + ", isGroup()=" + isGroup() + "]";
 	}
 
 }

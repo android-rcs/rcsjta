@@ -58,24 +58,24 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(HttpFileTransferSession.class.getName());
     
     /**
 	 * Constructor
 	 *
 	 * @param parent IMS service
-	 * @param content Content to be shared
+	 * @param content Content to share
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
+	 * @param thumbnail Content of thumbnail
 	 * @param chatSessionId Chat session ID
 	 * @param chatContributionId Chat contribution Id
 	 */
-	public HttpFileTransferSession(ImsService parent, MmContent content, String contact, byte[] thumbnail, String chatSessionID, String chatContributionId) {
+	public HttpFileTransferSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String chatSessionID,
+			String chatContributionId) {
 		super(parent, content, contact, thumbnail);
-		
 		this.chatSessionId = chatSessionID;
 		setContributionID(chatContributionId);
-        this.sessionState = HttpTransferState.PENDING;
+		this.sessionState = HttpTransferState.PENDING;
 	}
 	
 

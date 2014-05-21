@@ -39,7 +39,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
@@ -59,7 +59,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(TerminatingImageTransferSession.class.getName());
 
     /**
      * Constructor
@@ -67,8 +67,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 */
-	public TerminatingImageTransferSession(ImsService parent, SipRequest invite) {		
-		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), ChatUtils.extractFileThumbnail(invite));
+	public TerminatingImageTransferSession(ImsService parent, SipRequest invite) {
+		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), FileTransferUtils
+				.extractFileThumbnail(invite));
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

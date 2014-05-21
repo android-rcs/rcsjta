@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -574,15 +575,17 @@ public class RichMessagingHistory {
 	 * @param sessionId Session ID
 	 * @param direction Direction
 	 * @param content File content 
+	 * @param thumbnail Thumbnail content
 	 */
-	public void addFileTransfer(String contact, String sessionId, int direction, MmContent content) {
+	public void addFileTransfer(String contact, String sessionId, int direction, MmContent content, MmContent thumbnail) {
 		contact = PhoneUtils.extractNumberFromUri(contact);
 		if (logger.isActivated()){
 			logger.debug("Add file transfer entry: sessionID=" + sessionId +
 					", contact=" + contact +
 					", filename=" + content.getName() +
 					", size=" + content.getSize() +
-					", MIME=" + content.getEncoding());
+					", MIME=" + content.getEncoding() +
+					", thumbnail="+content.getName());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_SESSION_ID, sessionId);
@@ -592,6 +595,9 @@ public class RichMessagingHistory {
 		values.put(FileTransferData.KEY_DIRECTION, direction);
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
+		if (thumbnail != null) {
+			values.put(FileTransferData.KEY_FILEICON, Uri.fromFile(new File(thumbnail.getUrl())).toString());
+		}
 		
 		long date = Calendar.getInstance().getTimeInMillis();
 		if (direction == FileTransfer.Direction.INCOMING) {
@@ -621,8 +627,10 @@ public class RichMessagingHistory {
 	 *            the identity of the file transfer
 	 * @param content
 	 *            the File content
+	 * @param thumbnail
+	 *            The thumbnail content
 	 */
-	public void addOutgoingGroupFileTransfer(String chatId, String ftId, MmContent content) {
+	public void addOutgoingGroupFileTransfer(String chatId, String ftId, MmContent content, MmContent thumbnail) {
 		if (logger.isActivated()) {
 			logger.debug("addOutgoingGroupFileTransfer: ftId=" + ftId + ", chatId=" + chatId + " filename=" + content.getName()
 					+ ", size=" + content.getSize() + ", MIME=" + content.getEncoding());
@@ -642,6 +650,9 @@ public class RichMessagingHistory {
 		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
+		if (thumbnail != null) {
+			values.put(FileTransferData.KEY_FILEICON, Uri.fromFile(new File(thumbnail.getUrl())).toString());
+		}
 		cr.insert(ftDatabaseUri, values);
 	}
 	

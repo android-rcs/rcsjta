@@ -58,7 +58,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(TerminatingFileSharingSession.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(TerminatingFileSharingSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -66,15 +66,16 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 */
-	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {		
-		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), ChatUtils.extractFileThumbnail(invite));
+	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {
+		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), FileTransferUtils
+				.extractFileThumbnail(invite));
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
-		
+
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
-		setContributionID(id);		
+		setContributionID(id);
 	}
 	
 	/**

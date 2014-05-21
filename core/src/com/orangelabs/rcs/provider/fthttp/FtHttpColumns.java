@@ -34,7 +34,7 @@ public interface FtHttpColumns extends BaseColumns {
 	static final String TYPE = "type";
 	static final String CONTACT = "contact";
 	static final String CHATID = "chatid";
-	static final String FILENAME = "filename";
+	static final String FILEPATH = "filepath";
 	static final String DIRECTION = "direction";
 	static final String DATE = "date";
 	static final String DISPLAY_NAME = "display_name";
@@ -55,7 +55,7 @@ public interface FtHttpColumns extends BaseColumns {
             TYPE,
             CONTACT,
             CHATID,
-            FILENAME,
+            FILEPATH,
             DIRECTION,
             DATE,
             DISPLAY_NAME,

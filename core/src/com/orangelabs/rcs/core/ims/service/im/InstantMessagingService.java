@@ -118,7 +118,7 @@ public class InstantMessagingService extends ImsService {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(InstantMessagingService.class.getName());
 
 	/**
      * Constructor
@@ -301,17 +301,18 @@ public class InstantMessagingService extends ImsService {
     }
 
 	/**
-     * Initiate a file transfer session
-     * 
-     * @param contact Remote contact
-     * @param content Content to be sent
-     * @param thumbnail Thumbnail filename
-     * @param chatSessionId Chat session ID
-     * @param chatContributionId Chat contribution Id
-     * @return File transfer session
-     * @throws CoreException
-     */
-	public FileSharingSession initiateFileTransferSession(String contact, MmContent content, String thumbnail, String chatSessionId, String chatContributionId) throws CoreException {
+	 * Initiate a file transfer session
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param content
+	 *            Content of file to sent
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @return File transfer session
+	 * @throws CoreException
+	 */
+	public FileSharingSession initiateFileTransferSession(String contact, MmContent content, boolean tryAttachThumbnail) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -338,14 +339,7 @@ public class InstantMessagingService extends ImsService {
 		if (capability != null) {
 			isFToHttpSupportedByRemote = capability.isFileTransferHttpSupported();
 		}
-
-		// Get thumbnail data
-        byte[] thumbnailData = null;
-        if (thumbnail != null) {
-			// Create the thumbnail
-        	thumbnailData = ChatUtils.getFileThumbnail(thumbnail);
-		}
-        
+      
 		// Select default protocol
 		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
 		boolean isHttpProtocol = false;
@@ -355,56 +349,65 @@ public class InstantMessagingService extends ImsService {
 			}
 		}
 
+		if (tryAttachThumbnail && (content.getEncoding().startsWith("image/") == false)) {
+			tryAttachThumbnail = false;
+		}
 		// Initiate session
 		FileSharingSession session;
 		if (isHttpProtocol) {
 			// Create a new session
-			session = new OriginatingHttpFileSharingSession(
-					this,
-					content,
-					PhoneUtils.formatNumberToSipUri(contact),
-					thumbnailData,
-					chatSessionId,
-					chatContributionId);
+			session = new OriginatingHttpFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), tryAttachThumbnail);
 		} else {
+			if (tryAttachThumbnail) {
+				// Check thumbnail capabilities
+				if (capability != null && capability.isFileTransferThumbnailSupported() == false) {
+					tryAttachThumbnail = false;
+					if (logger.isActivated()) {
+						logger.warn("Thumbnail not supported by remote");
+					}
+				}
+				if (myCapability.isFileTransferThumbnailSupported() == false) {
+					tryAttachThumbnail = false;
+					if (logger.isActivated()) {
+						logger.warn("Thumbnail not supported !");
+					}
+				}
+			}
 			// Create a new session
-			session = new OriginatingFileSharingSession(
-					this,
-					content,
-					PhoneUtils.formatNumberToSipUri(contact),
-					thumbnail);
+			session = new OriginatingFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), tryAttachThumbnail);
 		}
-		
 		return session;
 	}
 	
 	/**
-     * Initiate a group file transfer session
-     * 
-     * @param contacts List of remote contacts
-     * @param content Content to be sent
-     * @param thumbnail Thumbnail filename
-     * @param chatSessionId Chat session ID
-     * @param chatContributionId Chat contribution ID
-     * @return File transfer session
-     * @throws CoreException
-     */
-	public FileSharingSession initiateGroupFileTransferSession(List<String> contactList, MmContent content, String thumbnail, String chatSessionId, String chatContributionId) throws CoreException {
+	 * Initiate a group file transfer session
+	 * 
+	 * @param contacts
+	 *            List of remote contacts
+	 * @param content
+	 *            The file content to be sent
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param chatSessionId
+	 *            Chat session ID
+	 * @param chatContributionId
+	 *            Chat contribution ID
+	 * @return File transfer session
+	 * @throws CoreException
+	 */
+	public FileSharingSession initiateGroupFileTransferSession(List<String> contactList, MmContent content, boolean tryAttachThumbnail,
+			String chatSessionId, String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + contactList.size() + " contacts");
 		}
 
-        if (logger.isActivated()) {
-            logger.debug("File exceeds max size: cancel the initiation");
-        }
+		// Select default protocol
+		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
+		if (!myCapability.isFileTransferHttpSupported()) {
+			throw new CoreException("Group file transfer not supported");
+		}
 
-        // Select default protocol
- 		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
-        if (!myCapability.isFileTransferHttpSupported()) {
-        	throw new CoreException("Group file transfer not supported");
-        }
-        
-        // Test number of sessions
+		// Test number of sessions
 		if ((maxFtSessions != 0) && (getFileTransferSessions().size() >= maxFtSessions)) {
 			if (logger.isActivated()) {
 				logger.debug("The max number of file transfer sessions is achieved: cancel the initiation");
@@ -412,29 +415,17 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Max file transfer sessions achieved");
 		}
 
-        // Test max size
-        if (maxFtSize > 0 && content.getSize() > maxFtSize) {
-            if (logger.isActivated()) {
-                logger.debug("File exceeds max size: cancel the initiation");
-            }
-            throw new CoreException("File exceeds max size");
-        }
-
-        // Get thumbnail data
-        byte[] thumbnailData = null;
-        if (thumbnail != null) {
-			// Create the thumbnail
-        	thumbnailData = ChatUtils.getFileThumbnail(thumbnail);
+		// Test max size
+		if (maxFtSize > 0 && content.getSize() > maxFtSize) {
+			if (logger.isActivated()) {
+				logger.debug("File exceeds max size: cancel the initiation");
+			}
+			throw new CoreException("File exceeds max size");
 		}
-        
-        // Create a new session
-		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(
-				this,
-				content,
-				ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-				new ListOfParticipant(contactList),
-				thumbnailData,
-				chatSessionId,
+
+		// Create a new session
+		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content, tryAttachThumbnail,
+				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), new ListOfParticipant(contactList), chatSessionId,
 				chatContributionId);
 
 		return session;

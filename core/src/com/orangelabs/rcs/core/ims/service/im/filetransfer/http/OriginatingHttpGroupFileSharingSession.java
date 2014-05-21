@@ -19,7 +19,6 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.gsma.services.rcs.chat.ChatLog;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -32,10 +31,12 @@ import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -72,23 +73,36 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
 	/**
 	 * Constructor
-	 *
-	 * @param parent IMS service
-	 * @param content Content to be shared
-	 * @param conferenceId Conference ID
-	 * @param participants List of participants
-	 * @param thumbnail Thumbnail
-	 * @param chatSessionId Chat session ID
-     * @param chatContributionId Chat contribution Id
+	 * 
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            The file content to share
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param conferenceId
+	 *            Conference ID
+	 * @param participants
+	 *            List of participants
+	 * @param chatSessionId
+	 *            Chat session ID
+	 * @param chatContributionId
+	 *            Chat contribution Id
 	 */
-	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, String conferenceId, ListOfParticipant participants, byte[] thumbnail, String chatSessionID, String chatContributionId) {
-		super(parent, content, conferenceId, thumbnail, chatSessionID, chatContributionId);
-
+	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean tryAttachThumbnail,
+			String conferenceId, ListOfParticipant participants, String chatSessionID, String chatContributionId) {
+		super(parent, content, conferenceId, null, chatSessionID, chatContributionId);
 		// Set participants involved in the transfer
 		this.participants = participants;
-		
+
+		MmContent thumbnail = null;
+		if (tryAttachThumbnail && MimeManager.isImageType(content.getEncoding())) {
+			// Create the thumbnail
+			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
+			setThumbnail(thumbnail);
+		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), getThumbnail(), this);
+		uploadManager = new HttpUploadManager(getContent(), thumbnail, this);
 	}
 
 	/**
@@ -174,7 +188,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         	return;
         }
         
-        if (result != null &&  ChatUtils.parseFileTransferHttpDocument(result) != null) {
+        if (result != null &&  FileTransferUtils.parseFileTransferHttpDocument(result) != null) {
         	fileInfo = new String(result);
             if (logger.isActivated()) {
                 logger.debug("Upload done with success: " + fileInfo);
