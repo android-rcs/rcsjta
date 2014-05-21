@@ -17,6 +17,10 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
+import java.io.File;
+
+import android.net.Uri;
+
 import com.gsma.services.rcs.JoynServiceException;
 
 /**
@@ -208,18 +212,22 @@ public class FileTransfer {
     }
     
 	/**
-     * Returns the complete filename including the path of the file icon
-     *
-     * @return Filename
+	 * Returns the URI of the file icon
+	 * 
+	 * @return the URI of the file icon or thumbnail
 	 * @throws JoynServiceException
-     */
-	public String getFileIconName() throws JoynServiceException {
+	 */
+	public Uri getFileIcon() throws JoynServiceException {
 		try {
-			return transferInf.getFileIconName();
-		} catch(Exception e) {
+			String fileIconName = transferInf.getFileIconName();
+			if (fileIconName != null) {
+				return Uri.fromFile(new File(fileIconName));
+			}
+			return null;
+		} catch (Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
-	}    
+	}
 
 	/**
 	 * Returns the state of the file transfer

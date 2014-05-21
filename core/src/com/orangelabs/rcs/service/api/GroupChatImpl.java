@@ -16,7 +16,6 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.orangelabs.rcs.core.Core;
-import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -32,8 +31,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.platform.file.FileDescription;
-import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -57,14 +55,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	private RemoteCallbackList<IGroupChatListener> listeners = new RemoteCallbackList<IGroupChatListener>();
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private Object lock = new Object();
 
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(GroupChatImpl.class.getName());
 
 	/**
 	 * Constructor
@@ -280,12 +278,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		final String msgId = IdGenerator.generateMessageID();
 
 		// Send text message
-        Thread t = new Thread() {
+       new Thread() {
     		public void run() {
     			session.sendTextMessage(msgId, text);
     		}
-    	};
-    	t.start();
+    	}.start();
 
 		return msgId;
 	}
@@ -304,52 +301,52 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		final GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
 				geoloc.getLatitude(), geoloc.getLongitude(),
 				geoloc.getExpiration(), geoloc.getAccuracy());
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.sendGeolocMessage(msgId, geolocPush);
     		}
-    	};
-    	t.start();
+    	}.start();
 		return msgId;
     }	
 
-    /**
-     * Transfers a file to participants. The parameter filename contains the complete
-     * path of the file to be transferred.
-     * 
-     * @param filename Filename to transfer
-     * @param fileicon Filename of the file icon associated to the file to be transfered
-     * @param listener File transfer event listener
-     * @return File transfer
-     * @throws ServerApiException 
-     */
-	public IFileTransfer sendFile(String filename, String fileicon, IFileTransferListener listener) throws ServerApiException {
+	/**
+	 * Transfers a file to participants. The parameter filename contains the complete path of the file to be transferred.
+	 * 
+	 * @param filename
+	 *            Url of file to transfer
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param listener
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws ServerApiException
+	 */
+	public IFileTransfer sendFile(String filename, boolean tryAttachThumbnail, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("sendFile (filename=" + filename + ") (fileicon=" + fileicon + ")");
+			logger.info("sendFile (filename=" + filename + ") (thumbnail=" + tryAttachThumbnail + ")");
 		}
 		try {
 			// Initiate the session
-			FileDescription desc = FileFactory.getFactory().getFileDescription(filename);
-			MmContent content = ContentManager.createMmContentFromUrl(filename, desc.getSize());
-
+			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
+			
 			String chatSessionId = session.getSessionID();
 			String chatId = session.getContributionID();
-			final FileSharingSession fileSharingsession = Core.getInstance().getImService()
-					.initiateGroupFileTransferSession(getParticipants(), content, fileicon, chatSessionId, chatId);
+			final FileSharingSession session = Core.getInstance().getImService()
+					.initiateGroupFileTransferSession(getParticipants(), content, tryAttachThumbnail, chatSessionId, chatId);
 
 			// Add session listener
-			FileTransferImpl sessionApi = new FileTransferImpl(fileSharingsession);
+			FileTransferImpl sessionApi = new FileTransferImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addOutgoingGroupFileTransfer(chatSessionId, fileSharingsession.getSessionID(),
-					fileSharingsession.getContent());
+			RichMessagingHistory.getInstance().addOutgoingGroupFileTransfer(chatSessionId, session.getSessionID(),
+					session.getContent(), session.getThumbnail());
 
 			// Start the session
 			new Thread() {
 				public void run() {
 					// Start the session
-					fileSharingsession.startSession();
+					session.startSession();
 				}
 			}.start();
 
@@ -371,12 +368,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @param status Is-composing status
 	 */
 	public void sendIsComposingEvent(final boolean status) {
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.sendIsComposingStatus(status);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
     /**

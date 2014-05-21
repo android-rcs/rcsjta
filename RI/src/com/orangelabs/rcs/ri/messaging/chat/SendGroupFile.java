@@ -246,13 +246,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
         }     	    	
     	
         // Get thumbnail option
-    	String tumbnail = null; 
         CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
-        if (ftThumb.isChecked()) {
-        	// Create a tumbnail
-        	tumbnail = Utils.createPictureThumbnail(getApplicationContext(), filename, 50 * 1024);
-        }
-    	final String fileicon = tumbnail; 
         
         // Initiate session in background
     	try {
@@ -264,7 +258,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
             }
             
             // Initiate transfer
-    		fileTransfer = groupChat.sendFile(filename,  fileicon, ftListener);
+    		fileTransfer = groupChat.sendFile(filename,  ftThumb.isChecked(), ftListener);
     	} catch(Exception e) {
 			hideProgressDialog();
 			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed));

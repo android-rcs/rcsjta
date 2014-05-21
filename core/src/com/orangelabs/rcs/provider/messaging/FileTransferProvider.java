@@ -53,7 +53,7 @@ public class FileTransferProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -77,7 +77,8 @@ public class FileTransferProvider extends ContentProvider {
         			+ FileTransferData.KEY_TIMESTAMP_DISPLAYED + " long,"
         			+ FileTransferData.KEY_SIZE + " long,"
         			+ FileTransferData.KEY_TOTAL_SIZE + " long,"
-        			+ FileTransferData.KEY_MSG_ID + " TEXT);");
+        			+ FileTransferData.KEY_MSG_ID + " TEXT,"
+        			+ FileTransferData.KEY_FILEICON + " TEXT);");
         }
         // @formatter:on
         

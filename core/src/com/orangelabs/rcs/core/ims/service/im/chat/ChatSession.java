@@ -45,6 +45,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingManage
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardNotifSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -526,7 +527,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	// Check if the message needs a delivery report
 	    			boolean imdnDisplayedRequested = false;
 			    	String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-                    boolean isFToHTTP = ChatUtils.isFileTransferHttpType(contentType);
+                    boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
                     if (isFToHTTP) {
                         sendMsrpMessageDeliveryStatus(remoteUri, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
                     } else if (dispositionNotification != null) {
@@ -543,8 +544,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     if (isFToHTTP) {
 						// File transfer over HTTP message
 						// Parse HTTP document
-						FileTransferHttpInfoDocument fileInfo = ChatUtils.parseFileTransferHttpDocument(cpimMsg.getMessageContent()
-								.getBytes());
+						FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg
+								.getMessageContent().getBytes());
 						if (fileInfo != null) {
 							receiveHttpFileTransfer(remoteUri, fileInfo, cpimMsgId);
 						} else {

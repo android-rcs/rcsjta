@@ -88,5 +88,10 @@ public class FileTransferData {
 	/**
 	 * Column name KEY_MSG_ID : the reference to the Chat message
 	 */
-	static final String KEY_MSG_ID =  FileTransferLog.MESSAGE_ID;	
+	static final String KEY_MSG_ID =  FileTransferLog.MESSAGE_ID;
+	
+	/**
+	 * Column name KEY_FILEICON : the URI of the file icon
+	 */
+	static final String KEY_FILEICON =  FileTransferLog.FILEICON;
 }

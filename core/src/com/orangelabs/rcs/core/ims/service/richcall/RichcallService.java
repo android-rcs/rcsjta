@@ -36,7 +36,6 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
@@ -154,12 +153,13 @@ public class RichcallService extends ImsService {
      * Initiate an image sharing session
      *
      * @param contact Remote contact
-     * @param content Content to be shared
-     * @param thumbnail Thumbnail filename
+     * @param content The file content to share
+     * @param thumbnail The thumbnail content
      * @return CSh session
      * @throws CoreException
      */
-	public ImageTransferSession initiateImageSharingSession(String contact, MmContent content, String thumbnail) throws CoreException {
+	public ImageTransferSession initiateImageSharingSession(String contact, MmContent content, MmContent thumbnail)
+			throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate image sharing session with contact " + contact + ", file " + content.toString());
 		}
@@ -215,19 +215,9 @@ public class RichcallService extends ImsService {
             throw new CoreException("Max content sharing sessions achieved");
         }
 
-		// Get thumbnail data
-        byte[] thumbnailData = null;
-        if (thumbnail != null) {
-			// Create the thumbnail
-        	thumbnailData = ChatUtils.getFileThumbnail(thumbnail);
-		}		
-        
 		// Create a new session
-		OriginatingImageTransferSession session = new OriginatingImageTransferSession(
-				this,
-				content,
-				PhoneUtils.formatNumberToSipUri(contact),
-				thumbnailData);
+		OriginatingImageTransferSession session = new OriginatingImageTransferSession(this, content,
+				PhoneUtils.formatNumberToSipUri(contact), thumbnail);
 
 		return session;
 	}

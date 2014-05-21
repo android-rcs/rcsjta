@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.local;
@@ -201,6 +205,10 @@ public class StackProvisioning extends Activity {
 			RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_PROTOCOL, (String) spinner.getSelectedItem());
 		}
 
+        spinner = (Spinner)findViewById(R.id.client_vendor);
+        String value = (String)spinner.getSelectedItem();
+        RcsSettings.getInstance().writeParameter(RcsSettingsData.VENDOR_NAME, value);
+
 		saveEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
 		saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
 				bundle);
@@ -256,6 +264,25 @@ public class StackProvisioning extends Activity {
 			mode = RcsSettings.getInstance().getAutoConfigMode();
 		}
 		spinner.setSelection((mode == RcsSettingsData.HTTPS_AUTO_CONFIG) ? 1 : 0);
+
+        spinner = (Spinner)findViewById(R.id.client_vendor);
+        ArrayAdapter<CharSequence> adapterVendor = ArrayAdapter.createFromResource(this,
+                R.array.vendors, android.R.layout.simple_spinner_item);
+        adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapterVendor);
+
+        String[] vendorArray = getResources().getStringArray(R.array.vendors);
+        String vendorInDB = RcsSettings.getInstance().getVendor();
+
+        if (vendorInDB != null && vendorInDB.length() > 0) {
+            if (vendorInDB.equals(vendorArray[0])) {
+                spinner.setSelection(0);
+            } else if (vendorInDB.equals(vendorArray[1])) {
+                spinner.setSelection(1);
+            }
+        } else {
+            spinner.setSelection(0);
+        }
 
 		setEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
 		setCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,

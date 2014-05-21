@@ -18,8 +18,6 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,11 +42,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -76,10 +72,10 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
-	 /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
     
 	/**
 	 * Get supported feature tags for a group chat
@@ -267,20 +263,6 @@ public class ChatUtils {
     	}
     }
     
-    /**
-     * Is a file transfer HTTP event type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isFileTransferHttpType(String mime) {
-    	if ((mime != null) && mime.toLowerCase().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-
     /**
      * Generate resource-list for a chat session
      * 
@@ -691,23 +673,6 @@ public class ChatUtils {
 		}
 	    return null;
 	}
-	
-	/**
-	 * Parse a file transfer over HTTP document
-	 *
-	 * @param xml XML document
-	 * @return File transfer document
-	 */
-	public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml) {
-		try {
-		    InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-		    FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput);
-		    return ftHttpParser.getFtInfo();
-		} catch(Exception e) {
-			return null;
-		}
-	}
-	
 
 	/**
 	 * Parse a file transfer resume info
@@ -933,62 +898,7 @@ public class ChatUtils {
         }
         return participants;
     }
-
-    /**
-     * Returns the data of the thumbnail file
-     * 
-     * @param filename Filename
-     * @return Bytes or null in case of error
-     */
-    public static byte[] getFileThumbnail(String filename) {
-    	if (filename == null) {
-    		return null;
-    	}
-    	try {
-	    	File file = new File(filename);
-	    	byte [] data = new byte[(int)file.length()];
-	    	FileInputStream fis = new FileInputStream(file);
-	    	fis.read(data);
-	    	fis.close();
-	    	return data;
-    	} catch(Exception e) {
-    		return null;
-    	}
-    }
     
-    /**
-     * Extract thumbnail from incoming INVITE request
-     * 
-     * @param request Request
-     * @return Thumbnail
-     */
-    public static byte[] extractFileThumbnail(SipRequest request) {
-		try {
-			// Extract message from content/CPIM
-		    String content = request.getContent();
-		    String boundary = request.getBoundaryContentType();
-			Multipart multi = new Multipart(content, boundary);
-			if (multi.isMultipart()) {
-		    	// Get image/jpeg content
-		    	String jpeg = multi.getPart("image/jpeg");
-		    	if (jpeg != null) {
-		    		// Decode the content
-		    		return Base64.decodeBase64(jpeg.getBytes());
-		    	}
-		    	
-		    	// Get image/png content
-		    	String png = multi.getPart("image/png");
-		    	if (png != null) {
-		    		// Decode the content
-		    		return Base64.decodeBase64(png.getBytes());
-		    	}
-		    }
-		} catch(Exception e) {
-			return null;
-		}		
-		return null;
-    }
-
     /**
      * Is request is for FToHTTP
      *
@@ -1003,21 +913,4 @@ public class ChatUtils {
             return false;
         }
     }
-
-    /**
-     * Get the HTTP file transfer info document
-     *
-     * @param request Request
-     * @return FT HTTP info
-     */
-	public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
-        InstantMessage message = getFirstMessage(request);
-        if ((message != null) && (message instanceof FileTransferMessage)) {
-        	FileTransferMessage ftMsg = (FileTransferMessage)message;
-			byte[] xml = ftMsg.getFileInfo().getBytes();
-            return parseFileTransferHttpDocument(xml);
-        } else {
-            return null;
-        }
-	}
 }

@@ -84,7 +84,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	/**
 	 * Thumbnail to upload
 	 */
-	private byte[] thumbnail;
+	private MmContent thumbnail;
 
 	/**
 	 * TID of the upload
@@ -126,13 +126,12 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * @param content
 	 *            File content to upload
 	 * @param thumbnail
-	 *            Thumbnail of the file
+	 *            content of Thumbnail
 	 * @param listener
 	 *            HTTP transfer event listener
 	 */
-	public HttpUploadManager(MmContent content, byte[] thumbnail, HttpUploadTransferEventListener listener) {
+	public HttpUploadManager(MmContent content, MmContent thumbnail, HttpUploadTransferEventListener listener) {
 		super(listener);
-
 		this.content = content;
 		this.thumbnail = thumbnail;
 		tid = UUID.randomUUID().toString();
@@ -314,7 +313,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 		// Add thumbnail
 		if (thumbnail != null) {
-			writeThumbnailMultipart(outputStream, filepath);
+			writeThumbnailMultipart(outputStream);
 		}
 		// From this point, resuming is possible
 		((HttpUploadTransferEventListener)getListener()).uploadStarted();
@@ -427,11 +426,12 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * 
 	 * @param outputStream
 	 *            DataOutputStream to write to
-	 * @param filepath
-	 *            File path
 	 */
-	private void writeThumbnailMultipart(DataOutputStream outputStream, String filepath) throws IOException {
-		if (thumbnail.length > 0) {
+	private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
+		if (logger.isActivated()) {
+			logger.debug("write thumbnail " + thumbnail.getName() + " (size=" + thumbnail.getSize() + ")");
+		}
+		if (thumbnail.getSize() > 0) {
 			String[] splittedPath = content.getUrl().split("/");
 			String filename = splittedPath[splittedPath.length - 1];
 
@@ -439,9 +439,9 @@ public class HttpUploadManager extends HttpTransferManager {
 			outputStream.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_" + filename + "\""
 					+ lineEnd);
 			outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
-			outputStream.writeBytes("Content-Length: " + thumbnail.length);
+			outputStream.writeBytes("Content-Length: " + thumbnail.getSize());
 			outputStream.writeBytes(lineEnd + lineEnd);
-			outputStream.write(thumbnail);
+			outputStream.write(thumbnail.getData());
 			outputStream.writeBytes(lineEnd);
 		}
 	}

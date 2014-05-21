@@ -103,7 +103,7 @@ public class ContentManager{
      */
 	public static MmContent createMmContentFromUrl(String url, long size) {
 		String ext = MimeManager.getFileExtension(url);
-		String mime = MimeManager.getMimeType(ext);
+		String mime = MimeManager.getInstance().getMimeType(ext);
 		return createMmContentFromMime(url, mime, size);
 	}
 	
@@ -118,7 +118,7 @@ public class ContentManager{
      */
 	public static MmContent createMmContentFromFilename(String filename, String url, long size) {
 		String ext = MimeManager.getFileExtension(filename);
-		String mime = MimeManager.getMimeType(ext);
+		String mime = MimeManager.getInstance().getMimeType(ext);
 		MmContent content = createMmContentFromMime(url, mime, size);
 		content.setName(filename);
 		

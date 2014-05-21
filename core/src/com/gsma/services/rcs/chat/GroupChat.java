@@ -293,20 +293,23 @@ public class GroupChat {
 		}    	
     }	
 
-    /**
-     * Transfers a file to participants. The parameter filename contains the complete
-     * path of the file to be transferred.
-     * 
-     * @param filename Filename to transfer
-     * @param fileicon Filename of the file icon associated to the file to be transfered
-     * @param listener File transfer event listener
-     * @return File transfer
-     * @throws JoynServiceException
+	/**
+	 * Transfers a file to participants. The parameter filename contains the complete path of the file to be transferred.
+	 * 
+	 * @param filename
+	 *            Filename to transfer
+	 * @param fileIcon
+	 *            File icon option. If true, the stack tries to attach thumbnail. Thumbnail may not be attached if file is not an
+	 *            image.
+	 * @param listener
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
-     */
-    public FileTransfer sendFile(String filename, String fileicon, FileTransferListener listener) throws JoynServiceException {
+	 */
+    public FileTransfer sendFile(String filename, boolean fileIcon, FileTransferListener listener) throws JoynServiceException {
     	try {
-			IFileTransfer ftIntf = chatInf.sendFile(filename, fileicon, listener);
+			IFileTransfer ftIntf = chatInf.sendFile(filename, fileIcon, listener);
 			if (ftIntf != null) {
 				return new FileTransfer(ftIntf);
 			} else {

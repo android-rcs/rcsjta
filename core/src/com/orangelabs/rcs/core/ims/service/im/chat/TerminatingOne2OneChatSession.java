@@ -36,6 +36,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -94,11 +95,12 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
             }
 
             // Check if Auto-accept (FT HTTP force auto-accept for the chat session)
-            if (RcsSettings.getInstance().isChatAutoAccepted() || ChatUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
-                if (logger.isActivated()) {
-                    logger.debug("Auto accept chat invitation");
-                }
-            } else {
+			if (RcsSettings.getInstance().isChatAutoAccepted()
+					|| FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+				if (logger.isActivated()) {
+					logger.debug("Auto accept chat invitation");
+				}
+			} else {
                 if (logger.isActivated()) {
                     logger.debug("Accept manually chat invitation");
                 }

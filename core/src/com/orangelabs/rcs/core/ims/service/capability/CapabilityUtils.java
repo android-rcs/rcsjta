@@ -19,6 +19,7 @@ package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import android.text.TextUtils;
@@ -273,7 +274,7 @@ public class CapabilityUtils {
     	            String[] types = attr.getValue().split(" ");
     	            for(int j = 0; j < types.length; j++) {
     	            	String fmt = types[j];
-    	            	if ((fmt != null) && MimeManager.isMimeTypeSupported(fmt)) { // Changed by Deutsche Telekom AG
+    	            	if ((fmt != null) && MimeManager.getInstance().isMimeTypeSupported(fmt)) { // Changed by Deutsche Telekom AG
     	            		imgFormats.addElement(fmt);
     	            	}
     	    		}
@@ -313,12 +314,10 @@ public class CapabilityUtils {
 		        if (video) {
 		        	// Get supported video formats
 					Vector<VideoFormat> videoFormats = MediaRegistry.getSupportedVideoFormats();
-					StringBuffer videoSharingConfig = new StringBuffer();
-					for(int i=0; i < videoFormats.size(); i++) {
-						VideoFormat fmt = videoFormats.elementAt(i);
-						videoSharingConfig.append("m=video 0 RTP/AVP " + fmt.getPayload() + SipUtils.CRLF);
-						videoSharingConfig.append("a=rtpmap:" + fmt.getPayload() + " " + fmt.getCodec() + SipUtils.CRLF);
-
+					StringBuilder videoSharingConfig = new StringBuilder();
+					for (VideoFormat videoFormat : videoFormats) {
+						videoSharingConfig.append("m=video 0 RTP/AVP " + videoFormat.getPayload() + SipUtils.CRLF);
+						videoSharingConfig.append("a=rtpmap:" + videoFormat.getPayload() + " " + videoFormat.getCodec() + SipUtils.CRLF);
 					}
 					
 	                // Changed by Deutsche Telekom
@@ -327,14 +326,14 @@ public class CapabilityUtils {
 	        
 				// Add image and geoloc config
 		        if (image || geoloc) {
-					StringBuffer supportedTransferFormats = new StringBuffer();
+					StringBuilder supportedTransferFormats = new StringBuilder();
 
 					// Get supported image formats
 		        	// Changed by Deutsche Telekom
-					Vector<String> mimeTypesVector = MimeManager.getSupportedImageMimeTypes();
-					for(int i=0; i < mimeTypesVector.size(); i++) {
-						supportedTransferFormats.append(mimeTypesVector.elementAt(i) + " ");
-				    }
+					Set<String> imageMimeTypes = MimeManager.getInstance().getSupportedImageMimeTypes();
+					for (String imageMimeType : imageMimeTypes) {
+						supportedTransferFormats.append(imageMimeType + " ");
+					}
 					
 					// Get supported geoloc
 		        	if (geoloc) {

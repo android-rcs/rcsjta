@@ -11,6 +11,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
+import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -51,7 +52,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 */
 	private String localUrl;
 
-	private byte[] thumbnail;
+	private MmContent thumbnail;
 
 	/**
 	 * Retry counter
@@ -70,17 +71,17 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 *            File content to download
 	 * @param listener
 	 *            HTTP transfer event listener
-	 * @param filename
+	 * @param filepath
 	 *            Filename to download
 	 */
-	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filename) {
+	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filepath) {
 		super(listener, content.getUrl());
 		this.content = content;
-		this.localUrl = filename;
+		this.localUrl = filepath;
 		// Init file
 		file = new File(localUrl);
 		if (logger.isActivated()) {
-			logger.debug("HttpDownloadManager file=" + filename + " length=" + file.length());
+			logger.debug("HttpDownloadManager file=" + filepath + " length=" + file.length());
 		}
 		streamForFile = openStremForFile(file);
 	}
@@ -242,9 +243,10 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 * 
 	 * @param thumbnailInfo
 	 *            Thumbnail info
-	 * @return Thumbnail picture data or null in case of error
+	 * @param filename the thumbnail filename
+	 * @return Thumbnail picture content or null in case of error
 	 */
-	public byte[] downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo) {
+	public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String filename) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Download Thumbnail" + content.getUrl());
@@ -265,7 +267,13 @@ public class HttpDownloadManager extends HttpTransferManager {
 					logger.debug("Failed to download Thumbnail");
 				}
 			}
-			thumbnail = baos.toByteArray();
+			// Generate a URL from the filename and mime-type
+			String url = ContentManager.generateUrlForReceivedContent(filename, thumbnailInfo.getThumbnailType());
+			// Create the content for filename
+			thumbnail = ContentManager.createMmContentFromFilename(filename, url, baos.size());
+			// Save data to file
+			thumbnail.writeData2File(baos.toByteArray());
+			thumbnail.closeFile();
 			return thumbnail;
 		} catch (Exception e) {
 			if (logger.isActivated()) {

@@ -37,14 +37,12 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -67,33 +65,37 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
-    
-    /**
-     * Thumbnail type 
-     */
-    private String thumbnailEncoding = null;
+    private static final Logger logger = Logger.getLogger(OriginatingFileSharingSession.class.getName());
 
 	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param content Content to be shared
-	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail filename
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content to be shared
+	 * @param contact
+	 *            Remote contact
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, String thumbnail) {
-		super(parent, content, contact, ChatUtils.getFileThumbnail(thumbnail));
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
+		super(parent, content, contact, null);
 		
+		if (logger.isActivated()) {
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" thumbnail="+tryAttachThumbnail);
+		}
 		// Create dialog path
 		createOriginatingDialogPath();
 		
 		// Set contribution ID
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
-		setContributionID(id);	
+		setContributionID(id);
 		
-		// Save the thumbnail mime type
-		thumbnailEncoding = MimeManager.getMimeType(MimeManager.getMimeExtension(thumbnail));
+		if (tryAttachThumbnail) {
+			// Create the thumbnail
+			setThumbnail(FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID()));
+		}
 	}
 
 	/**
@@ -143,11 +145,11 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    		sdp += "a=file-location:" + location + SipUtils.CRLF;
 	    	}
 
-	    	if (getThumbnail() != null && thumbnailEncoding != null) {
+	    	if (getThumbnail() != null) {
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 
 	    		// Encode the thumbnail file
-	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail());
+	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail().getData());
 
 	    		// Build multipart
 	    		String multipart = 
@@ -157,7 +159,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    				SipUtils.CRLF +
 	    				sdp + SipUtils.CRLF + 
 	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": " + thumbnailEncoding + SipUtils.CRLF +
+	    				ContentTypeHeader.NAME + ": " + getThumbnail().getEncoding() + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_TRANSFER_ENCODING + ": base64" + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_ID + ": <image@joyn.com>" + SipUtils.CRLF +
 	    				ContentLengthHeader.NAME + ": "+ imageEncoded.length() + SipUtils.CRLF +

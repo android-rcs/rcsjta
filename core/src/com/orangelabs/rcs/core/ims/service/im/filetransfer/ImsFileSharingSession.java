@@ -54,11 +54,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param content Content to be shared
+	 * @param content Content of file to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
+	 * @param thumbnail Content of Thumbnail
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, byte[] thumbnail) {
+	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
 		super(parent, content, contact, thumbnail);
 	}
 	
