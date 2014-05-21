@@ -55,7 +55,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	private RemoteCallbackList<IGroupChatListener> listeners = new RemoteCallbackList<IGroupChatListener>();
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private Object lock = new Object();
 
@@ -309,19 +309,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		return msgId;
     }	
 
-    /**
-     * Transfers a file to participants. The parameter filename contains the complete
-     * path of the file to be transferred.
-     * 
-     * @param filename Url of file to transfer
-     * @param fileicon the file icon option
-     * @param listener File transfer event listener
-     * @return File transfer
-     * @throws ServerApiException 
-     */
-	public IFileTransfer sendFile(String filename, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
+	/**
+	 * Transfers a file to participants. The parameter filename contains the complete path of the file to be transferred.
+	 * 
+	 * @param filename
+	 *            Url of file to transfer
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param listener
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws ServerApiException
+	 */
+	public IFileTransfer sendFile(String filename, boolean tryAttachThumbnail, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("sendFile (filename=" + filename + ") (fileicon=" + fileicon + ")");
+			logger.info("sendFile (filename=" + filename + ") (thumbnail=" + tryAttachThumbnail + ")");
 		}
 		try {
 			// Initiate the session
@@ -330,7 +332,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			String chatSessionId = session.getSessionID();
 			String chatId = session.getContributionID();
 			final FileSharingSession session = Core.getInstance().getImService()
-					.initiateGroupFileTransferSession(getParticipants(), content, fileicon, chatSessionId, chatId);
+					.initiateGroupFileTransferSession(getParticipants(), content, tryAttachThumbnail, chatSessionId, chatId);
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);

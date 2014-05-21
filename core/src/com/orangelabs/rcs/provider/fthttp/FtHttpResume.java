@@ -37,9 +37,9 @@ public abstract class FtHttpResume {
 	final private FtHttpDirection ftHttpDirection;
 
 	/**
-	 * The filename URL
+	 * The file path
 	 */
-	final private String filename;
+	final private String filepath;
 
     /**
      * The mime type of the file to download
@@ -104,7 +104,7 @@ public abstract class FtHttpResume {
 	 * 
 	 * @param ftHttpDirection
 	 *            the {@code direction} value.
-	 * @param filename
+	 * @param filepath
 	 *            the {@code filename} value.
      * @param mimeType
      *            the {@code mimeType} value.
@@ -127,14 +127,14 @@ public abstract class FtHttpResume {
 	 * @param date
 	 *            the {@code date} value.
 	 */
-	public FtHttpResume(FtHttpDirection ftHttpDirection, String filename, String mimeType, Long size,
+	public FtHttpResume(FtHttpDirection ftHttpDirection, String filepath, String mimeType, Long size,
 	        String thumbnail, String contact, String displayName, String chatId, String sessionId,
 	        String chatSessionId, boolean isGroup, Date date) {
-		if (size <= 0 || ftHttpDirection == null || mimeType == null || filename == null)
+		if (size <= 0 || ftHttpDirection == null || mimeType == null || filepath == null)
 			throw new IllegalArgumentException("Null argument");
 		this.date = date;
 		this.ftHttpDirection = ftHttpDirection;
-		this.filename = filename;
+		this.filepath = filepath;
         this.mimeType = mimeType;
         this.size = size;
 		this.thumbnail = thumbnail;
@@ -154,8 +154,8 @@ public abstract class FtHttpResume {
 		return ftHttpDirection;
 	}
 
-	public String getFilename() {
-		return filename;
+	public String getFilepath() {
+		return filepath;
 	}
 
     public String getMimetype() {
@@ -196,7 +196,7 @@ public abstract class FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResume [date=" + date + ", dir=" + ftHttpDirection + ", file=" + filename + " thumbnail="+thumbnail+"]";
+		return "FtHttpResume [date=" + date + ", dir=" + ftHttpDirection + ", file=" + filepath + " thumbnail="+thumbnail+"]";
 	}
 
 }

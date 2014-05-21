@@ -101,7 +101,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [url=" + url + ", messageId=" + messageId + ", getFilename()=" + getFilename()
+		return "FtHttpResumeDownload [url=" + url + ", messageId=" + messageId + ", getFilepath()=" + getFilepath()
 				+ ", getSize()=" + getSize() + ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact()
 				+ ", getChatId()=" + getChatId() + ", getSessionId()=" + getSessionId() + ", getChatSessionId()="
 				+ getChatSessionId() + ", isGroup()=" + isGroup() + "]";

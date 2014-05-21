@@ -70,16 +70,20 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param content Content to be shared
-	 * @param contact Remote contact
-	 * @param fileIcon Thumbnail option
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content to be shared
+	 * @param contact
+	 *            Remote contact
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileIcon) {
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
 		super(parent, content, contact, null);
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileIcon="+fileIcon);
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" thumbnail="+tryAttachThumbnail);
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -88,7 +92,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
 		setContributionID(id);
 		
-		if (fileIcon) {
+		if (tryAttachThumbnail) {
 			// Create the thumbnail
 			setThumbnail(FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID()));
 		}

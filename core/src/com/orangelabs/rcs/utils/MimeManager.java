@@ -18,100 +18,150 @@
 
 package com.orangelabs.rcs.utils;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import android.text.TextUtils;
 
 /**
  * MIME manager
  * 
  * @author jexa7410
+ * @author LEMORDANT Philippe
  */
 public class MimeManager {
 	/**
-	 * List of supported MIME type per extension
+	 * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice versa.
 	 */
-    private static Hashtable<String, String> mimeTable = new Hashtable<String, String>();
-    static {
-    	// Image type
-    	mimeTable.put("jpg", "image/jpeg");
-    	mimeTable.put("jpeg", "image/jpeg");
-    	mimeTable.put("png", "image/png");
-    	mimeTable.put("bmp", "image/bmp");
+	private static MimeManager instance;
 
-    	// Video type
-    	mimeTable.put("3gp", "video/3gpp");    	
-    	mimeTable.put("mp4", "video/mp4");
-    	mimeTable.put("mp4a", "video/mp4");
-    	mimeTable.put("mpeg4", "video/mp4");
-    	mimeTable.put("mpeg", "video/mpeg");
-    	mimeTable.put("mpg", "video/mpeg");
-    	
-    	// Visit Card type
-    	mimeTable.put("vcf", "text/vcard");
-    	
-    	// Geoloc type
-    	mimeTable.put("xml", "application/vnd.gsma.rcspushlocation+xml");
-    }    
-    
-    /**
-     * Is MIME type supported 
-     * 
-     * @param mime MIME-Type
-     * @return Boolean
-     */
-    public static boolean isMimeTypeSupported(String mime) {
-    	if (mime.equals("*")) { // Changed by Deutsche Telekom AG    		
-    		return true;
-    	} else {
-    		return mimeTable.containsValue(mime);
-    	}
-    }    
-    
-    /**
-     * Returns the supported MIME types 
-     * 
-     * @return List
-     */
-    public static Vector<String> getSupportedMimeTypes() {
-    	Vector<String> result = new Vector<String>();
-		for (Enumeration<String> e = mimeTable.elements() ; e.hasMoreElements() ;) {
-			String mime = e.nextElement();
-			result.addElement(mime);
-	    }    	    	
-		return result;
-    }
-    
-    /**
-     * Returns the supported image MIME types 
-     * 
-     * @return List
-     */
-    public static Vector<String> getSupportedImageMimeTypes() {
-    	Vector<String> result = new Vector<String>();
-		for (Enumeration<String> e = mimeTable.elements() ; e.hasMoreElements() ;) {
-			String mime = e.nextElement();
-			if (mime.startsWith("image") && (!result.contains(mime))) {
-				result.addElement(mime);
-			}
-	    }    	    	
-		return result;
-    }
-    
-    /**
-	 * Returns the MIME type associated to a given file extension
-	 * 
-	 * @param ext File extension
-	 * @return MIME type
+	/**
+	 * Mime-Type to file extension mapping:
 	 */
-    public static String getMimeType(String ext) {
-    	if (ext != null) {
-    		return mimeTable.get(ext.toLowerCase());
-    	} else {
-    		return null;
-    	}
-    }
-    
+	private HashMap<String, String> mimeTypeToExtensionMap;
+
+	/**
+	 * File extension to Mime-Type mapping:
+	 */
+	private HashMap<String, String> extensionToMimeTypeMap;
+
+	/**
+	 * Set of image MIME-type:
+	 */
+	private Set<String> imageMimeTypeSet;
+
+	/**
+	 * Creates a new MIME-type map.
+	 */
+	private MimeManager() {
+		mimeTypeToExtensionMap = new HashMap<String, String>();
+		extensionToMimeTypeMap = new HashMap<String, String>();
+		imageMimeTypeSet = new HashSet<String>();
+	}
+
+	/**
+	 * @return The singleton instance of the MIME-type map.
+	 */
+	public static MimeManager getInstance() {
+		if (instance == null) {
+			instance = new MimeManager();
+
+			// Image type
+			instance.loadMap("jpg", "image/jpeg");
+			instance.loadMap("jpeg", "image/jpeg");
+			instance.loadMap("png", "image/png");
+			instance.loadMap("bmp", "image/bmp");
+
+			// Video type
+			instance.loadMap("3gp", "video/3gpp");
+			instance.loadMap("mp4", "video/mp4");
+			instance.loadMap("mp4a", "video/mp4");
+			instance.loadMap("mpeg4", "video/mp4");
+			instance.loadMap("mpeg", "video/mpeg");
+			instance.loadMap("mpg", "video/mpeg");
+
+			// Visit Card type
+			instance.loadMap("vcf", "text/vcard");
+
+			// Geoloc type
+			instance.loadMap("xml", "application/vnd.gsma.rcspushlocation+xml");
+		}
+		return instance;
+	}
+
+	/**
+	 * Load an entry into the map.
+	 */
+	private void loadMap(String extension, String mimeType) {
+		// Do not override extension if already inserted.
+		// First extension inserted should be the most representative one.
+		if (!mimeTypeToExtensionMap.containsKey(mimeType)) {
+			mimeTypeToExtensionMap.put(mimeType, extension);
+		}
+
+		extensionToMimeTypeMap.put(extension, mimeType);
+
+		// Insert into imageMimeType set if image
+		if (isImageType(mimeType)) {
+			imageMimeTypeSet.add(mimeType);
+		}
+	}
+
+	/**
+	 * Is MIME-type supported
+	 * 
+	 * @param mimeType
+	 *            the MIME-Type
+	 * @return True if there is a MIME-type entry in the map
+	 */
+	public boolean isMimeTypeSupported(String mimeType) {
+		if (mimeType.equals("*")) { // Changed by Deutsche Telekom AG
+			return true;
+		}
+		if (TextUtils.isEmpty(mimeType)) {
+			return false;
+		}
+		return mimeTypeToExtensionMap.containsKey(mimeType);
+	}
+
+	/**
+	 * Returns the MIME-type associated to a given file extension
+	 * 
+	 * @param extension
+	 *            The file extension
+	 * @return The MIME-type for the extension or null if there is none.
+	 */
+	public String getMimeType(String extension) {
+		if (TextUtils.isEmpty(extension)) {
+			return null;
+		}
+		return extensionToMimeTypeMap.get(extension.toLowerCase());
+	}
+
+	/**
+	 * Returns the supported image MIME types
+	 * 
+	 * @return Set of image MIME-types
+	 */
+	public Set<String> getSupportedImageMimeTypes() {
+		return instance.imageMimeTypeSet;
+	}
+
+	/**
+	 * Get extension having MIME-type
+	 * 
+	 * @param mimeType
+	 *            the MIME-type
+	 * @return The extension for the MIME-type or null if there is none.
+	 */
+	public String getExtensionFromMimeType(String mimeType) {
+		if (TextUtils.isEmpty(mimeType)) {
+			return null;
+		}
+		return mimeTypeToExtensionMap.get(mimeType);
+	}
+  
 	/**
 	 * Returns URL extension
 	 * 

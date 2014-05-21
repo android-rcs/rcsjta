@@ -90,7 +90,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeUpload [tid=" + tid + ", getFilename()=" + getFilename() + ", getSize()=" + getSize()
+		return "FtHttpResumeUpload [tid=" + tid + ", getFilepath()=" + getFilepath() + ", getSize()=" + getSize()
 				+ ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
 				+ ", getSessionId()=" + getSessionId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
 				+ "]";

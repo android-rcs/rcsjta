@@ -143,24 +143,27 @@ public class FileTransferService extends JoynService {
     	return transferFile(contact, filename, false, listener);
     }    
     
-    /**
-     * Transfers a file to a contact. The parameter filename contains the complete
-     * path of the file to be transferred. The parameter contact supports the following
-     * formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * Tel-URI. If the format of the contact is not supported an exception is thrown.
-     * 
-     * @param contact 
-     * @param filename Filename to transfer
-     * @param fileicon the icon option
-     * @param listener File transfer event listener
-     * @return File transfer
-     * @throws JoynServiceException
+	/**
+	 * Transfers a file to a contact. The parameter filename contains the complete path of the file to be transferred. The parameter
+	 * contact supports the following formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
+	 * format of the contact is not supported an exception is thrown.
+	 * 
+	 * @param contact
+	 * @param filename
+	 *            Filename to transfer
+	 * @param fileIcon
+	 *            File icon option. If true, the stack tries to attach thumbnail. Thumbnail may not be attached if file is not an
+	 *            image or if local or remote contact does not support thumbnail.
+	 * @param listener
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
-     */
-    public FileTransfer transferFile(String contact, String filename, boolean fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+	 */
+    public FileTransfer transferFile(String contact, String filename, boolean fileIcon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	if (api != null) {
     		try {
-				IFileTransfer ftIntf = api.transferFile(contact, filename, fileicon, listener);
+				IFileTransfer ftIntf = api.transferFile(contact, filename, fileIcon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {

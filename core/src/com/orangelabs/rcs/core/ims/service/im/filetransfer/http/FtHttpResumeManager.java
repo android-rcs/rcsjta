@@ -115,8 +115,8 @@ public class FtHttpResumeManager {
 		switch (ftHttpResume.getDirection()) {
 		case INCOMING:
 			FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-			MmContent downloadContent = ContentManager.createMmContentFromMime(downloadInfo.getFilename(),
-                    downloadInfo.getUrl(), downloadInfo.getMimetype(), downloadInfo.getSize());
+			MmContent downloadContent = ContentManager.createMmContentFromMime(downloadInfo.getUrl(), downloadInfo.getMimetype(),
+					downloadInfo.getSize());
 			// Creates the Resume Download session object
 			final ResumeDownloadFileSharingSession resumeDownload = new ResumeDownloadFileSharingSession(
                     imsService, downloadContent, downloadInfo);
@@ -140,7 +140,7 @@ public class FtHttpResumeManager {
             FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
             if (!ftHttpResume.isGroup()) {
                 // Get upload content
-                MmContent uploadContent = ContentManager.createMmContentFromMime(uploadInfo.getFilename(),
+                MmContent uploadContent = ContentManager.createMmContentFromMime(uploadInfo.getFilepath(),
                         uploadInfo.getMimetype(), uploadInfo.getSize());
 
                 // Create Resume Upload session 

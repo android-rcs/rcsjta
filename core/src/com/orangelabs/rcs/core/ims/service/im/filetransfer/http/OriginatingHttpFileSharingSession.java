@@ -63,19 +63,23 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
 	/**
 	 * Constructor
-	 *
-	 * @param parent IMS service
-	 * @param content Content of file to share
-	 * @param contact Remote contact
-	 * @param fileIcon Thumbnail option
+	 * 
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content of file to share
+	 * @param contact
+	 *            Remote contact
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileIcon) {
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
 		super(parent, content, contact, null, null, null);
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
 		}
 		MmContent thumbnail = null;
-		if (fileIcon) {
+		if (tryAttachThumbnail) {
 			// Create the thumbnail
 			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
 			setThumbnail(thumbnail);
@@ -86,11 +90,15 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	
 	/**
 	 * Constructor
-	 *
-	 * @param parent IMS service
-	 * @param content Content of file to share
-	 * @param contact Remote contact
-	 * @param thumbnail Content of thumbnail
+	 * 
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content of file to share
+	 * @param contact
+	 *            Remote contact
+	 * @param thumbnail
+	 *            Content of thumbnail
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
 		super(parent, content, contact, thumbnail, null, null);

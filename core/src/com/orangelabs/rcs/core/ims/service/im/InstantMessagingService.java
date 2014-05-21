@@ -301,15 +301,18 @@ public class InstantMessagingService extends ImsService {
     }
 
 	/**
-     * Initiate a file transfer session
-     * 
-     * @param contact Remote contact
-     * @param content Content of file to sent
-     * @param fileicon The file icon option
-     * @return File transfer session
-     * @throws CoreException
-     */
-	public FileSharingSession initiateFileTransferSession(String contact, MmContent content, boolean fileIcon) throws CoreException {
+	 * Initiate a file transfer session
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param content
+	 *            Content of file to sent
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @return File transfer session
+	 * @throws CoreException
+	 */
+	public FileSharingSession initiateFileTransferSession(String contact, MmContent content, boolean tryAttachThumbnail) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -346,47 +349,53 @@ public class InstantMessagingService extends ImsService {
 			}
 		}
 
-		if (fileIcon && (content.getEncoding().startsWith("image/") == false)) {
-			fileIcon = false;
+		if (tryAttachThumbnail && (content.getEncoding().startsWith("image/") == false)) {
+			tryAttachThumbnail = false;
 		}
 		// Initiate session
 		FileSharingSession session;
 		if (isHttpProtocol) {
 			// Create a new session
-			session = new OriginatingHttpFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), fileIcon);
+			session = new OriginatingHttpFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), tryAttachThumbnail);
 		} else {
-			if (fileIcon) {
+			if (tryAttachThumbnail) {
 				// Check thumbnail capabilities
 				if (capability != null && capability.isFileTransferThumbnailSupported() == false) {
-					fileIcon = false;
+					tryAttachThumbnail = false;
 					if (logger.isActivated()) {
 						logger.warn("Thumbnail not supported by remote");
 					}
 				}
 				if (myCapability.isFileTransferThumbnailSupported() == false) {
-					fileIcon = false;
+					tryAttachThumbnail = false;
 					if (logger.isActivated()) {
 						logger.warn("Thumbnail not supported !");
 					}
 				}
 			}
 			// Create a new session
-			session = new OriginatingFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), fileIcon);
+			session = new OriginatingFileSharingSession(this, content, PhoneUtils.formatNumberToSipUri(contact), tryAttachThumbnail);
 		}
 		return session;
 	}
 	
 	/**
-     * Initiate a group file transfer session
-     * 
-     * @param contacts List of remote contacts
-     * @param content The file content to be sent
-     * @param chatSessionId Chat session ID
-     * @param chatContributionId Chat contribution ID
-     * @return File transfer session
-     * @throws CoreException
-     */
-	public FileSharingSession initiateGroupFileTransferSession(List<String> contactList, MmContent content, boolean fileIcon,
+	 * Initiate a group file transfer session
+	 * 
+	 * @param contacts
+	 *            List of remote contacts
+	 * @param content
+	 *            The file content to be sent
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param chatSessionId
+	 *            Chat session ID
+	 * @param chatContributionId
+	 *            Chat contribution ID
+	 * @return File transfer session
+	 * @throws CoreException
+	 */
+	public FileSharingSession initiateGroupFileTransferSession(List<String> contactList, MmContent content, boolean tryAttachThumbnail,
 			String chatSessionId, String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + contactList.size() + " contacts");
@@ -415,7 +424,7 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		// Create a new session
-		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content, fileIcon,
+		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content, tryAttachThumbnail,
 				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), new ListOfParticipant(contactList), chatSessionId,
 				chatContributionId);
 

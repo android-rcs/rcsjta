@@ -129,7 +129,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		ContentValues values = new ContentValues();
 		values.put(FtHttpColumns.DATE, System.currentTimeMillis());
 		values.put(FtHttpColumns.DIRECTION, ftHttpResume.getDirection().ordinal());
-		values.put(FtHttpColumns.FILENAME, ftHttpResume.getFilename());
+		values.put(FtHttpColumns.FILEPATH, ftHttpResume.getFilepath());
 		values.put(FtHttpColumns.TYPE, ftHttpResume.getMimetype());
 		values.put(FtHttpColumns.SIZE, ftHttpResume.getSize());
 		values.put(FtHttpColumns.THUMBNAIL, ftHttpResume.getThumbnail());

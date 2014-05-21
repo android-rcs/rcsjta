@@ -144,7 +144,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		// Session ID must be equal to the FT HTTP initial one
 		setSessionID(resume.getSessionId());
 		// Instantiate the download manager
-		downloadManager = new HttpDownloadManager(getContent(), this, resumeFT.getFilename());
+		downloadManager = new HttpDownloadManager(getContent(), this, resumeFT.getFilepath());
 	}
 
 	/**

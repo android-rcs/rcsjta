@@ -71,17 +71,17 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 *            File content to download
 	 * @param listener
 	 *            HTTP transfer event listener
-	 * @param filename
+	 * @param filepath
 	 *            Filename to download
 	 */
-	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filename) {
+	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filepath) {
 		super(listener, content.getUrl());
 		this.content = content;
-		this.localUrl = filename;
+		this.localUrl = filepath;
 		// Init file
 		file = new File(localUrl);
 		if (logger.isActivated()) {
-			logger.debug("HttpDownloadManager file=" + filename + " length=" + file.length());
+			logger.debug("HttpDownloadManager file=" + filepath + " length=" + file.length());
 		}
 		streamForFile = openStremForFile(file);
 	}

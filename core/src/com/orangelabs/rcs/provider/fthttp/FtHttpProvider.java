@@ -89,7 +89,7 @@ public class FtHttpProvider extends ContentProvider {
     			            + FtHttpColumns.TYPE + " TEXT,"
     			            + FtHttpColumns.CONTACT + " TEXT,"
     			            + FtHttpColumns.CHATID + " TEXT,"
-    			            + FtHttpColumns.FILENAME + " TEXT NOT NULL,"
+    			            + FtHttpColumns.FILEPATH + " TEXT NOT NULL,"
     			            + FtHttpColumns.DIRECTION + " INTEGER NOT NULL,"
     			            + FtHttpColumns.DATE + " INTEGER NOT NULL,"
     			            + FtHttpColumns.DISPLAY_NAME + " TEXT,"

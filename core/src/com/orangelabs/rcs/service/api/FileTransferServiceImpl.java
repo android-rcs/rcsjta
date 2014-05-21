@@ -198,7 +198,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
     public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup) {
 		if (logger.isActivated()) {
-			logger.info("Receive file transfer invitation from " + session.getRemoteContact());
+			logger.info("Receive FT invitation from " + session.getRemoteContact() + " file=" + session.getContent().getName()
+					+ " size=" + session.getContent().getSize());
 		}
 
 		// Extract number from contact 
@@ -278,22 +279,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     			RcsSettings.getInstance().getMaxFileIconSize());
     }    
     
-    /**
-     * Transfers a file to a contact. The parameter file contains the complete filename
-     * including the path to be transferred. The parameter contact supports the following
-     * formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * Tel-URI. If the format of the contact is not supported an exception is thrown.
-     * 
-     * @param contact Contact
-     * @param filename Filename to transfer
-     * @param fileicon The file icon option
-     * @param listenet File transfer event listener
-     * @return File transfer
-     * @throws ServerApiException
-     */
-    public IFileTransfer transferFile(String contact, String filename, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
+	/**
+	 * Transfers a file to a contact. The parameter file contains the complete filename including the path to be transferred. The
+	 * parameter contact supports the following formats: MSISDN in national or international format, SIP address, SIP-URI or
+	 * Tel-URI. If the format of the contact is not supported an exception is thrown.
+	 * 
+	 * @param contact
+	 *            Contact
+	 * @param filename
+	 *            Filename to transfer
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param listenet
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws ServerApiException
+	 */
+    public IFileTransfer transferFile(String contact, String filename, boolean tryAttachThumbnail, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Transfer file " + filename + " to " + contact + " (fileicon=" + fileicon + ")");
+			logger.info("Transfer file " + filename + " to " + contact + " (thumbnail=" + tryAttachThumbnail + ")");
 		}
 
 		// Test IMS connection
@@ -303,7 +307,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
 			
-			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon);
+			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, tryAttachThumbnail);
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);

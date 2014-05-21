@@ -36,6 +36,7 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -72,22 +73,30 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
 	/**
 	 * Constructor
-	 *
-	 * @param parent IMS service
-	 * @param content The file content to share
-	 * @param conferenceId Conference ID
-	 * @param participants List of participants
-	 * @param chatSessionId Chat session ID
-     * @param chatContributionId Chat contribution Id
+	 * 
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            The file content to share
+	 * @param tryAttachThumbnail
+	 *            true if the stack must try to attach thumbnail
+	 * @param conferenceId
+	 *            Conference ID
+	 * @param participants
+	 *            List of participants
+	 * @param chatSessionId
+	 *            Chat session ID
+	 * @param chatContributionId
+	 *            Chat contribution Id
 	 */
-	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean fileIcon, String conferenceId,
-			ListOfParticipant participants, String chatSessionID, String chatContributionId) {
+	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean tryAttachThumbnail,
+			String conferenceId, ListOfParticipant participants, String chatSessionID, String chatContributionId) {
 		super(parent, content, conferenceId, null, chatSessionID, chatContributionId);
 		// Set participants involved in the transfer
 		this.participants = participants;
 
 		MmContent thumbnail = null;
-		if (fileIcon && content.getEncoding().startsWith("image/")) {
+		if (tryAttachThumbnail && MimeManager.isImageType(content.getEncoding())) {
 			// Create the thumbnail
 			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
 			setThumbnail(thumbnail);
