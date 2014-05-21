@@ -191,7 +191,7 @@ public class KeyStoreManager {
      * @param cert certificate 
      */
     public static void setClientCertificateFingerprint(Certificate cert) {
-        fingerprint = KeyStoreManager.getCertFingerprint(cert, "SHA-1");;
+        fingerprint = KeyStoreManager.getCertFingerprint(cert, "SHA-1");
     }
 
     /**

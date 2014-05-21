@@ -25,11 +25,11 @@
 
     <target name="docs" description="Generate RCS API javadoc">
     <echo>Generate Javadoc</echo>
-    <delete dir="${terminal.root}/docs"/>
-    <mkdir dir="${terminal.root}/docs"/>
+    <delete dir="${terminal.root}/docs/javadoc"/>
+    <mkdir dir="${terminal.root}/docs/javadoc"/>
     <javadoc doctitle="GSMA RCS Terminal API"
         verbose="on"
-        destdir="docs"
+        destdir="docs/javadoc"
         use="true"
         access="public" 
         classpath="${android_jar}:${project.all.jars.path}" 

@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.service.api;
 
 import com.orangelabs.rcs.core.Core;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 
 /**
  * Server API utils
