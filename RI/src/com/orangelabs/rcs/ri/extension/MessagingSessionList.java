@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.session;
+package com.orangelabs.rcs.ri.extension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,19 +29,20 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.session.MultimediaSession;
-import com.gsma.services.rcs.session.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List of multimedia sessions in progress
+ * List of messaging sessions in progress
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionList extends ListActivity implements JoynServiceListener {
+public class MessagingSessionList extends ListActivity implements JoynServiceListener {
 	/**
 	 * MM session API
 	 */
@@ -50,7 +51,7 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 	/**
 	 * List of sessions
 	 */
-	private List<MultimediaSession> sessions = new ArrayList<MultimediaSession>();
+	private List<MultimediaMessagingSession> sessions = new ArrayList<MultimediaMessagingSession>();
 
     /**
 	 * API connection state
@@ -63,10 +64,10 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 		
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.session_list);
+		setContentView(R.layout.extension_messaging_session_list);
 
         // Set title
-        setTitle(R.string.menu_mm_sessions_list);
+        setTitle(R.string.menu_messaging_sessions_list);
 
         // Instanciate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
@@ -113,7 +114,7 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
     public void onServiceDisconnected(int error) {
 		apiEnabled = false;
 
-		Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
+		Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_disabled));
     }    
     
     /**
@@ -137,14 +138,14 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 		
 		// Display the selected session
 		try {
-			Intent intent = new Intent(this, MultimediaSessionView.class);
+			Intent intent = new Intent(this, MessagingSessionView.class);
 			String sessionId = sessions.get(position).getSessionId();
-			intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OPEN);
-			intent.putExtra(MultimediaSessionView.EXTRA_SESSION_ID, sessionId);
+			intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OPEN);
+			intent.putExtra(MessagingSessionView.EXTRA_SESSION_ID, sessionId);
 			startActivity(intent);
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed));
 		}
 	}
 
@@ -158,21 +159,21 @@ public class MultimediaSessionList extends ListActivity implements JoynServiceLi
 
 			if (apiEnabled) {
 		    	// Get list of pending sessions
-		    	Set<MultimediaSession> currentSessions = sessionApi.getSessions(TestMultimediaSessionApi.SERVICE_ID);
-		    	sessions = new ArrayList<MultimediaSession>(currentSessions);
+		    	Set<MultimediaMessagingSession> currentSessions = sessionApi.getMessagingSessions(TestMultimediaSessionApi.SERVICE_ID);
+		    	sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
 				if (sessions.size() > 0){
 			        String[] items = new String[sessions.size()];    
 			        for (int i = 0; i < items.length; i++) {
 						items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
 			        }
-					setListAdapter(new ArrayAdapter<String>(MultimediaSessionList.this, android.R.layout.simple_list_item_1, items));
+					setListAdapter(new ArrayAdapter<String>(MessagingSessionList.this, android.R.layout.simple_list_item_1, items));
 				} else {
 					setListAdapter(null);
 				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed));
 		}
     }
 }

@@ -249,35 +249,22 @@
         
         <!-- MM session API -->
 
-        <activity android:name=".session.TestMultimediaSessionApi"/>
+        <activity android:name=".extension.TestMultimediaSessionApi"/>
 
-        <activity android:name=".session.InitiateMultimediaSession"/>
+        <activity android:name=".extension.InitiateMessagingSession"/>
         
-		<receiver android:name=".session.MultimediaSessionInvitationReceiver">
+		<receiver android:name=".extension.MessagingSessionInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
+		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
                 <data android:mimeType="com.gsma.services.rcs/ext.sipdemo" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 	    	</intent-filter>
         </receiver>
 
-        <activity android:name=".session.MultimediaSessionList"/>
-		
-        <activity android:name=".session.MultimediaSessionSettings"/>
+        <activity android:name=".extension.MessagingSessionList"/>
         
-        <activity android:name=".session.SendMultimediaMessage"/>
-        
-        <activity android:name=".session.MultimediaSessionView"/>
-        
-   		<receiver android:name=".session.MultimediaMessageReceiver">
-            <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE"/>
-                <data android:mimeType="com.gsma.services.rcs/ext.sipdemo" />
-        		<category android:name="android.intent.category.LAUNCHER" />
-        		<category android:name="android.intent.category.DEFAULT" />
-		    	</intent-filter>
-        </receiver>
+        <activity android:name=".extension.MessagingSessionView"/>
 		
         <!-- IP call API -->
 

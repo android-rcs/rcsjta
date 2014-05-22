@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.session;
+package com.orangelabs.rcs.ri.extension;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -48,9 +48,8 @@ public class TestMultimediaSessionApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_mm_session),
-    		getString(R.string.menu_mm_sessions_list),
-    		getString(R.string.menu_send_mm_message)
+    		getString(R.string.menu_initiate_messaging_session),
+    		getString(R.string.menu_messaging_sessions_list)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -59,15 +58,11 @@ public class TestMultimediaSessionApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	startActivity(new Intent(this, InitiateMultimediaSession.class));
+            	startActivity(new Intent(this, InitiateMessagingSession.class));
 	            break;
 	            
 	        case 1:
-            	startActivity(new Intent(this, MultimediaSessionList.class));
-	            break;
-
-	        case 2:
-            	startActivity(new Intent(this, SendMultimediaMessage.class));
+            	startActivity(new Intent(this, MessagingSessionList.class));
 	            break;
         }
     }
