@@ -20,15 +20,12 @@ package com.orangelabs.rcs.core.ims.service;
 
 import java.util.List;
 
-import javax2.sip.message.Request;
-
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
 import com.gsma.services.rcs.capability.CapabilityService;
-import com.gsma.services.rcs.session.MultimediaMessageIntent;
-import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -82,8 +79,7 @@ public class SipIntentManager {
 	 */
 	private Intent generateSipIntent(SipRequest request, String featureTag) {
 		String mime = formatIntentMimeType(featureTag);
-		String action = formatIntentAction(request.getMethod());
-		Intent intent = new Intent(action);
+		Intent intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
 		intent.addCategory(Intent.CATEGORY_DEFAULT);
 		intent.setType(mime.toLowerCase());
 		return intent;
@@ -100,22 +96,6 @@ public class SipIntentManager {
 		List<ResolveInfo> list = packageManager.queryBroadcastReceivers(intent,
 				PackageManager.MATCH_DEFAULT_ONLY);
 		return (list.size() > 0);
-	}
-	
-	/**
-	 * Format intent action
-	 * 
-	 * @param request Request method name
-	 * @return Intent action
-	 */
-	private String formatIntentAction(String request) { 
-		String action;
-		if (request.equals(Request.MESSAGE)) {
-			action = MultimediaMessageIntent.ACTION_NEW_MESSAGE;
-		} else {
-			action = MultimediaSessionIntent.ACTION_NEW_INVITATION;
-		}
-		return action;
 	}
 	
 	/**

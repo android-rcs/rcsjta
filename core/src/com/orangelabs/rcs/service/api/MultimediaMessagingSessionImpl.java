@@ -20,9 +20,9 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteCallbackList;
 
-import com.gsma.services.rcs.session.IMultimediaSession;
-import com.gsma.services.rcs.session.IMultimediaSessionListener;
-import com.gsma.services.rcs.session.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
+import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
@@ -33,11 +33,11 @@ import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * SIP session
+ * Multimedia messaging session
  *
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionImpl extends IMultimediaSession.Stub implements SipSessionListener {
+public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.Stub implements SipSessionListener {
 
 	/**
 	 * Core session
@@ -45,9 +45,9 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	private GenericSipSession session;
 
 	/**
-	 * List of listeners
+	 * List of listeners for messaging session
 	 */
-	private RemoteCallbackList<IMultimediaSessionListener> listeners = new RemoteCallbackList<IMultimediaSessionListener>();
+	private RemoteCallbackList<IMultimediaMessagingSessionListener> listeners = new RemoteCallbackList<IMultimediaMessagingSessionListener>();
 
 	/**
 	 * Lock used for synchronisation
@@ -64,7 +64,7 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
      *
      * @param session Session
      */
-	public MultimediaSessionImpl(GenericSipSession session) {
+	public MultimediaMessagingSessionImpl(GenericSipSession session) {
 		this.session = session;
 		
 		session.addListener(this);
@@ -195,11 +195,11 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	}
 
 	/**
-	 * Adds a listener on session events
+	 * Adds a listener on messaging session events
 	 * 
 	 * @param listener Session event listener
 	 */
-	public void addEventListener(IMultimediaSessionListener listener) {
+	public void addEventListener(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an event listener");
 		}
@@ -210,11 +210,11 @@ public class MultimediaSessionImpl extends IMultimediaSession.Stub implements Si
 	}
 
 	/**
-	 * Removes a listener on session events
+	 * Removes a listener on messaging session events
 	 * 
 	 * @param listener Session event listener
 	 */
-	public void removeEventListener(IMultimediaSessionListener listener) {
+	public void removeEventListener(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an event listener");
 		}

@@ -15,16 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.session;
-
-
+package com.gsma.services.rcs.extension;
 
 /**
  * This class offers callback methods on multimedia session events
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaSessionListener extends IMultimediaSessionListener.Stub {
+public abstract class MultimediaMessagingSessionListener extends IMultimediaMessagingSessionListener.Stub {
 	/**
 	 * Callback called when the session is pending.
 	 */
