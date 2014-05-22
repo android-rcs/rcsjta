@@ -21,9 +21,12 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -76,7 +79,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	/**
 	 * List of participants
 	 */
-	private ListOfParticipant participants = new ListOfParticipant();
+	private Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
 
 	/**
 	 * MSRP manager
@@ -136,7 +139,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(ChatSession.class.getSimpleName());
 
     /**
 	 * Constructor
@@ -145,7 +148,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param contact Remote contact
 	 * @param participants List of participants
 	 */
-	public ChatSession(ImsService parent, String contact, ListOfParticipant participants) {
+	public ChatSession(ImsService parent, String contact, Set<ParticipantInfo> participants) {
 		super(parent, contact);
 
 		// Set the session participants
@@ -309,7 +312,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * 
 	 * @return List of participants
 	 */
-    public ListOfParticipant getParticipants() {
+    public Set<ParticipantInfo> getParticipants() {
 		return participants;
 	}
         
@@ -318,7 +321,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * 
 	 * @return List of participants
 	 */
-    public abstract ListOfParticipant getConnectedParticipants();
+    public abstract Set<ParticipantInfo> getConnectedParticipants();
     
     /**
 	 * Returns the IM session identity

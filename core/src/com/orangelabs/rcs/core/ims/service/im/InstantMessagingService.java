@@ -20,12 +20,14 @@ package com.orangelabs.rcs.core.ims.service.im;
 
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -43,10 +45,10 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -79,6 +81,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class InstantMessagingService extends ImsService {
+
     /**
      * Chat features tags
      */
@@ -119,6 +122,7 @@ public class InstantMessagingService extends ImsService {
      * The logger
      */
     private static final Logger logger = Logger.getLogger(InstantMessagingService.class.getName());
+
 
 	/**
      * Constructor
@@ -228,59 +232,6 @@ public class InstantMessagingService extends ImsService {
 
 		return result;
     }
-	
-	/**
-     * Returns IM sessions with a list of contact
-     * 
-     * @param contact Contact
-     * @return List of sessions
-     */
-	public Vector<ChatSession> getImSessionsWith(List<String> contacts) {
-		// Search all IM sessions
-		Vector<ChatSession> result = new Vector<ChatSession>();
-		Enumeration<ImsServiceSession> list = getSessions();
-		loopThroughSession:while(list.hasMoreElements()) {
-			ImsServiceSession session = list.nextElement();
-			if (session instanceof GroupChatSession) {
-				List<String> connectedParticipants = ((GroupChatSession) session).getConnectedParticipants().getList();
-				
-				if(contacts.size() != connectedParticipants.size())
-				{
-					continue;
-				}
-
-				for(String contact : contacts)
-				{
-					if(!connectedParticipants.contains(contact))
-					{
-						continue loopThroughSession;
-					}
-				}
-				result.add((ChatSession)session);
-			}
-		}
-
-		return result;
-    }
-
-	/**
-     * Returns file transfer sessions with a given contact
-     * 
-     * @param contact Contact
-     * @return List of sessions
-     */
-	public Vector<FileSharingSession> getFileTransferSessionsWith(String contact) {
-		Vector<FileSharingSession> result = new Vector<FileSharingSession>();
-		Enumeration<ImsServiceSession> list = getSessions();
-		while(list.hasMoreElements()) {
-			ImsServiceSession session = list.nextElement();
-			if ((session instanceof FileSharingSession) && PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
-				result.add((FileSharingSession)session);
-			}
-		}
-
-		return result;
-    }
 
 	/**
      * Returns active file transfer sessions
@@ -339,7 +290,7 @@ public class InstantMessagingService extends ImsService {
 		if (capability != null) {
 			isFToHttpSupportedByRemote = capability.isFileTransferHttpSupported();
 		}
-      
+
 		// Select default protocol
 		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
 		boolean isHttpProtocol = false;
@@ -352,6 +303,7 @@ public class InstantMessagingService extends ImsService {
 		if (tryAttachThumbnail && (content.getEncoding().startsWith("image/") == false)) {
 			tryAttachThumbnail = false;
 		}
+
 		// Initiate session
 		FileSharingSession session;
 		if (isHttpProtocol) {
@@ -395,7 +347,7 @@ public class InstantMessagingService extends ImsService {
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateGroupFileTransferSession(List<String> contactList, MmContent content, boolean tryAttachThumbnail,
+	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> contactList, MmContent content, boolean tryAttachThumbnail,
 			String chatSessionId, String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + contactList.size() + " contacts");
@@ -425,7 +377,7 @@ public class InstantMessagingService extends ImsService {
 
 		// Create a new session
 		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content, tryAttachThumbnail,
-				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), new ListOfParticipant(contactList), chatSessionId,
+				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), contactList, chatSessionId,
 				chatContributionId);
 
 		return session;
@@ -612,7 +564,7 @@ public class InstantMessagingService extends ImsService {
 				this,
 				ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
 				subject,
-				new ListOfParticipant(contacts));
+				ParticipantInfoUtils.getParticipantInfoFromContacts(contacts));
 
 		return session;
     }
@@ -713,7 +665,8 @@ public class InstantMessagingService extends ImsService {
 			}
 			throw new CoreException("Rejoin ID not found in database");
 		}
-		List<String> participants = groupChat.getParticipants(); // Added by Deutsche Telekom AG
+
+		Set<ParticipantInfo> participants = groupChat.getParticipants(); // Added by Deutsche Telekom AG
 		if (participants.size() == 0) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be rejoined: participants not found");
@@ -725,14 +678,8 @@ public class InstantMessagingService extends ImsService {
 		if (logger.isActivated()) {
 			logger.debug("Rejoin group chat: " + groupChat.toString());
 		}
-		RejoinGroupChatSession session = new RejoinGroupChatSession(
-				this,
-				groupChat.getRejoinId(),
-				groupChat.getContributionId(),
-				groupChat.getSubject(),
-				groupChat.getParticipants());
 
-		return session;
+		return new RejoinGroupChatSession(this, groupChat);
     }
     
     /**
@@ -764,8 +711,10 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Group chat conversation not found in database");
 		}
 
+		// TODO check whether participants of GroupChatInfo cannot be used instead
+		
 		// Get the connected participants from database
-		List<String> participants = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(chatId);
+		Set<ParticipantInfo> participants = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(chatId);
 		
 		if (participants.size() == 0) {
 			if (logger.isActivated()) {
@@ -778,14 +727,9 @@ public class InstantMessagingService extends ImsService {
 		if (logger.isActivated()) {
 			logger.debug("Restart group chat: " + groupChat.toString());
 		}
-		RestartGroupChatSession session = new RestartGroupChatSession(
-				this,
-				ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-				groupChat.getSubject(),
-				new ListOfParticipant(participants),
-				chatId);
 
-		return session;
+		return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), groupChat.getSubject(),
+				participants, chatId);
     }    
     
     /**

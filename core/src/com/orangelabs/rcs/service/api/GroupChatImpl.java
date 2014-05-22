@@ -1,11 +1,13 @@
 package com.orangelabs.rcs.service.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
-import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -13,6 +15,7 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.orangelabs.rcs.core.Core;
@@ -62,7 +65,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(GroupChatImpl.class.getName());
+	private static final Logger logger = Logger.getLogger(GroupChatImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -169,12 +172,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 				
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
@@ -189,12 +191,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		RichMessagingHistory.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
 		
         // Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.rejectSession(603);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -207,27 +208,26 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 		
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
-	 * Returns the list of connected participants. A participant is identified
+	 * Returns the list of participants. A participant is identified
 	 * by its MSISDN in national or international format, SIP address, SIP-URI or Tel-URI.
 	 * 
 	 * @return List of participants
 	 */
-	public List<String> getParticipants() {
-		if (logger.isActivated()) {
-			logger.info("Get list of connected participants in the session");
-		}
-		return session.getConnectedParticipants().getList();
+	public List<ParticipantInfo> getParticipants() {
+		List<ParticipantInfo> result = new ArrayList<ParticipantInfo>();
+		if (session.getConnectedParticipants() == null || session.getConnectedParticipants().size()==0)
+			return result;
+		return new ArrayList<ParticipantInfo>(session.getConnectedParticipants());
 	}
-
+	
 	/**
 	 * Returns the max number of participants for a group chat from the group
 	 * chat info subscription (this value overrides the provisioning parameter)
@@ -235,36 +235,56 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return Number
 	 */
 	public int getMaxParticipants() {
-        if (logger.isActivated()) {
-            logger.info("Get max number of participants in the session");
-        }
         return session.getMaxParticipants();
     }
 
 	/**
+	 * Calculate the number of participants who did not decline or left the Group chat.
+	 * 
+	 * @param setOfParticipant
+	 *            the set of participant information
+	 * @return the number of participants who did not decline or left the Group chat.
+	 */
+	private static int getNumberOfParticipants(final Set<ParticipantInfo> participants) {
+		int result = 0;
+		for (ParticipantInfo participant : participants) {
+			switch (participant.getStatus()) {
+			case Status.DEPARTED:
+			case Status.DECLINED:
+				break;
+			default:
+				result++;
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * Adds participants to a group chat
 	 * 
-	 * @param participants List of participants
+	 * @param participants Set of participants
 	 */
 	public void addParticipants(final List<String> participants) {
 		if (logger.isActivated()) {
-			logger.info("Add " + participants.size() + " participants to the session");
+			logger.info("Add " + Arrays.toString(participants.toArray()) + " participants to the session");
 		}
 
-		int max = session.getMaxParticipants()-1;
-		int connected = session.getConnectedParticipants().getList().size(); 
-        if (connected < max) {
-            // Add a list of participants to the session
-	        Thread t = new Thread() {
-	    		public void run() {
-	                session.addParticipants(participants);
-	    		}
-	    	};
-	    	t.start();
-        } else {
-        	// Max participants achieved
-            handleAddParticipantFailed("Maximum number of participants reached");
-        }
+		int max = session.getMaxParticipants() - 1;
+		// PDD 6.3.5.9 Adding participants to a Group Chat (Clarification)
+		// For the maximum user count, the joyn client shall take into account both the active and inactive users,
+		// but not those that have explicitly left or declined the Chat.
+		int connected = getNumberOfParticipants(session.getConnectedParticipants());
+		if (connected < max) {
+			// Add a list of participants to the session
+			new Thread() {
+				public void run() {
+					session.addParticipants(new HashSet<String>(participants));
+				}
+			}.start();
+		} else {
+			// Max participants achieved
+			handleAddParticipantFailed("Maximum number of participants reached");
+		}
 	}
 	
 	/**
@@ -278,12 +298,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		final String msgId = IdGenerator.generateMessageID();
 
 		// Send text message
-       new Thread() {
+        new Thread() {
     		public void run() {
     			session.sendTextMessage(msgId, text);
     		}
     	}.start();
-
 		return msgId;
 	}
 	
@@ -309,8 +328,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		return msgId;
     }	
 
-	/**
-	 * Transfers a file to participants. The parameter filename contains the complete path of the file to be transferred.
+    /**
+     * Transfers a file to participants. The parameter filename contains the complete
+     * path of the file to be transferred.
 	 * 
 	 * @param filename
 	 *            Url of file to transfer
@@ -331,8 +351,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			
 			String chatSessionId = session.getSessionID();
 			String chatId = session.getContributionID();
+			Set<ParticipantInfo> participants = session.getConnectedParticipants();
 			final FileSharingSession session = Core.getInstance().getImService()
-					.initiateGroupFileTransferSession(getParticipants(), content, tryAttachThumbnail, chatSessionId, chatId);
+					.initiateGroupFileTransferSession(participants, content, tryAttachThumbnail, chatSessionId, chatId);
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -387,12 +408,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			
 			// Send MSRP delivery status
-	        Thread t = new Thread() {
+	         new Thread() {
 	    		public void run() {
 	    			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Could not send MSRP delivery status",e);
@@ -789,18 +809,28 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
 
-	/**
-	 * Returns the list of participants in the group conversation
-	 * 
-	 * @return List of participants
-	 * @throws JoynServiceException
-     * @see ParticipantInfo
-	 */
-    public List<ParticipantInfo> getParticipantInfo() throws RemoteException {
-		if (logger.isActivated()) {
-			logger.info("Get list of participant information");
-		}
-		// TODO FUSION return List<ParticipantInfo> from session
-		return null;
-	}
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleParticipantStatusChanged(com.gsma.services.rcs.chat.ParticipantInfo)
+     */
+    public void handleParticipantStatusChanged(ParticipantInfo participantInfo)
+    {
+    	synchronized(lock) {
+			if (logger.isActivated()) {
+				logger.info("handleParticipantStatusChanged "+participantInfo);
+			}
+	  		// Notify event listeners
+			final int N = listeners.beginBroadcast();
+	        for (int i=0; i < N; i++) {
+	            try {
+	            	listeners.getBroadcastItem(i).onParticipantStatusChanged(participantInfo);
+	            } catch(Exception e) {
+	            	if (logger.isActivated()) {
+	            		logger.error("Can't notify listener", e);
+	            	}
+	            }
+	        }
+	        listeners.finishBroadcast();		
+	    }
+    }
+
 }

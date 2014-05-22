@@ -18,10 +18,13 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import java.util.Set;
+
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
 import javax2.sip.header.WarningHeader;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -47,7 +50,7 @@ public class RestartGroupChatSession extends GroupChatSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(RestartGroupChatSession.class.getSimpleName());
 
     /**
 	 * Constructor
@@ -58,7 +61,7 @@ public class RestartGroupChatSession extends GroupChatSession {
 	 * @param participants List of invited participants
 	 * @param contributionId Contribution ID
 	 */
-	public RestartGroupChatSession(ImsService parent, String conferenceId, String subject, ListOfParticipant participants, String contributionId) {
+	public RestartGroupChatSession(ImsService parent, String conferenceId, String subject, Set<ParticipantInfo> participants, String contributionId) {
 		super(parent, conferenceId, participants);
 
 		// Set subject
@@ -103,7 +106,7 @@ public class RestartGroupChatSession extends GroupChatSession {
                     SdpUtils.DIRECTION_SENDRECV);
 
 	        // Generate the resource list for given participants
-	        String resourceList = ChatUtils.generateChatResourceList(getParticipants().getList());
+	        String resourceList = ChatUtils.generateChatResourceList(ParticipantInfoUtils.getContactsFromParticipantInfo(getParticipants()));
 	    	
 	    	// Build multipart
 	    	String multipart =

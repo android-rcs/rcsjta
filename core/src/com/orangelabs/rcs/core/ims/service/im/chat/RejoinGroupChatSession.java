@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import java.util.List;
-
 import javax2.sip.header.SubjectHeader;
 
 import com.gsma.services.rcs.chat.GroupChat;
@@ -42,30 +40,27 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(RejoinGroupChatSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param rejoinId Rejoin ID
-	 * @param chatId Chat ID or contribution ID
-	 * @param subject Subject
-	 * @param participants List of participants 
+	 * @param groupChatInfo Group Chat information
 	 */
-	public RejoinGroupChatSession(ImsService parent, String rejoinId, String chatId, String subject, List<String> participants) {
-		super(parent, rejoinId, new ListOfParticipant(participants));
+	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo) {
+		super(parent, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants());
 
 		// Set subject
-		if ((subject != null) && (subject.length() > 0)) {
-			setSubject(subject);		
+		if ((groupChatInfo.getSubject() != null) && (groupChatInfo.getSubject().length() > 0)) {
+			setSubject(groupChatInfo.getSubject());		
 		}
 
 		// Create dialog path
 		createOriginatingDialogPath();
 		
 		// Set contribution ID
-		setContributionID(chatId);
+		setContributionID(groupChatInfo.getContributionId());
 	}
 	
 	/**

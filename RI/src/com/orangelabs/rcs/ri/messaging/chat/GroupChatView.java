@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,9 +52,12 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.session.MultimediaSessionView;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -76,6 +81,8 @@ public class GroupChatView extends ChatView {
 	public final static String EXTRA_SUBJECT = "subject";
 	public final static String EXTRA_CONTACT = "contact";
 
+	private final static String[] TAB_PARTICIPANT_STATUS = { "UNKNOWN", "CONNECTED", "DISCONNECTED", "DEPARTED", "BOOTED", "FAILED", "BUSY",
+			"DECLINED", "PENDING" };
 	/**
 	 * Remote contact
 	 */
@@ -99,12 +106,17 @@ public class GroupChatView extends ChatView {
     /**
      * List of participants
      */
-    private ArrayList<String> participants = new ArrayList<String>();
+    private List<String> participants = new ArrayList<String>();
 
     /**
      * Group chat listener
      */
     private MyGroupChatListener chatListener = new MyGroupChatListener();
+    
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
     
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +125,7 @@ public class GroupChatView extends ChatView {
     
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
@@ -155,6 +167,9 @@ public class GroupChatView extends ChatView {
 		    	// Get chat session
 				groupChat = chatApi.getGroupChat(chatId);
 				if (groupChat == null) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "onServiceConnected session not found for chatId=" + chatId);
+					}
 	    			Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_session_not_found));
 	    			return;
 				}
@@ -169,7 +184,16 @@ public class GroupChatView extends ChatView {
 		        subject = groupChat.getSubject();
 
 		        // Set list of participants
-				participants = new ArrayList<String>(groupChat.getParticipants());
+		        participants = getListOfParticipants(groupChat.getParticipants());
+		        if (LogUtils.isActive) {
+		        	if (participants == null) {
+		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"'");
+		        	} else {
+		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"' participants="+Arrays.toString(participants.toArray()));
+		        	}
+					
+					
+				}
 			} else {
 				// Incoming chat from its Intent
 		        chatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
@@ -191,8 +215,8 @@ public class GroupChatView extends ChatView {
 		        subject = groupChat.getSubject();
 
 		        // Set list of participants
-				participants = new ArrayList<String>(groupChat.getParticipants());
-
+				participants = getListOfParticipants(groupChat.getParticipants());
+				
 				// Display accept/reject dialog
 				if (!chatApi.getConfiguration().isGroupChatAutoAcceptMode()) {
 	                // Manual accept
@@ -244,6 +268,38 @@ public class GroupChatView extends ChatView {
 		}
     }
     
+	/**
+	 * get a list of contact from a set of participant info
+	 * @param setOfParticipant a set of participant info
+	 * @return a list of contact
+	 */
+	private List<String> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
+		List<String> result = new ArrayList<String>();
+		if (setOfParticipant.size() != 0) {
+			for (ParticipantInfo participantInfo : setOfParticipant) {
+				// TODO consider status ?
+				result.add(participantInfo.getContact());
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * get a set of contact from a set of participant info
+	 * @param setOfParticipant a set of participant info
+	 * @return a set of contact
+	 */
+	private Set<String> getSetOfParticipants(Set<ParticipantInfo> setOfParticipant) {
+		Set<String> result = new HashSet<String>();
+		if (setOfParticipant.size() != 0) {
+			for (ParticipantInfo participantInfo : setOfParticipant) {
+				// TODO consider status ?
+				result.add(participantInfo.getContact());
+			}
+		}
+		return result;
+	}
+	
     /**
      * Callback called when service has been disconnected. This method is called when
      * the service is disconnected from the RCS service (e.g. service deactivated).
@@ -414,7 +470,7 @@ public class GroupChatView extends ChatView {
     /**
      * Update the is composing status
      * 
-     * @param isTyping Is compoing status
+     * @param isTyping Is composing status
      */
     protected void setTypingStatus(boolean isTyping) {
 		try {
@@ -448,13 +504,13 @@ public class GroupChatView extends ChatView {
     	// Build list of available contacts not already in the conference
     	List<String> availableParticipants = new ArrayList<String>(); 
 		try {
-			Set<String> currentContacts = groupChat.getParticipants();
+			Set<ParticipantInfo> currentContacts = groupChat.getParticipants();
 			Set<JoynContact> contacts = contactsApi.getJoynContacts();
 			for (JoynContact c1 : contacts) {
 				String contact = c1.getContactId();
 				boolean found = false;
-				for(String c2 : currentContacts) {
-					if (c2.equals(contact)) {
+				for(ParticipantInfo c2 : currentContacts) {
+					if (c2.getContact().equals(contact) && isConnected(c2.getStatus())) {
 						found = true;
 						break;
 					}
@@ -551,7 +607,7 @@ public class GroupChatView extends ChatView {
 				
 			case R.id.menu_participants:
 				try {
-					Utils.showList(this, getString(R.string.menu_participants), groupChat.getParticipants());			
+					Utils.showList(this, getString(R.string.menu_participants), getSetOfParticipants(groupChat.getParticipants()));			
 			    } catch(JoynServiceNotAvailableException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_api_disabled));
@@ -582,7 +638,7 @@ public class GroupChatView extends ChatView {
 
 			case R.id.menu_showus_map:
 				try {
-					showUsInMap(groupChat.getParticipants());
+					showUsInMap(getSetOfParticipants(groupChat.getParticipants()));
 			    } catch(JoynServiceException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_api_failed));
@@ -759,5 +815,33 @@ public class GroupChatView extends ChatView {
 				}
 			});
     	}
-    };	
+
+		/* (non-Javadoc)
+		 * @see com.gsma.services.rcs.chat.GroupChatListener#onParticipantStatusChanged(com.gsma.services.rcs.chat.ParticipantInfo)
+		 */
+		@Override
+		public void onParticipantStatusChanged(final ParticipantInfo participant) {
+			handler.post(new Runnable() {
+				public void run() {
+					String newStatus = TAB_PARTICIPANT_STATUS[participant.getStatus() % (TAB_PARTICIPANT_STATUS.length + 1)];
+					if (LogUtils.isActive) {
+						Log.d(LOGTAG, "onParticipantStatusChanged contact=" + participant.getContact() + " status=" + newStatus);
+					}
+					addNotifHistory(getString(R.string.label_contact_status_changed, participant.getContact(), newStatus));
+				}
+			});
+		}
+    };
+    
+	/**
+	 * Test is status is connected
+	 * 
+	 * @param status
+	 *            the status
+	 * @return true if connected
+	 * @hide
+	 */
+	public static boolean isConnected(int status) {
+		return ((status == Status.CONNECTED) || (status == Status.PENDING) || (status == Status.BOOTED));
+	}
 }

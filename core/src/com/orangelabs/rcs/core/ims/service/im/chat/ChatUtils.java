@@ -20,7 +20,9 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
@@ -29,6 +31,7 @@ import org.xml.sax.InputSource;
 
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -72,10 +75,10 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+	 /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
     
 	/**
 	 * Get supported feature tags for a group chat
@@ -266,13 +269,12 @@ public class ChatUtils {
     /**
      * Generate resource-list for a chat session
      * 
-     * @param participants List of participants
+     * @param participants Set of participants
      * @return XML document
      */
-    public static String generateChatResourceList(List<String> participants) {
-		StringBuffer uriList = new StringBuffer();
-		for(int i=0; i < participants.size(); i++) {
-			String contact = participants.get(i);
+    public static String generateChatResourceList(Set<String> participants) {
+		StringBuilder uriList = new StringBuilder();
+		for (String contact : participants) {
 			uriList.append(" <entry uri=\"" +
 					PhoneUtils.formatNumberToSipUri(contact) + "\" cp:copyControl=\"to\"/>" 
 					+ CRLF);
@@ -284,36 +286,7 @@ public class ChatUtils {
 			uriList.toString() +
 			"</list></resource-lists>";
 		return xml;
-    }    
-
-    /**
-     * Generate resource-list for a extended chat session
-     * 
-     * @param existingParticipant Replaced participant
-     * @param replaceHeader Replace header
-     * @param newParticipants List of new participants
-     * @return XML document
-     */
-    public static String generateExtendedChatResourceList(String existingParticipant, String replaceHeader, List<String> newParticipants) {
-		StringBuffer uriList = new StringBuffer();
-		for(int i=0; i < newParticipants.size(); i++) {
-			String contact = newParticipants.get(i);
-			if (contact.equals(existingParticipant)) {
-				uriList.append(" <entry cp:copyControl=\"to\" uri=\"" + PhoneUtils.formatNumberToSipUri(existingParticipant) +
-					StringUtils.encodeXML(replaceHeader) + "\"/>" + CRLF);
-			} else {
-				uriList.append(" <entry cp:copyControl=\"to\" uri=\"" + PhoneUtils.formatNumberToSipUri(contact) + "\"/>" + CRLF);
-			}
-		}
-		
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
-			"<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" " + 
-			"xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">" +
-			"<list>" + CRLF +
-			uriList.toString() +
-			"</list></resource-lists>";
-		return xml;
-    }    
+    }
 
     /**
      * Is IMDN service
@@ -872,11 +845,11 @@ public class ChatUtils {
      * Get list of participants from 'resource-list' present in XML document and
      * include the 'remote' as participant.
      * 
-     * @return {@link ListOfParticipant} participant list
+     * @return {@link SetOfParticipant} participant list
      * @author Deutsche Telekom AG
      */
-    public static ListOfParticipant getListOfParticipants(SipRequest request) {
-        ListOfParticipant participants = new ListOfParticipant();
+    public static Set<ParticipantInfo> getListOfParticipants(SipRequest request) {
+        Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
         try {
             String content = request.getContent();
             String boundary = request.getBoundaryContentType();
@@ -886,11 +859,11 @@ public class ChatUtils {
                 String listPart = multi.getPart("application/resource-lists+xml");
                 if (listPart != null) {
                 	// Create list from XML
-                    participants = new ListOfParticipant(listPart);
+                    participants = ParticipantInfoUtils.parseResourceList(listPart);
 
                     // Include remote contact
                     String remote = getReferredIdentity(request);
-                    participants.addParticipant(remote);
+                    ParticipantInfoUtils.addParticipant(participants, remote);
                 }
             }
         } catch (Exception e) {
@@ -898,7 +871,7 @@ public class ChatUtils {
         }
         return participants;
     }
-    
+
     /**
      * Is request is for FToHTTP
      *

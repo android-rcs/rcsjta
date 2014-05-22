@@ -17,6 +17,10 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.event;
 
+/**
+ * @author YPLO6403
+ *
+ */
 public class User {
 	public final static String STATE_UNKNOWN = "unknown";
 	public final static String STATE_CONNECTED = "connected";
@@ -96,11 +100,4 @@ public class User {
 		return result;
 	}
 
-	public static boolean isConnected(String state) {
-		return (state.equals(User.STATE_CONNECTED) || state.equals(User.STATE_PENDING) || state.equals(User.STATE_BOOTED));
-	}
-	
-	public static boolean isDisconnected(String state) {
-		return !isConnected(state);
-	}
 }

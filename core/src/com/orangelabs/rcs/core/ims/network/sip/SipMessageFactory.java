@@ -23,7 +23,7 @@ import gov2.nist.javax2.sip.Utils;
 import gov2.nist.javax2.sip.header.Subject;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax2.sip.ClientTransaction;
@@ -1154,13 +1154,13 @@ public class SipMessageFactory {
 	 * Create a SIP REFER request
 	 * 
 	 * @param dialog SIP dialog path
-	 * @param participants List of participants
+	 * @param participants Set of participants
 	 * @param subject Subject
 	 * @param contributionId Contribution ID
 	 * @return SIP request
 	 * @throws SipException
 	 */
-    public static SipRequest createRefer(SipDialogPath dialog, List<String> participants, String subject, String contributionId) throws SipException {
+    public static SipRequest createRefer(SipDialogPath dialog, Set<String> participants, String subject, String contributionId) throws SipException {
     	try {
 			// Create the request
 		    Request refer = dialog.getStackDialog().createRequest(Request.REFER);

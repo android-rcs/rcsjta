@@ -19,7 +19,6 @@ package com.gsma.services.rcs.chat;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -194,21 +193,6 @@ public class GroupChat {
 	}
 	
 	/**
-	 * Returns the list of participants in the group conversation
-	 * 
-	 * @return List of participants
-	 * @throws JoynServiceException
-     * @see ParticipantInfo
-	 */
-	public List<ParticipantInfo> getParticipantInfo() throws JoynServiceException {
-		try {
-			return chatInf.getParticipantInfo();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
 	 * Returns the subject of the group chat
 	 * 
 	 * @return Subject
@@ -229,9 +213,9 @@ public class GroupChat {
 	 * @return List of participants
 	 * @throws JoynServiceException
 	 */
-	public Set<String> getParticipants() throws JoynServiceException {
+	public Set<ParticipantInfo> getParticipants() throws JoynServiceException {
 		try {
-			return new HashSet<String>(chatInf.getParticipants());
+			return new HashSet<ParticipantInfo>(chatInf.getParticipants());
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}		

@@ -430,7 +430,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		// Update rich messaging history
 		RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
-				session.getSubject(), session.getParticipants().getList(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
+				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
 		
 		// Add session in the list
 		GroupChatImpl sessionApi = new GroupChatImpl(session);
@@ -514,7 +514,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 			// Update rich messaging history
 			RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
-					session.getSubject(), session.getParticipants().getList(),
+					session.getSubject(), session.getParticipants(),
 					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
 
 			// Start the session
@@ -595,12 +595,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 			final ChatSession session = Core.getInstance().getImService().restartGroupChatSession(chatId);
 
 			// Start the session
-	        Thread t = new Thread() {
+	       new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 			
 			// Add session in the list
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);

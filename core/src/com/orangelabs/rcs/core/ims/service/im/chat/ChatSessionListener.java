@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 
 /**
@@ -84,4 +85,12 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param geoloc Geoloc message
      */
     public void handleReceiveGeoloc(GeolocMessage geoloc);
+    
+	/**
+	 * Participant status changed
+	 * 
+	 * @param participantInfo
+	 *            the participant information
+	 */
+    public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
 }

@@ -196,6 +196,7 @@
 <string name="label_ft_thumb">Thumbnail</string>
 <string name="menu_send_file">Send file</string>
 <string name="label_geoloc_msg">Geoloc</string>
+<string name="label_contact_status_changed">%1$s new status %2$s</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
