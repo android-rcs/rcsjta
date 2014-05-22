@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.session;
+package com.orangelabs.rcs.ri.extension;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -31,21 +31,21 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Initiate multimedia session
+ * Initiate messaging session
  *  
  * @author Jean-Marc AUFFRET
  */
-public class InitiateMultimediaSession extends Activity {
+public class InitiateMessagingSession extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		// Set layout
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.session_initiate);
+		setContentView(R.layout.extension_initiate_messaging_session);
 
 		// Set title
-		setTitle(R.string.menu_initiate_mm_session);
+		setTitle(R.string.menu_initiate_messaging_session);
 		
 		// Set contact selector
 		Spinner spinner = (Spinner)findViewById(R.id.contact);
@@ -77,10 +77,10 @@ public class InitiateMultimediaSession extends Activity {
             String remoteContact = cursor.getString(1);
 
 			// Display session view
-			Intent intent = new Intent(InitiateMultimediaSession.this, MultimediaSessionView.class);
+			Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OUTGOING);
-        	intent.putExtra(MultimediaSessionView.EXTRA_CONTACT, remoteContact);
+        	intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
+        	intent.putExtra(MessagingSessionView.EXTRA_CONTACT, remoteContact);
 			startActivity(intent);
 			
         	// Exit activity

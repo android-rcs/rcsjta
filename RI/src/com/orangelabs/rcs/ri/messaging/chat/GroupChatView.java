@@ -52,7 +52,7 @@ import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.session.MultimediaSessionView;
+import com.orangelabs.rcs.ri.extension.MessagingSessionView;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -148,7 +148,7 @@ public class GroupChatView extends ChatView {
 		        // Initiate group chat
     			startGroupChat();				
 			} else
-			if (mode == MultimediaSessionView.MODE_OPEN) {
+			if (mode == MessagingSessionView.MODE_OPEN) {
 				// Open an existing session
 		        chatId = getIntent().getStringExtra(GroupChatView.EXTRA_CHAT_ID);
 		        

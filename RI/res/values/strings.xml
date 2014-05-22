@@ -252,39 +252,25 @@
 <!-- Geoloc sharing menu -->
 
 <!--  MM session menu -->
-<string name="menu_mm_sessions">Multimedia session</string>
-<string name="menu_initiate_mm_session">Initiate session</string>
-<string name="menu_mm_sessions_list">Current sessions</string>
-<string name="menu_send_mm_message">Send message</string>
-<string name="label_initiate_mm_session">Initiate session</string>
-<string name="label_close_mm_session">Close session</string>
-<string name="label_no_mm_session">No session</string>
-<string name="label_recv_mm_msg">Receive message from %s:</string>
-<string name="label_mm_msg_content">Message content:</string>
-<string name="label_mm_msg_type">Message content type:</string>
-<string name="label_send_mm_msg">Send message</string>
+<string name="menu_mm_session">Multimedia session</string>
+<string name="menu_initiate_messaging_session">Initiate messaging session</string>
+<string name="menu_messaging_sessions_list">Current messaging sessions</string>
+<string name="label_initiate_session">Initiate session</string>
+<string name="label_close_session">Close session</string>
+<string name="label_no_session">No session</string>
 <string name="label_service_id">Service ID:</string>
-<string name="label_local_sdp">Local SDP:</string>
-<string name="label_remote_sdp">Remote SDP:</string>
-<string name="label_mm_msg_sent">Message sent in background...</string>
-<string name="label_mm_msg_success">Message sent with success</string>
-<string name="label_mm_msg_failed">Message has failed</string>
-<string name="label_save_settings">Save</string>
-<string name="label_restore_settings">Restore</string>
-<string name="label_settings_saved">Settings have been saved</string>
-<string name="label_settings_restored">Default settings have been restored</string>
-<string name="label_mm_session_in_progress">Session in progress...</string>
-<string name="label_mm_session_canceled">Session initiation has been canceled</string>
-<string name="label_mm_session_aborted">Session aborted</string>
-<string name="label_mm_session_declined">Session invitation has been declined</string>
-<string name="label_mm_session_failed">Session has failed (error code %d)</string>
-<string name="title_mm_session">Multimedia session</string>
-<string name="label_mm_session_has_expired">Session has expired</string>
-<string name="title_recv_mm_session">Multimedia session invitation</string>
+<string name="label_session_in_progress">Session in progress...</string>
+<string name="label_session_canceled">Session initiation has been canceled</string>
+<string name="label_session_aborted">Session aborted</string>
+<string name="label_session_declined">Session invitation has been declined</string>
+<string name="label_session_failed">Session has failed (error code %d)</string>
+<string name="label_session_has_expired">Session has expired</string>
+<string name="title_recv_messaging_session">Multimedia messaging session invitation</string>
+<string name="title_messaging_session">Messaging session</string>
 <string name="label_session">Session %s</string>
 <string name="label_session_from">from %s</string>
-<string name="label_send_mm_data">Send data</string>
-<string name="label_recv_mm_data">Receive data:</string>
+<string name="label_send_data">Send data</string>
+<string name="label_recv_data">Receive data:</string>
 
 <!-- Geolocation push -->
 <string name="label_select_geoloc">Select from a map</string>

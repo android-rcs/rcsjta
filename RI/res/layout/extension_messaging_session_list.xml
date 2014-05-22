@@ -12,7 +12,7 @@
 
 		<TextView android:id="@android:id/empty"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
-			android:text="@string/label_no_mm_session" android:gravity="center"
+			android:text="@string/label_no_session" android:gravity="center"
 			android:textAppearance="?android:attr/textAppearanceLarge" />
 	</FrameLayout>
 

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.session;
+package com.orangelabs.rcs.ri.extension;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,20 +25,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 
-import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Multimedia session invitation receiver
+ * Messaging session invitation receiver
  *  
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
+public class MessagingSessionInvitationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
         // Display invitation notification
-		MultimediaSessionInvitationReceiver.addSessionInvitationNotification(context, intent);
+		MessagingSessionInvitationReceiver.addSessionInvitationNotification(context, intent);
     }
 
     /**
@@ -49,18 +49,18 @@ public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact
-		String contact = invitation.getStringExtra(MultimediaSessionIntent.EXTRA_CONTACT);
+		String contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
 
 		// Get session ID
-		String sessionId = invitation.getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+		String sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, MultimediaSessionView.class);
+		intent.setClass(context, MessagingSessionView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(sessionId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_mm_session);
+        String notifTitle = context.getString(R.string.title_recv_messaging_session);
 		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);

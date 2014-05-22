@@ -15,26 +15,13 @@
 			android:layout_marginRight="5dip"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
-
-		<TableRow android:paddingTop="5dip">
-	        <TextView android:text="@string/label_mm_msg_content"
- 			 android:layout_marginLeft="5dip"
-	         android:gravity="right"/>
-			<EditText android:id="@+id/content"
-			 android:layout_marginLeft="5dip"
-			 android:layout_marginRight="5dip"
-			 android:maxLength="512"
-			 android:text="Hello world" />
-	    </TableRow>
-
+        
 	    <TableRow android:padding="5dip"></TableRow>
-		
-		<Button android:text="@string/label_send_mm_msg"
+        
+		<Button android:text="@string/label_initiate_session"
 		 android:layout_marginLeft="5dip"
 		 android:layout_marginRight="5dip"
-		 android:id="@+id/send_btn" 
-		 android:enabled="false"/>
-
+		 android:id="@+id/initiate_btn"/>
 	</TableLayout>
 	
 </ScrollView>	
