@@ -1,9 +1,9 @@
-package com.gsma.services.rcs.session;
+package com.gsma.services.rcs.extension;
 
 /**
- * Callback methods for multimedia session events
+ * Callback methods for multimedia messaging session events
  */
-interface IMultimediaSessionListener {
+interface IMultimediaMessagingSessionListener {
 	void onSessionStarted();
 	
 	void onSessionRinging();

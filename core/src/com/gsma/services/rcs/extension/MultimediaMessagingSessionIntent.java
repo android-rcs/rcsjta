@@ -16,16 +16,16 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.session;
+package com.gsma.services.rcs.extension;
 
 /**
- * Intent for multimedia session invitations
+ * Intent for multimedia messaging session invitations
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionIntent {
+public class MultimediaMessagingSessionIntent {
     /**
-     * Broadcast action: a new multimedia session invitation has been received.
+     * Broadcast action: a new messaging session invitation has been received.
      * <p>Intent includes the following extras:
      * <ul>
      * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
@@ -37,7 +37,7 @@ public class MultimediaSessionIntent {
      *  in the intent and corresponding to the invoked service.
      * </ul>
      */
-	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.session.action.NEW_SESSION";
+	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION";
 
 	/**
 	 * MSISDN of the contact sending the invitation

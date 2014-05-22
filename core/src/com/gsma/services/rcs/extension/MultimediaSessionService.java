@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.session;
+package com.gsma.services.rcs.extension;
 
 import java.util.HashSet;
 import java.util.List;
@@ -107,25 +107,25 @@ public class MultimediaSessionService extends JoynService {
     };
     
     /**
-     * Initiates a new multimedia session for real time messaging with a remote contact and
-     * for a given service. The messages exchanged in real time during the session may be from
+     * Initiates a new session for real time messaging with a remote contact and for a given
+     * service extension. The messages are exchanged in real time during the session may be from
      * any type. The parameter contact supports the following formats: MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
      * @param contact Contact
-     * @param listener Multimedia session event listener
-     * @return Multimedia session
+     * @param listener Multimedia messaging session event listener
+     * @return Multimedia messaging session
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public MultimediaSession initiateSession(String serviceId, String contact, MultimediaSessionListener listener) throws JoynServiceException, JoynContactFormatException {
+    public MultimediaMessagingSession initiateMessagingSession(String serviceId, String contact, MultimediaMessagingSessionListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IMultimediaSession sessionIntf = api.initiateSession(serviceId, contact, listener);
+				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact, listener);
 				if (sessionIntf != null) {
-					return new MultimediaSession(sessionIntf);
+					return new MultimediaMessagingSession(sessionIntf);
 				} else {
 					return null;
 				}
@@ -138,19 +138,19 @@ public class MultimediaSessionService extends JoynService {
     }    
     
     /**
-     * Returns the list of sessions associated to a given service ID
+     * Returns the list of messaging sessions associated to a given service ID
      * 
      * @param serviceId Service ID
-     * @return List of sessions
+     * @return List of messaging sessions
      * @throws JoynServiceException
      */
-    public Set<MultimediaSession> getSessions(String serviceId) throws JoynServiceException {
+    public Set<MultimediaMessagingSession> getMessagingSessions(String serviceId) throws JoynServiceException {
 		if (api != null) {
 			try {
-	    		Set<MultimediaSession> result = new HashSet<MultimediaSession>();
-				List<IBinder> mmsList = api.getSessions(serviceId);
+	    		Set<MultimediaMessagingSession> result = new HashSet<MultimediaMessagingSession>();
+				List<IBinder> mmsList = api.getMessagingSessions(serviceId);
 				for (IBinder binder : mmsList) {
-					MultimediaSession session = new MultimediaSession(IMultimediaSession.Stub.asInterface(binder));
+					MultimediaMessagingSession session = new MultimediaMessagingSession(IMultimediaMessagingSession.Stub.asInterface(binder));
 					result.add(session);
 				}
 				return result;
@@ -163,17 +163,17 @@ public class MultimediaSessionService extends JoynService {
     }    
 
     /**
-     * Returns a current session from its unique session ID
+     * Returns a current messaging session from its unique session ID
      * 
-     * @return Multimedia session or null if not found
+     * @return Multimedia messaging session or null if not found
      * @throws JoynServiceException
      */
-    public MultimediaSession getSession(String sessionId) throws JoynServiceException {
+    public MultimediaMessagingSession getMessagingSession(String sessionId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaSession sessionIntf = api.getSession(sessionId);
+				IMultimediaMessagingSession sessionIntf = api.getMessagingSession(sessionId);
 				if (sessionIntf != null) {
-					return new MultimediaSession(sessionIntf);
+					return new MultimediaMessagingSession(sessionIntf);
 				} else {
 					return null;
 				}
@@ -186,18 +186,18 @@ public class MultimediaSessionService extends JoynService {
     }    
     
     /**
-     * Returns a current session from its invitation Intent
+     * Returns a current messaging session from its invitation Intent
      * 
      * @param intent Invitation intent
-     * @return Multimedia session or null if not found
+     * @return Multimedia messaging session or null if not found
      * @throws JoynServiceException
      */
-    public MultimediaSession getSessionFor(Intent intent) throws JoynServiceException {
+    public MultimediaMessagingSession getMessagingSessionFor(Intent intent) throws JoynServiceException {
 		if (api != null) {
 			try {
-				String sessionId = intent.getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+				String sessionId = intent.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 				if (sessionId != null) {
-					return getSession(sessionId);
+					return getMessagingSession(sessionId);
 				} else {
 					return null;
 				}
@@ -208,29 +208,4 @@ public class MultimediaSessionService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
-
-    /**
-     * Sends a message in pager mode to a contact and for a given service. The message may
-     * be any type of content. The parameter contact supports the following formats: MSISDN in
-     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
-     * contact is not supported an exception is thrown. 
-     * 
-     * @param serviceId Service ID
-     * @param contact Contact
-     * @param content Message content
-	 * @return Returns true if sent successfully else returns false
-     * @throws JoynServiceException
-	 * @throws JoynContactFormatException
-     */
-    public boolean sendMessage(String serviceId, String contact, byte[] content) throws JoynServiceException, JoynContactFormatException {
-		if (api != null) {
-			try {
-				return api.sendMessage(serviceId, contact, content);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }    
 }

@@ -28,22 +28,19 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.session.IMultimediaSession;
-import com.gsma.services.rcs.session.IMultimediaSessionListener;
-import com.gsma.services.rcs.session.IMultimediaSessionService;
-import com.gsma.services.rcs.session.MultimediaMessageIntent;
-import com.gsma.services.rcs.session.MultimediaSessionIntent;
+import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
+import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.IMultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
-import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * SIP API service
+ * Multimedia session API service
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -56,7 +53,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	/**
 	 * List of sessions
 	 */
-	private static Hashtable<String, IMultimediaSession> sipSessions = new Hashtable<String, IMultimediaSession>();  
+	private static Hashtable<String, IMultimediaMessagingSession> messagingSessions = new Hashtable<String, IMultimediaMessagingSession>();  
 
 	/**
 	 * Lock used for synchronization
@@ -82,7 +79,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	public void close() {
 		// Clear list of sessions
-		sipSessions.clear();
+		messagingSessions.clear();
 		
 		if (logger.isActivated()) {
 			logger.info("Multimedia session service API is closed");
@@ -94,12 +91,12 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * 
 	 * @param session SIP session
 	 */
-	protected static void addSipSession(MultimediaSessionImpl session) {
+	protected static void addSipSession(MultimediaMessagingSessionImpl session) {
 		if (logger.isActivated()) {
-			logger.debug("Add a multimedia session in the list (size=" + sipSessions.size() + ")");
+			logger.debug("Add a multimedia session in the list (size=" + messagingSessions.size() + ")");
 		}
 		
-		sipSessions.put(session.getSessionId(), session);
+		messagingSessions.put(session.getSessionId(), session);
 	}
 
 	/**
@@ -109,10 +106,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	protected static void removeSipSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a multimedia session from the list (size=" + sipSessions.size() + ")");
+			logger.debug("Remove a multimedia session from the list (size=" + messagingSessions.size() + ")");
 		}
 		
-		sipSessions.remove(sessionId);
+		messagingSessions.remove(sessionId);
 	}	
 	
     /**
@@ -188,34 +185,35 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	public void receiveSipSessionInvitation(Intent intent, GenericSipSession session) {
 		// Add session in the list
-		MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
+		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
 		MultimediaSessionServiceImpl.addSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaSessionIntent.EXTRA_CONTACT, number);
-		intent.putExtra(MultimediaSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-		intent.putExtra(MultimediaSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
 	}
 	
     /**
-     * Initiates a new multimedia session for real time messaging with a remote contact and
-     * for a given service. The messages exchanged in real time during the session may be from
+     * Initiates a new session for real time messaging with a remote contact and for a given
+     * service extension. The messages are exchanged in real time during the session may be from
      * any type. The parameter contact supports the following formats: MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
      * @param contact Contact
-     * @param listener Multimedia session event listener
+     * @param listener Multimedia messaging session event listener
+     * @return Multimedia messaging session
      * @return Multimedia session
 	 * @throws ServerApiException
      */
-    public IMultimediaSession initiateSession(String serviceId, String contact, IMultimediaSessionListener listener) throws ServerApiException {
+    public IMultimediaMessagingSession initiateMessagingSession(String serviceId, String contact, IMultimediaMessagingSessionListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia session with " + contact);
 		}
@@ -229,7 +227,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			final GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact, featureTag);
 			
 			// Add session listener
-			MultimediaSessionImpl sessionApi = new MultimediaSessionImpl(session);
+			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
@@ -252,35 +250,35 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
     /**
-     * Returns a current session from its unique session ID
+     * Returns a current messaging session from its unique session ID
      * 
-     * @return Multimedia session or null if not found
+     * @return Multimedia messaging session or null if not found
      * @throws ServerApiException
      */
-    public IMultimediaSession getSession(String sessionId) throws ServerApiException {
+    public IMultimediaMessagingSession getMessagingSession(String sessionId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get multimedia session " + sessionId);
 		}
 
-		return sipSessions.get(sessionId);
+		return messagingSessions.get(sessionId);
 	}
 
 
     /**
-     * Returns the list of sessions associated to a given service ID
+     * Returns the list of messaging sessions associated to a given service ID
      * 
      * @param serviceId Service ID
      * @return List of sessions
      * @throws ServerApiException
      */
-    public List<IBinder> getSessions(String serviceId) throws ServerApiException {
+    public List<IBinder> getMessagingSessions(String serviceId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get multimedia sessions for service " + serviceId);
 		}
 
 		try {
 			ArrayList<IBinder> result = new ArrayList<IBinder>();
-			for (IMultimediaSession sessionApi : sipSessions.values()) {
+			for (IMultimediaMessagingSession sessionApi : messagingSessions.values()) {
 				// Filter on the service ID
 				if (sessionApi.getServiceId().equals(serviceId)) {
 					result.add(sessionApi.asBinder());
@@ -293,57 +291,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			}
 			throw new ServerApiException(e.getMessage());
 		}
-	}
-    
-    /**
-     * Sends a message in pager mode to a contact and for a given service. The message may
-     * be any type of content. The parameter contact supports the following formats: MSISDN in
-     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
-     * contact is not supported an exception is thrown. 
-     * 
-     * @param serviceId Service ID
-     * @param contact Contact
-     * @param content Message content
-	 * @return Returns true if sent successfully else returns false
-	 * @throws ServerApiException
-     */
-    public boolean sendMessage(String serviceId, String contact, byte[] content) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Send instant message to " + contact);
-		}
-
-		// Test IMS connection
-		ServerApiUtils.testIms();
-
-		try {
-			// Send instant message
-			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			return Core.getInstance().getSipService().sendInstantMessage(contact, featureTag, content);
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-	}
-    
-	/**
-	 * Receive an instant message (SIP MESSAGE)
-	 *  
-     * @param intent Resolved intent
-     * @param message Instant message request
-   	 */
-	public void receiveSipInstantMessage(Intent intent, SipRequest message) {
-		// Broadcast intent related to the received invitation
-		String contact = SipUtils.getAssertedIdentity(message);
-		String number = PhoneUtils.extractNumberFromUri(contact);
-		String displayName = SipUtils.getDisplayNameFromUri(message.getFrom());
-		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTACT, number);
-		intent.putExtra(MultimediaMessageIntent.EXTRA_DISPLAY_NAME, displayName);
-		intent.putExtra(MultimediaMessageIntent.EXTRA_CONTENT, message.getRawContent());
-		
-		// Broadcast intent related to the received invitation
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
 	}
 
 	/**

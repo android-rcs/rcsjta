@@ -15,113 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.session;
+package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.JoynServiceException;
 
 /**
  * This class maintains the information related to a multimedia
- * session and offers methods to manage it and to send messages
- * in real time. 
+ * session for a real time messaging service. 
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSession {
+public class MultimediaMessagingSession extends MultimediaSession {
     /**
-     * Multimedia session state
+     * Messaging session interface
      */
-    public static class State {
-    	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
-    	 * Session invitation received
-    	 */
-    	public final static int INVITED = 1;
-    	
-    	/**
-    	 * Session invitation sent
-    	 */
-    	public final static int INITIATED = 2;
-    	
-    	/**
-    	 * Session is started
-    	 */
-    	public final static int STARTED = 3;
-    	
-    	/**
-    	 * Session has been aborted or 
-    	 */
-    	public final static int ABORTED = 5;
-    	
-        /**
-         * Session has been terminated
-         */
-        public static final int TERMINATED = 6;
-
-        /**
-    	 * Session has failed 
-    	 */
-    	public final static int FAILED = 7;
-    	
-        private State() {
-        }    	
-    }
-    
-    /**
-     * Direction of the session
-     */
-    public static class Direction {
-        /**
-         * Incoming session
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing session
-         */
-        public static final int OUTGOING = 1;
-    }     
-    
-    /**
-     * Session error
-     */
-    public static class Error {
-    	/**
-    	 * Session invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 0;
-
-    	/**
-    	 * Session has failed
-    	 */
-    	public final static int SESSION_FAILED = 1;
-
-    	/**
-    	 * Media has failed
-    	 */
-    	public final static int MEDIA_FAILED = 2;
-
-    	private Error() {
-        }    	
-    }
-    
-    /**
-     * Multimedia session interface
-     */
-    private IMultimediaSession sessionInf;
+    private IMultimediaMessagingSession sessionIntf;
 
     /**
      * Constructor
      * 
      * @param sessionInf Multimedia session interface
      */
-    MultimediaSession(IMultimediaSession sessionInf) {
-    	this.sessionInf = sessionInf;
+    MultimediaMessagingSession(IMultimediaMessagingSession sessionIntf) {
+    	super();
+    	
+    	this.sessionIntf = sessionIntf;
     }
-
+    
     /**
 	 * Returns the session ID of the multimedia session
 	 * 
@@ -130,7 +50,7 @@ public class MultimediaSession {
 	 */
 	public String getSessionId() throws JoynServiceException {
 		try {
-			return sessionInf.getSessionId();
+			return sessionIntf.getSessionId();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -144,7 +64,7 @@ public class MultimediaSession {
 	 */
 	public String getRemoteContact() throws JoynServiceException {
 		try {
-			return sessionInf.getRemoteContact();
+			return sessionIntf.getRemoteContact();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -158,7 +78,7 @@ public class MultimediaSession {
 	 */
 	public String getServiceId() throws JoynServiceException {
 		try {
-			return sessionInf.getServiceId();
+			return sessionIntf.getServiceId();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -173,7 +93,7 @@ public class MultimediaSession {
 	 */
 	public int getState() throws JoynServiceException {
 		try {
-			return sessionInf.getState();
+			return sessionIntf.getState();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -188,7 +108,7 @@ public class MultimediaSession {
 	 */
 	public int getDirection() throws JoynServiceException {
 		try {
-			return sessionInf.getDirection();
+			return sessionIntf.getDirection();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -201,7 +121,7 @@ public class MultimediaSession {
 	 */
 	public void acceptInvitation() throws JoynServiceException {
 		try {
-			sessionInf.acceptInvitation();
+			sessionIntf.acceptInvitation();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -214,7 +134,7 @@ public class MultimediaSession {
 	 */
 	public void rejectInvitation() throws JoynServiceException {
 		try {
-			sessionInf.rejectInvitation();
+			sessionIntf.rejectInvitation();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -227,21 +147,36 @@ public class MultimediaSession {
 	 */
 	public void abortSession() throws JoynServiceException {
 		try {
-			sessionInf.abortSession();
+			sessionIntf.abortSession();
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
-	
+    
+    /**
+     * Sends a message in real time
+     * 
+     * @param content Message content
+	 * @return Returns true if sent successfully else returns false
+     * @throws JoynServiceException
+     */
+    public boolean sendMessage(byte[] content) throws JoynServiceException {
+		try {
+			return sessionIntf.sendMessage(content);
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+    }    
+
 	/**
 	 * Adds a listener on session events
 	 * 
 	 * @param listener Session event listener
 	 * @throws JoynServiceException
 	 */
-	public void addEventListener(MultimediaSessionListener listener) throws JoynServiceException {
+	public void addEventListener(MultimediaMessagingSessionListener listener) throws JoynServiceException {
 		try {
-			sessionInf.addEventListener(listener);
+			sessionIntf.addEventListener(listener);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
@@ -253,26 +188,11 @@ public class MultimediaSession {
 	 * @param listener Session event listener
 	 * @throws JoynServiceException
 	 */
-	public void removeEventListener(MultimediaSessionListener listener) throws JoynServiceException {
+	public void removeEventListener(MultimediaMessagingSessionListener listener) throws JoynServiceException {
 		try {
-			sessionInf.removeEventListener(listener);
+			sessionIntf.removeEventListener(listener);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
-
-    /**
-     * Sends a message in real time
-     * 
-     * @param content Message content
-	 * @return Returns true if sent successfully else returns false
-     * @throws JoynServiceException
-     */
-    public boolean sendMessage(byte[] content) throws JoynServiceException {
-		try {
-			return sessionInf.sendMessage(content);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-    }    
 }
