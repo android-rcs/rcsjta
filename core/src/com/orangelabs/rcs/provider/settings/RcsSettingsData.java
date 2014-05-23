@@ -873,7 +873,12 @@ public class RcsSettingsData {
     public static final String TCP_FALLBACK = "TcpFallback";
     
 	/**
-     * Allow RCS extensions capability
+     * Control RCS extensions
+     */
+	public static final String CONTROL_EXTENSIONS = "ControlRcsExtensions";
+
+	/**
+     * Allow RCS extensions
      */
 	public static final String ALLOW_EXTENSIONS = "AllowRcsExtensions";
 	

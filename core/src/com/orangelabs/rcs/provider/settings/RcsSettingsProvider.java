@@ -78,7 +78,7 @@ public class RcsSettingsProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 101;
+        private static final int DATABASE_VERSION = 102;
 
         private Context ctx;
 
@@ -241,6 +241,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR,	RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY,	RcsSettingsData.FALSE);
             addParameter(db, RcsSettingsData.TCP_FALLBACK,						RcsSettingsData.FALSE);   
+            addParameter(db, RcsSettingsData.CONTROL_EXTENSIONS,				RcsSettingsData.TRUE);   
             addParameter(db, RcsSettingsData.ALLOW_EXTENSIONS,					RcsSettingsData.TRUE);   
             addParameter(db, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,			"0");   
        }

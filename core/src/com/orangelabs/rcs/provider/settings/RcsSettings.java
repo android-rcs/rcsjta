@@ -2790,11 +2790,24 @@ public class RcsSettings {
     }
     
     /**
-     * Is RCS extension allowed
+     * Is RCS extensions controlled
      * 
      * @return Boolean
      */
-    public boolean isExtensionAllowed() {
+    public boolean isExtensionsControlled() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CONTROL_EXTENSIONS));
+        }
+        return result;
+    }
+
+    /**
+     * Is RCS extensions allowed
+     * 
+     * @return Boolean
+     */
+    public boolean isExtensionsAllowed() {
         boolean result = false;
         if (instance != null) {
             result = Boolean.parseBoolean(readParameter(RcsSettingsData.ALLOW_EXTENSIONS));
