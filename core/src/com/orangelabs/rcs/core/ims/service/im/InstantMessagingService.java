@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.core.ims.service.im;
 
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -538,15 +539,17 @@ public class InstantMessagingService extends ImsService {
 		getImsModule().getCore().getListener().handleOneOneChatSessionInvitation(session);
     }
 
-    /**
-     * Initiate an ad-hoc group chat session
-     * 
-     * @param contacts List of contacts
-     * @param subject Subject
-     * @return IM session
-     * @throws CoreException
-     */
-    public ChatSession initiateAdhocGroupChatSession(List<String> contacts, String subject) throws CoreException {
+	/**
+	 * Initiate an ad-hoc group chat session
+	 * 
+	 * @param contacts
+	 *            List of contacts
+	 * @param subject
+	 *            Subject
+	 * @return IM session
+	 * @throws CoreException
+	 */
+	public ChatSession initiateAdhocGroupChatSession(List<String> contacts, String subject) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an ad-hoc group chat session");
 		}
@@ -559,15 +562,19 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Max chat sessions achieved");
 		}
 
+		// Convert List of contacts to Set of ParticipantInfo because AIDL does not support Set type.
+		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+		for (String participant : contacts) {
+			ParticipantInfo object = new ParticipantInfo(participant);
+			participants.add(object);
+		}
+
 		// Create a new session
-		OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(
-				this,
-				ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-				subject,
-				ParticipantInfoUtils.getParticipantInfoFromContacts(contacts));
+		OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
+				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants);
 
 		return session;
-    }
+	}
 
     /**
      * Receive ad-hoc group chat session invitation

@@ -487,15 +487,18 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChatSessions.remove(chatId);
 	}
 
-    /**
-     * Initiates a group chat with a group of contact and returns a GroupChat
-     * instance. The subject is optional and may be null.
-     * 
-     * @param contact List of contacts
-     * @param subject Subject
-     * @param listener Chat event listener
+	/**
+	 * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject is optional and may be null.
+	 * 
+	 * @param contact
+	 *            List of contacts
+	 * @param subject
+	 *            Subject
+	 * @param listener
+	 *            Chat event listener
 	 * @throws ServerApiException
-     */
+	 *             Note: List is used instead of Set because AIDL does only support List
+	 */
     public IGroupChat initiateGroupChat(List<String> contacts, String subject, IGroupChatListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an ad-hoc group chat session");
@@ -518,12 +521,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
 
 			// Start the session
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 					session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 						
 			// Add session in the list
 			ChatServiceImpl.addGroupChatSession(sessionApi);

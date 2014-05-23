@@ -19,7 +19,6 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.xml.sax.InputSource;
@@ -46,37 +45,18 @@ public class ParticipantInfoUtils {
 	private static final Logger logger = Logger.getLogger(ParticipantInfoUtils.class.getSimpleName());
 
 	/**
-	 * Create a set of ParticipantInfo from a list of contacts
-	 * 
-	 * @param The
-	 *            list of contacts
-	 * @return The set of ParticipantInfo
-	 */
-	public static Set<ParticipantInfo> getParticipantInfoFromContacts(List<String> contacts) {
-		Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
-		if (contacts == null) {
-			return set;
-		}
-		for (String participant : contacts) {
-			ParticipantInfo object = new ParticipantInfo(participant);
-			set.add(object);
-		}
-		return set;
-	}
-
-	/**
 	 * Create a set of contacts from a set of ParticipantInfo
 	 * 
-	 * @param contacts
+	 * @param participantInfos
 	 *            The set of ParticipantInfo
 	 * @return The set of contacts
 	 */
-	public static Set<String> getContactsFromParticipantInfo(Set<ParticipantInfo> contacts) {
+	public static Set<String> getContactsFromParticipantInfo(Set<ParticipantInfo> participantInfos) {
 		Set<String> result = new HashSet<String>();
-		if (contacts == null) {
+		if (participantInfos == null) {
 			return result;
 		}
-		for (ParticipantInfo participant : contacts) {
+		for (ParticipantInfo participant : participantInfos) {
 			result.add(participant.getContact());
 		}
 		return result;
