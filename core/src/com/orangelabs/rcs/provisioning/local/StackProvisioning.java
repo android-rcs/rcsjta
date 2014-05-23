@@ -238,6 +238,7 @@ public class StackProvisioning extends Activity {
 		saveCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, bundle);
 		saveCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, bundle);
 		saveCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, bundle);
+		saveCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, bundle);
 		saveCheckBoxParameter(this, R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, bundle);
 		saveEditTextParameter(this, R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
 	}
@@ -415,6 +416,7 @@ public class StackProvisioning extends Activity {
 		setCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, bundle);
 		setCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, bundle);
 		setCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, bundle);
+		setCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, bundle);
 		setCheckBoxParameter(this, R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, bundle);
 		setEditTextParameter(this, R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
 	}

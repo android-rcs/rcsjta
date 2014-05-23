@@ -102,17 +102,24 @@ public class ServiceExtensionManager {
 			return false;
 		}
 
-		if (!RcsSettings.getInstance().isExtensionAllowed()) {
-			if (logger.isActivated()) {
-				logger.debug("Extensions are not allowed");
-			}
-			return false;
-		}
-		
 		try {
 			String pkgName = appInfo.activityInfo.packageName;
 			if (logger.isActivated()) {
-				logger.debug("Check application for extension " + ext + " from package " + pkgName);
+				logger.debug("Check extension " + ext + " from package " + pkgName);
+			}
+	
+			if (!RcsSettings.getInstance().isExtensionsControlled()) {
+				if (logger.isActivated()) {
+					logger.debug("Extension is authorized (no control)");
+				}
+				return true;
+			}
+			
+			if (!RcsSettings.getInstance().isExtensionsAllowed()) {
+				if (logger.isActivated()) {
+					logger.debug("Extensions are not allowed");
+				}
+				return false;
 			}
 			
 			String authDocumentPath = "/sdcard/iari-authorization.xml"; // TODO: get from provisioning
