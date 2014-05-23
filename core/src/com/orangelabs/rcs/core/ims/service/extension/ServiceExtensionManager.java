@@ -102,6 +102,13 @@ public class ServiceExtensionManager {
 			return false;
 		}
 
+		if (!RcsSettings.getInstance().isExtensionAllowed()) {
+			if (logger.isActivated()) {
+				logger.debug("Extensions are not allowed");
+			}
+			return false;
+		}
+		
 		try {
 			String pkgName = appInfo.activityInfo.packageName;
 			if (logger.isActivated()) {
