@@ -499,6 +499,7 @@ public class ProvisioningParser {
         String isAuth = null;
         String rcsIPVoiceCallAuth = null;
         String rcsIPVideoCallAuth = null;
+        String allowExtensions = null;
         if (node == null) {
             return;
         }
@@ -630,6 +631,20 @@ public class ProvisioningParser {
                     }
                 }
                 
+                if (allowExtensions == null) {
+                    if ((allowExtensions = getValueByParamName("allowRCSExtensions", childnode, TYPE_INT)) != null) {
+                    	int value =Integer.decode(allowExtensions);
+                        if ((value % 16) == 0){
+                        	RcsSettings.getInstance().writeParameter(
+                                  RcsSettingsData.ALLOW_EXTENSIONS, RcsSettingsData.FALSE);
+                        } else {
+                        	RcsSettings.getInstance().writeParameter(
+                                    RcsSettingsData.ALLOW_EXTENSIONS, RcsSettingsData.TRUE);
+                        }
+                        continue;
+                    }
+                }
+
                 // Not used: "standaloneMsgAuth"
                 // Not used: "geolocPullAuth"
                 
@@ -1292,6 +1307,7 @@ public class ProvisioningParser {
         String rcsIPVideoCallUpgradeFromCS = null;
         String rcsIPVideoCallUpgradeOnCapError = null;
         String beIPVideoCallUpgradeAttemptEarly = null;
+        String maxMsrpLengthExtensions = null;
         
         Node typenode = null;
         if (node == null) {
@@ -1386,6 +1402,13 @@ public class ProvisioningParser {
                     }
                 }
                 
+                if (maxMsrpLengthExtensions == null) {
+                	if ((maxMsrpLengthExtensions = getValueByParamName("extensionsMaxMSRPSize", childnode, TYPE_INT)) != null) {
+                        RcsSettings.getInstance().writeParameter(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, maxMsrpLengthExtensions);
+                        continue;
+                    }
+                }
+
                 // Not supported: "WarnSizeImageShare"
                 
             } while ((childnode = childnode.getNextSibling()) != null);

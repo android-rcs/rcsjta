@@ -696,7 +696,7 @@ public class RcsSettingsData {
      * RCS extensions capability
      */
 	public static final String CAPABILITY_RCS_EXTENSIONS = "CapabilityRcsExtensions";
-
+	
 	/**
      * Instant messaging is always on (Store & Forward server)
      */
@@ -871,9 +871,14 @@ public class RcsSettingsData {
      * TCP fallback option
      */
     public static final String TCP_FALLBACK = "TcpFallback";
-
-    /**
-     * Vendor name of the Client.
+    
+	/**
+     * Allow RCS extensions capability
      */
-    public static final String VENDOR_NAME = "VendorName";
+	public static final String ALLOW_EXTENSIONS = "AllowRcsExtensions";
+	
+	/**
+     * Max lenght for extensions using real time messaging (MSRP)  
+     */
+	public static final String MAX_MSRP_SIZE_EXTENSIONS = "ExtensionsMaxMsrpSize";
 }

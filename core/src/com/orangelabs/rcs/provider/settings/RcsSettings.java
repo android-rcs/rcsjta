@@ -2788,17 +2788,33 @@ public class RcsSettings {
         }
         return result;
     }
-
+    
     /**
-     * Get vendor name of the client
-     *
-     * @return Vendor
+     * Is RCS extension allowed
+     * 
+     * @return Boolean
      */
-    public String getVendor() {
-        String result = "OrangeLabs";
+    public boolean isExtensionAllowed() {
+        boolean result = false;
         if (instance != null) {
-            result = readParameter(RcsSettingsData.VENDOR_NAME);
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.ALLOW_EXTENSIONS));
         }
         return result;
+    }
+	
+    /**
+     * Get max lenght for extensions using real time messaging (MSRP)
+     * 
+     * @return Max length
+     */
+    public int getMaxMsrpLengthForExtensions() {
+		int result = 2048;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS));
+			} catch (Exception e) {
+			}
+		}
+		return result;
     }
 }
