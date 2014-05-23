@@ -30,7 +30,7 @@ import com.orangelabs.rcs.utils.PhoneUtils;
  * 
  * @author YPLO6403
  */
-public class ParticipantInfo implements Parcelable, Serializable, Cloneable {
+public class ParticipantInfo implements Parcelable, Serializable {
 
 	private static final long serialVersionUID = 0L;
 
@@ -229,19 +229,6 @@ public class ParticipantInfo implements Parcelable, Serializable, Cloneable {
 	}
 
 	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 * @hide
-	 */
-	@Override public ParticipantInfo clone() {	
-		try {
-			return (ParticipantInfo)super.clone();
-		} catch(CloneNotSupportedException cnse) {
-			// Never reach this point since Cloneable
-		}
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 * @hide
 	 */
@@ -275,18 +262,6 @@ public class ParticipantInfo implements Parcelable, Serializable, Cloneable {
 		if (status != other.status)
 			return false;
 		return true;
-	}
-
-	/**
-	 * Test is status is connected
-	 * 
-	 * @param status
-	 *            the status
-	 * @return true if connected
-	 * @hide
-	 */
-	public static boolean isConnected(int status) {
-		return ((status == Status.CONNECTED) || (status == Status.PENDING) || (status == Status.BOOTED));
 	}
 
 	/* (non-Javadoc)
