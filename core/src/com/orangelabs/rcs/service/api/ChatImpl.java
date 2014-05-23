@@ -9,6 +9,7 @@ import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.IChat;
 import com.gsma.services.rcs.chat.IChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -46,7 +47,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	private RemoteCallbackList<IChatListener> listeners = new RemoteCallbackList<IChatListener>();
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private Object lock = new Object();
 
@@ -181,17 +182,13 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 					
 					// Update with new session
 					setCoreSession(session);
-			
-					// Update rich messaging history
-					RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 	
 					// Start the session
-			        Thread t = new Thread() {
+			        new Thread() {
 			    		public void run() {
 							session.startSession();
 			    		}
-			    	};
-			    	t.start();
+			    	}.start();
 					return session.getFirstMessage().getMessageId();
 				} catch(Exception e) {
 					if (logger.isActivated()) {
@@ -208,7 +205,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				final String msgId = IdGenerator.generateMessageID();
 		
 				// Send message
-		        Thread t = new Thread() {
+		        new Thread() {
 		    		public void run() {
 						if (msg instanceof GeolocMessage) {
 							session.sendGeolocMessage(msgId, ((GeolocMessage)msg).getGeoloc());
@@ -216,8 +213,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 							session.sendTextMessage(msgId, msg.getTextMessage());					
 						}
 		    		}
-		    	};
-		    	t.start();
+		    	}.start();
 				return msgId;
 	    	}
 		}    	
@@ -239,12 +235,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 					(session.getDialogPath() != null) &&
 						(session.getDialogPath().isSessionEstablished())) { 
 				// Send via MSRP
-		        Thread t = new Thread() {
+		        new Thread() {
 		    		public void run() {
 						session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 		    		}
-		    	};
-		    	t.start();
+		    	}.start();
 			} else {
 				// Send via SIP MESSAGE
 				Core.getInstance().getImService().getImdnManager().sendMessageDeliveryStatus(
@@ -309,6 +304,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
      */
+    @Override
     public void handleSessionStarted() {
     	synchronized(lock) {
 	    	if (logger.isActivated()) {
@@ -323,6 +319,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted(int)
      */
+    @Override
     public void handleSessionAborted(int reason) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -340,6 +337,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
+    @Override
     public void handleSessionTerminatedByRemote() {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -357,6 +355,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
      */
+    @Override
     public void handleReceiveMessage(InstantMessage message) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -398,6 +397,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveGeoloc(com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage)
      */
+    @Override
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -441,7 +441,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError(com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
      */
-	public void handleImError(ChatError error) {
+    @Override
+    public void handleImError(ChatError error) {
 		synchronized (lock) {
 			if (logger.isActivated()) {
 				logger.info("IM error " + error.getErrorCode());
@@ -477,6 +478,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	/* (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)
 	 */
+	@Override
 	public void handleIsComposingEvent(String contact, boolean status) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
@@ -501,7 +503,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
+	@Override
+	public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
@@ -532,30 +535,35 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /**
-     * Conference event
-     * 
-	 * @param contact Contact
-	 * @param contactDisplayname Contact display name
-     * @param state State associated to the contact
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleConferenceEvent(java.lang.String, java.lang.String, java.lang.String)
      */
+    @Override
     public void handleConferenceEvent(String contact, String contactDisplayname, String state) {
     	// Not used here
     }
     
-    /**
-     * Request to add participant is successful
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful()
      */
+    @Override
     public void handleAddParticipantSuccessful() {
     	// Not used in single chat
     }
     
-    /**
-     * Request to add participant has failed
-     * 
-     * @param reason Error reason
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantFailed(java.lang.String)
      */
+    @Override
     public void handleAddParticipantFailed(String reason) {
     	// Not used in single chat
     }
+
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleParticipantStatusChanged(com.gsma.services.rcs.chat.ParticipantInfo)
+	 */
+	@Override
+	public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
+		// Not used in single chat
+	}
 }

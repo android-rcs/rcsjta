@@ -23,6 +23,8 @@ import java.io.Serializable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.orangelabs.rcs.utils.PhoneUtils;
+
 /**
  * Participant information
  * 
@@ -43,7 +45,16 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	private String contact = null;
 
 	/**
-	 * Participant status
+	 * Participant status The status may have the following values:
+	 * <ul>
+	 * <li>UNKNOWN,
+	 * <li>CONNECTED,
+	 * <li>DEPARTED,
+	 * <li>BOOTED,
+	 * <li>FAILED,
+	 * <li>BUSY,
+	 * <li>DECLINED,
+	 * <li>PENDING </u>
 	 */
 	public static class Status {
 		/**
@@ -94,18 +105,36 @@ public class ParticipantInfo implements Parcelable, Serializable {
 		private Status() {
 		}
 	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param contact
+	 *            contact
+	 * @hide
+	 */
+	public ParticipantInfo(String contact) {
+		this(contact, Status.UNKNOWN);
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param status Status
-	 * @param contact Contact
+	 * @param contact
+	 *            Contact
+	 * @param status
+	 *            Status
 	 * @hide
 	 */
-	public ParticipantInfo(int status, String contact) {
+	public ParticipantInfo(String contact,int status) {
 		super();
 		this.status = status;
-		this.contact = contact;
+		String number = PhoneUtils.extractNumberFromUri(contact);
+		if (PhoneUtils.isGlobalPhoneNumber(number)) {
+			this.contact = number;
+		} else {
+			throw new IllegalArgumentException("Invalid contact "+contact);
+		}
 	}
 
 	/**
@@ -137,13 +166,26 @@ public class ParticipantInfo implements Parcelable, Serializable {
 	 * Returns the status
 	 * 
 	 * @return Status
+	 * @see Status
 	 */
 	public int getStatus() {
 		return status;
 	}
 
 	/**
-	 * Returns the contact
+	 * Sets the status
+	 * 
+	 * @param status
+	 *            the new status
+	 * @see Status
+	 * @hide
+	 */
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	
+	/**
+	 * Returns the contact number
 	 * 
 	 * @return Contact
 	 */
@@ -185,4 +227,50 @@ public class ParticipantInfo implements Parcelable, Serializable {
 		this.contact = in.readString();
 		this.status = in.readInt();
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 * @hide
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((contact == null) ? 0 : contact.hashCode());
+		result = prime * result + status;
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @hide
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ParticipantInfo other = (ParticipantInfo) obj;
+		if (contact == null) {
+			if (other.contact != null)
+				return false;
+		} else if (!contact.equals(other.contact))
+			return false;
+		if (status != other.status)
+			return false;
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 * @hide
+	 */
+	@Override
+	public String toString() {
+		return "ParticipantInfo [contact=" + contact+ ", status=" + status+ "]";
+	}
+	
 }

@@ -19,9 +19,9 @@
 package com.orangelabs.rcs.provider.messaging;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -49,6 +49,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Rich messaging history for chats and file transfers.
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class RichMessagingHistory {
 	/**
@@ -79,7 +81,7 @@ public class RichMessagingHistory {
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(RichMessagingHistory.class.getSimpleName());
 	
 	/**
 	 * Create instance
@@ -115,6 +117,33 @@ public class RichMessagingHistory {
 	/*--------------------- Group chat methods -----------------------*/
 
 	/**
+	 * Convert a set of ParticipantInfo into a string
+	 * 
+	 * @param participants
+	 *            the participant information
+	 * @return the string with comma separated values of key pairs formatted as follows: "key=value"
+	 */
+	private static String writeParticipantInfo(Set<ParticipantInfo> participants) {
+		if (participants == null || participants.size() == 0) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		int size = participants.size();
+		for (ParticipantInfo participant : participants) {
+			// set key
+			sb.append(participant.getContact());
+			sb.append('=');
+			// set value
+			sb.append(participant.getStatus());
+			if (--size != 0) {
+				// Not last item : add separator
+				sb.append(',');
+			}
+		}
+		return sb.toString();
+	}
+	
+	/**
 	 * Add group chat session
 	 * 
 	 * @param chatId Chat ID
@@ -123,7 +152,7 @@ public class RichMessagingHistory {
 	 * @param status Status
 	 * @param direction Direction
 	 */
-	public void addGroupChat(String chatId, String subject, List<String> participants, int status, int direction) {
+	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int direction) {
 		if (logger.isActivated()) {
 			logger.debug("addGroupChat (chatID=" + chatId + ") (subject=" + subject + ") (status=" + status + ") (dir=" + direction
 					+ ")");
@@ -132,45 +161,10 @@ public class RichMessagingHistory {
 		values.put(ChatData.KEY_CHAT_ID, chatId);
 		values.put(ChatData.KEY_STATUS, status);
 		values.put(ChatData.KEY_SUBJECT, subject);
-		values.put(ChatData.KEY_PARTICIPANTS, RichMessagingHistory.getParticipants(participants));
+		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
 		values.put(ChatData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		cr.insert(chatDatabaseUri, values);
-	}
-
-	/**
-	 * Get list of participants into a string
-	 * 
-	 * @param participants List of participants
-	 * @return String (contacts are comma separated)
-	 */
-	private static String getParticipants(List<String> participants) {
-		StringBuffer result = new StringBuffer();
-		for(String contact : participants){
-			if (contact != null) {
-				result.append(PhoneUtils.extractNumberFromUri(contact)+";");
-			}
-		}
-		return result.toString();
-	}
-
-	/**
-	 * Get list of participants from a string
-	 * 
-	 * @param String  participants (contacts are comma separated)
-	 * @return String[] contacts or null if 
-	 */
-	private static List<String> getParticipants(String participants) {
-		ArrayList<String> result = new ArrayList<String>();
-		if (participants!=null && participants.trim().length()>0) {
-			String[] items = participants.split(";", 0);
-			for (int i = 0; i < items.length; i++) {
-				if (items[i] != null) {
-					result.add(items[i]);
-				}
-			}
-		}
-		return result;
 	}
 
 	/**
@@ -189,6 +183,23 @@ public class RichMessagingHistory {
 				values, 
 				ChatData.KEY_CHAT_ID + " = '" + chatId + "'", 
 				null);
+	}
+	
+	/**
+	 * Update group chat set of participants
+	 * 
+	 * @param chatId
+	 *            Chat ID
+	 * @param participants
+	 *            The set of participants
+	 */
+	public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
+		if (logger.isActivated()) {
+			logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants=" + participants + ")");
+		}
+		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
+		cr.update(chatDatabaseUri, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 	
 	/**
@@ -220,59 +231,70 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("Get group chat info for " + chatId);
 		}
-    	GroupChatInfo result = null;
-    	Cursor cursor = cr.query(chatDatabaseUri, 
-    			new String[] {
-    				ChatData.KEY_CHAT_ID,
-    				ChatData.KEY_REJOIN_ID,
-    				ChatData.KEY_PARTICIPANTS,
-    				ChatData.KEY_SUBJECT
-    			},
-    			"(" + ChatData.KEY_CHAT_ID + "='" + chatId + "')", 
-				null, 
-    			ChatData.KEY_TIMESTAMP + " DESC");
-    	
-    	if (cursor.moveToFirst()) {
-    		String participants = cursor.getString(2); 
-        	List<String> list = RichMessagingHistory.getParticipants(participants);		
-        	result = new GroupChatInfo(
-    				cursor.getString(0),
-    				cursor.getString(1),
-    				chatId,
-    				list,
-    				cursor.getString(3));
-    	}
-    	cursor.close();
-    	return result;
+		GroupChatInfo result = null;
+		Cursor cursor = null;
+
+		// @formatter:off
+		String[] projection = new String[] { ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
+				ChatData.KEY_SUBJECT };
+		// @formatter:on
+		String selection = ChatData.KEY_CHAT_ID + "= ?";
+		String[] selArgs = new String[] { chatId };
+		try {
+			cursor = cr.query(chatDatabaseUri, projection, selection, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			if (cursor.moveToFirst()) {
+				// Decode list of participants
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(cursor.getString(2));
+				result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId, participants, cursor.getString(3));
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return result;
 	}
 	
 	/**
-	 * Get the group chat participants who have been connected to the chat
+	 * Get the group chat participants
 	 * 
 	 * @param chatId Chat ID
 	 * @result List of contacts
 	 */
-	public List<String> getGroupChatConnectedParticipants(String chatId) {
+	public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId) {
 		if (logger.isActivated()) {
 			logger.debug("Get connected participants for " + chatId);
 		}
-		List<String> result = new ArrayList<String>();
-     	Cursor cursor = cr.query(msgDatabaseUri, 
-    			new String[] {
-    				MessageData.KEY_CONTACT
-    			},
-    			"(" + MessageData.KEY_CHAT_ID + "='" + chatId + "') AND (" + 
-    				MessageData.KEY_TYPE + "=" + ChatLog.Message.Type.SYSTEM + ")",
-    			null, 
-    			MessageData.KEY_TIMESTAMP + " DESC");
-    	while(cursor.moveToNext()) {
-    		String participant = cursor.getString(0);
-    		if ((participant != null) && (!result.contains(participant))) {
-    			result.add(participant);
-    		}
-    	}
-    	cursor.close();
-    	return result;
+		Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
+		String[] projection = new String[] { ChatData.KEY_PARTICIPANTS };
+		String selection = ChatData.KEY_CHAT_ID + "= ?";
+		String[] selArgs = new String[] { chatId };
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(chatDatabaseUri, projection, selection, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			if (cursor.moveToFirst()) {
+				// Decode list of participants
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(cursor.getString(0));
+				if (participants != null) {
+					for (ParticipantInfo participantInfo : participants) {
+						// Only consider participants who have not declined or left GC
+						switch (participantInfo.getStatus()) {
+						case ParticipantInfo.Status.DEPARTED:
+						case ParticipantInfo.Status.DECLINED:
+							break;
+						default:
+							result.add(participantInfo);
+							break;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return result;
 	}
 
 	/*--------------------- Chat messages methods -----------------------*/
@@ -365,7 +387,7 @@ public class RichMessagingHistory {
 		return label + "," + geoloc.getLatitude() + "," + geoloc.getLongitude() + "," + geoloc.getExpiration() + ","
 				+ geoloc.getAccuracy();
 	}
-
+	
 	/**
 	 * Add a group chat message
 	 * 

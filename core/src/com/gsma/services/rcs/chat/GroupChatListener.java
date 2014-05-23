@@ -110,4 +110,12 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param contact Contact
 	 */
 	public abstract void onParticipantDisconnected(String contact);
+	
+    /**
+     * Callback called when a participant status has changed
+     *
+     * @param participantInfo the participant information
+     */
+    public abstract void onParticipantStatusChanged(ParticipantInfo participantInfo);
+
 }

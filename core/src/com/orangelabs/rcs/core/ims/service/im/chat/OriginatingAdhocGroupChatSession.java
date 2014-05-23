@@ -18,9 +18,12 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import java.util.Set;
+
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -55,7 +58,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	 * @param subject Subject associated to the session
 	 * @param participants List of invited participants
 	 */
-	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject, ListOfParticipant participants) {
+	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject, Set<ParticipantInfo> participants) {
 		super(parent, conferenceId, participants);
 
 		// Set subject
@@ -101,7 +104,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	                    SdpUtils.DIRECTION_SENDRECV);
 
 	        // Generate the resource list for given participants
-	        String resourceList = ChatUtils.generateChatResourceList(getParticipants().getList());
+	        String resourceList = ChatUtils.generateChatResourceList(ParticipantInfoUtils.getContactsFromParticipantInfo(getParticipants()));
 	    	
 	    	// Build multipart
 	    	String multipart =

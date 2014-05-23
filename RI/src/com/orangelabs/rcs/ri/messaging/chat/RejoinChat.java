@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynServiceException;
@@ -33,7 +34,9 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -79,6 +82,11 @@ public class RejoinChat {
 	 * Restart chat manager
 	 */
 	private RestartChat restartChat = null;
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(RejoinChat.class.getSimpleName());
 
 	/**
      * Constructor
@@ -103,6 +111,9 @@ public class RejoinChat {
     	
     	// Initiate the session in background
     	try {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "RejoinChat chatId=" + chatId);
+			}
     		groupChat = chatApi.rejoinGroupChat(chatId);
     		groupChat.addEventListener(chatListener);
     	} catch(Exception e) {
@@ -163,6 +174,9 @@ public class RejoinChat {
     	public void onSessionStarted() {
 			handler.post(new Runnable() { 
 				public void run() {
+					if (LogUtils.isActive) {
+						Log.d(LOGTAG, "onSessionStarted chatId=" + chatId);
+					}
 					try {
 	                    // Hide progress dialog
 						hideProgressDialog();
@@ -189,6 +203,9 @@ public class RejoinChat {
     	
     	// Session aborted
     	public void onSessionAborted() {
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onSessionAborted chatId=" + chatId);
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -202,6 +219,9 @@ public class RejoinChat {
     	
     	// Session error
     	public void onSessionError(final int error) {
+    		if (LogUtils.isActive) {
+				Log.w(LOGTAG, "onSessionError chatId=" + chatId+" error="+error);
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -262,7 +282,13 @@ public class RejoinChat {
     	// A participant is disconnected from the group chat
     	public void onParticipantDisconnected(String contact) {
     		// Not used here
-    	}    	
+    	}
+
+    	// The status of a GC participant has changed
+		@Override
+		public void onParticipantStatusChanged(ParticipantInfo arg0) {
+			// Not used here
+		}
     };
     
 	/**

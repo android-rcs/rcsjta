@@ -1,9 +1,12 @@
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.StorageUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -32,7 +35,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * List of participants
      */
-    protected ListOfParticipant participants = new ListOfParticipant();
+    protected Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
 
     /**
 	 * Thumbnail
@@ -96,7 +99,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * 
 	 * @return List of participants 
 	 */
-	public ListOfParticipant getParticipants() {
+	public Set<ParticipantInfo> getParticipants() {
 		return participants;
 	}
 	

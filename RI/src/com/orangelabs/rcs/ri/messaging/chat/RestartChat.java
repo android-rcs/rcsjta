@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynServiceException;
@@ -33,7 +34,9 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -75,6 +78,11 @@ public class RestartChat {
      */
     private MyGroupChatListener chatListener = new MyGroupChatListener();	
 	
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(RestartChat.class.getSimpleName());
+	
 	/**
      * Constructor
      * 
@@ -95,19 +103,31 @@ public class RestartChat {
     	if (groupChat != null) {
     		return;
     	}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "start chatId=" + chatId);
+		}
     	
     	// Initiate the session in background
     	try {
     		groupChat = chatApi.restartGroupChat(chatId);
-    		groupChat.addEventListener(chatListener);
+    		if (groupChat != null) {
+    			groupChat.addEventListener(chatListener);
+    		} else {
+    			if (LogUtils.isActive) {
+    				Log.w(LOGTAG, "Cannot restart Group chat session chatId "+chatId);
+    			}
+    			// Show error
+    			Utils.showMessageAndExit(activity, activity.getString(R.string.label_restart_chat_exception));	
+    			return;
+    		}
     	} catch(Exception e) {
-    		e.printStackTrace();
-    		
-			// Hide progress dialog
-			hideProgressDialog();
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
 
 			// Show error
-			Utils.showMessage(activity, activity.getString(R.string.label_restart_chat_exception));		
+			Utils.showMessageAndExit(activity, activity.getString(R.string.label_restart_chat_exception));	
+			return;
     	}
         
         // Display a progress dialog
@@ -150,6 +170,9 @@ public class RestartChat {
     private class MyGroupChatListener extends GroupChatListener {
     	// Session started
     	public void onSessionStarted() {
+    		if (LogUtils.isActive) {
+    			Log.d(LOGTAG, "onSessionStarted chatId=" + chatId);
+    		}
 			handler.post(new Runnable() { 
 				public void run() {
 					try {
@@ -178,6 +201,9 @@ public class RestartChat {
     	
     	// Session aborted
     	public void onSessionAborted() {
+    		if (LogUtils.isActive) {
+    			Log.d(LOGTAG, "onSessionAborted chatId=" + chatId);
+    		}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -191,6 +217,9 @@ public class RestartChat {
     	
     	// Session error
     	public void onSessionError(final int error) {
+    		if (LogUtils.isActive) {
+    			Log.e(LOGTAG, "onSessionError chatId=" + chatId+" error="+error);
+    		}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -249,7 +278,13 @@ public class RestartChat {
     	// A participant is disconnected from the group chat
     	public void onParticipantDisconnected(String contact) {
     		// Not used here
-    	}    	
+    	}
+    	
+    	// The status of a GC participant has changed
+		@Override
+		public void onParticipantStatusChanged(ParticipantInfo arg0) {
+			// Not used here
+		}
     };
 
 	/**

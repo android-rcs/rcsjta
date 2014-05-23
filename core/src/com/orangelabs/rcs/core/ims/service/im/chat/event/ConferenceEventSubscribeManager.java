@@ -19,6 +19,8 @@
 package com.orangelabs.rcs.core.ims.service.im.chat.event;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import javax2.sip.header.ExpiresHeader;
@@ -26,6 +28,8 @@ import javax2.sip.header.SubscriptionStateHeader;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -38,7 +42,7 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
+import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.platform.registry.RegistryFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -91,12 +95,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
 	 * List of connected participants
 	 */
-	private ListOfParticipant connectedParticipants = new ListOfParticipant();	
+	private Set<ParticipantInfo> participants;	
 	
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class.getName());
 
     /**
      * Constructor
@@ -107,7 +111,9 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     	this.session  = session;
     	this.imsModule = session.getImsService().getImsModule();
 		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
-    	
+		// Initiate list of participants with list of invited with status UNKNOWN
+		participants = new HashSet<ParticipantInfo>(session.getParticipants());
+		
     	int defaultExpirePeriod = RcsSettings.getInstance().getSubscribeExpirePeriod();
     	int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD, -1);
     	if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
@@ -140,8 +146,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	 * 
 	 * @return List of participants
 	 */
-    public ListOfParticipant getParticipants() {
-		return connectedParticipants;
+    public Set<ParticipantInfo> getParticipants() {
+		return participants;
 	}
     
     /**
@@ -149,152 +155,131 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * 
      * @param notify Received notify
      */
-    public void receiveNotification(SipRequest notify) {
-    	if (logger.isActivated()) {
+	public void receiveNotification(SipRequest notify) {
+		if (logger.isActivated()) {
 			logger.debug("New conference event notification received");
-		}    	
-    	
-	    // Parse XML part
-	    byte[] content = notify.getContentBytes();
+		}
+
+		// Parse XML part
+		byte[] content = notify.getContentBytes();
 		if (content != null) {
 			try {
-		    	InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
-		    	ConferenceInfoParser confParser = new ConferenceInfoParser(pidfInput);
-		    	ConferenceInfoDocument conference = confParser.getConferenceInfo();
-		    	if (conference != null) {
-		    		int maxParticipants = conference.getMaxUserCount(); 
-                    if (maxParticipants > 0) {
-				    	if (logger.isActivated()) {
-				    		logger.debug("Set max number of participants to " + maxParticipants);
-				    	}
-                        session.setMaxParticipants(maxParticipants);
-                    }
-                    // Changed by Deutsche Telekom
-			    	// reset list of participants if conference event state is full
-					if (ConferenceInfoDocument.STATE_FULL.equalsIgnoreCase(conference.getState())) {
-						connectedParticipants.removeAllParticipant();
+				InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
+				ConferenceInfoParser confParser = new ConferenceInfoParser(pidfInput);
+				ConferenceInfoDocument conference = confParser.getConferenceInfo();
+				if (conference != null) {
+					int maxParticipants = conference.getMaxUserCount();
+					if (maxParticipants > 0) {
+						if (logger.isActivated()) {
+							logger.debug("Set max number of participants to " + maxParticipants);
+						}
+						session.setMaxParticipants(maxParticipants);
 					}
-                    ListOfParticipant disconnectedParticipants = new ListOfParticipant();
-			    	Vector<User> users = conference.getUsers();
-			    	for(int i=0; i < users.size(); i++) {
-			    		User user = (User)users.elementAt(i);
-			    		String entity = PhoneUtils.extractNumberFromUri(user.getEntity());
-			    		if (StringUtils.isEmpty(entity)) {
-			    			// Empty entity
-			    			continue;
-			    		}
-			    		
-				    	if (logger.isActivated()) {
-				    		logger.debug("Conference info notification for " + entity);
-				    	}
-				    	
-				    	String me = ImsModule.IMS_USER_PROFILE.getUsername();
-				    	if (user.isMe() || PhoneUtils.compareNumbers(entity, me)) {
-			    			// By-pass me
-			    			continue;
-			    		}
-			    		
-				    	// Get state
-				    	String state = user.getState();
-				    	String method = user.getDisconnectionMethod(); 
-				    	if (logger.isActivated()) {
-				    		logger.debug("User conference info: " + user.toString());
-				    	}
-				    	if (method != null) {
-					    	// If there is a method then use it as a specific state
-				    		state = method;
+					Set<ParticipantInfo> newSet = new HashSet<ParticipantInfo>();
+					if (!ConferenceInfoDocument.STATE_FULL.equalsIgnoreCase(conference.getState())) {
+						newSet = new HashSet<ParticipantInfo>(participants);
+					}
+					Vector<User> users = conference.getUsers();
+					for (User user : users) {
+						String entity = PhoneUtils.extractNumberFromUri(user.getEntity());
+						if (StringUtils.isEmpty(entity)) {
+							// Empty entity
+							continue;
+						}
 
-				    		// If session failed because declined by remote then use it as a specific state
-				    		if (method.equals("failed")) {
-					    		String reason = user.getFailureReason();
-					    		if ((reason != null) && reason.contains("603")) {
-					    			state = User.STATE_DECLINED;
-					    		}
-				    		}
-				    	}
+						if (logger.isActivated()) {
+							logger.debug("Conference info notification for " + entity);
+						}
+
+						String me = ImsModule.IMS_USER_PROFILE.getUsername();
+						if (user.isMe() || PhoneUtils.compareNumbers(entity, me)) {
+							// By-pass me
+							continue;
+						}
+
+						// Get state
+						String state = user.getState();
+						String method = user.getDisconnectionMethod();
+						if (logger.isActivated()) {
+							logger.debug("User conference info: " + user);
+						}
+						if (method != null) {
+							// If there is a method then use it as a specific state
+							state = method;
+
+							// If session failed because declined by remote then use it as a specific state
+							if (method.equals("failed")) {
+								String reason = user.getFailureReason();
+								if ((reason != null) && reason.contains("603")) {
+									state = User.STATE_DECLINED;
+								}
+							}
+						}
 
 						// Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575 dialing-in: Endpoint is
 						// dialing into the conference, not yet in the roster (probably being authenticated). dialing-out: Focus has
 						// dialed out to connect the endpoint to the conference, but the endpoint is not yet in the roster (probably
 						// being authenticated).
-                        if ((state.equalsIgnoreCase("dialing-out")) || (state.equalsIgnoreCase("dialing-in"))) {
-                            state = User.STATE_PENDING;
-                        }
-			    		// Update the participants list
-			    		if (User.isConnected(state)) {
-			    			// A participant has joined the session
-			    			connectedParticipants.addParticipant(entity);
-			    		} else
-			    		if (User.isDisconnected(state)) {
-			    			// A participant has quit the session
-			    			connectedParticipants.removeParticipant(entity);
-			    			disconnectedParticipants.addParticipant(entity);
-			    		}
-			    		
-						// There are some states that we do not want to notify to listeners. These are all the states that have not
-						// changed since last notification. It is important to bypass them, else they will produce noise in the
-						// notification behavior (for example we will see "participant has departed" once again, even if he departed
-						// during the last session and was not reinvited this time).
-						if (!RichMessagingHistory.getInstance().hasLastKnownStateForParticipantChanged(session.getContributionID(),
-								entity, state)) {
-							if (logger.isActivated()) {
-								logger.debug("State for " + entity + " was already " + state + ", do not notify listeners");
-							}
-							continue;
-						} else {
-							if (logger.isActivated()) {
-								logger.debug("State for " + entity + " has changed and is now " + state + ", notify listeners");
+						if ((state.equalsIgnoreCase("dialing-out")) || (state.equalsIgnoreCase("dialing-in"))) {
+							state = User.STATE_PENDING;
+						}
+						ParticipantInfo item2add = new ParticipantInfo(entity, getStatus(state));
+						// Update the set of participants
+						ParticipantInfoUtils.addParticipant(newSet, item2add);
+						// Check if original set has changed
+						if (participants.contains(item2add) == false) {
+							// Notify session listeners
+							for (int j = 0; j < session.getListeners().size(); j++) {
+								((ChatSessionListener) session.getListeners().get(j)).handleConferenceEvent(entity,
+										user.getDisplayName(), state);
 							}
 						}
-						
-			    		// Notify session listeners
-		    	    	for(int j=0; j < session.getListeners().size(); j++) {
-		    	    		((ChatSessionListener)session.getListeners().get(j)).handleConferenceEvent(entity,
-		    	    				user.getDisplayName(), state);
-				        }
-			    	}
-			    	if (session instanceof GroupChatSession) {
-			    		// Update the list of participants of the terminating group chat session
-			    		UpdateSessionParticipantList(connectedParticipants, disconnectedParticipants, ((GroupChatSession)session).getParticipants());
 					}
-		    	}
-	    	} catch(Exception e) {
-	    		if (logger.isActivated()) {
-	    			logger.error("Can't parse XML notification", e);
-	    		}
-	    	}
+					if (session instanceof GroupChatSession && newSet.equals(participants) == false) {
+						// Update the set of participants of the terminating group chat session
+						UpdateSessionParticipantSet(newSet);
+					}
+				}
+			} catch (Exception e) {
+				if (logger.isActivated()) {
+					logger.error("Can't parse XML notification", e);
+				}
+			}
 		}
-		
+
 		// Check subscription state
-    	SubscriptionStateHeader stateHeader = (SubscriptionStateHeader)notify.getHeader(SubscriptionStateHeader.NAME);
+		SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify.getHeader(SubscriptionStateHeader.NAME);
 		if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
 			if (logger.isActivated()) {
 				logger.info("Conference event subscription has been terminated by server");
 			}
 			terminatedByServer();
-		}    	
-    }
-	
-	/**
-	 * Update the list of participants of the group chat session to be aligned with the provider content
-	 * 
-	 * @param connectedUsers
-	 *            the list of connected users to add to the session list if not already present
-	 * @param disconnectedUsers
-	 *            the list of connected users to remove from the session list if present
-	 * @param sessionUsers
-	 *            the list of participants of the group chat session
-	 */
-	private static void UpdateSessionParticipantList(final ListOfParticipant connectedUsers,
-			final ListOfParticipant disconnectedUsers, ListOfParticipant sessionUsers) {
-		for (String user : connectedUsers.getList()) {
-			sessionUsers.addParticipant(user);
-		}
-		for (String user : disconnectedUsers.getList()) {
-			sessionUsers.removeParticipant(user);
 		}
 	}
 
+	/**
+	 * Update the set of participants of the group chat session to be aligned with the provider content
+	 * 
+	 * @param newSet
+	 *            the new set of participants
+	 */
+	private void UpdateSessionParticipantSet(final Set<ParticipantInfo> newSet) {
+		// Save old set of participants
+		Set<ParticipantInfo> oldSet = participants;
+		participants = newSet;
+		// Update provider
+		RichMessagingHistory.getInstance().updateGroupChatParticipant(session.getContributionID(), participants);
+		// Notify participant status change. Make a copy of new set.
+		Set<ParticipantInfo> workSet = new HashSet<ParticipantInfo>(newSet);
+		// Notify status change for the new set
+		workSet.removeAll(oldSet);
+		for (ParticipantInfo item : workSet) {
+			for (int i = 0; i < session.getListeners().size(); i++) {
+				((ChatSessionListener) session.getListeners().get(i)).handleParticipantStatusChanged(item);
+			}
+		}
+	}
+	
 	/**
      * Check if the received notification if for this subscriber
      * 
@@ -703,5 +688,43 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         
         // Reset dialog path attributes
         resetDialogPath();
+	}
+	
+	/**
+	 * Convert the status into integer
+	 * 
+	 * @param status
+	 *            the string status
+	 * @return the integer status
+	 */
+	private static int getStatus(final String status) {
+		if (status == null || status.equals(User.STATE_UNKNOWN)) {
+			return Status.UNKNOWN;
+		}
+		if (status.equals(User.STATE_CONNECTED)) {
+			return Status.CONNECTED;
+		}
+		if (status.equals(User.STATE_DISCONNECTED)) {
+			return Status.DISCONNECTED;
+		}
+		if (status.equals(User.STATE_DEPARTED)) {
+			return Status.DEPARTED;
+		}
+		if (status.equals(User.STATE_BOOTED)) {
+			return Status.BOOTED;
+		}
+		if (status.equals(User.STATE_FAILED)) {
+			return Status.FAILED;
+		}
+		if (status.equals(User.STATE_BUSY)) {
+			return Status.BUSY;
+		}
+		if (status.equals(User.STATE_DECLINED)) {
+			return Status.DECLINED;
+		}
+		if (status.equals(User.STATE_PENDING)) {
+			return Status.PENDING;
+		}
+		return Status.UNKNOWN;
 	}
 }

@@ -77,7 +77,7 @@ public class ContributionIdGenerator {
             byte[] contributionId = mac.doFinal(callId.getBytes());
 
             // Convert to Hexa and keep only 128 bits
-            StringBuffer hexString = new StringBuffer(32);
+            StringBuilder hexString = new StringBuilder(32);
             for (int i = 0; i < 16 && i < contributionId.length; i++) {
                 String hex = Integer.toHexString(0xFF & contributionId[i]);
                 if (hex.length() == 1) {

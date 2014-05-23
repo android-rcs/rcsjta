@@ -18,11 +18,14 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax2.sip.header.SubjectHeader;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -98,10 +101,10 @@ public abstract class OneOneChatSession extends ChatSession {
 	 * @param contact Contact
 	 * @return List of participants
 	 */
-    private static ListOfParticipant generateOneOneParticipants(String contact) {
-    	ListOfParticipant list = new ListOfParticipant();
-    	list.addParticipant(contact);
-		return list;
+    private static Set<ParticipantInfo> generateOneOneParticipants(String contact) {
+    	Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
+    	ParticipantInfoUtils.addParticipant(set, contact);
+		return set;
 	}
 
     /**
@@ -109,7 +112,7 @@ public abstract class OneOneChatSession extends ChatSession {
 	 * 
 	 * @return List of participants
 	 */
-    public ListOfParticipant getConnectedParticipants() {
+    public Set<ParticipantInfo> getConnectedParticipants() {
 		return getParticipants();
 	}
 

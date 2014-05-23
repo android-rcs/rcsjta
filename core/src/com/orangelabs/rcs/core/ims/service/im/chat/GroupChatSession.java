@@ -18,11 +18,12 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import java.util.List;
+import java.util.Set;
 
 import javax2.sip.header.ExtensionHeader;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -50,8 +51,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Abstract Group chat session
  * 
  * @author Jean-Marc AUFFRET
- */
-/**
  * @author YPLO6403
  *
  */
@@ -59,22 +58,24 @@ public abstract class GroupChatSession extends ChatSession {
 	/**
 	 * Conference event subscribe manager
 	 */
-	private ConferenceEventSubscribeManager conferenceSubscriber = new ConferenceEventSubscribeManager(this); 
+	private ConferenceEventSubscribeManager conferenceSubscriber; 
 		
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(GroupChatSession.class.getSimpleName());
 
     /**
 	 * Constructor for originating side
 	 * 
 	 * @param parent IMS service
 	 * @param conferenceId Conference id
-	 * @param participants List of invited participants
+	 * @param participants Set of invited participants
 	 */
-	public GroupChatSession(ImsService parent, String conferenceId, ListOfParticipant participants) {
+	public GroupChatSession(ImsService parent, String conferenceId, Set<ParticipantInfo> participants) {
 		super(parent, conferenceId, participants);
+		
+		conferenceSubscriber = new ConferenceEventSubscribeManager(this); 
 		
 		// Set feature tags
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
@@ -107,7 +108,7 @@ public abstract class GroupChatSession extends ChatSession {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#getConnectedParticipants()
      */
-    public ListOfParticipant getConnectedParticipants() {
+    public Set<ParticipantInfo> getConnectedParticipants() {
 		return conferenceSubscriber.getParticipants();
 	}
     
@@ -414,16 +415,16 @@ public abstract class GroupChatSession extends ChatSession {
 	        }
         }
 	}
-
+	
 	/**
 	 * Add a list of participants to the session
 	 * 
-	 * @param participants List of participants
+	 * @param participants set of participants
 	 */
-	public void addParticipants(List<String> participants) {
+	public void addParticipants(Set<String> participants) {
 		try {
 			if (participants.size() == 1) {
-				addParticipant(participants.get(0));
+				addParticipant(participants.iterator().next());
 				return;
 			}
 			

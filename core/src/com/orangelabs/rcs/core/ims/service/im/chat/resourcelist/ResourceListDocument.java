@@ -17,24 +17,27 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.resourcelist;
 
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Resource-list document
  * 
  * @author jexa7410
+ * @author YPLO6403
+ *
  */
 public class ResourceListDocument {
-	private Vector<String> entries = new Vector<String>();
+	private Set<String> entries = new HashSet<String>();
 	
 	public ResourceListDocument() {
 	}
 	
 	public void addEntry(String uri) {
-		entries.addElement(uri);
+		entries.add(uri);
 	}
 	
-	public Vector<String> getEntries() {
+	public Set<String> getEntries() {
 		return entries;
 	}
 }

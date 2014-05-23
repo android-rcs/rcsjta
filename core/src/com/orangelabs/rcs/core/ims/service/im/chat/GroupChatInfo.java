@@ -17,7 +17,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import java.util.List;
+import java.util.Set;
+
+import com.gsma.services.rcs.chat.ParticipantInfo;
 
 /**
  * Group chat info
@@ -41,9 +43,9 @@ public class GroupChatInfo {
 	private String contributionId;
 	
 	/**
-	 * List of initial participants
+	 * Set of initial participants
 	 */
-	private List<String> participants;
+	private Set<ParticipantInfo> participants;
 	
 	/**
 	 * Subject
@@ -59,7 +61,7 @@ public class GroupChatInfo {
 	 * @param particpants Participants
 	 * @param subject Subject
 	 */
-	public GroupChatInfo(String sessionId, String rejoinId, String contributionId, List<String> participants, String subject) {
+	public GroupChatInfo(String sessionId, String rejoinId, String contributionId, Set<ParticipantInfo> participants, String subject) {
 		this.sessionId = sessionId;
 		this.rejoinId = rejoinId;
 		this.contributionId = contributionId;
@@ -95,11 +97,11 @@ public class GroupChatInfo {
 	}
 
 	/**
-	 * Returns list of participants
+	 * Returns set of participants
 	 * 
 	 * @return Participants
 	 */
-	public List<String> getParticipants() {
+	public Set<ParticipantInfo> getParticipants() {
 		return participants;
 	}
 

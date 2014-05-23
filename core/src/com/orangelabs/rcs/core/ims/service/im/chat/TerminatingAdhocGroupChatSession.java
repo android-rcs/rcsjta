@@ -19,11 +19,12 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -49,10 +50,15 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
 
+	/**
+	 * List of missing participants in case of restart 
+	 */
+	Set<String> missingParticipants = null;
+	
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(TerminatingAdhocGroupChatSession.class.getSimpleName());
     
     /**
      * Constructor
@@ -63,23 +69,55 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite) {
 		super(parent, ChatUtils.getReferredIdentity(invite), ChatUtils.getListOfParticipants(invite));
 
-		// Detect if it's a rejoin
-		if (getParticipants().getList().size() == 0) {
-			if (logger.isActivated()) {
-	    		logger.info("Invite to join a group chat");
-	    	}
-		}
-		
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);
 		setSubject(subject);
-		
+
 		// Create dialog path
 		createTerminatingDialogPath(invite);
-		
+
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
-		setContributionID(id);				
+		setContributionID(id);
+
+		// Detect if it's a rejoin
+		if (getParticipants().size() == 0) {
+			if (logger.isActivated()) {
+				logger.info("Invite to join a group chat");
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.info("List of invited participants: " + Arrays.toString(getParticipants().toArray()));
+			}
+			// Detect if it's a restart: retrieve list of initial participants
+			Set<ParticipantInfo> initialParticipants = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(
+					getContributionID());
+			if (initialParticipants != null && initialParticipants.size() > 0) {
+				if (logger.isActivated()) {
+					logger.info("List of initial participants: " + Arrays.toString(initialParticipants.toArray()));
+				}
+				missingParticipants = new HashSet<String>();
+				// Run through the list of initial participants
+				for (ParticipantInfo participantInfo : initialParticipants) {
+					// Is initial participant in the invited list ?
+					if (ParticipantInfoUtils.getItem(getParticipants(), participantInfo.getContact()) == null) {
+						// Initial participant does not belong to list of invited.
+						// Participant is missing: should be re-invited
+						missingParticipants.add(participantInfo.getContact());
+					}
+				}
+				if (missingParticipants.size() != 0) {
+					if (logger.isActivated()) {
+						logger.info("Invite to restart with missing participants: "
+								+ Arrays.toString(missingParticipants.toArray()));
+					}
+				}
+			} else {
+				if (logger.isActivated()) {
+					logger.info("No initial Group Chat");
+				}
+			}
+		}
 	}
 
 	/**
@@ -205,7 +243,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     			session.setSuccessReportOption(false);
     			
     			// Open the connection
-    			Thread thread = new Thread(){
+    			new Thread(){
     				public void run(){
     					try {
     						// Open the MSRP session
@@ -220,8 +258,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				        	}
 						}		
     				}
-    			};
-    			thread.start();
+    			}.start();
             }
             
             // Create a 200 OK response
@@ -266,9 +303,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     	    		getListeners().get(i).handleSessionStarted();
     	        }
 
-				// Invite missing participant
-				inviteMissingParticipants(getParticipants());
-				
+    	    	// Check if some participants are missing
+    	    	if (missingParticipants != null && missingParticipants.size() > 0) {
+					// Only keep participants who are not invited by the AS
+    	    		inviteMissingParticipants(missingParticipants);
+    	    	}
+    	    	
     	    	// Subscribe to event package
             	getConferenceEventSubscriber().subscribe();
 
@@ -296,29 +336,18 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	
 	/**
 	 * Invite missing participants.
-	 * <p>
-	 * This method is executed once upon reception of the first conference event notification after invite.
 	 * 
-	 * @param invitedParticipants
-	 *            the list of invited participants contained in the notify with full state
+	 * @param participants
+	 *            the list of missing participants
 	 */
-	private void inviteMissingParticipants(final ListOfParticipant invitedParticipants) {
+	private void inviteMissingParticipants(final Set<String> participants) {
+		if (logger.isActivated()) {
+			logger.info("Invite missing participants: " + Arrays.toString(missingParticipants.toArray()));
+		}
 		new Thread() {
 			public void run() {
 				try {
-					if (logger.isActivated()) {
-						logger.debug("Check if participants are missing in the conference");
-					}
-					Set<String> connectedProvider = new HashSet<String>(RichMessagingHistory.getInstance()
-							.getGroupChatConnectedParticipants(getContributionID()));
-					Set<String> invitedSet = new HashSet<String>(invitedParticipants.getList());
-					// Only keep participants who are not invited by the AS
-					connectedProvider.removeAll(invitedSet);
-					if (!connectedProvider.isEmpty()) {
-						if (logger.isActivated())
-							logger.debug("Add " + connectedProvider.size() + " missing participants in the conference");
-						addParticipants(new ArrayList<String>(connectedProvider));
-					}
+					addParticipants(participants);
 				} catch (Exception e) {
 					if (logger.isActivated()) {
 						logger.error("Session initiation has failed", e);
@@ -327,4 +356,5 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			}
 		}.start();
 	}
+	
 }

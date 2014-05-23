@@ -17,8 +17,10 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -28,7 +30,6 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.ListOfParticipant;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -69,7 +70,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
 
 	/**
 	 * Constructor
@@ -90,11 +91,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 *            Chat contribution Id
 	 */
 	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean tryAttachThumbnail,
-			String conferenceId, ListOfParticipant participants, String chatSessionID, String chatContributionId) {
+			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId) {
 		super(parent, content, conferenceId, null, chatSessionID, chatContributionId);
 		// Set participants involved in the transfer
 		this.participants = participants;
-
+		
 		MmContent thumbnail = null;
 		if (tryAttachThumbnail && MimeManager.isImageType(content.getEncoding())) {
 			// Create the thumbnail

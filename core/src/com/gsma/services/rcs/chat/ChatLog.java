@@ -17,7 +17,9 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import android.net.Uri;
@@ -26,6 +28,8 @@ import android.net.Uri;
  * Content provider for chat history
  *  
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class ChatLog {
     /**
@@ -74,7 +78,42 @@ public class ChatLog {
          * <P>Type: LONG</P>
          */
         public static final String TIMESTAMP = "timestamp";
-    }
+        
+        /**
+         * The name of the column containing the list of participants and associated status.
+         * <P>Type: TEXT</P>
+         * @see ParticipantInfo
+         */
+        public static final String PARTICIPANTS = "participants";
+        
+		/**
+         * Utility method to get list of ParticipantInfo objects from its string representation in the ChatLog provider.
+         *
+         * @param participants
+         *            the SET of participant information from the ChatLog provider
+         * @return the SET of participant information
+         */
+		public static Set<ParticipantInfo> getParticipantInfo(String participants) {
+			if (participants == null) {
+				return null;
+			}
+			String[] tokens = participants.split(",");
+			Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
+			for (String participant : tokens) {
+				String[] keyValue = participant.split("=");
+				if (keyValue.length == 2) {
+					String contact = keyValue[0];
+					int status = ParticipantInfo.Status.UNKNOWN;
+					try {
+						status = Integer.parseInt(keyValue[1]) % 9;
+					} catch (NumberFormatException e) {
+					}
+					result.add(new ParticipantInfo(contact, status));
+				}
+			}
+			return result;
+		}
+	}
     
     /**
      * Chat message from a single chat or group chat

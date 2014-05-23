@@ -5,7 +5,7 @@ import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-
+ 
 /**
  * Group chat interface
  */
@@ -20,7 +20,7 @@ interface IGroupChat {
 
 	String getSubject();	
 
-	List<String> getParticipants();
+	List<ParticipantInfo> getParticipants();
 	
 	void acceptInvitation();
 	
@@ -43,8 +43,6 @@ interface IGroupChat {
 	void removeEventListener(in IGroupChatListener listener);
 
 	String sendGeoloc(in Geoloc geoloc);
-
-	List<ParticipantInfo> getParticipantInfo();
-	
+		
 	IFileTransfer sendFile(in String filename, in boolean tryAttachThumbnail, in IFileTransferListener listener);
 }
