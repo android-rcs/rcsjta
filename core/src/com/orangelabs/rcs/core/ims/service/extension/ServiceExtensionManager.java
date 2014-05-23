@@ -26,8 +26,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.List;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -35,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 
+import com.android.org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.gsma.iariauth.validator.PackageProcessor;
 import com.gsma.iariauth.validator.ProcessingResult;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -110,7 +109,7 @@ public class ServiceExtensionManager {
 			}
 			
 			String authDocumentPath = "/sdcard/iari-authorization.xml"; // TODO: get from provisioning
-			String ksPath = "/sdcard/range-root-truststore.jks"; // TODO: get from provisioning
+			String ksPath = "/sdcard/range-root-truststore.bks"; // TODO: get from provisioning
 			String ksPasswd = "secret"; // TODO: get from provisioning
 			File authDocument = new File(authDocumentPath);
 			KeyStore ks = loadKeyStore(ksPath, ksPasswd);
@@ -180,9 +179,11 @@ public class ServiceExtensionManager {
 				}
 			}
 		} catch(FileNotFoundException e) {
+			e.printStackTrace();
 		} finally {
 			try { if(fis != null) fis.close(); } catch(Throwable t) {}
 		}
+		
 		return ks;
 	}
 	
