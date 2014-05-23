@@ -401,6 +401,19 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
+       	<TextView android:text="Max MSRP length for extensions (bytes):"
+	    android:paddingTop="5dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
+		<EditText android:id="@+id/MaxMsrpLengthExtensions"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	 	android:layout_marginLeft="5dip"
+	 	android:layout_marginRight="5dip"
+	 	android:maxLength="6"
+	 	android:lines="1"
+	 	android:inputType="numberSigned"/>
+		
 		 <CheckBox android:id="@+id/TcpFallback"
 	    android:paddingTop="5dip"
 		android:layout_height="wrap_content"
@@ -486,7 +499,15 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
         android:text="IMEI as device ID"/>
-	</LinearLayout>
+        
+        <CheckBox android:id="@+id/AllowExtensions"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip"
+		android:layout_marginRight="5dip"
+        android:text="RCS extensions"/>
+        
+      	</LinearLayout>
 	</ScrollView>
 </LinearLayout>
 		
