@@ -111,7 +111,7 @@
 	</target>
 
 	<target name="generate-api">
-	    <ant dir="${terminal.root}/core" antfile="build-local.xml" target="api" inheritAll="false" />        
+	    <ant dir="${terminal.root}/core" antfile="build.xml" target="api" inheritAll="false" />        
 	</target>
 	<target name="generate-ri-apk" depends="generate-api">
 	    <ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
