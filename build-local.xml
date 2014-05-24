@@ -25,6 +25,8 @@
 
     <target name="docs" description="Generate RCS API javadoc">
     <echo>Generate Javadoc</echo>
+    <delete dir="${terminal.root}/docs"/>
+    <mkdir dir="${terminal.root}/docs"/>
     <delete dir="${terminal.root}/docs/javadoc"/>
     <mkdir dir="${terminal.root}/docs/javadoc"/>
     <javadoc doctitle="GSMA RCS Terminal API"
@@ -111,7 +113,7 @@
 	</target>
 
 	<target name="generate-api">
-	    <ant dir="${terminal.root}/core" target="api" inheritAll="false" />        
+	    <ant dir="${terminal.root}/core" antfile="build.xml" target="api" inheritAll="false" />        
 	</target>
 	<target name="generate-ri-apk" depends="generate-api">
 	    <ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
