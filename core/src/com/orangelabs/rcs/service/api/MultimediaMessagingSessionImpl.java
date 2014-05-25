@@ -285,7 +285,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	        listeners.finishBroadcast();
 	        
 	        // Remove session from the list
-	        MultimediaSessionServiceImpl.removeSipSession(session.getSessionID());
+	        MultimediaSessionServiceImpl.removeMessagingSipSession(session.getSessionID());
 	    }
     }
     
@@ -312,7 +312,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	        listeners.finishBroadcast();
 	        
 	        // Remove session from the list
-	        MultimediaSessionServiceImpl.removeSipSession(session.getSessionID());
+	        MultimediaSessionServiceImpl.removeMessagingSipSession(session.getSessionID());
 	    }
     }
     
@@ -357,7 +357,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	        listeners.finishBroadcast();
 	        
 	        // Remove session from the list
-	        MultimediaSessionServiceImpl.removeSipSession(session.getSessionID());
+	        MultimediaSessionServiceImpl.removeMessagingSipSession(session.getSessionID());
 	    }
     }
     

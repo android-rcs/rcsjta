@@ -422,10 +422,23 @@ public class ImsServiceDispatcher extends Thread {
     			Intent intent = intentMgr.isSipRequestResolved(request);
 	    		if (intent != null) {
 	    			// Generic SIP session
-		    		if (logger.isActivated()) {
-		    			logger.debug("Generic SIP session invitation");
+		    		if (isTagPresent(sdp, "msrp")) {
+			    		if (logger.isActivated()) {
+			    			logger.debug("Generic SIP session invitation with MSRP media");
+			    		}
+		    			imsModule.getSipService().receiveMsrpSessionInvitation(intent, request);
+		    		} else
+		    		if (isTagPresent(sdp, "rtp")) {
+			    		if (logger.isActivated()) {
+			    			logger.debug("Generic SIP session invitation with RTP media");
+			    		}
+		    			imsModule.getSipService().receiveRtpSessionInvitation(intent, request);
+		    		} else {
+			    		if (logger.isActivated()) {
+			    			logger.debug("Media not supported for a generic SIP session");
+			    		}
+						sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
 		    		}
-	    			imsModule.getSipService().receiveSessionInvitation(intent, request);
 		    	} else {
 					// Unknown service: reject the invitation with a 606 Not Acceptable
 					if (logger.isActivated()) {

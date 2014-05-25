@@ -744,15 +744,27 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
      */
-    public void handleSipSessionInvitation(Intent intent, GenericSipSession session) {
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipSession session) {
 		if (logger.isActivated()) {
-			logger.debug("Handle event receive SIP session invitation");
+			logger.debug("Handle event receive SIP MSRP session invitation");
 		}
 		
 		// Broadcast the invitation
-		sessionApi.receiveSipSessionInvitation(intent, session);
+		sessionApi.receiveMsrpSipSessionInvitation(intent, session);
     }    
     
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
+     */
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipSession session) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event receive SIP RTP session invitation");
+		}
+		
+		// Broadcast the invitation
+		sessionApi.receiveRtpSipSessionInvitation(intent, session);
+    }    
+
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleUserConfirmationRequest(java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
      */
