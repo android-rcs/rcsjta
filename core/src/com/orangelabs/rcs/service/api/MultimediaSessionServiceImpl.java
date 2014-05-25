@@ -31,6 +31,8 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
+import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
+import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -51,9 +53,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
 
 	/**
-	 * List of sessions
+	 * List of messaging sessions
 	 */
 	private static Hashtable<String, IMultimediaMessagingSession> messagingSessions = new Hashtable<String, IMultimediaMessagingSession>();  
+
+	/**
+	 * List of streaming sessions
+	 */
+	private static Hashtable<String, IMultimediaStreamingSession> streamingSessions = new Hashtable<String, IMultimediaStreamingSession>();  
 
 	/**
 	 * Lock used for synchronization
@@ -87,32 +94,58 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 	
 	/**
-	 * Add a SIP session in the list
+	 * Add a messaging session in the list
 	 * 
 	 * @param session SIP session
 	 */
-	protected static void addSipSession(MultimediaMessagingSessionImpl session) {
+	protected static void addMessagingSipSession(MultimediaMessagingSessionImpl session) {
 		if (logger.isActivated()) {
-			logger.debug("Add a multimedia session in the list (size=" + messagingSessions.size() + ")");
+			logger.debug("Add a messaging session in the list (size=" + messagingSessions.size() + ")");
 		}
 		
 		messagingSessions.put(session.getSessionId(), session);
 	}
 
 	/**
-	 * Remove a SIP session from the list
+	 * Remove a messaging session from the list
 	 * 
 	 * @param sessionId Session ID
 	 */
-	protected static void removeSipSession(String sessionId) {
+	protected static void removeMessagingSipSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a multimedia session from the list (size=" + messagingSessions.size() + ")");
+			logger.debug("Remove a messaging session from the list (size=" + messagingSessions.size() + ")");
 		}
 		
 		messagingSessions.remove(sessionId);
 	}	
 	
-    /**
+	/**
+	 * Add a streaming session in the list
+	 * 
+	 * @param session SIP session
+	 */
+	protected static void addStreamingSipSession(MultimediaStreamingSessionImpl session) {
+		if (logger.isActivated()) {
+			logger.debug("Add a streaming session in the list (size=" + messagingSessions.size() + ")");
+		}
+		
+		streamingSessions.put(session.getSessionId(), session);
+	}
+
+	/**
+	 * Remove a streaming session from the list
+	 * 
+	 * @param sessionId Session ID
+	 */
+	protected static void removeStreamingSipSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Remove a streaming session from the list (size=" + messagingSessions.size() + ")");
+		}
+		
+		streamingSessions.remove(sessionId);
+	}	
+
+	/**
      * Returns true if the service is registered to the platform, else returns false
      * 
 	 * @return Returns true if registered else returns false
@@ -178,15 +211,15 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     }	
 	
 	/**
-	 * Receive a new SIP session invitation
+	 * Receive a new SIP session invitation with MRSP media
 	 * 
      * @param intent Resolved intent
      * @param session SIP session
 	 */
-	public void receiveSipSessionInvitation(Intent intent, GenericSipSession session) {
+	public void receiveMsrpSipSessionInvitation(Intent intent, GenericSipSession session) {
 		// Add session in the list
 		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
-		MultimediaSessionServiceImpl.addSipSession(sessionApi);
+		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
@@ -199,23 +232,44 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
 	}
 	
-    /**
+	/**
+	 * Receive a new SIP session invitation with RTP media
+	 * 
+     * @param intent Resolved intent
+     * @param session SIP session
+	 */
+	public void receiveRtpSipSessionInvitation(Intent intent, GenericSipSession session) {
+		// Add session in the list
+		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
+		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
+		
+		// Broadcast intent related to the received invitation
+		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
+		
+		// Broadcast intent related to the received invitation
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
+	}
+
+	/**
      * Initiates a new session for real time messaging with a remote contact and for a given
-     * service extension. The messages are exchanged in real time during the session may be from
-     * any type. The parameter contact supports the following formats: MSISDN in national or
-     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
-     * not supported an exception is thrown.
+     * service extension. The messages are exchanged in real time during the session and may
+     * be from any type. The parameter contact supports the following formats: MSISDN in
+     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
+     * contact is not supported an exception is thrown.
      * 
      * @param serviceId Service ID
      * @param contact Contact
      * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
-     * @return Multimedia session
 	 * @throws ServerApiException
      */
     public IMultimediaMessagingSession initiateMessagingSession(String serviceId, String contact, IMultimediaMessagingSessionListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a multimedia session with " + contact);
+			logger.info("Initiate a multimedia messaging session with " + contact);
 		}
 
 		// Test IMS connection
@@ -239,7 +293,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	    	t.start();
 			
 			// Add session in the list
-			MultimediaSessionServiceImpl.addSipSession(sessionApi);
+			MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
 			if (logger.isActivated()) {
@@ -257,7 +311,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaMessagingSession getMessagingSession(String sessionId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get multimedia session " + sessionId);
+			logger.info("Get multimedia messaging session " + sessionId);
 		}
 
 		return messagingSessions.get(sessionId);
@@ -273,7 +327,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public List<IBinder> getMessagingSessions(String serviceId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get multimedia sessions for service " + serviceId);
+			logger.info("Get multimedia messaging sessions for service " + serviceId);
 		}
 
 		try {
@@ -293,7 +347,75 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		}
 	}
 
-	/**
+    /**
+     * Initiates a new session for real time streaming with a remote contact and for a given
+     * service extension. The payload are exchanged in real time during the session and may be
+     * from any type. The parameter contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
+     * not supported an exception is thrown.
+     * 
+     * @param serviceId Service ID
+     * @param contact Contact
+     * @param listener Multimedia streaming session event listener
+     * @return Multimedia streaming session
+	 * @throws ServerApiException
+     */
+    public IMultimediaStreamingSession initiateStreamingSession(String serviceId, String contact, IMultimediaStreamingSessionListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Initiate a multimedia streaming session with " + contact);
+		}
+
+		// Test IMS connection
+		ServerApiUtils.testIms();
+
+		// TODO
+		throw new ServerApiException("Not implemented");
+	}
+
+    /**
+     * Returns a current streaming session from its unique session ID
+     * 
+     * @return Multimedia streaming session or null if not found
+     * @throws ServerApiException
+     */
+    public IMultimediaStreamingSession getStreamingSession(String sessionId) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Get multimedia streaming session " + sessionId);
+		}
+
+		return streamingSessions.get(sessionId);
+	}
+
+    /**
+     * Returns the list of streaming sessions associated to a given service ID
+     * 
+     * @param serviceId Service ID
+     * @return List of sessions
+     * @throws ServerApiException
+     */
+    public List<IBinder> getStreamingSessions(String serviceId) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Get multimedia streaming sessions for service " + serviceId);
+		}
+
+		try {
+			ArrayList<IBinder> result = new ArrayList<IBinder>();
+			for (IMultimediaStreamingSession sessionApi : streamingSessions.values()) {
+				// Filter on the service ID
+				if (sessionApi.getServiceId().equals(serviceId)) {
+					result.add(sessionApi.asBinder());
+				}
+			}
+			return result;
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e.getMessage());
+		}
+	}
+
+    /**
 	 * Returns service version
 	 * 
 	 * @return Version

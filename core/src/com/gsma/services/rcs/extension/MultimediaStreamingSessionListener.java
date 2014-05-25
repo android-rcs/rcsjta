@@ -18,11 +18,11 @@
 package com.gsma.services.rcs.extension;
 
 /**
- * This class offers callback methods on multimedia messaging session events
+ * This class offers callback methods on multimedia streaming session events
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaMessagingSessionListener extends IMultimediaMessagingSessionListener.Stub {
+public abstract class MultimediaStreamingSessionListener extends IMultimediaStreamingSessionListener.Stub {
 	/**
 	 * Callback called when the session is pending.
 	 */
@@ -47,9 +47,9 @@ public abstract class MultimediaMessagingSessionListener extends IMultimediaMess
 	public abstract void onSessionError(int error);
 	
 	/**
-	 * Callback called when a new message has been received
+	 * Callback called when a new payload has been received
 	 * 
-	 * @param content Message content
+	 * @param content Payload content
 	 */
-	public abstract void onNewMessage(byte[] content);
+	public abstract void onNewPayload(byte[] content);
 }

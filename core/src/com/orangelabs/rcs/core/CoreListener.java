@@ -21,7 +21,6 @@ package com.orangelabs.rcs.core;
 import android.content.Intent;
 
 import com.orangelabs.rcs.core.ims.ImsError;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -211,14 +210,22 @@ public interface CoreListener {
     public void handleFileDeliveryStatus(String ftSessionId, String status, String contact); 
 
     /**
-     * New SIP session invitation
+     * New SIP MSRP session invitation
      * 
 	 * @param intent Resolved intent
      * @param session SIP session
      */
-    public void handleSipSessionInvitation(Intent intent, GenericSipSession session);
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipSession session);
 
-	/**
+    /**
+     * New SIP RTP session invitation
+     * 
+	 * @param intent Resolved intent
+     * @param session SIP session
+     */
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipSession session);
+
+    /**
      * User terms confirmation request
      *
      * @param remote Remote server

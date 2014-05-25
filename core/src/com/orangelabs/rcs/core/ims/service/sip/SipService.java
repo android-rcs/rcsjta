@@ -111,12 +111,12 @@ public class SipService extends ImsService {
 	}
 
     /**
-     * Receive a session invitation
+     * Receive a session invitation with MSRP media
      * 
      * @param intent Resolved intent
      * @param invite Initial invite
      */
-	public void receiveSessionInvitation(Intent intent, SipRequest invite) {
+	public void receiveMsrpSessionInvitation(Intent intent, SipRequest invite) {
 		// Create a new session
     	TerminatingSipSession session = new TerminatingSipSession(
 					this,
@@ -126,10 +126,23 @@ public class SipService extends ImsService {
 		session.startSession();
 
 		// Notify listener
-		getImsModule().getCore().getListener().handleSipSessionInvitation(intent, session);
+		getImsModule().getCore().getListener().handleSipMsrpSessionInvitation(intent, session);
 	}
 
     /**
+     * Receive a session invitation with RTP media
+     * 
+     * @param intent Resolved intent
+     * @param invite Initial invite
+     */
+	public void receiveRtpSessionInvitation(Intent intent, SipRequest invite) {
+		// TODO
+		
+		// Notify listener
+		getImsModule().getCore().getListener().handleSipRtpSessionInvitation(intent, null /* TODO */);
+	}
+	
+	/**
      * Returns SIP sessions
      * 
      * @return List of sessions
