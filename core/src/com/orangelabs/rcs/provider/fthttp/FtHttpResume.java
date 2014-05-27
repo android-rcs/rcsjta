@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -72,9 +76,9 @@ public abstract class FtHttpResume {
 	final private String chatId;
 
 	/**
-	 * the session Id
+	 * the file transfer Id
 	 */
-	final private String sessionId;
+	final private String fileTransferId;
 
 	/**
 	 * the Chat session Id
@@ -93,10 +97,10 @@ public abstract class FtHttpResume {
 	 * @see #FtHttpResume(FtHttpDirection,String,String,Long,String,String,String,String,String,String,boolean,Date)
 	 */
 	public FtHttpResume(FtHttpDirection ftHttpDirection, String filename, String mimeType, Long size,
-            String thumbnail, String contact, String displayName, String chatId, String sessionId,
+            String thumbnail, String contact, String displayName, String chatId, String fileTransferId,
             String chatSessionId, boolean isGroup) {
         this(ftHttpDirection, filename, mimeType, size, thumbnail, contact, displayName, chatId,
-                sessionId, chatSessionId, isGroup, null);
+        		fileTransferId, chatSessionId, isGroup, null);
 	}
 
 	/**
@@ -118,8 +122,8 @@ public abstract class FtHttpResume {
 	 *            the {@code displayName} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
-	 * @param sessionId
-	 *            the {@code sessionId} value.
+	 * @param fileTransferId
+	 *            the {@code fileTransferId} value.
 	 * @param chatSessionId
 	 *            the {@code chatSessionId} value.
 	 * @param isGroup
@@ -128,7 +132,7 @@ public abstract class FtHttpResume {
 	 *            the {@code date} value.
 	 */
 	public FtHttpResume(FtHttpDirection ftHttpDirection, String filepath, String mimeType, Long size,
-	        String thumbnail, String contact, String displayName, String chatId, String sessionId,
+	        String thumbnail, String contact, String displayName, String chatId, String fileTransferId,
 	        String chatSessionId, boolean isGroup, Date date) {
 		if (size <= 0 || ftHttpDirection == null || mimeType == null || filepath == null)
 			throw new IllegalArgumentException("Null argument");
@@ -141,7 +145,7 @@ public abstract class FtHttpResume {
 		this.contact = contact;
 		this.displayName = displayName;
 		this.chatId = chatId;
-		this.sessionId = sessionId;
+		this.fileTransferId = fileTransferId;
 		this.chatSessionId = chatSessionId;
 		this.isGroup = isGroup;
 	}
@@ -182,8 +186,8 @@ public abstract class FtHttpResume {
 		return chatId;
 	}
 
-	public String getSessionId() {
-		return sessionId;
+	public String getFileTransferId() {
+		return fileTransferId;
 	}
 
 	public String getChatSessionId() {

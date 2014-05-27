@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -25,6 +29,7 @@ import java.util.List;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -206,8 +211,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-		RichMessagingHistory.getInstance().addFileTransfer(number, session.getSessionID(), FileTransfer.Direction.INCOMING,
-				session.getContent(), session.getThumbnail());
+		if (isGroup) {
+			RichMessagingHistory.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
+					number, session.getFileTransferId(), session.getContent(), session.getThumbnail());
+		} else {
+			RichMessagingHistory.getInstance().addFileTransfer(number, session.getFileTransferId(),
+					FileTransfer.Direction.INCOMING, session.getContent(), session.getThumbnail());
+		}
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -257,8 +267,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		receiveFileTransferInvitation(session, chatSession.isGroupChat());
 		
 		// Update rich messaging history
-		RichMessagingHistory.getInstance().updateFileTransferChatId(session.getSessionID(), chatSession.getContributionID(),
-				chatSession.getFirstMessage().getMessageId());
+		if (chatSession.isGroupChat()) {
+			RichMessagingHistory.getInstance().updateFileTransferChatId(
+					chatSession.getFirstMessage().getMessageId(), chatSession.getContributionID());
+		}
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -314,8 +326,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getSessionID(), FileTransfer.Direction.OUTGOING,
-					session.getContent(), session.getThumbnail());
+			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getFileTransferId(),
+					FileTransfer.Direction.OUTGOING, session.getContent(), session.getThumbnail());
 
 			// Start the session
 	        new Thread() {
@@ -410,20 +422,20 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * terminating, and Displayed status is done when the file is downloaded.
      * In FToMSRP, the two status are directly done just after MSRP transfer complete.
      *
-     * @param ftSessionId File transfer session Id
+     * @param fileTransferId File transfer Id
      * @param status status of File transfer
      * @param contact contact who received file
      */
-    public void handleFileDeliveryStatus(String ftSessionId, String status, String contact) {
+    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DELIVERED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DELIVERED);
 
 			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
             for (int i=0; i < N; i++) {
                 try {
-                    listeners.getBroadcastItem(i).onReportFileDelivered(ftSessionId);
+                    listeners.getBroadcastItem(i).onReportFileDelivered(fileTransferId);
                 } catch(Exception e) {
                     if (logger.isActivated()) {
                         logger.error("Can't notify listener", e);
@@ -434,13 +446,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(ftSessionId, FileTransfer.State.DISPLAYED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DISPLAYED);
 
 			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
             for (int i=0; i < N; i++) {
                 try {
-                    listeners.getBroadcastItem(i).onReportFileDisplayed(ftSessionId);
+                    listeners.getBroadcastItem(i).onReportFileDisplayed(fileTransferId);
                 } catch(Exception e) {
                     if (logger.isActivated()) {
                         logger.error("Can't notify listener", e);
@@ -450,7 +462,112 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             listeners.finishBroadcast();
         }
     }
-    
+
+    /**
+     * Group File Transfer delivery status delivered
+     *
+     * @param fileTransferId File transfer Id
+     * @param contact contact who received file
+     */
+	private void handleGroupFileDeliveryStatusDelivered(String fileTransferId, String contact) {
+		// Update rich messaging history
+		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
+		richMessagingHistory.updateGroupChatDeliveryInfoStatus(fileTransferId,
+				ImdnDocument.DELIVERY_STATUS_DELIVERED, contact);
+		// TODO : Listeners to notify group file delivery status for
+		// individual contacts will be implemented as part of CR011. For now,
+		// the same callback is used for sending both per contact group delivery
+		// status and for the whole group message delivery status.
+		// Notify File transfer delivery listeners
+		final int N = listeners.beginBroadcast();
+		for (int i = 0; i < N; i++) {
+			try {
+				listeners.getBroadcastItem(i).onReportFileDelivered(fileTransferId);
+			} catch (Exception e) {
+				if (logger.isActivated()) {
+					logger.error("Can't notify listener per contact", e);
+				}
+			}
+		}
+		listeners.finishBroadcast();
+		if (richMessagingHistory.isDeliveredToAllRecipients(fileTransferId)) {
+			richMessagingHistory.updateFileTransferStatus(fileTransferId,
+					FileTransfer.State.DELIVERED);
+			// Notify File transfer delivery listeners
+			final int P = listeners.beginBroadcast();
+			for (int i = 0; i < P; i++) {
+				try {
+					listeners.getBroadcastItem(i).onReportFileDelivered(fileTransferId);
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
+    /**
+     * Group File Transfer delivery status displayed
+     *
+     * @param fileTransferId File transfer Id
+     * @param contact contact who received file
+     */
+	private void handleGroupFileDeliveryStatusDisplayed(String fileTransferId, String contact) {
+		// Update rich messaging history
+		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
+		richMessagingHistory.updateGroupChatDeliveryInfoStatus(fileTransferId,
+				ImdnDocument.DELIVERY_STATUS_DISPLAYED, contact);
+		// TODO : Listeners to notify group file delivery status for
+		// individual contacts will be implemented as part of CR011. For now,
+		// the same callback is used for sending both per contact group delivery
+		// status and for the whole group message delivery status.
+		// Notify File transfer delivery listeners
+		final int N = listeners.beginBroadcast();
+		for (int i = 0; i < N; i++) {
+			try {
+				listeners.getBroadcastItem(i).onReportFileDisplayed(fileTransferId);
+			} catch (Exception e) {
+				if (logger.isActivated()) {
+					logger.error("Can't notify listener per contact", e);
+				}
+			}
+		}
+		listeners.finishBroadcast();
+		if (richMessagingHistory.isDisplayedByAllRecipients(fileTransferId)) {
+			richMessagingHistory.updateFileTransferStatus(fileTransferId,
+					FileTransfer.State.DISPLAYED);
+
+			final int P = listeners.beginBroadcast();
+			for (int i = 0; i < P; i++) {
+				try {
+					listeners.getBroadcastItem(i).onReportFileDisplayed(fileTransferId);
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
+    /**
+     * Group File Transfer delivery status.
+     *
+     * @param fileTransferId File transfer Id
+     * @param status status of File transfer
+     * @param contact contact who received file
+     */
+	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact) {
+		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+			handleGroupFileDeliveryStatusDelivered(fileTransferId, contact);
+		} else if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+			handleGroupFileDeliveryStatusDisplayed(fileTransferId, contact);
+		}
+	}
+
 	/**
 	 * Returns service version
 	 * 
@@ -537,5 +654,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
+	
+	/**
+     * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in the UI).
+     *
+     * @param transferID File transfer ID
+     */
+	@Override
+	public void markFileTransferAsRead(String transferId) throws RemoteException {
+		//No notification type corresponds currently to mark as read
+		RichMessagingHistory.getInstance().markFileTransferAsRead(transferId);
+	}
 
 }

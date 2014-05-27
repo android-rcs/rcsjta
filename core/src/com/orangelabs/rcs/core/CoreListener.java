@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core;
@@ -204,11 +208,20 @@ public interface CoreListener {
     /**
      * New file delivery status
      *
-     * @param ftSessionId File transfer session Id
+     * @param fileTransferId File transfer Id
      * @param status Delivery status
      * @param contact who notified status
      */
-    public void handleFileDeliveryStatus(String ftSessionId, String status, String contact); 
+    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact);
+
+    /**
+     * New group file delivery status
+     *
+     * @param fileTransferId File transfer Id
+     * @param status Delivery status
+     * @param contact who notified status
+     */
+    public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact);
 
     /**
      * New SIP session invitation
@@ -269,4 +282,9 @@ public interface CoreListener {
      * SIM has changed
      */
     public void handleSimHasChanged();
+
+    /**
+     * Try to send delayed displayed notification after service reconnection
+     */
+    public void tryToDispatchAllPendingDisplayNotifications();
 }

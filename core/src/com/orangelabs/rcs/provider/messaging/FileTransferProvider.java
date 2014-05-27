@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
@@ -81,12 +85,13 @@ public class FileTransferProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
         	db.execSQL("CREATE TABLE " + TABLE + " ("
         			+ FileTransferData.KEY_ID + " integer primary key autoincrement,"
-        			+ FileTransferData.KEY_SESSION_ID + " TEXT,"
+        			+ FileTransferData.KEY_FT_ID + " TEXT,"
         			+ FileTransferData.KEY_CONTACT + " TEXT,"
         			+ FileTransferData.KEY_NAME + " TEXT,"
         			+ FileTransferData.KEY_CHAT_ID + " TEXT,"
         			+ FileTransferData.KEY_MIME_TYPE + " TEXT,"
         			+ FileTransferData.KEY_STATUS + " integer,"
+        			+ FileTransferData.KEY_READ_STATUS + " integer,"
         			+ FileTransferData.KEY_DIRECTION + " integer,"
         			+ FileTransferData.KEY_TIMESTAMP + " long,"
         			+ FileTransferData.KEY_TIMESTAMP_SENT + " long,"
@@ -94,7 +99,6 @@ public class FileTransferProvider extends ContentProvider {
         			+ FileTransferData.KEY_TIMESTAMP_DISPLAYED + " long,"
         			+ FileTransferData.KEY_SIZE + " long,"
         			+ FileTransferData.KEY_TOTAL_SIZE + " long,"
-        			+ FileTransferData.KEY_MSG_ID + " TEXT,"
         			+ FileTransferData.KEY_FILEICON + " TEXT);");
         }
         // @formatter:on

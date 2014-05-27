@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -38,9 +42,8 @@ public interface FtHttpColumns extends BaseColumns {
 	static final String DIRECTION = "direction";
 	static final String DATE = "date";
 	static final String DISPLAY_NAME = "display_name";
-	static final String SESSION_ID = "session_id";
+	static final String FT_ID = "ft_id";
 	static final String THUMBNAIL = "thumbnail";
-	static final String MESSAGE_ID = "message_id";
 	static final String IS_GROUP = "is_group";
 	static final String CHAT_SESSION_ID = "chat_session_id";
 	
@@ -59,9 +62,8 @@ public interface FtHttpColumns extends BaseColumns {
             DIRECTION,
             DATE,
             DISPLAY_NAME,
-            SESSION_ID,
+            FT_ID,
             THUMBNAIL,
-            MESSAGE_ID,
             IS_GROUP,
             CHAT_SESSION_ID
     };

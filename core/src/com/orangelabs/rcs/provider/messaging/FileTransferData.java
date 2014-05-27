@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
@@ -40,8 +44,8 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_SESSION_ID = FileTransferLog.FT_ID;
-	
+	static final String KEY_FT_ID = FileTransferLog.FT_ID;
+
 	/**
 	 * Column name
 	 */
@@ -76,6 +80,11 @@ public class FileTransferData {
 	 * Column name
 	 */
 	static final String KEY_STATUS = FileTransferLog.STATE;
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
 
 	/**
 	 * Column name
@@ -102,11 +111,6 @@ public class FileTransferData {
 	 */
 	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
 
-	/**
-	 * Column name KEY_MSG_ID : the reference to the Chat message
-	 */
-	static final String KEY_MSG_ID =  FileTransferLog.MESSAGE_ID;
-	
 	/**
 	 * Column name KEY_FILEICON : the URI of the file icon
 	 */

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
@@ -111,6 +115,12 @@ public class FileTransferLog {
     public static final String STATE = "state";
     
     /**
+     * The name of the column containing the read status for the transfer.
+     * <P>Type: INTEGER</P>
+     */
+    public static final String READ_STATUS = "read_status";
+
+    /**
      * The name of the column containing the file icon (absolute path).
      * <P>Type: TEXT</P>
      */
@@ -121,10 +131,4 @@ public class FileTransferLog {
      * <P>Type: TEXT</P>
      */
     public static final String CHAT_ID = "chat_id";
-    
-    /**
-     * The name of the column containing the identity of the chat message.
-     * <P>Type: LONG</P>
-     */
-    public static final String MESSAGE_ID = "msg_id";
 }

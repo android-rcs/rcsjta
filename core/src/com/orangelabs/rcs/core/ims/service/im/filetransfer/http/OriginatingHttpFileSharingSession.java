@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
@@ -37,6 +41,8 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.service.api.ChatImpl;
+import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -74,7 +80,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            true if the stack must try to attach thumbnail
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
-		super(parent, content, contact, null, null, null);
+		super(parent, content, contact, null, null, null, IdGenerator.generateMessageID());
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
 		}
@@ -99,9 +105,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Remote contact
 	 * @param thumbnail
 	 *            Content of thumbnail
+	 * @param fileTransferId
+	 *            File transfer Id
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
-		super(parent, content, contact, thumbnail, null, null);
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String fileTransferId) {
+		super(parent, content, contact, thumbnail, null, null, fileTransferId);
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}
@@ -153,6 +161,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                      chatSession = null;
                  }
             }
+            // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
+            String msgId = getFileTransferId();
             if (chatSession != null) {
 				// A chat session exists
                 if (logger.isActivated()) {
@@ -163,20 +173,17 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 				String mime = CpimMessage.MIME_TYPE;
 				String from = ChatUtils.ANOMYNOUS_URI;
 				String to = ChatUtils.ANOMYNOUS_URI;
-				String msgId = IdGenerator.generateMessageID();
-
 				// Send file info in CPIM message
 				String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
 				
 				// Send content
 				chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, MsrpSession.TypeMsrpChunk.HttpFileSharing);
-                RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
 			} else {
 				// A chat session should be initiated
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via a new chat session");
                 }
-            	FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false);
+                FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false, msgId);
                 // Initiate a new chat session to send file transfer info in the first message, session does not need to be retrieved since it is not used
                 try {
 					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), firstMsg);
@@ -188,12 +195,9 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
 					return;
 				}
-                String msgId = firstMsg.getMessageId();
 				setChatSessionID(chatSession.getSessionID());
 				setContributionID(chatSession.getContributionID());
-				RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
-				RichMessagingHistory.getInstance().updateMessageFileTansferId(msgId, getSessionID());
-   			
+
                 chatSession.startSession();
                 // Add session in the list
 				//ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
@@ -54,11 +58,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	protected HttpDownloadManager downloadManager;
 
 	/**
-	 * ID of the incoming transfer message
-	 */
-	private String msgId;
-
-	/**
 	 * Remote instance Id
 	 */
 	private String remoteInstanceId = null;
@@ -87,16 +86,17 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the chat session
 	 * @param fileTransferInfo
 	 *            the File transfer info document
-	 * @param msgId
-	 *            the Message ID
+	 * @param fileTransferId
+	 *            the File transfer Id
 	 * @param contact
 	 *            the remote contact
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-			FileTransferHttpInfoDocument fileTransferInfo, String msgId, String contact) {
-		super(parent, ContentManager.createMmContentFromMime(fileTransferInfo.getFilename(), fileTransferInfo.getFileUrl(),
-				fileTransferInfo.getFileType(), fileTransferInfo.getFileSize()), contact, null, chatSession.getSessionID(),
-				chatSession.getContributionID());
+			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, String contact) {
+		super(parent, ContentManager.createMmContentFromFilename(fileTransferInfo.getFilename(),
+				fileTransferInfo.getFileUrl(), fileTransferInfo.getFileSize()),
+				chatSession.getRemoteContact(), null, chatSession.getSessionID(),
+				chatSession.getContributionID(), fileTransferId);
 
 		setRemoteDisplayName(chatSession.getRemoteDisplayName());
         // Build a new dialogPath with this of chatSession and an empty CallId
@@ -107,7 +107,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		if (inviteContactHeader != null) {
 			this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);
 		}
-		this.msgId = msgId;
 		isGroup = chatSession.isGroupChat();
 		
 		// Instantiate the download manager
@@ -117,11 +116,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		// Download thumbnail
 		if (fileTransferInfo.getFileThumbnail() != null) {
 			FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-			String iconName = FileTransferUtils.builThumbnaiUrl(msgId,thumbnailInfo.getThumbnailType());
+			String iconName = FileTransferUtils.builThumbnaiUrl(getFileTransferId(),thumbnailInfo.getThumbnailType());
 			setThumbnail(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
-		
-		RichMessagingHistory.getInstance().updateMessageFileTansferId(msgId, getSessionID());
 	}
 
 	/**
@@ -136,13 +133,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
 		super(parent, content, resume.getContact(), FileTransferUtils.createMmContentFromUrl(resume.getThumbnail()), resume
-				.getChatSessionId(), resume.getChatId());
+				.getChatSessionId(), resume.getChatId(), resume.getFileTransferId());
 		setRemoteDisplayName(resume.getDisplayName());
 		this.isGroup = resume.isGroup();
-		this.msgId = resume.getMessageId();
 		this.resumeFT = resume;
-		// Session ID must be equal to the FT HTTP initial one
-		setSessionID(resume.getSessionId());
 		// Instantiate the download manager
 		downloadManager = new HttpDownloadManager(getContent(), this, resumeFT.getFilepath());
 	}
@@ -222,16 +216,13 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 handleError(error);
                 return;
             }
-            
-            // TODO FUSION is it the appropriate place to update db ?
-            RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), getChatSessionID(), msgId);
-            
+
 			// Notify listeners
 			for (int j = 0; j < getListeners().size(); j++) {
 				getListeners().get(j).handleSessionStarted();
 			}
 			// Create download entry in fthttp table
-            resumeFT = new FtHttpResumeDownload(this, downloadManager.getLocalUrl(), msgId,
+            resumeFT = new FtHttpResumeDownload(this, downloadManager.getLocalUrl(), getFileTransferId(),
                     getThumbnail().getUrl(), isGroup);
             FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 			// Download file from the HTTP server
@@ -317,6 +308,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Report status
 	 */
 	protected void sendDeliveryReport(String status) {
+		String msgId = getFileTransferId();
 		if (msgId != null) {
 			if (logger.isActivated()) {
 				logger.debug("Send delivery report " + status);

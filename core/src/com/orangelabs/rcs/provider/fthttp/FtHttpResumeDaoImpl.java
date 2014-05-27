@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -37,6 +41,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  */
 public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
+
+	private static final String SELECTION_FILE_BY_FT_ID = new StringBuilder(
+			FtHttpColumns.FT_ID).append("=?").toString();
 
 	/**
 	 * Current instance
@@ -86,32 +93,45 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, null, null, null);
-			if (cursor != null) {
-				while (cursor.moveToNext()) {
-					long size = cursor.getLong(3);
-					String mimeType = cursor.getString(4);
-					String contact = cursor.getString(5);
-					String chatId = cursor.getString(6);
-					String file = cursor.getString(7);
-					int direction = cursor.getInt(8);
-					String displayName = cursor.getString(10);
-					String sessionId = cursor.getString(11);
-					String thumbnail = cursor.getString(12);
-					boolean isGroup = cursor.getInt(14) != 0;
-					String chatSessionId = cursor.getString(15);
+			if (cursor != null && cursor.moveToFirst()) {
+				int sizeColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE);
+				int mimeTypeColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE);
+				int contactColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT);
+				int chatIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID);
+				int fileColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH);
+				int directionColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.DIRECTION);
+				int displayNameColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME);
+				int fileTransferIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID);
+				int thumbnailColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL);
+				int isGroupColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP);
+				int chatSessionIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID);
+				int urlColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.IN_URL);
+				int tidColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.OU_TID);
+				do {
+					long size = cursor.getLong(sizeColumnIdx);
+					String mimeType = cursor.getString(mimeTypeColumnIdx);
+					String contact = cursor.getString(contactColumnIdx);
+					String chatId = cursor.getString(chatIdColumnIdx);
+					String file = cursor.getString(fileColumnIdx);
+					int direction = cursor.getInt(directionColumnIdx);
+					String displayName = cursor.getString(displayNameColumnIdx);
+					String fileTransferId = cursor.getString(fileTransferIdColumnIdx);
+					String thumbnail = cursor.getString(thumbnailColumnIdx);
+					boolean isGroup = cursor.getInt(isGroupColumnIdx) != 0;
+					String chatSessionId = cursor.getString(chatSessionIdColumnIdx);
 					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
-						String url = cursor.getString(2);
+						String url = cursor.getString(urlColumnIdx);
 						MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
 						String messageId = cursor.getString(13);
-						result.add(new FtHttpResumeDownload(file, thumbnail, content, messageId, contact, displayName, chatId,
-								sessionId, chatSessionId, isGroup));
+						result.add(new FtHttpResumeDownload(file, thumbnail, content, contact, displayName, chatId,
+								fileTransferId, chatSessionId, isGroup));
 					} else {
-						String tid = cursor.getString(1);
+						String tid = cursor.getString(tidColumnIdx);
 						MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
-						result.add(new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, sessionId,
-								chatSessionId, isGroup));
+						result.add(new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, fileTransferId,
+ 								chatSessionId, isGroup));
 					}
-				}
+				} while (cursor.moveToNext());
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
@@ -136,13 +156,12 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		values.put(FtHttpColumns.CONTACT, ftHttpResume.getContact());
 		values.put(FtHttpColumns.DISPLAY_NAME, ftHttpResume.getDisplayName());
 		values.put(FtHttpColumns.CHATID, ftHttpResume.getChatId());
-		values.put(FtHttpColumns.SESSION_ID, ftHttpResume.getSessionId());
+		values.put(FtHttpColumns.FT_ID, ftHttpResume.getFileTransferId());
 		values.put(FtHttpColumns.CHAT_SESSION_ID, ftHttpResume.getChatSessionId());
 		values.put(FtHttpColumns.IS_GROUP, ftHttpResume.isGroup());
 		if (ftHttpResume instanceof FtHttpResumeDownload) {
 			FtHttpResumeDownload download = (FtHttpResumeDownload) ftHttpResume;
 			values.put(FtHttpColumns.IN_URL, download.getUrl());
-			values.put(FtHttpColumns.MESSAGE_ID, download.getMessageId());
 			if (logger.isActivated()) {
 				logger.debug("insert " + download + ")");
 			}
@@ -168,7 +187,9 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		if (logger.isActivated()) {
 			logger.debug("delete " + ftHttpResume);
 		}
-		return cr.delete(FtHttpColumns.CONTENT_URI, FtHttpColumns.SESSION_ID + " = " + ftHttpResume.getSessionId(), null);
+		return cr.delete(FtHttpColumns.CONTENT_URI, SELECTION_FILE_BY_FT_ID, new String[] {
+			ftHttpResume.getFileTransferId()
+		});
 	}
 
 	@Override
@@ -180,19 +201,19 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
 			if (cursor != null) {
 				if (cursor.moveToNext()) {
-					String url = cursor.getString(2);
-					long size = cursor.getLong(3);
-					String mimeType = cursor.getString(4);
-					String contact = cursor.getString(5);
-					String chatId = cursor.getString(6);
-					String displayName = cursor.getString(10);
-					String sessionId = cursor.getString(11);
-					String thumbnail = cursor.getString(12);
-					boolean isGroup = cursor.getInt(14) != 0;
-					String chatSessionId = cursor.getString(15);
-					MmContent fileContent = ContentManager.createMmContentFromMime(url, mimeType, size);
-					return new FtHttpResumeUpload(fileContent, thumbnail, tid, contact, displayName, chatId, sessionId,
-							chatSessionId, isGroup);
+					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
+					String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE));
+					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
+					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
+					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH));
+					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
+					String fileTransferId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID));
+					String thumbnail = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL));
+					boolean isGroup = cursor.getInt(cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP)) != 0;
+					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
+					MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
+					return new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, fileTransferId,
+ 							chatSessionId, isGroup);
 				}
 			}
 		} catch (Exception e) {
@@ -215,20 +236,19 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
 			if (cursor != null) {
 				if (cursor.moveToNext()) {
-					long size = cursor.getLong(3);
-					String mimeType = cursor.getString(4);
-					String contact = cursor.getString(5);
-					String chatId = cursor.getString(6);
-					String file = cursor.getString(7);
-					String displayName = cursor.getString(10);
-					String sessionId = cursor.getString(11);
-					String thumbnail = cursor.getString(12);
-					String messageId = cursor.getString(13);
-					boolean isGroup = cursor.getInt(14) != 0;
-					String chatSessionId = cursor.getString(15);
+					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
+					String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE));
+					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
+					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
+					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH));
+					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
+					String fileTransferId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID));
+					String thumbnail = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL));
+					boolean isGroup = cursor.getInt(cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP)) != 0;
+					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
 					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
-					return new FtHttpResumeDownload(file, thumbnail, content, messageId, contact, displayName, chatId, sessionId,
-							chatSessionId, isGroup);
+					return new FtHttpResumeDownload(file, thumbnail, content, contact, displayName, chatId, fileTransferId,
+ 							chatSessionId, isGroup);
 				}
 			}
 		} catch (Exception e) {

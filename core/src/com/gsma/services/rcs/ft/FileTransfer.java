@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
@@ -86,6 +90,21 @@ public class FileTransfer {
     	
     	private State() {
         }    	
+    }
+
+    /**
+     * File transfer read status
+     */
+    public static class ReadStatus {
+        /**
+         * The invitation or file corresponding to this file transfer has not yet been displayed in the UI.
+         */
+        public final static int UNREAD = 0;
+
+        /**
+         * The invitation or file corresponding to the file transfer has been displayed in the UI.
+         */
+        public final static int READ = 1;
     }
     
     /**

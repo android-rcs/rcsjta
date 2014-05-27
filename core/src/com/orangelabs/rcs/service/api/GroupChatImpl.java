@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -33,6 +37,7 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.orangelabs.rcs.core.Core;
@@ -377,8 +382,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addOutgoingGroupFileTransfer(chatSessionId, session.getSessionID(),
-					session.getContent(), session.getThumbnail());
+			RichMessagingHistory.getInstance().addOutgoingGroupFileTransfer(
+					session.getContributionID(), session.getFileTransferId(), session.getContent(), session.getThumbnail());
 
 			// Start the session
 			new Thread() {
@@ -400,7 +405,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
     /**
-	 * Sends a “is-composing” event. The status is set to true when typing
+	 * Sends a Â“is-composingÂ” event. The status is set to true when typing
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
@@ -589,7 +594,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
 	            			message.getTextMessage(),
-	            			message.getServerDate(), message.isImdnDisplayedRequested());
+	            			message.getServerDate());
 	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
@@ -726,7 +731,34 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	        listeners.finishBroadcast();
 	    }
     }
-    
+
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String)
+     */
+	public void handleSendMessageFailure(String msgId) {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.info("New message failure status for message " + msgId);
+			}
+
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+
+			// Notify event listeners
+			final int N = listeners.beginBroadcast();
+			for (int i = 0; i < N; i++) {
+				try {
+					listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
@@ -737,30 +769,65 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status, contact);
-        	
+			RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
+			richMessagingHistory.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
+			// TODO : Listeners to notify group file delivery status for
+			// individual contacts will be implemented as part of CR011. For now,
+			// the same callback is used for sending both per contact group delivery
+			// status and for the whole group message delivery status.
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-	            		listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
-	            	} else
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-	        			listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-	            	} else
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
-	            		listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }
-    }
+			for (int i = 0; i < N; i++) {
+				try {
+					if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
+					} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
+					} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+							|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+							|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
+					}
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)
+					&& richMessagingHistory.isDeliveredToAllRecipients(msgId)) {
+				richMessagingHistory.updateOutgoingChatMessageDeliveryStatus(msgId, status);
+				final int P = listeners.beginBroadcast();
+				for (int i = 0; i < P; i++) {
+					try {
+						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
+					} catch (Exception e) {
+						if (logger.isActivated()) {
+							logger.error("Can't notify listener", e);
+						}
+					}
+				}
+				listeners.finishBroadcast();
+
+			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)
+					&& richMessagingHistory.isDisplayedByAllRecipients(msgId)) {
+				richMessagingHistory.updateOutgoingChatMessageDeliveryStatus(msgId, status);
+				final int Q = listeners.beginBroadcast();
+				for (int i = 0; i < Q; i++) {
+					try {
+						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
+					} catch (Exception e) {
+						if (logger.isActivated()) {
+							logger.error("Can't notify listener", e);
+						}
+					}
+				}
+				listeners.finishBroadcast();
+			}
+
+		}
+	}
     
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful()
@@ -814,7 +881,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            			geoloc.getGeoloc().getExpiration());
 	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
 	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
-	            			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+	            			geolocApi, geoloc.getDate());
 	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {

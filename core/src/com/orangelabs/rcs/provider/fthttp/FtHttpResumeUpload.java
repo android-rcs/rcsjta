@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -48,7 +52,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 */
 	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, String thumbnail, boolean isGroup) {
 		this(session.getContent(), thumbnail, tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
-				.getContributionID(), session.getSessionID(), session.getChatSessionID(), isGroup);
+				.getContributionID(), session.getFileTransferId(), session.getChatSessionID(), isGroup);
 	}
 
 	/**
@@ -76,9 +80,9 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 *            the {@code isGroup} value.
 	 */
 	public FtHttpResumeUpload(MmContent file, String thumbnail, String tid, String contact,
-            String displayName, String chatId, String sessionId, String chatSessionId, boolean isGroup) {
+            String displayName, String chatId, String fileTransferId, String chatSessionId, boolean isGroup) {
         super(FtHttpDirection.OUTGOING, file.getUrl(), file.getEncoding(), file.getSize(), thumbnail, contact,
-               displayName, chatId, sessionId, chatSessionId, isGroup);
+               displayName, chatId, fileTransferId, chatSessionId, isGroup);
 		if (tid == null)
 			throw new IllegalArgumentException("Null tid");
 		this.tid = tid;
@@ -92,7 +96,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	public String toString() {
 		return "FtHttpResumeUpload [tid=" + tid + ", getFilepath()=" + getFilepath() + ", getSize()=" + getSize()
 				+ ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
-				+ ", getSessionId()=" + getSessionId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
+				+ ", getFileTransferId()=" + getFileTransferId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
 				+ "]";
 	}
 

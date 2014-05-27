@@ -40,5 +40,7 @@ interface IChatService {
     
 	IGroupChat getGroupChat(in String chatId);
 	
+	void markMessageAsRead(in String msgId);
+	
 	int getServiceVersion();
 }

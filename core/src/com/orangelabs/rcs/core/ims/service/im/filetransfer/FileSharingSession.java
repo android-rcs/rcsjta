@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
@@ -63,6 +67,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * File transfer paused
 	 */
 	private boolean fileTransferPaused = false;
+	
+	/**
+	 * File transfer Id
+	 */
+	private String filetransferId;
 
 	/**
      * The logger
@@ -77,11 +86,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param contact Remote contact
 	 * @param thumbnail Thumbnail
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
+	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String filetransferId) {
 		super(parent, contact);
 		
 		this.content = content;
 		this.thumbnail = thumbnail;
+		this.filetransferId = filetransferId;
 	}
 
 	/**
@@ -130,14 +140,14 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	}	
 	
 	/**
-	 * Returns the "file-transfer-id" attribute
+	 * Returns the unique id for file transfer
 	 * 
-	 * @return String
+	 * @return filetransferId String
 	 */
 	public String getFileTransferId() {
-		return "" + System.currentTimeMillis();
-	}	
-	
+		return filetransferId;
+	}
+
 	/**
 	 * File has been transfered
 	 */

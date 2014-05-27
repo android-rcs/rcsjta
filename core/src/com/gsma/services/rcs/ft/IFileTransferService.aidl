@@ -23,6 +23,8 @@ interface IFileTransferService {
 	IFileTransfer getFileTransfer(in String transferId);
 
 	IFileTransfer transferFile(in String contact, in String filename, in boolean tryAttachThumbnail, in IFileTransferListener listener);
+
+	void markFileTransferAsRead(in String transferId);
 	
 	void addNewFileTransferListener(in INewFileTransferListener listener);
 

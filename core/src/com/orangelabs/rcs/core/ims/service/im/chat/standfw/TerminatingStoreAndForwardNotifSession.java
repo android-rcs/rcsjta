@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
@@ -376,21 +380,31 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
      * @param xml XML document
      */
     public void receiveMessageDeliveryStatus(String contact, String xml) {
-    	try {
-	    	// Parse the IMDN document
+		try {
+			// Parse the IMDN document
 			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-			if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
-				// Check message in RichMessagingHistory
-				String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(imdn.getMsgId());
-				if (ftSessionId != null) {
-					// Notify the file delivery
-					((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(ftSessionId, imdn.getStatus(), contact);
-				} else {
-					// Notify the message delivery outside of the chat session
-					getImsService().getImsModule().getCore().getListener()
-							.handleMessageDeliveryStatus(contact, imdn.getMsgId(), imdn.getStatus());
+			if (imdn != null) {
+				String msgId = imdn.getMsgId();
+				String status = imdn.getStatus();
+				if ((msgId != null) && (status != null)) {
+					// Check message in RichMessagingHistory
+					// Note: FileTransferId is always generated to equal the
+					// associated msgId of a FileTransfer invitation message.
+					String fileTransferId = msgId;
+					boolean isFileTransfer = RichMessagingHistory.getInstance().isFileTransfer(
+							fileTransferId);
+					if (isFileTransfer) {
+						// Notify the file delivery
+						((InstantMessagingService)getImsService()).receiveFileDeliveryStatus(
+								fileTransferId, status, contact);
+					} else {
+						// Notify the message delivery outside of the chat
+						// session
+						getImsService().getImsModule().getCore().getListener()
+								.handleMessageDeliveryStatus(contact, msgId, status);
+					}
 				}
-			}			 
+			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't parse IMDN document", e);

@@ -11,8 +11,6 @@ interface IChat {
 	
 	String sendMessage(in String message);
 	
-	void sendDisplayedDeliveryReport(in String msgId);
-	
 	void sendIsComposingEvent(in boolean status);
 	
 	void addEventListener(in IChatListener listener);
