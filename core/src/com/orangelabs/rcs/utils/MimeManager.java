@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.utils;
@@ -23,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
 
 /**
  * MIME manager
@@ -31,6 +36,8 @@ import android.text.TextUtils;
  * @author LEMORDANT Philippe
  */
 public class MimeManager {
+
+	private static final String DEFAULT_FILE_ENCONDING = "application/octet-stream";
 	/**
 	 * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice versa.
 	 */
@@ -125,6 +132,10 @@ public class MimeManager {
 		return mimeTypeToExtensionMap.containsKey(mimeType);
 	}
 
+	private String getMimeTypeFromMap(String extension) {
+		return extensionToMimeTypeMap.get(extension.toLowerCase());
+	}
+
 	/**
 	 * Returns the MIME-type associated to a given file extension
 	 * 
@@ -136,7 +147,12 @@ public class MimeManager {
 		if (TextUtils.isEmpty(extension)) {
 			return null;
 		}
-		return extensionToMimeTypeMap.get(extension.toLowerCase());
+		String mimeType = getMimeTypeFromMap(extension);
+		if (mimeType != null) {
+			return mimeType;
+		}
+		mimeType = (MimeTypeMap.getSingleton()).getMimeTypeFromExtension(extension);
+		return (mimeType != null) ? mimeType : DEFAULT_FILE_ENCONDING;
 	}
 
 	/**

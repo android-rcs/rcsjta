@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
@@ -27,6 +31,8 @@ import java.io.InputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+
+import android.net.Uri;
 
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -55,6 +61,11 @@ public class HttpDownloadManager extends HttpTransferManager {
 	File file;
 
 	/**
+	 * URI of file to be created
+	 */
+	Uri downloadedFile;
+
+	/**
 	 * Stream that writes the file
 	 */
 	BufferedOutputStream streamForFile = null;
@@ -64,12 +75,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 */
 	int calclength = 0;
 
-	/**
-	 * the URL of the downloaded file
-	 */
-	private String localUrl;
-
-	private MmContent thumbnail;
+	private MmContent fileicon;
 
 	/**
 	 * Retry counter
@@ -88,17 +94,16 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 *            File content to download
 	 * @param listener
 	 *            HTTP transfer event listener
-	 * @param filepath
-	 *            Filename to download
+	 * @param httpServerAddress
+	 *            Server address from where file is downloaded
 	 */
-	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, String filepath) {
-		super(listener, content.getUrl());
+	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, Uri httpServerAddress) {
+		super(listener, httpServerAddress);
 		this.content = content;
-		this.localUrl = filepath;
-		// Init file
-		file = new File(localUrl);
+		downloadedFile = content.getUri();
+		file = new File(downloadedFile.getPath());
 		if (logger.isActivated()) {
-			logger.debug("HttpDownloadManager file=" + filepath + " length=" + file.length());
+			logger.debug("HttpDownloadManager file from " + httpServerAddress + " length=" + content.getSize());
 		}
 		streamForFile = openStremForFile(file);
 	}
@@ -120,14 +125,14 @@ public class HttpDownloadManager extends HttpTransferManager {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Returns the local Url
-	 * 
-	 * @return localUrl
+	 * Returns complete file URI
+	 *
+	 * @return Uri of downloaded file
 	 */
-	public String getLocalUrl() {
-		return localUrl;
+	public Uri getDownloadedFileUri() {
+		return downloadedFile;
 	}
 
 	/**
@@ -138,7 +143,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	public boolean downloadFile() {
 		try {
 			if (logger.isActivated()) {
-				logger.debug("Download file " + content.getUrl());
+				logger.debug("Download file " + getHttpServerAddr());
 			}
 			if (streamForFile == null) {
 				streamForFile = openStremForFile(file);
@@ -146,7 +151,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 					return false;
 			}
 			// Send GET request
-			HttpGet request = new HttpGet(content.getUrl());
+			HttpGet request = new HttpGet(getHttpServerAddr().toString());
             request.addHeader("User-Agent", SipUtils.userAgentString());
 			if (HTTP_TRACE_ENABLED) {
 				String trace = ">>> Send HTTP request:";
@@ -258,19 +263,19 @@ public class HttpDownloadManager extends HttpTransferManager {
 	/**
 	 * Download the thumbnail
 	 * 
-	 * @param thumbnailInfo
-	 *            Thumbnail info
-	 * @param filename the thumbnail filename
-	 * @return Thumbnail picture content or null in case of error
+	 * @param fileicon
+	 *            fileicon info
+	 * @param fileName the fileicon filename
+	 * @return fileicon picture content or null in case of error
 	 */
-	public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String filename) {
+	public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String fileName) {
 		try {
 			if (logger.isActivated()) {
-				logger.debug("Download Thumbnail" + content.getUrl());
+				logger.debug("Download fileicon" + getHttpServerAddr());
 			}
 
 			// Send GET request
-			HttpGet request = new HttpGet(thumbnailInfo.getThumbnailUrl());
+			HttpGet request = new HttpGet(thumbnailInfo.getThumbnailUri().toString());
 			if (HTTP_TRACE_ENABLED) {
 				String trace = ">>> Send HTTP request:";
 				trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
@@ -285,14 +290,13 @@ public class HttpDownloadManager extends HttpTransferManager {
 				}
 				return null;
 			}
-			// Generate a URL from the filename and mime-type
-			String url = ContentManager.generateUrlForReceivedContent(filename, thumbnailInfo.getThumbnailType());
 			// Create the content for filename
-			thumbnail = ContentManager.createMmContentFromFilename(filename, url, baos.size());
+			Uri fileiconUri = ContentManager.generateUriForReceivedContent(fileName, thumbnailInfo.getThumbnailType());
+			fileicon = ContentManager.createMmContent(fileiconUri, baos.size(),fileName);
 			// Save data to file
-			thumbnail.writeData2File(baos.toByteArray());
-			thumbnail.closeFile();
-			return thumbnail;
+			fileicon.writeData2File(baos.toByteArray());
+			fileicon.closeFile();
+			return fileicon;
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Download thumbnail exception", e);
@@ -364,12 +368,13 @@ public class HttpDownloadManager extends HttpTransferManager {
 		}
 		resetParamForResume();
 		try {
+			Uri serverAddress = getHttpServerAddr();
 			if (logger.isActivated()) {
-				logger.debug("Resume Download file " + content.getUrl() + " from byte " + file.length());
+				logger.debug("Resume Download file " + serverAddress + " from byte " + file.length());
 			}
 
 			// Send GET request
-			HttpGet request = new HttpGet(content.getUrl());
+			HttpGet request = new HttpGet(serverAddress.toString());
 			long downloadedLength = file.length();
 			long completeSize = content.getSize();
             request.addHeader("User-Agent", SipUtils.userAgentString());

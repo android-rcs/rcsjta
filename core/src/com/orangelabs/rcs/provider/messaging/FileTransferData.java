@@ -94,6 +94,11 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
+	static final String KEY_FILE = FileTransferLog.FILE;
+
+	/**
+	 * Column name
+	 */
 	static final String KEY_NAME = FileTransferLog.FILENAME;
 	
 	/**

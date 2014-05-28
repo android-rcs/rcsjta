@@ -116,7 +116,7 @@ public interface IFileTransferLog {
 	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize);
 
 	/**
-	 * Update file transfer URL
+	 * Update file transfer URI
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID

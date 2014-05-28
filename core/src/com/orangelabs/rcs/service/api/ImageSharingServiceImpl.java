@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -23,6 +27,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 
@@ -36,10 +41,13 @@ import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.platform.file.FileDescription;
+import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -249,19 +257,19 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}    
     
     /**
-     * Shares an image with a contact. The parameter file contains the complete filename
-     * including the path of the image to be shared. An exception if thrown if there is
+     * Shares an image with a contact. The parameter file contains the URI
+     * of the image to be shared(for a local or a remote image). An exception if thrown if there is
      * no ongoing CS call. The parameter contact supports the following formats: MSISDN
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
      * @param contact Contact
-     * @param filename Filename to share
+     * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws ServerApiException
      */
-    public IImageSharing shareImage(String contact, String filename, IImageSharingListener listener) throws ServerApiException {
+    public IImageSharing shareImage(String contact, Uri file, IImageSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an image sharing session with " + contact);
 		}
@@ -271,7 +279,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
 		try {
 			// Create an image content
-			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
+			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
+			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
+
 			// Initiate a sharing session
 			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
@@ -296,6 +306,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			addImageSharingSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
+			// TODO:Handle Security exception in CR026
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}

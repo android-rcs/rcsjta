@@ -55,7 +55,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -348,60 +347,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     	}.start();
 		return msgId;
     }	
-
-    /**
-     * Transfers a file to participants. The parameter filename contains the complete
-     * path of the file to be transferred.
-	 * 
-	 * @param filename
-	 *            Url of file to transfer
-	 * @param tryAttachThumbnail
-	 *            true if the stack must try to attach thumbnail
-	 * @param listener
-	 *            File transfer event listener
-	 * @return File transfer
-	 * @throws ServerApiException
-	 */
-	public IFileTransfer sendFile(String filename, boolean tryAttachThumbnail, IFileTransferListener listener) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("sendFile (filename=" + filename + ") (thumbnail=" + tryAttachThumbnail + ")");
-		}
-		try {
-			// Initiate the session
-			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
-			
-			String chatSessionId = session.getSessionID();
-			String chatId = session.getContributionID();
-			Set<ParticipantInfo> participants = session.getConnectedParticipants();
-			final FileSharingSession session = Core.getInstance().getImService()
-					.initiateGroupFileTransferSession(participants, content, tryAttachThumbnail, chatSessionId, chatId);
-
-			// Add session listener
-			FileTransferImpl sessionApi = new FileTransferImpl(session);
-			sessionApi.addEventListener(listener);
-
-			// Update rich messaging history
-			MessagingLog.getInstance().addOutgoingGroupFileTransfer(
-					session.getContributionID(), session.getFileTransferId(), session.getContent(), session.getThumbnail());
-
-			// Start the session
-			new Thread() {
-				public void run() {
-					// Start the session
-					session.startSession();
-				}
-			}.start();
-
-			// Add session in the list
-			FileTransferServiceImpl.addFileTransferSession(sessionApi);
-			return sessionApi;
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-	}
 
     /**
 	 * Sends a is-composing event. The status is set to true when typing

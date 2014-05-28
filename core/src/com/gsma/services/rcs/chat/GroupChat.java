@@ -25,11 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferListener;
-import com.gsma.services.rcs.ft.IFileTransfer;
 
 /**
  * Group chat
@@ -281,33 +277,6 @@ public class GroupChat {
 		}    	
     }	
 
-	/**
-	 * Transfers a file to participants. The parameter filename contains the complete path of the file to be transferred.
-	 * 
-	 * @param filename
-	 *            Filename to transfer
-	 * @param fileIcon
-	 *            File icon option. If true, the stack tries to attach thumbnail. Thumbnail may not be attached if file is not an
-	 *            image.
-	 * @param listener
-	 *            File transfer event listener
-	 * @return File transfer
-	 * @throws JoynServiceException
-	 * @throws JoynContactFormatException
-	 */
-    public FileTransfer sendFile(String filename, boolean fileIcon, FileTransferListener listener) throws JoynServiceException {
-    	try {
-			IFileTransfer ftIntf = chatInf.sendFile(filename, fileIcon, listener);
-			if (ftIntf != null) {
-				return new FileTransfer(ftIntf);
-			} else {
-				return null;
-			}
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		} 
-	}	
-    
 	/**
 	 * Sends an Is-composing event. The status is set to true when typing
 	 * a message, else it is set to false.

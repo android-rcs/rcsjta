@@ -88,13 +88,16 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, contact);
 		values.put(FileTransferData.KEY_CONTACT, contact);
-		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		if (direction == FileTransfer.Direction.OUTGOING) {
+			values.put(FileTransferData.KEY_FILE, content.getUri().toString());
+		}
+		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, direction);
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
 		if (thumbnail != null) {
-			values.put(FileTransferData.KEY_FILEICON, Uri.fromFile(new File(thumbnail.getUrl())).toString());
+			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}
 
 		long date = Calendar.getInstance().getTimeInMillis();
@@ -132,7 +135,8 @@ public class FileTransferLog implements IFileTransferLog {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
+		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.OUTGOING);
 		values.put(FileTransferData.KEY_SIZE, 0);
@@ -146,7 +150,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
 		if (thumbnail != null) {
-			values.put(FileTransferData.KEY_FILEICON, Uri.fromFile(new File(thumbnail.getUrl())).toString());
+			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}
 		cr.insert(ftDatabaseUri, values);
 
@@ -185,7 +189,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
 		values.put(FileTransferData.KEY_CONTACT, contact);
-		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.INCOMING);
 		values.put(FileTransferData.KEY_SIZE, 0);
@@ -199,7 +203,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INVITED);
 		if (thumbnail != null) {
-			values.put(FileTransferData.KEY_FILEICON, Uri.fromFile(new File(thumbnail.getUrl())).toString());
+			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}
 
 		cr.insert(ftDatabaseUri, values);
@@ -269,10 +273,10 @@ public class FileTransferLog implements IFileTransferLog {
 	@Override
 	public void updateFileTransferred(String fileTransferId, MmContent content) {
 		if (logger.isActivated()) {
-			logger.debug("updateFileTransferUrl (fileTransferId=" + fileTransferId + ") (url=" + content.getUrl() + ")");
+			logger.debug("updateFileTransferUri (fileTransferId=" + fileTransferId + ") (uri=" + content.getUri() + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_NAME, content.getUrl());
+		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERRED);
 		values.put(FileTransferData.KEY_SIZE,content.getSize());
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });

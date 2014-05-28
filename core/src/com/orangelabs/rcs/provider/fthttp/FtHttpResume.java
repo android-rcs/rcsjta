@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
+import android.net.Uri;
+
 import java.util.Date;
 
 /**
@@ -41,9 +43,14 @@ public abstract class FtHttpResume {
 	final private FtHttpDirection ftHttpDirection;
 
 	/**
-	 * The file path
+	 * Uri of file
 	 */
-	final private String filepath;
+	final private Uri file;
+
+	/**
+	 * The file name
+	 */
+	final private String fileName;
 
     /**
      * The mime type of the file to download
@@ -53,12 +60,12 @@ public abstract class FtHttpResume {
     /**
      * The size of the file to download
      */
-    final private Long size;
+    final private long size;
 
 	/**
-	 * The thumbnail URL
+	 * The fileicon URI
 	 */
-	final private String thumbnail;
+	final private Uri fileicon;
 
 	/**
 	 * The remote contact number
@@ -94,12 +101,12 @@ public abstract class FtHttpResume {
 	 * Works just like FtHttpResume(Direction,String,String,String,String,String,String,String,boolean,Date) except the date
 	 * is always null
 	 * 
-	 * @see #FtHttpResume(FtHttpDirection,String,String,Long,String,String,String,String,String,String,boolean,Date)
+	 * @see #FtHttpResume(FtHttpDirection,String,String,long,String,String,String,String,String,String,boolean,Date)
 	 */
-	public FtHttpResume(FtHttpDirection ftHttpDirection, String filename, String mimeType, Long size,
-            String thumbnail, String contact, String displayName, String chatId, String fileTransferId,
+	public FtHttpResume(FtHttpDirection ftHttpDirection, Uri file, String fileName, String mimeType, long size,
+            Uri fileicon, String contact, String displayName, String chatId, String fileTransferId,
             String chatSessionId, boolean isGroup) {
-        this(ftHttpDirection, filename, mimeType, size, thumbnail, contact, displayName, chatId,
+        this(ftHttpDirection, file, fileName, mimeType, size, fileicon, contact, displayName, chatId,
         		fileTransferId, chatSessionId, isGroup, null);
 	}
 
@@ -108,14 +115,16 @@ public abstract class FtHttpResume {
 	 * 
 	 * @param ftHttpDirection
 	 *            the {@code direction} value.
-	 * @param filepath
-	 *            the {@code filename} value.
+	 * @param file
+	 *            the {@code Uri of file} value.
+	 * @param fileName
+	 *            the {@code fileName} value.
      * @param mimeType
      *            the {@code mimeType} value.
      * @param size
      *            the {@code size} value.
-	 * @param thumbnail
-	 *            the {@code thumbnail} value.
+	 * @param fileicon
+	 *            the {@code fileicon} value.
 	 * @param contact
 	 *            the {@code contact} value.
 	 * @param displayName
@@ -131,17 +140,18 @@ public abstract class FtHttpResume {
 	 * @param date
 	 *            the {@code date} value.
 	 */
-	public FtHttpResume(FtHttpDirection ftHttpDirection, String filepath, String mimeType, Long size,
-	        String thumbnail, String contact, String displayName, String chatId, String fileTransferId,
+	public FtHttpResume(FtHttpDirection ftHttpDirection,  Uri file, String fileName, String mimeType, long size,
+	        Uri fileicon, String contact, String displayName, String chatId, String fileTransferId,
 	        String chatSessionId, boolean isGroup, Date date) {
-		if (size <= 0 || ftHttpDirection == null || mimeType == null || filepath == null)
+		if (size <= 0 || ftHttpDirection == null || mimeType == null || file == null)
 			throw new IllegalArgumentException("Null argument");
 		this.date = date;
 		this.ftHttpDirection = ftHttpDirection;
-		this.filepath = filepath;
+		this.file = file;
+		this.fileName = fileName;
         this.mimeType = mimeType;
         this.size = size;
-		this.thumbnail = thumbnail;
+		this.fileicon = fileicon;
 		this.contact = contact;
 		this.displayName = displayName;
 		this.chatId = chatId;
@@ -158,20 +168,24 @@ public abstract class FtHttpResume {
 		return ftHttpDirection;
 	}
 
-	public String getFilepath() {
-		return filepath;
+	public Uri getFileUri() {
+		return file;
+	}
+
+	public String getFileName() {
+		return fileName;
 	}
 
     public String getMimetype() {
         return mimeType;
     }
 
-    public Long getSize() {
+    public long getSize() {
         return size;
     }
 
-	public String getThumbnail() {
-		return thumbnail;
+	public Uri getFileicon() {
+		return fileicon;
 	}
 
 	public String getContact() {
@@ -200,7 +214,7 @@ public abstract class FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResume [date=" + date + ", dir=" + ftHttpDirection + ", file=" + filepath + " thumbnail="+thumbnail+"]";
+		return "FtHttpResume [date=" + date + ", dir=" + ftHttpDirection + ", file=" + file + ", fileName=" + fileName + ",fileicon="+fileicon+"]";
 	}
 
 }

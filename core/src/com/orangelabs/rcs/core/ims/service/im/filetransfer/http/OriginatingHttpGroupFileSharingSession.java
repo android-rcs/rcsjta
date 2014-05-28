@@ -83,8 +83,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 *            IMS service
 	 * @param content
 	 *            The file content to share
-	 * @param tryAttachThumbnail
-	 *            true if the stack must try to attach thumbnail
+	 * @param fileicon
+	 *            true if the stack must try to attach fileicon
 	 * @param conferenceId
 	 *            Conference ID
 	 * @param participants
@@ -94,20 +94,20 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 * @param chatContributionId
 	 *            Chat contribution Id
 	 */
-	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean tryAttachThumbnail,
+	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean fileicon,
 			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId) {
 		super(parent, content, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
 		// Set participants involved in the transfer
 		this.participants = participants;
 		
-		MmContent thumbnail = null;
-		if (tryAttachThumbnail && MimeManager.isImageType(content.getEncoding())) {
-			// Create the thumbnail
-			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
-			setThumbnail(thumbnail);
+		MmContent fileiconContent = null;
+		if (fileicon && MimeManager.isImageType(content.getEncoding())) {
+			// Create the fileicon
+			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getSessionID());
+			setFileicon(fileiconContent);
 		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), thumbnail, this);
+		uploadManager = new HttpUploadManager(getContent(), fileiconContent, this);
 	}
 
 	/**

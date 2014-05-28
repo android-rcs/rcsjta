@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
+
+import android.net.Uri;
 
 /**
  * File transfer over HTTP info document
@@ -40,9 +46,9 @@ public class FileTransferHttpInfoDocument {
 	private String type = null;
 
 	/**
-	 * URL of the file
+	 * URI of the file
 	 */
-	private String url = null;
+	private Uri file = null;
 
 	/**
 	 * Validity of the file
@@ -57,7 +63,7 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Filename
 	 */
-	private String filename; 
+	private String fileName;
 
 	/**
 	 * Constructor
@@ -102,21 +108,21 @@ public class FileTransferHttpInfoDocument {
 	}
 
 	/**
-	 * Get file URL
+	 * Get file URI
 	 *
-	 * @return File URL
+	 * @return File URI
 	 */
-	public String getFileUrl() {
-		return url;
+	public Uri getFileUri() {
+		return file;
 	}
 
 	/**
-	 * Set file URL
+	 * Set file URI
 	 *
-	 * @param fileUrl
+	 * @param fileUri
 	 */
-	public void setFileUrl(String url) {
-		this.url = url;
+	public void setFileUri(Uri file) {
+		this.file = file;
 	}
 
 	/**
@@ -156,20 +162,20 @@ public class FileTransferHttpInfoDocument {
 	}
 
 	/**
-	 * Set the filename
+	 * Set the fileName
 	 * 
-	 * @param filename Filename
+	 * @param fileName FileName
 	 */
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public void setFilename(String fileName) {
+		this.fileName = fileName;
 	}
 	
 	/**
-	 * Return the filename
+	 * Return the fileName
 	 * 
-	 * @return Filename
+	 * @return FileName
 	 */
 	public String getFilename() {
-		return filename;
+		return fileName;
 	}
 }

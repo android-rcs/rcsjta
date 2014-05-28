@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +15,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.platform.file;
 
 import com.orangelabs.rcs.platform.FactoryException;
 
+import android.net.Uri;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * File factory
@@ -64,31 +68,13 @@ public abstract class FileFactory {
 	}
 
 	/**
-	 * Open a file input stream
-	 * 
-	 * @param url URL
-	 * @return Input stream
-	 * @throws IOException
-	 */
-	public abstract InputStream openFileInputStream(String url) throws IOException;
-
-	/**
-	 * Open a file output stream
-	 * 
-	 * @param url URL
-	 * @return Output stream
-	 * @throws IOException
-	 */
-	public abstract OutputStream openFileOutputStream(String url) throws IOException;
-	
-	/**
 	 * Returns the description of a file
-	 * 
-	 * @param url URL of the file
+	 *
+	 * @param file URI of the file
 	 * @return File description
 	 * @throws IOException
 	 */
-	public abstract FileDescription getFileDescription(String url) throws IOException;
+	public abstract FileDescription getFileDescription(Uri file) throws IOException;
 	
 	/**
 	 * Update the media storage

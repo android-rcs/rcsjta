@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +15,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.content;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.MimeManager;
-import com.orangelabs.rcs.utils.StringUtils;
+
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Vector;
 
 /**
  * Multimedia content manager
@@ -39,13 +48,13 @@ import com.orangelabs.rcs.utils.StringUtils;
  */
 public class ContentManager{
     /**
-     * Generate an URL for the received content
+     * Generate an Uri for the received content
      * 
-     * @param filename Filename
+     * @param fileName File name
      * @param mime MIME type
-     * @return URL
+     * @return Uri
      */
-	public static String generateUrlForReceivedContent(String filename, String mime) {
+	public static Uri generateUriForReceivedContent(String fileName, String mime) {
 		// Generate a file path
 		String path;
     	if (mime.startsWith("image")) {
@@ -57,24 +66,25 @@ public class ContentManager{
 			path = RcsSettings.getInstance().getFileRootDirectory();
     	}
 
-    	// Check that the filename will not overwrite existing file
+    	// Check that the fileName will not overwrite existing file
     	// We modify it if a file of the same name exists, by appending _1 before the extension
     	// For example if image.jpeg exists, next file will be image_1.jpeg, then image_2.jpeg etc
     	String extension = "";
-    	if ((filename!=null) && (filename.indexOf('.')!=-1)){
+    	if ((fileName!=null) && (fileName.indexOf('.')!=-1)){
     		// if extension is present, split it
-    		extension = "." + filename.substring(filename.lastIndexOf('.')+1);
-    		filename = filename.substring(0, filename.lastIndexOf('.'));
+    		extension = "." + fileName.substring(fileName.lastIndexOf('.')+1);
+    		fileName = fileName.substring(0, fileName.lastIndexOf('.'));
     	}
-    	String destination = filename;
+    	String destination = fileName;
     	int i = 1;
     	while(FileFactory.getFactory().fileExists(path + destination + extension)){
-    		destination = filename + '_' + i;
+    		destination = fileName + '_' + i;
     		i++;
     	}
 
     	// Return free destination url
-        return path + destination + extension;
+    	String filePath = path + destination + extension;
+        return Uri.fromFile(new File(filePath));
 	}
 
 	/**
@@ -84,99 +94,78 @@ public class ContentManager{
 	 * @throws IOException
 	 */
 	public static void saveContent(MmContent content) throws IOException {
+		ParcelFileDescriptor pfd = null;
 		// Write data
-		OutputStream os = FileFactory.getFactory().openFileOutputStream(content.getUrl());
-		os.write(content.getData());
-		os.flush();
-        os.close();
-
-		// Update the media storage
-		FileFactory.getFactory().updateMediaStorage(content.getUrl());
-	}
-
-    /**
-     * Create a content object from URL description
-     * 
-     * @param url Content URL
-     * @param size Content size
-     * @return Content instance
-     */
-	public static MmContent createMmContentFromUrl(String url, long size) {
-		String ext = MimeManager.getFileExtension(url);
-		String mime = MimeManager.getInstance().getMimeType(ext);
-		return createMmContentFromMime(url, mime, size);
-	}
-	
-
-    /**
-     * Create a content object from Filename
-     * 
-     * @param filename Name of the file
-     * @param url Content URL
-     * @param size Content size
-     * @return Content instance
-     */
-	public static MmContent createMmContentFromFilename(String filename, String url, long size) {
-		String ext = MimeManager.getFileExtension(filename);
-		String mime = MimeManager.getInstance().getMimeType(ext);
-		MmContent content = createMmContentFromMime(url, mime, size);
-		content.setName(filename);
-		
-		return content;
-	}
-
-    /**
-     * Create a content object from MIME type
-     * 
-     * @param url Content URL
-     * @param mime MIME type
-     * @param size Content size
-     * @return Content instance
-     */
-	public static MmContent createMmContentFromMime(String url, String mime, long size) {
-		if (mime != null) {
-	    	if (mime.startsWith("image/")) {
-	    		// Photo content
-	    		return new PhotoContent(url, mime, size);
-	        }
-	    	if (mime.startsWith("video/")) {
-	    		// Video content
-	    		return new VideoContent(url, mime, size);
-	        }
-	    	if (mime.equals(VisitCardContent.ENCODING)) {
-	    		// Visit Card content
-	    		return new VisitCardContent(url, size);
-	        }
-	    	if (mime.equals(GeolocContent.ENCODING)) {
-	    		// Geoloc content
-	    		return new GeolocContent(url, size);
-	        }
+		OutputStream os = null;
+		Uri file = content.getUri();
+		try {
+			pfd = AndroidFactory.getApplicationContext().getContentResolver()
+					.openFileDescriptor(file, "w");
+			os = new FileOutputStream(pfd.getFileDescriptor());
+			os.write(content.getData());
+			os.flush();
+		} finally {
+			if (os != null) {
+				os.close();
+			}
+			if (pfd != null) {
+				pfd.close();
+			}
 		}
-		
-		// File content
-		return new FileContent(url, size);
+		// Update the media storage with uri.getPath() since its always fileUri
+		// in the receiver side
+		FileFactory.getFactory().updateMediaStorage(file.getPath());
+	}
+
+	/**
+	 * Create a content object from URI description
+	 *
+	 * @param uri Content URI
+	 * @param size Content size
+	 * @param fileName The file name
+	 * @return Content instance
+	 */
+	public static MmContent createMmContent(Uri uri, long size, String fileName) {
+		String extension = MimeManager.getFileExtension(fileName);
+		String mime = MimeManager.getInstance().getMimeType(extension);
+		return createMmContentFromMime(uri, mime, size, fileName);
 	}
 
     /**
-     * Create a content object from MIME type. In case of mime-type not present, the creation of content is based on
-     * file name.
-     *
-     * @param filename Name of the file
-     * @param url Content URL
-     * @param mime MIME type
-     * @param size Content size
-     * @return Content instance
-     */
-    public static MmContent createMmContentFromMime(String filename, String url, String mime, long size) {
-        MmContent content;
-        if (!StringUtils.isEmpty(mime)) {
-            content = createMmContentFromMime(url, mime, size);
-        } else {
-            content = createMmContentFromFilename(filename, url, size);
-        }
-        content.setName(filename);
-        return content;
-    }
+	 * Create a content object from MIME type
+	 *
+	 * @param uri Content URI
+	 * @param mime MIME type
+	 * @param size Content size
+	 * @param fileName The file name
+	 * @return Content instance
+	 */
+	public static MmContent createMmContentFromMime(Uri uri, String mime, long size, String fileName) {
+		if (mime != null) {
+			if (mime.startsWith(PhotoContent.ENCODING)) {
+				// Photo content
+				return new PhotoContent(uri, mime, size, fileName);
+			}
+			if (mime.startsWith(VideoContent.ENCODING)) {
+				// Video content
+				return new VideoContent(uri, mime, size, fileName);
+			}
+			if (mime.startsWith(AudioContent.ENCODING)) {
+				// Audio content
+				return new AudioContent(uri, mime, size, fileName);
+			}
+			if (mime.equals(VisitCardContent.ENCODING)) {
+				// Visit Card content
+				return new VisitCardContent(uri, size, fileName);
+			}
+			if (mime.equals(GeolocContent.ENCODING)) {
+				// Geoloc content
+				return new GeolocContent(uri, size, fileName);
+			}
+		}
+		// File content
+		return new FileContent(uri, size, fileName);
+	}
 
     /**
      * Create a live video content object
@@ -315,8 +304,8 @@ public class ContentManager{
 			String mime = SipUtils.extractParameter(fileSelectorValue, "type:", "application/octet-stream");
 			long size = Long.parseLong(SipUtils.extractParameter(fileSelectorValue, "size:", "-1"));
 			String filename = SipUtils.extractParameter(fileSelectorValue, "name:", "");
-			String url = ContentManager.generateUrlForReceivedContent(filename, mime);				
-			MmContent mContent = ContentManager.createMmContentFromMime(url, mime, size);
+			Uri file = ContentManager.generateUriForReceivedContent(filename, mime);
+			MmContent mContent = ContentManager.createMmContent(file, size, filename);
 			return mContent;
 		} catch(Exception e) {
 			return null;

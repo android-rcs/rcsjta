@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
+
+import android.net.Uri;
 
 
 /**
@@ -53,7 +59,7 @@ public abstract class FileTransferListener extends IFileTransferListener.Stub {
 	/**
 	 * Callback called when the file has been transferred
 	 * 
-	 * @param filename Filename including the path of the transferred file
+	 * @param file URI of the transferred file transferred (local or a remote file)
 	 */
-	public abstract void onFileTransferred(String filename);
+	public abstract void onFileTransferred(Uri file);
 }

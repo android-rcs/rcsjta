@@ -41,6 +41,4 @@ interface IGroupChat {
 	void removeEventListener(in IGroupChatListener listener);
 
 	String sendGeoloc(in Geoloc geoloc);
-		
-	IFileTransfer sendFile(in String filename, in boolean tryAttachThumbnail, in IFileTransferListener listener);
 }

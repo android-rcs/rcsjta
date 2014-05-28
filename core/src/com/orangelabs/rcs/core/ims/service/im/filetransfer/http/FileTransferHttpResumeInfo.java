@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import org.xml.sax.helpers.DefaultHandler;
+
+import android.net.Uri;
 
 /**
  * File transfer over HTTP info document
@@ -36,9 +42,9 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	private int end = 0;
 
 	/**
-	 * HTTP upload URL for the file
+	 * HTTP upload Uri for the file
 	 */
-	private String url = null;
+	private Uri file = null;
 
 
 	/**
@@ -70,17 +76,17 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	}
 
 	/**
-	 * @return the url
+	 * @return the Uri
 	 */
-	protected String getUrl() {
-		return url;
+	protected Uri getUri() {
+		return file;
 	}
 
 	/**
-	 * @param url the url to set
+	 * @param file the Uri to set
 	 */
-	protected void setUrl(String url) {
-		this.url = url;
+	protected void setUri(Uri file) {
+		this.file = file;
 	}
 
 }

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
@@ -35,6 +39,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.net.Uri;
 
 /**
  * Originating geoloc sharing session (transfer)
@@ -116,9 +122,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	    	}
 
 	    	// Set File-location attribute
-	    	String location = getFileLocationAttribute();
+	    	Uri location = getFileLocationAttribute();
 	    	if (location != null) {
-	    		sdp += "a=file-location:" + location + SipUtils.CRLF;
+	    		sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
 	    	}
 	   
     		// Set the local SDP part in the dialog path

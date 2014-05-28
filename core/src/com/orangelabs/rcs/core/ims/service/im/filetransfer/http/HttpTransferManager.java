@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
@@ -50,6 +54,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Proxy;
+import android.net.Uri;
 
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -74,7 +79,7 @@ public abstract class HttpTransferManager {
 	/**
      * HTTP server address
      */
-    private String serverAddr = RcsSettings.getInstance().getFtHttpServer();
+    private Uri serverAddr = Uri.parse(RcsSettings.getInstance().getFtHttpServer());
 
 	/**
      * HTTP server login
@@ -139,9 +144,9 @@ public abstract class HttpTransferManager {
      * @param listener HTTP event listener
      * @param address HTTP server address
      */
-    public HttpTransferManager(HttpTransferEventListener listener, String address) {
+    public HttpTransferManager(HttpTransferEventListener listener, Uri address) {
         this.listener = listener;
-
+        this.serverAddr = address;
         initServerAddress(address);
     }
 
@@ -151,10 +156,10 @@ public abstract class HttpTransferManager {
      *
      * @param address server address
      */
-    private void initServerAddress(String address) {
+    private void initServerAddress(Uri address) {
         try {
             // Extract protocol and port
-            URL url = new URL(address);
+            URL url = new URL(address.toString());
             String protocol = url.getProtocol();
             int port = url.getPort();
             if (port == -1) {
@@ -214,7 +219,7 @@ public abstract class HttpTransferManager {
      *
      * @return Address
      */
-    public String getHttpServerAddr() {
+    public Uri getHttpServerAddr() {
         return serverAddr;
     }
 

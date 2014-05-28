@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
@@ -28,6 +32,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.net.Uri;
 import android.util.TimeFormatException;
 
 import com.orangelabs.rcs.utils.DateUtils;
@@ -40,7 +45,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class FileTransferHttpInfoParser extends DefaultHandler {
 /*  File-Transfer HTTP SAMPLE:
-    <?xml version="1.0" encoding=”UTF-8”?>
+    <?xml version="1.0" encoding=â€UTF-8â€?>
     <file>
         <file-info type="thumbnail">
             <file-size>[thumbnail size in bytes]</file-size>
@@ -137,12 +142,12 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 				String validity = attr.getValue("until").trim();
 				
 				if (ftInfo.getFileThumbnail() != null || thumbnailInfo == null){ 
-					ftInfo.setFileUrl(url);
+					ftInfo.setFileUri(Uri.parse(url));
 					ftInfo.setTransferValidity(parseValidityDate(validity));
 					
 				} else
 				if (thumbnailInfo != null) {
-					thumbnailInfo.setThumbnailUrl(url);		
+					thumbnailInfo.setThumbnailUri(Uri.parse(url));
 					thumbnailInfo.setThumbnailValidity(parseValidityDate(validity));
 					ftInfo.setFileThumbnail(thumbnailInfo);
 				}

@@ -38,12 +38,13 @@ public interface FtHttpColumns extends BaseColumns {
 	static final String TYPE = "type";
 	static final String CONTACT = "contact";
 	static final String CHATID = "chatid";
-	static final String FILEPATH = "filepath";
+	static final String FILE = "file";
+	static final String FILENAME = "filename";
 	static final String DIRECTION = "direction";
 	static final String DATE = "date";
 	static final String DISPLAY_NAME = "display_name";
 	static final String FT_ID = "ft_id";
-	static final String THUMBNAIL = "thumbnail";
+	static final String FILEICON = "fileicon";
 	static final String IS_GROUP = "is_group";
 	static final String CHAT_SESSION_ID = "chat_session_id";
 	
@@ -58,12 +59,13 @@ public interface FtHttpColumns extends BaseColumns {
             TYPE,
             CONTACT,
             CHATID,
-            FILEPATH,
+            FILE,
+            FILENAME,
             DIRECTION,
             DATE,
             DISPLAY_NAME,
             FT_ID,
-            THUMBNAIL,
+            FILEICON,
             IS_GROUP,
             CHAT_SESSION_ID
     };

@@ -44,6 +44,8 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.net.Uri;
+
 /**
  * Terminating file transfer HTTP session
  * 
@@ -92,8 +94,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
 			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, String contact) {
-		super(parent, ContentManager.createMmContentFromFilename(fileTransferInfo.getFilename(),
-				fileTransferInfo.getFileUrl(), fileTransferInfo.getFileSize()),
+		super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),fileTransferInfo.getFileSize(),fileTransferInfo.getFilename()),
 				chatSession.getRemoteContact(), null, chatSession.getSessionID(),
 				chatSession.getContributionID(), fileTransferId);
 
@@ -109,14 +110,13 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		isGroup = chatSession.isGroupChat();
 		
 		// Instantiate the download manager
-		downloadManager = new HttpDownloadManager(getContent(), this, ContentManager.generateUrlForReceivedContent(getContent()
-				.getName(), getContent().getEncoding()));
+		downloadManager = new HttpDownloadManager(getContent(), this, fileTransferInfo.getFileUri());
 
 		// Download thumbnail
 		if (fileTransferInfo.getFileThumbnail() != null) {
 			FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-			String iconName = FileTransferUtils.builThumbnaiUrl(getFileTransferId(),thumbnailInfo.getThumbnailType());
-			setThumbnail(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
+			String iconName = FileTransferUtils.buildFileiconUrl(getFileTransferId(),thumbnailInfo.getThumbnailType());
+			setFileicon(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
 	}
 
@@ -132,14 +132,14 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
 		super(parent, content, resume.getContact(),
-				resume.getThumbnail() != null ? FileTransferUtils.createMmContentFromUrl(resume
-						.getThumbnail()) : null, resume.getChatSessionId(), resume.getChatId(),
+				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
+						.getFileicon()) : null, resume.getChatSessionId(), resume.getChatId(),
 				resume.getFileTransferId());
 		setRemoteDisplayName(resume.getDisplayName());
 		this.isGroup = resume.isGroup();
 		this.resumeFT = resume;
 		// Instantiate the download manager
-		downloadManager = new HttpDownloadManager(getContent(), this, resumeFT.getFilepath());
+		downloadManager = new HttpDownloadManager(getContent(), this, resume.getDownloadServerAddress());
 	}
 
 	/**
@@ -222,12 +222,15 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			for (int j = 0; j < getListeners().size(); j++) {
 				getListeners().get(j).handleSessionStarted();
 			}
+			Uri file = downloadManager.getDownloadedFileUri();
+			Uri downloadServerAddress = downloadManager.getHttpServerAddr();
+
 			// Create download entry in fthttp table
-			if (getThumbnail() != null) {
-				resumeFT = new FtHttpResumeDownload(this, downloadManager.getLocalUrl(), getFileTransferId(), getThumbnail()
-						.getUrl(), isGroup);
+			if (getFileicon() != null) {
+				resumeFT = new FtHttpResumeDownload(this, downloadServerAddress, file, getFileTransferId(), getFileicon()
+						.getUri(), isGroup);
 			} else {
-				resumeFT = new FtHttpResumeDownload(this, downloadManager.getLocalUrl(), getFileTransferId(), null, isGroup);
+				resumeFT = new FtHttpResumeDownload(this, downloadServerAddress, file, getFileTransferId(), null, isGroup);
 			}
 
             FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
@@ -238,7 +241,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				}
 
 				// Set filename
-				getContent().setUrl(downloadManager.getLocalUrl());
+				getContent().setUri(file);
 
 				// File transfered
 				handleFileTransfered();
@@ -349,7 +352,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 					}
 
 					// Set filename
-					getContent().setUrl(downloadManager.getLocalUrl());
+					getContent().setUri(downloadManager.getDownloadedFileUri());
 
 					// File transfered
 					handleFileTransfered();

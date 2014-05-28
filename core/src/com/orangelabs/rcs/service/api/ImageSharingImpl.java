@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 
+import android.net.Uri;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.ish.ImageSharing;
@@ -96,6 +101,15 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
 	public String getFileName() {
 		return session.getContent().getName();
+	}
+
+	/**
+	 * Returns the Uri of the file to be transferred
+	 *
+	 * @return Filename
+	 */
+	public Uri getFile() {
+		return session.getContent().getUri();
 	}
 
 	/**
@@ -438,7 +452,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      *
      * @param filename Filename associated to the received content
      */
-    public void handleContentTransfered(String filename) {
+    public void handleContentTransfered(Uri file) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("Image transferred");
@@ -451,7 +465,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onImageShared(filename);
+	            	listeners.getBroadcastItem(i).onImageShared(file);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
