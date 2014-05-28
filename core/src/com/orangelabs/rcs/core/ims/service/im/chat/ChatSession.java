@@ -969,7 +969,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	        boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
 	        if (result) {
 	            // Update rich messaging history
-			RichMessagingHistory.getInstance().updateIncomingChatMessageDeliveryStatus(msgId, status);
+	           //since the requested display report was now successfully send we mark this message as fully received.
+			RichMessagingHistory.getInstance().markIncomingChatMessageAsReceived(msgId);
 	        }
 		}
 	    

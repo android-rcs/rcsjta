@@ -22,6 +22,10 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE;
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -47,8 +51,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -72,7 +74,7 @@ public class RichMessagingHistory {
 			.append(ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED).append(" AND ")
 			.append(GroupChatDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
 			.append(ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR).append(",")
-			.append(ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_AND_DISPLAY_ERROR)
+			.append(ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR)
 			.append("))").toString();
 
 	private static final String SELECTION_FILE_BY_FT_ID = new StringBuilder(
@@ -464,11 +466,7 @@ public class RichMessagingHistory {
 			values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
 			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);		
-			if (msg.isImdnDisplayedRequested()) {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED);
-			} else {
-				values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.RECEIVED);
-			}
+			values.put(MessageData.KEY_STATUS, ChatLog.Message.Status.Content.RECEIVED);
 		} else {
 			// Send message
 			values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
@@ -573,19 +571,17 @@ public class RichMessagingHistory {
 	}
 
 	/**
-	 * Update chat message delivery status
+	 * Mark incoming chat message status as received
 	 *
 	 * @param msgId Message ID
-	 * @param status Delivery status
 	 */
-	public void updateIncomingChatMessageDeliveryStatus(String msgId, String status) {
+	public void markIncomingChatMessageAsReceived(String msgId) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Update chat delivery status: msgID=").append(msgId)
-					.append(", status=").append(status).toString());
+			logger.debug(new StringBuilder(
+					"Mark incoming chat message status as received for msgID=")
+					.append(msgId).toString());
 		}
-    	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-    		RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.RECEIVED);
-    	}
+		updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.RECEIVED);
 	}
 
 	/**
@@ -599,22 +595,16 @@ public class RichMessagingHistory {
 			logger.debug(new StringBuilder("Update chat delivery status: msgID=").append(msgId)
 					.append(", status=").append(status).toString());
 		}
-		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
 		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.DELIVERED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.DELIVERED);
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			richMessagingHistory
-					.markMessageAsRead(msgId);
+			markMessageAsRead(msgId);
 		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		} else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		} else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		}
 	}
 
@@ -628,16 +618,12 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("Update chat delivery status: msgID=" + msgId + ", status=" + status);
 		}
-		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
 		if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		} else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		} else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-			richMessagingHistory.updateChatMessageStatus(msgId,
-					ChatLog.Message.Status.Content.FAILED);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		}
 	}
 
@@ -1003,7 +989,6 @@ public class RichMessagingHistory {
 		if (logger.isActivated()) {
 			logger.debug("Set chat delivery requested: msgID=" + msgId);
 		}
-		// TODO FUSION will be changed with CR013 read/displayed/delivered ?
 		updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED);
 	}
 	
@@ -1124,24 +1109,21 @@ public class RichMessagingHistory {
 		ContentValues values = new ContentValues();
 		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, deliveryStatus);
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-		if (deliveryStatus != ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED) {
-			values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE,
-					ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE);
-		} else {
+		if (deliveryStatus == ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED) {
 			Pair<Integer, Integer> statusAndReasonCode = getGroupChatDeliveryInfoStatus(msgId,
 					contact);
-			if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED == statusAndReasonCode.first) {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE,
-						ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR);
-
-			} else if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED == statusAndReasonCode.first
-					&& ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR == statusAndReasonCode.second) {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE,
-						ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_AND_DISPLAY_ERROR);
+			int status = statusAndReasonCode.first;
+			int reasonCode = statusAndReasonCode.second;
+			if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED == status) {
+				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DISPLAY_ERROR);
+			} else if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED == status
+					&& ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR == reasonCode) {
+				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DELIVERY_ERROR);
 			} else {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE,
-						ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR);
+				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DELIVERY_ERROR);
 			}
+		} else {
+			values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, NONE);
 		}
 		String[] selectionArgs = new String[] {
 				msgId, contact

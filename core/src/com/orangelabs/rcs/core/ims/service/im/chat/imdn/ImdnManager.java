@@ -104,8 +104,11 @@ public class ImdnManager extends Thread {
 				// Send SIP MESSAGE
 				sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
 
-				// Update rich messaging history
-				RichMessagingHistory.getInstance().updateIncomingChatMessageDeliveryStatus(delivery.getMsgId(), delivery.getStatus());
+				// Update rich messaging history when sending DISPLAYED report
+				// Since the requested display report was now successfully send we mark this message as fully received
+				if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus()))
+					RichMessagingHistory.getInstance().markIncomingChatMessageAsReceived(
+							delivery.getMsgId());
 			} catch(Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Unexpected exception", e);

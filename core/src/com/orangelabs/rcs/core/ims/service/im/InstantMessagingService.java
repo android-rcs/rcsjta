@@ -54,7 +54,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -78,7 +77,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

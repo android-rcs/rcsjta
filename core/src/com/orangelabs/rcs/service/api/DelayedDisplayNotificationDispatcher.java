@@ -12,6 +12,10 @@ import com.orangelabs.rcs.utils.logger.Logger;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+/**
+ * Delayed Display Notification Dispatcher retrieves those text messages for
+ * which requested display reports have not yet been successfully sent.
+ */
 public class DelayedDisplayNotificationDispatcher implements Runnable {
 
 	private final static String SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(

@@ -150,8 +150,8 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 				// If the file is bigger than FT MAX SIZE, a warning message is displayed when trying to
 				// send or receive a file larger than the mentioned limit and the transfer will be cancelled
 				// (that is at protocol level, the SIP INVITE request will never be sent or an automatic
-				// rejection response SIP 403 Forbidden with a Warning header set to �133 Size
-				// exceeded� will be sent by the entity that detects that the file size is too big to the other
+				// rejection response SIP 403 Forbidden with a Warning header set to 133 Size
+				// exceeded will be sent by the entity that detects that the file size is too big to the other
 				// end depending on the scenario).
                 send403Forbidden(getDialogPath().getInvite(), getDialogPath().getLocalTag(),"133 Size exceeded");
                 // Close session

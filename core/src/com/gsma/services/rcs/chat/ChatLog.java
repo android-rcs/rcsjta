@@ -196,12 +196,6 @@ public class ChatLog {
 			 * A displayed-error delivery report has been received.
 			 */
 			public static final int DISPLAY_ERROR = 2;
-
-			/**
-			 * Both delivery-error and display-error delivery reports has been
-			 * received.
-			 */
-			public static final int DELIVERY_AND_DISPLAY_ERROR = 3;
 		}
 
 		/**
