@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
@@ -53,11 +57,6 @@ public class ChatMessage implements Parcelable {
 	 */
 	private Date receiptAt;
 
-	/**
-	 * Flag indicating is a displayed report is requested
-	 */
-	private boolean displayedReportRequested = false;
-
     /**
      * Constructor for outgoing message
      * 
@@ -68,11 +67,10 @@ public class ChatMessage implements Parcelable {
      * @param displayedReportRequested Flag indicating if a displayed report is requested
      * @hide
 	 */
-	public ChatMessage(String messageId, String remote, String message, Date receiptAt, boolean displayedReportRequested) {
+	public ChatMessage(String messageId, String remote, String message, Date receiptAt) {
 		this.id = messageId;
 		this.contact = remote;
 		this.message = message;
-		this.displayedReportRequested = displayedReportRequested;
 		this.receiptAt = receiptAt;
 	}
 	
@@ -87,7 +85,6 @@ public class ChatMessage implements Parcelable {
 		this.contact = source.readString();
 		this.message = source.readString();
 		this.receiptAt = new Date(source.readLong());
-		this.displayedReportRequested = source.readInt() != 0;
     }
 	
 	/**
@@ -113,7 +110,6 @@ public class ChatMessage implements Parcelable {
     	dest.writeString(contact);
     	dest.writeString(message);
     	dest.writeLong(receiptAt.getTime());
-    	dest.writeInt(displayedReportRequested ? 1 : 0);
     }
 
     /**
@@ -166,14 +162,5 @@ public class ChatMessage implements Parcelable {
 	 */
 	public Date getReceiptDate() {
 		return receiptAt;
-	}
-
-	/**
-	 * Is displayed delivery report requested
-	 * 
-	 * @return Returns true if requested else returns false
-	 */
-	public boolean isDisplayedReportRequested() {
-		return displayedReportRequested;
 	}
 }

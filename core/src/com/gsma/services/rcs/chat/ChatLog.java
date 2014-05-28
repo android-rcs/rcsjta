@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
@@ -114,7 +118,107 @@ public class ChatLog {
 			return result;
 		}
 	}
-    
+
+	/**
+	 * Group chat delivery info (delivery information on group chat messages and file transfers)
+	 */
+	public static class GroupChatDeliveryInfo {
+
+		public static final Uri CONTENT_URI = Uri
+				.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo");
+
+		public static final Uri CONTENT_MSG_URI = Uri
+				.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/messageid/");
+
+		public static final String ID = "_id";
+
+		public static final String DELIVERY_STATUS = "delivery_status";
+
+		public static final String DISPLAY_STATUS = "display_status";
+
+		public static final String REASON_CODE = "reason_code";
+
+		public static final String MESSAGE_ID = "msg_id";
+
+		public static final String CHAT_ID = "chat_id";
+
+		public static final String CONTACT = "contact";
+
+		public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
+
+		public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
+
+		/**
+		 * Group chat delivery status of the entry
+		 */
+		public static class DeliveryStatus {
+			/**
+			 * this message or file-transfer has not received any delivered or
+			 * displayed delivery report for the specified contact.
+			 */
+			public static final int NOT_DELIVERED = 0;
+
+			/**
+			 * The message or file-transfer has received a delivered delivery
+			 * report for the specified contact
+			 */
+			public static final int DELIVERED = 1;
+
+			/**
+			 * The message or file-transfer has received a displayed delivery
+			 * report for the specified contact.
+			 */
+			public static final int DISPLAYED = 2;
+
+			/**
+			 * The message or file-transfer has received a delivery report
+			 * failure for the specified contact.
+			 */
+			public static final int FAILED = 3;
+		}
+
+		/**
+		 * Group chat delivery status reason
+		 */
+		public static class ReasonCode {
+
+			/**
+			 * No specific reason code specified.
+			 */
+			public static final int NONE = 0;
+
+			/**
+			 * A delivered-error delivery report has been received.
+			 */
+			public static final int DELIVERY_ERROR = 1;
+
+			/**
+			 * A displayed-error delivery report has been received.
+			 */
+			public static final int DISPLAY_ERROR = 2;
+		}
+
+		/**
+		 * Displayed status of entry
+		 */
+		public static class DisplayStatus {
+			/**
+			 * The entry has not been displayed.
+			 */
+			public static final int NOT_DISPLAYED = 0;
+
+			/**
+			 * The entry has been displayed.
+			 */
+			public static final int DISPLAYED = 1;
+
+			/**
+			 * Display status is not supported.
+			 */
+			public static final int UNSUPPORTED = 2;
+		}
+	}
+
     /**
      * Chat message from a single chat or group chat
      */
@@ -154,6 +258,13 @@ public class ChatLog {
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_STATUS = "status";
+
+        /**
+         * The name of the column containing the message read status.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String READ_STATUS = "read_status";
+
         	
         /**
          * The name of the column containing the message direction.
@@ -211,12 +322,6 @@ public class ChatLog {
         public static final String MIME_TYPE = "mime_type";
         
         /**
-         * The name of the column containing the identify of the file transfer .
-         * <P>Type: TEXT</P>
-         */
-        public static final String FT_ID = "ft_id";
-        
-        /**
          * Type of the message
          */
         public static class Type {
@@ -266,21 +371,20 @@ public class ChatLog {
              */
             public static class Content {
 		        /**
-		         * The message has been delivered, but we don't know if the message
-		         * has been read by the remote
+		         * The message has been delivered to the remote.
 		         */
-		        public static final int UNREAD = 0;
+		        public static final int DELIVERED = 0;
 	
 		        /**
-		         * The message has been delivered and a displayed delivery report is
-		         * requested, but we don't know if the message has been read by the remote
+		         * The message has been received and a displayed delivery report is
+		         * requested
 		         */
-		        public static final int UNREAD_REPORT = 1;
+		        public static final int DISPLAY_REPORT_REQUESTED = 1;
 		        
 		        /**
-		         * The message has been read by the remote (i.e. displayed)
+		         * The message is delivered and no display delivery report is requested.
 		         */
-		        public static final int READ = 2;
+		        public static final int RECEIVED = 2;
 		        
 		        /**
 		         * The message is in progress of sending
@@ -352,6 +456,21 @@ public class ChatLog {
 		         */
 		        public static final int BUSY = 7;
             }
+        }
+
+        /**
+         * Read status of the message
+         */
+        public static class ReadStatus {
+		    /**
+		    * The message has not yet been displayed in the UI.
+		    */
+		    public static final int UNREAD = 0;
+
+		    /**
+		     * The message has been displayed in the UI.
+		     */
+		    public static final int READ = 1;
         }
     }
     

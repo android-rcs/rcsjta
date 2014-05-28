@@ -61,9 +61,10 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * @param content Content of file to be shared
 	 * @param contact Remote contact
 	 * @param thumbnail Content of Thumbnail
+	 * @param filetransferId File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
-		super(parent, content, contact, thumbnail);
+	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String filetransferId) {
+		super(parent, content, contact, thumbnail, filetransferId);
 	}
 	
 	/**
@@ -71,7 +72,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * 
 	 * @return String
 	 */
-	public String getFileTransferId() {
+	public String getFileTransferIdAttribute() {
 		return "" + System.currentTimeMillis();
 	}	
 	

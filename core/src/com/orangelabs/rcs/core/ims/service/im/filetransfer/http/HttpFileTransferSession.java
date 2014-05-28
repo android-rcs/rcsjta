@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
@@ -69,10 +73,11 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 	 * @param thumbnail Content of thumbnail
 	 * @param chatSessionId Chat session ID
 	 * @param chatContributionId Chat contribution Id
+	 * @param fileTransferId File transfer Id
 	 */
 	public HttpFileTransferSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String chatSessionID,
-			String chatContributionId) {
-		super(parent, content, contact, thumbnail);
+			String chatContributionId, String fileTransferId) {
+		super(parent, content, contact, thumbnail, fileTransferId);
 		this.chatSessionId = chatSessionID;
 		setContributionID(chatContributionId);
 		this.sessionState = HttpTransferState.PENDING;
@@ -120,7 +125,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                 boolean found = false;
                 List<FtHttpResume> createdFileTransfers = dao.queryAll();
                 for (FtHttpResume ftHttpResume : createdFileTransfers) {
-                    if (ftHttpResume.getSessionId().equals(getSessionID())) {
+                    if (ftHttpResume.getFileTransferId().equals(getFileTransferId())) {
                         found = true;
                         break;
                     }

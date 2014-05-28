@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service;
@@ -716,14 +720,27 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleFileDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleFileDeliveryStatus(String ftSessionId, String status, String contact) {
+    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact) {
     	 if (logger.isActivated()) {
-             logger.debug("Handle file delivery status: session=" + ftSessionId + " status=" + status + " contact="+contact);
+        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contact);
          }
 
         // Notify listeners
-        ftApi.handleFileDeliveryStatus(ftSessionId, status, contact);
+        ftApi.handleFileDeliveryStatus(fileTransferId, status, contact);
     }
+
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.CoreListener#handleFileDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
+     */
+	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact) {
+		if (logger.isActivated()) {
+			logger.debug("Handle group file delivery status: fileTransferId=" + fileTransferId + " status="
+					+ status + " contact=" + contact);
+		}
+
+		// Notify listeners
+		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
+	}
 
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
@@ -807,5 +824,10 @@ public class RcsCoreService extends Service implements CoreListener {
 		
 		// Broadcast the invitation
 		ipcallApi.receiveIPCallInvitation(session);
+	}
+
+	@Override
+	public void tryToDispatchAllPendingDisplayNotifications() {
+		chatApi.tryToDispatchAllPendingDisplayNotifications();
 	}
 }

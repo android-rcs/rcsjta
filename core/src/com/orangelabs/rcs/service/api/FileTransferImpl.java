@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -79,7 +83,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 * @return Transfer ID
 	 */
 	public String getTransferId() {
-		return session.getSessionID();
+		return session.getFileTransferId();
 	}
 	
 	/**
@@ -234,7 +238,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		}
 		
 		// Update rich messaging history
-  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+  		RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.ABORTED);
 
   		// Reject invitation
         Thread t = new Thread() {
@@ -366,7 +370,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.STARTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -395,7 +399,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.ABORTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -430,7 +434,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
 	  		} else {
 				// Update rich messaging history
-				RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.ABORTED);
+				RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.ABORTED);
 
 				// Notify event listeners
 				final int N = listeners.beginBroadcast();
@@ -468,7 +472,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.FAILED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.FAILED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -512,7 +516,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     public void handleTransferProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
 			// Update rich messaging history
-	  		RichMessagingHistory.getInstance().updateFileTransferProgress(session.getSessionID(), currentSize, totalSize);
+	  		RichMessagingHistory.getInstance().updateFileTransferProgress(session.getFileTransferId(), currentSize, totalSize);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -541,7 +545,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferUrl(session.getSessionID(), filename);
+			RichMessagingHistory.getInstance().updateFileTransferUrl(session.getFileTransferId(), filename);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -568,7 +572,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.PAUSED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.PAUSED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -595,7 +599,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getSessionID(), FileTransfer.State.STARTED);
+			RichMessagingHistory.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.STARTED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();

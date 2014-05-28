@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -34,11 +38,6 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	final private String url;
 
 	/**
-	 * the message Id
-	 */
-	final private String messageId;
-
-	/**
 	 * Creates a FT HTTP resume download data object (immutable)
 	 * 
 	 * @param session
@@ -52,10 +51,10 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(HttpFileTransferSession session, String filename, String messageId, String thumbnail,
+	public FtHttpResumeDownload(HttpFileTransferSession session, String filename, String filetransferId, String thumbnail,
 			boolean isGroup) {
-		this(filename, thumbnail, session.getContent(), messageId, session.getRemoteContact(), session.getRemoteDisplayName(),
-				session.getContributionID(), session.getSessionID(), session.getChatSessionID(), isGroup);
+		this(filename, thumbnail, session.getContent(), session.getRemoteContact(), session.getRemoteDisplayName(),
+				session.getContributionID(), filetransferId, session.getChatSessionID(), isGroup);
 	}
 
 	/**
@@ -82,12 +81,11 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(String file, String thumbnail, MmContent content, String messageId, String contact,
-			String displayName, String chatId, String sessionId, String chatSessionId, boolean isGroup) {
-		super(FtHttpDirection.INCOMING, file, content.getEncoding(), content.getSize(), thumbnail, contact, displayName, chatId, sessionId, chatSessionId, isGroup);
+	public FtHttpResumeDownload(String file, String thumbnail, MmContent content, String contact,
+			String displayName, String chatId, String filetransferId, String chatSessionId, boolean isGroup) {
+		super(FtHttpDirection.INCOMING, file, content.getEncoding(), content.getSize(), thumbnail, contact, displayName, chatId, filetransferId, chatSessionId, isGroup);
 		this.url = content.getUrl();
-		this.messageId = messageId;
-		if (url == null || messageId == null)
+		if (url == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");
 	}
 
@@ -95,15 +93,11 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 		return url;
 	}
 
-	public String getMessageId() {
-		return messageId;
-	}
-
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [url=" + url + ", messageId=" + messageId + ", getFilepath()=" + getFilepath()
+		return "FtHttpResumeDownload [url=" + url + ", getFilepath()=" + getFilepath()
 				+ ", getSize()=" + getSize() + ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact()
-				+ ", getChatId()=" + getChatId() + ", getSessionId()=" + getSessionId() + ", getChatSessionId()="
+				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId() + ", getChatSessionId()="
 				+ getChatSessionId() + ", isGroup()=" + isGroup() + "]";
 	}
 

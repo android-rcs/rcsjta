@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -21,14 +25,19 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.util.Pair;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -46,6 +55,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -66,12 +76,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 	/**
 	 * List of chat sessions
 	 */
-	private static Hashtable<String, IChat> chatSessions = new Hashtable<String, IChat>();  
+	// TODO : This change is only temporary. Will be changed with the implementation of CR018
+	private static Hashtable<String, ChatImpl> chatSessions = new Hashtable<String, ChatImpl>();
 
 	/**
 	 * List of group chat sessions
 	 */
 	private static Hashtable<String, IGroupChat> groupChatSessions = new Hashtable<String, IGroupChat>();  
+
+	private final static Executor mDisplayNotificationProcessor = Executors
+			.newSingleThreadExecutor();
 
 	/**
 	 * List of file chat invitation listeners
@@ -94,6 +108,41 @@ public class ChatServiceImpl extends IChatService.Stub {
 	public ChatServiceImpl() {
 		if (logger.isActivated()) {
 			logger.info("Chat service API is loaded");
+		}
+	}
+
+	/**
+	 * Tries to Flush pending display notifications
+	 */
+	public void tryToDispatchAllPendingDisplayNotifications() {
+		mDisplayNotificationProcessor.execute(new DelayedDisplayNotificationDispatcher(
+				AndroidFactory.getApplicationContext().getContentResolver(), this));
+	}
+
+	/**
+	 * Tries to send a displayed delivery report
+	 *
+	 * @param msgId Message ID
+	 * @param contactNumber Contact number
+	 */
+	public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, String contactNumber) {
+		try {
+			ChatImpl chatImpl = chatSessions.get(contactNumber);
+			if (chatImpl != null) {
+				chatImpl.sendDisplayedDeliveryReport(msgId);
+				return;
+			}
+			Core.getInstance()
+					.getImService()
+					.getImdnManager()
+					.sendMessageDeliveryStatus(PhoneUtils.formatNumberToSipUri(contactNumber),
+							msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+		} catch (Exception ignore) {
+			/*
+			 * Purposely ignoring exception since this method only makes an
+			 * attempt to send report and in case of failure the report will be
+			 * sent later as postponed delivery report.
+			 */
 		}
 	}
 
@@ -209,13 +258,12 @@ public class ChatServiceImpl extends IChatService.Stub {
         			geoloc.getGeoloc().getExpiration());
         	msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
         			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
-        			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+        			geolocApi, geoloc.getDate());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
     	} else {
         	msgApi = new ChatMessage(msg.getMessageId(),
         			PhoneUtils.extractNumberFromUri(msg.getRemote()),
-        			msg.getTextMessage(), msg.getServerDate(),
-        			msg.isImdnDisplayedRequested());
+        			msg.getTextMessage(), msg.getServerDate());
         	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);    		
     	}
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -343,7 +391,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 			if (chat != null) {
 				// TODO FUSION check if correct ?
             	chat.handleMessageDeliveryStatus(msgId, status, contact);
-	    	}
+			} else {
+				// Update rich messaging history
+				RichMessagingHistory.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId,
+						status);
+
+				// TODO : Callbacks for delivery notifications received outside
+				// session will be implemented as part of CR011.
+			}
     	}
     }
     
@@ -403,8 +458,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		try {
 			ArrayList<IBinder> result = new ArrayList<IBinder>(chatSessions.size());
-			for (Enumeration<IChat> e = chatSessions.elements() ; e.hasMoreElements() ;) {
-				IChat sessionApi = (IChat)e.nextElement() ;
+			for (Enumeration<ChatImpl> e = chatSessions.elements() ; e.hasMoreElements() ;) {
+				IChat sessionApi = e.nextElement() ;
 				result.add(sessionApi.asBinder());
 			}
 			return result;
@@ -750,6 +805,21 @@ public class ChatServiceImpl extends IChatService.Stub {
 		}
 		
 		listeners.unregister(listener);
+	}
+
+	/**
+	 * Mark a received message as read (ie. displayed in the UI)
+	 * 
+	 * @param msgId Message ID
+	 * @throws ServerApiException
+	 */
+	@Override
+	public void markMessageAsRead(String msgId) throws ServerApiException {
+		RichMessagingHistory.getInstance().markMessageAsRead(msgId);
+
+		if (getConfiguration().isDisplayedDeliveryReport()) {
+			tryToDispatchAllPendingDisplayNotifications();
+		}
 	}
 
 	/**

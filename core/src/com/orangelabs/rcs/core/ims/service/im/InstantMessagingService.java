@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im;
@@ -43,13 +47,13 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.DelayedDisplayNotificationManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -73,7 +77,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -114,6 +117,9 @@ public class InstantMessagingService extends ImsService {
 	private ImdnManager imdnMgr = null;	
 	
 	private FtHttpResumeManager resumeManager = null;
+
+	private DelayedDisplayNotificationManager delayedDisplayNotificationManager = null;
+	
 	/**
 	 * Store & Forward manager
 	 */
@@ -152,6 +158,10 @@ public class InstantMessagingService extends ImsService {
 		// Start IMDN manager
         imdnMgr = new ImdnManager(this);
 		imdnMgr.start();
+
+		// Send delayed displayed notifications for read messages if they were
+		// not sent before already
+		delayedDisplayNotificationManager = new DelayedDisplayNotificationManager(this);
 		// Start resuming FT HTTP
 		resumeManager = new FtHttpResumeManager(this);
 	}
@@ -785,12 +795,15 @@ public class InstantMessagingService extends ImsService {
 	    	String contact = SipUtils.getAssertedIdentity(message);
 	    	String status = imdn.getStatus();
 	    	String msgId = imdn.getMsgId();
+			// Note: FileTransferId is always generated to equal the
+			// associated msgId of a FileTransfer invitation message.
+			String fileTransferId = msgId;
 
             // Check if message delivery of a file transfer
-            String ftSessionId = RichMessagingHistory.getInstance().getFileTransferId(msgId);
-            if (!StringUtils.isEmpty(ftSessionId)) {
+            boolean isFileTransfer = RichMessagingHistory.getInstance().isFileTransfer(fileTransferId);
+            if (isFileTransfer) {
                 // Notify the file delivery outside of the chat session
-                receiveFileDeliveryStatus(ftSessionId, status, contact);
+                receiveFileDeliveryStatus(fileTransferId, status, contact);
             } else {
     			// Get session associated to the contact
     			Vector<ChatSession> sessions = Core.getInstance().getImService().getImSessionsWith(contact);
@@ -809,14 +822,28 @@ public class InstantMessagingService extends ImsService {
     }
 
     /**
-     * @param ftSessionId
+     * Receive 1-1 file delivery status
+     *
+     * @param fileTransferId
      * @param status
      * @param contact
      */
-    public void receiveFileDeliveryStatus(String ftSessionId, String status, String contact) {
+    public void receiveFileDeliveryStatus(String fileTransferId, String status, String contact) {
         // Notify the file delivery outside of the chat session
-        getImsModule().getCore().getListener().handleFileDeliveryStatus(ftSessionId, status, contact);
+        getImsModule().getCore().getListener().handleFileDeliveryStatus(fileTransferId, status, contact);
     }
+
+	/**
+	 * Receive group file delivery status
+	 *
+	 * @param fileTransferId
+	 * @param status
+	 * @param contact
+	 */
+	public void receiveGroupFileDeliveryStatus(String fileTransferId, String status, String contact) {
+		getImsModule().getCore().getListener()
+				.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
+	}
 
     /**
      * Receive S&F push messages

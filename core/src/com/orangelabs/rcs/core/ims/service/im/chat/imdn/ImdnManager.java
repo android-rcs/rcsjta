@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 
@@ -100,8 +104,11 @@ public class ImdnManager extends Thread {
 				// Send SIP MESSAGE
 				sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
 
-				// Update rich messaging history
-				RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(delivery.getMsgId(), delivery.getStatus(),delivery.getContact());
+				// Update rich messaging history when sending DISPLAYED report
+				// Since the requested display report was now successfully send we mark this message as fully received
+				if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus()))
+					RichMessagingHistory.getInstance().markIncomingChatMessageAsReceived(
+							delivery.getMsgId());
 			} catch(Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Unexpected exception", e);

@@ -29,8 +29,6 @@ interface IGroupChat {
 	String sendMessage(in String text);
 
 	void sendIsComposingEvent(in boolean status);
-	
-	void sendDisplayedDeliveryReport(in String msgId);
 
 	void addParticipants(in List<String> participants);
 	

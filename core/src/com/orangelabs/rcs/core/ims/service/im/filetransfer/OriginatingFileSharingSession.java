@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
@@ -80,7 +84,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	 *            true if the stack must try to attach thumbnail
 	 */
 	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
-		super(parent, content, contact, null);
+		super(parent, content, contact, null, IdGenerator.generateMessageID());
 		
 		if (logger.isActivated()) {
 			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" thumbnail="+tryAttachThumbnail);
@@ -135,7 +139,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
-                    msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferId(), selector,
+                    msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(), selector,
                     "attachment", localSetup, msrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_SENDONLY, maxSize);
 
@@ -289,8 +293,10 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
         }
 
         // Notify delivery
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getSessionID(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
+        String fileTransferId = getFileTransferId();
+        String remoteContact = getRemoteContact();
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(fileTransferId, ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteContact);
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(fileTransferId, ImdnDocument.DELIVERY_STATUS_DISPLAYED, remoteContact);
 	}
 	
 	/**

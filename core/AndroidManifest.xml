@@ -147,6 +147,10 @@
 		<provider android:authorities="com.orangelabs.rcs.chat;com.gsma.services.rcs.provider.chat"
 		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
+		
+		<provider android:authorities="com.gsma.services.rcs.provider.groupchatdeliveryinfo"
+			android:exported="true"
+			android:name="com.orangelabs.rcs.provider.messaging.GroupChatDeliveryInfoProvider"/>
 			
 		<provider android:authorities="com.orangelabs.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
 		    android:exported="true"

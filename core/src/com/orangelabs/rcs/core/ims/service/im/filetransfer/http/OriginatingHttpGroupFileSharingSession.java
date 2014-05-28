@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
@@ -92,7 +96,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 */
 	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean tryAttachThumbnail,
 			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId) {
-		super(parent, content, conferenceId, null, chatSessionID, chatContributionId);
+		super(parent, content, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
 		// Set participants involved in the transfer
 		this.participants = participants;
 		
@@ -161,7 +165,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String mime = CpimMessage.MIME_TYPE;
         String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
         String to = ChatUtils.ANOMYNOUS_URI;
-        String msgId = IdGenerator.generateMessageID();
+        // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
+        String msgId = getFileTransferId();
 
         // Send file info in CPIM message
         String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
@@ -170,11 +175,9 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
 		// Insert chat message into database
 		FileTransferMessage msg = new FileTransferMessage(msgId, null, fileInfo, false, null);
-		RichMessagingHistory.getInstance()
-				.addGroupChatMsgOutgoingFileTransfer(msg, chatSession.getContributionID(), getSessionID());
 
 		// Update File Transfer raw with chat message ID
-		RichMessagingHistory.getInstance().updateFileTransferChatId(getSessionID(), chatSession.getContributionID(), msgId);
+		RichMessagingHistory.getInstance().updateFileTransferChatId(msgId, chatSession.getContributionID());
     }
     
     

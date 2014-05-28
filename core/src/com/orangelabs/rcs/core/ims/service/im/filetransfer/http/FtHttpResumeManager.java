@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
@@ -87,7 +91,7 @@ public class FtHttpResumeManager {
 				// This is necessary in case of the application can't update the
 				// status before device switch off.
 				for (FtHttpResume ftHttpResume : listFile2resume) {
-					RichMessagingHistory.getInstance().updateFileTransferStatus(ftHttpResume.getSessionId(),
+					RichMessagingHistory.getInstance().updateFileTransferStatus(ftHttpResume.getFileTransferId(),
 							FileTransfer.State.PAUSED);
 				}
 				listOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);

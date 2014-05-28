@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -241,7 +245,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * 
      * @param msgId Message ID
      */
-    public void sendDisplayedDeliveryReport(final String msgId) {
+    /*package private*/ void sendDisplayedDeliveryReport(final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
@@ -270,7 +274,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
 	
     /**
-     * Sends an “is-composing” event. The status is set to true when
+     * Sends an Â“is-composingÂ” event. The status is set to true when
      * typing a message, else it is set to false.
      * 
      * @param status Is-composing status
@@ -386,7 +390,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
         			PhoneUtils.extractNumberFromUri(message.getRemote()),
         			message.getTextMessage(),
-        			message.getServerDate(), message.isImdnDisplayedRequested());
+        			message.getServerDate());
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
@@ -430,7 +434,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         			geoloc.getGeoloc().getExpiration());
         	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
         			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
-        			geolocApi, geoloc.getDate(), geoloc.isImdnDisplayedRequested());
+        			geolocApi, geoloc.getDate());
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
@@ -516,7 +520,34 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	        listeners.finishBroadcast();
 		}
 	}
-    
+
+    /* (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String)
+     */
+	public void handleSendMessageFailure(String msgId) {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.info("New message failure status for message " + msgId);
+			}
+
+			// Update rich messaging history
+			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+
+			// Notify event listeners
+			final int N = listeners.beginBroadcast();
+			for (int i = 0; i < N; i++) {
+				try {
+					listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Can't notify listener", e);
+					}
+				}
+			}
+			listeners.finishBroadcast();
+		}
+	}
+
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
      */
@@ -528,21 +559,22 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageDeliveryStatus(msgId, status, contact);
+			RichMessagingHistory.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-	            		listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
-	            	} else
-	            	if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-	            		listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-	            	} else {
-	            		listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-	            	}
-	            } catch(Exception e) {
+				try {
+					if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
+					} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
+					} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+							|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+							|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+						listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
+					}
+				} catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
 	            	}

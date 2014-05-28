@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
@@ -41,6 +45,7 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -68,7 +73,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	 */
 	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {
 		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), FileTransferUtils
-				.extractFileThumbnail(invite));
+				.extractFileThumbnail(invite), IdGenerator.generateMessageID());
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
@@ -145,8 +150,8 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 				// If the file is bigger than FT MAX SIZE, a warning message is displayed when trying to
 				// send or receive a file larger than the mentioned limit and the transfer will be cancelled
 				// (that is at protocol level, the SIP INVITE request will never be sent or an automatic
-				// rejection response SIP 403 Forbidden with a Warning header set to “133 Size
-				// exceeded” will be sent by the entity that detects that the file size is too big to the other
+				// rejection response SIP 403 Forbidden with a Warning header set to 133 Size
+				// exceeded will be sent by the entity that detects that the file size is too big to the other
 				// end depending on the scenario).
                 send403Forbidden(getDialogPath().getInvite(), getDialogPath().getLocalTag(),"133 Size exceeded");
                 // Close session
