@@ -72,7 +72,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * 
 	 * @return Instance
 	 */
-	public static synchronized MessagingLog getInstance() {
+	public static MessagingLog getInstance() {
 		return instance;
 	}
 
