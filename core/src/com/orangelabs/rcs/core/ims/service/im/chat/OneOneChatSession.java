@@ -43,7 +43,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.StringUtils;
@@ -164,12 +164,12 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
-		RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -212,12 +212,12 @@ public abstract class OneOneChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
-		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {

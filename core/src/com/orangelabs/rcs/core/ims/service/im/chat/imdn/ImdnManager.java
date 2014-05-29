@@ -31,7 +31,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.FifoBuffer;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -107,7 +107,7 @@ public class ImdnManager extends Thread {
 				// Update rich messaging history when sending DISPLAYED report
 				// Since the requested display report was now successfully send we mark this message as fully received
 				if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus()))
-					RichMessagingHistory.getInstance().markIncomingChatMessageAsReceived(
+					MessagingLog.getInstance().markIncomingChatMessageAsReceived(
 							delivery.getMsgId());
 			} catch(Exception e) {
 				if (logger.isActivated()) {

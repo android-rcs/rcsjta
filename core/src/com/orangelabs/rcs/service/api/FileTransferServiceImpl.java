@@ -47,7 +47,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -212,10 +212,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		// Update rich messaging history
 		if (isGroup) {
-			RichMessagingHistory.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
+			MessagingLog.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
 					number, session.getFileTransferId(), session.getContent(), session.getThumbnail());
 		} else {
-			RichMessagingHistory.getInstance().addFileTransfer(number, session.getFileTransferId(),
+			MessagingLog.getInstance().addFileTransfer(number, session.getFileTransferId(),
 					FileTransfer.Direction.INCOMING, session.getContent(), session.getThumbnail());
 		}
 
@@ -268,7 +268,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		
 		// Update rich messaging history
 		if (chatSession.isGroupChat()) {
-			RichMessagingHistory.getInstance().updateFileTransferChatId(
+			MessagingLog.getInstance().updateFileTransferChatId(
 					chatSession.getFirstMessage().getMessageId(), chatSession.getContributionID());
 		}
 
@@ -326,7 +326,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addFileTransfer(contact, session.getFileTransferId(),
+			MessagingLog.getInstance().addFileTransfer(contact, session.getFileTransferId(),
 					FileTransfer.Direction.OUTGOING, session.getContent(), session.getThumbnail());
 
 			// Start the session
@@ -429,7 +429,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void handleFileDeliveryStatus(String fileTransferId, String status, String contact) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DELIVERED);
+			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DELIVERED);
 
 			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -446,7 +446,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DISPLAYED);
+			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DISPLAYED);
 
 			// Notify File transfer delivery listeners
             final int N = listeners.beginBroadcast();
@@ -471,8 +471,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
 	private void handleGroupFileDeliveryStatusDelivered(String fileTransferId, String contact) {
 		// Update rich messaging history
-		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
-		richMessagingHistory.updateGroupChatDeliveryInfoStatus(fileTransferId,
+		MessagingLog messagingLog = MessagingLog.getInstance();
+		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId,
 				ImdnDocument.DELIVERY_STATUS_DELIVERED, contact);
 		// TODO : Listeners to notify group file delivery status for
 		// individual contacts will be implemented as part of CR011. For now,
@@ -490,8 +490,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 		}
 		listeners.finishBroadcast();
-		if (richMessagingHistory.isDeliveredToAllRecipients(fileTransferId)) {
-			richMessagingHistory.updateFileTransferStatus(fileTransferId,
+		if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
+			messagingLog.updateFileTransferStatus(fileTransferId,
 					FileTransfer.State.DELIVERED);
 			// Notify File transfer delivery listeners
 			final int P = listeners.beginBroadcast();
@@ -516,8 +516,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
 	private void handleGroupFileDeliveryStatusDisplayed(String fileTransferId, String contact) {
 		// Update rich messaging history
-		RichMessagingHistory richMessagingHistory = RichMessagingHistory.getInstance();
-		richMessagingHistory.updateGroupChatDeliveryInfoStatus(fileTransferId,
+		MessagingLog messagingLog = MessagingLog.getInstance();
+		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId,
 				ImdnDocument.DELIVERY_STATUS_DISPLAYED, contact);
 		// TODO : Listeners to notify group file delivery status for
 		// individual contacts will be implemented as part of CR011. For now,
@@ -535,8 +535,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 		}
 		listeners.finishBroadcast();
-		if (richMessagingHistory.isDisplayedByAllRecipients(fileTransferId)) {
-			richMessagingHistory.updateFileTransferStatus(fileTransferId,
+		if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+			messagingLog.updateFileTransferStatus(fileTransferId,
 					FileTransfer.State.DISPLAYED);
 
 			final int P = listeners.beginBroadcast();
@@ -663,7 +663,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	@Override
 	public void markFileTransferAsRead(String transferId) throws RemoteException {
 		//No notification type corresponds currently to mark as read
-		RichMessagingHistory.getInstance().markFileTransferAsRead(transferId);
+		MessagingLog.getInstance().markFileTransferAsRead(transferId);
 	}
 
 }

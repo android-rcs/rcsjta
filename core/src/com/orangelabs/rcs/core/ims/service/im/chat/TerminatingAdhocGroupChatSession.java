@@ -39,7 +39,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -90,7 +90,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				logger.info("List of invited participants: " + Arrays.toString(getParticipants().toArray()));
 			}
 			// Detect if it's a restart: retrieve list of initial participants
-			Set<ParticipantInfo> initialParticipants = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(
+			Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance().getGroupChatConnectedParticipants(
 					getContributionID());
 			if (initialParticipants != null && initialParticipants.size() > 0) {
 				if (logger.isActivated()) {

@@ -29,15 +29,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
-import android.util.Pair;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -57,7 +54,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -393,7 +390,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             	chat.handleMessageDeliveryStatus(msgId, status, contact);
 			} else {
 				// Update rich messaging history
-				RichMessagingHistory.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId,
+				MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId,
 						status);
 
 				// TODO : Callbacks for delivery notifications received outside
@@ -501,7 +498,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Update rich messaging history
-		RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
+		MessagingLog.getInstance().addGroupChat(session.getContributionID(),
 				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
 		
 		// Add session in the list
@@ -588,7 +585,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addGroupChat(session.getContributionID(),
+			MessagingLog.getInstance().addGroupChat(session.getContributionID(),
 					session.getSubject(), session.getParticipants(),
 					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
 
@@ -815,7 +812,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
 	@Override
 	public void markMessageAsRead(String msgId) throws ServerApiException {
-		RichMessagingHistory.getInstance().markMessageAsRead(msgId);
+		MessagingLog.getInstance().markMessageAsRead(msgId);
 
 		if (getConfiguration().isDisplayedDeliveryReport()) {
 			tryToDispatchAllPendingDisplayNotifications();

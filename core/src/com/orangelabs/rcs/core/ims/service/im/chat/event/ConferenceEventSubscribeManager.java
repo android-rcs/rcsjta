@@ -44,7 +44,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.platform.registry.RegistryFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PeriodicRefresher;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -268,7 +268,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 		Set<ParticipantInfo> oldSet = participants;
 		participants = newSet;
 		// Update provider
-		RichMessagingHistory.getInstance().updateGroupChatParticipant(session.getContributionID(), participants);
+		MessagingLog.getInstance().updateGroupChatParticipant(session.getContributionID(), participants);
 		// Notify participant status change. Make a copy of new set.
 		Set<ParticipantInfo> workSet = new HashSet<ParticipantInfo>(newSet);
 		// Notify status change for the new set

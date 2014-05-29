@@ -35,7 +35,7 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -91,7 +91,7 @@ public class FtHttpResumeManager {
 				// This is necessary in case of the application can't update the
 				// status before device switch off.
 				for (FtHttpResume ftHttpResume : listFile2resume) {
-					RichMessagingHistory.getInstance().updateFileTransferStatus(ftHttpResume.getFileTransferId(),
+					MessagingLog.getInstance().updateFileTransferStatus(ftHttpResume.getFileTransferId(),
 							FileTransfer.State.PAUSED);
 				}
 				listOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);

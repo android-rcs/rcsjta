@@ -41,10 +41,9 @@ import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.ConferenceEventSubscribeManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
-import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -225,13 +224,13 @@ public abstract class GroupChatSession extends ChatSession {
 
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
-		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg,
+		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), msg,
 				ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
@@ -271,13 +270,13 @@ public abstract class GroupChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
-		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
+		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
 				ChatLog.Message.Direction.OUTGOING);
 
 		// Check if message has been sent with success or not
 		if (!result) {
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 			
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {

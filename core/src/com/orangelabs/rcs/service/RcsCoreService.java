@@ -67,7 +67,7 @@ import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
@@ -233,7 +233,7 @@ public class RcsCoreService extends Service implements CoreListener {
             ContactsManager.createInstance(getApplicationContext());
 
             // Instantiate the rich messaging history 
-            RichMessagingHistory.createInstance(getApplicationContext());
+            MessagingLog.createInstance(getApplicationContext());
             
             // Instantiate the rich call history 
             RichCallHistory.createInstance(getApplicationContext());

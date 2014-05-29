@@ -33,7 +33,7 @@ import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.provisioning.https.HttpsProvisioningService;
@@ -186,8 +186,8 @@ public class LauncherUtils {
         FtHttpResumeDaoImpl.getInstance().deleteAll();
         
         // Clear all entries in chat, message and file transfer tables
-        RichMessagingHistory.createInstance(context);
-        RichMessagingHistory.getInstance().deleteAllEntries();
+        MessagingLog.createInstance(context);
+        MessagingLog.getInstance().deleteAllEntries();
 
         // Clear all entries in IP call table 
         IPCallHistory.createInstance(context);

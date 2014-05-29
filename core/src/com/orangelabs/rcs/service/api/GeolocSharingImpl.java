@@ -32,7 +32,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -396,9 +396,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			// TODO FUSION check display name parameter
 			GeolocMessage geolocMsg = new GeolocMessage(msgId, session.getRemoteContact(), geoloc, false, null);
 			if (session instanceof OriginatingGeolocTransferSession) { 
-				RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+				MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 			} else {
-				RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.INCOMING);
+				MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.INCOMING);
 			}
 			
 	  		// Notify event listeners

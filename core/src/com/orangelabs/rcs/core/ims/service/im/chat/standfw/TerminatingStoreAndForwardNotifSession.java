@@ -45,7 +45,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -390,7 +390,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 					// Note: FileTransferId is always generated to equal the
 					// associated msgId of a FileTransfer invitation message.
 					String fileTransferId = msgId;
-					boolean isFileTransfer = RichMessagingHistory.getInstance().isFileTransfer(
+					boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(
 							fileTransferId);
 					if (isFileTransfer) {
 						// Notify the file delivery

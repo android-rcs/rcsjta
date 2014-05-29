@@ -41,7 +41,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -384,7 +384,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 			
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
+			MessagingLog.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
 			
 			// Create a chat message
         	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
@@ -426,7 +426,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 			
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().addChatMessage(geoloc, ChatLog.Message.Direction.INCOMING);
+			MessagingLog.getInstance().addChatMessage(geoloc, ChatLog.Message.Direction.INCOMING);
 			
 			// Create a geoloc message
         	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
@@ -473,7 +473,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			switch (error.getErrorCode()) {
 			case ChatError.SESSION_INITIATION_FAILED:
 			case ChatError.SESSION_INITIATION_CANCELLED:
-				RichMessagingHistory.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
+				MessagingLog.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
 						ChatLog.Message.Status.Content.FAILED);
 				// notify listener
 				final int N = listeners.beginBroadcast();
@@ -531,7 +531,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 
 			// Notify event listeners
 			final int N = listeners.beginBroadcast();
@@ -559,7 +559,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			}
 	
 			// Update rich messaging history
-			RichMessagingHistory.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
+			MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
 			
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();

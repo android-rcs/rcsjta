@@ -27,7 +27,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -162,7 +162,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
      */
     public void handle404SessionNotFound(SipResponse resp) {
 		// Rejoin session has failed, we update the database with status terminated by remote
-        RichMessagingHistory.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
+        MessagingLog.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
 
 		// Notify listener
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));

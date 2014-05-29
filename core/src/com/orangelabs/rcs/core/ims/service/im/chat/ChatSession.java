@@ -56,7 +56,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
@@ -567,7 +567,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		    			if (imdnDisplayedRequested) {
 		    				// Check if displayed delivery report is enabled
 		    				if (RcsSettings.getInstance().isImDisplayedNotificationActivated())
-		    					RichMessagingHistory.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
+		    					MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
 		    			}
 			    	} else
 		    		if (ChatUtils.isApplicationIsComposingType(contentType)) {
@@ -711,7 +711,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param displayName the display name
 	 */
 	private void receiveText(String contact, String txt, String msgId, boolean imdnDisplayedRequested, Date date, String displayName) {
-		if (!RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
+		if (!MessagingLog.getInstance().isNewMessage(getContributionID(), msgId)) {
 			// Message already received
 			return;
 		}
@@ -760,7 +760,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param pseudo the display name
 	 */
 	private void receiveGeoloc(String contact, String geolocDoc, String msgId, boolean imdnDisplayedRequested, Date date, String pseudo) {
-		if (!RichMessagingHistory.getInstance().isNewMessage(getContributionID(), msgId)) {
+		if (!MessagingLog.getInstance().isNewMessage(getContributionID(), msgId)) {
 			// Message already received
 			return;
 		}
@@ -826,7 +826,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		// Update rich messaging history
 		// TODO FUSION imdn + display name ?
 		FileTransferMessage msg = new FileTransferMessage(msgId, contact, fileTransferInfo.getFilename(), false, null);
-		RichMessagingHistory.getInstance().addGroupChatMessage(getContributionID(), msg, ChatLog.Message.Direction.INCOMING);
+		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), msg, ChatLog.Message.Direction.INCOMING);
 
 		// Create a new session
 		FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId, contact);
@@ -970,7 +970,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	        if (result) {
 	            // Update rich messaging history
 	           //since the requested display report was now successfully send we mark this message as fully received.
-			RichMessagingHistory.getInstance().markIncomingChatMessageAsReceived(msgId);
+			MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
 	        }
 		}
 	    
@@ -1004,7 +1004,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 					// Note: FileTransferId is always generated to equal the
 					// associated msgId of a FileTransfer invitation message.
 					String fileTransferId = msgId;
-					boolean isFileTransfer = RichMessagingHistory.getInstance().isFileTransfer(
+					boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(
 							fileTransferId);
 					if (isFileTransfer) {
 						if (isGroupChat()) {

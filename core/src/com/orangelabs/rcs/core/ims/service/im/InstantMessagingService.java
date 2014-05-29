@@ -72,7 +72,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpF
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -462,7 +462,7 @@ public class InstantMessagingService extends ImsService {
 		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, number, firstMsg);
 		// Save the message
 		if (firstMsg != null) {
-			RichMessagingHistory.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
+			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
 		}
 		return session;
 	}
@@ -483,7 +483,7 @@ public class InstantMessagingService extends ImsService {
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (RichMessagingHistory.getInstance().isNewMessage(remote, msgId) == false) {
+				if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;
@@ -499,7 +499,7 @@ public class InstantMessagingService extends ImsService {
 
 			// Save the message in the spam folder
 			if (firstMsg != null) {
-				RichMessagingHistory.getInstance().addSpamMessage(firstMsg);
+				MessagingLog.getInstance().addSpamMessage(firstMsg);
 			}
 
 			// Send message delivery report if requested
@@ -525,7 +525,7 @@ public class InstantMessagingService extends ImsService {
 
 		// Save the message
 		if (firstMsg != null) {
-			RichMessagingHistory.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
+			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
 		}
 
 		// Test number of sessions
@@ -629,14 +629,14 @@ public class InstantMessagingService extends ImsService {
 		 * request for the chat with a SIP 603 DECLINE response. Subsequent INVITE requests should not be rejected as they may be
 		 * received when the user is added again to the Chat by one of the participants.
 		 */
-		boolean reject = RichMessagingHistory.getInstance().isGroupChatNextInviteRejected(session.getContributionID());
+		boolean reject = MessagingLog.getInstance().isGroupChatNextInviteRejected(session.getContributionID());
 		if (reject) {
 			if (logger.isActivated()) {
 				logger.debug("Chat Id " + session.getContributionID() + " is declined since previously terminated by user while disconnected");
 			}
 			// Send a 603 Decline response
 			sendErrorResponse(invite, Response.DECLINE);
-			RichMessagingHistory.getInstance().acceptGroupChatNextInvitation(session.getContributionID());
+			MessagingLog.getInstance().acceptGroupChatNextInvitation(session.getContributionID());
 			return;
 		}
 
@@ -669,7 +669,7 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		// Get the group chat info from database
-		GroupChatInfo groupChat = RichMessagingHistory.getInstance().getGroupChatInfo(chatId); 
+		GroupChatInfo groupChat = MessagingLog.getInstance().getGroupChatInfo(chatId); 
 		if (groupChat == null) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be rejoined: conversation not found");
@@ -720,7 +720,7 @@ public class InstantMessagingService extends ImsService {
 		}
 		
 		// Get the group chat info from database
-		GroupChatInfo groupChat = RichMessagingHistory.getInstance().getGroupChatInfo(chatId);
+		GroupChatInfo groupChat = MessagingLog.getInstance().getGroupChatInfo(chatId);
 		if (groupChat == null) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be restarted: conversation not found");
@@ -731,7 +731,7 @@ public class InstantMessagingService extends ImsService {
 		// TODO check whether participants of GroupChatInfo cannot be used instead
 		
 		// Get the connected participants from database
-		Set<ParticipantInfo> participants = RichMessagingHistory.getInstance().getGroupChatConnectedParticipants(chatId);
+		Set<ParticipantInfo> participants = MessagingLog.getInstance().getGroupChatConnectedParticipants(chatId);
 		
 		if (participants.size() == 0) {
 			if (logger.isActivated()) {
@@ -800,7 +800,7 @@ public class InstantMessagingService extends ImsService {
 			String fileTransferId = msgId;
 
             // Check if message delivery of a file transfer
-            boolean isFileTransfer = RichMessagingHistory.getInstance().isFileTransfer(fileTransferId);
+            boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(fileTransferId);
             if (isFileTransfer) {
                 // Notify the file delivery outside of the chat session
                 receiveFileDeliveryStatus(fileTransferId, status, contact);
@@ -861,7 +861,7 @@ public class InstantMessagingService extends ImsService {
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (RichMessagingHistory.getInstance().isNewMessage(remote, msgId) == false) {
+				if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;
@@ -954,7 +954,7 @@ public class InstantMessagingService extends ImsService {
         }
 
 		// Save the first message
-		RichMessagingHistory.getInstance().addChatMessage(ChatUtils.getFirstMessage(invite), ChatLog.Message.Direction.INCOMING);
+		MessagingLog.getInstance().addChatMessage(ChatUtils.getFirstMessage(invite), ChatLog.Message.Direction.INCOMING);
 
         // Create and start a chat session
         TerminatingOne2OneChatSession one2oneChatSession = new TerminatingOne2OneChatSession(this, invite);

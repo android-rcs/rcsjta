@@ -39,7 +39,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -177,7 +177,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		FileTransferMessage msg = new FileTransferMessage(msgId, null, fileInfo, false, null);
 
 		// Update File Transfer raw with chat message ID
-		RichMessagingHistory.getInstance().updateFileTransferChatId(msgId, chatSession.getContributionID());
+		MessagingLog.getInstance().updateFileTransferChatId(msgId, chatSession.getContributionID());
     }
     
     
