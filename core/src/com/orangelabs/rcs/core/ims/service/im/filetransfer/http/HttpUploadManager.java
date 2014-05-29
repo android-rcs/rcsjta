@@ -441,7 +441,31 @@ public class HttpUploadManager extends HttpTransferManager {
 			outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
 			outputStream.writeBytes("Content-Length: " + thumbnail.getSize());
 			outputStream.writeBytes(lineEnd + lineEnd);
-			outputStream.write(thumbnail.getData());
+			// Are thumbnail data available ?
+			if (thumbnail.getData() != null) {
+				// Thumbnail data were loaded upon creation.
+				// Write thumbnail content
+				outputStream.write(thumbnail.getData());
+			} else {
+				// Thumbnail must be loaded from file.
+				FileInputStream fileInputStream = null;
+				try {
+					fileInputStream = new FileInputStream(thumbnail.getUrl());
+					byte[] buffer = new byte[(int)thumbnail.getSize()];
+					int bytesRead = fileInputStream.read(buffer, 0, (int)thumbnail.getSize());
+					if (bytesRead > 0) {
+						outputStream.write(buffer);
+					}
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error(e.getMessage(), e);
+					}
+				} finally {
+					if (fileInputStream != null) {
+						fileInputStream.close();
+					}
+				}
+			}
 			outputStream.writeBytes(lineEnd);
 		}
 	}
@@ -486,25 +510,35 @@ public class HttpUploadManager extends HttpTransferManager {
 		outputStream.writeBytes(filePartHeader);
 
 		// Write file content
-		FileInputStream fileInputStream = new FileInputStream(file);
-		int bytesAvailable = fileInputStream.available();
-		int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
-		byte[] buffer = new byte[bufferSize];
-		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		int progress = 0;
-		
-		while (bytesRead > 0 && !isCancelled()) {
-			progress += bytesRead;
-			outputStream.write(buffer, 0, bytesRead);
-			bytesAvailable = fileInputStream.available();
-			getListener().httpTransferProgress(progress, file.length());
-			bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
-			buffer = new byte[bufferSize];
-			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = new FileInputStream(file);
+			int bytesAvailable = fileInputStream.available();
+			int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
+			byte[] buffer = new byte[bufferSize];
+			int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			int progress = 0;
+
+			while (bytesRead > 0 && !isCancelled()) {
+				progress += bytesRead;
+				outputStream.write(buffer, 0, bytesRead);
+				bytesAvailable = fileInputStream.available();
+				getListener().httpTransferProgress(progress, file.length());
+				bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
+				buffer = new byte[bufferSize];
+				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(), e);
+			}
+		} finally {
+			if (fileInputStream != null) {
+				fileInputStream.close();
+			}
 		}
 		if (!isCancelled())
 			outputStream.writeBytes(lineEnd);
-		fileInputStream.close();
 	}
 
 	/**
