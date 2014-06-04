@@ -54,7 +54,7 @@ public class MediaRtpSender {
     /**
      * Local RTP port
      */
-	protected int localRtpPort;
+	protected int localPort;
 
     /**
      * The logger
@@ -68,9 +68,9 @@ public class MediaRtpSender {
      */
     public MediaRtpSender(Format format, int localRtpPort) {
     	this.format = format;
-        this.localRtpPort = localRtpPort;
+        this.localPort = localRtpPort;
     }
-
+    
     /**
      * Prepare the RTP session
      *
@@ -94,7 +94,7 @@ public class MediaRtpSender {
 			}
 
             // Create the output stream
-            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            outputStream = new RtpOutputStream(remoteAddress, remotePort, localPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 			if (logger.isActivated()) {

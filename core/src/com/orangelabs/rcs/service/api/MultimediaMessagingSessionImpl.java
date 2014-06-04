@@ -25,10 +25,10 @@ import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
-import com.orangelabs.rcs.core.ims.service.sip.OriginatingSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -42,7 +42,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	/**
 	 * Core session
 	 */
-	private GenericSipSession session;
+	private GenericSipMsrpSession session;
 
 	/**
 	 * List of listeners for messaging session
@@ -64,7 +64,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      *
      * @param session Session
      */
-	public MultimediaMessagingSessionImpl(GenericSipSession session) {
+	public MultimediaMessagingSessionImpl(GenericSipMsrpSession session) {
 		this.session = session;
 		
 		session.addListener(this);
@@ -110,7 +110,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 				result = MultimediaSession.State.TERMINATED;
 			} else {
 				// Session pending
-				if (session instanceof OriginatingSipSession) {
+				if (session instanceof OriginatingSipMsrpSession) {
 					result = MultimediaSession.State.INITIATED;
 				} else {
 					result = MultimediaSession.State.INVITED;
@@ -127,7 +127,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	 * @see MultimediaSession.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingSipSession) {
+		if (session instanceof OriginatingSipMsrpSession) {
 			return MultimediaSession.Direction.OUTGOING;
 		} else {
 			return MultimediaSession.Direction.INCOMING;

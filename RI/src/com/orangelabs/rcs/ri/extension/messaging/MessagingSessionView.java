@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.extension;
+package com.orangelabs.rcs.ri.extension.messaging;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -89,7 +89,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	/**
 	 * Service ID
 	 */
-    private String serviceId = TestMultimediaSessionApi.SERVICE_ID;
+    private String serviceId = MessagingSessionUtils.SERVICE_ID;
 
     /**
 	 * Session
@@ -112,7 +112,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
         
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.extension_messaging_session_view);
+        setContentView(R.layout.extension_session_view);
 
         // Set title
         setTitle(R.string.title_messaging_session);

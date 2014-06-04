@@ -20,15 +20,15 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteCallbackList;
 
-import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
-import com.orangelabs.rcs.core.ims.service.sip.OriginatingSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -42,7 +42,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	/**
 	 * Core session
 	 */
-	private GenericSipSession session;
+	private GenericSipRtpSession session;
 
 	/**
 	 * List of listeners for streaming session
@@ -64,7 +64,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      *
      * @param session Session
      */
-	public MultimediaStreamingSessionImpl(GenericSipSession session) {
+	public MultimediaStreamingSessionImpl(GenericSipRtpSession session) {
 		this.session = session;
 		
 		session.addListener(this);
@@ -110,7 +110,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 				result = MultimediaSession.State.TERMINATED;
 			} else {
 				// Session pending
-				if (session instanceof OriginatingSipSession) {
+				if (session instanceof OriginatingSipRtpSession) {
 					result = MultimediaSession.State.INITIATED;
 				} else {
 					result = MultimediaSession.State.INVITED;
@@ -127,7 +127,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 * @see MultimediaSession.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingSipSession) {
+		if (session instanceof OriginatingSipRtpSession) {
 			return MultimediaSession.Direction.OUTGOING;
 		} else {
 			return MultimediaSession.Direction.INCOMING;

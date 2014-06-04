@@ -27,6 +27,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList;
+import com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession;
+import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList;
 
 /**
  * MM session API
@@ -34,11 +38,6 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestMultimediaSessionApi extends ListActivity {
-	/**
-	 * Service ID constant
-	 */
-	public final static String SERVICE_ID = "ext.sipdemo";
-
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +48,9 @@ public class TestMultimediaSessionApi extends ListActivity {
         // Set items
         String[] items = {
     		getString(R.string.menu_initiate_messaging_session),
-    		getString(R.string.menu_messaging_sessions_list)
+    		getString(R.string.menu_messaging_sessions_list),
+    		getString(R.string.menu_initiate_streaming_session),
+    		getString(R.string.menu_streaming_sessions_list)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -63,6 +64,14 @@ public class TestMultimediaSessionApi extends ListActivity {
 	            
 	        case 1:
             	startActivity(new Intent(this, MessagingSessionList.class));
+	            break;
+
+	        case 2:
+            	startActivity(new Intent(this, InitiateStreamingSession.class));
+	            break;
+	            
+	        case 3:
+            	startActivity(new Intent(this, StreamingSessionList.class));
 	            break;
         }
     }

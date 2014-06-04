@@ -60,7 +60,8 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -744,25 +745,25 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
      */
-    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipSession session) {
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event receive SIP MSRP session invitation");
 		}
 		
 		// Broadcast the invitation
-		sessionApi.receiveMsrpSipSessionInvitation(intent, session);
+		sessionApi.receiveSipMsrpSessionInvitation(intent, session);
     }    
     
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
      */
-    public void handleSipRtpSessionInvitation(Intent intent, GenericSipSession session) {
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event receive SIP RTP session invitation");
 		}
 		
 		// Broadcast the invitation
-		sessionApi.receiveRtpSipSessionInvitation(intent, session);
+		sessionApi.receiveSipRtpSessionInvitation(intent, session);
     }    
 
     /* (non-Javadoc)

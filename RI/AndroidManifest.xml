@@ -251,21 +251,33 @@
 
         <activity android:name=".extension.TestMultimediaSessionApi"/>
 
-        <activity android:name=".extension.InitiateMessagingSession"/>
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"/>
         
-		<receiver android:name=".extension.MessagingSessionInvitationReceiver">
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"/>
+        
+        <receiver android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
-                <data android:mimeType="com.gsma.services.rcs/ext.sipdemo" />
+                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+        		<category android:name="android.intent.category.LAUNCHER" />
+        		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.streaming" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 	    	</intent-filter>
         </receiver>
-
-        <activity android:name=".extension.MessagingSessionList"/>
-        
-        <activity android:name=".extension.MessagingSessionView"/>
-		
+        	
         <!-- IP call API -->
 
         <activity android:name=".ipcall.TestIPCallApi">

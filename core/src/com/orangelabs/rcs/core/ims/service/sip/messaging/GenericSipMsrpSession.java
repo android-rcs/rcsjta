@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.core.ims.service.sip;
+package com.orangelabs.rcs.core.ims.service.sip.messaging;
 
 import java.io.ByteArrayInputStream;
 import java.util.Vector;
@@ -36,16 +36,19 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
+import com.orangelabs.rcs.core.ims.service.sip.SipService;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Generic SIP session 
+ * Generic SIP MSRP session 
  * 
  * @author jexa7410
  */
-public abstract class GenericSipSession extends ImsServiceSession implements MsrpEventListener {
+public abstract class GenericSipMsrpSession extends ImsServiceSession implements MsrpEventListener {
 	/**
 	 * Feature tag
 	 */
@@ -68,7 +71,7 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
 	 * @param contact Remote contact
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipSession(ImsService parent, String contact, String featureTag) {
+	public GenericSipMsrpSession(ImsService parent, String contact, String featureTag) {
 		super(parent, contact);
 
 		// Set the service feature tag
@@ -135,7 +138,7 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.port;
 
-        // Create the MSRP session (without MSRPs)
+        // Create the MSRP session
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this, null);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
@@ -252,15 +255,24 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
         }
 	}
     
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferProgress(long, long)
+	/**
+	 * Data transfer in progress
+	 * 
+	 * @param currentSize Current transfered size in bytes
+	 * @param totalSize Total size in bytes
 	 */
 	public void msrpTransferProgress(long currentSize, long totalSize) {
 		// Not used here
 	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferProgress(long, long, byte[])
+    /**
+     * Data transfer in progress
+     *
+     * @param currentSize Current transfered size in bytes
+     * @param totalSize Total size in bytes
+     * @param data received data chunk
+     * @return true if data are processed and can be delete in cache. If false, so data were stored in
+     *         MsrpSession cache until msrpDataReceived is called.
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
 		// Not used here
@@ -268,15 +280,19 @@ public abstract class GenericSipSession extends ImsServiceSession implements Msr
     }
 
 
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferAborted()
+	/**
+	 * Data transfer has been aborted
 	 */
 	public void msrpTransferAborted() {
 		// Not used here
 	}	
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener#msrpTransferError(java.lang.String, java.lang.String, com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
+    /**
+     * Data transfer error
+     *
+     * @param msgId Message ID
+     * @param error Error code
+     * @param typeMsrpChunk Type of MSRP chunk
      */
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
 		if (isSessionInterrupted()) {

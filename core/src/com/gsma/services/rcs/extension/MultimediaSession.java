@@ -17,6 +17,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
+import com.gsma.services.rcs.JoynServiceException;
 
 /**
  * This class maintains the information related to a multimedia
@@ -106,10 +107,73 @@ public abstract class MultimediaSession {
     	private Error() {
         }    	
     }    
-
+    
     /**
      * Constructor
      */
     MultimediaSession() {
     }
+    
+    /**
+	 * Returns the session ID of the multimedia session
+	 * 
+	 * @return Session ID
+	 * @throws JoynServiceException
+	 */
+	public abstract String getSessionId() throws JoynServiceException;
+	
+	/**
+	 * Returns the remote contact
+	 * 
+	 * @return Contact
+	 * @throws JoynServiceException
+	 */
+	public abstract String getRemoteContact() throws JoynServiceException;
+	
+	/**
+	 * Returns the service ID
+	 * 
+	 * @return Service ID
+	 * @throws JoynServiceException
+	 */
+	public abstract String getServiceId() throws JoynServiceException;
+	
+	/**
+	 * Returns the state of the session
+	 * 
+	 * @return State
+	 * @see MultimediaSession.State
+	 * @throws JoynServiceException
+	 */
+	public abstract int getState() throws JoynServiceException;
+	
+	/**
+	 * Returns the direction of the session (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see MultimediaSession.Direction
+	 * @throws JoynServiceException
+	 */
+	public abstract int getDirection() throws JoynServiceException;	
+	
+	/**
+	 * Accepts session invitation.
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public abstract void acceptInvitation() throws JoynServiceException;
+	
+	/**
+	 * Rejects session invitation
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public abstract void rejectInvitation() throws JoynServiceException;
+	
+	/**
+	 * Aborts the session
+	 * 
+	 * @throws JoynServiceException
+	 */
+	public abstract void abortSession() throws JoynServiceException;    
 }

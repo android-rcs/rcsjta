@@ -57,8 +57,12 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
+<<<<<<< HEAD
 import com.orangelabs.rcs.ri.extension.MessagingSessionView;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+=======
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
+>>>>>>> Package refactoring
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 

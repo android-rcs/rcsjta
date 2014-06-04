@@ -208,4 +208,107 @@ public class MultimediaSessionService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
+
+    /**
+     * Initiates a new session for real time streaming with a remote contact and for a given
+     * service extension. The payload are exchanged in real time during the session and may be
+     * from any type. The parameter contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is
+     * not supported an exception is thrown.
+     * 
+     * @param serviceId Service ID
+     * @param contact Contact
+     * @param listener Multimedia streaming session event listener
+     * @return Multimedia streaming session
+     * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+     */
+    public MultimediaStreamingSession initiateStreamingSession(String serviceId, String contact, MultimediaStreamingSessionListener listener) throws JoynServiceException, JoynContactFormatException {
+		if (api != null) {
+			try {
+				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact, listener);
+				if (sessionIntf != null) {
+					return new MultimediaStreamingSession(sessionIntf);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
+    
+    /**
+     * Returns the list of streaming sessions associated to a given service ID
+     * 
+     * @param serviceId Service ID
+     * @return List of streaming sessions
+     * @throws JoynServiceException
+     */
+    public Set<MultimediaStreamingSession> getStreamingSessions(String serviceId) throws JoynServiceException {
+		if (api != null) {
+			try {
+	    		Set<MultimediaStreamingSession> result = new HashSet<MultimediaStreamingSession>();
+				List<IBinder> mmsList = api.getStreamingSessions(serviceId);
+				for (IBinder binder : mmsList) {
+					MultimediaStreamingSession session = new MultimediaStreamingSession(IMultimediaStreamingSession.Stub.asInterface(binder));
+					result.add(session);
+				}
+				return result;
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
+
+    /**
+     * Returns a current streaming session from its unique session ID
+     * 
+     * @return Multimedia streaming session or null if not found
+     * @throws JoynServiceException
+     */
+    public MultimediaStreamingSession getStreamingSession(String sessionId) throws JoynServiceException {
+		if (api != null) {
+			try {
+				IMultimediaStreamingSession sessionIntf = api.getStreamingSession(sessionId);
+				if (sessionIntf != null) {
+					return new MultimediaStreamingSession(sessionIntf);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }    
+    
+    /**
+     * Returns a current streaming session from its invitation Intent
+     * 
+     * @param intent Invitation intent
+     * @return Multimedia streaming session or null if not found
+     * @throws JoynServiceException
+     */
+    public MultimediaStreamingSession getStreamingSessionFor(Intent intent) throws JoynServiceException {
+		if (api != null) {
+			try {
+				String sessionId = intent.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+				if (sessionId != null) {
+					return getStreamingSession(sessionId);
+				} else {
+					return null;
+				}
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }     
 }

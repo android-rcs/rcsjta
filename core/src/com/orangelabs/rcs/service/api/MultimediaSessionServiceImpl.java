@@ -36,7 +36,8 @@ import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -216,7 +217,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param intent Resolved intent
      * @param session SIP session
 	 */
-	public void receiveMsrpSipSessionInvitation(Intent intent, GenericSipSession session) {
+	public void receiveSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
 		// Add session in the list
 		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
 		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
@@ -238,7 +239,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param intent Resolved intent
      * @param session SIP session
 	 */
-	public void receiveRtpSipSessionInvitation(Intent intent, GenericSipSession session) {
+	public void receiveSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
 		// Add session in the list
 		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
 		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
@@ -278,7 +279,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Initiate a new session
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			final GenericSipSession session = Core.getInstance().getSipService().initiateSession(contact, featureTag);
+			final GenericSipMsrpSession session = Core.getInstance().getSipService().initiateMsrpSession(contact, featureTag);
 			
 			// Add session listener
 			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
@@ -368,8 +369,33 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
-		// TODO
-		throw new ServerApiException("Not implemented");
+		try {
+			// Initiate a new session
+			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+			final GenericSipRtpSession session = Core.getInstance().getSipService().initiateRtpSession(contact, featureTag);
+			
+			// Add session listener
+			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
+			sessionApi.addEventListener(listener);
+
+			// Start the session
+	        Thread t = new Thread() {
+	    		public void run() {
+	    			session.startSession();
+	    		}
+	    	};
+	    	t.start();
+			
+			// Add session in the list
+			MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
+			return sessionApi;
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e.getMessage());
+		}
+
 	}
 
     /**
