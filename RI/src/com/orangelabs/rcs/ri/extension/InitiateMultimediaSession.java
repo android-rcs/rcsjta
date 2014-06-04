@@ -18,7 +18,6 @@
 package com.orangelabs.rcs.ri.extension;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
@@ -31,22 +30,19 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Initiate messaging session
+ * Abstract class to initiate a multimedia session
  *  
  * @author Jean-Marc AUFFRET
  */
-public class InitiateMessagingSession extends Activity {
+public abstract class InitiateMultimediaSession extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		// Set layout
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.extension_initiate_messaging_session);
+		setContentView(R.layout.extension_initiate_session);
 
-		// Set title
-		setTitle(R.string.menu_initiate_messaging_session);
-		
 		// Set contact selector
 		Spinner spinner = (Spinner)findViewById(R.id.contact);
 		spinner.setAdapter(Utils.createContactListAdapter(this));
@@ -76,15 +72,18 @@ public class InitiateMessagingSession extends Activity {
 			MatrixCursor cursor = (MatrixCursor) spinner.getSelectedItem();
             String remoteContact = cursor.getString(1);
 
-			// Display session view
-			Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
-        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
-        	intent.putExtra(MessagingSessionView.EXTRA_CONTACT, remoteContact);
-			startActivity(intent);
+			// Initiate session
+            initiateSession(remoteContact);
 			
         	// Exit activity
         	finish();     
 		}
 	};
+	
+	/**
+	 * Initiate session
+	 * 
+	 * @param contact Remote contact
+	 */
+	public abstract void initiateSession(String contact);
 }

@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.core.ims.service.sip;
+package com.orangelabs.rcs.core.ims.service.sip.messaging;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -34,14 +34,15 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Terminating SIP session
+ * Terminating SIP MSRP session
  * 
  * @author jexa7410
  */
-public class TerminatingSipSession extends GenericSipSession {
+public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	/**
      * The logger
      */
@@ -53,7 +54,7 @@ public class TerminatingSipSession extends GenericSipSession {
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 */
-	public TerminatingSipSession(ImsService parent, SipRequest invite) {
+	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite) {
 		super(parent, SipUtils.getAssertedIdentity(invite), invite.getFeatureTags().get(0));
 
 		// Create dialog path
@@ -66,7 +67,7 @@ public class TerminatingSipSession extends GenericSipSession {
 	public void run() {
 		try {		
 	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new session as terminating");
+	    		logger.info("Initiate a new MSRP session as terminating");
 	    	}
 	
 			// Send a 180 Ringing response

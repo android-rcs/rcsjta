@@ -32,7 +32,8 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 
 /**
  * Observer of core events
@@ -215,7 +216,7 @@ public interface CoreListener {
 	 * @param intent Resolved intent
      * @param session SIP session
      */
-    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipSession session);
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session);
 
     /**
      * New SIP RTP session invitation
@@ -223,7 +224,7 @@ public interface CoreListener {
 	 * @param intent Resolved intent
      * @param session SIP session
      */
-    public void handleSipRtpSessionInvitation(Intent intent, GenericSipSession session);
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session);
 
     /**
      * User terms confirmation request

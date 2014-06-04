@@ -15,26 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.extension;
+package com.orangelabs.rcs.ri.extension.messaging;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import android.app.ListActivity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.MultimediaSessionList;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -42,12 +36,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MessagingSessionList extends ListActivity implements JoynServiceListener {
-	/**
-	 * MM session API
-	 */
-	private MultimediaSessionService sessionApi;
-
+public class MessagingSessionList extends MultimediaSessionList {
 	/**
 	 * List of sessions
 	 */
@@ -62,81 +51,16 @@ public class MessagingSessionList extends ListActivity implements JoynServiceLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-        // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.extension_messaging_session_list);
-
         // Set title
         setTitle(R.string.menu_messaging_sessions_list);
-
-        // Instanciate API
-        sessionApi = new MultimediaSessionService(getApplicationContext(), this);
-        
-        // Connect API
-        sessionApi.connect();
 	}
 	
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-    	// Update the list of sessions
-		updateList();
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-
-        // Disconnect API
-        sessionApi.disconnect();
-	}	
-	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		apiEnabled = true;
-
-		// Display the list of sessions
-		updateList();
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		apiEnabled = false;
-
-		Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_disabled));
-    }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Nothing to do here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Update the list of sessions
-		updateList();
-    }      
-	
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		
-		// Display the selected session
+	/**
+	 * Display a session
+	 * 
+	 * @param sessionId Session ID
+	 */
+	public void displaySession(int position) {
 		try {
 			Intent intent = new Intent(this, MessagingSessionView.class);
 			String sessionId = sessions.get(position).getSessionId();
@@ -148,18 +72,18 @@ public class MessagingSessionList extends ListActivity implements JoynServiceLis
 			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed));
 		}
 	}
-
+	
     /**
      * Update the displayed list
      */
-    private void updateList() {
+    public void updateList() {
 		try {
 			// Reset the list
 			sessions.clear();
 
 			if (apiEnabled) {
 		    	// Get list of pending sessions
-		    	Set<MultimediaMessagingSession> currentSessions = sessionApi.getMessagingSessions(TestMultimediaSessionApi.SERVICE_ID);
+		    	Set<MultimediaMessagingSession> currentSessions = sessionApi.getMessagingSessions(MessagingSessionUtils.SERVICE_ID);
 		    	sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
 				if (sessions.size() > 0){
 			        String[] items = new String[sessions.size()];    

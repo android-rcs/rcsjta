@@ -52,7 +52,7 @@ import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.extension.MessagingSessionView;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 

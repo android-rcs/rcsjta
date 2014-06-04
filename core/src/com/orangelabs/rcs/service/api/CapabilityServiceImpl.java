@@ -192,7 +192,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isImageSharingSupported(),
     				capabilities.isVideoSharingSupported(),
     				capabilities.isImSessionSupported(),
-    				capabilities.isFileTransferSupported(),
+    				capabilities.isFileTransferSupported() || capabilities.isFileTransferHttpSupported(),
     				capabilities.isGeolocationPushSupported(),
     				capabilities.isIPVoiceCallSupported(),
     				capabilities.isIPVideoCallSupported(),

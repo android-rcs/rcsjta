@@ -1,36 +1,19 @@
-/*******************************************************************************
- * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010 France Telecom S.A.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-
-package com.orangelabs.rcs.core.ims.service.sip;
+package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Originating SIP session
- * 
- * @author jexa7410
+ * Originating SIP RTP session
+ *  
+ * @author Jean-Marc AUFFRET
  */
-public class OriginatingSipSession extends GenericSipSession {
+public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	/**
      * The logger
      */
@@ -43,7 +26,7 @@ public class OriginatingSipSession extends GenericSipSession {
 	 * @param contact Remote contact
 	 * @param featureTag Feature tag
 	 */
-	public OriginatingSipSession(ImsService parent, String contact, String featureTag) {
+	public OriginatingSipRtpSession(ImsService parent, String contact, String featureTag) {
 		super(parent, contact, featureTag);
 		
 		// Create dialog path
@@ -56,23 +39,9 @@ public class OriginatingSipSession extends GenericSipSession {
 	public void run() {
 		try {
 	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new session as originating");
+	    		logger.info("Initiate a new RTP session as originating");
 	    	}
 	    	
-    		// Set setup mode
-	    	String localSetup = createMobileToMobileSetupOffer();
-            if (logger.isActivated()){
-				logger.debug("Local setup attribute is " + localSetup);
-			}
-
-            // Set local port
-            int localMsrpPort;
-            if ("active".equals(localSetup)) {
-                localMsrpPort = 9; // See RFC4145, Page 4
-            } else {
-                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
-            }
-    	
 			// Set SDP offer
 	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
@@ -82,11 +51,9 @@ public class OriginatingSipSession extends GenericSipSession {
 	            "s=-" + SipUtils.CRLF +
 				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
+	            "m=application " + getLocalRtpPort() + " RTP/AVP " + getRtpFormat().getPayload() + SipUtils.CRLF + 
 	    		"a=sendrecv" + SipUtils.CRLF;
-
+	    	
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
 

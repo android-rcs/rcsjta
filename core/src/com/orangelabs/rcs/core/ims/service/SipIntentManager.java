@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -60,12 +61,14 @@ public class SipIntentManager {
 		for(int i=0; i < tags.size(); i++) {
 			String featureTag = tags.get(i);
 			Intent intent = generateSipIntent(request, featureTag);
-			if (logger.isActivated()) {
-				logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
-			}
-			if (isSipIntentResolvedByBroadcastReceiver(intent)) {
-				result = intent;
-				break;
+			if (intent != null) {
+				if (logger.isActivated()) {
+					logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
+				}
+				if (isSipIntentResolvedByBroadcastReceiver(intent)) {
+					result = intent;
+					break;
+				}
 			}
 		}
 		return result;
@@ -78,10 +81,25 @@ public class SipIntentManager {
 	 * @param featureTag Feature tag
 	 */
 	private Intent generateSipIntent(SipRequest request, String featureTag) {
-		String mime = formatIntentMimeType(featureTag);
-		Intent intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
-		intent.addCategory(Intent.CATEGORY_DEFAULT);
-		intent.setType(mime.toLowerCase());
+		String content = request.getContent();
+		if (content == null) {
+			return null;
+		}
+		
+		Intent intent = null;
+		if (content.toLowerCase().contains("msrp")){
+			intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
+		} else
+		if (content.toLowerCase().contains("rtp")){
+			intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+		}
+		
+		if (intent != null) {
+			String mime = formatIntentMimeType(featureTag);
+			intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.setType(mime.toLowerCase());
+		}
+		
 		return intent;
 	}
 

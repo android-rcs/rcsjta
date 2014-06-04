@@ -26,7 +26,10 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
+import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -34,11 +37,11 @@ import com.orangelabs.rcs.ri.utils.Utils;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class MessagingSessionInvitationReceiver extends BroadcastReceiver {
+public class SessionInvitationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
         // Display invitation notification
-		MessagingSessionInvitationReceiver.addSessionInvitationNotification(context, intent);
+		SessionInvitationReceiver.addSessionInvitationNotification(context, intent);
     }
 
     /**
@@ -48,19 +51,32 @@ public class MessagingSessionInvitationReceiver extends BroadcastReceiver {
      * @param invitation Intent invitation
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
-    	// Get remote contact
-		String contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
-
-		// Get session ID
-		String sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
-
+    	// Get remote contact and session
+		String contact;
+		String sessionId;
+		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
+			contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
+			sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+		} else {
+			contact = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT);
+			sessionId = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+		}
+		
 		// Create notification
+		Class myClass;
+        String notifTitle;
+		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
+			myClass = MessagingSessionView.class;
+	        notifTitle = context.getString(R.string.title_recv_messaging_session);
+		} else {
+			myClass = StreamingSessionView.class;
+			notifTitle = context.getString(R.string.title_recv_streaming_session);
+		}
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, MessagingSessionView.class);
+		intent.setClass(context, myClass);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(sessionId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_messaging_session);
 		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
