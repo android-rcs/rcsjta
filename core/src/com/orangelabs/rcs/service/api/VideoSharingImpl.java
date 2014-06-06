@@ -123,7 +123,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * @see VideoSharing.State
 	 */
 	public int getState() {
-		int result = VideoSharing.State.UNKNOWN;
+		int result = VideoSharing.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

@@ -98,8 +98,6 @@ public class ChatServiceConfiguration {
 	/**
 	 * Constructor
 	 * 
-	 * @param chatSF Chat S&F
-	 * @param groupChatSF Group chat S&F
 	 * @param warnSF Store and Forward warning
 	 * @param chatTimeout Chat timeout
 	 * @param isComposingTimeout Is-composing timeout

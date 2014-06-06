@@ -79,7 +79,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return State 
 	 */
 	public int getState() {
-		int result = IPCall.State.UNKNOWN;
+		int result = IPCall.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

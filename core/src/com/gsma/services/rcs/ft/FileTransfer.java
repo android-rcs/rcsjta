@@ -39,9 +39,9 @@ public class FileTransfer {
      */
     public static class State {
     	/**
-    	 * Unknown state
+    	 * Inactive state
     	 */
-    	public final static int UNKNOWN = 0;
+    	public final static int INACTIVE = 0;
 
     	/**
     	 * File transfer invitation received

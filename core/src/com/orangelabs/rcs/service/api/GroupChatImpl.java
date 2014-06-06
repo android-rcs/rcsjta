@@ -138,7 +138,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return State 
 	 */
 	public int getState() {
-		int result = GroupChat.State.UNKNOWN;
+		int result = GroupChat.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

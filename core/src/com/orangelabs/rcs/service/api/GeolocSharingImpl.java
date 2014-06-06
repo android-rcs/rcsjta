@@ -116,7 +116,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	 * @return State 
 	 */
 	public int getState() {
-		int result = GeolocSharing.State.UNKNOWN;
+		int result = GeolocSharing.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

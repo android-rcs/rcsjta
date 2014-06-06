@@ -105,7 +105,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	 * @return State 
 	 */
 	public int getState() {
-		int result = ImageSharing.State.UNKNOWN;
+		int result = ImageSharing.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

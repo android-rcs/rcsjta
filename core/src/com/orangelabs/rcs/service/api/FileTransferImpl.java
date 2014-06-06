@@ -138,7 +138,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	 * @return State 
 	 */
 	public int getState() {
-		int result = FileTransfer.State.UNKNOWN;
+		int result = FileTransfer.State.INACTIVE;
 		if (session instanceof HttpFileTransferSession) {
 			// HTTP transfer
 			int state = ((HttpFileTransferSession)session).getSessionState(); 
