@@ -367,6 +367,7 @@ public class StreamingSessionView extends Activity implements JoynServiceListene
 
     	// Session error
     	public void onSessionError(final int error) {
+System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + error);    		
 			handler.post(new Runnable() {
 				public void run() {
 					// Hide progress dialog
