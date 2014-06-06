@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.content.Context;
 import android.telephony.PhoneNumberUtils;
 
@@ -45,6 +48,17 @@ public class PhoneUtils {
 	 */
 	private static String COUNTRY_AREA_CODE = "0";
 	
+    /**
+     * Regular expression of the SIP header
+     *
+     */
+    private final static String REGEXP_EXTRACT_URI = "<(.*)>";
+    
+    /**
+     * Pattern to extract Uri from SIP header
+     */
+    private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
+
 	/**
 	 * Set the country code
 	 * 
@@ -219,15 +233,20 @@ public class PhoneUtils {
 	}
 	
 	/**
-	 * Clean URI from '<' heading character or '>' trailing character
+	 * get URI from SIP identity header
 	 * 
-	 * @param uri
-	 *            the identity
-	 * @return the cleaned Uri
+	 * @param header
+	 *            the SIP header
+	 * @return the Uri
 	 */
-	public static String cleanUriHeadingTrailingChar(String uri) {
-		if (uri == null)
-			return uri;
-		return uri.replaceAll("^<|>$", "");
+	public static String extractUriFromSipHeader(String header) {
+		if (header != null) {
+			Matcher matcher = PATTERN_EXTRACT_URI.matcher(header);
+			if (matcher.find()) {
+				return matcher.group(1);
+			}
+		}
+		return header;
 	}
+
 }

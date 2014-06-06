@@ -339,22 +339,22 @@ public class SipUtils {
 				// Get value of the first header
 				assertedHeader1 = ((ExtensionHeader) list.next()).getValue();
 				if (assertedHeader1.contains("tel:")) {
-					return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader1);
+					return PhoneUtils.extractUriFromSipHeader(assertedHeader1);
 				}
 				if (list.hasNext()) {
 					// Get value of the second header (it may not be present)
 					String assertedHeader2 = ((ExtensionHeader) list.next())
 							.getValue();
 					if (assertedHeader2.contains("tel:")) {
-						return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader2);
+						return PhoneUtils.extractUriFromSipHeader(assertedHeader2);
 					}
 				}
 				// In case there is no tel uri, return the value of the first header
-				return PhoneUtils.cleanUriHeadingTrailingChar(assertedHeader1);
+				return PhoneUtils.extractUriFromSipHeader(assertedHeader1);
 			}
 		}
 		// No P-AssertedIdentity header, we take the value in the FROM uri
-		return PhoneUtils.cleanUriHeadingTrailingChar(request.getFromUri());
+		return PhoneUtils.extractUriFromSipHeader(request.getFromUri());
 	}
 	
     /**
