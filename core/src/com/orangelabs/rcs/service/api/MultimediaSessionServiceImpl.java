@@ -34,6 +34,7 @@ import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
@@ -247,9 +248,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		// Broadcast intent related to the received invitation
 		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, number);
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
+		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	

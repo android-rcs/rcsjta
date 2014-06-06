@@ -1,11 +1,13 @@
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.MediaRtpReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.MediaRtpSender;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.Format;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.data.DataFormat;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
+import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -134,6 +136,22 @@ public class GenericSipRtpSession extends ImsServiceSession implements RtpStream
                 getDialogPath().getLocalContent());
     }
 
+    /**
+     * Generate SDP
+     */
+    public String generateSdp() {
+    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+    	return "v=0" + SipUtils.CRLF +
+            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+            "s=-" + SipUtils.CRLF +
+			"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+            "t=0 0" + SipUtils.CRLF +			
+            "m=application " + localRtpPort + " RTP/AVP " + getRtpFormat().getPayload() + SipUtils.CRLF + 
+            "a=rtpmap:" + getRtpFormat().getPayload() + " " + getRtpFormat().getCodec() + "/90000" + SipUtils.CRLF + // TODO: hardcoded value
+			"a=sendrecv" + SipUtils.CRLF;
+    }
+    
     /**
      * Prepare media session
      * 

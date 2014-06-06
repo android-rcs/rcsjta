@@ -142,9 +142,6 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this, null);
         session.setFailureReportOption(false);
         session.setSuccessReportOption(false);
-
-        // Open the MSRP session
-        getMsrpMgr().openMsrpSession();
     }
 
     /**
@@ -153,7 +150,8 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
      * @throws Exception 
      */
     public void startMediaSession() throws Exception {
-        // Nothing to do
+        // Open the MSRP session
+        getMsrpMgr().openMsrpSession();
     }
 
     /**

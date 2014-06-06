@@ -52,8 +52,8 @@ public class SessionInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact and session
-		String contact;
-		String sessionId;
+		String contact = null;
+		String sessionId = null;
 		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
 			contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
 			sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
