@@ -75,12 +75,12 @@ public class SingleChatView extends ChatView {
 	/**
 	 * Remote contact
 	 */
-	private String contact = null;
+	private String contact;
     
     /**
      * Chat 
      */
-	private Chat chat = null;
+	private Chat chat;
 
     /**
      * Chat listener
@@ -114,14 +114,12 @@ public class SingleChatView extends ChatView {
     @Override
 	protected void onResume() {
         super.onResume();
-        
         activityDisplayed = true;
     }
 
     @Override
 	protected void onPause() {
         super.onStart();
-        
         activityDisplayed = false;
     }
 
@@ -156,11 +154,9 @@ public class SingleChatView extends ChatView {
 			// Open chat
     		chat = chatApi.openSingleChat(contact, chatListener);
 							
-			// Instanciate the composing manager
+			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
 			
-			// Update displayed report
-			updateDisplayedReport();
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled));
@@ -184,44 +180,39 @@ public class SingleChatView extends ChatView {
     /**
      * Load history
      */
-    private void loadHistory() {
+	private void loadHistory() {
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact);
+		Cursor cursor = null;
 		try {
-			Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact);		
-	    	Cursor cursor = getContentResolver().query(uri, 
-	    			new String[] {
-	    				ChatLog.Message.DIRECTION,
-	    				ChatLog.Message.CONTACT_NUMBER,
-	    				ChatLog.Message.BODY,
-	    				ChatLog.Message.MIME_TYPE,
-	    				ChatLog.Message.MESSAGE_STATUS,
-	    				ChatLog.Message.MESSAGE_TYPE,
-	    				ChatLog.Message.MESSAGE_ID
-	    				},
-    				null, 
-	    			null, 
-	    			ChatLog.Message.TIMESTAMP + " ASC");
-	    	while(cursor.moveToNext()) {
-	    		int direction = cursor.getInt(0);
-	    		String contact = cursor.getString(1);
-	    		String content = cursor.getString(2);
-	    		String contentType = cursor.getString(3);
-	    		int status = cursor.getInt(4);
-	    		int type = cursor.getInt(5);
-	    		String msgId = cursor.getString(6);
+			// @formatter:off
+			String[] projection = new String[] { 	ChatLog.Message.DIRECTION, 
+													ChatLog.Message.CONTACT_NUMBER, 
+													ChatLog.Message.BODY,
+													ChatLog.Message.MIME_TYPE, 
+													ChatLog.Message.MESSAGE_TYPE };
+			// @formatter:on
+			cursor = getContentResolver().query(uri, projection, null, null, ChatLog.Message.TIMESTAMP + " ASC");
+			while (cursor.moveToNext()) {
+				int direction = cursor.getInt(0);
+				String contact = cursor.getString(1);
+				String content = cursor.getString(2);
+				String contentType = cursor.getString(3);
+				int type = cursor.getInt(4);
 
-	    		// Add only messages to the history
-	    		if (type != ChatLog.Message.Type.SYSTEM) {
-	        		addMessageHistory(direction, contact, content, contentType);
-	    		}	    			
-	    		
-	    		// Send displayed report for older messages
-		        if (isDeliveryDisplayed && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
-		        	sendDisplayedReport(msgId);
-		        }	    		
-	    	}
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
+				// Add only messages to the history
+				if (type != ChatLog.Message.Type.SYSTEM) {
+					addMessageHistory(direction, contact, content, contentType);
+				}
+			}
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
 	}
 
     /**
@@ -234,10 +225,8 @@ public class SingleChatView extends ChatView {
     	try {
 			// Send the text to remote
 			String msgId = chat.sendMessage(msg);
-			
 	        // Warn the composing manager that the message was sent
 			composingManager.messageWasSent();
-
 			return msgId;
 	    } catch(Exception e) {
 	    	e.printStackTrace();
@@ -255,47 +244,13 @@ public class SingleChatView extends ChatView {
         try {
 			// Send the text to remote
         	String msgId = chat.sendGeoloc(geoloc);
-	    	
 	        // Warn the composing manager that the message was sent
 	    	composingManager.messageWasSent();
-
 	    	return msgId;
 	    } catch(Exception e) {
 	    	e.printStackTrace();
 	    	return null;
 	    }
-    }
-
-    /**
-     * Update displayed report
-     */
-    private void updateDisplayedReport() {
-    	Thread t = new Thread() {
-    		public void run() {
-				try {
-			    	Cursor cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, 
-			    			new String[] {
-			    				ChatLog.Message.MESSAGE_STATUS,
-			    				ChatLog.Message.MESSAGE_ID
-			    				},
-			    			ChatLog.Message.CHAT_ID + "='" + contact + "'", 
-			    			null, 
-			    			ChatLog.Message.TIMESTAMP + " ASC");
-			    	while(cursor.moveToNext()) {
-			    		int status = cursor.getInt(0);
-			    		String msgId = cursor.getString(1);
-		
-			    		// Send displayed report for older messages
-				        if (isDeliveryDisplayed && (status == ChatLog.Message.Status.Content.UNREAD_REPORT)) {
-				        	sendDisplayedReport(msgId);
-				        }	    		
-			    	}
-		    	} catch(Exception e) {
-		    		e.printStackTrace();
-		    	}
-    		}
-    	};
-    	t.start();
     }
     
     /**
@@ -330,21 +285,6 @@ public class SingleChatView extends ChatView {
 			e.printStackTrace();
 		}
 	}    
-    
-    /**
-     * Send a displayed report
-     * 
-     * @param msgId Message ID
-     */
-    private void sendDisplayedReport(String msgId) {
-        try {
-			if (chat != null) {
-				chat.sendDisplayedDeliveryReport(msgId);
-			}
-        } catch(Exception e) {
-			e.printStackTrace();
-        }
-    }
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -399,34 +339,42 @@ public class SingleChatView extends ChatView {
      */
     private class MyChatListener extends ChatListener {
     	// Callback called when a new message has been received
-    	public void onNewMessage(final ChatMessage message) {
-			handler.post(new Runnable() { 
+		public void onNewMessage(final ChatMessage message) {
+			handler.post(new Runnable() {
 				public void run() {
-					// Send a displayed delivery report
-			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
-			        	sendDisplayedReport(message.getId());
-			        }
-
-			        // Display the received message
+					if (chatApi != null) {
+						try {
+							chatApi.markMessageAsRead(message.getId());
+						} catch (Exception e) {
+							if (LogUtils.isActive) {
+								Log.e(LOGTAG, e.getMessage(), e);
+							}
+						}
+					}
+					// Display the received message
 					displayReceivedMessage(message);
 				}
 			});
-    	}
+		}
 
     	// Callback called when a new geoloc has been received
-    	public void onNewGeoloc(final GeolocMessage message) {
-			handler.post(new Runnable() { 
+		public void onNewGeoloc(final GeolocMessage message) {
+			handler.post(new Runnable() {
 				public void run() {
-					// Send a displayed delivery report
-			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
-			        	sendDisplayedReport(message.getId());
-			        }
-
-			        // Display the received geoloc
-			        displayReceivedGeoloc(message);
+					if (chatApi != null) {
+						try {
+							chatApi.markMessageAsRead(message.getId());
+						} catch (Exception e) {
+							if (LogUtils.isActive) {
+								Log.e(LOGTAG, e.getMessage(), e);
+							}
+						}
+					}
+					// Display the received geoloc
+					displayReceivedGeoloc(message);
 				}
 			});
-    	}
+		}
 
     	// Callback called when a message has been delivered to the remote
     	public void onReportMessageDelivered(String msgId) {

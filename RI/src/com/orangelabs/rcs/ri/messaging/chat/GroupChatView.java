@@ -81,12 +81,21 @@ public class GroupChatView extends ChatView {
 	public final static String EXTRA_SUBJECT = "subject";
 	public final static String EXTRA_CONTACT = "contact";
 
-	private final static String[] TAB_PARTICIPANT_STATUS = { "UNKNOWN", "CONNECTED", "DISCONNECTED", "DEPARTED", "BOOTED", "FAILED", "BUSY",
-			"DECLINED", "PENDING" };
+	// @formatter:off
+	private final static String[] TAB_PARTICIPANT_STATUS = { "UNKNOWN", 
+															"CONNECTED", 
+															"DISCONNECTED", 
+															"DEPARTED", 
+															"BOOTED", 
+															"FAILED", 
+															"BUSY",
+															"DECLINED", 
+															"PENDING" };
+	// @formatter:on
 	/**
 	 * Remote contact
 	 */
-	private String contact = null;
+	private String contact;
 
 	/**
 	 * Subject
@@ -96,12 +105,12 @@ public class GroupChatView extends ChatView {
     /**
      * Chat ID 
      */
-	private String chatId = null;
+	private String chatId;
 
 	/**
 	 * Group chat
 	 */
-	private GroupChat groupChat = null;
+	private GroupChat groupChat;
 
     /**
      * List of participants
@@ -257,7 +266,7 @@ public class GroupChatView extends ChatView {
 				composeText.setFilters(filterArray);
 			}
 			
-			// Instanciate the composing manager
+			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
@@ -371,39 +380,41 @@ public class GroupChatView extends ChatView {
     private void loadHistory() {
 		if (chatId == null) {
 			return;
-		}
-
+		}		
+		// TODO bug Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);
+		Uri uri = ChatLog.Message.CONTENT_URI;
+		Cursor cursor = null;
 		try {
-			// TODO bug Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);		
-			Uri uri = ChatLog.Message.CONTENT_URI; 
-	    	Cursor cursor = getContentResolver().query(uri, 
-	    			new String[] {
+			// @formatter:off
+			String[] projection = new String[] {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
 	    				ChatLog.Message.BODY,
 	    				ChatLog.Message.MIME_TYPE,
-	    				ChatLog.Message.MESSAGE_STATUS,
-	    				ChatLog.Message.MESSAGE_TYPE,
-	    				ChatLog.Message.MESSAGE_ID
-	    				},
-	    			ChatLog.Message.CHAT_ID + "='" + chatId + "'", 
-	    			null, 
-	    			ChatLog.Message.TIMESTAMP + " ASC");
-	    	while(cursor.moveToNext()) {
-	    		int direction = cursor.getInt(0);
-	    		String contact = cursor.getString(1);
-	    		String content = cursor.getString(2);
-	    		String contentType = cursor.getString(3);
-	    		int type = cursor.getInt(5);
+	    				ChatLog.Message.MESSAGE_TYPE };
+			// @formatter:on
+			String where = ChatLog.Message.CHAT_ID + "= ?";
+			String[] whereArgs = new String[] { chatId };
+			cursor = getContentResolver().query(uri, projection, where, whereArgs, ChatLog.Message.TIMESTAMP + " ASC");
+			while (cursor.moveToNext()) {
+				int direction = cursor.getInt(0);
+				String contact = cursor.getString(1);
+				String content = cursor.getString(2);
+				String contentType = cursor.getString(3);
+				int type = cursor.getInt(4);
 
-	    		// Add only messages to the history
-	    		if (type != ChatLog.Message.Type.SYSTEM) {
-	        		addMessageHistory(direction, contact, content, contentType);	        		
-	    		}	    			
-	    	}
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
+				// Add only messages to the history
+				if (type != ChatLog.Message.Type.SYSTEM) {
+					addMessageHistory(direction, contact, content, contentType);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
     }
     
     /**
@@ -489,8 +500,8 @@ public class GroupChatView extends ChatView {
      */
     private void sendDisplayedReport(String msgId) {
         try {
-			if (groupChat != null) {
-				groupChat.sendDisplayedDeliveryReport(msgId);
+			if (chatApi != null) {
+				chatApi.markMessageAsRead(msgId);
 			}
         } catch(Exception e) {
 			e.printStackTrace();
@@ -722,7 +733,7 @@ public class GroupChatView extends ChatView {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Send a displayed delivery report
-			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
+			        if (isDeliveryDisplayed) {
 			        	sendDisplayedReport(message.getId());
 			        }
 
@@ -737,7 +748,7 @@ public class GroupChatView extends ChatView {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Send a displayed delivery report
-			        if (isDeliveryDisplayed && message.isDisplayedReportRequested()) {
+			        if (isDeliveryDisplayed) {
 			        	sendDisplayedReport(message.getId());
 			        }
 
@@ -841,7 +852,7 @@ public class GroupChatView extends ChatView {
 	 * @return true if connected
 	 * @hide
 	 */
-	public static boolean isConnected(int status) {
+	private static boolean isConnected(int status) {
 		return ((status == Status.CONNECTED) || (status == Status.PENDING) || (status == Status.BOOTED));
 	}
 }
