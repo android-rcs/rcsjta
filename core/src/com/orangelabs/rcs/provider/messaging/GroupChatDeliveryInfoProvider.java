@@ -4,6 +4,10 @@
  */
 package com.orangelabs.rcs.provider.messaging;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -15,10 +19,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Delivery info history provider of chat and file messages
@@ -34,7 +34,7 @@ public class GroupChatDeliveryInfoProvider extends ContentProvider {
     private static final int ROW_ID = 3;
 
     private static final String DATABASE_NAME = "groupchatdeliveryinfo.db";
-
+    
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
         private static final int DATABASE_VERSION = 1;
@@ -186,44 +186,33 @@ public class GroupChatDeliveryInfoProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
-        Cursor cursor = null;
-        try {
-            SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-            queryBuilder.setTables(DATABASE_TABLE);
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
+		Cursor cursor = null;
+		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+		queryBuilder.setTables(DATABASE_TABLE);
 
-            String uriSelectionKey = getUriSelectionKey(uri);
-            SQLiteDatabase database = openHelper.getReadableDatabase();
-            if (uriSelectionKey == null) {
-                cursor = queryBuilder.query(database, projection, selection, selectionArgs, null,
-                        null, sort);
+		String uriSelectionKey = getUriSelectionKey(uri);
+		SQLiteDatabase database = openHelper.getReadableDatabase();
+		if (uriSelectionKey == null) {
+			cursor = queryBuilder.query(database, projection, selection, selectionArgs, null, null, sort);
 
-            } else if (selectionArgs == null) {
-                String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
-                cursor = queryBuilder.query(database, projection, finalSelection, new String[] {
-                    uri.getLastPathSegment()
-                }, null, null, sort);
+		} else if (selectionArgs == null) {
+			String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
+			cursor = queryBuilder.query(database, projection, finalSelection, new String[] { uri.getLastPathSegment() }, null,
+					null, sort);
 
-            } else {
-                List<String> selectionArgsList = new ArrayList<String>(selectionArgs.length + 1);
-                selectionArgsList.add(uri.getLastPathSegment());
-                selectionArgsList.addAll(Arrays.asList(selectionArgs));
-                String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
-                cursor = queryBuilder.query(database, projection, finalSelection,
-                        selectionArgsList.toArray(new String[selectionArgsList.size()]), null,
-                        null, sort);
-            }
+		} else {
+			List<String> selectionArgsList = new ArrayList<String>(selectionArgs.length + 1);
+			selectionArgsList.add(uri.getLastPathSegment());
+			selectionArgsList.addAll(Arrays.asList(selectionArgs));
+			String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
+			cursor = queryBuilder.query(database, projection, finalSelection,
+					selectionArgsList.toArray(new String[selectionArgsList.size()]), null, null, sort);
+		}
 
-            cursor.setNotificationUri(getContext().getContentResolver(),
-                    GroupChatDeliveryInfoData.CONTENT_URI);
-            return cursor;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
+		cursor.setNotificationUri(getContext().getContentResolver(), GroupChatDeliveryInfoData.CONTENT_URI);
+		return cursor;
+	}
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {

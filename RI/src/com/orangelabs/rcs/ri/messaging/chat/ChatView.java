@@ -108,12 +108,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * Utility class to manage the is-composing status
      */
     protected IsComposingManager composingManager = null;
-	
-	/**
-	 * Delivery display report
-	 */
-    protected boolean isDeliveryDisplayed = true;
-    
+	    
 	/**
 	 * Smileys
 	 */

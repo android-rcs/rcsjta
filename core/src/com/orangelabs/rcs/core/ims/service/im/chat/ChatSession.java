@@ -533,19 +533,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	
 			    	// Check if the message needs a delivery report
 	    			boolean imdnDisplayedRequested = false;
-			    	String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+	    			String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
                     boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
-                    if (isFToHTTP) {
-                        sendMsrpMessageDeliveryStatus(remoteUri, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
-                    } else if (dispositionNotification != null) {
-			    		if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
-			    			// Positive delivery requested, send MSRP message with status "delivered" 
-			    			sendMsrpMessageDeliveryStatus(remoteUri, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
-			    		}
-			    		if (dispositionNotification.contains(ImdnDocument.DISPLAY)) {
-			    			imdnDisplayedRequested = true;
-			    		}
-			    	}
+                    
 
 			    	// Analyze received message thanks to the MIME type 
                     if (isFToHTTP) {
@@ -558,30 +548,42 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 						} else {
 							// TODO : else return error to Originating side
 						}
-                    } else
-	                if (ChatUtils.isTextPlainType(contentType)) {
-				    	// Text message
-		    			receiveText(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, imdnDisplayedRequested, date, pseudo);
-		    			
-		    			// Mark the message as waiting a displayed report if needed 
-		    			if (imdnDisplayedRequested) {
-		    				// Check if displayed delivery report is enabled
-		    				if (RcsSettings.getInstance().isImDisplayedNotificationActivated())
-		    					MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
-		    			}
-			    	} else
-		    		if (ChatUtils.isApplicationIsComposingType(contentType)) {
-					    // Is composing event
-		    			receiveIsComposing(number, cpimMsg.getMessageContent().getBytes());
-			    	} else
-			    	if (ChatUtils.isMessageImdnType(contentType)) {
-						// Delivery report
-						receiveMessageDeliveryStatus(number,cpimMsg.getMessageContent());
-			    	} else	
-			    	if (ChatUtils.isGeolocType(contentType)) {
-						// Geoloc message
-						receiveGeoloc(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, imdnDisplayedRequested, date,pseudo);
-			    	} 
+					} else {
+						if (dispositionNotification!= null && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
+			    			imdnDisplayedRequested = true;
+			    		}
+						if (ChatUtils.isTextPlainType(contentType)) {
+							// Text message
+							receiveText(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId,
+									imdnDisplayedRequested, date, pseudo);
+
+							// Mark the message as waiting a displayed report if needed
+							if (imdnDisplayedRequested) {
+								// Check if displayed delivery report is enabled
+								if (RcsSettings.getInstance().isImDisplayedNotificationActivated())
+									MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
+							}
+						} else if (ChatUtils.isApplicationIsComposingType(contentType)) {
+							// Is composing event
+							receiveIsComposing(number, cpimMsg.getMessageContent().getBytes());
+						} else if (ChatUtils.isMessageImdnType(contentType)) {
+							// Delivery report
+							receiveMessageDeliveryStatus(number, cpimMsg.getMessageContent());
+						} else if (ChatUtils.isGeolocType(contentType)) {
+							// Geoloc message
+							receiveGeoloc(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId,
+									imdnDisplayedRequested, date, pseudo);
+						}
+					}
+                   
+                    if (isFToHTTP) {
+                        sendMsrpMessageDeliveryStatus(remoteUri, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+                    } else if (dispositionNotification != null) {
+			    		if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
+			    			// Positive delivery requested, send MSRP message with status "delivered" 
+			    			sendMsrpMessageDeliveryStatus(remoteUri, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+			    		}
+			    	}
 				}
 	    	} catch(Exception e) {
 		   		if (logger.isActivated()) {

@@ -139,9 +139,6 @@ public class SingleChatView extends ChatView {
      */
     public void onServiceConnected() {
     	try {
-    		// Set chat settings
-            isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
-
 			// Set max label length
 			int maxMsgLength = chatApi.getConfiguration().getSingleChatMessageMaxLength();
 			if (maxMsgLength > 0) {
@@ -188,21 +185,17 @@ public class SingleChatView extends ChatView {
 			String[] projection = new String[] { 	ChatLog.Message.DIRECTION, 
 													ChatLog.Message.CONTACT_NUMBER, 
 													ChatLog.Message.BODY,
-													ChatLog.Message.MIME_TYPE, 
-													ChatLog.Message.MESSAGE_TYPE };
+													ChatLog.Message.MIME_TYPE };
+			String where = ChatLog.Message.MESSAGE_TYPE + " != ?";
+			String[] whereArgs = { ""+ChatLog.Message.Type.SYSTEM };
 			// @formatter:on
-			cursor = getContentResolver().query(uri, projection, null, null, ChatLog.Message.TIMESTAMP + " ASC");
+			cursor = getContentResolver().query(uri, projection, where, whereArgs, ChatLog.Message.TIMESTAMP + " ASC");
 			while (cursor.moveToNext()) {
 				int direction = cursor.getInt(0);
 				String contact = cursor.getString(1);
 				String content = cursor.getString(2);
 				String contentType = cursor.getString(3);
-				int type = cursor.getInt(4);
-
-				// Add only messages to the history
-				if (type != ChatLog.Message.Type.SYSTEM) {
-					addMessageHistory(direction, contact, content, contentType);
-				}
+				addMessageHistory(direction, contact, content, contentType);
 			}
 		} catch (Exception e) {
 			if (LogUtils.isActive) {

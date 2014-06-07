@@ -255,9 +255,6 @@ public class GroupChatView extends ChatView {
 			// Load history
 			loadHistory();
 
-    		// Set chat settings
-            isDeliveryDisplayed = chatApi.getConfiguration().isDisplayedDeliveryReport();
-
             // Set max label length
 			int maxMsgLength = chatApi.getConfiguration().getGroupChatMessageMaxLength();
 			if (maxMsgLength > 0) {
@@ -377,10 +374,10 @@ public class GroupChatView extends ChatView {
     /**
      * Load history
      */
-    private void loadHistory() {
+	private void loadHistory() {
 		if (chatId == null) {
 			return;
-		}		
+		}
 		// TODO bug Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);
 		Uri uri = ChatLog.Message.CONTENT_URI;
 		Cursor cursor = null;
@@ -390,23 +387,17 @@ public class GroupChatView extends ChatView {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
 	    				ChatLog.Message.BODY,
-	    				ChatLog.Message.MIME_TYPE,
-	    				ChatLog.Message.MESSAGE_TYPE };
+	    				ChatLog.Message.MIME_TYPE };
 			// @formatter:on
-			String where = ChatLog.Message.CHAT_ID + "= ?";
-			String[] whereArgs = new String[] { chatId };
+			String where = ChatLog.Message.CHAT_ID + "= ? AND " + ChatLog.Message.MESSAGE_TYPE + " != ?";
+			String[] whereArgs = new String[] { chatId, "" + ChatLog.Message.Type.SYSTEM };
 			cursor = getContentResolver().query(uri, projection, where, whereArgs, ChatLog.Message.TIMESTAMP + " ASC");
 			while (cursor.moveToNext()) {
 				int direction = cursor.getInt(0);
 				String contact = cursor.getString(1);
 				String content = cursor.getString(2);
 				String contentType = cursor.getString(3);
-				int type = cursor.getInt(4);
-
-				// Add only messages to the history
-				if (type != ChatLog.Message.Type.SYSTEM) {
-					addMessageHistory(direction, contact, content, contentType);
-				}
+				addMessageHistory(direction, contact, content, contentType);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -415,7 +406,7 @@ public class GroupChatView extends ChatView {
 				cursor.close();
 			}
 		}
-    }
+	}
     
     /**
      * Send text message
@@ -494,11 +485,11 @@ public class GroupChatView extends ChatView {
 	}
     
     /**
-     * Send a displayed report
+     * Mark message as read
      * 
      * @param msgId Message ID
      */
-    private void sendDisplayedReport(String msgId) {
+    private void markMessageAsRead(String msgId) {
         try {
 			if (chatApi != null) {
 				chatApi.markMessageAsRead(msgId);
@@ -733,9 +724,7 @@ public class GroupChatView extends ChatView {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Send a displayed delivery report
-			        if (isDeliveryDisplayed) {
-			        	sendDisplayedReport(message.getId());
-			        }
+					markMessageAsRead(message.getId());
 
 			        // Display the received message
 					displayReceivedMessage(message);
@@ -748,9 +737,7 @@ public class GroupChatView extends ChatView {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Send a displayed delivery report
-			        if (isDeliveryDisplayed) {
-			        	sendDisplayedReport(message.getId());
-			        }
+					markMessageAsRead(message.getId());
 
 			        // Display the received geoloc
 			        displayReceivedGeoloc(message);
