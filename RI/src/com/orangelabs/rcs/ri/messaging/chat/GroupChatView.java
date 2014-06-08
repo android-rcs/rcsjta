@@ -378,8 +378,7 @@ public class GroupChatView extends ChatView {
 		if (chatId == null) {
 			return;
 		}
-		// TODO bug Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);
-		Uri uri = ChatLog.Message.CONTENT_URI;
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);
 		Cursor cursor = null;
 		try {
 			// @formatter:off
@@ -387,17 +386,19 @@ public class GroupChatView extends ChatView {
 	    				ChatLog.Message.DIRECTION,
 	    				ChatLog.Message.CONTACT_NUMBER,
 	    				ChatLog.Message.BODY,
-	    				ChatLog.Message.MIME_TYPE };
+	    				ChatLog.Message.MIME_TYPE,
+	    				ChatLog.Message.MESSAGE_ID };
 			// @formatter:on
-			String where = ChatLog.Message.CHAT_ID + "= ? AND " + ChatLog.Message.MESSAGE_TYPE + " != ?";
-			String[] whereArgs = new String[] { chatId, "" + ChatLog.Message.Type.SYSTEM };
+			String where = ChatLog.Message.MESSAGE_TYPE + " != ?";
+			String[] whereArgs = new String[] { "" + ChatLog.Message.Type.SYSTEM };
 			cursor = getContentResolver().query(uri, projection, where, whereArgs, ChatLog.Message.TIMESTAMP + " ASC");
 			while (cursor.moveToNext()) {
 				int direction = cursor.getInt(0);
 				String contact = cursor.getString(1);
 				String content = cursor.getString(2);
 				String contentType = cursor.getString(3);
-				addMessageHistory(direction, contact, content, contentType);
+				String msgId = cursor.getString(4);
+				addMessageHistory(direction, contact, content, contentType, msgId);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -746,28 +747,28 @@ public class GroupChatView extends ChatView {
     	}    	
 
     	// Callback called when a message has been delivered to the remote
-    	public void onReportMessageDelivered(String msgId) {
+    	public void onReportMessageDelivered(final String msgId) {
 			handler.post(new Runnable() { 
 				public void run() {
-					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered), msgId);
 				}
 			});
     	}
 
     	// Callback called when a message has been displayed by the remote
-    	public void onReportMessageDisplayed(String msgId) {
+    	public void onReportMessageDisplayed(final String msgId) {
 			handler.post(new Runnable() { 
 				public void run() {
-					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed), msgId);
 				}
 			});
     	}
     	
     	// Callback called when a message has failed to be delivered to the remote
-    	public void onReportMessageFailed(String msgId) {
+    	public void onReportMessageFailed(final String msgId) {
 			handler.post(new Runnable() { 
 				public void run() {
-					addNotifHistory(getString(R.string.label_receive_delivery_status_failed));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_failed), msgId);
 				}
 			});
     	}
@@ -791,7 +792,7 @@ public class GroupChatView extends ChatView {
     	public void onParticipantJoined(final String contact, String contactDisplayname) {
 			handler.post(new Runnable() {
 				public void run(){
-					addNotifHistory(getString(R.string.label_contact_joined, contact));
+					addNotifHistory(getString(R.string.label_contact_joined, contact), null);
 				}
 			});
     	}
@@ -800,7 +801,7 @@ public class GroupChatView extends ChatView {
     	public void onParticipantLeft(final String contact) {
 			handler.post(new Runnable() {
 				public void run(){
-					addNotifHistory(getString(R.string.label_contact_left, contact));
+					addNotifHistory(getString(R.string.label_contact_left, contact), null);
 				}
 			});
     	}
@@ -809,7 +810,7 @@ public class GroupChatView extends ChatView {
     	public void onParticipantDisconnected(final String contact) {
 			handler.post(new Runnable() {
 				public void run(){
-					addNotifHistory(getString(R.string.label_contact_disconnected, contact));
+					addNotifHistory(getString(R.string.label_contact_disconnected, contact), null);
 				}
 			});
     	}
@@ -825,7 +826,7 @@ public class GroupChatView extends ChatView {
 					if (LogUtils.isActive) {
 						Log.d(LOGTAG, "onParticipantStatusChanged contact=" + participant.getContact() + " status=" + newStatus);
 					}
-					addNotifHistory(getString(R.string.label_contact_status_changed, participant.getContact(), newStatus));
+					addNotifHistory(getString(R.string.label_contact_status_changed, participant.getContact(), newStatus), null);
 				}
 			});
 		}

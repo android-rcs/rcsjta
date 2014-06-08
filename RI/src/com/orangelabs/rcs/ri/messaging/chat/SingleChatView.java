@@ -185,7 +185,8 @@ public class SingleChatView extends ChatView {
 			String[] projection = new String[] { 	ChatLog.Message.DIRECTION, 
 													ChatLog.Message.CONTACT_NUMBER, 
 													ChatLog.Message.BODY,
-													ChatLog.Message.MIME_TYPE };
+													ChatLog.Message.MIME_TYPE,
+													ChatLog.Message.MESSAGE_ID };
 			String where = ChatLog.Message.MESSAGE_TYPE + " != ?";
 			String[] whereArgs = { ""+ChatLog.Message.Type.SYSTEM };
 			// @formatter:on
@@ -195,7 +196,8 @@ public class SingleChatView extends ChatView {
 				String contact = cursor.getString(1);
 				String content = cursor.getString(2);
 				String contentType = cursor.getString(3);
-				addMessageHistory(direction, contact, content, contentType);
+				String messageId = cursor.getString(4);
+				addMessageHistory(direction, contact, content, contentType, messageId);
 			}
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
@@ -370,34 +372,34 @@ public class SingleChatView extends ChatView {
 		}
 
     	// Callback called when a message has been delivered to the remote
-    	public void onReportMessageDelivered(String msgId) {
+    	public void onReportMessageDelivered(final String msgId) {
 			handler.post(new Runnable(){
 				public void run(){
 					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered), msgId);
 				}
 			});
     	}
 
     	// Callback called when a message has been displayed by the remote
-    	public void onReportMessageDisplayed(String msgId) {
+    	public void onReportMessageDisplayed(final String msgId) {
 			handler.post(new Runnable(){
 				public void run(){
 					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed), msgId);
 				}
 			});
     	}
 
     	// Callback called when a message has failed to be delivered to the remote
-    	public void onReportMessageFailed(String msgId) {
+    	public void onReportMessageFailed(final String msgId) {
 			if (LogUtils.isActive) {
 				Log.w(LOGTAG, "onReportMessageFailed msgId=" + msgId);
 			}
 			handler.post(new Runnable(){
 				public void run(){
 					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_failed));
+					addNotifHistory(getString(R.string.label_receive_delivery_status_failed), msgId);
 				}
 			});
     	}

@@ -68,7 +68,7 @@ public class ChatProvider extends ContentProvider {
 		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat", RCSAPI_CHATS);
 		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat/#", RCSAPI_CHAT_ID);	
         uriMatcher.addURI("com.orangelabs.rcs.chat", "message", MESSAGES);
-        uriMatcher.addURI("com.orangelabs.rcs.chat", "message/#", MESSAGE_ID);
+        uriMatcher.addURI("com.orangelabs.rcs.chat", "message/*", MESSAGE_ID);
 		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message", RCSAPI_MESSAGES);
 		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
     }
@@ -177,14 +177,12 @@ public class ChatProvider extends ContentProvider {
 			case CHAT_ID:
 			case RCSAPI_CHAT_ID:
 		        qb.setTables(TABLE_CHAT);
-                qb.appendWhere(ChatData.KEY_CHAT_ID + "=");
-                qb.appendWhere(uri.getPathSegments().get(1));
+                qb.appendWhere(ChatData.KEY_CHAT_ID + "= '"+uri.getPathSegments().get(1)+"'");
                 break;
 			case MESSAGE_ID:
 			case RCSAPI_MESSAGE_ID:
 		        qb.setTables(TABLE_MESSAGE);
-                qb.appendWhere(MessageData.KEY_CHAT_ID + "= '" +
-                		PhoneUtils.formatNumberToInternational(uri.getPathSegments().get(1)) + "'");
+                qb.appendWhere(MessageData.KEY_CHAT_ID + "= '" +uri.getPathSegments().get(1) + "'");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -197,7 +195,6 @@ public class ChatProvider extends ContentProvider {
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
         }
-
         return c;
     }
 

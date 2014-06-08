@@ -198,57 +198,45 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     /**
      * Add a message from database in the message history
      * 
-     * @param contact Contact
-     * @param message Text message
      */
-    protected void addMessageHistory(int direction, String contact, String content, String contentType) {
-    	String text = null;
-    	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
+	protected void addMessageHistory(int direction, String contact, String content, String contentType, String msgId) {
+		if (contentType.equals(GeolocMessage.MIME_TYPE)) {
 			Geoloc geoloc = ChatLog.getGeoloc(content);
 			if (geoloc != null) {
-    	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
-    		}
-    	} else
-    	if (contentType.equals(ChatMessage.MIME_TYPE)) {
-    		text = content;
-    	}
-    	
-    	if (text != null) {
-			TextMessageItem item = new TextMessageItem(direction, contact, text);
-			msgListAdapter.add(item);
-    	}
-    }
+				addGeolocHistory(direction, contact, geoloc, msgId);
+			}
+		} else {
+			if (contentType.equals(ChatMessage.MIME_TYPE)) {
+				addMessageHistory(direction, contact, content, msgId);
+			}
+		}
+	}
     
     /**
      * Add a text message in the message history
      * 
-     * @param contact Contact
-     * @param message Text message
      */
-    protected void addMessageHistory(int direction, String contact, String text) {
-		TextMessageItem item = new TextMessageItem(direction, contact, text);
+    protected void addMessageHistory(int direction, String contact, String text, String msgId) {
+		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
 		msgListAdapter.add(item);
     }
     
     /**
      * Add a geoloc message in the message history
      * 
-     * @param contact Contact
-     * @param geoloc Geoloc message
      */
-    protected void addGeolocHistory(int direction, String contact, Geoloc geoloc) {
+    protected void addGeolocHistory(int direction, String contact, Geoloc geoloc, String msgId) {
     	String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
-		TextMessageItem item = new TextMessageItem(direction, contact, text);
+		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
 		msgListAdapter.add(item);
     }
 
     /**
      * Add a notif in the message history
      * 
-     * @param notif Notification
      */
-    protected void addNotifHistory(String notif) {
-		NotifMessageItem item = new NotifMessageItem(notif);
+    protected void addNotifHistory(String notif, String messageId) {
+		NotifMessageItem item = new NotifMessageItem(messageId, notif);
 		msgListAdapter.add(item);
     }    
         
@@ -279,7 +267,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         String msgId = sendTextMessage(text);
     	if (msgId != null) {
 	    	// Add text to the message history
-	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text);
+	        addMessageHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text, msgId );
 	        composeText.setText(null);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
@@ -310,7 +298,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         String msgId = sendGeolocMessage(geoloc);
     	if (msgId != null) {
 	    	// Add geoloc to the message history
-    		addGeolocHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), geoloc);
+    		addGeolocHistory(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), geoloc, msgId);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
     	}
@@ -324,7 +312,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected void displayReceivedMessage(ChatMessage msg) {
         String contact = msg.getContact();
 		String txt = msg.getMessage();
-        addMessageHistory(ChatLog.Message.Direction.INCOMING, contact, txt);
+        addMessageHistory(ChatLog.Message.Direction.INCOMING, contact, txt, msg.getId());
     }
 
     /**
@@ -334,7 +322,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 */
     protected void displayReceivedGeoloc(GeolocMessage msg) {
     	// Add geoloc to the message history
-		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), msg.getGeoloc());
+		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), msg.getGeoloc(), msg.getId());
     }
 
     /**
@@ -513,12 +501,13 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 */
 	protected abstract class MessageItem {
 		private int direction;
-		
 	    private String contact;
+	    private String messageId;
 
-	    public MessageItem(int direction, String contact) {
+	    public MessageItem(int direction, String contact, String messageId) {
 	    	this.direction = direction;
     		this.contact = contact;
+    		this.messageId = messageId;
 	    }
 	    
 	    public int getDirection() {
@@ -528,6 +517,11 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    public String getContact() {
 	    	return contact;
 	    }
+
+		public String getMessageId() {
+			return messageId;
+		}
+
 	}	
 	
 	/**
@@ -536,9 +530,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	private class TextMessageItem extends MessageItem {
 	    private String text;
 	    
-	    public TextMessageItem(int direction, String contact, String text) {
-	    	super(direction, contact);
-	    	
+	    public TextMessageItem(int direction, String contact, String text, String messageId) {
+	    	super(direction, contact, messageId);
 	    	this.text = text;
 	    }
 	    
@@ -553,9 +546,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	private class NotifMessageItem extends MessageItem {
 	    private String text;
 	    
-	    public NotifMessageItem(String text) {
-	    	super(ChatLog.Message.Direction.IRRELEVANT, null);
-	    	
+	    public NotifMessageItem(String msgId, String text) {
+	    	super(ChatLog.Message.Direction.IRRELEVANT, null, msgId);
 	    	this.text = text;
 	    }
 	    
