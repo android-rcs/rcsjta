@@ -130,11 +130,7 @@ public class ChatLog {
 		public static final Uri CONTENT_MSG_URI = Uri
 				.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/messageid/");
 
-		public static final String ID = "_id";
-
-		public static final String DELIVERY_STATUS = "delivery_status";
-
-		public static final String DISPLAY_STATUS = "display_status";
+		public static final String DELIVERY_STATUS = "status";
 
 		public static final String REASON_CODE = "reason_code";
 
@@ -196,26 +192,6 @@ public class ChatLog {
 			 * A displayed-error delivery report has been received.
 			 */
 			public static final int DISPLAY_ERROR = 2;
-		}
-
-		/**
-		 * Displayed status of entry
-		 */
-		public static class DisplayStatus {
-			/**
-			 * The entry has not been displayed.
-			 */
-			public static final int NOT_DISPLAYED = 0;
-
-			/**
-			 * The entry has been displayed.
-			 */
-			public static final int DISPLAYED = 1;
-
-			/**
-			 * Display status is not supported.
-			 */
-			public static final int UNSUPPORTED = 2;
 		}
 	}
 

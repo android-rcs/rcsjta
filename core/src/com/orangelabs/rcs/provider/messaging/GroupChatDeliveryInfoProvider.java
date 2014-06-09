@@ -37,7 +37,7 @@ public class GroupChatDeliveryInfoProvider extends ContentProvider {
     
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -186,33 +186,45 @@ public class GroupChatDeliveryInfoProvider extends ContentProvider {
     }
 
     @Override
-	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
-		Cursor cursor = null;
-		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-		queryBuilder.setTables(DATABASE_TABLE);
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sort) {
+        Cursor cursor = null;
+        try {
+            SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+            queryBuilder.setTables(DATABASE_TABLE);
 
-		String uriSelectionKey = getUriSelectionKey(uri);
-		SQLiteDatabase database = openHelper.getReadableDatabase();
-		if (uriSelectionKey == null) {
-			cursor = queryBuilder.query(database, projection, selection, selectionArgs, null, null, sort);
+            String uriSelectionKey = getUriSelectionKey(uri);
+            SQLiteDatabase database = openHelper.getReadableDatabase();
+            if (uriSelectionKey == null) {
+                cursor = queryBuilder.query(database, projection, selection, selectionArgs, null,
+                        null, sort);
 
-		} else if (selectionArgs == null) {
-			String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
-			cursor = queryBuilder.query(database, projection, finalSelection, new String[] { uri.getLastPathSegment() }, null,
-					null, sort);
+            } else if (selectionArgs == null) {
+                String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
+                cursor = queryBuilder.query(database, projection, finalSelection, new String[] {
+                    uri.getLastPathSegment()
+                }, null, null, sort);
 
-		} else {
-			List<String> selectionArgsList = new ArrayList<String>(selectionArgs.length + 1);
-			selectionArgsList.add(uri.getLastPathSegment());
-			selectionArgsList.addAll(Arrays.asList(selectionArgs));
-			String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
-			cursor = queryBuilder.query(database, projection, finalSelection,
-					selectionArgsList.toArray(new String[selectionArgsList.size()]), null, null, sort);
-		}
+            } else {
+                List<String> selectionArgsList = new ArrayList<String>(selectionArgs.length + 1);
+                selectionArgsList.add(uri.getLastPathSegment());
+                selectionArgsList.addAll(Arrays.asList(selectionArgs));
+                String finalSelection = buildKeyedSelection(uriSelectionKey, selection);
+                cursor = queryBuilder.query(database, projection, finalSelection,
+                        selectionArgsList.toArray(new String[selectionArgsList.size()]), null,
+                        null, sort);
+            }
+            cursor.setNotificationUri(getContext().getContentResolver(),
+                    GroupChatDeliveryInfoData.CONTENT_URI);
+            return cursor;
 
-		cursor.setNotificationUri(getContext().getContentResolver(), GroupChatDeliveryInfoData.CONTENT_URI);
-		return cursor;
-	}
+        } catch (RuntimeException e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
+        }
+    }
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {

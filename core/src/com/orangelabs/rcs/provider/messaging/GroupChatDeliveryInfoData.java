@@ -23,7 +23,7 @@ public class GroupChatDeliveryInfoData {
     public static final Uri CONTENT_ROW_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/rowid");
 
-    public static final String KEY_ID = ChatLog.GroupChatDeliveryInfo.ID;
+    public static final String KEY_ID = "_id";
 
     public static final String KEY_DELIVERY_STATUS = ChatLog.GroupChatDeliveryInfo.DELIVERY_STATUS;
 
