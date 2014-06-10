@@ -23,6 +23,11 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
 	 */
 	protected MultimediaSessionService sessionApi;
 	
+	/**
+	 * API enable flag
+	 */
+	protected boolean apiEnabled = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,7 +47,7 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
 	protected void onResume() {
 		super.onResume();
 
-    	// Update the list of sessions
+		// Update the list of sessions
 		updateList();
 	}
 	
@@ -60,6 +65,8 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
+    	apiEnabled = true;
+    	
 		// Display the list of sessions
 		updateList();
     }
@@ -72,7 +79,9 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
+    	apiEnabled = false;
+
+    	Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
     }    
     
     /**

@@ -42,11 +42,6 @@ public class MessagingSessionList extends MultimediaSessionList {
 	 */
 	private List<MultimediaMessagingSession> sessions = new ArrayList<MultimediaMessagingSession>();
 
-    /**
-	 * API connection state
-	 */
-	private boolean apiEnabled = false;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -80,7 +75,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 		try {
 			// Reset the list
 			sessions.clear();
-
+			
 			if (apiEnabled) {
 		    	// Get list of pending sessions
 		    	Set<MultimediaMessagingSession> currentSessions = sessionApi.getMessagingSessions(MessagingSessionUtils.SERVICE_ID);

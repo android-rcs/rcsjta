@@ -256,6 +256,13 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	    	featureTagEdit.setText(serviceId);
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
 	    	contactEdit.setText(contact);
+			Button sendBtn = (Button)findViewById(R.id.send_btn);
+			if (session != null) {
+				sendBtn.setEnabled(true);
+			} else {
+				sendBtn.setEnabled(false);
+			}
+
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_api_failed));

@@ -199,7 +199,8 @@ public class MediaRtpSender {
 			processor.stopProcessing();
 		}
 
-        if (outputStream != null)
+        if (outputStream != null) {
             outputStream.close();
+        }
     }
 }

@@ -64,7 +64,7 @@ public class IPCallList extends Activity {
 	/**
 	 * Create list adapter
 	 */
-	private FtListAdapter createListAdapter() {
+	private CallListAdapter createListAdapter() {
 		Uri uri = IPCallLog.CONTENT_URI;
         String[] projection = new String[] {
     		IPCallLog.ID,
@@ -79,20 +79,20 @@ public class IPCallList extends Activity {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
 		}
-		return new FtListAdapter(this, cursor);
+		return new CallListAdapter(this, cursor);
 	}
 	
     /**
      * List adapter
      */
-    private class FtListAdapter extends CursorAdapter {
+    private class CallListAdapter extends CursorAdapter {
     	/**
     	 * Constructor
     	 * 
     	 * @param context Context
     	 * @param c Cursor
     	 */
-		public FtListAdapter(Context context, Cursor c) {
+		public CallListAdapter(Context context, Cursor c) {
             super(context, c);
         }
 
