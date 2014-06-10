@@ -37,6 +37,7 @@ import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 
+import com.gsma.services.rcs.JoynService;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
@@ -288,6 +289,10 @@ public class StartService extends Service {
         }
     }
 
+	private void broadcastServiceProvisioned() {
+		getApplicationContext().sendBroadcast(new Intent(JoynService.ACTION_SERVICE_PROVISIONED));
+	}
+
     /**
      * Check account
      *
@@ -353,7 +358,11 @@ public class StartService extends Service {
     			logger.info("Restore " + currentUserAccount);
     		}
     		BackupRestoreDb.restoreAccount(currentUserAccount);
-            
+    		// Send service provisioned intent as the configuration settings
+    		// are now loaded by means of restoring previous values that were backed
+    		// up during SIM Swap.
+    		broadcastServiceProvisioned();
+
             // Activate service if new account
             RcsSettings.getInstance().setServiceActivationState(true);
 
