@@ -122,7 +122,6 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
 						String url = cursor.getString(urlColumnIdx);
 						MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
-						String messageId = cursor.getString(13);
 						result.add(new FtHttpResumeDownload(file, thumbnail, content, contact, displayName, chatId,
 								fileTransferId, chatSessionId, isGroup));
 					} else {
