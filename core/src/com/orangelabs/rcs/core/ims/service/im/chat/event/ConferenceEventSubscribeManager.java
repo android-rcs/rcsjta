@@ -330,7 +330,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
     	// Unsubscribe before to quit
 		if ((imsModule.getCurrentNetworkInterface() != null) &&
-				imsModule.getCurrentNetworkInterface().isRegistered()) {
+				imsModule.getCurrentNetworkInterface().isRegistered() && subscribed) {
 				unSubscribe();
     	}
 		
