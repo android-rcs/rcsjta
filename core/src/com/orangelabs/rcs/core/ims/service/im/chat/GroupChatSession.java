@@ -310,7 +310,7 @@ public abstract class GroupChatSession extends ChatSession {
         // Changed by Deutsche Telekom
         final String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
         final String to = contact;
-        sendMsrpMessageDeliveryStatus(contact, from, to, msgId, status);
+        sendMsrpMessageDeliveryStatus(from, to, msgId, status);
     }
 
 	/**

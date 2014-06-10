@@ -814,7 +814,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	public void markMessageAsRead(String msgId) throws ServerApiException {
 		MessagingLog.getInstance().markMessageAsRead(msgId);
 
-		if (getConfiguration().isDisplayedDeliveryReport()) {
+		if (RcsSettings.getInstance().isImReportsActivated()) {
 			tryToDispatchAllPendingDisplayNotifications();
 		}
 	}

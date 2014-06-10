@@ -934,10 +934,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		// Send status in CPIM + IMDN headers
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
-		sendMsrpMessageDeliveryStatus(contact, from, to, msgId, status);
+		sendMsrpMessageDeliveryStatus(from, to, msgId, status);
 	}
 	
-	   // Changed by Deutsche Telekom
 		/**
 		 * Send message delivery status via MSRP
 		 * 
@@ -946,35 +945,24 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		 * @param msgId Message ID
 		 * @param status Status
 		 */
-	    public void sendMsrpMessageDeliveryStatus(String contact, String from, String to, String msgId, String status) {
-	        // Send status in CPIM + IMDN headers
-	        // Changed by Deutsche Telekom
-
-	        String imdn = ChatUtils.buildDeliveryReport(msgId, status);
-	        // Changed by Deutsche Telekom
-	        if (logger.isActivated()) {
-	            logger.debug("Send delivery status " + status + " for message " + msgId );
-	        }
-	        // Changed by Deutsche Telekom
-	        String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
-	        
-	        // Changed by Deutsche Telekom
-	        TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.OtherMessageDeliveredReportStatus; 
-	        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-	            typeMsrpChunk = TypeMsrpChunk.MessageDisplayedReport;
-	        } else
-	        if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-	            typeMsrpChunk = TypeMsrpChunk.MessageDeliveredReport;
-	        }
-	        
-	        // Send data
-	        boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
-	        if (result) {
-	            // Update rich messaging history
-	           //since the requested display report was now successfully send we mark this message as fully received.
-			MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
-	        }
+	public void sendMsrpMessageDeliveryStatus(String from, String to, String msgId, String status) {
+		// Send status in CPIM + IMDN headers
+		String imdn = ChatUtils.buildDeliveryReport(msgId, status);
+		if (logger.isActivated()) {
+			logger.debug("Send delivery status " + status + " for message " + msgId);
 		}
+		String content = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
+
+		TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.OtherMessageDeliveredReportStatus;
+		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
+			typeMsrpChunk = TypeMsrpChunk.MessageDisplayedReport;
+		} else if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+			typeMsrpChunk = TypeMsrpChunk.MessageDeliveredReport;
+		}
+
+		// Send data
+		sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
+	}
 	    
 	/**
      * Handle a message delivery status from a SIP message
