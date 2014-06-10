@@ -336,7 +336,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             			case SipSessionError.SESSION_INITIATION_DECLINED:
 	            			code = MultimediaSession.Error.INVITATION_DECLINED;
 	            			break;
-            			case SipSessionError.MEDIA_TRANSFER_FAILED:
+            			case SipSessionError.MEDIA_FAILED:
 	            			code = MultimediaSession.Error.MEDIA_FAILED;
 	            			break;
 	            		default:

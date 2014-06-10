@@ -41,11 +41,6 @@ public class StreamingSessionList extends MultimediaSessionList {
 	 * List of sessions
 	 */
 	private List<MultimediaStreamingSession> sessions = new ArrayList<MultimediaStreamingSession>();
-
-    /**
-	 * API connection state
-	 */
-	private boolean apiEnabled = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

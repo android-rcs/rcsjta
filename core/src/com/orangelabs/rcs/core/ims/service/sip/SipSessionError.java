@@ -30,9 +30,9 @@ public class SipSessionError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;
 
 	/**
-	 * Media transfer has failed (e.g. MSRP failure)
+	 * Media has failed (e.g. RTP or MSRP failure)
 	 */
-	public final static int MEDIA_TRANSFER_FAILED = SESSION_ERROR_CODES + 1;
+	public final static int MEDIA_FAILED = SESSION_ERROR_CODES + 1;
 	
 	/**
      * Constructor

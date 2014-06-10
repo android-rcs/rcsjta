@@ -303,7 +303,7 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 
         // Notify listeners
         for(int i=0; i < getListeners().size(); i++) {
-            ((SipSessionListener)getListeners().get(i)).handleSessionError(new SipSessionError(SipSessionError.MEDIA_TRANSFER_FAILED, error));
+            ((SipSessionListener)getListeners().get(i)).handleSessionError(new SipSessionError(SipSessionError.MEDIA_FAILED, error));
         }
     }
 }

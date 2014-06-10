@@ -336,7 +336,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			ArrayList<IBinder> result = new ArrayList<IBinder>();
 			for (IMultimediaMessagingSession sessionApi : messagingSessions.values()) {
 				// Filter on the service ID
-				if (sessionApi.getServiceId().equals(serviceId)) {
+				if (sessionApi.getServiceId().contains(serviceId)) {
 					result.add(sessionApi.asBinder());
 				}
 			}
@@ -429,7 +429,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			ArrayList<IBinder> result = new ArrayList<IBinder>();
 			for (IMultimediaStreamingSession sessionApi : streamingSessions.values()) {
 				// Filter on the service ID
-				if (sessionApi.getServiceId().equals(serviceId)) {
+				if (sessionApi.getServiceId().contains(serviceId)) {
 					result.add(sessionApi.asBinder());
 				}
 			}
