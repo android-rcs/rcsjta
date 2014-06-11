@@ -29,11 +29,7 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Messaging session interface
      */
-    public static class State {
-    	/**
-    	 * Inactive state
-    	 */
-    	public final static int INACTIVE = 0;
+    private IMultimediaMessagingSession sessionIntf;
 
     /**
      * Constructor

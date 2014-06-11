@@ -94,7 +94,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 * @return State
 	 */
 	public int getState() {
-		int result = MultimediaSession.State.UNKNOWN;
+		int result = MultimediaSession.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {

@@ -32,9 +32,9 @@ public abstract class MultimediaSession {
      */
     public static class State {
     	/**
-    	 * Unknown state
+    	 * Session is inactive
     	 */
-    	public final static int UNKNOWN = 0;
+    	public final static int INACTIVE = 0;
 
     	/**
     	 * Session invitation received
