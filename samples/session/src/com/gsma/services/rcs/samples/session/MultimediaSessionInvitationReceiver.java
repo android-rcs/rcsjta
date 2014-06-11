@@ -25,8 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.samples.session.utils.Utils;
-import com.gsma.services.rcs.session.MultimediaSessionIntent;
 
 /**
  * Multimedia session invitation receiver
@@ -48,10 +48,10 @@ public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact
-		String contact = invitation.getStringExtra(MultimediaSessionIntent.EXTRA_CONTACT);
+		String contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
 
 		// Get session ID
-		String sessionId = invitation.getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+		String sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 
 		// Create notification
 		Intent intent = new Intent(invitation);

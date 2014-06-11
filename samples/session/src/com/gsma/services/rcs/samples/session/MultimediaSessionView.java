@@ -36,11 +36,12 @@ import android.widget.Toast;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.samples.session.utils.Utils;
-import com.gsma.services.rcs.session.MultimediaSession;
-import com.gsma.services.rcs.session.MultimediaSessionIntent;
-import com.gsma.services.rcs.session.MultimediaSessionListener;
-import com.gsma.services.rcs.session.MultimediaSessionService;
 
 
 /**
@@ -95,7 +96,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     /**
 	 * MM session
 	 */
-	private MultimediaSession session = null;
+	private MultimediaMessagingSession session = null;
 
     /**
      * MM session listener
@@ -191,10 +192,10 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     			startSession();
 			} else {
 				// Incoming session from its Intent
-		        sessionId = getIntent().getStringExtra(MultimediaSessionIntent.EXTRA_SESSION_ID);
+		        sessionId = getIntent().getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 
 		        // Get the session
-	    		session = sessionApi.getSession(sessionId);
+	    		session = sessionApi.getMessagingSession(sessionId);
 				if (session == null) {
 					// Session not found or expired
 					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_has_expired));
@@ -268,7 +269,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		// Initiate the chat session in background
     	try {
 			// Initiate session
-			session = sessionApi.initiateSession(ServiceUtils.SERVICE_ID, contact, sessionListener);
+			session = sessionApi.initiateMessagingSession(ServiceUtils.SERVICE_ID, contact, sessionListener);
     	} catch(Exception e) {
     		e.printStackTrace();
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));		
@@ -320,7 +321,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     /**
      * Session event listener
      */
-    private class MySessionListener extends MultimediaSessionListener {
+    private class MySessionListener extends MultimediaMessagingSessionListener {
     	// Session ringing
     	public void onSessionRinging() {
     	}
