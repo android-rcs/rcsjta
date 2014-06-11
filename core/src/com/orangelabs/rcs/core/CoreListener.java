@@ -215,7 +215,6 @@ public interface CoreListener {
     public void handleFileDeliveryStatus(String fileTransferId, String status, String contact);
 
     /**
-<<<<<<< HEAD
      * New group file delivery status
      *
      * @param fileTransferId File transfer Id
@@ -225,8 +224,6 @@ public interface CoreListener {
     public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact);
 
     /**
-=======
->>>>>>> abc372ed4f077d8e5e5812b55b1ff98a871ac284
      * New SIP MSRP session invitation
      * 
 	 * @param intent Resolved intent
