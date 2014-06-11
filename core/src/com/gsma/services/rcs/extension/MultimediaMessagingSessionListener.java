@@ -15,50 +15,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
-package com.orangelabs.rcs.core.ims.service.sip;
-
-import com.orangelabs.rcs.core.ims.service.ImsServiceError;
-import com.orangelabs.rcs.core.ims.service.ImsSessionBasedServiceError;
+package com.gsma.services.rcs.extension;
 
 /**
- * SIP session error
+ * This class offers callback methods on multimedia messaging session events
  * 
- * @author jexa7410
+ * @author Jean-Marc AUFFRET
  */
-public class SipSessionError extends ImsSessionBasedServiceError {
-	static final long serialVersionUID = 1L;
-
+public abstract class MultimediaMessagingSessionListener extends IMultimediaMessagingSessionListener.Stub {
 	/**
-	 * Media has failed (e.g. RTP or MSRP failure)
+	 * Callback called when the session is pending.
 	 */
-	public final static int MEDIA_FAILED = SESSION_ERROR_CODES + 1;
+	public abstract void onSessionRinging();
 	
 	/**
-     * Constructor
-     *
-     * @param error Error
-     */
-    public SipSessionError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
-    }
-
-	/**
-	 * Constructor
-	 * 
-	 * @param code Error code
+	 * Callback called when the session is started
 	 */
-	public SipSessionError(int code) {
-		super(code);
-	}
+	public abstract void onSessionStarted();
 	
 	/**
-	 * Constructor
-	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * Callback called when the session has been aborted or terminated
 	 */
-	public SipSessionError(int code, String msg) {
-		super(code, msg);
-	}
+	public abstract void onSessionAborted();
+	
+	/**
+	 * Callback called when the session has failed
+	 * 
+	 * @param error Error
+	 * @see MultimediaSession.Error
+	 */
+	public abstract void onSessionError(int error);
+	
+	/**
+	 * Callback called when a new message has been received
+	 * 
+	 * @param content Message content
+	 */
+	public abstract void onNewMessage(byte[] content);
 }

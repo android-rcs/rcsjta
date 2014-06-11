@@ -25,7 +25,6 @@ package com.orangelabs.rcs.core;
 import android.content.Intent;
 
 import com.orangelabs.rcs.core.ims.ImsError;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -37,7 +36,8 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 
 /**
  * Observer of core events
@@ -224,22 +224,22 @@ public interface CoreListener {
     public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact);
 
     /**
-     * New SIP session invitation
+     * New SIP MSRP session invitation
      * 
 	 * @param intent Resolved intent
      * @param session SIP session
      */
-    public void handleSipSessionInvitation(Intent intent, GenericSipSession session);
-    
-	/**
-	 * New SIP instant message received
-	 * 
-     * @param intent Resolved intent
-     * @param message Instant message request
-	 */
-    public void handleSipInstantMessageReceived(Intent intent, SipRequest message);  
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session);
 
-	/**
+    /**
+     * New SIP RTP session invitation
+     * 
+	 * @param intent Resolved intent
+     * @param session SIP session
+     */
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session);
+
+    /**
      * User terms confirmation request
      *
      * @param remote Remote server

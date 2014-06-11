@@ -249,36 +249,35 @@
         
         <!-- MM session API -->
 
-        <activity android:name=".session.TestMultimediaSessionApi"/>
+        <activity android:name=".extension.TestMultimediaSessionApi"/>
 
-        <activity android:name=".session.InitiateMultimediaSession"/>
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"/>
         
-		<receiver android:name=".session.MultimediaSessionInvitationReceiver">
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"/>
+        
+        <receiver android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
-                <data android:mimeType="com.gsma.services.rcs/ext.sipdemo" />
+		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+        		<category android:name="android.intent.category.LAUNCHER" />
+        		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.streaming" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
 	    	</intent-filter>
         </receiver>
-
-        <activity android:name=".session.MultimediaSessionList"/>
-		
-        <activity android:name=".session.MultimediaSessionSettings"/>
-        
-        <activity android:name=".session.SendMultimediaMessage"/>
-        
-        <activity android:name=".session.MultimediaSessionView"/>
-        
-   		<receiver android:name=".session.MultimediaMessageReceiver">
-            <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.session.action.NEW_MESSAGE"/>
-                <data android:mimeType="com.gsma.services.rcs/ext.sipdemo" />
-        		<category android:name="android.intent.category.LAUNCHER" />
-        		<category android:name="android.intent.category.DEFAULT" />
-		    	</intent-filter>
-        </receiver>
-		
+        	
         <!-- IP call API -->
 
         <activity android:name=".ipcall.TestIPCallApi">

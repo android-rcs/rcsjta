@@ -61,7 +61,7 @@ public class VideoRtpSender extends MediaRtpSender {
 			}
 
             // Create the output stream
-            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            outputStream = new RtpOutputStream(remoteAddress, remotePort, localPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 			if (logger.isActivated()) {

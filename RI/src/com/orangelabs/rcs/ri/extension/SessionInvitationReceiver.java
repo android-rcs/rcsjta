@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.samples.session;
+package com.orangelabs.rcs.ri.extension;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -26,18 +26,22 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
+import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Multimedia session invitation receiver
+ * Messaging session invitation receiver
  *  
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
+public class SessionInvitationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
         // Display invitation notification
-		MultimediaSessionInvitationReceiver.addSessionInvitationNotification(context, intent);
+		SessionInvitationReceiver.addSessionInvitationNotification(context, intent);
     }
 
     /**
@@ -47,22 +51,35 @@ public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
      * @param invitation Intent invitation
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
-    	// Get remote contact
-		String contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
-
-		// Get session ID
-		String sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
-
+    	// Get remote contact and session
+		String contact = null;
+		String sessionId = null;
+		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
+			contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
+			sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+		} else {
+			contact = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT);
+			sessionId = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+		}
+		
 		// Create notification
+		Class myClass;
+        String notifTitle;
+		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
+			myClass = MessagingSessionView.class;
+	        notifTitle = context.getString(R.string.title_recv_messaging_session);
+		} else {
+			myClass = StreamingSessionView.class;
+			notifTitle = context.getString(R.string.title_recv_streaming_session);
+		}
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, MultimediaSessionView.class);
+		intent.setClass(context, myClass);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(sessionId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_invitation);
-		Notification notif = new Notification(R.drawable.notif_invitation_icon, notifTitle, System.currentTimeMillis());
+		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_recv_invitation, contact), contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

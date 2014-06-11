@@ -37,11 +37,11 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contacts.IContactsService;
+import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ish.IImageSharingService;
-import com.gsma.services.rcs.session.IMultimediaSessionService;
 import com.gsma.services.rcs.vsh.IVideoSharingService;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
@@ -49,7 +49,6 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreListener;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.ImsError;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -61,7 +60,8 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -745,25 +745,25 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
      */
-    public void handleSipSessionInvitation(Intent intent, GenericSipSession session) {
+    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
 		if (logger.isActivated()) {
-			logger.debug("Handle event receive SIP session invitation");
+			logger.debug("Handle event receive SIP MSRP session invitation");
 		}
 		
 		// Broadcast the invitation
-		sessionApi.receiveSipSessionInvitation(intent, session);
+		sessionApi.receiveSipMsrpSessionInvitation(intent, session);
     }    
     
     /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handleSipInstantMessageReceived(android.content.Intent, com.orangelabs.rcs.core.ims.protocol.sip.SipRequest)
+     * @see com.orangelabs.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent, com.orangelabs.rcs.core.ims.service.sip.GenericSipSession)
      */
-    public void handleSipInstantMessageReceived(Intent intent, SipRequest message) {  
-    	if (logger.isActivated()) {
-			logger.debug("Handle event receive SIP instant message");
+    public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
+		if (logger.isActivated()) {
+			logger.debug("Handle event receive SIP RTP session invitation");
 		}
 		
-		// Broadcast the message
-		sessionApi.receiveSipInstantMessage(intent, message);
+		// Broadcast the invitation
+		sessionApi.receiveSipRtpSessionInvitation(intent, session);
     }    
 
     /* (non-Javadoc)
