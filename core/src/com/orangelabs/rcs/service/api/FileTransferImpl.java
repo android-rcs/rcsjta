@@ -415,7 +415,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	        listeners.finishBroadcast();
 	        
 	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
+	        FileTransferServiceImpl.removeFileTransferSession(session.getFileTransferId());
 	    }
     }
     
@@ -431,7 +431,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			// Check if the file has been transferred or not
 	  		if (session.isFileTransfered()) {
 		        // Remove session from the list
-	  			FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
+	  			FileTransferServiceImpl.removeFileTransferSession(session.getFileTransferId());
 	  		} else {
 				// Update rich messaging history
 				MessagingLog.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.ABORTED);
@@ -450,7 +450,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 		        listeners.finishBroadcast();
 
 		        // Remove session from the list
-		        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
+		        FileTransferServiceImpl.removeFileTransferSession(session.getFileTransferId());
 	  		}
 	    }
     }
@@ -503,7 +503,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 	        listeners.finishBroadcast();
 	        
 	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getSessionID());
+	        FileTransferServiceImpl.removeFileTransferSession(session.getFileTransferId());
 	    }
     }
     
