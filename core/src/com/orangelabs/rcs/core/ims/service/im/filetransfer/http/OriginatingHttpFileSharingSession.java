@@ -284,12 +284,18 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	@Override
 	public void uploadStarted() {
         // Create upload entry in fthttp table
+		String tId = uploadManager.getTid();
 		if (getThumbnail() != null) {
-			resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail().getUrl(),false);
+			resumeFT = new FtHttpResumeUpload(this, tId, getThumbnail().getUrl(), false);
 		} else {
-			resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),null,false);
+			resumeFT = new FtHttpResumeUpload(this, tId, null, false);
 		}
-        FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
+		// Insert entry into table only if it does not exist earlier.
+		// Incases when the file is uploaded from beginning as a result of
+		// resume failure, an entry would have been already present in the
+		// table and duplicate entry should not be made.
+		if (FtHttpResumeDaoImpl.getInstance().queryUpload(tId) == null)
+			FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 	}
 
 	public HttpUploadManager getUploadManager() {

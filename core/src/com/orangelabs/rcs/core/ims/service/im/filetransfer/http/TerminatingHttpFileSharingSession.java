@@ -131,8 +131,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the Data Object to access FT HTTP table in DB
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
-		super(parent, content, resume.getContact(), FileTransferUtils.createMmContentFromUrl(resume.getThumbnail()), resume
-				.getChatSessionId(), resume.getChatId(), resume.getFileTransferId());
+		super(parent, content, resume.getContact(),
+				resume.getThumbnail() != null ? FileTransferUtils.createMmContentFromUrl(resume
+						.getThumbnail()) : null, resume.getChatSessionId(), resume.getChatId(),
+				resume.getFileTransferId());
 		setRemoteDisplayName(resume.getDisplayName());
 		this.isGroup = resume.isGroup();
 		this.resumeFT = resume;

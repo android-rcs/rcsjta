@@ -266,6 +266,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 				if (logger.isActivated()) {
 					logger.debug("Failed to download Thumbnail");
 				}
+				return null;
 			}
 			// Generate a URL from the filename and mime-type
 			String url = ContentManager.generateUrlForReceivedContent(filename, thumbnailInfo.getThumbnailType());
