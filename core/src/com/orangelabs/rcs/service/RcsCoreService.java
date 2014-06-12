@@ -381,7 +381,7 @@ public class RcsCoreService extends Service implements CoreListener {
         } else
         if (IMultimediaSessionService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
-    			logger.debug("SIP API binding");
+    			logger.debug("Multimedia session API binding");
     		}
             return sessionApi;
         } else {

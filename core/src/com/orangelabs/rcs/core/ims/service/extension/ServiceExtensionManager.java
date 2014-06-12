@@ -51,9 +51,9 @@ public class ServiceExtensionManager {
      * The logger
      */
     private static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getName());
-	
+	   
 	/**
-	 * Update supported extensions
+	 * Update supported extensions after third party application installation  
 	 * 
 	 * @param context Context
 	 */
@@ -87,14 +87,14 @@ public class ServiceExtensionManager {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
+	}    
+    
 	/**
 	 * Is extension authorized
 	 * 
 	 * @param context Context
 	 * @param appInfo Application info
-	 * @param ext Extension
+	 * @param ext Extension ID
 	 * @return Boolean
 	 */
 	public static boolean isExtensionAuthorized(Context context, ResolveInfo appInfo, String ext) {
@@ -103,30 +103,24 @@ public class ServiceExtensionManager {
 		}
 
 		try {
-			String pkgName = appInfo.activityInfo.packageName;
-			if (logger.isActivated()) {
-				logger.debug("Check extension " + ext + " from package " + pkgName);
-			}
-	
-			if (!RcsSettings.getInstance().isExtensionsControlled()) {
-				if (logger.isActivated()) {
-					logger.debug("Extension is authorized (no control)");
-				}
-				return true;
-			}
-			
 			if (!RcsSettings.getInstance().isExtensionsAllowed()) {
 				if (logger.isActivated()) {
 					logger.debug("Extensions are not allowed");
 				}
 				return false;
 			}
-			
-			String authDocumentPath = "/sdcard/iari-authorization.xml"; // TODO: get from provisioning
-			String ksPath = "/sdcard/range-root-truststore.bks"; // TODO: get from provisioning
-			String ksPasswd = "secret"; // TODO: get from provisioning
-			File authDocument = new File(authDocumentPath);
-			KeyStore ks = loadKeyStore(ksPath, ksPasswd);
+
+			if (!RcsSettings.getInstance().isExtensionsControlled()) {
+				if (logger.isActivated()) {
+					logger.debug("No control on extensions");
+				}
+				return true;
+			}
+					
+			String pkgName = appInfo.activityInfo.packageName;
+			if (logger.isActivated()) {
+				logger.debug("Check extension " + ext + " for package " + pkgName);
+			}
 
 			// Checking procedure
 			boolean authorized = false;
@@ -146,7 +140,7 @@ public class ServiceExtensionManager {
 					}
 				} else {
 					if (logger.isActivated()) {
-						logger.debug("Extension is not authorized: " + result.getStatus() + " " + result.getError().toString());
+						logger.debug("Extension " + ext + " is not authorized: " + result.getStatus() + " " + result.getError().toString());
 					}
 				}
 			} else {
@@ -166,11 +160,26 @@ public class ServiceExtensionManager {
 	
 	/* static init */
 	private static Provider bcProvider = new BouncyCastleProvider();
+	private static KeyStore ks = null;
+	private static File authDocument = null;
 	static {
 		org.apache.xml.security.Init.init();
 		Security.addProvider(bcProvider);
+		
+		String authDocumentPath = "/sdcard/iari-authorization.xml"; // TODO: get from provisioning
+		String ksPath = "/sdcard/range-root-truststore.bks"; // TODO: get from provisioning
+		String ksPasswd = "secret"; // TODO: get from provisioning
+		authDocument = new File(authDocumentPath);
+		ks = loadKeyStore(ksPath, ksPasswd);
 	}	
 
+	/**
+	 * Load the keystore
+	 * 
+	 * @param path Path
+	 * @param password Password
+	 * @return Keystore
+	 */
 	private static KeyStore loadKeyStore(String path, String password) {
 		KeyStore ks = null;
 		File certKeyFile = new File(path);

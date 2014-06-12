@@ -28,7 +28,6 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
@@ -287,11 +286,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			logger.info("Initiate a multimedia messaging session with " + contact);
 		}
 
-		// Test security extension
-		ServerApiUtils.testSecurityExtension(serviceId);
-
 		// Test IMS connection
 		ServerApiUtils.testIms();
+
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(serviceId);
 
 		try {
 			// Initiate a new session
@@ -383,11 +382,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			logger.info("Initiate a multimedia streaming session with " + contact);
 		}
 
-		// Test security extension
-		ServerApiUtils.testSecurityExtension(serviceId);
-
 		// Test IMS connection
 		ServerApiUtils.testIms();
+		
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(serviceId);
 
 		try {
 			// Initiate a new session

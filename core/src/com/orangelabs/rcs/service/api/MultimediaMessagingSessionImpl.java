@@ -145,11 +145,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	
 	/**
 	 * Accepts session invitation
+	 * 
+	 * @throws ServerApiException
 	 */
-	public void acceptInvitation() {
+	public void acceptInvitation() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Accept session invitation");
 		}
+		
+		// Test API permission
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 		
 		// Accept invitation
         Thread t = new Thread() {

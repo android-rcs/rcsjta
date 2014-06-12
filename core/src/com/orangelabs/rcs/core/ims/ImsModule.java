@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceDispatcher;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityService;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferManager;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
@@ -45,6 +46,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService;
 import com.orangelabs.rcs.core.ims.userprofile.UserProfile;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -106,6 +108,9 @@ public class ImsModule implements SipEventListener {
     	if (logger.isActivated()) {
     		logger.info("IMS module initialization");
     	}
+    	
+    	// Get capability extensions
+    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext());
    	
 		// Create the IMS connection manager
         try {
