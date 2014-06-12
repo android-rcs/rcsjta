@@ -180,6 +180,9 @@ public class VideoSharingList extends Activity {
 		} else
 		if (state == VideoSharing.State.TERMINATED) {
 			return getString(R.string.label_state_terminated);
+		} else
+		if (state == VideoSharing.State.INACTIVE) {
+			return getString(R.string.label_state_inactive);
 		} else {
 			return getString(R.string.label_state_unknown);
 		}

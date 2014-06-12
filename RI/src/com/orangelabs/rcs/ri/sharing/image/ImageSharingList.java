@@ -185,6 +185,9 @@ public class ImageSharingList extends Activity {
 		} else
 		if (state == ImageSharing.State.TRANSFERRED) {
 			return getString(R.string.label_state_transferred);
+		} else
+		if (state == ImageSharing.State.INACTIVE) {
+			return getString(R.string.label_state_inactive);
 		} else {
 			return getString(R.string.label_state_unknown);
 		}

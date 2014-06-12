@@ -41,6 +41,7 @@
 <string name="label_incoming">incoming</string>
 <string name="label_outgoing">outgoing</string>
 <string name="label_state_unknown">unknown</string>
+<string name="label_state_inactive">inactive</string>
 <string name="label_state_aborted">aborted</string>
 <string name="label_state_failed">failed</string>
 <string name="label_state_initiated">initiated</string>

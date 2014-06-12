@@ -159,6 +159,9 @@ public class IPCallList extends Activity {
 		} else
 		if (state == IPCall.State.STARTED) {
 			return getString(R.string.label_state_started);
+		} else
+		if (state == IPCall.State.INACTIVE) {
+			return getString(R.string.label_state_inactive);
 		} else {
 			return getString(R.string.label_state_unknown);
 		}
