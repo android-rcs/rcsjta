@@ -17,14 +17,27 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.extension;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.Provider;
+import java.security.Security;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 
+import com.android.org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.gsma.iariauth.validator.PackageProcessor;
+import com.gsma.iariauth.validator.ProcessingResult;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Service extension manager which adds supported extension after having
@@ -33,6 +46,12 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * @author Jean-Marc AUFFRET
  */
 public class ServiceExtensionManager {
+	
+	/**
+     * The logger
+     */
+    private static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getName());
+	
 	/**
 	 * Update supported extensions
 	 * 
@@ -69,7 +88,7 @@ public class ServiceExtensionManager {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Is extension authorized
 	 * 
@@ -79,7 +98,131 @@ public class ServiceExtensionManager {
 	 * @return Boolean
 	 */
 	public static boolean isExtensionAuthorized(Context context, ResolveInfo appInfo, String ext) {
-		// TODO: add security management
-		return true;
+		if ((appInfo == null) || (appInfo.activityInfo== null)) {
+			return false;
+		}
+
+		try {
+			String pkgName = appInfo.activityInfo.packageName;
+			if (logger.isActivated()) {
+				logger.debug("Check extension " + ext + " from package " + pkgName);
+			}
+	
+			if (!RcsSettings.getInstance().isExtensionsControlled()) {
+				if (logger.isActivated()) {
+					logger.debug("Extension is authorized (no control)");
+				}
+				return true;
+			}
+			
+			if (!RcsSettings.getInstance().isExtensionsAllowed()) {
+				if (logger.isActivated()) {
+					logger.debug("Extensions are not allowed");
+				}
+				return false;
+			}
+			
+			String authDocumentPath = "/sdcard/iari-authorization.xml"; // TODO: get from provisioning
+			String ksPath = "/sdcard/range-root-truststore.bks"; // TODO: get from provisioning
+			String ksPasswd = "secret"; // TODO: get from provisioning
+			File authDocument = new File(authDocumentPath);
+			KeyStore ks = loadKeyStore(ksPath, ksPasswd);
+
+			// Checking procedure
+			boolean authorized = false;
+			PackageInfo pkg = context.getPackageManager().getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+			Signature[] signs = pkg.signatures;
+			if (signs.length > 0) {
+				String sha1Sign = getFingerprint(signs[0].toByteArray());
+				if (logger.isActivated()) {
+					logger.debug("Check application fingerprint: " + sha1Sign);
+				}
+				PackageProcessor processor = new PackageProcessor(ks, ext, sha1Sign);
+				ProcessingResult result = processor.processIARIauthorization(authDocument);
+				if (result.getStatus() == ProcessingResult.STATUS_OK) {
+					authorized = true;
+					if (logger.isActivated()) {
+						logger.debug("Extension is authorized");
+					}
+				} else {
+					if (logger.isActivated()) {
+						logger.debug("Extension is not authorized: " + result.getStatus() + " " + result.getError().toString());
+					}
+				}
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("Extension is not authorized: no signature found");
+				}
+			}
+			return authorized;
+			
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Internal exception", e);
+			}
+			return false;
+		}
+	}
+	
+	/* static init */
+	private static Provider bcProvider = new BouncyCastleProvider();
+	static {
+		org.apache.xml.security.Init.init();
+		Security.addProvider(bcProvider);
+	}	
+
+	private static KeyStore loadKeyStore(String path, String password) {
+		KeyStore ks = null;
+		File certKeyFile = new File(path);
+		if(!certKeyFile.exists() || !certKeyFile.isFile()) {
+			return null;
+		}
+		char[] pass = password.toCharArray();
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(path);
+			try {
+				ks = KeyStore.getInstance("jks");
+				ks.load(fis, pass);
+			} catch (Exception e1) {
+				try {
+					ks = KeyStore.getInstance("bks", bcProvider);
+					ks.load(fis, pass);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		} catch(FileNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			try { if(fis != null) fis.close(); } catch(Throwable t) {}
+		}
+		
+		return ks;
+	}
+	
+    /**
+     * Returns the fingerprint of a certificate
+     * 
+     * @param cert Certificate
+     * @param algorithm hash algorithm to be used
+     * @return String as xx:yy:zz
+     */
+    public static String getFingerprint(byte[] cert) throws Exception {
+    	MessageDigest md = MessageDigest.getInstance("SHA-1");
+    	md.update(cert);
+    	byte[] digest = md.digest();
+    	
+    	String toRet = "";
+    	for (int i = 0; i < digest.length; i++) {
+    		if (i != 0)
+    			toRet += ":";
+    		int b = digest[i] & 0xff;
+    		String hex = Integer.toHexString(b);
+    		if (hex.length() == 1)
+    			toRet += "0";
+    		toRet += hex;
+    	}
+    	return toRet.toUpperCase();
 	}
 }

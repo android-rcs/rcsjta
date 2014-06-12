@@ -2788,7 +2788,7 @@ public class RcsSettings {
         }
         return result;
     }
-
+    
     /**
      * Get vendor name of the client
      *
@@ -2800,5 +2800,47 @@ public class RcsSettings {
             result = readParameter(RcsSettingsData.VENDOR_NAME);
         }
         return result;
+    }
+
+    /**
+     * Is RCS extensions controlled
+     * 
+     * @return Boolean
+     */
+    public boolean isExtensionsControlled() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CONTROL_EXTENSIONS));
+        }
+        return result;
+    }
+
+    /**
+     * Is RCS extensions allowed
+     * 
+     * @return Boolean
+     */
+    public boolean isExtensionsAllowed() {
+        boolean result = false;
+        if (instance != null) {
+            result = Boolean.parseBoolean(readParameter(RcsSettingsData.ALLOW_EXTENSIONS));
+        }
+        return result;
+    }
+	
+    /**
+     * Get max lenght for extensions using real time messaging (MSRP)
+     * 
+     * @return Max length
+     */
+    public int getMaxMsrpLengthForExtensions() {
+		int result = 2048;
+		if (instance != null) {
+			try {
+				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS));
+			} catch (Exception e) {
+			}
+		}
+		return result;
     }
 }

@@ -107,11 +107,11 @@
 		<echo>zip sdk</echo>
 		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/joyn-sdk-${sdk.version}.zip"/>		
 		<echo>cleanup</echo>
-		<delete dir="${terminal.root}/sdk-joyn2"/>
+		<delete dir="${terminal.root}/sdk-joyn"/>
 	</target>
 
 	<target name="generate-api">
-	    <ant dir="${terminal.root}/core" target="api" inheritAll="false" />        
+	    <ant dir="${terminal.root}/core" antfile="build.xml" target="api" inheritAll="false" />        
 	</target>
 	<target name="generate-ri-apk" depends="generate-api">
 	    <ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
