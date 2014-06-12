@@ -28,18 +28,21 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -256,6 +259,16 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
 	}
 
+    /**
+     * Returns the configuration of the multimedia session service
+     * 
+     * @return Configuration
+     */
+    public MultimediaSessionServiceConfiguration getConfiguration() {
+    	return new MultimediaSessionServiceConfiguration(
+    			RcsSettings.getInstance().getMaxMsrpLengthForExtensions());
+	}  
+    
 	/**
      * Initiates a new session for real time messaging with a remote contact and for a given
      * service extension. The messages are exchanged in real time during the session and may
@@ -273,6 +286,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia messaging session with " + contact);
 		}
+
+		// Test security extension
+		ServerApiUtils.testSecurityExtension(serviceId);
 
 		// Test IMS connection
 		ServerApiUtils.testIms();
@@ -366,6 +382,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia streaming session with " + contact);
 		}
+
+		// Test security extension
+		ServerApiUtils.testSecurityExtension(serviceId);
 
 		// Test IMS connection
 		ServerApiUtils.testIms();

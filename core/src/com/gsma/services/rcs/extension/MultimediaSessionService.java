@@ -106,6 +106,24 @@ public class MultimediaSessionService extends JoynService {
         }
     };
     
+	/**
+     * Returns the configuration of the multimedia session service
+     * 
+     * @return Configuration
+     * @throws JoynServiceException
+     */
+    public MultimediaSessionServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}     
+    
     /**
      * Initiates a new session for real time messaging with a remote contact and for a given
      * service extension. The messages are exchanged in real time during the session may be from

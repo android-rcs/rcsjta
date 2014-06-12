@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.ipcall;
 
 /**
- * IP call configuration object
+ * IP call service configuration object
  */
 parcelable IPCallServiceConfiguration;

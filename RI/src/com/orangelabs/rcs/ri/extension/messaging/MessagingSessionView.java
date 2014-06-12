@@ -196,6 +196,8 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	    	    	return;
 	            } 
 	            
+System.out.println(">>>>>>>>>>>>>>>>>> " + sessionApi.getConfiguration().getMessageMaxLength());	            
+	            
 		    	// Get remote contact
 				contact = getIntent().getStringExtra(MessagingSessionView.EXTRA_CONTACT);
 		        

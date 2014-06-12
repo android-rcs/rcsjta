@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.vsh;
 
 /**
- * Video sharing configuration object
+ * Video sharing service configuration object
  */
 parcelable VideoSharingServiceConfiguration;

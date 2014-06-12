@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.ft;
 
 /**
- * File transfer configuration object
+ * File transfer service configuration object
  */
 parcelable FileTransferServiceConfiguration;

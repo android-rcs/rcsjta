@@ -18,7 +18,14 @@
 
 package com.orangelabs.rcs.service.api;
 
+import java.util.List;
+
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.orangelabs.rcs.platform.AndroidFactory;
 
 /**
  * Server API utils
@@ -58,4 +65,28 @@ public class ServerApiUtils {
 				(Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) &&
 				(Core.getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
 	}
+	
+	/**
+	 * Test security extension
+	 * 
+	 * @param extension Extension ID
+	 * @throws ServerApiException
+	 */
+	public static void testSecurityExtension(String extension) throws ServerApiException {
+/*	TODO	PackageManager packageManager = AndroidFactory.getApplicationContext().getPackageManager();
+		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+		
+		boolean authorized = false;
+		for(int i=0; i < list.size(); i++) {
+			ResolveInfo info = list.get(i);
+			if (ServiceExtensionManager.isExtensionAuthorized(AndroidFactory.getApplicationContext(), info, extension)) {
+				authorized = true;
+				break;
+			}
+		}
+		
+		if (!authorized) {
+			throw new ServerApiException("Extension not authorized"); 
+		}*/
+	}	
 }

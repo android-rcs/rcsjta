@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.chat;
 
 /**
- * Chat configuration object
+ * Chat service configuration object
  */
 parcelable ChatServiceConfiguration;

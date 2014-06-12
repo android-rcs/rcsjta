@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.ish;
 
 /**
- * Image sharing configuration object
+ * Image sharing service configuration object
  */
 parcelable ImageSharingServiceConfiguration;
