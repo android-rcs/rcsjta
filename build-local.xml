@@ -25,8 +25,6 @@
 
     <target name="docs" description="Generate RCS API javadoc">
     <echo>Generate Javadoc</echo>
-    <delete dir="${terminal.root}/docs"/>
-    <mkdir dir="${terminal.root}/docs"/>
     <delete dir="${terminal.root}/docs/javadoc"/>
     <mkdir dir="${terminal.root}/docs/javadoc"/>
     <javadoc doctitle="GSMA RCS Terminal API"
@@ -109,7 +107,7 @@
 		<echo>zip sdk</echo>
 		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/joyn-sdk-${sdk.version}.zip"/>		
 		<echo>cleanup</echo>
-		<delete dir="${terminal.root}/sdk-joyn2"/>
+		<delete dir="${terminal.root}/sdk-joyn"/>
 	</target>
 
 	<target name="generate-api">

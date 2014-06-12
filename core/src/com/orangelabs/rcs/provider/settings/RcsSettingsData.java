@@ -872,7 +872,12 @@ public class RcsSettingsData {
      */
     public static final String TCP_FALLBACK = "TcpFallback";
     
-	/**
+    /**
+     * Vendor name of the Client.
+     */
+    public static final String VENDOR_NAME = "VendorName";
+
+    /**
      * Control RCS extensions
      */
 	public static final String CONTROL_EXTENSIONS = "ControlRcsExtensions";

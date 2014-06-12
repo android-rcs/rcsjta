@@ -2790,6 +2790,19 @@ public class RcsSettings {
     }
     
     /**
+     * Get vendor name of the client
+     *
+     * @return Vendor
+     */
+    public String getVendor() {
+        String result = "OrangeLabs";
+        if (instance != null) {
+            result = readParameter(RcsSettingsData.VENDOR_NAME);
+        }
+        return result;
+    }
+
+    /**
      * Is RCS extensions controlled
      * 
      * @return Boolean
