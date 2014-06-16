@@ -263,19 +263,18 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferUrl(java.lang.String, java.lang.String)
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferred(java.lang.String, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void updateFileTransferUrl(String fileTransferId, String url) {
+	public void updateFileTransferred(String fileTransferId, MmContent content) {
 		if (logger.isActivated()) {
-			logger.debug("updateFileTransferUrl (fileTransferId=" + fileTransferId + ") (url=" + url + ")");
+			logger.debug("updateFileTransferUrl (fileTransferId=" + fileTransferId + ") (url=" + content.getUrl() + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_NAME, url);
+		values.put(FileTransferData.KEY_NAME, content.getUrl());
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERRED);
+		values.put(FileTransferData.KEY_SIZE,content.getSize());
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
 

@@ -26,6 +26,7 @@ import android.os.RemoteCallbackList;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -536,22 +537,22 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     /**
      * File has been transfered
      * 
-     * @param filename Filename associated to the received content
+     * @param content MmContent associated to the received file
      */
-    public void handleFileTransfered(String filename) {
+    public void handleFileTransfered(MmContent content) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("Content transferred");
 			}
 	
 			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferUrl(session.getFileTransferId(), filename);
+			MessagingLog.getInstance().updateFileTransferred(session.getFileTransferId(), content);
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onFileTransferred(filename);
+	            	listeners.getBroadcastItem(i).onFileTransferred(content.getUrl());
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
