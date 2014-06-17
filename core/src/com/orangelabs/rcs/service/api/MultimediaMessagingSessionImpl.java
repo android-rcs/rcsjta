@@ -167,11 +167,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
 	/**
 	 * Rejects session invitation
+	 * 
+	 * @throws ServerApiException
 	 */
-	public void rejectInvitation() {
+	public void rejectInvitation() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
+
+		// Test API permission
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Reject invitation
         Thread t = new Thread() {
@@ -184,11 +189,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
 	/**
 	 * Aborts the session
+	 * 
+	 * @throws ServerApiException
 	 */
-	public void abortSession() {
+	public void abortSession() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Cancel session");
 		}
+
+		// Test API permission
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Abort the session
         Thread t = new Thread() {
@@ -234,9 +244,13 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * 
      * @param content Message content
 	 * @return Returns true if sent successfully else returns false
+	 * @throws ServerApiException
      */
-    public boolean sendMessage(byte[] content) {
-    	return session.sendMessage(content);
+    public boolean sendMessage(byte[] content) throws ServerApiException {
+		// Test API permission
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+
+		return session.sendMessage(content);
     }	
 	
     /*------------------------------- SESSION EVENTS ----------------------------------*/

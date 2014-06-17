@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.network.registration;
 
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 

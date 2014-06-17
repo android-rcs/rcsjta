@@ -66,8 +66,7 @@ public class RegistrationUtils {
 		}
 		
 		// Extension
-		if (RcsSettings.getInstance().isExtensionsAllowed() &&
-				!TextUtils.isEmpty(RcsSettings.getInstance().getSupportedRcsExtensions())) {
+		if (RcsSettings.getInstance().isExtensionsAllowed()) {
 			icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
 		}
 		

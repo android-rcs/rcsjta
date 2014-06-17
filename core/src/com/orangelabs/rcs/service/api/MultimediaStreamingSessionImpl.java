@@ -145,12 +145,17 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	
 	/**
 	 * Accepts session invitation
+	 * 
+	 * @throws ServerApiException
 	 */
-	public void acceptInvitation() {
+	public void acceptInvitation() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Accept session invitation");
 		}
 		
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+
 		// Accept invitation
         Thread t = new Thread() {
     		public void run() {
@@ -162,11 +167,16 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
 	/**
 	 * Rejects session invitation
+	 * 
+	 * @throws ServerApiException 
 	 */
-	public void rejectInvitation() {
+	public void rejectInvitation() throws ServerApiException  {
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
+
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Reject invitation
         Thread t = new Thread() {
@@ -179,11 +189,16 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
 	/**
 	 * Aborts the session
+	 * 
+	 * @throws ServerApiException
 	 */
-	public void abortSession() {
+	public void abortSession() throws ServerApiException  {
 		if (logger.isActivated()) {
 			logger.info("Cancel session");
 		}
+
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Abort the session
         Thread t = new Thread() {
@@ -229,9 +244,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * 
      * @param content Payload content
 	 * @return Returns true if sent successfully else returns false
+	 * @throws ServerApiException 
      */
-    public boolean sendPayload(byte[] content) {
-    	if (session != null) {
+    public boolean sendPayload(byte[] content) throws ServerApiException  {
+		// Test security extension
+		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+
+		if (session != null) {
     		return session.sendPlayload(content);
     	} else {
     		return false;	
