@@ -120,10 +120,10 @@ public interface IFileTransferLog {
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param url
-	 *            File URL
+	 * @param content
+	 *            the MmContent of received file
 	 */
-	public void updateFileTransferUrl(String fileTransferId, String url);
+	public void updateFileTransferred(String fileTransferId, MmContent content);
 
 	/**
 	 * Tells if the MessageID corresponds to that of a file transfer

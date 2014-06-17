@@ -207,7 +207,7 @@ public class FtHttpResumeManager {
 			}
 
 			@Override
-			public void handleFileTransfered(String filename) {
+			public void handleFileTransfered(MmContent content) {
 				if (fired.compareAndSet(false, true)) {
 					processNext();
 				}

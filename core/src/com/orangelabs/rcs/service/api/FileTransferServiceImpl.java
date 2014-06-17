@@ -120,14 +120,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	/**
 	 * Remove a file transfer session from the list
 	 * 
-	 * @param sessionId Session ID
+	 * @param fileTransferId File transfer ID
 	 */
-	protected static void removeFileTransferSession(String sessionId) {
+	protected static void removeFileTransferSession(String fileTransferId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a file transfer session from the list (size=" + ftSessions.size() + ")");
 		}
 		
-		ftSessions.remove(sessionId);
+		ftSessions.remove(fileTransferId);
 	}
 	
     /**
@@ -228,7 +228,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
     	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+    	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
     	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
     	intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
     	intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
@@ -246,7 +246,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onNewFileTransfer(session.getSessionID());
+	            	listeners.getBroadcastItem(i).onNewFileTransfer(session.getFileTransferId());
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -600,7 +600,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
 		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
 		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
 		if (isGroup) {
 			intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, session.getContributionID());
 		}
@@ -641,7 +641,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
         intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
         intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-        intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getSessionID());
+        intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
         if (isGroup) {
             intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, chatId);
         }

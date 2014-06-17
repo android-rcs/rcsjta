@@ -226,11 +226,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         getImsService().removeSession(this);
         this.sessionState = HttpTransferState.TERMINATED;
 
-        // Notify listeners
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j))
-                    .handleFileTransfered(getContent().getUrl());
-        }
+		// Notify listeners
+		for (int j = 0; j < getListeners().size(); j++) {
+			((FileSharingSessionListener) getListeners().get(j)).handleFileTransfered(getContent());
+		}
     }
     
     /**

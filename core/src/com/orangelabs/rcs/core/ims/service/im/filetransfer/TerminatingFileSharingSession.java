@@ -372,7 +372,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 
 	    	// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent().getUrl());
+	    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent());
 	        }
 	   	} catch(IOException e) {
 	   		// Delete the temp file

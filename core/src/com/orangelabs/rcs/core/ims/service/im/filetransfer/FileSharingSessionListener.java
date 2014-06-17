@@ -17,6 +17,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 
 
@@ -47,9 +48,9 @@ public interface FileSharingSessionListener extends ImsSessionListener  {
      * but in case of file transfer over HTTP, only the content server has received the
      * file.
      *
-     * @param filename Filename associated to the received file
+     * @param content MmContent associated to the received file
      */
-    public void handleFileTransfered(String filename);
+    public void handleFileTransfered(MmContent content);
     
     /**
      * File transfer has been paused

@@ -158,6 +158,7 @@ public class FileTransferUtils {
 		iconName.append(msgId);
 		String extension = MimeManager.getInstance().getExtensionFromMimeType(mimeType);
 		if (extension != null) {
+			iconName.append(".");
 			iconName.append(extension);
 			return iconName.toString();
 		}
