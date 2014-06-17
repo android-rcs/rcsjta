@@ -55,6 +55,11 @@ public class FeatureTags {
 	public final static String FEATURE_RCSE = "+g.3gpp.iari-ref";
 	
 	/**
+	 * 3GPP feature tag prefix
+	 */
+	public final static String FEATURE_3GPP = "+g.3gpp.icsi-ref";
+	
+	/**
 	 * RCS-e image share feature tag
 	 */
 	public final static String FEATURE_RCSE_IMAGE_SHARE = "urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-is";
@@ -107,7 +112,7 @@ public class FeatureTags {
 	/**
 	 * 3GPP IP call feature tag
 	 */
-	public final static String FEATURE_3GPP_IP_VOICE_CALL = "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"";
+	public final static String FEATURE_3GPP_IP_VOICE_CALL = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel";
 	
 	/**
 	 * RCS-e IP call feature tag
@@ -124,6 +129,11 @@ public class FeatureTags {
 	 */
 	public final static String FEATURE_RCSE_EXTENSION = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs";
 	
+	/**
+	 * 3GPP RCS extension feature tag
+	 */
+	public final static String FEATURE_3GPP_EXTENSION = "urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.rcs.extension";
+
 	/**
 	 * SIP Automata feature tag
 	 * 

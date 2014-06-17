@@ -56,6 +56,8 @@ public class CapabilityUtils {
 	 */
  	public static String[] getSupportedFeatureTags(boolean richcall, boolean ipcall) {
 		List<String> tags = new ArrayList<String>();
+		List<String> icsiTags = new ArrayList<String>();
+		List<String> iariTags = new ArrayList<String>();
 
 		// Video share support
 		if (RcsSettings.getInstance().isVideoSharingSupported() && richcall
@@ -63,67 +65,68 @@ public class CapabilityUtils {
 			tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
 		}
 
-		// Changed by Deutsche Telekom
-		List<String> supportedTagList = new ArrayList<String>();
-
 		// Chat support
 		if (RcsSettings.getInstance().isImSessionSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_CHAT);
+			iariTags.add(FeatureTags.FEATURE_RCSE_CHAT);
 		}
 
 		// FT support
 		if (RcsSettings.getInstance().isFileTransferSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT);
+			iariTags.add(FeatureTags.FEATURE_RCSE_FT);
 		}
 
 		// FT over HTTP support
 		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
+			iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
 		}
 
 		// Image share support
 		if (RcsSettings.getInstance().isImageSharingSupported() && (richcall || ipcall)) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
+			iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
 		}
 
 		// Presence discovery support
 		if (RcsSettings.getInstance().isPresenceDiscoverySupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
+			iariTags.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
 		}
 
 		// Social presence support
 		if (RcsSettings.getInstance().isSocialPresenceSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
+			iariTags.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
 		}
 
 		// Geolocation push support
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
+			iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
 		}
 
 		// FT thumbnail support
 		if (RcsSettings.getInstance().isFileTransferThumbnailSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
+			iariTags.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
 		}
 
 		// FT S&F support
 		if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_FT_SF);
+			iariTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
 		}
 
 		// Group chat S&F support
 		if (RcsSettings.getInstance().isGroupChatStoreForwardSupported()) {
-			supportedTagList.add(FeatureTags.FEATURE_RCSE_GC_SF);
+			iariTags.add(FeatureTags.FEATURE_RCSE_GC_SF);
 		}
 
 		// IP call support
 		if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
 			tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
-			tags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
 		}
 		if (RcsSettings.getInstance().isIPVideoCallSupported()) {
 			tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
 		}
+		if (RcsSettings.getInstance().isIPVoiceCallSupported() || RcsSettings.getInstance().isIPVideoCallSupported()) {
+			icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
+		}		
+		
+		// Automata flag
 		if (RcsSettings.getInstance().isSipAutomata()) {
 			tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
 		}
@@ -131,14 +134,22 @@ public class CapabilityUtils {
 		// RCS extensions support
 		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
 		if (!TextUtils.isEmpty(exts)) {
-			supportedTagList.add(exts);
+			String[] ext = exts.split(",");
+			for(int i=0; i < ext.length; i++) {
+				iariTags.add(FeatureTags.FEATURE_RCSE_EXTENSION + "." + ext[i]);
+			}
 		}
 
-		// Add RCS-e prefix
-		if (!supportedTagList.isEmpty()) {
-			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", supportedTagList) + "\"");
+		// Add IARI prefix
+		if (!iariTags.isEmpty()) {
+            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");
 		}
-
+		
+		// Add ICSI prefix
+		if (!icsiTags.isEmpty()) {
+            tags.add(FeatureTags.FEATURE_3GPP + "=\"" + TextUtils.join(",", icsiTags) + "\"");
+		}
+		
  		return tags.toArray(new String[tags.size()]);
 	}
 
@@ -153,8 +164,8 @@ public class CapabilityUtils {
     	// Analyze feature tags
     	Capabilities capabilities = new Capabilities(); 
     	ArrayList<String> tags = msg.getFeatureTags();
-		boolean iPCall_RCSE = false;
-		boolean iPCall_3GPP = false;
+		boolean ipCall_RCSE = false;
+		boolean ipCall_3GPP = false;
 		
     	for(int i=0; i < tags.size(); i++) {
     		String tag = tags.get(i);
@@ -201,18 +212,18 @@ public class CapabilityUtils {
     		} else
         	if (tag.contains(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)) {
         		// Support IP Call
-        		if (iPCall_3GPP) {
+        		if (ipCall_3GPP) {
         			capabilities.setIPVoiceCallSupport(true);		 	
         		} else {
-        			iPCall_RCSE = true;	
+        			ipCall_RCSE = true;	
         		}
         	} else
         	if (tag.contains(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
         		// Support IP Call
-        		if (iPCall_RCSE) {
+        		if (ipCall_RCSE) {
         			capabilities.setIPVoiceCallSupport(true);		       	    	
         		} else {
-        			iPCall_3GPP = true;	
+        			ipCall_3GPP = true;	
         		}
         	} else
         	if (tag.contains(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL)) {
@@ -226,11 +237,13 @@ public class CapabilityUtils {
         		// Support FT S&F service
         		capabilities.setGroupChatStoreForwardSupport(true);
         	} else
-    		if (tag.startsWith(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION)) {
-    			// Support a RCS extension
-    			String[] value = tag.split("=");
-				capabilities.addSupportedExtension(StringUtils.removeQuotes(value[1]));
-			} else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
+// TODO    		if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".ext") ||
+// TODO   				tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".mnc")) {
+    		if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {    			
+    			// Support an RCS extension
+				capabilities.addSupportedExtension(extractServiceId(tag));
+			} else
+			if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
 				capabilities.setSipAutomata(true);
 			}
     	}
@@ -355,7 +368,7 @@ public class CapabilityUtils {
     }
     
 	/**
-	 * Extract service ID from fetaure tag extension
+	 * Extract service ID from feature tag extension
 	 * 
 	 * @param featureTag Feature tag
 	 * @return Service ID

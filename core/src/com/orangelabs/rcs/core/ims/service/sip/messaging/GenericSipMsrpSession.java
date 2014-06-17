@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Vector;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -39,6 +40,7 @@ import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -50,6 +52,11 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public abstract class GenericSipMsrpSession extends ImsServiceSession implements MsrpEventListener {
 	/**
+	 * MIME type
+	 */
+	public final static String MIME_TYPE = "text/plain"; 
+	
+	/**
 	 * Feature tag
 	 */
 	private String featureTag;	
@@ -58,6 +65,11 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 	 * MSRP manager
 	 */
 	private MsrpManager msrpMgr = null;
+	
+	/**
+	 * Max message size
+	 */
+	private int maxMsgSize = RcsSettings.getInstance().getMaxMsrpLengthForExtensions();
 
 	/**
      * The logger
@@ -102,6 +114,15 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 	}	
 
 	/**
+	 * Returns the max message size
+	 * 
+	 * @return Max message size
+	 */
+	public int getMaxMessageSize() {
+		return this.maxMsgSize;
+	}
+	
+	/**
 	 * Returns the MSRP manager
 	 * 
 	 * @return MSRP manager
@@ -124,6 +145,35 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
     }
 
     /**
+     * Generate SDP
+     * 
+     * @param setup Setup mode
+     */
+    public String generateSdp(String setup) {
+        int msrpPort;
+        if ("active".equals(setup)) {
+        	msrpPort = 9; // See RFC4145, Page 4
+        } else {
+        	msrpPort = getMsrpMgr().getLocalMsrpPort();
+        }
+    	
+    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+    	
+    	return "v=0" + SipUtils.CRLF +
+            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+            "s=-" + SipUtils.CRLF +
+			"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
+            "t=0 0" + SipUtils.CRLF +			
+            "m=message " + msrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
+            "a=setup:" + setup + SipUtils.CRLF +
+            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
+            "a=max-size:" + getMaxMessageSize() + SipUtils.CRLF +
+            "a=accept-types:" + GenericSipMsrpSession.MIME_TYPE + SipUtils.CRLF +
+    		"a=sendrecv" + SipUtils.CRLF;
+    }    
+    
+    /**
      * Prepare media session
      * 
      * @throws Exception 
@@ -140,7 +190,7 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 
         // Create the MSRP session
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, this, null);
-        session.setFailureReportOption(false);
+        session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
     }
 

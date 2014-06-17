@@ -34,12 +34,14 @@ public class IPCallService extends ImsService {
     /**
      * IP voice call features tags 
      */
-    public final static String[] FEATURE_TAGS_IP_VOICE_CALL = { FeatureTags.FEATURE_3GPP_IP_VOICE_CALL, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL};
-
+    public final static String[] FEATURE_TAGS_IP_VOICE_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
+    		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL};
+    
     /**
      * IP video call features tags 
      */
-    public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = { FeatureTags.FEATURE_3GPP_IP_VOICE_CALL, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL , FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL};
+    public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
+    		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL , FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL};
     
 	/**
 	 * Max sessions

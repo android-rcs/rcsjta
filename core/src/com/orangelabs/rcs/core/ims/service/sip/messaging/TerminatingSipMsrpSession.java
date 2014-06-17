@@ -139,27 +139,8 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 				logger.debug("Local setup attribute is " + localSetup);
 			}
 
-    		// Set local port
-	    	int localMsrpPort;
-	    	if (localSetup.equals("active")) {
-		    	localMsrpPort = 9; // See RFC4145, Page 4
-	    	} else {
-	    		localMsrpPort = getMsrpMgr().getLocalMsrpPort();
-	    	}            
-	    	
-			// Build SDP part
-	    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	String sdp =
-	    		"v=0" + SipUtils.CRLF +
-	            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "s=-" + SipUtils.CRLF +
-				"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +			
-	            "m=message " + localMsrpPort + " " + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF +
-	            "a=setup:" + localSetup + SipUtils.CRLF +
-	            "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF +
-	    		"a=sendrecv" + SipUtils.CRLF;
+			// Build SDP answer
+	    	String sdp = generateSdp(localSetup);
 
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
