@@ -825,10 +825,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			return;
 		}
 		
-		// Update rich messaging history
-		// TODO FUSION imdn + display name ?
-		FileTransferMessage msg = new FileTransferMessage(msgId, contact, fileTransferInfo.getFilename(), false, null);
-
 		// Create a new session
 		FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId, contact);
 
