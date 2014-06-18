@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.network.sip;
 
-import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
-
 import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Vector;
@@ -158,6 +156,11 @@ public class SipUtils {
 	 * Temp GRUU parameter
 	 */
 	public static final String TEMP_GRUU_PARAM = "temp-gruu";
+
+	/**
+	 * Explicit require tag
+	 */
+	public static final String EXPLICIT_REQUIRE = "explicit;require";
 
 	/**
 	 * Extract the URI part of a SIP address
@@ -481,49 +484,6 @@ public class SipUtils {
                 contact.setParameter(tags[i], null);
             }
         }
-    }
-    
-    /**
-     * Set the P-Preferred-Service header 
-     * 
-     * @param message SIP stack message
-     * @param value header's value
-     * @throws Exception
-     */
-    public static void setPPreferredService(SipMessage message, String value) throws Exception {
-    	ExtensionHeader header =  (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(PPreferredServiceHeader.NAME, value);
-		message.getStackMessage().addHeader(header);
-    }
-    
-    /**
-     * Get the P-Preferred-Service header 
-     * 
-     * @param message SIP stack message
-     * @return header's value or null if not exist
-     */
-    public static String getPPreferredService(SipMessage message)  {   	
-    	String pPreferredService = null;
-    	ExtensionHeader header =  (ExtensionHeader) message.getHeader(PPreferredServiceHeader.NAME);
-		if (header != null) {
-			pPreferredService = header.getValue();
-		}
-		return pPreferredService;
-    }
-    
-    /**
-     * Is P-Preferred-Service header set with right value or not in SIP message
-     * 
-     * @param message SIP message
-     * @param value  P-Preferred-Service header's value to be checked
-     * @return Boolean
-     */
-    public static boolean isPPReferredServicePresent(SipMessage message, String value){
-    	boolean result = false;
-    	if (getPPreferredService(message) != null) {
-    		result = getPPreferredService(message).equals(value);		
-    	}
-    	
-    	return result;
     }
 
     /**

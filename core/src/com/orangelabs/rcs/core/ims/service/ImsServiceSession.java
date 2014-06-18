@@ -137,7 +137,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
+	 * @param imsService IMS service
 	 * @param contact Remote contact
 	 */
 	public ImsServiceSession(ImsService imsService, String contact) {

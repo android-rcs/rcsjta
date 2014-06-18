@@ -21,7 +21,6 @@ package com.orangelabs.rcs.core.ims.service.sip.messaging;
 import java.io.IOException;
 import java.util.Vector;
 
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -188,8 +187,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
 			}
-			SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-	        		new String [] { getFeatureTag() }, sdp);
+			SipResponse resp = create200OKResponse();
 
             // The signalisation is established
             getDialogPath().sigEstablished();

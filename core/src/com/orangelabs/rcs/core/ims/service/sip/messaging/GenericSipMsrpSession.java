@@ -21,7 +21,6 @@ package com.orangelabs.rcs.core.ims.service.sip.messaging;
 import java.io.ByteArrayInputStream;
 import java.util.Vector;
 
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -31,12 +30,8 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.core.ims.service.ImsServiceError;
-import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
+import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
@@ -50,16 +45,11 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public abstract class GenericSipMsrpSession extends ImsServiceSession implements MsrpEventListener {
+public abstract class GenericSipMsrpSession extends GenericSipSession implements MsrpEventListener {
 	/**
 	 * MIME type
 	 */
 	public final static String MIME_TYPE = "text/plain"; 
-	
-	/**
-	 * Feature tag
-	 */
-	private String featureTag;	
 	
 	/**
 	 * MSRP manager
@@ -84,34 +74,13 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 	 * @param featureTag Feature tag
 	 */
 	public GenericSipMsrpSession(ImsService parent, String contact, String featureTag) {
-		super(parent, contact);
-
-		// Set the service feature tag
-		this.featureTag = featureTag;
+		super(parent, contact, featureTag);
 
         // Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
 		String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 		msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
 	}
-	
-	/**
-	 * Returns feature tag of the service
-	 * 
-	 * @return Feature tag
-	 */
-	public String getFeatureTag() {
-		return featureTag;
-	}
-	
-	/**
-	 * Returns the service ID
-	 * 
-	 * @return Service ID
-	 */
-	public String getServiceId() {
-		return CapabilityUtils.extractServiceId(featureTag);
-	}	
 
 	/**
 	 * Returns the max message size
@@ -130,19 +99,6 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 	public MsrpManager getMsrpMgr() {
 		return msrpMgr;
 	}
-	
-    /**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException 
-     */
-    public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(
-                getDialogPath(),
-                new String [] { getFeatureTag() },
-                getDialogPath().getLocalContent());
-    }
 
     /**
      * Generate SDP
@@ -214,35 +170,6 @@ public abstract class GenericSipMsrpSession extends ImsServiceSession implements
 				logger.debug("MSRP session has been closed");
 			}
     	}
-    }
-
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-        	return;
-        }
-        
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
-        }
-
-        // Close media session
-        closeMediaSession();
-
-        // Remove the current session
-        getImsService().removeSession(this);
-
-        // Notify listeners
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j))
-                    .handleSessionError(new SipSessionError(error));
-        }
     }
     
     /**
