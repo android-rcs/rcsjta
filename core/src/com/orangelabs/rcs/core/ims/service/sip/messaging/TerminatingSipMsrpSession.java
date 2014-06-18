@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.sip.messaging;
@@ -33,7 +37,9 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -75,44 +81,61 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 			// Send a 180 Ringing response
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
         
-			// Wait invitation answer
-	    	int answer = waitInvitationAnswer();
-			if (answer == ImsServiceSession.INVITATION_REJECTED) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected by user");
-				}
-				
-		    	// Remove the current session
-		    	getImsService().removeSession(this);
+            int answer = waitInvitationAnswer();
+            Vector<ImsSessionListener> listeners;
+            switch (answer) {
+                case ImsServiceSession.INVITATION_REJECTED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected by user");
+                    }
 
-		    	// Notify listeners
-		    	for(int i=0; i < getListeners().size(); i++) {
-		    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
-		        }
-				return;
-			} else
-			if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected on timeout");
-				}
+                    getImsService().removeSession(this);
 
-				// Ringing period timeout
-				send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
-				
-		    	// Remove the current session
-		    	getImsService().removeSession(this);
+                    listeners = getListeners();
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByUser();
+                    }
+                    return;
 
-		    	// Notify listeners
-    	    	for(int j=0; j < getListeners().size(); j++) {
-    	    		getListeners().get(j).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
-		        }
-				return;
-			} else
-            if (answer == ImsServiceSession.INVITATION_CANCELED) {
-                if (logger.isActivated()) {
-                    logger.debug("Session has been canceled");
-                }
-                return;
+                case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected on timeout");
+                    }
+
+                    // Ringing period timeout
+                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+                    getImsService().removeSession(this);
+
+                    listeners = getListeners();
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByTimeout();
+                    }
+                    return;
+
+                case ImsServiceSession.INVITATION_CANCELED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected by remote");
+                    }
+
+                    getImsService().removeSession(this);
+
+                    listeners = getListeners();
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByRemote();
+                    }
+                    return;
+
+                case ImsServiceSession.INVITATION_ACCEPTED:
+                    /*Note: Nothing to log here for sip msrp sessions.*/
+                    break;
+
+                default:
+                    if (logger.isActivated()) {
+                        logger.debug("Unknown invitation answer in TerminatingSipMsrpSession.run; answer="
+                                .concat(String.valueOf(answer)));
+                    }
+                    return;
             }
 			
         	// Parse the remote SDP part

@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -42,6 +45,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
@@ -52,6 +56,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -88,7 +93,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);
+
 	}
+
 	
 	/**
 	 * Background processing
@@ -104,52 +111,78 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}
+				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
+						Direction.INCOMING, getContent(), getFileicon(),
+						FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+
 			} else {
 				if (logger.isActivated()) {
 					logger.debug("Accept manually file transfer invitation");
 				}
+				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
+						Direction.INCOMING, getContent(), getFileicon(),
+						FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
 
 				// Send a 180 Ringing response
 				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-				// Wait invitation answer
 				int answer = waitInvitationAnswer();
-				if (answer == ImsServiceSession.INVITATION_REJECTED) {
-					if (logger.isActivated()) {
-						logger.debug("Session has been rejected by user");
-					}
+				Vector<ImsSessionListener> listeners = getListeners();
+				switch (answer) {
+					case ImsServiceSession.INVITATION_REJECTED:
 
-					// Remove the current session
-					getImsService().removeSession(this);
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected by user");
+						}
 
-					// Notify listeners
-					for (int i = 0; i < getListeners().size(); i++) {
-						getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
-					}
-					return;
-				} else if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
-					if (logger.isActivated()) {
-						logger.debug("Session has been rejected on timeout");
-					}
-					// Ringing period timeout
-					send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+						getImsService().removeSession(this);
 
-					// Remove the current session
-					getImsService().removeSession(this);
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByUser();
+						}
+						return;
 
-					// Notify listeners
-					for (int j = 0; j < getListeners().size(); j++) {
-						getListeners().get(j).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
-					}
-					return;
-				} else if (answer == ImsServiceSession.INVITATION_CANCELED) {
-					if (logger.isActivated()) {
-						logger.debug("Session has been canceled");
-					}
-					return;
+					case ImsServiceSession.INVITATION_NOT_ANSWERED:
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected on timeout");
+						}
+						// Ringing period timeout
+						send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByTimeout();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_CANCELED:
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected by remote");
+						}
+
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByRemote();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_ACCEPTED:
+						for (ImsSessionListener listener : listeners) {
+							((FileSharingSessionListener)listener).handleSessionAccepting();
+						}
+						break;
+
+					default:
+						if (logger.isActivated()) {
+							logger.debug("Unknown invitation answer in TerminatingMsrpFileSharingSession.run; answer="
+									.concat(String.valueOf(answer)));
+						}
+						return;
 				}
 			}
-            
+
             // FT should be rejected by user if file is too big or size exceeds device storage capacity.
             // This control should be done at UI level. However if user accepts invitation, the stack replies 403 Forbidden.
             FileSharingError error = FileSharingSession.isFileCapacityAcceptable(getContent().getSize());

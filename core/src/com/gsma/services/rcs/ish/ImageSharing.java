@@ -38,9 +38,9 @@ public class ImageSharing {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Sharing invitation received
@@ -58,43 +58,109 @@ public class ImageSharing {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * Image has been transferred with success 
+    	 * Sharing has been aborted
     	 */
-    	public final static int TRANSFERRED = 4;
+    	public final static int ABORTED = 4;
     	
     	/**
-    	 * Sharing has been aborted 
+    	 * Sharing has failed
     	 */
-    	public final static int ABORTED = 5;
+    	public final static int FAILED = 5;
     	
     	/**
-    	 * Sharing has failed 
+    	 * Image has been transferred with success
     	 */
-    	public final static int FAILED = 6;
+    	public final static int TRANSFERRED = 6;
 
     	/**
-    	 * Call ringing
+    	 * Sharing has been rejected
     	 */
-    	public final static int RINGING = 7;
+    	public final static int REJECTED = 7;
+
+    	/**
+    	 * Ringing
+    	 */
+    	public final static int RINGING = 8;
 
         private State() {
         }    	
     }
-    
+
     /**
-     * Direction of the sharing
+     * Reason code associated with the image share state.
      */
-    public static class Direction {
+    public static class ReasonCode {
+
         /**
-         * Incoming sharing
+         * No specific reason code specified.
          */
-        public static final int INCOMING = 0;
-        
+        public static final int UNSPECIFIED = 0;
+
         /**
-         * Outgoing sharing
+         * Image share is aborted by local user.
          */
-        public static final int OUTGOING = 1;
-    }      
+        public static final int ABORTED_BY_USER = 1;
+
+        /**
+         * Image share is aborted by remote user.
+         */
+        public static final int ABORTED_BY_REMOTE = 2;
+
+        /**
+         * Image share is aborted by system.
+         */
+        public static final int ABORTED_BY_SYSTEM = 3;
+
+        /**
+         * Image share is aborted because already taken by the secondary device.
+         */
+        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+
+        /**
+         * Incoming image was rejected due to time out.
+         */
+        public static final int REJECTED_TIME_OUT = 5;
+
+        /**
+         * Incoming image was rejected as is cannot be received due to lack of local storage space.
+         */
+        public static final int REJECTED_LOW_SPACE = 6;
+
+        /**
+         * Incoming image was rejected as it was too big to be received.
+         */
+        public static final int REJECTED_MAX_SIZE = 7;
+
+        /**
+         * Incoming image was rejected because max number of sharing sessions is achieved.
+         */
+        public static final int REJECTED_MAX_SHARING_SESSIONS = 8;
+
+        /**
+         * Incoming image was rejected by local user.
+         */
+        public static final int REJECTED_BY_USER = 9;
+
+        /**
+         * Incoming image was rejected by remote.
+         */
+        public static final int REJECTED_BY_REMOTE = 10;
+
+        /**
+         * Image share initiation failed;
+         */
+        public static final int FAILED_INITIATION = 11;
+
+        /**
+         * Sharing of the image share has failed.
+         */
+        public static final int FAILED_SHARING = 12;
+
+        /**
+         * Saving of the image share has failed.
+         */
+        public static final int FAILED_SAVING = 13;
+    }
     
     /**
      * Image sharing error

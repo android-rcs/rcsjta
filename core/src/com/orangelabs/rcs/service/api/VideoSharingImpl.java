@@ -22,22 +22,20 @@
 
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.vsh.VideoSharing.State.ABORTED;
-import static com.gsma.services.rcs.vsh.VideoSharing.State.FAILED;
-import static com.gsma.services.rcs.vsh.VideoSharing.State.STARTED;
-import static com.gsma.services.rcs.vsh.VideoSharing.State.TERMINATED;
-
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.gsma.services.rcs.vsh.VideoSharing;
+import com.gsma.services.rcs.vsh.VideoSharing.ReasonCode;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
+import com.orangelabs.rcs.provider.sharing.VideoSharingStateAndReasonCode;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -84,7 +82,61 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
 		session.addListener(this);
 	}
-	
+
+	private VideoSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
+		switch (error.getErrorCode()) {
+			case ContentSharingError.SESSION_INITIATION_FAILED:
+				return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
+						ReasonCode.FAILED_INITIATION);
+			case ContentSharingError.SESSION_INITIATION_CANCELLED:
+			case ContentSharingError.SESSION_INITIATION_DECLINED:
+				return new VideoSharingStateAndReasonCode(VideoSharing.State.REJECTED,
+						ReasonCode.REJECTED_BY_REMOTE);
+			case ContentSharingError.MEDIA_TRANSFER_FAILED:
+			case ContentSharingError.MEDIA_STREAMING_FAILED:
+			case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
+			case ContentSharingError.MEDIA_RENDERER_NOT_INITIALIZED:
+				return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
+						ReasonCode.FAILED_SHARING);
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in VideoSharingImpl.toStateAndReasonCode; error="
+								+ error + "!");
+		}
+	}
+
+	private int imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCodeAsReasonCode) {
+		switch (imsServiceSessionErrorCodeAsReasonCode) {
+			case ImsServiceSession.INVITATION_CANCELED:
+				return ReasonCode.ABORTED_BY_REMOTE;
+			case ImsServiceSession.TERMINATION_BY_SYSTEM:
+			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+				return ReasonCode.ABORTED_BY_SYSTEM;
+			case ImsServiceSession.TERMINATION_BY_USER:
+				return ReasonCode.ABORTED_BY_USER;
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in ImageSharingImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCodeAsReasonCode="
+								+ imsServiceSessionErrorCodeAsReasonCode + "!");
+		}
+	}
+
+	private void handleSessionRejected(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+		}
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setVideoSharingState(sharingId,
+					VideoSharing.State.ABORTED, reasonCode);
+
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+					sharingId, VideoSharing.State.ABORTED, reasonCode);
+
+			VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
+		}
+	}
+
     /**
 	 * Returns the sharing ID of the video sharing
 	 * 
@@ -129,43 +181,40 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * @see VideoSharing.State
 	 */
 	public int getState() {
-		int result = VideoSharing.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				// Session canceled
-				result = VideoSharing.State.ABORTED;
-			} else
-			if (dialogPath.isSessionEstablished()) {
-				// Session started
-				result = VideoSharing.State.STARTED;
-			} else
-			if (dialogPath.isSessionTerminated()) {
-				// Session terminated
-				result = VideoSharing.State.TERMINATED;
+				return VideoSharing.State.ABORTED;
+
+			} else if (dialogPath.isSessionEstablished()) {
+				return VideoSharing.State.STARTED;
+
+			} else if (dialogPath.isSessionTerminated()) {
+				return VideoSharing.State.TERMINATED;
+
 			} else {
-				// Session pending
 				if (session instanceof OriginatingVideoStreamingSession) {
-					result = VideoSharing.State.INITIATED;
-				} else {
-					result = VideoSharing.State.INVITED;
+					return VideoSharing.State.INITIATED;
 				}
+
+				return VideoSharing.State.INVITED;
 			}
 		}
-		return result;		
+
+		return VideoSharing.State.UNKNOWN;
 	}
 	
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see VideoSharing.Direction
+	 * @see Direction
 	 */
 	public int getDirection() {
 		if (session.isInitiatedByRemote()) {
-			return VideoSharing.Direction.INCOMING;
+			return Direction.INCOMING;
 		} else {
-			return VideoSharing.Direction.OUTGOING;
+			return Direction.OUTGOING;
 		}
 	}	
 	
@@ -199,9 +248,6 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			logger.info("Reject session invitation");
 		}
 		
-		// Update rich call history
-		RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
-
 		// Reject invitation
         Thread t = new Thread() {
     		public void run() {
@@ -233,96 +279,95 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted() {
+	public void handleSessionStarted() {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
-    	synchronized(lock) {
-			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), STARTED);
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setVideoSharingState(sharingId,
+					VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
 			startedAt = System.currentTimeMillis();
-			
-			// Notify event listeners
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), STARTED);
-	    }
-    }
 
-    /**
-     * Session has been aborted
-     * 
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+					sharingId, VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	/**
+	 * Session has been aborted
+	 *
 	 * @param reason Termination reason
 	 */
-    public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
-    	synchronized(lock) {
-			// Update rich call history
+		String sharingId = getSharingId();
+		synchronized (lock) {
 			if (session.getDialogPath().isSessionCancelled()) {
-				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), ABORTED);
+				RichCallHistory.getInstance().setVideoSharingState(sharingId,
+						VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+
+				mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+						sharingId, VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			} else {
-				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), TERMINATED);
-				RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+				int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+				RichCallHistory.getInstance().setVideoSharingState(sharingId,
+						VideoSharing.State.ABORTED, reasonCode);
+
+				mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+						sharingId, VideoSharing.State.ABORTED, reasonCode);
+				RichCallHistory.getInstance().setVideoSharingDuration(sharingId,
+						(System.currentTimeMillis() - startedAt) / 100);
 			}
-			
-	  		// Notify event listeners
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), ABORTED);
-	        
-	        // Remove session from the list
-	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
-	    }
-    }
-    
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote() {
+
+			VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
+		}
+	}
+
+	/**
+	 * Session has been terminated by remote
+	 */
+	public void handleSessionTerminatedByRemote() {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
-    	synchronized(lock) {
-			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), TERMINATED);
-			RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setVideoSharingState(sharingId,
+					VideoSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
+			RichCallHistory.getInstance().setVideoSharingDuration(sharingId,
+					(System.currentTimeMillis() - startedAt) / 100);
 
-			// Notify event listeners
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), TERMINATED);
-	        
-	        // Remove session from the list
-	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
-	    }
-    }
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+					getSharingId(), VideoSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
+
+			VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
+		}
+	}
 
     /**
      * Content sharing error
-     * 
+     *
      * @param error Error
      */
     public void handleSharingError(ContentSharingError error) {
 		if (logger.isActivated()) {
 			logger.info("Sharing error " + error.getErrorCode());
 		}
+		String sharingId = getSharingId();
+		VideoSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
     	synchronized(lock) {
-			if (error.getErrorCode() == ContentSharingError.SESSION_INITIATION_CANCELLED) {
-				// Do nothing here, this is an aborted event
-				return;
-			}
-			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), FAILED);
-			
-	  		// Notify event listeners
-			switch (error.getErrorCode()) {
-				case ContentSharingError.SESSION_INITIATION_DECLINED:
-					// TODO : Handle reason code in CR009
-					mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, VideoSharing.Error.INVITATION_DECLINED*/);
-					break;
-				default:
-					// TODO : Handle reason code in CR009
-					mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, VideoSharing.Error.SHARING_FAILED*/);
-			}
+			RichCallHistory.getInstance().setVideoSharingState(sharingId, state,
+					reasonCode);
+
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+					getSharingId(), state, reasonCode);
 	
-	        // Remove session from the list
-	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
+	        VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
 	    }
     }
     
@@ -334,5 +379,20 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
 	public void handleVideoResized(int width, int height) {
 		// TODO : Check if new callback needed
+	}
+
+	@Override
+	public void handleSessionRejectedByUser() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	}
+
+	@Override
+	public void handleSessionRejectedByTimeout() {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	}
+
+	@Override
+	public void handleSessionRejectedByRemote() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
 	}
 }

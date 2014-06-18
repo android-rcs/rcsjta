@@ -43,13 +43,13 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 		mOneToOneChatListeners.unregister(listener);
 	}
 
-	public void broadcastMessageStatusChanged(ContactId contact, String msgId, int status) {
+	public void broadcastMessageStatusChanged(ContactId contact, String msgId, int status,
+			int reasonCode) {
 		final int N = mOneToOneChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mOneToOneChatListeners.getBroadcastItem(i).onMessageStatusChanged(contact, msgId,
-						status);
+						status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

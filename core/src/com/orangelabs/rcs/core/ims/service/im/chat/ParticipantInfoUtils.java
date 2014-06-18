@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.xml.sax.InputSource;
@@ -51,7 +56,7 @@ public class ParticipantInfoUtils {
 	 *            The set of ParticipantInfo
 	 * @return The set of contact identifiers
 	 */
-	public static Set<ContactId> getContactsFromParticipantInfo(Set<ParticipantInfo> participantInfos) {
+	public static Set<ContactId> getContacts(Set<ParticipantInfo> participantInfos) {
 		Set<ContactId> contacts = new HashSet<ContactId>();
 		if (participantInfos == null) {
 			return contacts;
@@ -160,4 +165,19 @@ public class ParticipantInfoUtils {
 		return null;
 	}
 
+	/**
+	 * Convert List of contacts to Set of ParticipantInfo because AIDL does not
+	 * support Set type.
+	 *
+	 * @param contacts list of contact id
+	 * @return the corresponding ParticipantInfo set
+	 */
+	public static Set<ParticipantInfo> getParticipantInfos(List<ContactId> contacts) {
+		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+		for (ContactId contact : contacts) {
+			ParticipantInfo participant = new ParticipantInfo(contact);
+			participants.add(participant);
+		}
+		return participants;
+	}
 }

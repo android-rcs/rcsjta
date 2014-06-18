@@ -30,13 +30,15 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public abstract class FileTransferListener extends IFileTransferListener.Stub {
 	/**
-	 * Callback called when the file transfer status/reasonCode is changed.
+	 * Callback called when the file transfer state/reasonCode is changed.
 	 *
 	 * @param contact Contact ID
 	 * @param transferId Id of file transfer
 	 * @param state State of the file transfer
+	 * @param reasonCode Reason code
 	 */
-	public abstract void onTransferStateChanged(ContactId contact, String transferId, int state);
+	public abstract void onTransferStateChanged(ContactId contact, String transferId, int state, int reasonCode);
+
 
 	/**
 	 * Callback called during the file transfer progress.

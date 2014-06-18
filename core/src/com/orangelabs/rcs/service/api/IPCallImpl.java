@@ -21,21 +21,17 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.ipcall.IPCall.State.ABORTED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.FAILED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.HOLD;
-import static com.gsma.services.rcs.ipcall.IPCall.State.INVITED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.STARTED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.TERMINATED;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -43,7 +39,7 @@ import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener;
 import com.orangelabs.rcs.core.ims.service.ipcall.OriginatingIPCallSession;
-import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
+import com.orangelabs.rcs.provider.ipcall.IPCallStateAndReasonCode;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.service.broadcaster.IIPCallEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -70,6 +66,58 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * The logger
 	 */
 	private final Logger logger = Logger.getLogger(getClass().getName());
+
+	private IPCallStateAndReasonCode toStateAndReasonCode(IPCallError error) {
+		switch (error.getErrorCode()) {
+			case IPCallError.SESSION_INITIATION_DECLINED:
+			case IPCallError.SESSION_INITIATION_CANCELLED:
+				return new IPCallStateAndReasonCode(IPCall.State.REJECTED,
+						ReasonCode.REJECTED_BY_REMOTE);
+			case IPCallError.SESSION_INITIATION_FAILED:
+				return new IPCallStateAndReasonCode(IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
+			case IPCallError.PLAYER_NOT_INITIALIZED:
+			case IPCallError.PLAYER_FAILED:
+			case IPCallError.RENDERER_NOT_INITIALIZED:
+			case IPCallError.RENDERER_FAILED:
+			case IPCallError.UNSUPPORTED_AUDIO_TYPE:
+			case IPCallError.UNSUPPORTED_VIDEO_TYPE:
+				return new IPCallStateAndReasonCode(IPCall.State.FAILED, ReasonCode.FAILED_IPCALL);
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in IPCallImpl.toStateAndReasonCode; error=" + error + "!");
+		}
+	}
+
+	private int imsServiceSessionErrorToReasonCode(
+			int imsServiceSessionErrorCodeAsReasonCode) {
+		switch (imsServiceSessionErrorCodeAsReasonCode) {
+			case ImsServiceSession.TERMINATION_BY_SYSTEM:
+			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+				return ReasonCode.ABORTED_BY_SYSTEM;
+			case ImsServiceSession.TERMINATION_BY_USER:
+				return ReasonCode.ABORTED_BY_USER;
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in IPCallImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCodeAsReasonCode="
+								+ imsServiceSessionErrorCodeAsReasonCode + "!");
+		}
+	}
+
+	private void handleSessionRejected(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Call rejected; reasonCode=" + reasonCode + ".");
+		}
+
+		String callId = getCallId();
+		synchronized (lock) {
+			IPCallHistory.getInstance().setCallState(callId,
+					IPCall.State.REJECTED, reasonCode);
+
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.REJECTED, reasonCode);
+			IPCallServiceImpl.removeIPCallSession(callId);
+		}
+	}
 
 	/**
 	 * Constructor
@@ -104,33 +152,30 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	/**
 	 * Returns the state of the IP call
 	 * 
-	 * @return State 
+	 * @return State
 	 */
 	public int getState() {
-		int result = IPCall.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				// Session canceled
-				result = IPCall.State.ABORTED;
-			} else
-			if (dialogPath.isSessionEstablished()) {
-				// Session started
-				result = IPCall.State.STARTED;
-			} else
-			if (dialogPath.isSessionTerminated()) {
-				// Session terminated
-				result = IPCall.State.TERMINATED;
+				return IPCall.State.ABORTED;
+
+			} else if (dialogPath.isSessionEstablished()) {
+				return IPCall.State.STARTED;
+
+			} else if (dialogPath.isSessionTerminated()) {
+				return IPCall.State.TERMINATED;
+
 			} else {
-				// Session pending
 				if (session instanceof OriginatingIPCallSession) {
-					result = IPCall.State.INITIATED;
-				} else {
-					result = IPCall.State.INVITED;
+					return IPCall.State.INITIATED;
 				}
+
+				return IPCall.State.INVITED;
 			}
 		}
-		return result;
+
+		return IPCall.State.UNKNOWN;
 	}
 	
 	/**
@@ -141,9 +186,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 */
 	public int getDirection() {
 		if (session.isInitiatedByRemote()) {
-			return IPCall.Direction.INCOMING;
+			return Direction.INCOMING;
 		} else {
-			return IPCall.Direction.OUTGOING;
+			return Direction.OUTGOING;
 		}
 	}
 	
@@ -178,9 +223,6 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
-
-		// Update IP call history
-		IPCallHistory.getInstance().setCallStatus(session.getSessionID(), IPCall.State.ABORTED); 
 
 		// Reject invitation
         Thread t = new Thread() {
@@ -372,59 +414,61 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted() {
+	public void handleSessionStarted() {
 		if (logger.isActivated()) {
 			logger.info("Call started");
 		}
 		synchronized (lock) {
 			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), STARTED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
-    }
-    
-    /**
-     * Session has been aborted
-     * 
+	}
+
+	/**
+	 * Session has been aborted
+	 *
 	 * @param reason Termination reason
 	 */
-    public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
 			logger.info("Call aborted (reason " + reason + ")");
 		}
+		String callId = getCallId();
 		synchronized (lock) {
-			// Update rich messaging history
 			if (session.getDialogPath().isSessionCancelled()) {
-				IPCallHistory.getInstance().setCallStatus(session.getSessionID(), ABORTED);
+				IPCallHistory.getInstance().setCallState(callId,
+						IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			} else {
-				IPCallHistory.getInstance().setCallStatus(session.getSessionID(), TERMINATED);
+				int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+				IPCallHistory.getInstance().setCallState(callId,
+						IPCall.State.ABORTED, reasonCode);
+
+				mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(),
+						callId, IPCall.State.ABORTED, reasonCode);
 			}
-
-			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
-
-			// Remove session from the list
-			IPCallServiceImpl.removeIPCallSession(session.getSessionID());
+			IPCallServiceImpl.removeIPCallSession(callId);
 		}
-    }
-    
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote() {
+	}
+
+	/**
+	 * Session has been terminated by remote
+	 */
+	public void handleSessionTerminatedByRemote() {
 		if (logger.isActivated()) {
 			logger.info("Call terminated by remote");
 		}
+		String callId = getCallId();
 		synchronized (lock) {
-			// Update IP call history
-			IPCallHistory.getInstance().setCallStatus(session.getSessionID(), TERMINATED);
+			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ABORTED,
+					ReasonCode.ABORTED_BY_REMOTE);
 
-			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-			// Remove session from the list
-			IPCallServiceImpl.removeIPCallSession(session.getSessionID());
+			IPCallServiceImpl.removeIPCallSession(callId);
 		}
-    }
+	}
     
 	/**
 	 * IP Call error
@@ -435,22 +479,18 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Session error " + error.getErrorCode());
 		}
+		IPCallStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
+		String callId = getCallId(); 
 		synchronized (lock) {
-			// Update IP call history
-			IPCallHistory.getInstance().setCallStatus(session.getSessionID(), FAILED);
-			// Notify event listeners
-			switch (error.getErrorCode()) {
-				case SipSessionError.SESSION_INITIATION_DECLINED:
-					// TODO : Handle reason code in CR009
-					mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), FAILED /*, IPCall.Error.INVITATION_DECLINED*/);
-					break;
-				default:
-					// TODO : Handle reason code in CR009
-					mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), FAILED /*, IPCall.Error.CALL_FAILED*/);
-			}
+			IPCallHistory.getInstance().setCallState(callId,
+					state, reasonCode);
 
-			// Remove session from the list
-			IPCallServiceImpl.removeIPCallSession(session.getSessionID());
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					state, reasonCode);
+
+			IPCallServiceImpl.removeIPCallSession(callId);
 		}
 	}
 	
@@ -466,9 +506,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Add video invitation");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), INVITED);
+			// TODO : Verify if the state change callback listener used is the right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 	}
 	
@@ -480,40 +520,42 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Remove video invitation");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			// TODO : Verify if the state change callback listener used is the right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
 
 	/**
-	 * Add video has been accepted by user 
+	 * Add video has been accepted by user
 	 */
 	public void handleAddVideoAccepted() {
 		if (logger.isActivated()) {
 			logger.info("Add video accepted");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), STARTED);
+			// TODO : Verify if the state change callback listener used is the
+			// right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
-	 * Remove video has been accepted by user 
+	 * Remove video has been accepted by user
 	 */
 	public void handleRemoveVideoAccepted() {
 		if (logger.isActivated()) {
 			logger.info("Remove video accepted");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			// TODO : Verify if the state change callback listener used is the
+			// right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_USER);
 		}
 	}
-	
+
 	/**
 	 * Add video has been aborted
 	 * 
@@ -523,10 +565,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Add video aborted (reason " + reason + ")");
 		}
+		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
 		synchronized (lock) {
-	        // Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			IPCallHistory.getInstance().setCallState(session.getSessionID(), IPCall.State.ABORTED,
+					reasonCode);
+
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.ABORTED, reasonCode);
+
 		}
 	}
 	
@@ -539,11 +585,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Remove video aborted (reason " + reason + ")");
 		}
+		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+		String callId = getCallId();
 		synchronized (lock) {
-	        // Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
-		}		
+			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ABORTED,
+					reasonCode);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.ABORTED, reasonCode);
+		}
 	}
 	
 	/**
@@ -554,12 +603,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call hold");
 		}
+		String callId = getCallId();
 		synchronized (lock) {
-			// Update IP call history
-			IPCallHistory.getInstance().setCallStatus(session.getSessionID(), HOLD);
+			IPCallHistory.getInstance().setCallState(callId, IPCall.State.HOLD,
+					ReasonCode.UNSPECIFIED);
 
-			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), HOLD);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -571,12 +621,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call Resume invitation");
 		}
+		String callId = getCallId();
 		synchronized (lock) {
-			// Update IP call history
-			IPCallHistory.getInstance().setCallStatus(session.getSessionID(), STARTED);
+			IPCallHistory.getInstance().setCallState(callId, IPCall.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 
-			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), STARTED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -589,9 +640,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Call Hold accepted");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), HOLD);
+			// TODO : Verify if the state change callback listener used is the right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -604,10 +655,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call Hold aborted (reason " + errorCode + ")");
 		}
+		int reasonCode = imsServiceSessionErrorToReasonCode(errorCode);
 		synchronized (lock) {
-	        // Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.ABORTED, reasonCode);
 		}		
 	}
 
@@ -620,9 +671,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Call Resume accepted");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), STARTED);
+			// TODO : Verify if the state change callback listener used is the right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -631,13 +682,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * 
 	 * @param reason Termination reason
 	 */
-	public void handleCallResumeAborted(int code) {
+	public void handleCallResumeAborted() {
 		if (logger.isActivated()) {
-			logger.info("Call Resume aborted (reason " + code + ")");
+			logger.info("Call Resume aborted");
 		}
 		synchronized (lock) {
-			// TODO : Verify if the status change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), ABORTED);
+			// TODO : Verify if the state change callback listener used is the right one!
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
 		}		
 	}
 
@@ -646,8 +698,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 */
 	public void handle486Busy() {
 		// Notify event listeners
-		// TODO : Verify if the status change callback listener used is the right one!
-		mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(), FAILED);
+		// TODO : Verify if the state change callback listener used is the right one!
+		mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+				IPCall.State.REJECTED, ReasonCode.REJECTED_TIME_OUT);
 	}
 
     /**
@@ -677,5 +730,36 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			listeners.finishBroadcast();*/
 			// TODO
 		}
+	}
+
+	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting call");
+		}
+
+		String callId = getCallId();
+		synchronized (lock) {
+			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
+
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+					IPCall.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	@Override
+	public void handleSessionRejectedByUser() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	}
+
+	@Override
+	public void handleSessionRejectedByTimeout() {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	}
+
+	@Override
+	public void handleSessionRejectedByRemote() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
 	}
 }

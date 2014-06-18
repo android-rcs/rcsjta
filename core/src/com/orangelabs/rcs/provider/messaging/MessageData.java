@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
@@ -49,7 +49,7 @@ public class MessageData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTACT = ChatLog.Message.CONTACT_NUMBER;
+	static final String KEY_CONTACT = ChatLog.Message.CONTACT;
 
 	/**
 	 * Column name
@@ -64,7 +64,7 @@ public class MessageData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTENT = ChatLog.Message.BODY;
+	static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
 	/**
 	 * Column name
@@ -80,6 +80,11 @@ public class MessageData {
 	 * Column name
 	 */
 	static final String KEY_STATUS = ChatLog.Message.MESSAGE_STATUS;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
 
 	/**
 	 * Column name

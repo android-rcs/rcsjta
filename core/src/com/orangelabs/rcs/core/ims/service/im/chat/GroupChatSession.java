@@ -24,10 +24,12 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.Vector;
 
 import javax2.sip.header.ExtensionHeader;
 
 import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -40,6 +42,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimIdentity;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -256,18 +259,25 @@ public abstract class GroupChatSession extends ChatSession {
 
 		// Update rich messaging history
 		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
-		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), msg,
-				ChatLog.Message.Direction.OUTGOING);
 
-		// Check if message has been sent with success or not
-		if (!result) {
-			// Update rich messaging history
-			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
-			
-			// Notify listeners
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleSendMessageFailure(msgId);
+		/*TODO:This will be redone with CR037*/
+		if (result) {
+			MessagingLog.getInstance().addGroupChatMessage(getContributionID(), msg,
+					Direction.OUTGOING, ChatLog.Message.Status.Content.SENT,
+					ChatLog.Message.ReasonCode.UNSPECIFIED);
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				((ChatSessionListener)listener).handleMessageSent(msgId);
 			}
+		} else {
+			MessagingLog.getInstance().addGroupChatMessage(getContributionID(), msg,
+					Direction.OUTGOING, ChatLog.Message.Status.Content.SENT,
+					ChatLog.Message.ReasonCode.UNSPECIFIED);
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
+			}
+			
 		}
 	}
 	
@@ -303,16 +313,23 @@ public abstract class GroupChatSession extends ChatSession {
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
 		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
-				ChatLog.Message.Direction.OUTGOING);
+				Direction.OUTGOING, ChatLog.Message.Status.Content.RECEIVED,
+				ChatLog.Message.ReasonCode.UNSPECIFIED);
 
-		// Check if message has been sent with success or not
-		if (!result) {
-			// Update rich messaging history
-			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
-			
-			// Notify listeners
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleSendMessageFailure(msgId);
+		/*TODO:This will be redone with CR037*/
+		if (result) {
+			MessagingLog.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
+					Direction.OUTGOING, ChatLog.Message.Status.Content.SENT, ChatLog.Message.Status.Content.FAILED);
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				((ChatSessionListener)listener).handleMessageSent(msgId);
+			}
+		} else {
+			MessagingLog.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
+					Direction.OUTGOING, ChatLog.Message.Status.Content.FAILED, ChatLog.Message.ReasonCode.FAILED_SEND);
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
 			}
 		}
 	}

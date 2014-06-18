@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.richcall;
@@ -23,10 +27,13 @@ import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
+import com.gsma.services.rcs.vsh.VideoSharing;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -82,6 +89,21 @@ public class RichcallService extends ImsService {
      */
 	public RichcallService(ImsModule parent) throws CoreException {
         super(parent, true);
+	}
+
+	private void handleImageSharingInvitationRejected(SipRequest invite, int reasonCode) {
+		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+		MmContent content = ContentManager.createMmContentFromSdp(invite);
+		getImsModule().getCore().getListener()
+				.handleImageSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	private void handleVideoSharingInvitationRejected(SipRequest invite, int reasonCode) {
+		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+		VideoContent content = ContentManager.createLiveVideoContentFromSdp(invite.getSdpContent()
+				.getBytes());
+		getImsModule().getCore().getListener()
+				.handleVideoSharingInvitationRejected(contact, content, reasonCode);
 	}
 
 	/**
@@ -271,6 +293,7 @@ public class RichcallService extends ImsService {
                 logger.debug("Max sessions reached");
             }
         	rejectInvitation = true;
+        	handleImageSharingInvitationRejected(invite, ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         } else
         if (currentSessions.size() == 1) {
         	ContentSharingSession currentSession = currentSessions.elementAt(0);
@@ -287,6 +310,7 @@ public class RichcallService extends ImsService {
 				    logger.debug("Only bidirectional session with same contact authorized");
 				}
             	rejectInvitation = true;
+            	handleImageSharingInvitationRejected(invite, ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         	}
         }
         if (rejectInvitation) {
@@ -392,6 +416,7 @@ public class RichcallService extends ImsService {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
 			rejectInvitation = true;
+			/*TODO: Skip catching exception, which should be implemented in CR037.*/
 		}
 
         // Test if call is established
@@ -419,6 +444,7 @@ public class RichcallService extends ImsService {
 				    logger.debug("Max terminating sessions reached");
 				}
             	rejectInvitation = true;
+            	handleVideoSharingInvitationRejected(invite, VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         	} else
         	if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
         		// Not the same contact
@@ -426,6 +452,7 @@ public class RichcallService extends ImsService {
 				    logger.debug("Only bidirectional session with same contact authorized");
 				}
             	rejectInvitation = true;
+            	handleVideoSharingInvitationRejected(invite, VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         	}
         }
         if (rejectInvitation) {

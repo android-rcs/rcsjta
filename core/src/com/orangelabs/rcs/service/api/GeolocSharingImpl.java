@@ -21,10 +21,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -34,6 +36,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
+import com.orangelabs.rcs.provider.sharing.GeolocSharingStateAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGeolocSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -114,50 +117,47 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	/**
 	 * Returns the state of the geoloc sharing
 	 * 
-	 * @return State 
+	 * @return State
 	 */
 	public int getState() {
-		int result = GeolocSharing.State.INACTIVE;
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				// Session canceled
-				result = GeolocSharing.State.ABORTED;
-			} else
-			if (dialogPath.isSessionEstablished()) {
-				// Session started
-				result = GeolocSharing.State.STARTED;
-			} else
-			if (dialogPath.isSessionTerminated()) {
-				// Session terminated
+				return GeolocSharing.State.ABORTED;
+
+			} else if (dialogPath.isSessionEstablished()) {
+				return GeolocSharing.State.STARTED;
+
+			} else if (dialogPath.isSessionTerminated()) {
 				if (session.isGeolocTransfered()) {
-					result = GeolocSharing.State.TRANSFERRED;
-				} else {
-					result = GeolocSharing.State.ABORTED;
+					return GeolocSharing.State.TERMINATED;
 				}
+
+				return GeolocSharing.State.ABORTED;
+
 			} else {
-				// Session pending
 				if (session instanceof OriginatingGeolocTransferSession) {
-					result = GeolocSharing.State.INITIATED;
-				} else {
-					result = GeolocSharing.State.INVITED;
+					return GeolocSharing.State.INITIATED;
 				}
+
+				return GeolocSharing.State.INVITED;
 			}
 		}
-		return result;
+
+		return GeolocSharing.State.UNKNOWN;
 	}
 	
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see GeolocSharing.Direction
+	 * @see Direction
 	 */
 	public int getDirection() {
 		if (session.isInitiatedByRemote()) {
-			return GeolocSharing.Direction.INCOMING;
+			return Direction.INCOMING;
 		} else {
-			return GeolocSharing.Direction.OUTGOING;
+			return Direction.OUTGOING;
 		}
 	}		
 		
@@ -219,6 +219,55 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
+	private int sessionAbortedReasonToReasonCode(int sessionAbortedReason) {
+		switch (sessionAbortedReason) {
+			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+			case ImsServiceSession.TERMINATION_BY_SYSTEM:
+				return ReasonCode.ABORTED_BY_SYSTEM;
+			case ImsServiceSession.TERMINATION_BY_USER:
+				return ReasonCode.ABORTED_BY_USER;
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in GeolocSharingImpl.sessionAbortedReasonToReasonCode; sessionAbortedReason="
+								+ sessionAbortedReason + "!");
+		}
+	}
+
+	private GeolocSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
+		switch (error.getErrorCode()) {
+			case ContentSharingError.SESSION_INITIATION_FAILED:
+				return new GeolocSharingStateAndReasonCode(GeolocSharing.State.FAILED,
+						ReasonCode.FAILED_INITIATION);
+			case ContentSharingError.SESSION_INITIATION_CANCELLED:
+			case ContentSharingError.SESSION_INITIATION_DECLINED:
+				return new GeolocSharingStateAndReasonCode(GeolocSharing.State.REJECTED,
+						ReasonCode.REJECTED_BY_REMOTE);
+			case ContentSharingError.MEDIA_SAVING_FAILED:
+			case ContentSharingError.MEDIA_TRANSFER_FAILED:
+			case ContentSharingError.MEDIA_STREAMING_FAILED:
+			case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
+				return new GeolocSharingStateAndReasonCode(GeolocSharing.State.FAILED,
+						ReasonCode.FAILED_SHARING);
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in GeolocSharingImpl.toStateAndReasonCode; error=" + error
+								+ "!");
+		}
+	}
+
+	private void handleSessionRejected(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+		}
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
+					sharingId, GeolocSharing.State.REJECTED, reasonCode);
+
+			GeolocSharingServiceImpl.removeGeolocSharingSession(sharingId);
+		}
+	}
+
 	/**
 	 * Session is started
 	 */
@@ -227,88 +276,68 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			logger.info("Session started");
 		}
     	synchronized(lock) {
-			// Notify event listeners
 			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-					getSharingId(), GeolocSharing.State.STARTED);
+					getSharingId(), GeolocSharing.State.STARTED, ReasonCode.UNSPECIFIED);
 	    }
     }
     
-    /**
-     * Session has been aborted
-     * 
+	/**
+	 * Session has been aborted
+	 *
 	 * @param reason Termination reason
 	 */
-    public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
-    	synchronized(lock) {
-	  		// Notify event listeners
+		int reasonCode = sessionAbortedReasonToReasonCode(reason);
+		synchronized (lock) {
 			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-					getSharingId(), GeolocSharing.State.ABORTED);
-	
-	        // Remove session from the list
-	        GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
-	    }
-    }
-    
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote() {
+					getSharingId(), GeolocSharing.State.ABORTED, reasonCode);
+
+			GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
+		}
+	}
+
+	/**
+	 * Session has been terminated by remote
+	 */
+	public void handleSessionTerminatedByRemote() {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
-    	synchronized(lock) {
-			// Check if the geoloc has been transferred or not
-	  		if (session.isGeolocTransfered()) {
-		        // Remove session from the list
-	  			GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
-	  		} else {
-				// Notify event listeners
-				mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-						getSharingId(), GeolocSharing.State.ABORTED);
+		synchronized (lock) {
+			if (session.isGeolocTransfered()) {
+				GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
+			} else {
+				mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(
+						getRemoteContact(), getSharingId(), GeolocSharing.State.ABORTED,
+						ReasonCode.ABORTED_BY_REMOTE);
 
-		        // Remove session from the list
-		        GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
-	  		}
-	    }
-    }
-    
-    /**
-     * Content sharing error
-     *
-     * @param error Error
-     */
-    public void handleSharingError(ContentSharingError error) {
+				GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
+			}
+		}
+	}
+
+	/**
+	 * Content sharing error
+	 *
+	 * @param error Error
+	 */
+	public void handleSharingError(ContentSharingError error) {
 		if (logger.isActivated()) {
 			logger.info("Sharing error " + error.getErrorCode());
 		}
-    	synchronized(lock) {
-			if (error.getErrorCode() == ContentSharingError.SESSION_INITIATION_CANCELLED) {
-				// Do nothing here, this is an aborted event
-				return;
-			}
-			// Notify event listeners
-			switch (error.getErrorCode()) {
-				case ContentSharingError.SESSION_INITIATION_DECLINED:
-					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.INVITATION_DECLINED*/);
-					break;
-				case ContentSharingError.MEDIA_SAVING_FAILED:
-				case ContentSharingError.MEDIA_TRANSFER_FAILED:
-					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
-					break;
-				default:
-					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
-			}
-	
-	        // Remove session from the list
-	        GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
-	    }
-    }
+		GeolocSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+		String sharingId = getSharingId();
+		synchronized (lock) {
+
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
+					sharingId, stateAndReasonCode.getState(), stateAndReasonCode.getReasonCode());
+
+			GeolocSharingServiceImpl.removeGeolocSharingSession(sharingId);
+		}
+	}
     
     /**
      * Content has been transfered
@@ -326,13 +355,36 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			// TODO FUSION check display name parameter
 			GeolocMessage geolocMsg = new GeolocMessage(msgId, contact, geoloc, false, null);
 			if (session instanceof OriginatingGeolocTransferSession) { 
-				MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+				MessagingLog.getInstance()
+						.addOutgoingOneToOneChatMessage(geolocMsg,
+								ChatLog.Message.Status.Content.SENT,
+								ChatLog.Message.ReasonCode.UNSPECIFIED);
+				/*
+				 * TODO: Important notice. This will be changed with CR025, as
+				 * geoloc sharing object will not be persisted in the message
+				 * log.
+				 */
 			} else {
-				MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.INCOMING);
+				MessagingLog.getInstance().addIncomingOneToOneChatMessage(geolocMsg);
 			}
 
-			// Notify event listeners
-			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact, getSharingId(), GeolocSharing.State.TRANSFERRED);
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact,
+					getSharingId(), GeolocSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
 	    }
     }
+
+	@Override
+	public void handleSessionRejectedByUser() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	}
+
+	@Override
+	public void handleSessionRejectedByTimeout() {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	}
+
+	@Override
+	public void handleSessionRejectedByRemote() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
 }

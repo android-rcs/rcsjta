@@ -25,5 +25,5 @@ public interface IMultimediaStreamingSessionEventBroadcaster {
 	public void broadcastNewPayload(ContactId contact, String sessionId, byte[] content);
 
 	public void broadcastMultimediaStreamingStateChanged(ContactId contact, String sessionId,
-			int state);
+			int state, int reasonCode);
 }

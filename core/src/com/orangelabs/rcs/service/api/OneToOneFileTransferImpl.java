@@ -21,15 +21,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.ft.FileTransfer.State.ABORTED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.FAILED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.STARTED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.TRANSFERRED;
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -41,6 +38,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransfer
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSharingSession;
+import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -159,80 +157,77 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	/**
 	 * Returns the state of the file transfer
 	 * 
-	 * @return State 
+	 * @return State
 	 */
 	public int getState() {
-		int result = FileTransfer.State.INACTIVE;
 		if (session instanceof HttpFileTransferSession) {
-			// HTTP transfer
-			int state = ((HttpFileTransferSession)session).getSessionState(); 
-			if (state == HttpTransferState.CANCELLED) {
-				// Session canceled
-				result = FileTransfer.State.ABORTED;
-			} else
-			if (state == HttpTransferState.ESTABLISHED) {
-				// Session started
-				result = FileTransfer.State.STARTED;
-			} else
-			if (state == HttpTransferState.TERMINATED) {
-				// Session terminated
-				if (session.isFileTransfered()) {
-					result = FileTransfer.State.TRANSFERRED;
-				} else {
-					result = FileTransfer.State.ABORTED;
-				}
-			} else
-			if (state == HttpTransferState.PENDING) {
-				// Session pending
-				if (session instanceof OriginatingHttpFileSharingSession) {
-					result = FileTransfer.State.INITIATED;
-				} else {
-					result = FileTransfer.State.INVITED;
-				}
+			int state = ((HttpFileTransferSession)session).getSessionState();
+			switch (state) {
+				case HttpTransferState.CANCELLED:
+					return FileTransfer.State.ABORTED;
+
+				case HttpTransferState.ESTABLISHED:
+					return FileTransfer.State.STARTED;
+
+				case HttpTransferState.TERMINATED:
+					if (session.isFileTransfered()) {
+						return FileTransfer.State.TRANSFERRED;
+					}
+
+					return FileTransfer.State.ABORTED;
+
+				case HttpTransferState.PENDING:
+					if (session instanceof OriginatingHttpFileSharingSession) {
+						return FileTransfer.State.INITIATED;
+					}
+
+					return FileTransfer.State.INVITED;
+
+				default:
+					return FileTransfer.State.UNKNOWN;
 			}
+
 		} else {
 			// MSRP transfer
 			SipDialogPath dialogPath = session.getDialogPath();
 			if (dialogPath != null) {
 				if (dialogPath.isSessionCancelled()) {
-					// Session canceled
-					result = FileTransfer.State.ABORTED;
-				} else
-				if (dialogPath.isSessionEstablished()) {
-					// Session started
-					result = FileTransfer.State.STARTED;
-				} else
-				if (dialogPath.isSessionTerminated()) {
-					// Session terminated
+					return FileTransfer.State.ABORTED;
+
+				} else if (dialogPath.isSessionEstablished()) {
+					return FileTransfer.State.STARTED;
+
+				} else if (dialogPath.isSessionTerminated()) {
 					if (session.isFileTransfered()) {
-						result = FileTransfer.State.TRANSFERRED;
-					} else {
-						result = FileTransfer.State.ABORTED;
+						return FileTransfer.State.TRANSFERRED;
 					}
+
+					return FileTransfer.State.ABORTED;
+
 				} else {
-					// Session pending
 					if (session instanceof OriginatingMsrpFileSharingSession) {
-						result = FileTransfer.State.INITIATED;
-					} else {
-						result = FileTransfer.State.INVITED;
+						return FileTransfer.State.INITIATED;
 					}
+
+					return FileTransfer.State.INVITED;
 				}
 			}
 		}
-		return result;
+
+		return FileTransfer.State.UNKNOWN;
 	}
-	
+
 	/**
 	 * Returns the direction of the transfer (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see FileTransfer.Direction
+	 * @see Direction
 	 */
 	public int getDirection() {
 		if (session.isInitiatedByRemote()) {
-			return FileTransfer.Direction.INCOMING;
+			return Direction.INCOMING;
 		} else {
-			return FileTransfer.Direction.OUTGOING;
+			return Direction.OUTGOING;
 		}
 	}	
 		
@@ -260,9 +255,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
-		
-		// Update rich messaging history
-  		MessagingLog.getInstance().updateFileTransferStatus(session.getFileTransferId(), FileTransfer.State.ABORTED);
 
   		// Reject invitation
         Thread t = new Thread() {
@@ -351,174 +343,245 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			}
 		}
 	}
-	
-    /*------------------------------- SESSION EVENTS ----------------------------------*/
+
+	/*------------------------------- SESSION EVENTS ----------------------------------*/
+
+	private int sessionAbortedReasonToReasonCode(int sessionAbortedReason) {
+		switch (sessionAbortedReason) {
+			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+			case ImsServiceSession.TERMINATION_BY_SYSTEM:
+				return ReasonCode.ABORTED_BY_SYSTEM;
+			case ImsServiceSession.TERMINATION_BY_USER:
+				return ReasonCode.ABORTED_BY_USER;
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in OneToOneFileTransferImpl.sessionAbortedReasonToReasonCode; sessionAbortedReason="
+								+ sessionAbortedReason + "!");
+		}
+	}
+
+	private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
+		switch (error.getErrorCode()) {
+			case FileSharingError.SESSION_INITIATION_DECLINED:
+			case FileSharingError.SESSION_INITIATION_CANCELLED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_BY_REMOTE);
+			case FileSharingError.MEDIA_SAVING_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_SAVING);
+			case FileSharingError.MEDIA_SIZE_TOO_BIG:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_MAX_SIZE);
+			case FileSharingError.MEDIA_TRANSFER_FAILED:
+			case FileSharingError.MEDIA_UPLOAD_FAILED:
+			case FileSharingError.MEDIA_DOWNLOAD_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_DATA_TRANSFER);
+			case FileSharingError.NO_CHAT_SESSION:
+			case FileSharingError.SESSION_INITIATION_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_INITIATION);
+			case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_LOW_SPACE);
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in OneToOneFileTransferImpl.toStateAndReasonCode; error="
+								+ error + "!");
+		}
+	}
+
+	private void handleSessionRejected(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+		}
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED, reasonCode));
+
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.REJECTED, reasonCode);
+
+			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+		}
+	}
+
+	/**
+	 * File transfer has been paused by system
+	 */
+	private void handleFileTransferPaused(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Transfer paused by system");
+		}
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.PAUSED, reasonCode));
+
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.PAUSED, reasonCode);
+		}
+	}
 
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted() {
+	public void handleSessionStarted() {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
-    	synchronized(lock) {
-			String transferId = session.getFileTransferId();
-			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferStatus(transferId, STARTED);
+		String fileTransferId = session.getFileTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
+					fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.STARTED,
+							ReasonCode.UNSPECIFIED));
 
-			// Notify event listeners
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
-					transferId, STARTED);
-	    }
-    }
-    
-    /**
-     * Session has been aborted
-     * 
+					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	/**
+	 * Session has been aborted
+	 *
 	 * @param reason Termination reason
 	 */
-    public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
-    	synchronized(lock) {
-			// Update rich messaging history
-			String transferId = getTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(transferId, ABORTED);
+		int reasonCode = sessionAbortedReasonToReasonCode(reason);
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.ABORTED, reasonCode));
 
-			// Notify event listeners
-			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId,
-					ABORTED);
-	        
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(transferId);
-	    }
-    }
-    
-    /**
-     * Session has been terminated by remote
-     */
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.ABORTED, reasonCode);
+
+			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+		}
+	}
+
+	/**
+	 * Session has been terminated by remote
+	 */
 	public void handleSessionTerminatedByRemote() {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
+		String fileTransferId = getTransferId();
 		synchronized (lock) {
 			// Check if the file has been transferred or not
-			String transferId = getTransferId();
 			if (session.isFileTransfered()) {
-				// Remove session from the list
-				FileTransferServiceImpl.removeFileTransferSession(transferId);
+				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			} else {
-				// Update rich messaging history
-				MessagingLog.getInstance().updateFileTransferStatus(transferId, ABORTED);
+				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
+						fileTransferId,
+						new FileTransferStateAndReasonCode(FileTransfer.State.ABORTED,
+								ReasonCode.ABORTED_BY_REMOTE));
 
-				// Notify event listeners
 				mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
-						transferId, ABORTED);
+						fileTransferId, FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-				// Remove session from the list
-				FileTransferServiceImpl.removeFileTransferSession(transferId);
+				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			}
 		}
 	}
-    
-    /**
-     * File transfer error
-     * 
-     * @param error Error
-     */
-    public void handleTransferError(FileSharingError error) {
+
+	/**
+	 * File transfer error
+	 *
+	 * @param error Error
+	 */
+	public void handleTransferError(FileSharingError error) {
 		if (logger.isActivated()) {
 			logger.info("Sharing error " + error.getErrorCode());
 		}
-    	synchronized(lock) {
-			if (error.getErrorCode() == FileSharingError.SESSION_INITIATION_CANCELLED) {
-				// Do nothing here, this is an aborted event
-				return;
-			}
-			// Update rich messaging history
-			String transferId = session.getFileTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(transferId, FAILED);
 
-			// Notify event listeners
-			switch (error.getErrorCode()) {
-				case FileSharingError.SESSION_INITIATION_DECLINED:
-					// TODO : Handle reason code in CR009
-					mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId, FAILED /*, FileTransfer.Error.INVITATION_DECLINED*/);
-					break;
-				case FileSharingError.MEDIA_SAVING_FAILED:
-					// TODO : Handle reason code in CR009
-					mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId, FAILED /*, FileTransfer.Error.SAVING_FAILED*/);
-					break;
-				case FileSharingError.MEDIA_SIZE_TOO_BIG:
-				case FileSharingError.MEDIA_TRANSFER_FAILED:
-					// TODO : Handle reason code in CR009
-					mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId, FAILED /*, FileTransfer.Error.TRANSFER_FAILED*/);
-					break;
-				default:
-					// TODO : Handle reason code in CR009
-					mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId, FAILED /*, FileTransfer.Error.TRANSFER_FAILED*/);
-			}
+		String fileTransferId = getTransferId();
+		FileTransferStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					new FileTransferStateAndReasonCode(state, reasonCode));
 
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(transferId);
-	    }
-    }
-    
-    /**
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, state, reasonCode);
+
+			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+		}
+	}
+
+	/**
 	 * File transfer progress
 	 * 
 	 * @param currentSize Data size transferred 
 	 * @param totalSize Total size to be transferred
 	 */
-    public void handleTransferProgress(long currentSize, long totalSize) {
-    	synchronized(lock) {
-			// Update rich messaging history
-    		String transferId = getTransferId();
-	  		MessagingLog.getInstance().updateFileTransferProgress(transferId, currentSize, totalSize);
+	public void handleTransferProgress(long currentSize, long totalSize) {
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize,
+					totalSize);
 
 			// Notify event listeners
 			mOneToOneFileTransferBroadcaster.broadcastTransferprogress(getRemoteContact(),
-					transferId, currentSize, totalSize);
+					fileTransferId, currentSize, totalSize);
 		}
 	}
 
-    /**
-     * File has been transfered
-     *
-     * @param content MmContent associated to the received file
-     */
-    public void handleFileTransfered(MmContent content) {
+	/**
+	 * File transfer not allowed to send
+	 */
+	@Override
+	public void handleTransferNotAllowedToSend() {
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
+					fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+							ReasonCode.FAILED_NOT_ALLOWED_TO_SEND));
+
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.FAILED,
+					ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+		}
+	}
+
+	/**
+	 * File has been transfered
+	 *
+	 * @param content MmContent associated to the received file
+	 */
+	public void handleFileTransfered(MmContent content) {
 		if (logger.isActivated()) {
 			logger.info("Content transferred");
 		}
-    	synchronized(lock) {
-			// Update rich messaging history
-			String transferId = getTransferId();
-			MessagingLog.getInstance().updateFileTransferred(transferId, content);
-
-			// Notify event listeners
-			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId,
-					TRANSFERRED);
-	    }	
-    }
-    
-    /**
-     * File transfer has been paused
-     */
-	public void handleFileTransferPaused() {
-		if (logger.isActivated()) {
-			logger.info("Transfer paused");
-		}
 		synchronized (lock) {
-			// Update rich messaging history
-			String transferId = getTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(transferId, PAUSED);
+			String fileTransferId = getTransferId();
+			MessagingLog.getInstance().updateFileTransferred(fileTransferId, content);
 
-			// Notify event listeners
-			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId,
-					PAUSED);
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
 		}
+	}
+
+	/**
+	 * File transfer has been paused by user
+	 */
+	public void handleFileTransferPausedByUser() {
+		handleFileTransferPaused(ReasonCode.PAUSED_BY_USER);
+	}
+
+	/**
+	 * File transfer has been paused by system
+	 */
+	public void handleFileTransferPausedBySystem() {
+		handleFileTransferPaused(ReasonCode.PAUSED_BY_SYSTEM);
 	}
 
 	/**
@@ -528,15 +591,47 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Transfer resumed");
 		}
+		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			// Update rich messaging history
-			String transferId = getTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(transferId, STARTED);
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
+					fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.STARTED,
+							ReasonCode.UNSPECIFIED));
 
-			// Notify event listeners
-			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(), transferId,
-					STARTED);
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
+	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting transfer");
+		}
+		String fileTransferId = getTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
+					fileTransferId,
+					new FileTransferStateAndReasonCode(FileTransfer.State.ACCEPTING,
+							ReasonCode.UNSPECIFIED));
+
+			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
+					fileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	@Override
+	public void handleSessionRejectedByUser() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	}
+
+	@Override
+	public void handleSessionRejectedByTimeout() {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	}
+
+	@Override
+	public void handleSessionRejectedByRemote() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
 }

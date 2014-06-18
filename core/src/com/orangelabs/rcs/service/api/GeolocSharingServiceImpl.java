@@ -33,10 +33,12 @@ import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
+import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -234,6 +236,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 			// Initiate a sharing session
 			final GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geolocPush);
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact,
+					session.getSessionID(), GeolocSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
 			GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);

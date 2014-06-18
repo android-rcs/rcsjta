@@ -26,10 +26,10 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Pair;
 
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.DeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.provider.messaging.DeliveryInfoStatusAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -49,12 +49,12 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 
 	private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
 			GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-			.append(ChatLog.GroupChatDeliveryInfo.DeliveryStatus.NOT_DELIVERED).append(" OR (")
+			.append(DeliveryInfo.Status.NOT_DELIVERED).append(" OR (")
 			.append(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-			.append(ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED).append(" AND ")
+			.append(DeliveryInfo.Status.FAILED).append(" AND ")
 			.append(GroupChatDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
-			.append(ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR).append(",")
-			.append(ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR).append("))").toString();
+			.append(DeliveryInfo.ReasonCode.FAILED_DELIVERY).append(",")
+			.append(DeliveryInfo.ReasonCode.FAILED_DISPLAY).append("))").toString();
 
 	/**
 	 * Content resolver
@@ -79,9 +79,6 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 	@Override
 	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contact) {
 		if (logger.isActivated()) {
-			logger.debug("Add new entry: chatID=" + chatId + ", messageID=" + msgId );
-		}
-		if (logger.isActivated()) {
 			logger.debug("Add new entry: chatID=" + chatId + ", messageID=" + msgId + ", contact=" + contact);
 		}
 		ContentValues values = new ContentValues();
@@ -90,46 +87,11 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 		if (contact != null) {
 			values.put(GroupChatDeliveryInfoData.KEY_CONTACT, contact.toString());
 		}
-		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.NOT_DELIVERED);
-		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE);
+		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, DeliveryInfo.Status.NOT_DELIVERED);
+		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DeliveryInfo.ReasonCode.UNSPECIFIED);
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, 0);
 		return cr.insert(GroupChatDeliveryInfoDatabaseUri, values);
-	}
-
-	/**
-	 * Get status for individual contact
-	 * 
-	 * @param msgID
-	 *            Message ID
-	 * @param contact
-	 *            Contact ID for which the status should be retrieved
-	 * @return int Status
-	 */
-	public Pair<Integer, Integer> getGroupChatDeliveryInfoStatus(String msgId, ContactId contact) {
-		Cursor cursor = null;
-		try {
-			String[] selectionArgs = new String[] { msgId, contact.toString() };
-			String[] projection = new String[] { GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS,
-					GroupChatDeliveryInfoData.KEY_REASON_CODE, };
-			cursor = cr.query(GroupChatDeliveryInfoDatabaseUri, projection, SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT,
-					selectionArgs, null);
-			if (!cursor.moveToFirst()) {
-				if (logger.isActivated()) {
-					logger.warn("There was no group chat delivery info for msgId '" + msgId + "' and contact '" + contact
-							+ "' to get status from!");
-					return new Pair<Integer, Integer>(ChatLog.GroupChatDeliveryInfo.DeliveryStatus.NOT_DELIVERED,
-							ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE);
-				}
-			}
-			int deliveryStatus = cursor.getInt(cursor.getColumnIndexOrThrow(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS));
-			int statusReason = cursor.getInt(cursor.getColumnIndexOrThrow(GroupChatDeliveryInfoData.KEY_REASON_CODE));
-			return new Pair<Integer, Integer>(deliveryStatus, statusReason);
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
 	}
 
 	/**
@@ -137,24 +99,26 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 	 * 
 	 * @param msgID
 	 *            Message ID
-	 * @param deliveryStatus
-	 *            Delivery status of entry
-	 * @param reasonCode
-	 *            Reason code for status
+	 * @param DeliveryInfoStatusAndReasonCode
+	 *            Delivery info status and reason code
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatus(String msgId, int deliveryStatus, int reasonCode, ContactId contact) {
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId,
+			DeliveryInfoStatusAndReasonCode statusAndReasonCode, ContactId contact) {
 		ContentValues values = new ContentValues();
-		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, deliveryStatus);
+		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, statusAndReasonCode.getStatus());
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, reasonCode);
-		String[] selectionArgs = new String[] { msgId, contact.toString() };
-		if (cr.update(GroupChatDeliveryInfoDatabaseUri, values, SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
+		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, statusAndReasonCode.getReasonCode());
+		String[] selectionArgs = new String[] {
+				msgId, contact.toString()
+		};
+		if (cr.update(GroupChatDeliveryInfoDatabaseUri, values,
+				SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
-				logger.warn("There was not group chat delivery into for msgId '" + msgId + "' and contact '" + contact
-						+ "' to update!");
+				logger.warn("There was not group chat delivery into for msgId '" + msgId
+						+ "' and contact '" + contact + "' to update!");
 			}
 		}
 	}
@@ -188,7 +152,7 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(Uri.withAppendedPath(GroupChatDeliveryInfoData.CONTENT_MSG_URI, msgId), null,
-					GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS + "!= " + ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED,
+					GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS + "!= " + DeliveryInfo.Status.DISPLAYED,
 					null, null);
 			return !cursor.moveToFirst();
 		} finally {

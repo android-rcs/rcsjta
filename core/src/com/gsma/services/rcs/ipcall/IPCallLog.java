@@ -80,6 +80,12 @@ public class IPCallLog {
     public static final String STATE = "state";    
 
     /**
+     * The name of the column containing the reason code of the ip call state.
+     * <P>Type: INTEGER</P>
+     */
+    public static final String REASON_CODE = "reason_code";
+
+    /**
      * The name of the column containing the encoding type of video
      * <P>Type: INTEGER</P>
      */

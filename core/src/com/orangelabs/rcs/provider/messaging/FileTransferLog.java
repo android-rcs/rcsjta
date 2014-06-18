@@ -33,7 +33,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
@@ -42,6 +43,7 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -59,6 +61,10 @@ public class FileTransferLog implements IFileTransferLog {
 	private static final String SELECTION_FILE_BY_FT_ID = new StringBuilder(FileTransferData.KEY_FT_ID).append("=?").toString();
 
 	private static final String SELECTION_FILE_BY_T_ID = new StringBuilder(FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
+
+	private static final String SELECTION_BY_PAUSED_BY_SYSTEM = new StringBuilder(
+			FileTransferData.KEY_STATE).append("=? AND ").append(FileTransferData.KEY_REASON_CODE)
+			.append("=?").toString();
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -89,11 +95,14 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+			MmContent content, MmContent fileicon, int state, int reasonCode) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=").append(fileTransferId).append(", contact=")
-					.append(contact).append(", filename=").append(content.getName()).append(", size=").append(content.getSize())
-					.append(", MIME=").append(content.getEncoding()).toString());
+			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=")
+					.append(fileTransferId).append(", contact=").append(contact)
+					.append(", filename=").append(content.getName()).append(", size=")
+					.append(content.getSize()).append(", MIME=").append(content.getEncoding())
+					.append(", state=").append(state).append(", reasonCode=").append(reasonCode).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -105,26 +114,26 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_DIRECTION, direction);
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
-		if (thumbnail != null) {
-			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
+		if (fileicon != null) {
+			values.put(FileTransferData.KEY_FILEICON, fileicon.getUri().toString());
 		}
 
 		long date = Calendar.getInstance().getTimeInMillis();
-		values.put(FileTransferData.KEY_READ_STATUS, FileTransfer.ReadStatus.UNREAD);
-		if (direction == FileTransfer.Direction.INCOMING) {
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(FileTransferData.KEY_STATE, state);
+		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
+		if (direction == Direction.INCOMING) {
 			// Receive file
 			values.put(FileTransferData.KEY_TIMESTAMP, date);
 			values.put(FileTransferData.KEY_TIMESTAMP_SENT, 0);
 			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-			values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INVITED);
 		} else {
 			// Send file
 			values.put(FileTransferData.KEY_TIMESTAMP, date);
 			values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
 			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-			values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
 		}
 		cr.insert(ftDatabaseUri, values);
 	}
@@ -147,17 +156,18 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.OUTGOING);
+		values.put(FileTransferData.KEY_DIRECTION, Direction.OUTGOING);
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
 		long date = Calendar.getInstance().getTimeInMillis();
-		values.put(MessageData.KEY_READ_STATUS, ChatLog.Message.ReadStatus.UNREAD);
+		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 		// Send file
 		values.put(FileTransferData.KEY_TIMESTAMP, date);
 		values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
 		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INITIATED);
+		values.put(FileTransferData.KEY_STATE, FileTransfer.State.INITIATED);
+		values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED);
 		if (thumbnail != null) {
 			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}
@@ -178,17 +188,24 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * addIncomingGroupFileTransfer(java.lang.String,
+	 * com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+	 * com.orangelabs.rcs.core.content.MmContent,
+	 * com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent thumbnail) {
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contact,
+			String fileTransferId, MmContent content, MmContent fileicon, int state, int reasonCode) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=").append(fileTransferId)
-					.append(", chatId=").append(chatId).append(", contact=").append(contact).append(", filename=")
-					.append(content.getName()).append(", size=").append(content.getSize()).append(", MIME=")
-					.append(content.getEncoding()).toString());
+			logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=")
+					.append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
+					.append(contact).append(", filename=").append(content.getName())
+					.append(", size=").append(content.getSize()).append(", MIME=")
+					.append(content.getEncoding()).append(", state=").append(state)
+					.append(", reasonCode=").append(reasonCode).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -197,19 +214,20 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_CONTACT, contact.toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.INCOMING);
+		values.put(FileTransferData.KEY_DIRECTION, Direction.INCOMING);
 		values.put(FileTransferData.KEY_SIZE, 0);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, content.getSize());
-		values.put(FileTransferData.KEY_READ_STATUS, FileTransfer.ReadStatus.UNREAD);
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(FileTransferData.KEY_STATE, state);
+		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
 
 		long date = Calendar.getInstance().getTimeInMillis();
 		values.put(FileTransferData.KEY_TIMESTAMP, date);
 		values.put(FileTransferData.KEY_TIMESTAMP_SENT, 0);
 		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.INVITED);
-		if (thumbnail != null) {
-			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
+		if (fileicon != null) {
+			values.put(FileTransferData.KEY_FILEICON, fileicon.getUri().toString());
 		}
 
 		cr.insert(ftDatabaseUri, values);
@@ -217,23 +235,30 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferStatus(java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * updateFileTransferStateAndReasonCode(java.lang.String,
+	 * com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode)
 	 */
 	@Override
-	public void updateFileTransferStatus(String fileTransferId, int status) {
+	public void updateFileTransferStateAndReasonCode(String fileTransferId,
+			FileTransferStateAndReasonCode stateAndReasonCode) {
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
 		if (logger.isActivated()) {
-			logger.debug("updateFileTransferStatus (status=" + status + ") (fileTransferId=" + fileTransferId + ")");
+			logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
+					.append(fileTransferId).append(", state=").append(state)
+					.append(", reasonCode=").append(reasonCode).toString());
 		}
 		// TODO FUSION to check
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_STATUS, status);
-		if (status == FileTransfer.State.DELIVERED) {
-			// Delivered
-			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance().getTimeInMillis());
-		} else if (status == FileTransfer.State.DISPLAYED) {
-			// Displayed
-			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
+		values.put(FileTransferData.KEY_STATE, state);
+		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
+		if (state == FileTransfer.State.DELIVERED) {
+			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance()
+					.getTimeInMillis());
+		} else if (state == FileTransfer.State.DISPLAYED) {
+			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance()
+					.getTimeInMillis());
 		}
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
@@ -250,7 +275,7 @@ public class FileTransferLog implements IFileTransferLog {
 					.toString());
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_READ_STATUS, FileTransfer.ReadStatus.READ);
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ);
 		if (cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId }) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
@@ -269,8 +294,10 @@ public class FileTransferLog implements IFileTransferLog {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_SIZE, size);
 		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
-		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.STARTED);
-		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
+		values.put(FileTransferData.KEY_STATE, FileTransfer.State.STARTED);
+		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] {
+			fileTransferId
+		});
 	}
 
 	/* (non-Javadoc)
@@ -282,9 +309,12 @@ public class FileTransferLog implements IFileTransferLog {
 			logger.debug("updateFileTransferUri (fileTransferId=" + fileTransferId + ") (uri=" + content.getUri() + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERRED);
-		values.put(FileTransferData.KEY_SIZE,content.getSize());
-		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
+		values.put(FileTransferData.KEY_STATE, FileTransfer.State.TRANSFERRED);
+		values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED);
+		values.put(FileTransferData.KEY_SIZE, content.getSize());
+		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] {
+			fileTransferId
+		});
 	}
 
 	/*
@@ -372,11 +402,13 @@ public class FileTransferLog implements IFileTransferLog {
 	public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
 		Cursor cursor = null;
 		try {
-			// TODO : With implementation of CR009, use reason code to retrieve
-			// only those that were paused
-			// due to network interruptions - PAUSED_BY_SYSTEM
-			cursor = cr.query(ftDatabaseUri, null, FileTransferData.KEY_STATUS + "="
-					+ FileTransfer.State.PAUSED, null, ORDER_BY_TIMESTAMP_ASC);
+			String[] selectionArgs = new String[] {
+						String.valueOf(FileTransfer.State.PAUSED),
+						String.valueOf(FileTransfer.ReasonCode.PAUSED_BY_SYSTEM)
+			};
+
+			cursor = cr.query(ftDatabaseUri, null, SELECTION_BY_PAUSED_BY_SYSTEM,
+					selectionArgs, ORDER_BY_TIMESTAMP_ASC);
 			if (!cursor.moveToFirst()) {
 				return new ArrayList<FtHttpResume>();
 			}
@@ -416,7 +448,7 @@ public class FileTransferLog implements IFileTransferLog {
 				int direction = cursor.getInt(directionColumnIdx);
 				String fileicon = cursor.getString(fileiconColumnIdx);
 				boolean isGroup = !contact.toString().equals(chatId);
-				if (direction == FileTransfer.Direction.INCOMING) {
+				if (direction == Direction.INCOMING) {
 					String downloadServerAddress = cursor.getString(downloadServerAddressColumnIdx);
 					MmContent content = ContentManager.createMmContent(Uri.parse(file), size,
 							fileName);

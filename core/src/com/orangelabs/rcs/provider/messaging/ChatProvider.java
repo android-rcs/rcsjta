@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -87,7 +87,7 @@ public class ChatProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 10;
+        private static final int DATABASE_VERSION = 11;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -102,7 +102,8 @@ public class ChatProvider extends ContentProvider {
         			+ ChatData.KEY_REJOIN_ID + " TEXT,"
         			+ ChatData.KEY_SUBJECT + " TEXT,"
         			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
-        			+ ChatData.KEY_STATUS + " integer,"
+        			+ ChatData.KEY_STATE + " integer,"
+        			+ ChatData.KEY_REASON_CODE + " integer,"
         			+ ChatData.KEY_DIRECTION + " integer,"
         			+ ChatData.KEY_TIMESTAMP + " long,"
         			+ ChatData.KEY_REJECT_GC + " integer DEFAULT 0);");
@@ -116,6 +117,7 @@ public class ChatProvider extends ContentProvider {
         			+ MessageData.KEY_CONTENT_TYPE + " TEXT,"
         			+ MessageData.KEY_DIRECTION + " integer,"
         			+ MessageData.KEY_STATUS + " integer,"
+        			+ MessageData.KEY_REASON_CODE + " integer,"
         			+ MessageData.KEY_READ_STATUS + " integer,"
         			+ MessageData.KEY_TIMESTAMP + " long,"
         			+ MessageData.KEY_TIMESTAMP_SENT + " long,"

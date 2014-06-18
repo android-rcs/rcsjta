@@ -25,6 +25,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 
 /**
  * Chat session listener
@@ -64,20 +65,24 @@ public interface ChatSessionListener extends ImsSessionListener {
     public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state);
 
     /**
-     * New message failure status notifying the failure of sending
+     * Notifying sending of a message
      *
      * @param msgId Message ID
      */
-    public void handleSendMessageFailure(String msgId);
+    public void handleMessageSent(String msgId);
+    /**
+     * Notifying failure of sending message
+     *
+     * @param msgId Message ID
+     */
+    public void handleMessageFailedSend(String msgId);
 
     /**
      * New message delivery status that are received as part of imdn notification
-     * 
-	 * @param msgId Message ID
-     * @param status Delivery status
      * @param contact the remote contact identifier
+     * @param ImdnDocument imdn Imdn document
      */
-    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact);
+    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
     
     /**
      * Request to add participant is successful
@@ -108,4 +113,9 @@ public interface ChatSessionListener extends ImsSessionListener {
 	 *            the participant information
 	 */
     public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
+
+	/**
+	 * Session is being accepted
+	 */
+    public void handleSessionAccepting();
 }

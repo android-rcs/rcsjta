@@ -36,6 +36,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.orangelabs.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,7 +56,7 @@ public class GroupChatLog implements IGroupChatLog {
 	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
 
 	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(ChatData.KEY_CHAT_ID).append("=? AND ")
-			.append(ChatData.KEY_STATUS).append("=? AND ").append(ChatData.KEY_REJECT_GC).append("=1").toString();
+			.append(ChatData.KEY_STATE).append("=? AND ").append(ChatData.KEY_REJECT_GC).append("=1").toString();
 
 	/**
 	 * The logger
@@ -104,16 +105,18 @@ public class GroupChatLog implements IGroupChatLog {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set, int,
-	 * int)
+	 * int, int)
 	 */
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int direction) {
+	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants,
+			int status, int reasonCode, int direction) {
 		if (logger.isActivated()) {
-			logger.debug("addGroupChat (chatID=" + chatId + ") (subject=" + subject + ") (status=" + status + ") (dir=" + direction
-					+ ")");
+			logger.debug("addGroupChat (chatID=" + chatId + ") (subject=" + subject + ") (status="
+					+ status + ") (reasonCode=" + reasonCode + ") (dir=" + direction					+ ")");
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_CHAT_ID, chatId);
-		values.put(ChatData.KEY_STATUS, status);
+		values.put(ChatData.KEY_STATE, status);
+		values.put(ChatData.KEY_REASON_CODE, reasonCode);
 		values.put(ChatData.KEY_SUBJECT, subject);
 		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
 		values.put(ChatData.KEY_DIRECTION, direction);
@@ -143,16 +146,27 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatStatus(java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
+	 * updateGroupChatStatusAndReasonCode
+	 * (java.lang.String,com.orangelabs.rcs.provider
+	 * .messaging.GroupChatStateAndReasonCode)
 	 */
 	@Override
-	public void updateGroupChatStatus(String chatId, int status) {
+	public void updateGroupChatStateAndReasonCode(String chatId,
+			GroupChatStateAndReasonCode stateAndReasonCode) {
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
 		if (logger.isActivated()) {
-			logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (status=" + status + ")");
+			logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (state=" + state
+					+ ") (reasonCode=" + reasonCode + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_STATUS, status);
-		cr.update(chatDatabaseUri, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
+		values.put(ChatData.KEY_STATE, state);
+		values.put(ChatData.KEY_REASON_CODE, reasonCode);
+		String selectionArgs[] = new String[] {
+				chatId
+		};
+		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID, null);
 	}
 
 	/*
@@ -183,7 +197,7 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJOIN_ID, rejoinId);
-		values.put(ChatData.KEY_STATUS, GroupChat.State.STARTED);
+		values.put(ChatData.KEY_STATE, GroupChat.State.STARTED);
 		cr.update(chatDatabaseUri, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 

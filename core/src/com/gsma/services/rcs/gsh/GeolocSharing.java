@@ -37,9 +37,9 @@ public class GeolocSharing {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Sharing invitation received
@@ -57,43 +57,90 @@ public class GeolocSharing {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * Geoloc has been transferred with success 
+    	 * Sharing has been aborted
     	 */
-    	public final static int TRANSFERRED = 4;
-    	
-    	/**
-    	 * Sharing has been aborted 
-    	 */
-    	public final static int ABORTED = 5;
+    	public final static int ABORTED = 4;
     	
     	/**
     	 * Sharing has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 5;
+
+    	/**
+    	 * Sharing has been terminated
+    	 */
+    	public final static int TERMINATED = 6;
+
+    	/**
+    	 * Sharing invitation was rejected
+    	 */
+    	public final static int REJECTED = 7;
 
     	/**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 7;
+    	public final static int RINGING = 8;
 
         private State() {
         }    	
     }
-    
-    /**
-     * Direction of the sharing
-     */
-    public static class Direction {
-        /**
-         * Incoming sharing
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing sharing
-         */
-        public static final int OUTGOING = 1;
-    }      
+
+    public static class ReasonCode {
+    	/**
+    	 * No specific reason code specified.
+    	 */
+    	public final static int UNSPECIFIED = 0;
+
+    	/**
+    	 * Geolocation share is aborted by local user.
+    	 */
+    	public final static int ABORTED_BY_USER = 1;
+
+    	/**
+    	 * Geolocation share is aborted by remote user.
+    	 */
+    	public final static int ABORTED_BY_REMOTE = 2;
+
+    	/**
+    	 * Geolocation share is aborted by system.
+    	 */
+    	public final static int ABORTED_BY_SYSTEM = 3;
+
+    	/**
+    	 * Geolocation share is aborted because already taken by the secondary device.
+    	 */
+    	public final static int ABORTED_BY_SECONDARY_DEVICE = 4;
+
+    	/**
+    	 * Geolocation share invitation was rejected due to to many open sharing sessions.
+    	 */
+    	public final static int REJECTED_MAX_SHARING_SESSIONS = 5;
+
+    	/**
+    	 * Geolocation share invitation was rejected by local user.
+    	 */
+    	public final static int REJECTED_BY_USER = 6;
+
+    	/**
+    	 * Geolocation share invitation was rejected by remote.
+    	 */
+    	public final static int REJECTED_BY_REMOTE = 7;
+
+    	/**
+    	 * Geolocation share invitation was rejected due to time out.
+    	 */
+    	public final static int REJECTED_TIME_OUT = 8;
+
+    	/**
+    	 * Geolocation share initiation failed.
+    	 */
+    	public final static int FAILED_INITIATION = 9;
+
+    	/**
+    	 * Sharing of the geolocation has failed.
+    	 */
+    	public final static int FAILED_SHARING = 10;
+    }
     
     /**
      * Geoloc sharing error

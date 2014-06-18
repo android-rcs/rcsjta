@@ -36,9 +36,9 @@ public class IPCall {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Call invitation received
@@ -56,48 +56,103 @@ public class IPCall {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * call has been aborted 
+    	 * call has been aborted
     	 */
-    	public final static int ABORTED = 5;
-    	
-        /**
-         * Call has been terminated
-         */
-        public static final int TERMINATED = 6;
+    	public final static int ABORTED = 4;
 
-        /**
-    	 * Call has failed 
+    	/**
+    	 * Call has failed
     	 */
-    	public final static int FAILED = 7;
-    	
-        /**
-    	 * Call on hold 
+    	public final static int FAILED = 5;
+
+    	/**
+    	 * Call has been terminated
+    	 */
+    	public static final int TERMINATED = 6;
+
+    	/**
+    	 * Call rejected
+    	 */
+    	public final static int REJECTED = 7;
+
+    	/**
+    	 * Call on hold
     	 */
     	public final static int HOLD = 8;
 
-        /**
+    	/**
+    	 * Call about to be accepted
+    	 */
+    	public final static int ACCEPTING = 9;
+
+    	/**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 9;
+    	public final static int RINGING = 10;
 
     	private State() {
         }    	
     }
     
     /**
-     * Direction of the call
+     * Reason code associated with the ip call state.
      */
-    public static class Direction {
+    public static class ReasonCode {
         /**
-         * Incoming call
+         * No specific reason code specified.
          */
-        public static final int INCOMING = 0;
-        
+        public static final int UNSPECIFIED = 0;
+
         /**
-         * Outgoing call
+         * IP call share is aborted by local user.
          */
-        public static final int OUTGOING = 1;
-    }    
+        public static final int ABORTED_BY_USER = 1;
+
+        /**
+         * IP call share is aborted by remote user.
+         */
+        public static final int ABORTED_BY_REMOTE = 2;
+
+        /**
+         * IP call is aborted by system.
+         */
+        public static final int ABORTED_BY_SYSTEM = 3;
+
+        /**
+         * IP call is aborted because already taken by the secondary device.
+         */
+        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+
+        /**
+         * IP call invitation was rejected due to max number of sessions reached.
+         */
+        public static final int REJECTED_MAX_SESSIONS = 5;
+
+        /**
+         * IP call invitation was rejected by local user.
+         */
+        public static final int REJECTED_BY_USER = 6;
+
+        /**
+         * IP call invitation was rejected by remote.
+         */
+        public static final int REJECTED_BY_REMOTE = 7;
+
+        /**
+         * IP call has been rejected due to time out.
+         */
+        public static final int REJECTED_TIME_OUT = 8;
+
+        /**
+         * IP call initiation failed.
+         */
+        public static final int FAILED_INITIATION = 9;
+
+        /**
+         * IP call failed.
+         */
+        public static final int FAILED_IPCALL = 10;
+    }
     
     /**
      * Call error

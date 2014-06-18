@@ -36,9 +36,9 @@ public class VideoSharing {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Sharing invitation received
@@ -56,9 +56,14 @@ public class VideoSharing {
     	public final static int STARTED = 3;
     	
     	/**
-    	 * Sharing has been aborted 
+    	 * Sharing has been aborted
     	 */
-    	public final static int ABORTED = 5;
+    	public final static int ABORTED = 4;
+
+    	/**
+    	 * Sharing has failed
+    	 */
+    	public final static int FAILED = 5;
     	
         /**
          * Sharing has been terminated
@@ -66,33 +71,80 @@ public class VideoSharing {
         public static final int TERMINATED = 6;
 
         /**
-    	 * Sharing has failed 
+    	 * Sharing has been rejected
     	 */
-    	public final static int FAILED = 7;
+    	public final static int REJECTED = 7;
 
         /**
-    	 * Call ringing
+    	 * Ringing
     	 */
     	public final static int RINGING = 8;
 
     	private State() {
         }    	
     }
-    
+
     /**
-     * Direction of the sharing
+     * Reason code associated with the VIDEO share state.
      */
-    public static class Direction {
+    public static class ReasonCode {
+
         /**
-         * Incoming sharing
+         * No specific reason code specified.
          */
-        public static final int INCOMING = 0;
-        
+        public static final int UNSPECIFIED = 0;
+
         /**
-         * Outgoing sharing
+         * Video share is aborted by local user.
          */
-        public static final int OUTGOING = 1;
-    }    
+        public static final int ABORTED_BY_USER = 1;
+
+        /**
+         * Video share is aborted by remote user.
+         */
+        public static final int ABORTED_BY_REMOTE = 2;
+
+        /**
+         * Video share is aborted by system.
+         */
+        public static final int ABORTED_BY_SYSTEM = 3;
+
+        /**
+         * Video share is aborted because already taken by the secondary device.
+         */
+        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+
+        /**
+         * Video share invitation was rejected due to max number of sharing sessions
+         * already are open.
+         */
+        public static final int REJECTED_MAX_SHARING_SESSIONS = 5;
+
+        /**
+         * Video share invitation was rejected by local user.
+         */
+        public static final int REJECTED_BY_USER = 6;
+
+        /**
+         * Video share invitation was rejected by remote.
+         */
+        public static final int REJECTED_BY_REMOTE = 7;
+
+        /**
+         * Video share been rejected due to time out.
+         */
+        public static final int REJECTED_TIME_OUT = 8;
+
+        /**
+         * Video share initiation failed.
+         */
+        public static final int FAILED_INITIATION = 9;
+
+        /**
+         * Sharing of the video share has failed.
+         */
+        public static final int FAILED_SHARING = 10;
+    }
     
     /**
      * Video sharing error

@@ -68,6 +68,13 @@ public class ChatLog {
         public static final String STATE = "state";
 
         /**
+         * The name of the column containing the reason code of the state of the group chat.
+         * <P>Type: INTEGER</P>
+         * @see GroupChat.RcsCommon
+         */
+        public static final String REASON_CODE = "reason_code";
+
+        /**
          * The name of the column containing the subject of the group chat.
          * <P>Type: TEXT</P>
          */
@@ -76,7 +83,7 @@ public class ChatLog {
         /**
          * The name of the column containing the direction of the group chat.
          * <P>Type: INTEGER</P>
-    	 * @see GroupChat.Direction
+    	 * @see Direction
          */
         public static final String DIRECTION = "direction";
 
@@ -126,81 +133,6 @@ public class ChatLog {
 		}
 	}
 
-	/**
-	 * Group chat delivery info (delivery information on group chat messages and file transfers)
-	 */
-	public static class GroupChatDeliveryInfo {
-
-		public static final Uri CONTENT_URI = Uri
-				.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo");
-
-		public static final Uri CONTENT_MSG_URI = Uri
-				.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/messageid/");
-
-		public static final String DELIVERY_STATUS = "status";
-
-		public static final String REASON_CODE = "reason_code";
-
-		public static final String MESSAGE_ID = "msg_id";
-
-		public static final String CHAT_ID = "chat_id";
-
-		public static final String CONTACT = "contact";
-
-		public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
-
-		public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
-
-		/**
-		 * Group chat delivery status of the entry
-		 */
-		public static class DeliveryStatus {
-			/**
-			 * this message or file-transfer has not received any delivered or
-			 * displayed delivery report for the specified contact.
-			 */
-			public static final int NOT_DELIVERED = 0;
-
-			/**
-			 * The message or file-transfer has received a delivered delivery
-			 * report for the specified contact
-			 */
-			public static final int DELIVERED = 1;
-
-			/**
-			 * The message or file-transfer has received a displayed delivery
-			 * report for the specified contact.
-			 */
-			public static final int DISPLAYED = 2;
-
-			/**
-			 * The message or file-transfer has received a delivery report
-			 * failure for the specified contact.
-			 */
-			public static final int FAILED = 3;
-		}
-
-		/**
-		 * Group chat delivery status reason
-		 */
-		public static class ReasonCode {
-
-			/**
-			 * No specific reason code specified.
-			 */
-			public static final int NONE = 0;
-
-			/**
-			 * A delivered-error delivery report has been received.
-			 */
-			public static final int DELIVERY_ERROR = 1;
-
-			/**
-			 * A displayed-error delivery report has been received.
-			 */
-			public static final int DISPLAY_ERROR = 2;
-		}
-	}
 
     /**
      * Chat message from a single chat or group chat
@@ -243,6 +175,12 @@ public class ChatLog {
         public static final String MESSAGE_STATUS = "status";
 
         /**
+         * The name of the column containing the message status reason code.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String REASON_CODE = "reason_code";
+
+        /**
          * The name of the column containing the message read status.
          * <P>Type: INTEGER</P>
          */
@@ -266,13 +204,13 @@ public class ChatLog {
          * The name of the column containing the MSISDN of the remote contact.
          * <P>Type: TEXT</P>
          */
-        public static final String CONTACT_NUMBER = "contact_number";
+        public static final String CONTACT = "contact";
         
         /**
-         * The name of the column containing the message body.
-         * <P>Type: BLOB</P>
+         * The name of the column containing the message content.
+         * <P>Type: TEXT</P>
          */
-        public static final String BODY = "body";
+        public static final String CONTENT = "content";
      
         /**
          * The name of the column containing the time when message is created.
@@ -318,33 +256,8 @@ public class ChatLog {
 	         */
 	        public static final int SYSTEM = 1;
 	        
-	        /**
-	         * Spam message
-	         */
-	        public static final int SPAM = 2;
-	        
         }
-        	
-        /**
-         * Direction of the message
-         */
-        public static class Direction {
-	        /**
-	         * Incoming message
-	         */
-	        public static final int INCOMING = 0;
-	        
-	        /**
-	         * Outgoing message
-	         */
-	        public static final int OUTGOING = 1;
-	        
-	        /**
-	         * Irrelevant or not applicable (e.g. for a system message)
-	         */
-	        public static final int IRRELEVANT = 2;
-        }
-        
+
         /**
          * Status of the message
          */
@@ -353,115 +266,140 @@ public class ChatLog {
              * Status of a content message
              */
             public static class Content {
-		        /**
-		         * The message has been delivered to the remote.
-		         */
-		        public static final int DELIVERED = 0;
-	
-		        /**
-		         * The message has been received and a displayed delivery report is
-		         * requested
-		         */
-		        public static final int DISPLAY_REPORT_REQUESTED = 1;
-		        
-		        /**
-		         * The message is delivered and no display delivery report is requested.
-		         */
-		        public static final int RECEIVED = 2;
-		        
-		        /**
-		         * The message is in progress of sending
-		         */
-		        public static final int SENDING = 3;
-		        
-		        /**
-		         * The message has been sent
-		         */
-		        public static final int SENT = 4;
-	
-		        /**
-		         * The message is failed to be sent
-		         */
-		        public static final int FAILED = 5;
-		        
-		        /**
-		         * The message is queued to be sent by joyn service when possible
-		         */
-		        public static final int TO_SEND = 6;
-		        
-		        /**
-		         * The message is a spam message
-		         */
-		        public static final int BLOCKED = 7;
 
-		        /**
-		         * The message is displayed
-		         */
-		        public static final int DISPLAYED = 8;
+                /**
+                 * The message status in unknown
+                 */
+                public static final int UNKNOWN = 0;
+
+                /**
+                 * The message has been rejected
+                 */
+                public static final int REJECTED = 1;
+
+                /**
+                 * The message is queued to be sent by joyn service when
+                 * possible
+                 */
+                public static final int QUEUED = 2;
+
+                /**
+                 * The message is in progress of sending
+                 */
+                public static final int SENDING = 3;
+
+                /**
+                 * The message has been sent
+                 */
+                public static final int SENT = 4;
+
+                /**
+                 * The message sending has been failed
+                 */
+                public static final int FAILED = 5;
+
+                /**
+                 * The message has been delivered to the remote.
+                 */
+                public static final int DELIVERED = 6;
+
+                /**
+                 * The message has been received and a displayed delivery report
+                 * is requested
+                 */
+                public static final int DISPLAY_REPORT_REQUESTED = 7;
+
+                /**
+                 * The message is delivered and no display delivery report is
+                 * requested.
+                 */
+                public static final int RECEIVED = 8;
+
+                /**
+                 * The message has been displayed
+                 */
+                public static final int DISPLAYED = 9;
             }
-            
+
             /**
              * Status of the system message
              */
             public static class System {
-		        /**
-		         * Invitation of a participant is pending
-		         */
-		        public static final int PENDING = 0;
+                /**
+                 * Invitation of a participant is pending
+                 */
+                public static final int PENDING = 0;
 
-		        /**
-		         * Invitation accepted by a participant
-		         */
-		        public static final int ACCEPTED = 1;
-	        
-		        /**
-		         * Invitation declined by a participant
-		         */
-		        public static final int DECLINED = 2;
-	        
-		        /**
-		         * Invitation of a participant has failed
-		         */
-		        public static final int FAILED = 3;
-	        
-		        /**
-		         * Participant has joined the group chat
-		         */
-		        public static final int JOINED = 4;
-	        
-		        /**
-		         * Participant has left the group chat (i.e. departed)
-		         */
-		        public static final int GONE = 5;
+                /**
+                 * Invitation accepted by a participant
+                 */
+                public static final int ACCEPTED = 1;
 
-		        /**
-		         * Participant has been disconnected from the group chat (i.e. booted)
-		         */
-		        public static final int DISCONNECTED = 6;
-		        
-		        /**
-		         * Participant is busy
-		         */
-		        public static final int BUSY = 7;
+                /**
+                 * Invitation declined by a participant
+                 */
+                public static final int DECLINED = 2;
+
+                /**
+                 * Invitation of a participant has failed
+                 */
+                public static final int FAILED = 3;
+
+                /**
+                 * Participant has joined the group chat
+                 */
+                public static final int JOINED = 4;
+
+                /**
+                 * Participant has left the group chat (i.e. departed)
+                 */
+                public static final int GONE = 5;
+
+                /**
+                 * Participant has been disconnected from the group chat (i.e.
+                 * booted)
+                 */
+                public static final int DISCONNECTED = 6;
+
+                /**
+                 * Participant is busy
+                 */
+                public static final int BUSY = 7;
             }
         }
 
         /**
-         * Read status of the message
+         * Reason code of the message status
          */
-        public static class ReadStatus {
-		    /**
-		    * The message has not yet been displayed in the UI.
-		    */
-		    public static final int UNREAD = 0;
+        public static class ReasonCode {
 
-		    /**
-		     * The message has been displayed in the UI.
-		     */
-		    public static final int READ = 1;
+            /**
+             * No specific reason code specified.
+             */
+            public static final int UNSPECIFIED = 0;
+
+            /**
+             * Sending of the message failed.
+             */
+            public static final int FAILED_SEND = 1;
+
+            /**
+             * Delivering of the message failed.
+             */
+            public static final int FAILED_DELIVERY = 2;
+
+            /**
+             * Displaying of the message failed.
+             */
+            public static final int FAILED_DISPLAY = 3;
+
+            /**
+             * Incoming one-to-one message was detected as spam.
+             */
+            public static final int REJECTED_SPAM = 4;
         }
     }
-    
+
 	/**
 	 * Utility method to get a Geoloc object from its string representation in the ChatLog provider
 	 * 

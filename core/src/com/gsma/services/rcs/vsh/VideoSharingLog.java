@@ -80,6 +80,13 @@ public class VideoSharingLog {
     public static final String STATE = "state";    
 
     /**
+     * The name of the column containing the reason code of the state.
+     * <P>Type: INTEGER</P>
+     * @see VideoSharing.ReasonCode
+     */
+    public static final String REASON_CODE = "reason_code";
+
+    /**
      * The name of the column containing the encoding type of video
      * <P>Type: INTEGER</P>
 	 * @see VideoSharing.Encoding

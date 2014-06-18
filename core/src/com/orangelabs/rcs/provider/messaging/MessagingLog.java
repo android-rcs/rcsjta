@@ -36,7 +36,6 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.util.Pair;
 
 /**
  * Class to interface the Instant Messaging tables
@@ -102,11 +101,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set, int,
-	 * int)
+	 * int, int)
 	 */
 	@Override
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int direction) {
-		groupChatLog.addGroupChat(chatId, subject, participants, status, direction);
+	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
+		groupChatLog.addGroupChat(chatId, subject, participants, status, reasonCode, direction);
 	}
 
 	/*
@@ -122,11 +121,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatStatus(java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
+	 * updateGroupChatStatusAndReasonCode (java.lang.String,
+	 * com.orangelabs.rcs.provider.messaging.GroupChatStateAndReasonCode)
 	 */
 	@Override
-	public void updateGroupChatStatus(String chatId, int status) {
-		groupChatLog.updateGroupChatStatus(chatId, status);
+	public void updateGroupChatStateAndReasonCode(String chatId,
+			GroupChatStateAndReasonCode stateAndReasonCode) {
+		groupChatLog.updateGroupChatStateAndReasonCode(chatId, stateAndReasonCode);
 	}
 
 	/*
@@ -184,23 +186,34 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage,
-	 * int)
+	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addIncomingOneToOneChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage))
 	 */
 	@Override
-	public void addChatMessage(InstantMessage msg, int direction) {
-		messageLog.addChatMessage(msg, direction);
+	public void addIncomingOneToOneChatMessage(InstantMessage msg) {
+		messageLog.addIncomingOneToOneChatMessage(msg);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addOutgoingOneToOneChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage,
+	 * int,int)
+	 */
+	@Override
+	public void addOutgoingOneToOneChatMessage(InstantMessage msg, int status, int reasonCode) {
+		messageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatMessage(java.lang.String,
-	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage, int)
+	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage, int, int, int)
 	 */
 	@Override
-	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction) {
-		messageLog.addGroupChatMessage(chatId, msg, direction);
+	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction, int status, int reasonCode) {
+		messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
 	}
 
 	/*
@@ -226,11 +239,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#updateChatMessageStatus(java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
+	 * updateChatMessageStatusAndReasonCode (java.lang.String,
+	 * com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode)
 	 */
 	@Override
-	public void updateChatMessageStatus(String msgId, int status) {
-		messageLog.updateChatMessageStatus(msgId, status);
+	public void updateChatMessageStatusAndReasonCode(String msgId,
+			MessageStatusAndReasonCode statusAndReasonCode) {
+		messageLog.updateChatMessageStatusAndReasonCode(msgId, statusAndReasonCode);
 	}
 
 	/*
@@ -241,27 +257,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public void markIncomingChatMessageAsReceived(String msgId) {
 		messageLog.markIncomingChatMessageAsReceived(msgId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#updateOutgoingChatMessageDeliveryStatus(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
-	public void updateOutgoingChatMessageDeliveryStatus(String msgId, String status) {
-		messageLog.updateOutgoingChatMessageDeliveryStatus(msgId, status);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#updateChatMessageDeliveryStatus(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void updateChatMessageDeliveryStatus(String msgId, String status) {
-		messageLog.updateChatMessageDeliveryStatus(msgId, status);
 	}
 
 	/*
@@ -278,11 +273,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addFileTransfer(java.lang.String, java.lang.String, int,
-	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
+	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
-		fileTransferLog.addFileTransfer(contact, fileTransferId, direction, content, thumbnail);
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+			MmContent content, MmContent fileIcon, int status, int reasonCode) {
+		fileTransferLog.addFileTransfer(contact, fileTransferId, direction, content, fileIcon,
+				status, reasonCode);
 	}
 
 	/*
@@ -300,22 +297,26 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.lang.String, java.lang.String,
-	 * java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
+	 * java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent thumbnail) {
-		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content, thumbnail);
+			MmContent fileicon, int state, int reasonCode) {
+		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content,
+				fileicon, state, reasonCode);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferStatus(java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * updateFileTransferStateAndReasonCode(java.lang.String,
+	 * com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode)
 	 */
 	@Override
-	public void updateFileTransferStatus(String fileTransferId, int status) {
-		fileTransferLog.updateFileTransferStatus(fileTransferId, status);
+	public void updateFileTransferStateAndReasonCode(String fileTransferId,
+			FileTransferStateAndReasonCode stateAndReasonCode) {
+		fileTransferLog.updateFileTransferStateAndReasonCode(fileTransferId, stateAndReasonCode);
 	}
 
 	/*
@@ -369,16 +370,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#setChatMessageDeliveryRequested(java.lang.String)
-	 */
-	@Override
-	public void setChatMessageDeliveryRequested(String msgId) {
-		messageLog.setChatMessageDeliveryRequested(msgId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#isGroupChatNextInviteRejected(java.lang.String)
 	 */
 	@Override
@@ -410,23 +401,17 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#updateGroupChatDeliveryInfoStatus(java.lang.String,
-	 * java.lang.String, com.gsma.services.rcs.contacts.ContactId)
-	 */
-	@Override
-	public void updateGroupChatDeliveryInfoStatus(String msgId, int status, int reasonCode, ContactId contact) {
-		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatus(msgId, status, reasonCode, contact);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#getGroupChatDeliveryInfoStatus(java.lang.String,
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
+	 * updateGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String,
+	 * com.orangelabs.rcs.provider
+	 * .messaging.DeliveryInfoStatusAndReasonCode,java.lang.String,
 	 * com.gsma.services.rcs.contacts.ContactId)
 	 */
 	@Override
-	public Pair<Integer, Integer> getGroupChatDeliveryInfoStatus(String msgId, ContactId contact) {
-		return groupChatDeliveryInfoLog.getGroupChatDeliveryInfoStatus(msgId, contact);
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId,
+			DeliveryInfoStatusAndReasonCode statusAndReasonCode, ContactId contact) {
+		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId,
+				statusAndReasonCode, contact);
 	}
 
 	/*

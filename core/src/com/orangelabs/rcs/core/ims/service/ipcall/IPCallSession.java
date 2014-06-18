@@ -626,7 +626,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallResumeAborted(code);
+							.handleCallResumeAborted();
 				}
 			}
 		}

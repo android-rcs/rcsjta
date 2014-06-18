@@ -9,7 +9,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IChatListener {
 
-	void onMessageStatusChanged(in ContactId contact, in String msgId, in int status);
+	void onMessageStatusChanged(in ContactId contact, in String msgId, in int status, in int reasonCode);
 
 	void onComposingEvent(in ContactId contact, in boolean status);
 }

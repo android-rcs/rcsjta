@@ -21,8 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
@@ -85,7 +85,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 */
 	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileicon, MmContent content, ContactId contact,
 			String chatId, String filetransferId, boolean isGroup) {
-		super(FileTransfer.Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contact, chatId, filetransferId, isGroup);
+		super(Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contact, chatId, filetransferId, isGroup);
 		this.downloadServerAddress = downloadServerAddress;
 		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");

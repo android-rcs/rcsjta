@@ -39,9 +39,9 @@ public class GroupChat {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Chat invitation received
@@ -78,24 +78,81 @@ public class GroupChat {
     	 * Chat has failed 
     	 */
     	public final static int FAILED = 7;
+
+    	/**
+    	 * Chat is about to be accepted.
+    	 */
+    	public final static int ACCEPTING = 8;
+
+    	/**
+    	 * Chat invitation was rejected.
+    	 */
+    	public final static int REJECTED = 9;
     	
         private State() {
         }    	
     }
     
     /**
-     * Direction of the group chat
+     * Group chat state reason code
      */
-    public static class Direction {
+    public static class ReasonCode {
+
         /**
-         * Incoming chat
+         * No specific reason code specified.
          */
-        public static final int INCOMING = 0;
-        
+        public final static int UNSPECIFIED = 0;
+
         /**
-         * Outgoing chat
+         * Group chat is aborted by local user.
          */
-        public static final int OUTGOING = 1;
+        public final static int ABORTED_BY_USER = 1;
+
+        /**
+         * Group chat is aborted by remote user.
+         */
+
+        public final static int ABORTED_BY_REMOTE = 2;
+
+        /**
+         * Group chat is aborted by system.
+         */
+        public final static int ABORTED_BY_SYSTEM = 3;
+
+        /**
+         * Group chat is aborted because already taken by the secondary device.
+         */
+        public final static int ABORTED_BY_SECONDARY_DEVICE = 4;
+
+        /**
+         * Group chat invitation was rejected as it was detected as spam.
+         */
+        public final static int REJECTED_SPAM = 5;
+
+        /**
+         * Group chat invitation was rejected due to max number of chats open already.
+         */
+        public final static int REJECTED_MAX_CHATS = 6;
+
+        /**
+         * Group chat invitation was rejected by local user.
+         */
+        public final static int REJECTED_BY_USER = 7;
+
+        /**
+         * Group chat invitation was rejected by remote.
+         */
+        public final static int REJECTED_BY_REMOTE = 8;
+
+        /**
+         * Group chat invitation was rejected due to time out.
+         */
+        public final static int REJECTED_TIME_OUT = 9;
+
+        /**
+         * Group chat initiation failed.
+         */
+        public final static int FAILED_INITIATION = 10;
     }
     
     /**
@@ -153,7 +210,7 @@ public class GroupChat {
 	 * Returns the direction of the group chat (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see GroupChat.Direction
+	 * @see Direction
 	 * @throws JoynServiceException
 	 */
 	public int getDirection() throws JoynServiceException {

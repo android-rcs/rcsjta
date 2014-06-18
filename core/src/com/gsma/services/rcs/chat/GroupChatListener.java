@@ -33,10 +33,11 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	/**
 	 * Callback called when the group chat state is changed
 	 *
-	 * @param chatId
-	 * @param state
+	 * @param chatId chat id
+	 * @param state group chat state
+	 * @param reasonCode reason code
 	 */
-	public abstract void onGroupChatStateChanged(String chatId, int state);
+	public abstract void onGroupChatStateChanged(String chatId, int state, int reasonCode);
 
 	/**
 	 * Callback called when an Is-composing event has been received. If the
@@ -54,8 +55,10 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param chatId chat id
 	 * @param msgId message id
 	 * @param status message status
+	 * @param reasonCode reason code
 	 */
-	public abstract void onMessageStatusChanged(String chatId, String msgId, int status);
+	public abstract void onMessageStatusChanged(String chatId, String msgId, int status,
+			int reasonCode);
 
 	/**
 	 * Callback called when a group delivery info status/reasonCode was changed for a single recipient to a group message.

@@ -32,16 +32,19 @@ import android.os.IBinder;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.IImageSharingService;
 import com.gsma.services.rcs.ish.ImageSharing;
+import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -87,6 +90,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Image sharing service API is loaded");
 		}
+	}
+
+	/*Broadcast intent related to the received invitation*/
+	private void broadcastImageSharingInvitation(String sessionId) {
+		Intent newInvitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sessionId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
 	/**
@@ -191,23 +203,18 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 					+ session.getRemoteDisplayName());
 		}
 		ContactId contact = session.getRemoteContact();
-		// Update rich call history
+
 		RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
-				ImageSharing.Direction.INCOMING,
+				Direction.INCOMING,
 				session.getContent(),
-				ImageSharing.State.INVITED);
+				ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		// Update displayName of remote contact
 		 ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
 		// Add session in the list
 		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
 
-		// Broadcast intent related to the received invitation
-		Intent newInvitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+		broadcastImageSharingInvitation(session.getSessionID());
     }
 
     /**
@@ -248,11 +255,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			// Initiate a sharing session
 			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
-			// Update rich call history
+			String sharingId = session.getSessionID();
 			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
-					ImageSharing.Direction.OUTGOING,
-	    			session.getContent(),
-	    			ImageSharing.State.INITIATED);
+					Direction.OUTGOING, session.getContent(),
+					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mImageSharingEventBroadcaster.broadcastImageSharingStateChanged(contact, sharingId,
+					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
 			ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
@@ -317,6 +325,22 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     }    
 
 	/**
+	 * Add and broadcast image sharing invitation rejection
+	 * invitation.
+	 *
+	 * @param contact Contact
+	 * @param content Image content
+	 * @param reasonCode Reason code
+	 */
+	public void addAndBroadcastImageSharingInvitationRejected(ContactId contact,
+			MmContent content, int reasonCode) {
+		String sessionId = SessionIdGenerator.getNewId();
+		RichCallHistory.getInstance().addImageSharing(contact, sessionId,
+				Direction.INCOMING, content, ImageSharing.State.FAILED, reasonCode);
+		broadcastImageSharingInvitation(sessionId);
+	}
+
+    /**
 	 * Adds an event listener on image sharing events
 	 * 
 	 * @param listener Listener

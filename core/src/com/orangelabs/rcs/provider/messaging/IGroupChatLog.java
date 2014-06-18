@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
@@ -43,12 +43,15 @@ public interface IGroupChatLog {
 	 *            Subject
 	 * @param participants
 	 *            List of participants
-	 * @param status
-	 *            Status
+	 * @param state
+	 *            State
+	 * @param reasonCode
+	 *            ReasonCode
 	 * @param direction
 	 *            Direction
 	 */
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int direction);
+	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants,
+			int state, int reasonCode, int direction);
 
 	/**
 	 * Accept next Group Chat invitation
@@ -62,10 +65,11 @@ public interface IGroupChatLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
-	 * @param status
-	 *            Status
+	 * @param stateandReasonCode
+	 *            State and reasonCode
 	 */
-	public void updateGroupChatStatus(String chatId, int status);
+	public void updateGroupChatStateAndReasonCode(String chatId,
+			GroupChatStateAndReasonCode stateAndReasonCode);
 
 	/**
 	 * Update group chat set of participants

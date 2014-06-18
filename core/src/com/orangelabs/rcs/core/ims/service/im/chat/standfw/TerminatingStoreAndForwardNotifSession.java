@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -384,44 +384,36 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 		}
 	}
 	
-	/**
+    /**
      * Receive a message delivery status (XML document)
      * 
      * @param contact Contact identifier
      * @param xml XML document
      */
     public void receiveMessageDeliveryStatus(ContactId contact, String xml) {
-		try {
-			// Parse the IMDN document
-			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-			if (imdn != null) {
-				String msgId = imdn.getMsgId();
-				String status = imdn.getStatus();
-				if ((msgId != null) && (status != null)) {
-					// Check message in RichMessagingHistory
-					// Note: FileTransferId is always generated to equal the
-					// associated msgId of a FileTransfer invitation message.
-					String fileTransferId = msgId;
-					boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(
-							fileTransferId);
-					if (isFileTransfer) {
-						// Notify the file delivery
-						((InstantMessagingService)getImsService()).receiveFileDeliveryStatus(
-								fileTransferId, status, contact);
-					} else {
-						// Notify the message delivery outside of the chat
-						// session
-						getImsService().getImsModule().getCore().getListener()
-								.handleMessageDeliveryStatus(contact, msgId, status);
-					}
-				}
-			}
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Can't parse IMDN document", e);
-			}
-		}
-	}
+        try {
+            ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
+            if (imdn == null) {
+                return;
+            }
+
+            boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(imdn.getMsgId());
+            if (isFileTransfer) {
+                ((InstantMessagingService)getImsService()).receiveFileDeliveryStatus(contact, imdn);
+
+            } else {
+                // Notify the message delivery outside of the chat
+                // session
+                getImsService().getImsModule().getCore().getListener()
+                        .handleMessageDeliveryStatus(contact, imdn);
+
+            }
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Can't parse IMDN document", e);
+            }
+        }
+    }
 	
     // Changed by Deutsche Telekom
     @Override

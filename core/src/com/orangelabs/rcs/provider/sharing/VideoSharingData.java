@@ -59,7 +59,12 @@ public class VideoSharingData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_STATUS = VideoSharingLog.STATE;
+	static final String KEY_STATE = VideoSharingLog.STATE;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_REASON_CODE = VideoSharingLog.REASON_CODE;
 
 	/**
 	 * Column name

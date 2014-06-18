@@ -26,6 +26,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 
 import android.net.Uri;
 
@@ -50,10 +51,15 @@ public interface IFileTransferLog {
 	 *            Direction
 	 * @param content
 	 *            File content
-	 * @param thumbnail
-	 *            Thumbnail content
+	 * @param fileicon
+	 *            Fileicon content
+	 * @param state
+	 *            File transfer state
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail);
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+			MmContent content, MmContent fileicon, int state, int reasonCode);
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
@@ -64,10 +70,11 @@ public interface IFileTransferLog {
 	 *            the identity of the file transfer
 	 * @param content
 	 *            the File content
-	 * @param thumbnail
-	 *            The thumbnail content
+	 * @param Fileicon
+	 *            the fileicon content
 	 */
-	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId, MmContent content, MmContent thumbnail);
+	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId,
+			MmContent content, MmContent fileicon);
 
 	/**
 	 * Add incoming group file transfer
@@ -80,33 +87,32 @@ public interface IFileTransferLog {
 	 *            Chat ID
 	 * @param content
 	 *            File content
-	 * @param thumbnail
-	 *            Thumbnail content
+	 * @param fileicon
+	 *            Fileicon contentID
+	 * @param state
+	 *            File transfer state
+	 * @param reasonCode
+	 *            Reason code
 	 */
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent thumbnail);
+			MmContent fileicon, int state, int reasonCode);
 
 	/**
-	 * Update file transfer status
+	 * Update file transfer state
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param status
-	 *            New status
-	 * @param contact
-	 *            the contact
+	 * @param stateAndReasonCode
+	 *            File transfer state and reason code
 	 */
-	public void updateFileTransferStatus(String fileTransferId, int status);
+	public void updateFileTransferStateAndReasonCode(String fileTransferId,
+			FileTransferStateAndReasonCode stateAndReasonCode);
 
 	/**
-	 * Update file transfer status
+	 * Update file transfer read status
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param status
-	 *            New status
-	 * @param contact
-	 *            the contact
 	 */
 	public void markFileTransferAsRead(String fileTransferId);
 

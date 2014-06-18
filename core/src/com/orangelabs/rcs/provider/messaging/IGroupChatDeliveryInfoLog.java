@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.provider.messaging.DeliveryInfoStatusAndReasonCode;
 
 import android.net.Uri;
-import android.util.Pair;
 
 /**
  * Interface for the deliveryinfo table
@@ -55,14 +55,13 @@ public interface IGroupChatDeliveryInfoLog {
 	 * 
 	 * @param msgID
 	 *            Message ID
-	 * @param status
-	 *            Delivery status
-	 * @param reasonCode
-	 *            Delivery status reason code
+	 * @param DeliveryInfoStatusAndReasonCode
+	 *            Delivery info status and reason code
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatus(String msgId, int status, int reasonCode, ContactId contact);
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId,
+			DeliveryInfoStatusAndReasonCode statusAndReasonCode, ContactId contact);
 
 	/**
 	 * Check if all recipients have received message
@@ -81,15 +80,4 @@ public interface IGroupChatDeliveryInfoLog {
 	 * @return true If it is last contact to display message
 	 */
 	public boolean isDisplayedByAllRecipients(String msgId);
-
-	/**
-	 * Get status for individual contact
-	 *
-	 * @param msgId
-	 *            Message ID
-	 * @param contact
-	 *            Contact ID for which the status should be retrieved
-	 * @return Pair with integers: status and reasonCode
-	 */
-	public Pair<Integer, Integer> getGroupChatDeliveryInfoStatus(String msgId, ContactId contact);
 }

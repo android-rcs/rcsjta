@@ -33,10 +33,12 @@ public abstract class MultimediaStreamingSessionListener extends IMultimediaStre
 	 * Callback called when the multimedia messaging session state is changed
 	 *
 	 * @param contact Contact ID
-	 * @param sessionId
-	 * @param state
+	 * @param sessionId Session Id
+	 * @param state State
+	 * @param reasonCode Reason code
 	 */
-	public abstract void onMultimediaStreamingStateChanged(ContactId contact, String sessionId, int state);
+	public abstract void onMultimediaStreamingStateChanged(ContactId contact, String sessionId,
+			int state, int reasonCode);
 
 	/**
 	 * Callback called when a new payload has been received

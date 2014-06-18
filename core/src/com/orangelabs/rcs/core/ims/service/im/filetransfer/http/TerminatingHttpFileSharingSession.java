@@ -26,7 +26,12 @@ import javax2.sip.header.ContactHeader;
 
 import android.net.Uri;
 
+import java.util.Vector;
+
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -35,10 +40,12 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -104,14 +111,16 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		isGroup = chatSession.isGroupChat();
 		
 		// Instantiate the download manager
-		downloadManager = new HttpDownloadManager(getContent(), this, fileTransferInfo.getFileUri());
+		MmContent content = getContent();
+		downloadManager = new HttpDownloadManager(content, this, fileTransferInfo.getFileUri());
 
 		// Download thumbnail
 		if (fileTransferInfo.getFileThumbnail() != null) {
 			FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-			String iconName = FileTransferUtils.buildFileiconUrl(getFileTransferId(),thumbnailInfo.getThumbnailType());
+			String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId,thumbnailInfo.getThumbnailType());
 			setFileicon(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
+
 	}
 
 	/**
@@ -160,47 +169,71 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}
+				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
+						Direction.INCOMING, getContent(), getFileicon(),
+						FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 			} else {
 				if (logger.isActivated()) {
 					logger.debug("Accept manually file transfer invitation");
 				}
+				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
+						Direction.INCOMING, getContent(), getFileicon(),
+						FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
 
-				// Wait invitation answer
 				int answer = waitInvitationAnswer();
-				if (answer == ImsServiceSession.INVITATION_REJECTED) {
-					if (logger.isActivated()) {
-						logger.debug("Transfer has been rejected by user");
-					}
+				Vector<ImsSessionListener> listeners = getListeners();
+				switch (answer) {
+					case ImsServiceSession.INVITATION_REJECTED:
+						if (logger.isActivated()) {
+							logger.debug("Transfer has been rejected by user");
+						}
 
-					// Remove the current session
-					getImsService().removeSession(this);
+						getImsService().removeSession(this);
 
-					// Notify listeners
-					for (int i = 0; i < getListeners().size(); i++) {
-						getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
-					}
-					return;
-				} else if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
-					if (logger.isActivated()) {
-						logger.debug("Transfer has been rejected on timeout");
-					}
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByUser();
+						}
+						return;
 
-					// Remove the current session
-					getImsService().removeSession(this);
+					case ImsServiceSession.INVITATION_NOT_ANSWERED:
+						if (logger.isActivated()) {
+							logger.debug("Transfer has been rejected on timeout");
+						}
 
-					// Notify listeners
-					for (int j = 0; j < getListeners().size(); j++) {
-						getListeners().get(j).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
-					}
-					return;
-				} else if (answer == ImsServiceSession.INVITATION_CANCELED) {
-					if (logger.isActivated()) {
-						logger.debug("Transfer has been canceled");
-					}
-					return;
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByTimeout();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_CANCELED:
+						if (logger.isActivated()) {
+							logger.debug("Http transfer has been rejected by remote.");
+
+							getImsService().removeSession(this);
+
+							for (ImsSessionListener listener : listeners) {
+								listener.handleSessionRejectedByRemote();
+							}
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_ACCEPTED:
+						for (ImsSessionListener listener : listeners) {
+							((FileSharingSessionListener)listener).handleSessionAccepting();
+						}
+						break;
+
+					default:
+						if (logger.isActivated()) {
+							logger.debug("Unknown invitation answer in TerminatingHttpFileSharingSession.run; answer="
+									.concat(String.valueOf(answer)));
+						}
+						return;
 				}
 			}
-			
+
             // Reject if file is too big or size exceeds device storage capacity. This control should be done
             // on UI. It is done after end user accepts invitation to enable prior handling by the application.
             FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
@@ -358,7 +391,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	public void pauseFileTransfer() {
 		fileTransferPaused();
 		interruptSession();
-		downloadManager.pauseTransfer();
+		downloadManager.pauseTransferByUser();
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IImageSharingListener {
 
-	void onImageSharingStateChanged(in ContactId contact, in String sharingId, in int state);
+	void onImageSharingStateChanged(in ContactId contact, in String sharingId, in int state, in int reasonCode);
 
 	void onImageSharingProgress(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
 }

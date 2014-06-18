@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -77,7 +77,7 @@ public class ImageSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 3;
+        private static final int DATABASE_VERSION = 4;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -93,6 +93,7 @@ public class ImageSharingProvider extends ContentProvider {
         			+ ImageSharingLog.FILENAME + " TEXT,"
         			+ ImageSharingLog.MIME_TYPE + " TEXT,"
         			+ ImageSharingLog.STATE + " integer,"
+        			+ ImageSharingLog.REASON_CODE + " integer,"
         			+ ImageSharingLog.DIRECTION + " integer,"
         			+ ImageSharingLog.TIMESTAMP + " long,"
         			+ ImageSharingLog.TRANSFERRED + " long,"

@@ -79,7 +79,12 @@ public class FileTransferData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_STATUS = FileTransferLog.STATE;
+	static final String KEY_STATE = FileTransferLog.STATE;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
 	
 	/**
 	 * Column name

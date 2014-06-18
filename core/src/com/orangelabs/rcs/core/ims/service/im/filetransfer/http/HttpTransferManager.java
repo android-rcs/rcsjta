@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -289,16 +289,27 @@ public abstract class HttpTransferManager {
     	}
 		isCancelled = true;
 	}
+    
+    /**
+     * Interrupts file transfer
+     */
+    public void pauseTransferByUser() {
+        if (logger.isActivated()) {
+            logger.warn("User is pausing transfer");
+        }
+        isPaused = true;
+        getListener().httpTransferPausedByUser();
+    }
 	
     /**
      * Interrupts file transfer
      */
-	public void pauseTransfer() {
+	public void pauseTransferBySystem() {
     	if (logger.isActivated()) {
-    		logger.warn("Pausing transfer");
+    		logger.warn("System is pausing transfer");
     	}
 		isPaused = true;
-		getListener().httpTransferPaused();
+		getListener().httpTransferPausedBySystem();
 	}
 	
 	/**
