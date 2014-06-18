@@ -160,7 +160,7 @@ public class ImdnManager extends Thread {
 	 */
 	private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId) {
 		try {
-            if (!RcsSettings.getInstance().isImDisplayedNotificationActivated() && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(deliveryStatus.getStatus())) {
+            if (!RcsSettings.getInstance().isRespondToDisplayReports() && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(deliveryStatus.getStatus())) {
                 return;
             }
 

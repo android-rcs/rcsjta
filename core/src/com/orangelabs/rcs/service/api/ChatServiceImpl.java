@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -760,20 +761,21 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return Configuration
      */
     public ChatServiceConfiguration getConfiguration() {
+    	RcsSettings settings = RcsSettings.getInstance();
     	return new ChatServiceConfiguration(
-    			RcsSettings.getInstance().isStoreForwardWarningActivated(),
-    			RcsSettings.getInstance().getChatIdleDuration(),
-    			RcsSettings.getInstance().getIsComposingTimeout(),
-    			RcsSettings.getInstance().getMaxChatParticipants(),
-    			RcsSettings.getInstance().getMaxChatMessageLength(),
-    			RcsSettings.getInstance().getMaxGroupChatMessageLength(),
-    			RcsSettings.getInstance().getMaxChatSessions(),
-    			RcsSettings.getInstance().isSmsFallbackServiceActivated(),
-    			RcsSettings.getInstance().isChatAutoAccepted(),
-    			RcsSettings.getInstance().isGroupChatAutoAccepted(),
-    			RcsSettings.getInstance().isImReportsActivated(),
-    			RcsSettings.getInstance().getMaxGeolocLabelLength(),
-    			RcsSettings.getInstance().getGeolocExpirationTime());
+    			settings.isImAlwaysOn(),
+    			settings.isStoreForwardWarningActivated(),
+    			settings.getChatIdleDuration(),
+    			settings.getIsComposingTimeout(),
+    			settings.getMaxChatParticipants(),
+    			settings.getMinGroupChatParticipants(),
+    			settings.getMaxChatMessageLength(),
+    			settings.getMaxGroupChatMessageLength(),
+    			settings.getGroupChatSubjectMaxLength(),
+    			settings.isSmsFallbackServiceActivated(),
+    			settings.isRespondToDisplayReports(),
+    			settings.getMaxGeolocLabelLength(),
+    			settings.getGeolocExpirationTime());
 	}    
 
     /**
@@ -813,8 +815,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 	@Override
 	public void markMessageAsRead(String msgId) throws ServerApiException {
 		MessagingLog.getInstance().markMessageAsRead(msgId);
-
-		if (RcsSettings.getInstance().isImReportsActivated()) {
+		if (RcsSettings.getInstance().isImReportsActivated() && RcsSettings.getInstance().isRespondToDisplayReports()) {
+			if (logger.isActivated()) {
+				logger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "+msgId);
+			}
 			tryToDispatchAllPendingDisplayNotifications();
 		}
 	}
@@ -828,5 +832,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
+	}
+
+	/**
+	 * Set the parameter in order to respond or not to display reports when requested by the remote part.
+	 * 
+	 * @param state true if respond to display reports
+	 * @throws ServerApiException
+	 */
+	@Override
+	public void setRespondToDisplayReports(boolean state) throws RemoteException {
+		RcsSettings.getInstance().setRespondToDisplayReports(state);
 	}
 }

@@ -7,7 +7,18 @@
 			android:title="@string/rcs_settings_label_vibrate"
 			android:summary="@string/rcs_settings_summary_filetransfer_vibrate"
 		/>
-
+		<CheckBoxPreference
+			android:key="ft_auto_accept"
+			android:showDefault="true"
+			android:title="@string/rcs_settings_label_ft_auto_accept"
+			android:summary="@string/rcs_settings_summary_ft_auto_accept"
+		/>
+		<CheckBoxPreference
+			android:key="ft_auto_accept_in_roaming"
+			android:showDefault="true"
+			android:title="@string/rcs_settings_label_ft_auto_accept_in_roaming"
+			android:summary="@string/rcs_settings_summary_ft_auto_accept_in_roaming"
+		/>
 		<com.orangelabs.rcs.settings.FileTransferInvitationRingtone
 			android:key="filetransfer_invitation_ringtone"
 			android:title="@string/rcs_settings_label_ringtone"
@@ -15,6 +26,14 @@
 			android:showSilent="true"
 			android:summary="@string/rcs_settings_summary_filetransfer_ringtone"
 		/>
+		<ListPreference
+            android:dialogTitle="@string/rcs_settings_label_image_resize_option"
+            android:entries="@array/rcs_settings_list_image_resize_option_label"
+            android:entryValues="@array/rcs_settings_list_image_resize_option_value"
+            android:key="image_resize_option"
+            android:summary="@string/rcs_settings_summary_image_resize_option"
+            android:title="@string/rcs_settings_label_image_resize_option" />
+
 	</PreferenceCategory>
 	
 	<PreferenceCategory android:title="@string/rcs_settings_title_chat_invitation">

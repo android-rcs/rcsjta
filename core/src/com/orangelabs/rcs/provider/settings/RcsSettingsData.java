@@ -25,6 +25,8 @@ package com.orangelabs.rcs.provider.settings;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 
+import com.gsma.services.rcs.JoynServiceConfiguration;
+
 /**
  * RCS settings data constants
  *
@@ -39,17 +41,17 @@ public class RcsSettingsData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_ID = "_id";
+	static final String KEY_ID = JoynServiceConfiguration.Settings.ID;
 
 	/**
 	 * Column name
 	 */
-	static final String KEY_KEY = "key";
+	static final String KEY_KEY = JoynServiceConfiguration.Settings.KEY;
 
 	/**
 	 * Column name
 	 */
-	static final String KEY_VALUE = "value";
+	static final String KEY_VALUE = JoynServiceConfiguration.Settings.VALUE;
 
 	// ---------------------------------------------------------------------------
 	// Constants
@@ -60,16 +62,6 @@ public class RcsSettingsData {
 	 */
 	public static final String DEFAULT_GROUP_CHAT_URI = "sip:foo@bar";
 	
-	/**
-	 * Boolean value "true"
-	 */
-	public static final String TRUE = Boolean.toString(true);
-
-	/**
-	 * Boolean value "false"
-	 */
-    public static final String FALSE = Boolean.toString(false);
-
 	/**
 	 * GIBA authentication
 	 */
@@ -177,7 +169,7 @@ public class RcsSettingsData {
     /**
      * Send or not the displayed notification
      */
-    public static final String CHAT_DISPLAYED_NOTIFICATION = "ChatDisplayedNotification";
+    public static final String CHAT_RESPOND_TO_DISPLAY_REPORTS = "ChatRespondToDisplayReports";
 
 	/**
      * Predefined freetext
@@ -341,9 +333,28 @@ public class RcsSettingsData {
     /**
      * Convergent messaging UX option
      */
-    public static final String CONVERGENT_MESSAGING_UX = "ConvergentMessagingUx";
+    public static final String KEY_MESSAGING_MODE = JoynServiceConfiguration.Settings.MESSAGING_MODE;
 
+    /**
+     * Possible values for client messaging mode 
+     */
+	public static final int VALUE_MESSAGING_MODE_CONVERGED = JoynServiceConfiguration.Settings.MessagingModes.CONVERGED;
+	public static final int VALUE_MESSAGING_MODE_INTEGRATED = JoynServiceConfiguration.Settings.MessagingModes.INTEGRATED;
+	public static final int VALUE_MESSAGING_MODE_SEAMLESS = JoynServiceConfiguration.Settings.MessagingModes.SEAMLESS;
+	public static final int VALUE_MESSAGING_MODE_NONE = JoynServiceConfiguration.Settings.MessagingModes.NONE;
     
+	/**
+	 * Default messaging method
+	 */
+	public static final String KEY_DEFAULT_MESSAGING_METHOD = JoynServiceConfiguration.Settings.DEFAULT_MESSAGING_METHOD;
+	
+	/**
+     * Possible values for default messaging method 
+     */
+	public static final int VALUE_DEF_MSG_METHOD_AUTOMATIC = JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC;
+	public static final int VALUE_DEF_MSG_METHOD_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN;
+	public static final int VALUE_DEF_MSG_METHOD_NON_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_JOYN;
+	
     // ---------------------------------------------------------------------------
 	// User profile settings
 	// ---------------------------------------------------------------------------
@@ -351,12 +362,12 @@ public class RcsSettingsData {
 	/**
 	 * IMS username or username part of the IMPU (for HTTP Digest only)
 	 */
-	public static final String USERPROFILE_IMS_USERNAME = "ImsUsername";
+	public static final String USERPROFILE_IMS_USERNAME = JoynServiceConfiguration.Settings.MY_CONTACT_ID;
 
     /**
      * IMS display name
      */
-	public static final String USERPROFILE_IMS_DISPLAY_NAME = "ImsDisplayName";
+	public static final String USERPROFILE_IMS_DISPLAY_NAME = JoynServiceConfiguration.Settings.MY_DISPLAY_NAME;
 
 	/**
 	 * IMS home domain
@@ -446,7 +457,7 @@ public class RcsSettingsData {
     /**
      * Country code
      */
-	public static final String COUNTRY_CODE = "CountryCode";
+	public static final String COUNTRY_CODE = JoynServiceConfiguration.Settings.MY_COUNTRY_CODE;
 
     /**
      * Country area code
@@ -891,4 +902,31 @@ public class RcsSettingsData {
      * Max lenght for extensions using real time messaging (MSRP)  
      */
 	public static final String MAX_MSRP_SIZE_EXTENSIONS = "ExtensionsMaxMsrpSize";
+    
+    /**
+     * Validity of the RCS configuration.
+     */
+    public static final String CONFIGURATION_VALID = JoynServiceConfiguration.Settings.CONFIGURATION_VALIDITY;
+
+    /**
+	 * Auto accept file transfer invitation in roaming
+	 */
+	public static final String AUTO_ACCEPT_FT_IN_ROAMING = "AutoAcceptFtInRoaming";
+	
+	/**
+	* Auto accept file transfer enabled
+	*/
+	public static final String AUTO_ACCEPT_FT_CHANGEABLE = "AutoAcceptFtChangeable";
+
+	/**
+	 * List of possible values for the Image Resize Option
+	 */
+	public static final int VALUE_IMAGE_RESIZE_ALWAYS_PERFORM = 0;
+	public static final int VALUE_IMAGE_RESIZE_ONLY_ABOVE_MAX_SIZE = 1;
+	public static final int VALUE_IMAGE_RESIZE_ASK = 2;
+	/**
+	 * Image resize option
+	 */
+	public static final String KEY_IMAGE_RESIZE_OPTION = "ImageResizeOption";
+	
 }

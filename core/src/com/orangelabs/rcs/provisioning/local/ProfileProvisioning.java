@@ -381,27 +381,34 @@ public class ProfileProvisioning extends Activity {
 		 */
 		private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
 			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent);
-			
+			RcsSettings rcsSettings = RcsSettings.getInstance();
 			// Save GSMA release set into the provider
-			int gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+			int gsmaRelease = rcsSettings.getGsmaRelease();
+			// Save client Messaging Mode set into the provider
+			int messagingMode = rcsSettings.getMessagingMode();
 			
 			// Before parsing the provisioning, the GSMA release is set to Albatros
-			RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
-			if (parser.parse(gsmaRelease)) {
+			rcsSettings.setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
+			// Before parsing the provisioning, the client Messaging mode is set to NONE 
+			rcsSettings.setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_NONE);
+			
+			if (parser.parse(gsmaRelease,true)) {
 				// Customize provisioning data with user phone number
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, userPhoneNumber);
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, userPhoneNumber);
-				String homeDomain = RcsSettings.getInstance().readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
+				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, userPhoneNumber);
+				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, userPhoneNumber);
+				String homeDomain = rcsSettings.readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
 				String sipUri = userPhoneNumber + "@" + homeDomain;
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
+				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
+				rcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
 				return true;
 			} else {
 				if (logger.isActivated()) {
 					logger.error("Can't parse provisioning document");
 				}
 				// Restore GSMA release saved before parsing of the provisioning
-				RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
+				rcsSettings.setGsmaRelease(gsmaRelease);
+				// Restore the client messaging mode saved before parsing of the provisioning
+				rcsSettings.setMessagingMode(messagingMode);
 				return false;
 			}
 		}
@@ -411,7 +418,7 @@ public class ProfileProvisioning extends Activity {
 			super.onPostExecute(result);
 			updateProfileProvisioningUI(null);
 			// set configuration mode to manual
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.AUTO_CONFIG_MODE, "" + RcsSettingsData.NO_AUTO_CONFIG);
+			RcsSettings.getInstance().writeInteger(RcsSettingsData.AUTO_CONFIG_MODE, RcsSettingsData.NO_AUTO_CONFIG);
 			if (result)
 				Toast.makeText(ProfileProvisioning.this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();
 			else

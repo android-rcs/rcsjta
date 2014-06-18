@@ -238,5 +238,17 @@ public abstract class FileSharingSession extends ImsServiceSession {
 			}
 		}
 		return null;
-	}    
+	}
+	
+	/**
+	 * Check is file transfer is auto accepted
+	 * @return true if Auto Accepted
+	 */
+	public boolean isFileTransferAutoAccepted() {
+		if (getImsService().getImsModule().isInRoaming()) {
+			return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
+		} else {
+			return RcsSettings.getInstance().isFileTransferAutoAccepted();
+		}
+	}
 }

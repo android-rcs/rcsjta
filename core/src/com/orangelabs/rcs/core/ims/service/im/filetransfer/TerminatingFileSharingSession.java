@@ -44,7 +44,6 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -91,8 +90,8 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new file transfer session as terminating");
 	    	}
-			
-            if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
+
+            if (isFileTransferAutoAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}

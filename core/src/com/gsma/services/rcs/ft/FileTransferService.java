@@ -391,4 +391,66 @@ public class FileTransferService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
+	
+	/**
+	 * set the Auto Accept Mode of a File Transfer configuration.
+	 * <p>
+	 * The Auto Accept Mode can only be modified by client application if isAutoAcceptModeChangeable (see
+	 * FileTransferServiceConfiguration class) is true
+	 * 
+	 * @param enable
+	 *            true to enable else false
+	 * @throws JoynServiceException
+	 */
+    public void setAutoAccept(boolean enable) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.setAutoAccept(enable);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+	
+	/**
+	 * set the Auto Accept Mode of a File Transfer configuration while roaming.
+	 * <p>
+	 * The AutoAcceptModeInRoaming can only be modified by client application if isAutoAcceptModeChangeable (@see
+	 * FileTransferServiceConfiguration class) is true and if the Auto Accept Mode in normal conditions is true
+	 * 
+	 * @param enable
+	 *            true to enable else false
+	 * @throws JoynServiceException
+	 */
+	public void setAutoAcceptInRoaming(boolean enable) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.setAutoAcceptInRoaming(enable);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+    
+	/**
+	 * set the image resize option for file transfer. 
+	 * 
+	 * @param option
+	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
+	 */
+    public void setImageResizeOption(int option) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.setImageResizeOption(option);
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 }

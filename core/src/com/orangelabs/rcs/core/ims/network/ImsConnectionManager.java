@@ -598,7 +598,9 @@ public class ImsConnectionManager implements Runnable {
                         // InterruptedException thrown by stopImsConnection() may be caught by one
                         // of the methods used in currentNetworkInterface.register() above
                         if (imsPollingThreadID != Thread.currentThread().getId()) {
-                            logger.debug("IMS connection polling thread race condition");
+                        	if (logger.isActivated()) {
+                        		logger.debug("IMS connection polling thread race condition");
+                        	}
                             break;
                         } else {
                             if (logger.isActivated()) {
@@ -722,4 +724,14 @@ public class ImsConnectionManager implements Runnable {
             }
         }
     };
+    
+	/**
+	 * @return true is device is in roaming
+	 */
+	public boolean isInRoaming() {
+		if (connectivityMgr != null && connectivityMgr.getActiveNetworkInfo() != null) {
+			return connectivityMgr.getActiveNetworkInfo().isRoaming();
+		}
+		return false;
+	}
 }

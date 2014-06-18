@@ -211,6 +211,9 @@ public class LauncherUtils {
 
         // Clean terms status
         RcsSettings.getInstance().setProvisioningTermsAccepted(false);
+        
+        // Set the configuration validity flag to false 
+        RcsSettings.getInstance().setConfigurationValid(false);
     }
 
     /**

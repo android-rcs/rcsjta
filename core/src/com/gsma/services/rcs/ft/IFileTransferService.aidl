@@ -33,4 +33,10 @@ interface IFileTransferService {
 	void removeNewFileTransferListener(in INewFileTransferListener listener);
 	
 	int getServiceVersion();
+	
+	void setAutoAccept(in boolean mode);
+	
+	void setAutoAcceptInRoaming(in boolean mode);
+	
+	void setImageResizeOption(in int option);
 }

@@ -545,7 +545,7 @@ public class HttpsProvisioningManager {
 			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
             if (result.code == 511) {
                 // Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header Enrichment
-                // Use SMS provisionning on PS data network if server reply 511 NETWORK AUTHENTICATION REQUIRED 
+                // Use SMS provisioning on PS data network if server reply 511 NETWORK AUTHENTICATION REQUIRED 
                 return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri, client, localContext);
             } else if (result.code != 200) {
                 if (result.code == 503) {
@@ -697,10 +697,15 @@ public class HttpsProvisioningManager {
 				
 				// Save GSMA release set into the provider
 				int gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+				// Save client Messaging Mode set into the provider
+				int messagingMode = RcsSettings.getInstance().getMessagingMode();
 				
 				// Before parsing the provisioning, the GSMA release is set to Albatros
 				RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
-				if (parser.parse(gsmaRelease)) {
+				// Before parsing the provisioning, the client Messaging mode is set to NONE 
+				RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_NONE);
+				
+				if (parser.parse(gsmaRelease, first)) {
 					// Successfully provisioned, 1st time reg finalized
 					first = false;
 					ProvisioningInfo info = parser.getProvisioningInfo();
@@ -738,55 +743,71 @@ public class HttpsProvisioningManager {
 						if (validity > 0) {
 							HttpsProvisioningService.startRetryAlarm(context, retryIntent, validity * 1000);
 						}
+						// We parsed successfully the configuration
+						RcsSettings.getInstance().setConfigurationValid(true);
 						// Stop the RCS core service. Provisioning is still running.
 						LauncherUtils.stopRcsCoreService(context);
-					} else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
-						// -2 : Disable RCS client and stop configuration query
-						if (logger.isActivated()) {
-							logger.debug("Provisioning: disable RCS client");
-						}
-						// Disable and stop RCS service
-						RcsSettings.getInstance().setServiceActivationState(false);
-						LauncherUtils.stopRcsService(context);
-					} else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
-						// -1 Forbidden: reset account + version = 0-1 (doesn't restart)
-						if (logger.isActivated()) {
-							logger.debug("Provisioning forbidden: reset account");
-						}
-						// Reset config
-						LauncherUtils.resetRcsConfig(context);
-						// Force version to "-1" (resetRcs set version to "0")
-						RcsSettings.getInstance().setProvisioningVersion(version);
-						// Disable the RCS service
-						RcsSettings.getInstance().setServiceActivationState(false);
-					} else if (ProvisioningInfo.Version.RESETED.equals(version)) {
-						if (logger.isActivated()) {
-							logger.debug("Provisioning forbidden: no account");
-						}
-						// Reset config
-						LauncherUtils.resetRcsConfig(context);
 					} else {
-						// Start retry alarm
-						if (validity > 0) {
-							HttpsProvisioningService.startRetryAlarm(context, retryIntent, validity * 1000);
+						if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+							// -2 : Disable RCS client and stop configuration query
+							if (logger.isActivated()) {
+								logger.debug("Provisioning: disable RCS client");
+							}
+							// We parsed successfully the configuration
+							RcsSettings.getInstance().setConfigurationValid(true);
+							// Disable and stop RCS service
+							RcsSettings.getInstance().setServiceActivationState(false);
+							LauncherUtils.stopRcsService(context);
+						} else {
+							if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+								// -1 Forbidden: reset account + version = 0-1 (doesn't restart)
+								if (logger.isActivated()) {
+									logger.debug("Provisioning forbidden: reset account");
+								}
+								// Reset config
+								LauncherUtils.resetRcsConfig(context);
+								// Force version to "-1" (resetRcs set version to "0")
+								RcsSettings.getInstance().setProvisioningVersion(version);
+								// Disable the RCS service
+								RcsSettings.getInstance().setServiceActivationState(false);
+							} else {
+								if (ProvisioningInfo.Version.RESETED.equals(version)) {
+									if (logger.isActivated()) {
+										logger.debug("Provisioning forbidden: no account");
+									}
+									// Reset config
+									LauncherUtils.resetRcsConfig(context);
+								} else {
+									// Start retry alarm
+									if (validity > 0) {
+										HttpsProvisioningService.startRetryAlarm(context, retryIntent, validity * 1000);
+									}
+									// Terms request
+									if (info.getMessage() != null && !RcsSettings.getInstance().isProvisioningTermsAccepted()) {
+										showTermsAndConditions(info);
+									}
+									// We parsed successfully the configuration
+									RcsSettings.getInstance().setConfigurationValid(true);
+									// Start the RCS core service
+									LauncherUtils.launchRcsCoreService(context);
+								}
+							}
 						}
-						// Terms request
-						if (info.getMessage() != null && !RcsSettings.getInstance().isProvisioningTermsAccepted()) {
-							showTermsAndConditions(info);
-						}
-						// Start the RCS core service
-						LauncherUtils.launchRcsCoreService(context);
 					}
 					
 					// Send service provisioning intent
 					Intent intent = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
-					context.sendBroadcast(intent);					
+					context.sendBroadcast(intent);
 				} else {
 					if (logger.isActivated()) {
 						logger.debug("Can't parse provisioning document");
 					}
 					// Restore GSMA release saved before parsing of the provisioning
 					RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
+					
+					// Restore the client messaging mode saved before parsing of the provisioning
+					RcsSettings.getInstance().setMessagingMode(messagingMode);
+					
 					if (first) {
 						if (logger.isActivated()) {
 							logger.debug("As this is first launch and we do not have a valid configuration yet, retry later");

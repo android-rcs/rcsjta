@@ -668,23 +668,6 @@ public class ChatUtils {
 	}
 	
 	/**
-	 * Create a first message
-	 * 
-	 * @param remote Remote contact
-	 * @param msg Text message
-	 * @param imdn IMDN flag
-	 * @return First message
-	 */
-	public static InstantMessage createFirstMessage(String remote, String msg, boolean imdn) {
-		if ((msg != null) && (msg.length() > 0)) {
-			String msgId = IdGenerator.generateMessageID();
-			return new InstantMessage(msgId, remote, StringUtils.encodeUTF8(msg), imdn, null);
-		} else {
-			return null;
-		}	
-	}
-	
-	/**
 	 * Create a text message
 	 * 
 	 * @param remote Remote contact

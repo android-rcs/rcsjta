@@ -288,12 +288,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @return Configuration
      */
     public FileTransferServiceConfiguration getConfiguration() {
+    	RcsSettings rs = RcsSettings.getInstance();
     	return new FileTransferServiceConfiguration(
-    			RcsSettings.getInstance().getWarningMaxFileTransferSize(),
-    			RcsSettings.getInstance().getMaxFileTransferSize(),
-    			RcsSettings.getInstance().isFileTransferAutoAccepted(),
-    			RcsSettings.getInstance().isFileTransferThumbnailSupported(),
-    			RcsSettings.getInstance().getMaxFileIconSize());
+    			rs.getWarningMaxFileTransferSize(),
+    			rs.getMaxFileTransferSize(),
+    			rs.isFtAutoAcceptedModeChangeable(),
+    			rs.isFileTransferAutoAccepted(),
+    			rs.isFileTransferAutoAcceptedInRoaming(),
+    			rs.isFileTransferThumbnailSupported(),
+    			rs.getMaxFileTransferSessions()	,
+    			rs.getImageResizeOption());
     }    
 
 	/**
@@ -718,8 +722,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
         intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
         intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
-        // TODO FUSION change thumbnail byte array to filename 
-        //intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
         intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.INCOMING);
 
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -734,6 +736,50 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public void markFileTransferAsRead(String transferId) throws RemoteException {
 		//No notification type corresponds currently to mark as read
 		MessagingLog.getInstance().markFileTransferAsRead(transferId);
+	}
+
+	/**
+	 * Set Auto accept mode
+	 * @param enable true is AA is enabled in normal conditions
+	 */
+	@Override
+	public void setAutoAccept(boolean enable) throws RemoteException {
+		RcsSettings rs = RcsSettings.getInstance();
+		if (!rs.isFtAutoAcceptedModeChangeable()) {
+			throw new IllegalArgumentException("Auto accept mode is not changeable");
+		}
+		rs.setFileTransferAutoAccepted(enable);
+		if (!enable) {
+			// If AA is disabled in normal conditions then it must be disabled while roaming
+			rs.setFileTransferAutoAcceptedInRoaming(false);
+		}
+	}
+
+	/**
+	 * Set Auto accept mode in roaming
+	 * @param enable true is AA is enabled in roaming
+	 */
+	@Override
+	public void setAutoAcceptInRoaming(boolean enable) throws RemoteException {
+		RcsSettings rs = RcsSettings.getInstance();
+		if (!rs.isFtAutoAcceptedModeChangeable()) {
+			throw new IllegalArgumentException("Auto accept mode in roaming is not changeable");
+		}
+		if (!rs.isFileTransferAutoAccepted()) {
+			throw new IllegalArgumentException("Auto accept mode in normal conditions must be enabled");
+		}
+		rs.setFileTransferAutoAcceptedInRoaming(enable);
+	}
+
+	/**
+	 * Set the image resize option
+	 * 
+	 * @param option
+	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
+	 */
+	@Override
+	public void setImageResizeOption(int option) throws RemoteException {
+		RcsSettings.getInstance().setImageResizeOption(option);
 	}
 
 }
