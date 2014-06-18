@@ -124,7 +124,7 @@
         
 		<!-- RCS data providers -->	
 
-		<provider android:authorities="com.orangelabs.rcs.settings"
+		<provider android:authorities="com.orangelabs.rcs.settings;com.gsma.services.rcs.provider.settings"
 		    android:exported="true"
 			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
 

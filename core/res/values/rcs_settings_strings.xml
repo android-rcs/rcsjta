@@ -39,7 +39,11 @@
 	<string name="rcs_settings_summary_video_size">Select the video display resolution</string>
     <string name="rcs_settings_summary_min_battery_level">Stop the joyn service if battery low</string>
     <string name="rcs_settings_summary_min_storage">Disable File transfer and Image sharing capabilities if memory low</string>
-
+    <string name="rcs_settings_summary_image_resize_option">Select the resize option for outgoing image transfer</string>
+    <string name="rcs_settings_summary_ft_auto_accept">Auto accept file transfer</string>
+    <string name="rcs_settings_summary_ft_auto_accept_in_roaming">Auto accept file transfer while roaming</string>
+    
+    
 	<string name="rcs_settings_label_beep">Phone beep</string>
     <string name="rcs_settings_label_vibrate">Phone vibrate</string>
     <string name="rcs_settings_label_ringtone">Phone ringtone</string>
@@ -53,7 +57,9 @@
 	<string name="rcs_settings_label_about">joyn application</string>
 	<string name="rcs_settings_label_copyrights">Apache License Version 2.0</string>
 	<string name="rcs_settings_label_release">Release</string>
-
+	<string name="rcs_settings_label_ft_auto_accept">Auto accept</string>
+	<string name="rcs_settings_label_ft_auto_accept_in_roaming">Auto accept in roaming</string>
+	    
     <string name="rcs_settings_label_min_battery_level">Minimum battery level</string>
     <string name="rcs_settings_label_default_min_battery_level">0</string>
     <string-array name="rcs_settings_list_battery_level_value">
@@ -93,4 +99,17 @@
 	<string name="rcs_settings_title_caller_id">Caller identity</string>
 	<string name="rcs_settings_title_displayname">Display name</string>
 	<string name="rcs_settings_summary_edit_displayname">Display name associated to my phone number in outgoing calls</string>
+	
+	<string name="rcs_settings_label_image_resize_option">Image resize option</string>
+    <string name="rcs_settings_label_default_image_resize_option">2</string>
+    <string-array name="rcs_settings_list_image_resize_option_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="rcs_settings_list_image_resize_option_label">
+        <item>Always perform</item>
+        <item>Only above maximum size</item>
+        <item>Ask</item>
+    </string-array>
 </resources>

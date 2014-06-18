@@ -41,6 +41,24 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class RcsSettings {
 
 	/**
+	 * Minimum number of participants in a group chat
+	 */
+	private static final int MINIMUM_GC_PARTICIPANTS = 2;
+
+	/**
+	 * The maximum length of the Group Chat subject
+	 */
+	private static final int GROUP_CHAT_SUBJECT_MAX_LENGTH = 50;
+
+	private static final String WHERE_CLAUSE = new StringBuilder(RcsSettingsData.KEY_KEY).append("=?").toString();
+	
+// Purposely put in comments. Remove comment strongly impact performance.
+//	/**
+//     * The logger
+//     */
+//    private static final Logger logger = Logger.getLogger(RcsSettings.class.getSimpleName());
+
+	/**
 	 * Current instance
 	 */
 	private static RcsSettings instance = null;
@@ -54,7 +72,7 @@ public class RcsSettings {
 	 * Database URI
 	 */
 	private Uri databaseUri = RcsSettingsData.CONTENT_URI;
-	
+	   
     /**
      * Create instance
      *
@@ -87,25 +105,145 @@ public class RcsSettings {
 	}
 
 	/**
+	 * Read boolean parameter
+	 * <p>
+	 * If parsing of the value fails, method return false.
+	 * 
+	 * @param key
+	 *            the key field
+	 * @return the value field
+	 */
+	private boolean readBoolean(String key) {
+		return readBoolean(key, false);
+	}
+	
+	/**
+	 * Read boolean parameter
+	 * <p>
+	 * If parsing of the value fails, method return false.
+	 * 
+	 * @param key
+	 *            the key field
+	 * @param defaultValude
+	 * 				the default value
+	 * @return the value field
+	 */
+	private boolean readBoolean(String key, boolean defaultValue) {
+		try {
+			return Boolean.parseBoolean(readParameter(key));
+		} catch (Exception e) {
+		}
+		return defaultValue;
+	}
+	
+	/**
+	 * Write boolean parameter
+	 * 
+	 * @param key
+	 *            the key field
+	 * @param value
+	 *            the boolean value
+	 */
+	public void writeBoolean(String key, boolean value) {
+		writeParameter(key, Boolean.toString(value));
+	}
+	
+	/**
+	 * Read int parameter
+	 * <p>
+	 * If parsing of the value fails, method return default value.
+	 * 
+	 * @param key
+	 *            the key field
+	 * @param defaultValue
+	 *            the default value
+	 * @return the value field
+	 */
+	private int readInteger(String key, int defaultValue) {
+		try {
+			String result = readParameter(key);
+			// Purposely put in comments. Remove comment strongly impact performance.
+			// if (logger.isActivated()) {
+			// logger.debug("readInteger "+key+"="+result);
+			// }
+			return Integer.parseInt(result);
+		} catch (Exception e) {
+		}
+		return defaultValue;
+	}
+	
+	/**
+	 * Read String parameter
+	 * 
+	 * @param key
+	 *            the key field
+	 * @return the value field or null (if read fails)
+	 */
+	private String readString(String key) {
+		try {
+			return readParameter(key);
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Read String parameter
+	 * 
+	 * @param key
+	 *            the key field
+	 * @param defaultValue the default value
+	 * 
+	 * @return the value field or defaultValue (if read fails)
+	 */
+	private String readString(String key, String defaultValue) {
+		try {
+			return readParameter(key);
+		} catch (Exception e) {
+		}
+		return defaultValue;
+	}
+	
+	/**
+	 * Write integer parameter
+	 * 
+	 * @param key
+	 *            the key field
+	 * @param value
+	 *            the integer value
+	 */
+	public void writeInteger(String key, int value) {
+		// Purposely put in comments. Remove comment strongly impact performance.
+		// if (logger.isActivated()) {
+		// logger.debug("writeInteger "+key+"="+value);
+		// }
+		writeParameter(key, Integer.toString(value));
+	}
+		
+	/**
      * Read a parameter
      *
      * @param key Key
      * @return Value
      */
 	public String readParameter(String key) {
-		if (key == null) {
-			return null;
+		if (instance == null) {
+			throw new IllegalStateException( "RcsInstance not created");
 		}
-
-		String result = null;
-        Cursor c = cr.query(databaseUri, null, RcsSettingsData.KEY_KEY + "='" + key + "'", null, null);
-        if (c != null) {
-        	if ((c.getCount() > 0) && c.moveToFirst()) {
-	        	result = c.getString(2);
-        	}
-	        c.close();
-        }
-        return result;
+		Cursor c = null;
+		try {
+			String[] whereArg = new String[] { key };
+			c = cr.query(databaseUri, null, WHERE_CLAUSE, whereArg, null);
+			if (c.moveToFirst()) {
+				return c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
+			}
+		} catch (Exception e) {
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -114,32 +252,14 @@ public class RcsSettings {
      * @param key Key
      * @param value Value
      */
-	public void writeParameter(String key, String value) {
-		if ((key == null) || (value == null)) {
-			return;
+	public int writeParameter(String key, String value) {
+		if (instance == null || value == null) {
+			return 0;
 		}
-		
         ContentValues values = new ContentValues();
         values.put(RcsSettingsData.KEY_VALUE, value);
-        String where = RcsSettingsData.KEY_KEY + "='" + key + "'";
-        cr.update(databaseUri, values, where, null);
-	}
-
-	/**
-     * Insert a parameter
-     *
-     * @param key Key
-     * @param value Value
-     */
-	public void insertParameter(String key, String value) {
-		if ((key == null) || (value == null)) {
-			return;
-		}
-
-		ContentValues values = new ContentValues();
-        values.put(RcsSettingsData.KEY_KEY, key);
-        values.put(RcsSettingsData.KEY_VALUE, value);
-        cr.insert(databaseUri, values);
+        String[] whereArgs = new String[] { key };
+        return cr.update(databaseUri, values, WHERE_CLAUSE, whereArgs);
 	}
 
 	/**
@@ -148,11 +268,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isServiceActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.SERVICE_ACTIVATED));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.SERVICE_ACTIVATED);
     }
 
 	/**
@@ -161,9 +277,7 @@ public class RcsSettings {
      * @param state State
      */
 	public void setServiceActivationState(boolean state) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.SERVICE_ACTIVATED, Boolean.toString(state));
-		}
+		writeBoolean(RcsSettingsData.SERVICE_ACTIVATED, state);
     }
 
 	/**
@@ -172,11 +286,7 @@ public class RcsSettings {
      * @return Ringtone URI or null if there is no ringtone
      */
 	public String getPresenceInvitationRingtone() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.PRESENCE_INVITATION_RINGTONE);
-		}
-		return result;
+		return readString(RcsSettingsData.PRESENCE_INVITATION_RINGTONE);
 	}
 
 	/**
@@ -185,9 +295,7 @@ public class RcsSettings {
      * @param uri Ringtone URI
      */
 	public void setPresenceInvitationRingtone(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.PRESENCE_INVITATION_RINGTONE, uri);
-		}
+		writeParameter(RcsSettingsData.PRESENCE_INVITATION_RINGTONE, uri);
 	}
 
     /**
@@ -196,11 +304,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPhoneVibrateForPresenceInvitation() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.PRESENCE_INVITATION_VIBRATE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.PRESENCE_INVITATION_VIBRATE);
     }
 
 	/**
@@ -209,9 +313,7 @@ public class RcsSettings {
      * @param vibrate Vibrate state
      */
 	public void setPhoneVibrateForPresenceInvitation(boolean vibrate) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.PRESENCE_INVITATION_VIBRATE, Boolean.toString(vibrate));
-		}
+		writeBoolean(RcsSettingsData.PRESENCE_INVITATION_VIBRATE, vibrate);
     }
 
 	/**
@@ -220,11 +322,7 @@ public class RcsSettings {
      * @return Ringtone URI or null if there is no ringtone
      */
 	public String getCShInvitationRingtone() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.CSH_INVITATION_RINGTONE);
-		}
-		return result;
+		return readString(RcsSettingsData.CSH_INVITATION_RINGTONE);
 	}
 
 	/**
@@ -233,9 +331,7 @@ public class RcsSettings {
      * @param uri Ringtone URI
      */
 	public void setCShInvitationRingtone(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CSH_INVITATION_RINGTONE, uri);
-		}
+		writeParameter(RcsSettingsData.CSH_INVITATION_RINGTONE, uri);
 	}
 
     /**
@@ -244,11 +340,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPhoneVibrateForCShInvitation() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CSH_INVITATION_VIBRATE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CSH_INVITATION_VIBRATE);
     }
 
 	/**
@@ -257,9 +349,7 @@ public class RcsSettings {
      * @param vibrate Vibrate state
      */
 	public void setPhoneVibrateForCShInvitation(boolean vibrate) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CSH_INVITATION_VIBRATE, Boolean.toString(vibrate));
-		}
+		writeBoolean(RcsSettingsData.CSH_INVITATION_VIBRATE, vibrate);
     }
 
 	/**
@@ -268,11 +358,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPhoneBeepIfCShAvailable() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CSH_AVAILABLE_BEEP));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CSH_AVAILABLE_BEEP);
     }
 
 	/**
@@ -281,9 +367,7 @@ public class RcsSettings {
      * @param beep Beep state
      */
 	public void setPhoneBeepIfCShAvailable(boolean beep) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CSH_AVAILABLE_BEEP, Boolean.toString(beep));
-		}
+		writeBoolean(RcsSettingsData.CSH_AVAILABLE_BEEP, beep);
     }
 
 	/**
@@ -292,11 +376,7 @@ public class RcsSettings {
      * @return Ringtone URI or null if there is no ringtone
      */
 	public String getFileTransferInvitationRingtone() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE);
-		}
-		return result;
+		return readString(RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE);
 	}
 
 	/**
@@ -305,9 +385,7 @@ public class RcsSettings {
      * @param uri Ringtone URI
      */
 	public void setFileTransferInvitationRingtone(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE, uri);
-		}
+		writeParameter(RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE, uri);
 	}
 
     /**
@@ -316,11 +394,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPhoneVibrateForFileTransferInvitation() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE);
     }
 
 	/**
@@ -329,9 +403,7 @@ public class RcsSettings {
      * @param vibrate Vibrate state
      */
 	public void setPhoneVibrateForFileTransferInvitation(boolean vibrate) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE, Boolean.toString(vibrate));
-		}
+		writeParameter(RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE, Boolean.toString(vibrate));
     }
 
 	/**
@@ -340,11 +412,7 @@ public class RcsSettings {
      * @return Ringtone URI or null if there is no ringtone
      */
 	public String getChatInvitationRingtone() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.CHAT_INVITATION_RINGTONE);
-		}
-		return result;
+		return readString(RcsSettingsData.CHAT_INVITATION_RINGTONE);
 	}
 
 	/**
@@ -353,9 +421,7 @@ public class RcsSettings {
      * @param uri Ringtone URI
      */
 	public void setChatInvitationRingtone(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CHAT_INVITATION_RINGTONE, uri);
-		}
+		writeParameter(RcsSettingsData.CHAT_INVITATION_RINGTONE, uri);
 	}
 
     /**
@@ -364,11 +430,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPhoneVibrateForChatInvitation() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CHAT_INVITATION_VIBRATE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CHAT_INVITATION_VIBRATE, false);
     }
 
 	/**
@@ -377,9 +439,7 @@ public class RcsSettings {
      * @param vibrate Vibrate state
      */
 	public void setPhoneVibrateForChatInvitation(boolean vibrate) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CHAT_INVITATION_VIBRATE, Boolean.toString(vibrate));
-		}
+		writeBoolean(RcsSettingsData.CHAT_INVITATION_VIBRATE, vibrate);
 	}
 
 	/**
@@ -387,12 +447,8 @@ public class RcsSettings {
 	 *
 	 * @return Boolean
 	 */
-    public boolean isImDisplayedNotificationActivated() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CHAT_DISPLAYED_NOTIFICATION));
-        }
-        return result;
+    public boolean isRespondToDisplayReports() {
+        return readBoolean(RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS);
     }
 
     /**
@@ -400,10 +456,8 @@ public class RcsSettings {
      *
      * @param state
      */
-    public void setImDisplayedNotificationActivated(boolean state) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.CHAT_DISPLAYED_NOTIFICATION, Boolean.toString(state));
-        }
+    public void setRespondToDisplayReports(boolean state) {
+        writeBoolean(RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS, state);
     }
 
     /**
@@ -412,11 +466,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getPredefinedFreetext1() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FREETEXT1);
-		}
-		return result;
+		return readString(RcsSettingsData.FREETEXT1);
 	}
 
     /**
@@ -425,9 +475,7 @@ public class RcsSettings {
      * @param txt Text
      */
 	public void setPredefinedFreetext1(String txt) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FREETEXT1, txt);
-		}
+		writeParameter(RcsSettingsData.FREETEXT1, txt);
 	}
 
     /**
@@ -436,11 +484,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getPredefinedFreetext2() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FREETEXT2);
-		}
-		return result;
+		return readString(RcsSettingsData.FREETEXT2);
 	}
 
 	/**
@@ -449,9 +493,7 @@ public class RcsSettings {
      * @param txt Text
      */
 	public void setPredefinedFreetext2(String txt) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.FREETEXT2, txt);
-        }
+		writeParameter(RcsSettingsData.FREETEXT2, txt);
 	}
 
     /**
@@ -460,11 +502,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getPredefinedFreetext3() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FREETEXT3);
-		}
-		return result;
+		return readString(RcsSettingsData.FREETEXT3);
 	}
 
     /**
@@ -473,9 +511,7 @@ public class RcsSettings {
      * @param txt Text
      */
 	public void setPredefinedFreetext3(String txt) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.FREETEXT3, txt);
-        }
+		writeParameter(RcsSettingsData.FREETEXT3, txt);
 	}
 
     /**
@@ -484,11 +520,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getPredefinedFreetext4() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FREETEXT4);
-		}
-		return result;
+		return readString(RcsSettingsData.FREETEXT4);
 	}
 
 	/**
@@ -497,9 +529,7 @@ public class RcsSettings {
      * @param txt Text
      */
 	public void setPredefinedFreetext4(String txt) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.FREETEXT4, txt);
-        }
+		writeParameter(RcsSettingsData.FREETEXT4, txt);
 	}
 
     /**
@@ -508,13 +538,7 @@ public class RcsSettings {
      * @return Battery level in percentage
      */
     public int getMinBatteryLevel() {
-        int result = 0;
-        if (instance != null) {
-            try {
-                result = Integer.parseInt(readParameter(RcsSettingsData.MIN_BATTERY_LEVEL));
-            } catch(Exception e) {}
-        }
-        return result;
+       return readInteger(RcsSettingsData.MIN_BATTERY_LEVEL, 0);
     }
 
     /**
@@ -523,9 +547,7 @@ public class RcsSettings {
      * @param level Battery level in percentage
      */
     public void setMinBatteryLevel(int level) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.MIN_BATTERY_LEVEL, "" + level);
-        }
+        writeInteger(RcsSettingsData.MIN_BATTERY_LEVEL, level);
     }
 
     /**
@@ -534,13 +556,7 @@ public class RcsSettings {
      * @return Capacity in kilobytes
      */
     public int getMinStorageCapacity() {
-        int result = 0;
-        if (instance != null) {
-            try {
-                result = Integer.parseInt(readParameter(RcsSettingsData.MIN_STORAGE_CAPACITY));
-            } catch(Exception e) {}
-        }
-        return result;
+    	return readInteger(RcsSettingsData.MIN_STORAGE_CAPACITY,0);
     }
 
     /**
@@ -549,9 +565,7 @@ public class RcsSettings {
      * @param capacity Capacity in kilobytes
      */
     public void setMinStorageCapacity(int capacity) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.MIN_STORAGE_CAPACITY, "" + capacity);
-        }
+        writeInteger( RcsSettingsData.MIN_STORAGE_CAPACITY, capacity);
     }
 
     /**
@@ -560,11 +574,7 @@ public class RcsSettings {
      * @return Username part of SIP-URI
      */
 	public String getUserProfileImsUserName() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_USERNAME);
     }
 
 	/**
@@ -573,9 +583,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setUserProfileImsUserName(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, value);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, value);
     }
 
     /**
@@ -584,20 +592,14 @@ public class RcsSettings {
      * @return MSISDN
      */
 	public String getMsisdn() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.MSISDN);
-		}
-		return result;
+		return readString(RcsSettingsData.MSISDN);
     }
 	
 	/**
      * Set the value of the MSISDN
      */
 	public void setMsisdn(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.MSISDN, value);
-		}
+		writeParameter(RcsSettingsData.MSISDN, value);
     }
 
 	/**
@@ -606,11 +608,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getUserProfileImsDisplayName() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME);
     }
 
 	/**
@@ -619,9 +617,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setUserProfileImsDisplayName(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value);
     }
 
 	/**
@@ -630,11 +626,7 @@ public class RcsSettings {
      * @return SIP-URI
      */
 	public String getUserProfileImsPrivateId() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID);
     }
 
 	/**
@@ -643,9 +635,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
 	public void setUserProfileImsPrivateId(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, uri);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, uri);
     }
 
 	/**
@@ -654,11 +644,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getUserProfileImsPassword() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_PASSWORD);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_PASSWORD);
     }
 
 	/**
@@ -667,9 +653,7 @@ public class RcsSettings {
      * @param pwd Password
      */
 	public void setUserProfileImsPassword(String pwd) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_PASSWORD, pwd);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_PASSWORD, pwd);
     }
 
 	/**
@@ -678,11 +662,7 @@ public class RcsSettings {
      * @return String
      */
 	public String getUserProfileImsRealm() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_REALM);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_REALM);
     }
 
 	/**
@@ -691,9 +671,7 @@ public class RcsSettings {
      * @param realm Realm
      */
 	public void setUserProfileImsRealm(String realm) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_REALM, realm);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_REALM, realm);
     }
 
 	/**
@@ -702,11 +680,7 @@ public class RcsSettings {
      * @return Domain
      */
 	public String getUserProfileImsDomain() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
-		}
-		return result;
+		return readString(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
     }
 
 	/**
@@ -715,9 +689,7 @@ public class RcsSettings {
      * @param domain Domain
      */
 	public void setUserProfileImsDomain(String domain) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, domain);
-		}
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, domain);
 	}
 
     /**
@@ -726,11 +698,7 @@ public class RcsSettings {
      * @return Address
      */
 	public String getImsProxyAddrForMobile() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.IMS_PROXY_ADDR_MOBILE);
-		}
-		return result;
+		return readString(RcsSettingsData.IMS_PROXY_ADDR_MOBILE);
     }
 
 	/**
@@ -739,9 +707,7 @@ public class RcsSettings {
      * @param addr Address
      */
 	public void setImsProxyAddrForMobile(String addr) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.IMS_PROXY_ADDR_MOBILE, addr);
-		}
+		writeParameter(RcsSettingsData.IMS_PROXY_ADDR_MOBILE, addr);
 	}
 
     /**
@@ -750,13 +716,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getImsProxyPortForMobile() {
-		int result = 5060;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.IMS_PROXY_PORT_MOBILE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.IMS_PROXY_PORT_MOBILE,5060);
     }
 
 	/**
@@ -765,9 +725,7 @@ public class RcsSettings {
      * @param port Port number
      */
 	public void setImsProxyPortForMobile(int port) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.IMS_PROXY_PORT_MOBILE, "" + port);
-		}
+		writeInteger(RcsSettingsData.IMS_PROXY_PORT_MOBILE, port);
 	}
 
 	/**
@@ -776,11 +734,7 @@ public class RcsSettings {
      * @return Address
      */
 	public String getImsProxyAddrForWifi() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.IMS_PROXY_ADDR_WIFI);
-		}
-		return result;
+		return readString(RcsSettingsData.IMS_PROXY_ADDR_WIFI);
     }
 
 	/**
@@ -789,9 +743,7 @@ public class RcsSettings {
      * @param addr Address
      */
 	public void setImsProxyAddrForWifi(String addr) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.IMS_PROXY_ADDR_WIFI, addr);
-		}
+		writeParameter(RcsSettingsData.IMS_PROXY_ADDR_WIFI, addr);
 	}
 
 	/**
@@ -800,13 +752,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getImsProxyPortForWifi() {
-		int result = 5060;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.IMS_PROXY_PORT_WIFI));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.IMS_PROXY_PORT_WIFI,5060);
     }
 
 	/**
@@ -815,9 +761,7 @@ public class RcsSettings {
      * @param port Port number
      */
 	public void setImsProxyPortForWifi(int port) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.IMS_PROXY_PORT_WIFI, "" + port);
-		}
+		writeInteger(RcsSettingsData.IMS_PROXY_PORT_WIFI, port);
 	}
 
 	/**
@@ -826,11 +770,7 @@ public class RcsSettings {
      * @return Address as <host>:<port>/<root>
      */
 	public String getXdmServer() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.XDM_SERVER);
-		}
-		return result;
+		return readString(RcsSettingsData.XDM_SERVER);
     }
 
 	/**
@@ -839,9 +779,7 @@ public class RcsSettings {
      * @param addr Address as <host>:<port>/<root>
      */
 	public void setXdmServer(String addr) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.XDM_SERVER, addr);
-		}
+		writeParameter(RcsSettingsData.XDM_SERVER, addr);
 	}
 
     /**
@@ -850,11 +788,7 @@ public class RcsSettings {
      * @return String value
      */
 	public String getXdmLogin() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.XDM_LOGIN);
-		}
-		return result;
+		return readString(RcsSettingsData.XDM_LOGIN);
     }
 
 	/**
@@ -863,9 +797,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setXdmLogin(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.XDM_LOGIN, value);
-		}
+		writeParameter(RcsSettingsData.XDM_LOGIN, value);
 	}
 
     /**
@@ -874,11 +806,7 @@ public class RcsSettings {
      * @return String value
      */
 	public String getXdmPassword() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.XDM_PASSWORD);
-		}
-		return result;
+		return readString(RcsSettingsData.XDM_PASSWORD);
     }
 
 	/**
@@ -887,9 +815,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setXdmPassword(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.XDM_PASSWORD, value);
-		}
+		writeParameter(RcsSettingsData.XDM_PASSWORD, value);
 	}
 
 	/**
@@ -898,11 +824,7 @@ public class RcsSettings {
      * @return Address
      */
 	public String getFtHttpServer() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FT_HTTP_SERVER);
-		}
-		return result;
+		return readString(RcsSettingsData.FT_HTTP_SERVER);
     }
 
 	/**
@@ -911,9 +833,7 @@ public class RcsSettings {
      * @param addr Address 
      */
 	public void setFtHttpServer(String addr) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FT_HTTP_SERVER, addr);
-		}
+		writeParameter(RcsSettingsData.FT_HTTP_SERVER, addr);
 	}
 
     /**
@@ -922,11 +842,7 @@ public class RcsSettings {
      * @return String value
      */
 	public String getFtHttpLogin() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FT_HTTP_LOGIN);
-		}
-		return result;
+		return readString(RcsSettingsData.FT_HTTP_LOGIN);
     }
 
 	/**
@@ -935,9 +851,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setFtHttpLogin(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FT_HTTP_LOGIN, value);
-		}
+		writeParameter(RcsSettingsData.FT_HTTP_LOGIN, value);
 	}
 
     /**
@@ -946,11 +860,7 @@ public class RcsSettings {
      * @return String value
      */
 	public String getFtHttpPassword() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.FT_HTTP_PASSWORD);
-		}
-		return result;
+		return readString(RcsSettingsData.FT_HTTP_PASSWORD);
     }
 
 	/**
@@ -959,9 +869,7 @@ public class RcsSettings {
      * @param value Value
      */
 	public void setFtHttpPassword(String value) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, value);
-		}
+		writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, value);
 	}
 
     /**
@@ -970,11 +878,7 @@ public class RcsSettings {
      * @return String value
      */
     public String getFtProtocol() {
-        String result = null;
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.FT_PROTOCOL);
-        }
-        return result;
+    	return readString(RcsSettingsData.FT_PROTOCOL);
     }
 
     /**
@@ -983,9 +887,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setFtProtocol(String value) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.FT_PROTOCOL, value);
-        }
+    	writeParameter(RcsSettingsData.FT_PROTOCOL, value);
     }
 
     /**
@@ -994,11 +896,7 @@ public class RcsSettings {
      * @return SIP-URI
      */
 	public String getImConferenceUri() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.IM_CONF_URI);
-		}
-		return result;
+		return readString(RcsSettingsData.IM_CONF_URI);
     }
 
 	/**
@@ -1007,9 +905,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
 	public void setImConferenceUri(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.IM_CONF_URI, uri);
-		}
+		writeParameter(RcsSettingsData.IM_CONF_URI, uri);
 	}
 
     /**
@@ -1018,11 +914,7 @@ public class RcsSettings {
      * @return SIP-URI
      */
 	public String getEndUserConfirmationRequestUri() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI);
-		}
-		return result;
+		return readString(RcsSettingsData.ENDUSER_CONFIRMATION_URI);
     }
 
 	/**
@@ -1031,9 +923,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
 	public void setEndUserConfirmationRequestUri(String uri) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri);
-		}
+		writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri);
 	}
 	
 	/**
@@ -1042,11 +932,7 @@ public class RcsSettings {
      * @return Country code
      */
 	public String getCountryCode() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.COUNTRY_CODE);
-		}
-		return result;
+		return readString(RcsSettingsData.COUNTRY_CODE);
     }
 
 	/**
@@ -1055,9 +941,7 @@ public class RcsSettings {
      * @param code Country code
      */
 	public void setCountryCode(String code) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.COUNTRY_CODE, code);
-		}
+		writeParameter(RcsSettingsData.COUNTRY_CODE, code);
     }
 
 	/**
@@ -1066,11 +950,7 @@ public class RcsSettings {
      * @return Area code
      */
 	public String getCountryAreaCode() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.COUNTRY_AREA_CODE);
-		}
-		return result;
+		return readString(RcsSettingsData.COUNTRY_AREA_CODE);
     }
 
 	/**
@@ -1079,9 +959,7 @@ public class RcsSettings {
      * @param code Area code
      */
 	public void setCountryAreaCode(String code) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.COUNTRY_AREA_CODE, code);
-		}
+		writeParameter(RcsSettingsData.COUNTRY_AREA_CODE, code);
     }
 
 	/**
@@ -1128,13 +1006,7 @@ public class RcsSettings {
      * @return Size in kilobytes
      */
 	public int getMaxPhotoIconSize() {
-		int result = 256;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_PHOTO_ICON_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_PHOTO_ICON_SIZE,256);
 	}
 
     /**
@@ -1143,13 +1015,7 @@ public class RcsSettings {
      * @return Number of char
      */
 	public int getMaxFreetextLength() {
-		int result = 100;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_FREETXT_LENGTH));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_FREETXT_LENGTH,100);
 	}
 
     /**
@@ -1158,28 +1024,23 @@ public class RcsSettings {
      * @return Number of participants
      */
 	public int getMaxChatParticipants() {
-		int result = 10;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_PARTICIPANTS));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_CHAT_PARTICIPANTS,10);
 	}
 
+	/**
+	 * @return minimum number of participants in a Group Chat
+	 */
+	public int getMinGroupChatParticipants() {
+		return MINIMUM_GC_PARTICIPANTS;
+	}
+	
 	/**
      * Get max length of a chat message
      *
      * @return Number of char
      */
 	public int getMaxChatMessageLength() {
-		int result = 100;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_MSG_LENGTH));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_CHAT_MSG_LENGTH,100);
 	}
 
 	/**
@@ -1188,13 +1049,7 @@ public class RcsSettings {
      * @return Number of char
      */
 	public int getMaxGroupChatMessageLength() {
-		int result = 100;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,100);
 	}
 	
 	/**
@@ -1203,13 +1058,7 @@ public class RcsSettings {
      * @return Duration in seconds
      */
 	public int getChatIdleDuration() {
-		int result = 120;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.CHAT_IDLE_DURATION));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.CHAT_IDLE_DURATION,120);
 	}
 
     /**
@@ -1218,13 +1067,7 @@ public class RcsSettings {
      * @return Size in kilobytes
      */
 	public int getMaxFileTransferSize() {
-		int result = 2048;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_FILE_TRANSFER_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_FILE_TRANSFER_SIZE,2048);
 	}
 
     /**
@@ -1233,13 +1076,7 @@ public class RcsSettings {
      * @return Size in kilobytes
      */
 	public int getWarningMaxFileTransferSize() {
-		int result = 2048;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.WARN_FILE_TRANSFER_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.WARN_FILE_TRANSFER_SIZE, 2048);
 	}
 
 	/**
@@ -1248,13 +1085,7 @@ public class RcsSettings {
      * @return Size in kilobytes
      */
 	public int getMaxImageSharingSize() {
-		int result = 2048;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IMAGE_SHARE_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_IMAGE_SHARE_SIZE,2048);
 	}
 
     /**
@@ -1263,13 +1094,7 @@ public class RcsSettings {
      * @return Duration in seconds
      */
 	public int getMaxVideoShareDuration() {
-		int result = 600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_VIDEO_SHARE_DURATION));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_VIDEO_SHARE_DURATION, 600);
 	}
 
     /**
@@ -1278,13 +1103,7 @@ public class RcsSettings {
      * @return Number of sessions
      */
 	public int getMaxChatSessions() {
-		int result = 1;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_SESSIONS));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_CHAT_SESSIONS, 1);
 	}
 
     /**
@@ -1293,13 +1112,7 @@ public class RcsSettings {
      * @return Number of sessions
      */
 	public int getMaxFileTransferSessions() {
-		int result = 1;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,1);
 	}
 	
     /**
@@ -1308,13 +1121,7 @@ public class RcsSettings {
      * @return Number of sessions
      */
 	public int getMaxIPCallSessions() {
-		int result = 1;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IP_CALL_SESSIONS));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_IP_CALL_SESSIONS, 1);
 	}
 	
 	/**
@@ -1323,11 +1130,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isSmsFallbackServiceActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.SMS_FALLBACK_SERVICE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.SMS_FALLBACK_SERVICE);
 	}
 
 	/**
@@ -1336,11 +1139,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isChatAutoAccepted(){
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.AUTO_ACCEPT_CHAT));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.AUTO_ACCEPT_CHAT);
 	}
 
     /**
@@ -1349,11 +1148,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isGroupChatAutoAccepted(){
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT));
-        }
-        return result;
+    	return readBoolean(RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT);
     }
 
 	/**
@@ -1362,11 +1157,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFileTransferAutoAccepted() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER);
 	}
 
 	/**
@@ -1375,11 +1166,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isStoreForwardWarningActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.WARN_SF_SERVICE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.WARN_SF_SERVICE);
 	}
 
 	/**
@@ -1397,14 +1184,7 @@ public class RcsSettings {
 	 * 
 	 */
 	public int getImSessionStartMode() {
-		int result = 1;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.IM_SESSION_START));
-			} catch (Exception e) {
-			}
-		}
-		return result;
+		return readInteger(RcsSettingsData.IM_SESSION_START, 1);
 	}
 
 	/**
@@ -1413,13 +1193,7 @@ public class RcsSettings {
 	 * @return Number
 	 */
 	public int getMaxChatLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_CHAT_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_CHAT_LOG_ENTRIES, 200);
 	}
 
 	/**
@@ -1428,13 +1202,7 @@ public class RcsSettings {
 	 * @return Number
 	 */
 	public int getMaxRichcallLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, 200);
 	}
 	
 	/**
@@ -1443,15 +1211,8 @@ public class RcsSettings {
 	 * @return Number
 	 */
 	public int getMaxIPCallLogEntriesPerContact() {
-		int result = 200;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, 200);
 	}
-	
 	
     /**
      * Get polling period used before each IMS service check (e.g. test subscription state for presence service)
@@ -1459,13 +1220,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getImsServicePollingPeriod(){
-		int result = 300;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, 300);
 	}
 
 	/**
@@ -1474,13 +1229,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getSipListeningPort() {
-		int result = 5060;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_DEFAULT_PORT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_DEFAULT_PORT, 5060);
 	}
 
     /**
@@ -1489,11 +1238,7 @@ public class RcsSettings {
      * @return Protocol (udp | tcp | tls)
      */
 	public String getSipDefaultProtocolForMobile() {
-		String result = null;
-		if (instance != null) {
-            result = readParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE);
-		}
-		return result;
+           return readString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE);
 	}
 
     /**
@@ -1502,11 +1247,7 @@ public class RcsSettings {
      * @return Protocol (udp | tcp | tls)
      */
     public String getSipDefaultProtocolForWifi() {
-        String result = null;
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI);
-        }
-        return result;
+    	return readString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI);
     }
 
     /**
@@ -1515,11 +1256,7 @@ public class RcsSettings {
      * @return Path of the certificate
      */
     public String getTlsCertificateRoot() {
-        String result = null;
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT);
-        }
-        return result;
+    	return readString(RcsSettingsData.TLS_CERTIFICATE_ROOT);
     }
 
     /**
@@ -1528,11 +1265,7 @@ public class RcsSettings {
      * @return Path of the certificate
      */
     public String getTlsCertificateIntermediate() {
-        String result = null;
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE);
-        }
-        return result;
+    	return readParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE);
     }
 
     /**
@@ -1541,13 +1274,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getSipTransactionTimeout() {
-		int result = 30;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_TRANSACTION_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_TRANSACTION_TIMEOUT, 30);
 	}
 
 	/**
@@ -1556,13 +1283,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getDefaultMsrpPort() {
-		int result = 20000;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MSRP_DEFAULT_PORT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MSRP_DEFAULT_PORT, 20000);
 	}
 
 	/**
@@ -1571,13 +1292,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getDefaultRtpPort() {
-		int result = 10000;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.RTP_DEFAULT_PORT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.RTP_DEFAULT_PORT, 10000);
 	}
 
     /**
@@ -1586,13 +1301,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getMsrpTransactionTimeout() {
-		int result = 5;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, 5);
 	}
 
 	/**
@@ -1601,13 +1310,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getRegisterExpirePeriod() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.REGISTER_EXPIRE_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.REGISTER_EXPIRE_PERIOD, 3600);
 	}
 
 	/**
@@ -1616,13 +1319,7 @@ public class RcsSettings {
      * @return Time in seconds
      */
 	public int getRegisterRetryBaseTime() {
-		int result = 30;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.REGISTER_RETRY_BASE_TIME));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.REGISTER_RETRY_BASE_TIME, 30);
 	}
 
 	/**
@@ -1631,13 +1328,7 @@ public class RcsSettings {
      * @return Time in seconds
      */
 	public int getRegisterRetryMaxTime() {
-		int result = 1800;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.REGISTER_RETRY_MAX_TIME));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.REGISTER_RETRY_MAX_TIME, 1800);
 	}
 
 	/**
@@ -1646,13 +1337,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getPublishExpirePeriod() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.PUBLISH_EXPIRE_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.PUBLISH_EXPIRE_PERIOD, 3600);
 	}
 
 	/**
@@ -1661,13 +1346,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getRevokeTimeout() {
-		int result = 300;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.REVOKE_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.REVOKE_TIMEOUT, 300);
 	}
 
 	/**
@@ -1676,11 +1355,7 @@ public class RcsSettings {
      * @return Authentication procedure
      */
 	public String getImsAuhtenticationProcedureForMobile() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE);
-		}
-		return result;
+		return readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE);
 	}
 
 	/**
@@ -1689,11 +1364,7 @@ public class RcsSettings {
      * @return Authentication procedure
      */
 	public String getImsAuhtenticationProcedureForWifi() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI);
-		}
-		return result;
+		return readParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI);
 	}
 
     /**
@@ -1702,11 +1373,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isTelUriFormatUsed() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.TEL_URI_FORMAT));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.TEL_URI_FORMAT);
 	}
 
 	/**
@@ -1715,13 +1382,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getRingingPeriod() {
-		int result = 120;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.RINGING_SESSION_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.RINGING_SESSION_PERIOD, 120);
 	}
 
 	/**
@@ -1730,13 +1391,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getSubscribeExpirePeriod() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, 3600);
 	}
 
 	/**
@@ -1745,13 +1400,7 @@ public class RcsSettings {
      * @return Timer in seconds
      */
 	public int getIsComposingTimeout() {
-		int result = 15;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.IS_COMPOSING_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.IS_COMPOSING_TIMEOUT, 15);
 	}
 
 	/**
@@ -1760,13 +1409,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getSessionRefreshExpirePeriod() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, 3600);
 	}
 
     /**
@@ -1775,11 +1418,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPermanentStateModeActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.PERMANENT_STATE_MODE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.PERMANENT_STATE_MODE);
 	}
 
     /**
@@ -1788,11 +1427,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isTraceActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.TRACE_ACTIVATED));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.TRACE_ACTIVATED);
 	}
 
 	/**
@@ -1801,13 +1436,7 @@ public class RcsSettings {
      * @return trace level
      */
 	public int getTraceLevel() {
-		int result = Logger.ERROR_LEVEL;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.TRACE_LEVEL));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.TRACE_LEVEL,Logger.ERROR_LEVEL);
 	}
 
     /**
@@ -1816,11 +1445,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isSipTraceActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.SIP_TRACE_ACTIVATED));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.SIP_TRACE_ACTIVATED);
 	}
 
     /**
@@ -1828,15 +1453,10 @@ public class RcsSettings {
      *
      * @return SIP trace file
      */
-    public String getSipTraceFile() {
-        String result = Environment.getExternalStorageDirectory().getPath() + "sip.txt";
-        if (instance != null) {
-            try {
-                result = readParameter(RcsSettingsData.SIP_TRACE_FILE);
-            } catch(Exception e) {}
-        }
-        return result;
-    }
+	public String getSipTraceFile() {
+		String defaultValue = Environment.getExternalStorageDirectory().getPath() + "sip.txt";
+		return readString(RcsSettingsData.SIP_TRACE_FILE, defaultValue);
+	}
 	
     /**
      * Is media trace activated
@@ -1844,11 +1464,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isMediaTraceActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.MEDIA_TRACE_ACTIVATED));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.MEDIA_TRACE_ACTIVATED);
 	}
 
     /**
@@ -1857,13 +1473,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getCapabilityRefreshTimeout() {
-		int result = 1;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, 1);
 	}
 
 	/**
@@ -1872,13 +1482,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getCapabilityExpiryTimeout() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, 3600);
 	}
 
     /**
@@ -1887,13 +1491,7 @@ public class RcsSettings {
      * @return Timeout in seconds
      */
 	public int getCapabilityPollingPeriod() {
-		int result = 3600;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.CAPABILITY_POLLING_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.CAPABILITY_POLLING_PERIOD, 3600);
 	}
 
     /**
@@ -1902,11 +1500,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isCsVideoSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_CS_VIDEO));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_CS_VIDEO);
 	}
 
 	/**
@@ -1915,11 +1509,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFileTransferSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER);
 	}
 
 	/**
@@ -1928,13 +1518,10 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFileTransferHttpSupported() {
-		boolean result = false;
-		if (instance != null) {
-            if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0) && (getFtHttpPassword().length() > 0)) {
-                result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP));
-            }
+		if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0) && (getFtHttpPassword().length() > 0)) {
+			return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP);
 		}
-		return result;
+		return false;
 	}
 
 	/**
@@ -1943,11 +1530,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isImSessionSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IM_SESSION));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_IM_SESSION);
 	}
 	
 	/**
@@ -1956,11 +1539,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isImGroupSessionSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION);
 	}
 
 	/**
@@ -1969,11 +1548,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isImageSharingSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IMAGE_SHARING));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_IMAGE_SHARING);
 	}
 
 	/**
@@ -1982,11 +1557,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isVideoSharingSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_VIDEO_SHARING));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_VIDEO_SHARING);
 	}
 
 	/**
@@ -1995,13 +1566,10 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isPresenceDiscoverySupported() {
-		boolean result = false;
-		if (instance != null) {
-            if (getXdmServer().length() > 0) {
-            	result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY));
-            }
+		if (getXdmServer().length() > 0) {
+			return readBoolean(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY);
 		}
-		return result;
+		return false;
 	}
 
     /**
@@ -2010,13 +1578,10 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isSocialPresenceSupported() {
-		boolean result = false;
-		if (instance != null) {
-            if (getXdmServer().length() > 0) {
-            	result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE));
-            }
+		if (getXdmServer().length() > 0) {
+			return readBoolean(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE);
 		}
-		return result;
+		return false;
 	}
 
     /**
@@ -2025,13 +1590,8 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isGeoLocationPushSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH);
 	}
-	
 
     /**
      * Is file transfer thumbnail supported
@@ -2039,11 +1599,10 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFileTransferThumbnailSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL));
-		}
-		return result;
+		// Thumbnail is only supported in HTPP.
+		// The thThumbnail configuration settings is fixed 0 for MSRP per specification.
+		// Refer to PDD v3 page 106.
+		return isFileTransferHttpSupported();
 	}
 	
     /**
@@ -2052,11 +1611,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFileTransferStoreForwardSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF);
 	}
 
 	 /**
@@ -2065,11 +1620,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVoiceCallSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IP_VOICE_CALL));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_IP_VOICE_CALL);
 	}
 	
 	/**
@@ -2078,13 +1629,8 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVideoCallSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL);
 	}
-	
 	
     /**
      * Is group chat Store & Forward supported
@@ -2092,11 +1638,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isGroupChatStoreForwardSupported() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF);
 	}
 
 	/**
@@ -2105,11 +1647,7 @@ public class RcsSettings {
      * @return List of extensions (semicolon separated)
      */
 	public String getSupportedRcsExtensions() {
-		String result = null;
-		if (instance != null) {
-			return readParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS);
-		}
-		return result;
+		return readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS);
     }
 
 	/**
@@ -2118,9 +1656,7 @@ public class RcsSettings {
      * @param extensions List of extensions (semicolon separated)
      */
 	public void setSupportedRcsExtensions(String extensions) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, extensions);
-		}
+		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, extensions);
     }
 
 	/**
@@ -2129,11 +1665,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isImAlwaysOn() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IM_CAPABILITY_ALWAYS_ON));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IM_CAPABILITY_ALWAYS_ON);
 	}
 	
 	/**
@@ -2142,11 +1674,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isFtAlwaysOn() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON);
 	}
 
 	/**
@@ -2155,11 +1683,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isImReportsActivated() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IM_USE_REPORTS));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IM_USE_REPORTS);
 	}
 
 	/**
@@ -2168,13 +1692,7 @@ public class RcsSettings {
      * @return Network type
      */
 	public int getNetworkAccess() {
-		int result = RcsSettingsData.ANY_ACCESS;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.NETWORK_ACCESS));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.ANY_ACCESS);
 	}
 
     /**
@@ -2183,13 +1701,7 @@ public class RcsSettings {
      * @return Timer in milliseconds
      */
 	public int getSipTimerT1() {
-		int result = 2000;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_TIMER_T1));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_TIMER_T1, 2000);
 	}
 
     /**
@@ -2198,13 +1710,7 @@ public class RcsSettings {
      * @return Timer in milliseconds
      */
 	public int getSipTimerT2() {
-		int result = 16000;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_TIMER_T2));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_TIMER_T2, 16000);
 	}
 
     /**
@@ -2213,13 +1719,7 @@ public class RcsSettings {
      * @return Timer in milliseconds
      */
 	public int getSipTimerT4() {
-		int result = 17000;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_TIMER_T4));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_TIMER_T4, 17000);
 	}
 
 	/**
@@ -2228,11 +1728,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isSipKeepAliveEnabled() {
-		boolean result = true;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.SIP_KEEP_ALIVE));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.SIP_KEEP_ALIVE, true);
 	}
 
     /**
@@ -2241,13 +1737,7 @@ public class RcsSettings {
      * @return Period in seconds
      */
 	public int getSipKeepAlivePeriod() {
-		int result = 60;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, 60);
     }
 
 	/**
@@ -2256,11 +1746,7 @@ public class RcsSettings {
      * @return APN (null means any APN may be used to connect to RCS)
      */
 	public String getNetworkApn() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.RCS_APN);
-		}
-		return result;
+		return readString(RcsSettingsData.RCS_APN);
     }
 
 	/**
@@ -2269,11 +1755,7 @@ public class RcsSettings {
      * @return SIM operator name (null means any SIM operator is authorized to connect to RCS)
      */
 	public String getNetworkOperator() {
-		String result = null;
-		if (instance != null) {
-			result = readParameter(RcsSettingsData.RCS_OPERATOR);
-		}
-		return result;
+		return readString(RcsSettingsData.RCS_OPERATOR);
     }
 
 	/**
@@ -2282,11 +1764,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isGruuSupported() {
-		boolean result = true;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.GRUU));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.GRUU, true);
 	}
 
     /**
@@ -2295,11 +1773,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isImeiUsedAsDeviceId() {
-        boolean result = true;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.USE_IMEI_AS_DEVICE_ID));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.USE_IMEI_AS_DEVICE_ID, true);
     }
 
     /**
@@ -2308,11 +1782,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isCpuAlwaysOn() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CPU_ALWAYS_ON));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.CPU_ALWAYS_ON);
     }
 
 	/**
@@ -2321,13 +1791,7 @@ public class RcsSettings {
      * @return Mode
      */
 	public int getAutoConfigMode() {
-		int result = RcsSettingsData.NO_AUTO_CONFIG;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.AUTO_CONFIG_MODE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.AUTO_CONFIG_MODE, RcsSettingsData.NO_AUTO_CONFIG);
 	}
 
     /**
@@ -2336,11 +1800,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isProvisioningTermsAccepted() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED);
     }
 
     /**
@@ -2349,11 +1809,7 @@ public class RcsSettings {
      * @return Version
      */
     public String getProvisioningVersion() {
-        String result = "0";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.PROVISIONING_VERSION);
-        }
-        return result;
+    	return readString(RcsSettingsData.PROVISIONING_VERSION, "0");
     }
 
     /**
@@ -2362,9 +1818,7 @@ public class RcsSettings {
      * @param version Version
      */
     public void setProvisioningVersion(String version) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.PROVISIONING_VERSION, version);
-        }
+    	writeParameter(RcsSettingsData.PROVISIONING_VERSION, version);
     }
 
     /**
@@ -2373,10 +1827,7 @@ public class RcsSettings {
      * @param state State
      */
     public void setProvisioningTermsAccepted(boolean state) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED,
-                    Boolean.toString(state));
-        }
+        writeBoolean(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED, state);
     }
 
     /**
@@ -2384,24 +1835,18 @@ public class RcsSettings {
      *
      * @return Address
      */
-    public String getSecondaryProvisioningAddress() {
-        String result = "";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS);
-        }
-        return result;
-    }
+	public String getSecondaryProvisioningAddress() {
+		return readString(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, "");
+	}
 
     /**
      * Set secondary provisioning address
      *
      * @param Address
      */
-    public void setSecondaryProvisioningAddress(String value) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, value);
-        }
-    }
+	public void setSecondaryProvisioningAddress(String value) {
+		writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, value);
+	}
 
     /**
      * Is secondary provisioning address only used
@@ -2409,11 +1854,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isSecondaryProvisioningAddressOnly() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY);
     }
 
     /**
@@ -2422,9 +1863,7 @@ public class RcsSettings {
      * @param Boolean
      */
     public void setSecondaryProvisioningAddressOnly(boolean value) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, Boolean.toString(value));
-        }
+       writeBoolean(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, value);
     }
 
     /**
@@ -2461,7 +1900,7 @@ public class RcsSettings {
          if (TextUtils.isEmpty(getUserProfileImsDomain())) {
         	 return false;
          }
-         String mode = RcsSettings.getInstance().getImsAuhtenticationProcedureForMobile();
+         String mode = getImsAuhtenticationProcedureForMobile();
 		 if (mode.equals(RcsSettingsData.DIGEST_AUTHENT)) {
 	         if (TextUtils.isEmpty(getUserProfileImsUserName())) {
 	        	 return false;
@@ -2469,7 +1908,7 @@ public class RcsSettings {
 	         if (TextUtils.isEmpty(getUserProfileImsPassword())) {
 	        	 return false;
 	         }
-	         if (TextUtils.isEmpty(this.getUserProfileImsPrivateId())) {
+	         if (TextUtils.isEmpty(getUserProfileImsPrivateId())) {
 	        	 return false;
 	         }			
 		}
@@ -2483,16 +1922,11 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isGroupChatActivated() {
-		boolean result = false;
-		if (instance != null) {
-			String value = getImConferenceUri();
-			if ((value != null) &&
-					(value.length() > 0) &&
-						!value.equals(RcsSettingsData.DEFAULT_GROUP_CHAT_URI)) {
-				result = true;
-			}
+		String value = getImConferenceUri();
+		if (!TextUtils.isEmpty(value) && !value.equals(RcsSettingsData.DEFAULT_GROUP_CHAT_URI)) {
+			return true;
 		}
-		return result;
+		return false;
 	}
     
 	/**
@@ -2501,11 +1935,8 @@ public class RcsSettings {
 	 *  @return Directory path
 	 */
 	public String getPhotoRootDirectory() {
-        String result = Environment.getExternalStorageDirectory().toString();
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.DIRECTORY_PATH_PHOTOS);
-        }
-        return result;
+        String defaultValue = Environment.getExternalStorageDirectory().toString();
+        return readString(RcsSettingsData.DIRECTORY_PATH_PHOTOS, defaultValue);
 	}
 
 	/**
@@ -2514,9 +1945,7 @@ public class RcsSettings {
 	 *  @param path Directory path
 	 */
 	public void setPhotoRootDirectory(String path) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.DIRECTORY_PATH_PHOTOS, path);
-        }
+		writeParameter(RcsSettingsData.DIRECTORY_PATH_PHOTOS, path);
 	}
 
 	/**
@@ -2525,11 +1954,8 @@ public class RcsSettings {
 	 *  @return Directory path
 	 */
 	public String getVideoRootDirectory() {
-        String result = Environment.getExternalStorageDirectory().toString();
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.DIRECTORY_PATH_VIDEOS);
-        }
-        return result;
+		String defaultValue = Environment.getExternalStorageDirectory().toString();
+		return readString(RcsSettingsData.DIRECTORY_PATH_VIDEOS, defaultValue);
 	}
 	
 	/**
@@ -2538,9 +1964,7 @@ public class RcsSettings {
 	 *  @param path Directory path
 	 */
 	public void setVideoRootDirectory(String path) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.DIRECTORY_PATH_VIDEOS, path);
-        }
+		writeParameter(RcsSettingsData.DIRECTORY_PATH_VIDEOS, path);
 	}
 	
 	/**
@@ -2548,12 +1972,9 @@ public class RcsSettings {
 	 * 
 	 *  @return Directory path
 	 */
-	public String getFileRootDirectory() {	
-        String result = Environment.getExternalStorageDirectory().toString();
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.DIRECTORY_PATH_FILES);
-        }
-        return result;
+	public String getFileRootDirectory() {
+		String defaultValue = Environment.getExternalStorageDirectory().toString();
+		return readString(RcsSettingsData.DIRECTORY_PATH_FILES, defaultValue);
 	}
     
 	/**
@@ -2562,9 +1983,7 @@ public class RcsSettings {
 	 *  @param path Directory path
 	 */
 	public void setFileRootDirectory(String path) {
-        if (instance != null) {
-            writeParameter(RcsSettingsData.DIRECTORY_PATH_FILES, path);
-        }
+		writeParameter(RcsSettingsData.DIRECTORY_PATH_FILES, path);
 	}
 	
 	/**
@@ -2573,11 +1992,7 @@ public class RcsSettings {
 	 * @return Boolean
 	 */
 	public boolean isSecureMsrpOverWifi() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.SECURE_MSRP_OVER_WIFI));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.SECURE_MSRP_OVER_WIFI);
 	}
 
 	/**
@@ -2586,11 +2001,7 @@ public class RcsSettings {
 	 * @return Boolean
 	 */
 	public boolean isSecureRtpOverWifi() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.SECURE_RTP_OVER_WIFI));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.SECURE_RTP_OVER_WIFI);
 	}
 	
     /**
@@ -2599,13 +2010,7 @@ public class RcsSettings {
      * @return Number of char
      */
 	public int getMaxGeolocLabelLength() {
-		int result = 100;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, 100);
 	}
 	
     /**
@@ -2614,27 +2019,15 @@ public class RcsSettings {
      * @return Time in seconds
      */
 	public int getGeolocExpirationTime() {
-		int result = 1800;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.GEOLOC_EXPIRATION_TIME));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.GEOLOC_EXPIRATION_TIME, 1800);
 	}
 
 	public void setProvisioningToken(String token) {
-		if (instance != null) {
-            writeParameter(RcsSettingsData.PROVISIONING_TOKEN, token);
-        }
+		writeParameter(RcsSettingsData.PROVISIONING_TOKEN, token);
 	}
 
 	public String getProvisioningToken() {
-		String result = "0";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.PROVISIONING_TOKEN);
-        }
-        return result;
+		return readString(RcsSettingsData.PROVISIONING_TOKEN, "0");
 	}
 	
     /**
@@ -2643,11 +2036,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isSipAutomata() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.CAPABILITY_SIP_AUTOMATA));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.CAPABILITY_SIP_AUTOMATA);
 	}
 	
 	/**
@@ -2656,13 +2045,7 @@ public class RcsSettings {
      * @return Size in kilobytes
      */
 	public int getMaxFileIconSize() {
-		int result = 50;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_FILE_ICON_SIZE));
-			} catch(Exception e) {}
-		}
-		return result;
+		return readInteger(RcsSettingsData.MAX_FILE_ICON_SIZE, 50);
 	}
 	
 	/**
@@ -2671,14 +2054,8 @@ public class RcsSettings {
 	 * @return the GSMA release
 	 */
 	public int getGsmaRelease() {
-		int result = 1; // Blackbird
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.KEY_GSMA_RELEASE));
-			} catch (Exception e) {
-			}
-		}
-		return result;
+		// 1: Blackbird by default
+		return readInteger(RcsSettingsData.KEY_GSMA_RELEASE, 1);
 	}
 	
 	/**
@@ -2687,9 +2064,7 @@ public class RcsSettings {
 	 * @param release Release
 	 */
 	public void setGsmaRelease(int release) {
-		if (instance != null) {
-			writeParameter(RcsSettingsData.KEY_GSMA_RELEASE, ""+release);
-		}
+		writeInteger(RcsSettingsData.KEY_GSMA_RELEASE, release);
 	}
 	
 	/**
@@ -2698,7 +2073,7 @@ public class RcsSettings {
 	 * @return Boolean
 	 */
 	public boolean isAlbatrosRelease() {
-		return (RcsSettings.getInstance().getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
+		return (getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
 	}	
 
 	/**
@@ -2707,7 +2082,7 @@ public class RcsSettings {
 	 * @return Boolean
 	 */
 	public boolean isBlackbirdRelease() {
-		return (RcsSettings.getInstance().getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
+		return (getGsmaRelease() == RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
 	}		
 	
 	/**
@@ -2716,11 +2091,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVoiceCallBreakoutAA() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_AA));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IPVOICECALL_BREAKOUT_AA);
 	}
 	
 	/**
@@ -2729,11 +2100,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVoiceCallBreakoutCS() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVOICECALL_BREAKOUT_CS));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IPVOICECALL_BREAKOUT_CS);
 	}
 	
 	/**
@@ -2742,11 +2109,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVideoCallUpgradeFromCS() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS);
 	}
 	
 	
@@ -2756,11 +2119,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVideoCallUpgradeOnCapError() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR);
 	}
 	
 	/**
@@ -2769,11 +2128,7 @@ public class RcsSettings {
      * @return Boolean
      */
 	public boolean isIPVideoCallAttemptEarly() {
-		boolean result = false;
-		if (instance != null) {
-			result = Boolean.parseBoolean(readParameter(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY));
-		}
-		return result;
+		return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY);
 	}
 	
     /**
@@ -2782,38 +2137,27 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isTcpFallback() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.TCP_FALLBACK));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.TCP_FALLBACK);
     }
+
     
     /**
      * Get vendor name of the client
      *
      * @return Vendor
      */
-    public String getVendor() {
-        String result = "OrangeLabs";
-        if (instance != null) {
-            result = readParameter(RcsSettingsData.VENDOR_NAME);
-        }
-        return result;
-    }
+	public String getVendor() {
+		return readString(RcsSettingsData.VENDOR_NAME, "OrangeLabs");
+	}
 
     /**
      * Is RCS extensions controlled
      * 
      * @return Boolean
      */
-    public boolean isExtensionsControlled() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.CONTROL_EXTENSIONS));
-        }
-        return result;
-    }
+	public boolean isExtensionsControlled() {
+		return readBoolean(RcsSettingsData.CONTROL_EXTENSIONS);
+	}
 
     /**
      * Is RCS extensions allowed
@@ -2821,11 +2165,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isExtensionsAllowed() {
-        boolean result = false;
-        if (instance != null) {
-            result = Boolean.parseBoolean(readParameter(RcsSettingsData.ALLOW_EXTENSIONS));
-        }
-        return result;
+        return readBoolean(RcsSettingsData.ALLOW_EXTENSIONS);
     }
 	
     /**
@@ -2833,14 +2173,136 @@ public class RcsSettings {
      * 
      * @return Max length
      */
-    public int getMaxMsrpLengthForExtensions() {
-		int result = 2048;
-		if (instance != null) {
-			try {
-				result = Integer.parseInt(readParameter(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS));
-			} catch (Exception e) {
-			}
-		}
-		return result;
-    }
+	public int getMaxMsrpLengthForExtensions() {
+		return readInteger(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, 2048);
+	}
+
+	/**
+	 * Set the client messaging mode
+	 * 
+	 * @param mode
+	 *            the client messaging mode (0: CONVERGED, 1: INTEGRATED, 2: SEAMLESS, 3: NONE)
+	 */
+	public void setMessagingMode(int mode) {
+		writeInteger(RcsSettingsData.KEY_MESSAGING_MODE, mode % 4);
+	}
+	
+	/**
+	 * Get the client messaging mode
+	 * 
+	 * @return the client messaging mode (0: CONVERGED, 1: INTEGRATED, 2: SEAMLESS, 3: NONE)
+	 */
+	public int getMessagingMode() {
+		return readInteger(RcsSettingsData.KEY_MESSAGING_MODE, RcsSettingsData.VALUE_MESSAGING_MODE_NONE) % 4;
+	}
+
+	/**
+     * Is file transfer invitation auto accepted in roaming
+     *
+     * @return Boolean
+     */
+	public boolean isFileTransferAutoAcceptedInRoaming() {
+		return readBoolean(RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING);
+	}
+	
+	/**
+	 * Set File Transfer Auto Accepted in roaming
+	 * 
+	 * @param option
+	 *            Option
+	 */
+	public void setFileTransferAutoAcceptedInRoaming(boolean option) {
+		writeBoolean(RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING, option);
+	}
+
+	/**
+	 * Set File Transfer Auto Accepted in normal conditions
+	 * 
+	 * @param option
+	 *            Option
+	 */
+	public void setFileTransferAutoAccepted(boolean option) {
+		writeBoolean(RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER, option);
+	}
+	
+	/**
+     * Is file transfer invitation auto accepted enabled (by the network)
+     *
+     * @return Boolean
+     */
+	public boolean isFtAutoAcceptedModeChangeable() {
+		return readBoolean(RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE);
+	}
+	
+	/**
+     * Set File Transfer Auto Accepted Mode changeable option
+     *
+     * @param option Option
+     */
+	public void setFtAutoAcceptedModeChangeable(boolean option) {
+		writeBoolean(RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, option);
+	}
+
+	/**
+	 * returns the image resize option for file transfer in the range [ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK]
+	 * 
+	 * @return image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
+	 */
+	public int getImageResizeOption() {
+        return readInteger(RcsSettingsData.KEY_IMAGE_RESIZE_OPTION, RcsSettingsData.VALUE_IMAGE_RESIZE_ONLY_ABOVE_MAX_SIZE) % 3;
+	}
+	
+	/**
+	 * Set the image resize option
+	 * 
+	 * @param option
+	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
+	 */
+	public void setImageResizeOption(int option) {
+		writeInteger(RcsSettingsData.KEY_IMAGE_RESIZE_OPTION, option % 3);
+	}
+	
+	/**
+	 * Get the default messaging method
+	 * 
+	 * @return the default messaging method (0: AUTOMATIC, 1: JOYN, 2: NON_JOYN)
+	 */
+	public int getDefaultMessagingMethod() {
+		return readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.VALUE_DEF_MSG_METHOD_JOYN) % 3;
+	}
+	
+	/**
+	 * Set default messaging method
+	 * 
+	 * @param method
+	 *            the default messaging method (0: AUTOMATIC, 1: JOYN, 2: NON_JOYN)
+	 */
+	public void setDefaultMessagingMethod(int method) {
+		writeInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, method % 3);
+	}
+	
+	/**
+     * Is configuration valid
+     *
+     * @return Boolean
+     */
+	public boolean isConfigurationValid() {
+		return readBoolean(RcsSettingsData.CONFIGURATION_VALID);
+	}
+
+	/**
+     * Set configuration valid
+     *
+     * @param valid
+     */
+	public void setConfigurationValid(boolean valid) {
+		writeBoolean(RcsSettingsData.CONFIGURATION_VALID, valid);
+	}
+
+	/**
+	 * @return the maximum length of subject in Group Chat
+	 */
+	public int getGroupChatSubjectMaxLength() {
+		return GROUP_CHAT_SUBJECT_MAX_LENGTH;
+	}
 }

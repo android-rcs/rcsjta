@@ -153,7 +153,7 @@ public class ServiceProvisioning extends Activity {
 		if (bundle != null) {
 			bundle.putInt(RcsSettingsData.IM_SESSION_START, spinner.getSelectedItemPosition());
 		} else {
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.IM_SESSION_START, "" + spinner.getSelectedItemPosition());
+			RcsSettings.getInstance().writeInteger(RcsSettingsData.IM_SESSION_START, spinner.getSelectedItemPosition());
 		}
 
 		saveCheckBoxParameter(this, R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE, bundle);

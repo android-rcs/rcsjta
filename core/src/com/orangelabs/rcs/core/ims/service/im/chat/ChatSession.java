@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -560,7 +559,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 							// Mark the message as waiting a displayed report if needed
 							if (imdnDisplayedRequested) {
 								// Check if displayed delivery report is enabled
-								if (RcsSettings.getInstance().isImDisplayedNotificationActivated())
+								if (RcsSettings.getInstance().isRespondToDisplayReports())
 									MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
 							}
 						} else if (ChatUtils.isApplicationIsComposingType(contentType)) {
@@ -960,7 +959,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 
 		// Send data
-		sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
+		boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
+		if (result && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+			MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
+		}
 	}
 	    
 	/**

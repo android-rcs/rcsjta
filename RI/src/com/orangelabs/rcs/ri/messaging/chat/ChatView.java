@@ -139,7 +139,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         sendBtn = (Button)findViewById(R.id.send_button);
         sendBtn.setOnClickListener(this);
                
-        // Instanciate API
+        // Instantiate API
         chatApi = new ChatService(getApplicationContext(), this);
         contactsApi = new ContactsService(getApplicationContext(), null);
         

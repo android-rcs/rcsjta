@@ -172,7 +172,7 @@ public class Provisioning extends TabActivity {
 		if (bundle != null) {
 			bundle.putBoolean(rcsSettingsKey, box.isChecked());
 		} else {
-			RcsSettings.getInstance().writeParameter(rcsSettingsKey, Boolean.toString(box.isChecked()));
+			RcsSettings.getInstance().writeBoolean(rcsSettingsKey, box.isChecked());
 		}
 	}
 }

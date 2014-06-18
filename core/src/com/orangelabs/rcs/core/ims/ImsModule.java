@@ -469,4 +469,11 @@ public class ImsModule implements SipEventListener {
     public boolean isReady(){
         return isReady;
     }
+    
+	/**
+	 * @return true is device is in roaming
+	 */
+	public boolean isInRoaming() {
+		return connectionManager.isInRoaming();
+	}
 }

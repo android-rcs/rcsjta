@@ -198,7 +198,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	sizeTxt.setText(size);
 
 			// Display accept/reject dialog
-	    	if (resuming || ftApi.getConfiguration().isAutoAcceptMode()) {
+	    	if (resuming || ftApi.getConfiguration().isAutoAcceptEnabled()) {
 	    		// Auto accept. Check capacity
 				isCapacityOk(fileSize);
 	    	} else {

@@ -227,7 +227,8 @@ public class GroupChatView extends ChatView {
 				participants = getListOfParticipants(groupChat.getParticipants());
 				
 				// Display accept/reject dialog
-				if (!chatApi.getConfiguration().isGroupChatAutoAcceptMode()) {
+				// TODO manage new state ACCEPTING and REJECTED
+				if (groupChat.getState() == GroupChat.State.INVITED) {
 	                // Manual accept
 	    			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	    			builder.setTitle(R.string.title_group_chat);

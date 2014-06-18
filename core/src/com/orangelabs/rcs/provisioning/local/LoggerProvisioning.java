@@ -128,7 +128,7 @@ public class LoggerProvisioning extends Activity {
 			bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
 		} else {
 			Integer value = spinner.getSelectedItemPosition();
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.TRACE_LEVEL, value.toString());
+			RcsSettings.getInstance().writeInteger(RcsSettingsData.TRACE_LEVEL, value);
 		}
 	}
 

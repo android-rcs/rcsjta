@@ -273,6 +273,13 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 				if (ftApi.getConfiguration().isFileIconSupported()) {
 					ftThumb.setEnabled(true);
 				}
+//				if (LogUtils.isActive) {
+//					FileTransferServiceConfiguration conf = ftApi.getConfiguration();
+//					Log.d(LOGTAG, "onServiceConnected imageResizeOption="+conf.getImageResizeOption());
+//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptModeChangeable="+conf.isAutoAcceptModeChangeable());
+//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptEnabled="+conf.isAutoAcceptEnabled());
+//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptInRoamingEnabled="+conf.isAutoAcceptInRoamingEnabled());
+//				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

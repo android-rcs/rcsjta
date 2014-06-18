@@ -20,11 +20,13 @@ package com.orangelabs.rcs.settings;
 
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Messaging settings display
@@ -35,7 +37,15 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
     private CheckBoxPreference filetransfer_vibrate;
     private CheckBoxPreference chat_vibrate;
     private CheckBoxPreference chat_displayed_notification;
-
+    private ListPreference imageResizeOption;
+    private CheckBoxPreference ftAutoAccept;
+    private CheckBoxPreference ftAutoAcceptInRoaming;
+    
+    /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(MessagingSettingsDisplay.class.getSimpleName());
+        
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,22 +66,59 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
         chat_displayed_notification = (CheckBoxPreference)findPreference("chat_displayed_notification");
         chat_displayed_notification.setPersistent(false);
         chat_displayed_notification.setOnPreferenceChangeListener(this);
-        chat_displayed_notification.setChecked(RcsSettings.getInstance().isImDisplayedNotificationActivated());
+        chat_displayed_notification.setChecked(RcsSettings.getInstance().isRespondToDisplayReports());
+        
+        imageResizeOption = (ListPreference) findPreference("image_resize_option");
+        imageResizeOption.setPersistent(false);
+        imageResizeOption.setOnPreferenceChangeListener(this);
+        imageResizeOption.setValue("" + RcsSettings.getInstance().getImageResizeOption());
+               
+        ftAutoAccept = (CheckBoxPreference)findPreference("ft_auto_accept");
+        ftAutoAccept.setPersistent(false);
+        ftAutoAccept.setOnPreferenceChangeListener(this);
+        ftAutoAccept.setChecked(RcsSettings.getInstance().isFileTransferAutoAccepted());
+        ftAutoAccept.setDisableDependentsState(false);
+        ftAutoAccept.setEnabled(RcsSettings.getInstance().isFtAutoAcceptedModeChangeable());
+        ftAutoAccept.setShouldDisableView(true);
+        
+        ftAutoAcceptInRoaming = (CheckBoxPreference)findPreference("ft_auto_accept_in_roaming");
+        ftAutoAcceptInRoaming.setPersistent(false);
+        ftAutoAcceptInRoaming.setOnPreferenceChangeListener(this);
+        ftAutoAcceptInRoaming.setChecked(RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming());
+        ftAutoAcceptInRoaming.setDependency("ft_auto_accept");
 	}
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
         if (preference.getKey().equals("filetransfer_invitation_vibration")) {
-        	Boolean state = (Boolean)objValue;
-        	RcsSettings.getInstance().setPhoneVibrateForFileTransferInvitation(state.booleanValue());
+        	RcsSettings.getInstance().setPhoneVibrateForFileTransferInvitation((Boolean)objValue);
         } else
         if (preference.getKey().equals("chat_invitation_vibration")) {
-        	Boolean state = (Boolean)objValue;
-        	RcsSettings.getInstance().setPhoneVibrateForChatInvitation(state.booleanValue());
+        	RcsSettings.getInstance().setPhoneVibrateForChatInvitation((Boolean)objValue);
         } else
         if (preference.getKey().equals("chat_displayed_notification")) {
-            Boolean state = (Boolean)objValue;
-            RcsSettings.getInstance().setImDisplayedNotificationActivated(state.booleanValue());
-        }
+            RcsSettings.getInstance().setRespondToDisplayReports((Boolean)objValue);
+        } else 
+        if (preference.getKey().equals("image_resize_option")) {
+            // Set the image resize option
+            try {
+            	if (logger.isActivated()) {
+            		logger.debug("setImageResizeOption="+(String)objValue);
+            	}
+            	RcsSettings.getInstance().setImageResizeOption(Integer.parseInt((String)objValue));
+            } catch (Exception e) {
+                // Nothing to do
+            }
+        } else
+        if (preference.getKey().equals("ft_auto_accept")) {
+        	Boolean aa = (Boolean)objValue;
+        	RcsSettings.getInstance().setFileTransferAutoAccepted(aa);
+        	if (!aa) {
+        		RcsSettings.getInstance().setFileTransferAutoAcceptedInRoaming(false);
+        	}
+        } else
+        if (preference.getKey().equals("ft_auto_accept_in_roaming")) {
+            RcsSettings.getInstance().setFileTransferAutoAcceptedInRoaming((Boolean)objValue);
+        } 
         return true;
     }
 }

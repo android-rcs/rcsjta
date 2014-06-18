@@ -9,13 +9,13 @@ import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.provider.messaging.RichMessagingHistory;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 
 public class ChatMessageTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		RichMessagingHistory.createInstance(mContext);
+		MessagingLog.createInstance(mContext);
 	}
 
 	protected void tearDown() throws Exception {
@@ -29,7 +29,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		InstantMessage msg = new InstantMessage(msgId, remote, txt, true, "display");
 		
 		// Add entry
-		RichMessagingHistory.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote);		
@@ -72,7 +72,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true,"display");
 		
 		// Add entry
-		RichMessagingHistory.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote);		

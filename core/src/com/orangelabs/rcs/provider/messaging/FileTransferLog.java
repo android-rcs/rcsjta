@@ -285,9 +285,6 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	@Override
 	public boolean isFileTransfer(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("isFileTransfer (fileTransferId=" + fileTransferId + ")");
-		}
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(ftDatabaseUri, new String[] { FileTransferData.KEY_ID }, SELECTION_FILE_BY_FT_ID,

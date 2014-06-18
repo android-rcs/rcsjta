@@ -23,15 +23,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
-
-import com.orangelabs.rcs.ri.utils.LogUtils;
-
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Chat;
@@ -42,6 +40,7 @@ import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -147,7 +146,13 @@ public class SingleChatView extends ChatView {
 				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
 				composeText.setFilters(filterArray);
 			}
-			
+//			if (LogUtils.isActive) {
+//				ChatServiceConfiguration conf = chatApi.getConfiguration();
+//				Log.d(LOGTAG, "onServiceConnected GC min participants=" + conf.getGroupChatMinParticipants());
+//				Log.d(LOGTAG, "onServiceConnected GC max participants=" + conf.getGroupChatMaxParticipants());
+//				Log.d(LOGTAG, "onServiceConnected GC subject max length=" + conf.getGroupChatSubjectMaxLength());
+//				Log.d(LOGTAG, "onServiceConnected is respond to display reports=" + conf.isRespondToDisplayReportsEnabled());
+//			}
 			// Open chat
     		chat = chatApi.openSingleChat(contact, chatListener);
 							

@@ -431,5 +431,26 @@ public class ChatService extends JoynService {
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-	}    
+	}
+
+	/**
+	 * Set the parameter that controls whether to respond or not to display reports when requested by the remote.
+	 * <p>
+	 * Only applicable to one to one chat messages.
+	 * 
+	 * @param state
+	 *            true if respond to display reports
+	 * @throws JoynServiceException
+	 */
+	public void setRespondToDisplayReports(boolean state) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.setRespondToDisplayReports(state);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 }

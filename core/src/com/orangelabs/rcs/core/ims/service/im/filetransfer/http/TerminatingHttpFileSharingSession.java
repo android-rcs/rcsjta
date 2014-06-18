@@ -41,7 +41,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -162,7 +161,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				logger.info("Initiate a new HTTP file transfer session as terminating");
 			}
 
-			if (RcsSettings.getInstance().isFileTransferAutoAccepted()) {
+			if (isFileTransferAutoAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}

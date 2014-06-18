@@ -121,7 +121,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null) {
 			bundle.putInt(RcsSettingsData.AUTO_CONFIG_MODE, spinner.getSelectedItemPosition());
 		} else {
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.AUTO_CONFIG_MODE, "" + spinner.getSelectedItemPosition());
+			RcsSettings.getInstance().writeInteger(RcsSettingsData.AUTO_CONFIG_MODE, spinner.getSelectedItemPosition());
 		}
 
 		spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForMobile);
@@ -181,21 +181,21 @@ public class StackProvisioning extends Activity {
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.ANY_ACCESS);
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.NETWORK_ACCESS, "" + RcsSettingsData.ANY_ACCESS);
+				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.ANY_ACCESS);
 			}
 			break;
 		case 1:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.MOBILE_ACCESS);
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.NETWORK_ACCESS, "" + RcsSettingsData.MOBILE_ACCESS);
+				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.MOBILE_ACCESS);
 			}
 			break;
 		case 2:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.WIFI_ACCESS);
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.NETWORK_ACCESS, "" + RcsSettingsData.WIFI_ACCESS);
+				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.WIFI_ACCESS);
 			}
 			break;
 		}

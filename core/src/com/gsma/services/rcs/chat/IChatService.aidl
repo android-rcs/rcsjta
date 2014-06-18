@@ -45,4 +45,6 @@ interface IChatService {
 
 
 	int getServiceVersion();
+	
+	void setRespondToDisplayReports(in boolean state);
 }

@@ -31,6 +31,11 @@ import android.os.Parcelable;
  */
 public class ChatServiceConfiguration {
 	/**
+	 * IM always-on thanks to the Store & Forward
+	 */
+	private boolean imAlwaysOn;
+	
+	/**
 	 * Store and Forward warning
 	 */
 	private boolean warnSF;
@@ -59,11 +64,6 @@ public class ChatServiceConfiguration {
 	 * Max length of a message in a group chat
 	 */
 	private int maxMsgLengthGroupChat;
-
-	/**
-	 * Max group chat sessions
-	 */
-	private int maxGroupChat; 
 	
 	/**
 	 * SMS fallback
@@ -71,19 +71,9 @@ public class ChatServiceConfiguration {
 	private boolean smsFallback;
 
 	/**
-	 * Auto accept mode for single chat
+	 * Respond to displayed delivery report
 	 */
-	private boolean autoAcceptSingleChat;
-
-	/**
-	 * Auto accept mode for group chat
-	 */
-	private boolean autoAcceptGroupChat;
-	
-	/**
-	 * Displayed delivery report
-	 */
-	private boolean displayedDeliveryReport;
+	private boolean respondToDisplayReports;
 	
 	/**
 	 * Max geoloc label length
@@ -91,43 +81,51 @@ public class ChatServiceConfiguration {
 	private int maxGeolocLabelLength;
 
 	/**
-	 * Geoloc expiraion time
+	 * Geoloc expiration time
 	 */
 	private int geolocExpireTime;
+
+	private int minGroupChatParticipants;
+
+	/**
+	 * The maximum length a group chat subject can have. 
+	 * <p>The length is the number of bytes of the message encoded in UTF-8.
+	 */
+	private int groupChatSubjectMaxLength;
 	
 	/**
 	 * Constructor
 	 * 
+	 * @param imAlwaysOn IM always-on thanks to the Store & Forward
 	 * @param warnSF Store and Forward warning
 	 * @param chatTimeout Chat timeout
 	 * @param isComposingTimeout Is-composing timeout
 	 * @param maxGroupChatParticipants Max participants in a group chat
+	 * @param minGroupChatParticipants Min participants in a group chat
 	 * @param maxMsgLengthSingleChat Max length of a message in a single chat
 	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
-	 * @param maxGroupChat Max group chats
+	 * @param groupChatSubjectMaxLength Max length of subject in a group chat
 	 * @param smsFallback SMS fallback
-	 * @param autoAcceptSingleChat Auto accept mode for single chat
-	 * @param autoAcceptGroupChat Auto accept mode for group chat
-	 * @param displayedDeliveryReport Displayed delivery report
+	 * @param respondToDisplayReports Respond to displayed delivery report
 	 * @param maxGeolocLabelLength Max geoloc label length
 	 * @param geolocExpireTime Geoloc expiration time
      * @hide
 	 */
-	public ChatServiceConfiguration(boolean warnSF, int chatTimeout, int isComposingTimeout,
-			int maxGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
-			int maxGroupChat, boolean smsFallback, boolean autoAcceptSingleChat, boolean autoAcceptGroupChat,
-			boolean displayedDeliveryReport, int maxGeolocLabelLength, int geolocExpireTime) {
+	public ChatServiceConfiguration(boolean imAlwaysOn, boolean warnSF, int chatTimeout, int isComposingTimeout,
+			int maxGroupChatParticipants, int minGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
+			int groupChatSubjectMaxLength, boolean smsFallback, boolean respondToDisplayReports, int maxGeolocLabelLength,
+			int geolocExpireTime) {
+		this.imAlwaysOn = imAlwaysOn;
 		this.warnSF = warnSF;
 		this.chatTimeout = chatTimeout;
 		this.isComposingTimeout = isComposingTimeout;
 		this.maxGroupChatParticipants = maxGroupChatParticipants;
+		this.minGroupChatParticipants = minGroupChatParticipants;
 		this.maxMsgLengthSingleChat = maxMsgLengthSingleChat;
 		this.maxMsgLengthGroupChat = maxMsgLengthGroupChat;
-		this.maxGroupChat = maxGroupChat;
+		this.groupChatSubjectMaxLength = groupChatSubjectMaxLength;
 		this.smsFallback = smsFallback;
-		this.autoAcceptSingleChat = autoAcceptSingleChat;
-		this.autoAcceptGroupChat = autoAcceptGroupChat;
-		this.displayedDeliveryReport = displayedDeliveryReport;
+		this.respondToDisplayReports = respondToDisplayReports;
 		this.maxGeolocLabelLength = maxGeolocLabelLength;
 		this.geolocExpireTime = geolocExpireTime;
     }	
@@ -139,17 +137,17 @@ public class ChatServiceConfiguration {
      * @hide
 	 */
 	public ChatServiceConfiguration(Parcel source) {
+		this.imAlwaysOn = source.readInt() != 0;
+		this.warnSF = source.readInt() != 0;
 		this.chatTimeout = source.readInt();
 		this.isComposingTimeout = source.readInt();
 		this.maxGroupChatParticipants = source.readInt();
+		this.minGroupChatParticipants = source.readInt();
 		this.maxMsgLengthSingleChat = source.readInt();
 		this.maxMsgLengthGroupChat = source.readInt();
+		this.groupChatSubjectMaxLength = source.readInt();
 		this.smsFallback = source.readInt() != 0;
-		this.autoAcceptSingleChat = source.readInt() != 0;
-		this.autoAcceptGroupChat = source.readInt() != 0;
-		this.displayedDeliveryReport = source.readInt() != 0;
-		this.warnSF = source.readInt() != 0;
-		this.maxGroupChat = source.readInt(); 
+		this.respondToDisplayReports = source.readInt() != 0;
 		this.maxGeolocLabelLength = source.readInt();
 		this.geolocExpireTime = source.readInt();
     }
@@ -173,17 +171,17 @@ public class ChatServiceConfiguration {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
+    	dest.writeInt(imAlwaysOn ? 1 : 0);
+    	dest.writeInt(warnSF ? 1 : 0);
     	dest.writeInt(chatTimeout);
     	dest.writeInt(isComposingTimeout);
     	dest.writeInt(maxGroupChatParticipants);
+    	dest.writeInt(minGroupChatParticipants);
     	dest.writeInt(maxMsgLengthSingleChat);
     	dest.writeInt(maxMsgLengthGroupChat);
+    	dest.writeInt(groupChatSubjectMaxLength);
     	dest.writeInt(smsFallback ? 1 : 0);
-    	dest.writeInt(autoAcceptSingleChat ? 1 : 0);
-    	dest.writeInt(autoAcceptGroupChat ? 1 : 0);
-    	dest.writeInt(displayedDeliveryReport ? 1 : 0);
-    	dest.writeInt(warnSF ? 1 : 0);
-    	dest.writeInt(maxGroupChat);
+    	dest.writeInt(respondToDisplayReports ? 1 : 0);
     	dest.writeInt(maxGeolocLabelLength);
     	dest.writeInt(geolocExpireTime);
     }
@@ -205,9 +203,19 @@ public class ChatServiceConfiguration {
     };	
 	
 	/**
+	 * Is the Store and Forward capability is supported.
+	 * 
+	 * @return True if Store and Forward capability is supported, False if no Store & Forward capability
+	 */
+	public boolean isChatSf() {
+		return imAlwaysOn;
+	}
+
+	/**
 	 * Does the UX should alert the user that messages are handled differently when
 	 * the Store and Forward functionality is involved. It returns True if user should
 	 * be informed when sending message to offline user.
+	 * <p>This should be used with isChatSf.
 	 * 
 	 * @return Boolean
 	 */
@@ -216,7 +224,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the time after inactive chat session could be closed
+	 * Returns the time after inactive chat could be closed
 	 * 
 	 * @return Timeout in seconds
 	 */
@@ -225,7 +233,7 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the Is-composing timeout value
+	 * Returns the time after an inactive chat could be closed
 	 * 
 	 * @return Timeout in seconds
 	 */
@@ -234,16 +242,26 @@ public class ChatServiceConfiguration {
 	}	
 	
 	/**
-	 * Returns maximum number of participants in a group chat
+	 * Returns the maximum number of participants in a group chat
 	 * 
 	 * @return Number
 	 */
-	public int getGroupChatMaxParticipantsNumber() {
+	public int getGroupChatMaxParticipants() {
 		return maxGroupChatParticipants;
 	}
 	
 	/**
-	 * Return maximum length of a single chat message
+	 * Returns the minimum number of participants in a group chat
+	 * @return number
+	 */
+	public int getGroupChatMinParticipants() {
+	  return minGroupChatParticipants;	
+	}
+	
+	/**
+	 * Return maximum length of a single chat message.
+	 * <p>
+	 * The length is the number of bytes of the message encoded in UTF-8.
 	 * 
 	 * @return Number of bytes
 	 */
@@ -252,7 +270,9 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Return maximum length of a group chat message
+	 * Return maximum length of a group chat message.
+	 * <p>
+	 * The length is the number of bytes of the message encoded in UTF-8.
 	 * 
 	 * @return Number of bytes
 	 */
@@ -261,14 +281,14 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the max number of simultaneous group chats
-	 * 
-	 * @return Number
+	 * The maximum group chat subject’s length can have. 
+	 * <p>The length is the number of bytes of the message encoded in UTF-8.
+	 * @return The maximum group chat subject’s length can have.
 	 */
-	public int getMaxGroupChats() {
-		return maxGroupChat;
+	public int getGroupChatSubjectMaxLength() {
+		return groupChatSubjectMaxLength;
 	}
-	
+
 	/**
 	 * Does the UX proposes automatically a SMS fallback in case of chat failure. It
 	 * returns True if SMS fallback procedure is activated, else returns False.
@@ -280,39 +300,14 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Does auto accept mode activated for single chat
+	 * Does displayed delivery report activated on received chat messages.
+	 * <p>
+	 * Only applicable to one to one chat message.
 	 * 
 	 * @return Boolean
 	 */
-	public boolean isChatAutoAcceptMode() {
-		return autoAcceptSingleChat;
-	}
-	
-	/**
-	 * Does auto accept mode activated for group chat
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isGroupChatAutoAcceptMode() {
-		return autoAcceptGroupChat;
-	}
-	
-	/**
-	 * Does displayed delivery report activated on received chat messages
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isDisplayedDeliveryReport() {
-		return displayedDeliveryReport;
-	}
-	
-	/**
-	 * Activates or deactivates the responding to a displayed delivery report request on received chat messages
-	 * 
-	 * @param state State
-	 */
-	public void setDisplayedDeliveryReport(boolean state) {
-		this.displayedDeliveryReport = state;
+	public boolean isRespondToDisplayReportsEnabled() {
+		return respondToDisplayReports;
 	}
 
 	/**
