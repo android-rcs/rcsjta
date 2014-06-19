@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -133,8 +132,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
 			}
-			SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-	        		new String [] { getFeatureTag() }, sdp);
+			SipResponse resp = create200OKResponse();
 
             // The signalisation is established
             getDialogPath().sigEstablished();

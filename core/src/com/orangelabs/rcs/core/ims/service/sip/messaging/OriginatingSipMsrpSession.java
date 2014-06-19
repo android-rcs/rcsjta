@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.sip.messaging;
 
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
@@ -74,8 +73,7 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 	        if (logger.isActivated()) {
 	        	logger.info("Send INVITE");
 	        }
-	        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-	        		new String [] { getFeatureTag() }, sdp);
+	        SipRequest invite = createInvite();
 
 	        // Set the Authorization header
 	        getAuthenticationAgent().setAuthorizationHeader(invite);

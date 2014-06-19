@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.MediaRtpReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.MediaRtpSender;
@@ -27,12 +26,9 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
+import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
@@ -43,12 +39,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class GenericSipRtpSession extends ImsServiceSession implements RtpStreamListener {
-	/**
-	 * Feature tag
-	 */
-	private String featureTag;
-	
+public class GenericSipRtpSession extends GenericSipSession implements RtpStreamListener {
 	/**
 	 * RTP payload format
 	 */
@@ -97,10 +88,7 @@ public class GenericSipRtpSession extends ImsServiceSession implements RtpStream
 	 * @param featureTag Feature tag
 	 */
 	public GenericSipRtpSession(ImsService parent, String contact, String featureTag) {
-		super(parent, contact);
-
-		// Set the service feature tag
-		this.featureTag = featureTag;
+		super(parent, contact, featureTag);
 
 		// Get local port
 		localRtpPort = NetworkRessourceManager.generateLocalRtpPort();
@@ -119,24 +107,6 @@ public class GenericSipRtpSession extends ImsServiceSession implements RtpStream
     	return localRtpPort;
     }	
 	
-	/**
-	 * Returns feature tag of the service
-	 * 
-	 * @return Feature tag
-	 */
-	public String getFeatureTag() {
-		return featureTag;
-	}
-	
-	/**
-	 * Returns the service ID
-	 * 
-	 * @return Service ID
-	 */
-	public String getServiceId() {
-		return CapabilityUtils.extractServiceId(featureTag);
-	}	
-
 	/**
 	 * Returns the RTP receiver
 	 * 
@@ -164,19 +134,6 @@ public class GenericSipRtpSession extends ImsServiceSession implements RtpStream
 		return format;
 	}	
 	
-	/**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException 
-     */
-    public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(
-                getDialogPath(),
-                new String [] { getFeatureTag() },
-                getDialogPath().getLocalContent());
-    }
-
     /**
      * Generate SDP
      */
@@ -238,34 +195,6 @@ public class GenericSipRtpSession extends ImsServiceSession implements RtpStream
     	}
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-        	return;
-        }
-        
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-        }
-
-        // Close media session
-        closeMediaSession();
-
-        // Remove the current session
-        getImsService().removeSession(this);
-
-        // Notify listeners
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j))
-                    .handleSessionError(new SipSessionError(error));
-        }
-    }
-    
     /**
      * Sends a payload in real time
      * 
