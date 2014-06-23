@@ -73,7 +73,7 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	 */
 	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {
 		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), FileTransferUtils
-				.extractFileThumbnail(invite), IdGenerator.generateMessageID());
+				.extractFileIcon(invite), IdGenerator.generateMessageID());
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

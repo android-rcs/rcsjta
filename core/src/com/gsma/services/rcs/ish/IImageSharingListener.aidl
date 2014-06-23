@@ -12,5 +12,5 @@ interface IImageSharingListener {
 	
 	void onSharingProgress(in long currentSize, in long totalSize);
 
-	void onImageShared(in String filename);
+	void onImageShared(in Uri file);
 }

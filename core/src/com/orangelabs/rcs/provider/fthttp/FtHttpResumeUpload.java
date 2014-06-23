@@ -24,6 +24,8 @@ package com.orangelabs.rcs.provider.fthttp;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
+import android.net.Uri;
+
 /**
  * @author YPLO6403
  * 
@@ -45,13 +47,13 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 *            the {@code session} value.
 	 * @param tid
 	 *            the {@code tid} value.
-	 * @param thumbnail
-	 *            the {@code thumbnail} value.
+	 * @param fileicon
+	 *            the {@code fileicon} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, String thumbnail, boolean isGroup) {
-		this(session.getContent(), thumbnail, tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
+	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, Uri fileicon, boolean isGroup) {
+		this(session.getContent(), fileicon, tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
 				.getContributionID(), session.getFileTransferId(), session.getChatSessionID(), isGroup);
 	}
 
@@ -60,8 +62,8 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * 
 	 * @param file
 	 *            the {@code file} value.
-	 * @param thumbnail
-	 *            the {@code thumbnail} value.
+	 * @param fileicon
+	 *            the {@code fileicon} value.
 	 * @param content
      *            the {@code content} content.
 	 * @param tid
@@ -79,9 +81,9 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(MmContent file, String thumbnail, String tid, String contact,
+	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, String contact,
             String displayName, String chatId, String fileTransferId, String chatSessionId, boolean isGroup) {
-        super(FtHttpDirection.OUTGOING, file.getUrl(), file.getEncoding(), file.getSize(), thumbnail, contact,
+        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contact,
                displayName, chatId, fileTransferId, chatSessionId, isGroup);
 		if (tid == null)
 			throw new IllegalArgumentException("Null tid");
@@ -94,8 +96,8 @@ public class FtHttpResumeUpload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeUpload [tid=" + tid + ", getFilepath()=" + getFilepath() + ", getSize()=" + getSize()
-				+ ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
+		return "FtHttpResumeUpload [tid=" + tid + ", file=" + getFileUri() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
+				+ ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
 				+ ", getFileTransferId()=" + getFileTransferId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
 				+ "]";
 	}

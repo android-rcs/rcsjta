@@ -43,12 +43,14 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.net.Uri;
 
 /**
  * Originating file transfer session
@@ -80,14 +82,14 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	 *            Content to be shared
 	 * @param contact
 	 *            Remote contact
-	 * @param tryAttachThumbnail
-	 *            true if the stack must try to attach thumbnail
+	 * @param fileicon
+	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileicon) {
 		super(parent, content, contact, null, IdGenerator.generateMessageID());
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" thumbnail="+tryAttachThumbnail);
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileicon="+fileicon);
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -96,9 +98,9 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
 		setContributionID(id);
 		
-		if (tryAttachThumbnail) {
-			// Create the thumbnail
-			setThumbnail(FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID()));
+		if (fileicon) {
+			// Create the fileicon
+			setFileicon(FileTransferUtils.createFileicon(content.getUri(), getSessionID()));
 		}
 	}
 
@@ -144,16 +146,16 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
                     SdpUtils.DIRECTION_SENDONLY, maxSize);
 
 	    	// Set File-location attribute
-	    	String location = getFileLocationAttribute();
+	    	Uri location = getFileLocationAttribute();
 	    	if (location != null) {
-	    		sdp += "a=file-location:" + location + SipUtils.CRLF;
+	    		sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
 	    	}
 
-	    	if (getThumbnail() != null) {
+	    	if (getFileicon() != null) {
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 
-	    		// Encode the thumbnail file
-	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail().getData());
+	    		// Encode the fileicon file
+	    	    String imageEncoded = Base64.encodeBase64ToString(getFileicon().getData());
 
 	    		// Build multipart
 	    		String multipart = 
@@ -163,7 +165,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	    				SipUtils.CRLF +
 	    				sdp + SipUtils.CRLF + 
 	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": " + getThumbnail().getEncoding() + SipUtils.CRLF +
+	    				ContentTypeHeader.NAME + ": " + getFileicon().getEncoding() + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_TRANSFER_ENCODING + ": base64" + SipUtils.CRLF +
 	    				SipUtils.HEADER_CONTENT_ID + ": <image@joyn.com>" + SipUtils.CRLF +
 	    				ContentLengthHeader.NAME + ": "+ imageEncoded.length() + SipUtils.CRLF +
@@ -246,7 +248,7 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
                     InputStream stream; 
                     if (data == null) {
                         // Load data from URL
-                        stream = FileFactory.getFactory().openFileInputStream(getContent().getUrl());
+                        stream = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(getContent().getUri());
                     } else {
                         // Load data from memory
                         stream = new ByteArrayInputStream(data);

@@ -73,22 +73,22 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Content of file to share
 	 * @param contact
 	 *            Remote contact
-	 * @param tryAttachThumbnail
-	 *            true if the stack must try to attach thumbnail
+	 * @param fileicon
+	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean tryAttachThumbnail) {
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileicon) {
 		super(parent, content, contact, null, null, null, IdGenerator.generateMessageID());
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
 		}
-		MmContent thumbnail = null;
-		if (tryAttachThumbnail) {
-			// Create the thumbnail
-			thumbnail = FileTransferUtils.createFileThumbnail(content.getUrl(), getSessionID());
-			setThumbnail(thumbnail);
+		MmContent fileiconContent = null;
+		if (fileicon) {
+			// Create the fileicon
+			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getSessionID());
+			setFileicon(fileiconContent);
 		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), thumbnail, this);
+		uploadManager = new HttpUploadManager(getContent(), fileiconContent, this);
 	}
 	
 	/**
@@ -100,18 +100,18 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Content of file to share
 	 * @param contact
 	 *            Remote contact
-	 * @param thumbnail
-	 *            Content of thumbnail
+	 * @param fileiconContent
+	 *            Content of fileicon
 	 * @param fileTransferId
 	 *            File transfer Id
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String fileTransferId) {
-		super(parent, content, contact, thumbnail, null, null, fileTransferId);
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileiconContent, String fileTransferId) {
+		super(parent, content, contact, fileiconContent, null, null, fileTransferId);
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), getThumbnail(), this);
+		uploadManager = new HttpUploadManager(getContent(), getFileicon(), this);
 	}
 
 	/**
@@ -283,17 +283,15 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
 	@Override
 	public void uploadStarted() {
-        // Create upload entry in fthttp table
+		// Create upload entry in fthttp table
 		String tId = uploadManager.getTid();
-		if (getThumbnail() != null) {
-			resumeFT = new FtHttpResumeUpload(this, tId, getThumbnail().getUrl(), false);
-		} else {
-			resumeFT = new FtHttpResumeUpload(this, tId, null, false);
-		}
-		// Insert entry into table only if it does not exist earlier.
+		MmContent fileicon = getFileicon();
+		resumeFT = new FtHttpResumeUpload(this, tId, fileicon != null ? fileicon.getUri() : null,
+				false);
+		// Insert entry into table only if it does not exist earlier
 		// Incases when the file is uploaded from beginning as a result of
 		// resume failure, an entry would have been already present in the
-		// table and duplicate entry should not be made.
+		// table and duplicate entry should not be made
 		if (FtHttpResumeDaoImpl.getInstance().queryUpload(tId) == null)
 			FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 	}

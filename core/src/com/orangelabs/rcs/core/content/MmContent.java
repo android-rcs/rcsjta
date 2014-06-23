@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +15,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.content;
 
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.platform.file.FileFactory;
+
+import android.content.ContentResolver;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-
-import com.orangelabs.rcs.platform.file.FileFactory;
 
 
 /**
@@ -32,9 +42,14 @@ import com.orangelabs.rcs.platform.file.FileFactory;
  */
 public abstract class MmContent {
 	/**
-	 * Content URL
+	 * Content uri
 	 */
-	private String url;
+	private Uri file;
+
+	/**
+	 * The filename
+	 */
+	private String fileName;
 
 	/**
 	 * Content size in bytes
@@ -56,61 +71,63 @@ public abstract class MmContent {
      */
     private BufferedOutputStream out = null;
 
-    /**
-     * Name of the file
-     */
-	private String name;  
+	private ParcelFileDescriptor pfd;
 
     /**
      * Constructor
      * 
-     * @param url URL
      * @param encoding Encoding
      */
-	public MmContent(String url, String encoding) {
-		setUrl(url);
+	public MmContent(String encoding) {
 		this.encoding = encoding;
 		this.size = -1;
 	}
 
 	/**
-     * Constructor
-     * 
-     * @param url URL
-     * @param encoding Encoding
-     * @param size Content size
-     */
-	public MmContent(String url, String encoding, long size) {
-	    setUrl(url);
+	 * Constructor
+	 *
+	 * @param fileName File name
+	 * @param size Content size
+	 * @param encoding Encoding
+	 */
+	public MmContent(String fileName, long size, String encoding) {
+		this.fileName = fileName;
+		this.size = size;
+		this.encoding = encoding;
+	}
+
+    /**
+	 * Constructor
+	 *
+	 * @param file Uri
+	 * @param encoding Encoding
+	 * @param size Content size
+	 * @param fileName File name
+	 */
+	public MmContent(Uri file, String encoding, long size, String fileName) {
+		this.file = file;
 		this.encoding = encoding;
 		this.size = size;
+		this.fileName = fileName;
 	}
 
     /**
-     * Returns the URL
-     * 
-     * @return String
-     */
-	public String getUrl() {
-		return url;
+	 * Returns the uri
+	 *
+	 * @return uri
+	 */
+	public Uri getUri() {
+		return file;
 	}
 
-    /**
-     * Set the URL
-     * 
-     * @param url URL
-     */
-    public void setUrl(String url) {
-        this.url = url;
-
-        // Extract filename from URL
-        int index = url.lastIndexOf('/');
-        if (index != -1) {
-            this.name = url.substring(index+1);
-        } else {
-            this.name =  url;
-        }
-    }
+	/**
+	 * Sets the uri
+	 *
+	 * @param file Uri
+	 */
+	public void setUri(Uri file) {
+		this.file = file;
+	}
 
     /**
      * Returns the content size in bytes
@@ -177,7 +194,7 @@ public abstract class MmContent {
      * @return Name
      */
 	public String getName() {
-		return name;
+		return fileName;
     }
 	
 	/**
@@ -185,8 +202,8 @@ public abstract class MmContent {
      * 
      * @return Name
      */
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String fileName) {
+		this.fileName = fileName;
     }
 
 	/**
@@ -195,7 +212,7 @@ public abstract class MmContent {
      * @return String
      */
 	public String toString() {
-		return url + " (" + size + " bytes)";
+		return file + " (" + size + " bytes)";
 	}
 
 	/**
@@ -222,13 +239,15 @@ public abstract class MmContent {
      * @param data Data to append to file
      * @throws IOException
      */
-    public void writeData2File(byte[] data) throws IOException, IllegalArgumentException {
-        if (out == null) {
-            // To optimize I/O set buffer size to 8kBytes 
-            out = new BufferedOutputStream(FileFactory.getFactory().openFileOutputStream(getUrl()), 8*1024);
-        }
-        out.write(data);
-    }
+	public void writeData2File(byte[] data) throws IOException, IllegalArgumentException {
+		if (out == null) {
+			pfd = AndroidFactory.getApplicationContext().getContentResolver()
+					.openFileDescriptor(file, "w");
+			// To optimize I/O set buffer size to 8kBytes
+			out = new BufferedOutputStream(new FileOutputStream(pfd.getFileDescriptor()), 8 * 1024);
+		}
+		out.write(data);
+	}
 
     /**
      * Close written file and update media storage.
@@ -236,11 +255,17 @@ public abstract class MmContent {
      * @throws IOException
      */
     public void closeFile() throws IOException {
-        if (out != null) {
-            out.flush();
-            out.close();
-            out = null;
-            FileFactory.getFactory().updateMediaStorage(getUrl());
+        try {
+            if (out != null) {
+                out.flush();
+                out.close();
+                out = null;
+                FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
+            }
+        } finally {
+            if (pfd != null) {
+                pfd.close();
+            }
         }
     }
 
@@ -249,16 +274,25 @@ public abstract class MmContent {
      *
      * @throws IOException
      */
-    public void deleteFile() throws IOException {
-        if (out != null) {
-            out.close();
-            out = null;
-            File file = new File(getUrl());
-            if (file != null) {
-                if (!file.delete()) {
-                    throw new IOException("Unable to delete file: " + file.getAbsolutePath());
-                }
-            }
-        }
-    }
+	public void deleteFile() throws IOException {
+		if (out != null) {
+			try {
+				out.close();
+				out = null;
+			} finally {
+				Uri fileToDelete = getUri();
+				if (ContentResolver.SCHEME_FILE.equals(fileToDelete.getScheme())) {
+					File file = new File(fileToDelete.getPath());
+					if (file != null) {
+						if (!file.delete()) {
+							throw new IOException("Unable to delete file: "
+									+ file.getAbsolutePath());
+						}
+					}
+				} else {
+					throw new IOException("Not possible to delete file: " + fileToDelete);
+				}
+			}
+		}
+	}
 }

@@ -24,6 +24,8 @@ package com.orangelabs.rcs.provider.fthttp;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
+import android.net.Uri;
+
 /**
  * @author YPLO6403
  * 
@@ -33,70 +35,72 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransfer
 public final class FtHttpResumeDownload extends FtHttpResume {
 
 	/**
-	 * The URL to download file
+	 * The URI to download file from
 	 */
-	final private String url;
+	final private Uri downloadServerAddress;
 
 	/**
 	 * Creates a FT HTTP resume download data object (immutable)
 	 * 
 	 * @param session
 	 *            the {@code session} instance.
-	 * @param filename
-	 *            the {@code filename} value.
-	 * @param messageId
-	 *            the {@code messageId} value.
-	 * @param thumbnail
-	 *            the {@code thumbnail} value.
+	 * @param downloadServerAddress
+	 *            the {@code downloadServerAddress} instance.
+	 * @param file
+	 *            the {@code file} value.
+	 * @param filetransferId
+	 *            the {@code filetransferId} value.
+	 * @param fileicon
+	 *            the {@code fileicon} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(HttpFileTransferSession session, String filename, String filetransferId, String thumbnail,
+	public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress, Uri file, String filetransferId, Uri fileicon,
 			boolean isGroup) {
-		this(filename, thumbnail, session.getContent(), session.getRemoteContact(), session.getRemoteDisplayName(),
+		this(downloadServerAddress, file, fileicon, session.getContent(), session.getRemoteContact(), session.getRemoteDisplayName(),
 				session.getContributionID(), filetransferId, session.getChatSessionID(), isGroup);
 	}
 
 	/**
 	 * Creates a FT HTTP resume download data object
 	 * 
+	 * @param downloadServerAddress
+	 *            the {@code downloadServerAddress} instance.
 	 * @param file
 	 *            the {@code file} value.
-	 * @param thumbnail
-	 *            the {@code thumbnail} value.
+	 * @param fileicon
+	 *            the {@code fileicon} value.
 	 * @param content
 	 *            the {@code content} content.
-	 * @param messageId
-	 *            the {@code messageId} value.
 	 * @param contact
 	 *            the {@code contact} value.
 	 * @param displayName
 	 *            the {@code displayName} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
-	 * @param sessionId
-	 *            the {@code sessionId} value.
+	 * @param filetransferId
+	 *            the {@code filetransferId} value.
 	 * @param chatSessionId
 	 *            the {@code chatSessionId} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(String file, String thumbnail, MmContent content, String contact,
+	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileicon, MmContent content, String contact,
 			String displayName, String chatId, String filetransferId, String chatSessionId, boolean isGroup) {
-		super(FtHttpDirection.INCOMING, file, content.getEncoding(), content.getSize(), thumbnail, contact, displayName, chatId, filetransferId, chatSessionId, isGroup);
-		this.url = content.getUrl();
-		if (url == null || filetransferId == null)
+		super(FtHttpDirection.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contact, displayName, chatId, filetransferId, chatSessionId, isGroup);
+		this.downloadServerAddress = downloadServerAddress;
+		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");
 	}
 
-	public String getUrl() {
-		return url;
+	public Uri getDownloadServerAddress() {
+		return downloadServerAddress;
 	}
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [url=" + url + ", getFilepath()=" + getFilepath()
-				+ ", getSize()=" + getSize() + ", getThumbnail()=" + getThumbnail() + ", getContact()=" + getContact()
+		return "FtHttpResumeDownload [downloadServerAddress=" + downloadServerAddress + ", file=" + getFileUri() + ",getFileName()=" + getFileName()
+				+ ", getSize()=" + getSize() + ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact()
 				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId() + ", getChatSessionId()="
 				+ getChatSessionId() + ", isGroup()=" + isGroup() + "]";
 	}

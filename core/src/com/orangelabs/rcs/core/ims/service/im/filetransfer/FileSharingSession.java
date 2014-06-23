@@ -59,9 +59,9 @@ public abstract class FileSharingSession extends ImsServiceSession {
     protected Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
 
     /**
-	 * Thumbnail
+	 * Fileicon
 	 */
-	private MmContent thumbnail = null;
+	private MmContent fileicon = null;
 	
 	/**
 	 * File transfer paused
@@ -84,13 +84,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param parent IMS service
 	 * @param content Content to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Thumbnail
+	 * @param fileicon Thumbnail
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String filetransferId) {
+	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileicon, String filetransferId) {
 		super(parent, contact);
 		
 		this.content = content;
-		this.thumbnail = thumbnail;
+		this.fileicon = fileicon;
 		this.filetransferId = filetransferId;
 	}
 
@@ -198,21 +198,21 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	}
 
     /**
-     * Returns the thumbnail content
+     * Returns the fileicon content
      * 
-     * @return Thumbnail
+     * @return Fileicon
      */
-    public MmContent getThumbnail() {
-    	return thumbnail;
+    public MmContent getFileicon() {
+    	return fileicon;
     }
 
 	/**
-	 * Set the thumbnail
+	 * Set the fileicon
 	 * 
-	 * @param thumbnail Thumbnail content
+	 * @param fileicon Fileicon content
 	 */
-    public void setThumbnail(MmContent thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setFileicon(MmContent fileicon) {
+        this.fileicon = fileicon;
     }
     
 	/**

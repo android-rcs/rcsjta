@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provider.sharing;
@@ -170,9 +174,9 @@ public class RichCallHistory {
 		values.put(ImageSharingData.KEY_SESSION_ID, sessionId);
 		values.put(ImageSharingData.KEY_CONTACT, contact);
 		values.put(ImageSharingData.KEY_DIRECTION, direction);
-		values.put(ImageSharingData.KEY_NAME, content.getUrl());
+		values.put(ImageSharingData.KEY_FILE, content.getUri().toString());
+		values.put(ImageSharingData.KEY_NAME, content.getName());
 		values.put(ImageSharingData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(ImageSharingData.KEY_NAME, content.getUrl());
 		values.put(ImageSharingData.KEY_SIZE, 0);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, content.getSize());
 		values.put(ImageSharingData.KEY_STATUS, status);

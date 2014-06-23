@@ -75,7 +75,7 @@ public class FtHttpProvider extends ContentProvider {
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
     	private static final String DATABASE_NAME = "fthttp.db";
-    	private static final int DATABASE_VERSION = 2;
+    	private static final int DATABASE_VERSION = 3;
     
     	public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -93,12 +93,13 @@ public class FtHttpProvider extends ContentProvider {
     			            + FtHttpColumns.TYPE + " TEXT,"
     			            + FtHttpColumns.CONTACT + " TEXT,"
     			            + FtHttpColumns.CHATID + " TEXT,"
-    			            + FtHttpColumns.FILEPATH + " TEXT NOT NULL,"
+    			            + FtHttpColumns.FILE + " TEXT NOT NULL,"
+    			            + FtHttpColumns.FILENAME + " TEXT NOT NULL,"
     			            + FtHttpColumns.DIRECTION + " INTEGER NOT NULL,"
     			            + FtHttpColumns.DATE + " INTEGER NOT NULL,"
     			            + FtHttpColumns.DISPLAY_NAME + " TEXT,"
     			            + FtHttpColumns.FT_ID + " TEXT,"
-    			            + FtHttpColumns.THUMBNAIL + " TEXT,"
+    			            + FtHttpColumns.FILEICON + " TEXT,"
     			            + FtHttpColumns.IS_GROUP + " INTEGER,"
     			            + FtHttpColumns.CHAT_SESSION_ID + " TEXT"
     			            +");"

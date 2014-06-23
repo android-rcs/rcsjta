@@ -25,14 +25,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
@@ -41,12 +44,14 @@ import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.ft.INewFileTransferListener;
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.platform.file.FileDescription;
+import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -213,10 +218,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		// Update rich messaging history
 		if (isGroup) {
 			MessagingLog.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
-					number, session.getFileTransferId(), session.getContent(), session.getThumbnail());
+					number, session.getFileTransferId(), session.getContent(), session.getFileicon());
 		} else {
 			MessagingLog.getInstance().addFileTransfer(number, session.getFileTransferId(),
-					FileTransfer.Direction.INCOMING, session.getContent(), session.getThumbnail());
+					FileTransfer.Direction.INCOMING, session.getContent(), session.getFileicon());
 		}
 
 		// Add session in the list
@@ -290,26 +295,28 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     			RcsSettings.getInstance().isFileTransferThumbnailSupported(),
     			RcsSettings.getInstance().getMaxFileIconSize());
     }    
-    
+
 	/**
-	 * Transfers a file to a contact. The parameter file contains the complete filename including the path to be transferred. The
-	 * parameter contact supports the following formats: MSISDN in national or international format, SIP address, SIP-URI or
-	 * Tel-URI. If the format of the contact is not supported an exception is thrown.
+     * Transfers a file to a contact. The parameter file contains the URI of the
+     * file to be transferred (for a local or a remote file). The parameter
+     * contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of
+     * the contact is not supported an exception is thrown.
 	 * 
 	 * @param contact
 	 *            Contact
-	 * @param filename
-	 *            Filename to transfer
-	 * @param tryAttachThumbnail
-	 *            true if the stack must try to attach thumbnail
+	 * @param file
+	 *            URI of file to transfer
+	 * @param fileicon
+	 *            true if the stack must try to attach fileicon
 	 * @param listenet
 	 *            File transfer event listener
 	 * @return File transfer
 	 * @throws ServerApiException
 	 */
-    public IFileTransfer transferFile(String contact, String filename, boolean tryAttachThumbnail, IFileTransferListener listener) throws ServerApiException {
+    public IFileTransfer transferFile(String contact, Uri file, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Transfer file " + filename + " to " + contact + " (thumbnail=" + tryAttachThumbnail + ")");
+			logger.info("Transfer file " + file + " to " + contact + " (fileicon=" + fileicon + ")");
 		}
 
 		// Test IMS connection
@@ -317,9 +324,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		try {
 			// Initiate the session
-			MmContent content = FileTransferUtils.createMmContentFromUrl(filename);
-			
-			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, tryAttachThumbnail);
+			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
+			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(), fileDescription.getName());
+			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon);
 
 			// Add session listener
 			FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -327,7 +334,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 			// Update rich messaging history
 			MessagingLog.getInstance().addFileTransfer(contact, session.getFileTransferId(),
-					FileTransfer.Direction.OUTGOING, session.getContent(), session.getThumbnail());
+					FileTransfer.Direction.OUTGOING, session.getContent(), session.getFileicon());
 
 			// Start the session
 	        new Thread() {
@@ -340,13 +347,76 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addFileTransferSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
+			// TODO:Handle Security exception in CR026
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 			throw new ServerApiException(e.getMessage());
 		}
     }
-    
+
+    /**
+     * Transfers a file to participants. The parameter file contains the URI of the
+     * file to be transferred (for a local or a remote file).
+	 *
+	 * @param chatId ChatId of group chat
+	 * @param file
+	 *            Uri of file to transfer
+	 * @param fileicon
+	 *            true if the stack must try to attach fileicon
+	 * @param listener
+	 *            File transfer event listener
+	 * @return File transfer
+	 * @throws ServerApiException
+	 */
+	public IFileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon,
+			IFileTransferListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("sendFile (file=" + file + ") (fileicon=" + fileicon + ")");
+		}
+		try {
+			// Initiate the session
+			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
+			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
+					fileDescription.getName());
+
+			Set<ParticipantInfo> participants = MessagingLog.getInstance()
+					.getGroupChatConnectedParticipants(chatId);
+			final FileSharingSession session = Core
+					.getInstance()
+					.getImService()
+					.initiateGroupFileTransferSession(participants, content, fileicon,
+							chatId);
+
+			// Add session listener
+			FileTransferImpl sessionApi = new FileTransferImpl(session);
+			sessionApi.addEventListener(listener);
+
+			// Update rich messaging history
+			MessagingLog.getInstance().addOutgoingGroupFileTransfer(session.getContributionID(),
+					session.getFileTransferId(), session.getContent(), session.getFileicon());
+
+			// Start the session
+			new Thread() {
+				public void run() {
+					// Start the session
+					session.startSession();
+				}
+			}.start();
+
+			// Add session in the list
+			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			return sessionApi;
+
+		} catch (Exception e) {
+			// TODO:Handle Security exception in CR026
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e.getMessage());
+		}
+	}
+
     /**
      * Returns the list of file transfers in progress
      * 

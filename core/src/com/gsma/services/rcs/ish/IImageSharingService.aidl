@@ -22,7 +22,7 @@ interface IImageSharingService {
 	
 	IImageSharing getImageSharing(in String sharingId);
 
-	IImageSharing shareImage(in String contact, in String filename, in IImageSharingListener listener);
+	IImageSharing shareImage(in String contact, in Uri file, in IImageSharingListener listener);
 	
 	void addNewImageSharingListener(in INewImageSharingListener listener);
 

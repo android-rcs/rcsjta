@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ish;
 
@@ -22,9 +26,12 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
@@ -126,24 +133,48 @@ public class ImageSharingService extends JoynService {
 		}
 	}
 
+	private void grantUriPermissionToStackServices(Uri file) {
+		Intent imageSharingServiceIntent = new Intent(IImageSharingService.class.getName());
+		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
+				imageSharingServiceIntent, 0);
+		for (ResolveInfo stackService : stackServices) {
+			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
+					Intent.FLAG_GRANT_READ_URI_PERMISSION);
+		}
+	}
+
+	private void persistUriPermissionForClient(Uri file) {
+		ctx.getContentResolver().takePersistableUriPermission(file,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+	}
+
     /**
-     * Shares an image with a contact. The parameter file contains the complete filename
-     * including the path of the image to be shared. An exception if thrown if there is
+     * Shares an image with a contact. The parameter file contains the URI
+     * of the image to be shared(for a local or a remote image). An exception if thrown if there is
      * no ongoing CS call. The parameter contact supports the following formats: MSISDN
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
      * @param contact Contact
-     * @param filename Filename to share
+     * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
      */
-    public ImageSharing shareImage(String contact, String filename, ImageSharingListener listener) throws JoynServiceException, JoynContactFormatException {
+    public ImageSharing shareImage(String contact, Uri file, ImageSharingListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				IImageSharing sharingIntf = api.shareImage(contact, filename, listener);
+				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+					// Granting temporary read Uri permission from client to
+					// stack service if it is a content URI
+					grantUriPermissionToStackServices(file);
+					// Persist Uri access permission for the client
+					// to be able to read the contents from this Uri even
+					// after the client is restarted after device reboot.
+					persistUriPermissionForClient(file);
+				}
+				IImageSharing sharingIntf = api.shareImage(contact, file, listener);
 				if (sharingIntf != null) {
 					return new ImageSharing(sharingIntf);
 				} else {

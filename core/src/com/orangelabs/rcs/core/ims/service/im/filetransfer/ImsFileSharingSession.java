@@ -33,6 +33,8 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.net.Uri;
+
 /**
  * Abstract IMS file transfer session
  * 
@@ -60,11 +62,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * @param parent IMS service
 	 * @param content Content of file to be shared
 	 * @param contact Remote contact
-	 * @param thumbnail Content of Thumbnail
+	 * @param fileicon Content of fileicon
 	 * @param filetransferId File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent thumbnail, String filetransferId) {
-		super(parent, content, contact, thumbnail, filetransferId);
+	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileicon, String filetransferId) {
+		super(parent, content, contact, fileicon, filetransferId);
 	}
 	
 	/**
@@ -90,11 +92,12 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	/**
 	 * Returns the "file-location" attribute
 	 * 
-	 * @return String
+	 * @return Uri
 	 */
-	public String getFileLocationAttribute() {
-		if ((getContent().getUrl() != null) && getContent().getUrl().startsWith("http")) {
-			return getContent().getUrl();
+	public Uri getFileLocationAttribute() {
+		Uri file = getContent().getUri();
+		if ((file != null) && file.getScheme().startsWith("http")) {
+			return file;
 		} else {
 			return null;
 		}
@@ -117,7 +120,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      */
     public SipRequest createInvite() throws SipException {
         SipRequest invite;
-    	if (getThumbnail() != null) {
+    	if (getFileicon() != null) {
 	        invite = SipMessageFactory.createMultipartInvite(
 	                getDialogPath(),
 	                InstantMessagingService.FT_FEATURE_TAGS,

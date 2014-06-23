@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import android.net.Uri;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.ft.FileTransfer;
@@ -103,6 +104,15 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
      */
 	public String getFileName() {
 		return session.getContent().getName();
+	}
+
+	/**
+     * Returns the Uri of the file to be transferred
+     *
+     * @return Filename
+     */
+	public Uri getFile() {
+		return session.getContent().getUri();
 	}
 
 	/**
@@ -536,7 +546,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
     
     /**
      * File has been transfered
-     * 
+     *
      * @param content MmContent associated to the received file
      */
     public void handleFileTransfered(MmContent content) {
@@ -552,7 +562,7 @@ public class FileTransferImpl extends IFileTransfer.Stub implements FileSharingS
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onFileTransferred(content.getUrl());
+	            	listeners.getBroadcastItem(i).onFileTransferred(content.getUri());
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);

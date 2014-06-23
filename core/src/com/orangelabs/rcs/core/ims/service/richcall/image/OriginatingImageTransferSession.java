@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.richcall.image;
@@ -38,11 +42,13 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
-import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.net.Uri;
 
 /**
  * Originating content sharing session (transfer)
@@ -122,9 +128,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	                    maxSize);
 
 	    	// Set File-location attribute
-	    	String location = getFileLocationAttribute();
+	    	Uri location = getFileLocationAttribute();
 	    	if (location != null) {
-	    		sdp += "a=file-location:" + location + SipUtils.CRLF;
+	    		sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
 	    	}
 	   
 	    	if (getThumbnail() != null) {
@@ -221,8 +227,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             byte[] data = getContent().getData();
             InputStream stream; 
             if (data == null) {
-                // Load data from URL
-                stream = FileFactory.getFactory().openFileInputStream(getContent().getUrl());
+                // Load data from Uri
+                stream = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(getContent().getUri());
             } else {
                 // Load data from memory
                 stream = new ByteArrayInputStream(data);
@@ -276,7 +282,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     	
     	// Notify listeners
     	for(int j=0; j < getListeners().size(); j++) {
-    		((ImageTransferSessionListener)getListeners().get(j)).handleContentTransfered(getContent().getUrl());
+    		((ImageTransferSessionListener)getListeners().get(j)).handleContentTransfered(getContent().getUri());
         }
 	}
 	

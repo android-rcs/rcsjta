@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.content;
+
+import android.net.Uri;
 
 
 /**
@@ -25,27 +31,16 @@ package com.orangelabs.rcs.core.content;
  * @author vfml3370
  */
 public class VisitCardContent extends MmContent {
-	/**
-	 * Encoding type
-	 */
-	public static final String ENCODING = "text/vcard";
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param url URL
-	 * @param size Content size
-	 */
-	public VisitCardContent(String url, long size) {
-		super(url, ENCODING, size);
-	}
 
 	/**
 	 * Constructor
-	 * 
-	 * @param url URL
+	 *
+	 * @param visitCardFile URI
+	 * @param encoding the mime-type encoding
+	 * @param size Content size
+	 * @param fileName The filename
 	 */
-	public VisitCardContent(String url) {
-		super(url, ENCODING);
+	public VisitCardContent(Uri visitCardFile, String encoding, long size, String fileName) {
+		super(visitCardFile, encoding, size, fileName);
 	}
 }

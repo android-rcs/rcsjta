@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.platform.file;
+
+import android.net.Uri;
 
 /**
  * File description
@@ -30,6 +36,11 @@ public class FileDescription {
 	private String name;
 	
 	/**
+     * file URI
+     */
+    private Uri file;
+
+	/**
 	 * Size
 	 */
 	private long size = -1;
@@ -42,8 +53,9 @@ public class FileDescription {
 	/**
 	 * Constructor
 	 */
-	public FileDescription(String name, long size) {
+	public FileDescription(Uri file, String name, long size) {
 		this.name = name;
+		this.file = file;
 		this.size = size;
 	}
 

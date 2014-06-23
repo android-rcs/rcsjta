@@ -249,6 +249,20 @@ public class FileTransfer {
 	}
 
 	/**
+	 * Returns the Uri of the file
+	 *
+	 * @return Uri of file
+	 * @throws JoynServiceException
+	 */
+	public Uri getFile() throws JoynServiceException {
+		try {
+			return transferInf.getFile();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Returns the state of the file transfer
 	 * 
 	 * @return State

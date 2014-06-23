@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,11 +49,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 
+import android.net.Uri;
+
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.CloseableUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -99,9 +105,9 @@ public class HttpUploadManager extends HttpTransferManager {
 	private MmContent content;
 
 	/**
-	 * Thumbnail to upload
+	 * Fileicon to upload
 	 */
-	private MmContent thumbnail;
+	private MmContent fileicon;
 
 	/**
 	 * TID of the upload
@@ -142,15 +148,15 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * 
 	 * @param content
 	 *            File content to upload
-	 * @param thumbnail
-	 *            content of Thumbnail
+	 * @param fileicon
+	 *            content of fileicon
 	 * @param listener
 	 *            HTTP transfer event listener
 	 */
-	public HttpUploadManager(MmContent content, MmContent thumbnail, HttpUploadTransferEventListener listener) {
+	public HttpUploadManager(MmContent content, MmContent fileicon, HttpUploadTransferEventListener listener) {
 		super(listener);
 		this.content = content;
-		this.thumbnail = thumbnail;
+		this.fileicon = fileicon;
 		tid = UUID.randomUUID().toString();
 	}
 
@@ -162,7 +168,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	public byte[] uploadFile() {
 		try {
 			if (logger.isActivated()) {
-				logger.debug("Upload file " + content.getUrl());
+				logger.debug("Upload file " + content.getUri());
 			}
 
 			// Send a first POST request
@@ -235,7 +241,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private HttpPost generatePost() throws MalformedURLException, URISyntaxException, UnsupportedEncodingException {
 		// Check server address
-		url = new URL(getHttpServerAddr());
+		url = new URL(getHttpServerAddr().toString());
 		String protocol = url.getProtocol(); // TODO : exit if not HTTPS
 		String host = url.getHost();
 		String serviceRoot = url.getPath();
@@ -264,7 +270,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private byte[] sendMultipartPost(HttpResponse resp) throws CoreException, IOException, Exception {
 		DataOutputStream outputStream = null;
-		String filepath = content.getUrl();
+		Uri file = content.getUri();
 
 		// Get the connection
 		HttpsURLConnection connection = null;
@@ -328,15 +334,15 @@ public class HttpUploadManager extends HttpTransferManager {
 		outputStream = new DataOutputStream(connection.getOutputStream());
 		outputStream.writeBytes(body);
 
-		// Add thumbnail
-		if (thumbnail != null) {
+		// Add fileicon
+		if (fileicon != null) {
 			writeThumbnailMultipart(outputStream);
 		}
 		// From this point, resuming is possible
 		((HttpUploadTransferEventListener)getListener()).uploadStarted();
 		try {
 			// Add File
-			writeFileMultipart(outputStream, filepath);
+			writeFileMultipart(outputStream, file);
 			if (!isCancelled()) {
 				// if the upload is cancelled, we don't send the last boundary to get bad request
 				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens); 
@@ -430,6 +436,15 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (Exception e) {
+			
+			if (e instanceof SecurityException) {
+				if (logger.isActivated()) {
+					logger.warn("Unrecoverable SecurityException: File Transfer Upload aborted");
+				}
+				throw e;
+			}
+			e.printStackTrace();
+
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
@@ -446,30 +461,28 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
 		if (logger.isActivated()) {
-			logger.debug("write thumbnail " + thumbnail.getName() + " (size=" + thumbnail.getSize() + ")");
+			logger.debug("write fileicon " + fileicon.getName() + " (size=" + fileicon.getSize() + ")");
 		}
-		if (thumbnail.getSize() > 0) {
-			String[] splittedPath = content.getUrl().split("/");
-			String filename = splittedPath[splittedPath.length - 1];
-
+		if (fileicon.getSize() > 0) {
 			outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + lineEnd);
-			outputStream.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_" + filename + "\""
+			outputStream.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_" + content.getName() + "\""
 					+ lineEnd);
 			outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
-			outputStream.writeBytes("Content-Length: " + thumbnail.getSize());
+			outputStream.writeBytes("Content-Length: " + fileicon.getSize());
 			outputStream.writeBytes(lineEnd + lineEnd);
 			// Are thumbnail data available ?
-			if (thumbnail.getData() != null) {
+			if (fileicon.getData() != null) {
 				// Thumbnail data were loaded upon creation.
 				// Write thumbnail content
-				outputStream.write(thumbnail.getData());
+				outputStream.write(fileicon.getData());
 			} else {
 				// Thumbnail must be loaded from file.
 				FileInputStream fileInputStream = null;
 				try {
-					fileInputStream = new FileInputStream(thumbnail.getUrl());
-					byte[] buffer = new byte[(int)thumbnail.getSize()];
-					int bytesRead = fileInputStream.read(buffer, 0, (int)thumbnail.getSize());
+					fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+							.getContentResolver().openInputStream(fileicon.getUri());
+					byte[] buffer = new byte[(int)fileicon.getSize()];
+					int bytesRead = fileInputStream.read(buffer, 0, (int)fileicon.getSize());
 					if (bytesRead > 0) {
 						outputStream.write(buffer);
 					}
@@ -506,30 +519,30 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * 
 	 * @param outputStream
 	 *            DataOutputStream to write to
-	 * @param filepath
-	 *            File path
+	 * @param file
+	 *            File Uri
 	 * @throws IOException
 	 */
-	private void writeFileMultipart(DataOutputStream outputStream, String filepath)
+	private void writeFileMultipart(DataOutputStream outputStream, Uri file)
 			throws IOException {
 		// Check file path
-		String[] splittedPath = content.getUrl().split("/");
-		String filename = splittedPath[splittedPath.length - 1];
+		String filename = content.getName();
+		long fileSize = content.getSize();
 
 		// Build and write headers
 		String filePartHeader = twoHyphens + BOUNDARY_TAG + lineEnd;
 		filePartHeader += "Content-Disposition: form-data; name=\"File\"; filename=\"" + URLEncoder.encode(filename, "UTF-8")
 				+ "\"" + lineEnd;
 		filePartHeader += "Content-Type: " + content.getEncoding() + lineEnd;
-		File file = new File(filepath);
-		filePartHeader += "Content-Length: " + file.length() + lineEnd + lineEnd;
+		filePartHeader += "Content-Length: " + fileSize + lineEnd + lineEnd;
 
 		outputStream.writeBytes(filePartHeader);
 
 		// Write file content
-		FileInputStream fileInputStream = null;
+		InputStream fileInputStream = null;
 		try {
-			fileInputStream = new FileInputStream(file);
+			fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+					.getContentResolver().openInputStream(file);
 			int bytesAvailable = fileInputStream.available();
 			int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
 			byte[] buffer = new byte[bufferSize];
@@ -540,7 +553,7 @@ public class HttpUploadManager extends HttpTransferManager {
 				progress += bytesRead;
 				outputStream.write(buffer, 0, bytesRead);
 				bytesAvailable = fileInputStream.available();
-				getListener().httpTransferProgress(progress, file.length());
+				getListener().httpTransferProgress(progress, fileSize);
 				bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
 				buffer = new byte[bufferSize];
 				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
@@ -647,8 +660,9 @@ public class HttpUploadManager extends HttpTransferManager {
 				return getDownloadInfo(); // The file has already been uploaded completely
 			}
 			try {
-				if (sendPutForResumingUpload(ftResumeInfo) != null)
+				if (sendPutForResumingUpload(ftResumeInfo) != null)  {
 					return getDownloadInfo();
+				}
 				return null;
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -672,12 +686,12 @@ public class HttpUploadManager extends HttpTransferManager {
 			logger.debug("sendPutForResumingUpload. Already sent from "+resumeInfo.getStart()+" to "+resumeInfo.getEnd());
 		}
 		DataOutputStream outputStream = null;
-		String filepath = content.getUrl();
+		Uri file = content.getUri();
 
 		// Get the connection
 		HttpsURLConnection connection = null;
 		HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
-		connection = (HttpsURLConnection) new URL(resumeInfo.getUrl()).openConnection();
+		connection = (HttpsURLConnection) new URL(resumeInfo.getUri().toString()).openConnection();
 
 		try {
 			connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext().getSocketFactory());
@@ -729,7 +743,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 		try {
 			// Add File
-			writeRemainingFileData(outputStream, filepath, resumeInfo.getEnd());
+			writeRemainingFileData(outputStream, file, resumeInfo.getEnd());
 			if (!isCancelled()) {
 				// Check response status code
 				int responseCode = connection.getResponseCode();
@@ -788,6 +802,14 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (Exception e) {
+			if (e instanceof SecurityException) {
+				if (logger.isActivated()) {
+					logger.warn("Unrecoverable SecurityException: File Transfer resume Upload aborted");
+				}
+				throw e;
+			}
+			e.printStackTrace();
+
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
@@ -801,16 +823,16 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * 
 	 * @param outputStream
 	 *            the output stream
-	 * @param filepath
-	 *            the file to be uploaded
+	 * @param file
+	 *            the Uri of file to be uploaded
 	 * @param endingByte
 	 *            the offset in bytes
 	 * @throws IOException
 	 */
-	private void writeRemainingFileData(DataOutputStream outputStream, String filepath, int offset) throws IOException {
+	private void writeRemainingFileData(DataOutputStream outputStream, Uri file, int offset) throws IOException {
 		// Write file content
-		File file = new File(filepath);
-		FileInputStream fileInputStream = new FileInputStream(file);
+		FileInputStream fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+				.getContentResolver().openInputStream(file);
 		// Skip bytes already received
 		int bytesRead = (int) fileInputStream.skip(offset+1);
 		int bytesAvailable = fileInputStream.available();
@@ -826,7 +848,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			progress += bytesRead;
 			outputStream.write(buffer, 0, bytesRead);
 			bytesAvailable = fileInputStream.available();
-			getListener().httpTransferProgress(progress, file.length());
+			getListener().httpTransferProgress(progress, content.getSize());
 			bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
 			buffer = new byte[bufferSize];
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
@@ -846,7 +868,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private HttpResponse sendGetInfo(String suffix, boolean authRequired) throws Exception {
 		// Check server address
-		url = new URL(getHttpServerAddr());
+		url = new URL(getHttpServerAddr().toString());
 		String protocol = url.getProtocol(); // TODO : exit if not HTTPS
 		String host = url.getHost();
 		String serviceRoot = url.getPath();

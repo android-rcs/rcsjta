@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
@@ -130,44 +133,92 @@ public class FileTransferService extends JoynService {
 		}
 	}
 
+	private void grantUriPermissionToStackServices(Uri file) {
+		Intent fileTransferServiceIntent = new Intent(IFileTransferService.class.getName());
+		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
+				fileTransferServiceIntent, 0);
+		for (ResolveInfo stackService : stackServices) {
+			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
+					Intent.FLAG_GRANT_READ_URI_PERMISSION);
+		}
+	}
+
+	private void persistUriPermissionForClient(Uri file) {
+		 ctx.getContentResolver().takePersistableUriPermission(file,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+	}
+
     /**
-     * Transfers a file to a contact. The parameter filename contains the complete
-     * path of the file to be transferred. The parameter contact supports the following
-     * formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * Tel-URI. If the format of the contact is not supported an exception is thrown.
+     * Transfers a file to a contact. The parameter file contains the URI of the
+     * file to be transferred (for a local or a remote file). The parameter 
+     * contact supports the following formats: MSISDN in national or 
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of 
+     * the contact is not supported an exception is thrown.
      * 
      * @param contact 
-     * @param filename Filename to transfer
+     * @param file URI of file to transfer
      * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-    public FileTransfer transferFile(String contact, String filename, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
-    	return transferFile(contact, filename, false, listener);
-    }    
+    public FileTransfer transferFile(String contact, Uri file, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+    	return transferFile(contact, file, false, listener);
+    }
     
 	/**
-	 * Transfers a file to a contact. The parameter filename contains the complete path of the file to be transferred. The parameter
-	 * contact supports the following formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
-	 * format of the contact is not supported an exception is thrown.
+	 * Grant permission to the stack and persist access permission
+	 * @param file the file URI
+	 */
+	private void grantAndPersistUriPermission(Uri file) {
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
+			return;
+		}
+		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+			// Granting temporary read Uri permission from client to
+			// stack service if it is a content URI
+			grantUriPermissionToStackServices(file);
+			// Persist Uri access permission for the client
+			// to be able to read the contents from this Uri even
+			// after the client is restarted after device reboot.
+			persistUriPermissionForClient(file);
+		}
+	}
+    
+	/**
+     * Transfers a file to a contact. The parameter file contains the URI of the
+     * file to be transferred (for a local or a remote file). The parameter
+     * contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of
+     * the contact is not supported an exception is thrown.
 	 * 
 	 * @param contact
-	 * @param filename
-	 *            Filename to transfer
-	 * @param fileIcon
-	 *            File icon option. If true, the stack tries to attach thumbnail. Thumbnail may not be attached if file is not an
-	 *            image or if local or remote contact does not support thumbnail.
+	 * @param file
+	 *            Uri of file to transfer
+	 * @param fileicon
+	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be attached if file is not an
+	 *            image or if local or remote contact does not support fileicon.
 	 * @param listener
 	 *            File transfer event listener
 	 * @return File transfer
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
-    public FileTransfer transferFile(String contact, String filename, boolean fileIcon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+	/**
+	 * @param contact
+	 * @param file
+	 * @param fileicon
+	 * @param listener
+	 * @return
+	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+	 */
+	public FileTransfer transferFile(String contact, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	if (api != null) {
-    		try {
-				IFileTransfer ftIntf = api.transferFile(contact, filename, fileIcon, listener);
+			try {
+				grantAndPersistUriPermission(file);
+
+				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -180,7 +231,41 @@ public class FileTransferService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
-    
+
+	/**
+	 * Transfers a file to a group chat with an optional file icon.
+	 *
+	 * @param chatId
+	 * @param file Uri of file to transfer
+	 * @param fileicon File icon option. If true, the stack tries to attach
+	 *            fileicon. Fileicon may not be attached if file is not an
+	 *            image or if local or remote contact does not support
+	 *            fileicon.
+	 * @param listener File transfer event listener
+	 * @return File transfer
+	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+	 */
+	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon,
+			FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+		if (api != null) {
+			try {
+				grantAndPersistUriPermission(file);
+				
+				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon, listener);
+				if (ftIntf != null) {
+					return new FileTransfer(ftIntf);
+				} else {
+					return null;
+				}
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
     /**
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in the UI).
      *

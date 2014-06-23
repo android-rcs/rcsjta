@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
@@ -48,11 +52,11 @@ public interface FtHttpResumeDao {
 	/**
 	 * Query the download entry with url
 	 * 
-	 * @param url
-	 *            the {@code url} value.
+	 * @param downloadServerAddress
+	 *            the {@code downloadServerAddress} value.
 	 * @return the entry (Can be {@code null}).
 	 */
-	public FtHttpResumeDownload queryDownload(String url);
+	public FtHttpResumeDownload queryDownload(Uri downloadServerAddress);
 
 	/**
 	 * Works just like insert(FtHttpResume, Status) except the status is always STARTED

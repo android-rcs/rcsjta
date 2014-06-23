@@ -22,7 +22,9 @@ interface IFileTransferService {
 	
 	IFileTransfer getFileTransfer(in String transferId);
 
-	IFileTransfer transferFile(in String contact, in String filename, in boolean tryAttachThumbnail, in IFileTransferListener listener);
+	IFileTransfer transferFile(in String contact, in Uri file, in boolean fileicon, in IFileTransferListener listener);
+
+	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean fileicon, in IFileTransferListener listener);
 
 	void markFileTransferAsRead(in String transferId);
 	

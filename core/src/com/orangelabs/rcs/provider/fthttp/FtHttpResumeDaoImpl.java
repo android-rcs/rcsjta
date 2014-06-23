@@ -98,14 +98,15 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 				int mimeTypeColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE);
 				int contactColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT);
 				int chatIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID);
-				int fileColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH);
+				int fileColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FILE);
+				int fileNameColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FILENAME);
 				int directionColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.DIRECTION);
 				int displayNameColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME);
 				int fileTransferIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID);
-				int thumbnailColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL);
+				int fileiconColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.FILEICON);
 				int isGroupColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP);
 				int chatSessionIdColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID);
-				int urlColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.IN_URL);
+				int downloadServerAddressColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.IN_URL);
 				int tidColumnIdx = cursor.getColumnIndexOrThrow(FtHttpColumns.OU_TID);
 				do {
 					long size = cursor.getLong(sizeColumnIdx);
@@ -113,21 +114,25 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String contact = cursor.getString(contactColumnIdx);
 					String chatId = cursor.getString(chatIdColumnIdx);
 					String file = cursor.getString(fileColumnIdx);
+					String fileName = cursor.getString(fileNameColumnIdx);
 					int direction = cursor.getInt(directionColumnIdx);
 					String displayName = cursor.getString(displayNameColumnIdx);
 					String fileTransferId = cursor.getString(fileTransferIdColumnIdx);
-					String thumbnail = cursor.getString(thumbnailColumnIdx);
+					String fileicon = cursor.getString(fileiconColumnIdx);
 					boolean isGroup = cursor.getInt(isGroupColumnIdx) != 0;
 					String chatSessionId = cursor.getString(chatSessionIdColumnIdx);
 					if (FtHttpDirection.values()[direction] == FtHttpDirection.INCOMING) {
-						String url = cursor.getString(urlColumnIdx);
-						MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
-						result.add(new FtHttpResumeDownload(file, thumbnail, content, contact, displayName, chatId,
+						String downloadServerAddress = cursor.getString(downloadServerAddressColumnIdx);
+						MmContent content = ContentManager.createMmContent(Uri.parse(file), size, fileName);
+						Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+						result.add(new FtHttpResumeDownload(Uri.parse(downloadServerAddress), Uri
+								.parse(file), fileiconUri, content, contact, displayName, chatId,
 								fileTransferId, chatSessionId, isGroup));
 					} else {
 						String tid = cursor.getString(tidColumnIdx);
-						MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
-						result.add(new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, fileTransferId,
+						MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType, size, fileName);
+						Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+						result.add(new FtHttpResumeUpload(content, fileiconUri, tid, contact, displayName, chatId, fileTransferId,
  								chatSessionId, isGroup));
 					}
 				} while (cursor.moveToNext());
@@ -148,10 +153,14 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		ContentValues values = new ContentValues();
 		values.put(FtHttpColumns.DATE, System.currentTimeMillis());
 		values.put(FtHttpColumns.DIRECTION, ftHttpResume.getDirection().ordinal());
-		values.put(FtHttpColumns.FILEPATH, ftHttpResume.getFilepath());
+		values.put(FtHttpColumns.FILE, ftHttpResume.getFileUri().toString());
+		values.put(FtHttpColumns.FILENAME, ftHttpResume.getFileName());
 		values.put(FtHttpColumns.TYPE, ftHttpResume.getMimetype());
 		values.put(FtHttpColumns.SIZE, ftHttpResume.getSize());
-		values.put(FtHttpColumns.THUMBNAIL, ftHttpResume.getThumbnail());
+		Uri fileiconUri = ftHttpResume.getFileicon();
+		if (fileiconUri != null) {
+			values.put(FtHttpColumns.FILEICON, fileiconUri.toString());
+		}
 		values.put(FtHttpColumns.CONTACT, ftHttpResume.getContact());
 		values.put(FtHttpColumns.DISPLAY_NAME, ftHttpResume.getDisplayName());
 		values.put(FtHttpColumns.CHATID, ftHttpResume.getChatId());
@@ -160,7 +169,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		values.put(FtHttpColumns.IS_GROUP, ftHttpResume.isGroup());
 		if (ftHttpResume instanceof FtHttpResumeDownload) {
 			FtHttpResumeDownload download = (FtHttpResumeDownload) ftHttpResume;
-			values.put(FtHttpColumns.IN_URL, download.getUrl());
+			values.put(FtHttpColumns.IN_URL, download.getDownloadServerAddress().toString());
 			if (logger.isActivated()) {
 				logger.debug("insert " + download + ")");
 			}
@@ -200,18 +209,20 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
 			if (cursor != null) {
 				if (cursor.moveToNext()) {
+					String fileName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILENAME));
 					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
 					String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE));
 					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
 					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
-					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH));
+					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILE));
 					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
 					String fileTransferId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID));
-					String thumbnail = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL));
+					String fileicon = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEICON));
 					boolean isGroup = cursor.getInt(cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP)) != 0;
 					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
-					MmContent content = ContentManager.createMmContentFromMime(file, mimeType, size);
-					return new FtHttpResumeUpload(content, thumbnail, tid, contact, displayName, chatId, fileTransferId,
+					MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType, size, fileName);
+					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+					return new FtHttpResumeUpload(content, fileiconUri, tid, contact, displayName, chatId, fileTransferId,
  							chatSessionId, isGroup);
 				}
 			}
@@ -227,26 +238,27 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 	}
 
 	@Override
-	public FtHttpResumeDownload queryDownload(String url) {
+	public FtHttpResumeDownload queryDownload(Uri downloadServerAddress) {
 		String selection = FtHttpColumns.IN_URL + " = ? AND " + FtHttpColumns.DIRECTION + " = ?";
-		String[] selectionArgs = { url, "" + FtHttpDirection.INCOMING.ordinal() };
+		String[] selectionArgs = { downloadServerAddress.toString(), "" + FtHttpDirection.INCOMING.ordinal() };
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(FtHttpColumns.CONTENT_URI, FtHttpColumns.FULL_PROJECTION, selection, selectionArgs, "_ID LIMIT 1");
 			if (cursor != null) {
 				if (cursor.moveToNext()) {
+					String fileName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILENAME));
 					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
-					String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE));
 					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
 					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
-					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEPATH));
+					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILE));
 					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
 					String fileTransferId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FT_ID));
-					String thumbnail = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.THUMBNAIL));
+					String fileicon = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILEICON));
 					boolean isGroup = cursor.getInt(cursor.getColumnIndexOrThrow(FtHttpColumns.IS_GROUP)) != 0;
 					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
-					MmContent content = ContentManager.createMmContentFromMime(url, mimeType, size);
-					return new FtHttpResumeDownload(file, thumbnail, content, contact, displayName, chatId, fileTransferId,
+					MmContent content = ContentManager.createMmContent(Uri.parse(file), size, fileName);
+					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+					return new FtHttpResumeDownload(downloadServerAddress, Uri.parse(file), fileiconUri, content, contact, displayName, chatId, fileTransferId,
  							chatSessionId, isGroup);
 				}
 			}

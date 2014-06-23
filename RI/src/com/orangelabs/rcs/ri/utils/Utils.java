@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.utils;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.text.DateFormat;
@@ -323,19 +322,20 @@ public class Utils {
 	 * Show a picture and exit activity
 	 * 
 	 * @param activity Activity
-	 * @param url Picture to be displayed
+	 * @param uri Picture to be displayed
 	 */
-    public static void showPictureAndExit(final Activity activity, String url) {
+    public static void showPictureAndExit(final Activity activity, Uri uri) {
         if (activity.isFinishing()) {
         	return;
         }
-        
-        Toast.makeText(activity, activity.getString(R.string.label_receive_image, url), Toast.LENGTH_LONG).show();
-
+        try {
+        	String filename = FileUtils.getFileName(activity, uri);
+            Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename), Toast.LENGTH_LONG).show();
+		} catch (Exception e) {
+		}
         Intent intent = new Intent();  
         intent.setAction(android.content.Intent.ACTION_VIEW);  
-        File file = new File(url);  
-        intent.setDataAndType(Uri.fromFile(file), "image/*");  
+        intent.setDataAndType(uri, "image/*");  
         activity.startActivity(intent);        
     }
   

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +15,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.platform.file;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
+import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.logger.Logger;
+import com.orangelabs.rcs.platform.file.FileDescription;
+import com.orangelabs.rcs.utils.FileUtils;
 
 /**
  * Android file factory
@@ -42,45 +45,19 @@ public class AndroidFileFactory extends FileFactory {
 	 * The logger
 	 */
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	
-	/**
-	 * Open a file input stream
-	 * 
-	 * @param url URL
-	 * @return Input stream
-	 * @throws IOException
-	 */
-	public InputStream openFileInputStream(String url) throws IOException {
-		File file = new File(url);
-		return new FileInputStream(file);
-	}
 
 	/**
-	 * Open a file output stream
-	 * 
-	 * @param url URL
-	 * @return Output stream
-	 * @throws IOException
-	 */
-	public OutputStream openFileOutputStream(String url) throws IOException {
-		File file = new File(url);
-		return new FileOutputStream(file);
-	}
-	
-	/**
 	 * Returns the description of a file
-	 * 
-	 * @param url URL of the file
+	 *
+	 * @param file URI of the file
 	 * @return File description
 	 * @throws IOException
 	 */
-	public FileDescription getFileDescription(String url) throws IOException {
-		File file = new File(url);
-		if (file.isDirectory()) {
-			return new FileDescription(url, -1L, true);
-		} else {
-			return new FileDescription(url, file.length(), false);
-		}
+	public FileDescription getFileDescription(Uri file) throws IOException {
+		Context context = AndroidFactory.getApplicationContext();
+		String fileName = FileUtils.getFileName(context, file);
+		long fileSize = FileUtils.getFileSize(context, file);
+		return new FileDescription(file, fileName, fileSize);
 	}
 	
 	/**

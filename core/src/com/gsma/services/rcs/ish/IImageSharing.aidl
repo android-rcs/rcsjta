@@ -11,6 +11,8 @@ interface IImageSharing {
 
 	String getRemoteContact();
 
+	Uri getFile();
+
 	String getFileName();
 
 	long getFileSize();

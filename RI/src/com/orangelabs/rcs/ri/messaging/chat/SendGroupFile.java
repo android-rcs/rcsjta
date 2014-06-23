@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,12 +25,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.provider.MediaStore;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,12 +50,15 @@ import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Send file to group
  * 
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 public class SendGroupFile extends Activity implements JoynServiceListener {
 	/**
@@ -92,6 +92,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	private String filename;
 	
 	/**
+	 * Selected fileUri
+	 */
+	private Uri file;
+	
+	/**
 	 * Selected filesize (kB)
 	 */
 	private long filesize = -1;
@@ -110,6 +115,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
      * File transfer listener
      */
     private MyFileTransferListener ftListener = new MyFileTransferListener();
+    
+    /**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(SendGroupFile.class.getSimpleName());
     
     /**
      * Progress dialog
@@ -256,9 +266,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
                 Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_chat_aborted));
                 return;
             }
-            
+            if (LogUtils.isActive) {
+				Log.d(LOGTAG, "initiateTransfer filename="+filename+" size="+filesize);
+			}
             // Initiate transfer
-    		fileTransfer = groupChat.sendFile(filename,  ftThumb.isChecked(), ftListener);
+    		fileTransfer = ftApi.transferFileToGroupChat(chatId, file,  ftThumb.isChecked(), ftListener);
     	} catch(Exception e) {
 			hideProgressDialog();
 			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed));
@@ -299,42 +311,33 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
      * @param resultCode Result code
      * @param data Data
      */
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (resultCode != RESULT_OK) {
-    		return;
-    	}
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != RESULT_OK) {
+			return;
+		}
 
-    	switch(requestCode) {
-	    	case SELECT_IMAGE: {
-	    		if ((data != null) && (data.getData() != null)) {
-	    			// Get selected photo URI
-	    			Uri uri = data.getData();
-	
-	    			// Get image filename
-	    			Cursor cursor = getContentResolver().query(uri, new String[] {MediaStore.Images.ImageColumns.DATA}, null, null, null); 
-	    			cursor.moveToFirst();
-	    			filename = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-	    			cursor.close();     	    		
-	    			
-	    			// Display the selected filename attribute
-	    			TextView uriEdit = (TextView)findViewById(R.id.uri);
-	    			try {
-	    				File file = new File(filename);
-	    				filesize = file.length()/1024;
-	    				uriEdit.setText(filesize + " KB");
-	    			} catch(Exception e) {
-	    				filesize = -1;
-	    				uriEdit.setText(filename);
-	    			}
-	    			
-	    			// Show invite button
-	    			Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-	    			inviteBtn.setEnabled(true);
-	    		}
-	    	}             
-	    	break;
-    	}
-    }
+		switch (requestCode) {
+		case SELECT_IMAGE:
+			if ((data != null) && (data.getData() != null)) {
+				// Get selected photo URI
+				file = data.getData();
+				// Display the selected filename attribute
+				TextView uriEdit = (TextView) findViewById(R.id.uri);
+				try {
+					filename = FileUtils.getFileName(this, file);
+					filesize = FileUtils.getFileSize(this, file) / 1024;
+					uriEdit.setText(filesize + " KB");
+				} catch (Exception e) {
+					filesize = -1;
+					uriEdit.setText("Unknown");
+				}
+				// Show invite button
+				Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+				inviteBtn.setEnabled(true);
+			}
+			break;
+		}
+	}
 
 	/**
 	 * Hide progress dialog
@@ -352,7 +355,10 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     private class MyFileTransferListener extends FileTransferListener {
     	// File transfer started
     	public void onTransferStarted() {
-			handler.post(new Runnable() { 
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferStarted");
+			}
+			handler.post(new Runnable() {
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
@@ -366,7 +372,10 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     	
     	// File transfer aborted
     	public void onTransferAborted() {
-			handler.post(new Runnable() { 
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferAborted");
+			}
+			handler.post(new Runnable() {
 				public void run() {
 					// Hide progress dialog
 					hideProgressDialog();
@@ -379,6 +388,9 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 
     	// File transfer error
     	public void onTransferError(final int error) {
+    		if (LogUtils.isActive) {
+				Log.w(LOGTAG, "onTransferError "+error);
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -406,8 +418,25 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     		});
     	}
 
-    	// File transferred
-    	public void onFileTransferred(String filename) {
+		@Override
+		public void onFileTransferPaused() throws RemoteException {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onFileTransferPaused");
+			}
+		}
+
+		@Override
+		public void onFileTransferResumed() throws RemoteException {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onFileTransferResumed");
+			}
+		}
+
+		@Override
+		public void onFileTransferred(Uri file) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onFileTransferred");
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
@@ -418,18 +447,6 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 					statusView.setText("transferred");
 				}
 			});
-    	}
-
-		@Override
-		public void onFileTransferPaused() throws RemoteException {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onFileTransferResumed() throws RemoteException {
-			// TODO Auto-generated method stub
-			
 		}
     };
     

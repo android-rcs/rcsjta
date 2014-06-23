@@ -51,7 +51,13 @@ public class FileTransferLog {
      * <P>Type: TEXT</P>
      */
     public static final String CONTACT_NUMBER = "contact_number";
-	
+
+    /**
+     * The name of the column containing the URI of the file.
+     * <P>Type: TEXT</P>
+     */
+    public static final String FILE = "file";
+
     /**
      * The name of the column containing the filename (absolute path).
      * <P>Type: TEXT</P>

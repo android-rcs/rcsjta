@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
+
+import android.net.Uri;
 
 /**
  * File transfer over HTTP thumbnail
@@ -35,9 +41,9 @@ public class FileTransferHttpThumbnail {
 	private String contentType = null;
 	
 	/**
-	 * Thumbnail URL
+	 * Thumbnail URI
 	 */
-	private String url = null;
+	private Uri thumbnail = null;
 	
 	/**
 	 * Validity of the file thumbnail
@@ -69,21 +75,21 @@ public class FileTransferHttpThumbnail {
 	}
 
 	/**
-	 * Get thumbnail URL
+	 * Get thumbnail URI
 	 *
-	 * @return Thumbnail URL
+	 * @return Thumbnail URI
 	 */
-	public String getThumbnailUrl() {
-		return url;
+	public Uri getThumbnailUri() {
+		return thumbnail;
 	}
 
 	/**
-	 * Set thumbnail URL
+	 * Set thumbnail URI
 	 * 
-	 * @param url Thumbnail URL
+	 * @param thumbnail Thumbnail URI
 	 */
-	public void setThumbnailUrl(String url) {
-		this.url = url;
+	public void setThumbnailUri(Uri thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 
 	/**

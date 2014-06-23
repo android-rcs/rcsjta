@@ -18,20 +18,17 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,17 +41,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate image sharing
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
  */
 public class InitiateImageSharing extends Activity implements JoynServiceListener {
 	/**
@@ -71,6 +72,12 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 	 * Selected filename
 	 */
 	private String filename;
+	
+	/**
+	 * Selected fileUri
+	 */
+	private Uri file;
+	
 	
 	/**
 	 * Selected filesize (kB)
@@ -95,7 +102,13 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     /**
      * Progress dialog
      */
-    private Dialog progressDialog = null; 
+    private Dialog progressDialog = null;
+    
+    /**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(InitiateImageSharing.class.getSimpleName());
+    
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,7 +136,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
         dialBtn.setOnClickListener(btnDialListener);
         dialBtn.setEnabled(false);
 
-        // Instanciate API
+        // Instantiate API
 		ishApi = new ImageSharingService(getApplicationContext(), this);
 		
 		// Connect API
@@ -216,8 +229,11 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
             final String remote = cursor.getString(1);
 
         	try {
+                if (LogUtils.isActive) {
+    				Log.d(LOGTAG, "shareImage image="+filename+" size="+filesize);
+    			}
                 // Initiate sharing
-        		imageSharing = ishApi.shareImage(remote, filename, ishListener);
+        		imageSharing = ishApi.shareImage(remote, file, ishListener);
         	} catch(Exception e) {
         		e.printStackTrace();
 				hideProgressDialog();
@@ -266,41 +282,32 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
      * @param resultCode Result code
      * @param data Data
      */
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (resultCode != RESULT_OK) {
-    		return;
-    	}
-    	
-        switch(requestCode) {
-            case SELECT_IMAGE: {
-            	if ((data != null) && (data.getData() != null)) {
-            		// Get selected photo URI
-            		Uri uri = data.getData();
-            		
-                    // Get image filename
-                    Cursor cursor = getContentResolver().query(uri, new String[] {MediaStore.Images.ImageColumns.DATA}, null, null, null); 
-                    cursor.moveToFirst();
-                    filename = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-                    cursor.close();     
-                    
-                    // Display the selected filename attribute
-                    TextView uriEdit = (TextView)findViewById(R.id.uri);
-					try {
-						File file = new File(filename);
-						filesize = file.length()/1024;
-						uriEdit.setText(filesize + " KB");
-					} catch(Exception e) {
-						filesize = -1;
-					    uriEdit.setText(filename);
-					}
-					
-					// Enable invite button
-					Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-					inviteBtn.setEnabled(true);            
-            	}
-	    	}             
-            break;
-        }
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != RESULT_OK) {
+			return;
+		}
+
+		switch (requestCode) {
+		case SELECT_IMAGE:
+			if ((data != null) && (data.getData() != null)) {
+				// Get selected photo URI
+				file = data.getData();
+				// Display the selected filename attribute
+				TextView uriEdit = (TextView) findViewById(R.id.uri);
+				try {
+					filename = FileUtils.getFileName(this, file);
+					filesize = FileUtils.getFileSize(this, file) / 1024;
+					uriEdit.setText(filesize + " KB");
+				} catch (Exception e) {
+					filesize = -1;
+					uriEdit.setText("Unknown");
+				}
+				// Enable invite button
+				Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+				inviteBtn.setEnabled(true);
+			}
+			break;
+		}
     }
     
 	/**
@@ -374,7 +381,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     	}
 
     	// Image shared
-    	public void onImageShared(String filename) {
+    	public void onImageShared(Uri file) {
 			handler.post(new Runnable() { 
 				public void run() {
 					// Hide progress dialog
