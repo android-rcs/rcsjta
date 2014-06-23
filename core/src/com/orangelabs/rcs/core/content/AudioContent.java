@@ -33,11 +33,6 @@ import android.net.Uri;
 public class AudioContent extends MmContent {
 
 	/**
-	 * Encoding type
-	 */
-	public static final String ENCODING = "audio/";
-
-	/**
 	 * Constructor
 	 * 
 	 * @aparam encoding Encoding

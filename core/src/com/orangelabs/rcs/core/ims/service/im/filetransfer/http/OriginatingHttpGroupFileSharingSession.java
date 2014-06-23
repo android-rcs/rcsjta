@@ -173,8 +173,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         
         // Send content
 		chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
-		// Insert chat message into database
-		FileTransferMessage msg = new FileTransferMessage(msgId, null, fileInfo, false, null);
 
 		// Update File Transfer raw with chat message ID
 		MessagingLog.getInstance().updateFileTransferChatId(msgId, chatSession.getContributionID());

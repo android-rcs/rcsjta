@@ -75,8 +75,6 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 */
 	int calclength = 0;
 
-	private MmContent fileicon;
-
 	/**
 	 * Retry counter
 	 */
@@ -105,7 +103,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 		if (logger.isActivated()) {
 			logger.debug("HttpDownloadManager file from " + httpServerAddress + " length=" + content.getSize());
 		}
-		streamForFile = openStremForFile(file);
+		streamForFile = openStreamForFile(file);
 	}
 
 	/**
@@ -115,15 +113,15 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 *            file path
 	 * @return BufferedOutputStream or null
 	 */
-	static BufferedOutputStream openStremForFile(File file) {
+	static BufferedOutputStream openStreamForFile(File file) {
 		try {
 			return new BufferedOutputStream(new FileOutputStream(file, true));
 		} catch (FileNotFoundException e) {
 			if (logger.isActivated()) {
-				logger.error("Could not open stream, file does not exists.");
+				logger.error("Could not open stream: file does not exists");
 			}
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -146,7 +144,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 				logger.debug("Download file " + getHttpServerAddr());
 			}
 			if (streamForFile == null) {
-				streamForFile = openStremForFile(file);
+				streamForFile = openStreamForFile(file);
 				if (streamForFile == null)
 					return false;
 			}
@@ -269,6 +267,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 * @return fileicon picture content or null in case of error
 	 */
 	public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String fileName) {
+		MmContent fileicon = null;
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Download fileicon" + getHttpServerAddr());
@@ -283,7 +282,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 			}
 
 			// Execute request
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos;
 			if ((baos = getThumbnail(request)) == null) {
 				if (logger.isActivated()) {
 					logger.debug("Failed to download Thumbnail");
@@ -292,16 +291,22 @@ public class HttpDownloadManager extends HttpTransferManager {
 			}
 			// Create the content for filename
 			Uri fileiconUri = ContentManager.generateUriForReceivedContent(fileName, thumbnailInfo.getThumbnailType());
-			fileicon = ContentManager.createMmContent(fileiconUri, baos.size(),fileName);
+			fileicon = ContentManager.createMmContent(fileiconUri, baos.size(), fileName);
 			// Save data to file
 			fileicon.writeData2File(baos.toByteArray());
-			fileicon.closeFile();
 			return fileicon;
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Download thumbnail exception", e);
 			}
 			return null;
+		} finally {
+			if (fileicon != null) {
+				try {
+					fileicon.closeFile();
+				} catch (Exception e2) {
+				}
+			}
 		}
 	}
 
@@ -362,7 +367,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 */
 	public boolean resumeDownload() {
 		if (streamForFile == null) {
-			streamForFile = openStremForFile(file);
+			streamForFile = openStreamForFile(file);
 			if (streamForFile == null)
 				return false;
 		}

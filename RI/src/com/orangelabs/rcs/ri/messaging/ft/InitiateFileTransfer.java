@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.ft;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -59,14 +57,15 @@ import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.MediaUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate file transfer
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class InitiateFileTransfer extends Activity implements JoynServiceListener {
 	/**
@@ -83,6 +82,11 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	 * Selected filename
 	 */
 	private String filename;
+	
+	/**
+	 * Selected fileUri
+	 */
+	private Uri file;
 	
 	/**
 	 * Selected filesize (kB)
@@ -350,7 +354,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         // Initiate session in background
     	try {
     		// Initiate transfer
-    		fileTransfer = ftApi.transferFile(remote, filename, ftThumb.isChecked(), ftListener);
+    		fileTransfer = ftApi.transferFile(remote, file, ftThumb.isChecked(), ftListener);
     		
             Button pauseBtn = (Button)findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);
@@ -404,46 +408,41 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * @param resultCode Result code
      * @param data Data
      */
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (resultCode != RESULT_OK) {
-    		return;
-    	}
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != RESULT_OK) {
+			return;
+		}
 
-    	switch(requestCode) {
-	    	case SELECT_IMAGE: {
-	    		if ((data != null) && (data.getData() != null)) {
-	    			// Get selected photo URI
-	    			Uri uri = data.getData();
-	    			
-	    			// Get image filename
-	    			filename = MediaUtils.getFilePath(this, uri);
-
-	    			// Display file info
-	    			TextView uriEdit = (TextView)findViewById(R.id.uri);
+		switch (requestCode) {
+		case SELECT_IMAGE:
+			if ((data != null) && (data.getData() != null)) {
+				// Get selected photo URI
+				file = data.getData();
+				// Display file info
+				TextView uriEdit = (TextView) findViewById(R.id.uri);
+				TextView sizeEdit = (TextView) findViewById(R.id.size);
+				// Display the selected filename attribute
+				try {
+					// Get image filename and size
+					filename = FileUtils.getFileName(this, file);
+					filesize = FileUtils.getFileSize(this, file) / 1024;
+					sizeEdit.setText(filesize + " KB");
 					uriEdit.setText(filename);
-	    			TextView sizeEdit = (TextView) findViewById(R.id.size);
-	    			// Display the selected filename attribute
-	    			try {
-	    				File file = new File(filename);
-	    				filesize = file.length() / 1024;
-	    				sizeEdit.setText(filesize + " KB");
-	    				uriEdit.setText( file.getName());
-	    			} catch (Exception e) {
-	    				if (LogUtils.isActive) {
-	    					Log.e(LOGTAG, e.getMessage(), e);
-	    				}
-	    				filesize = -1;
-	    				sizeEdit.setText("Unknown");
-	    				uriEdit.setText(filename);
-	    			}
-					// Enable invite button
-					Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-	    			inviteBtn.setEnabled(true);
-	    		}
-	    	}             
-	    	break;
-    	}
-    }
+				} catch (Exception e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, e.getMessage(), e);
+					}
+					filesize = -1;
+					sizeEdit.setText("Unknown");
+					uriEdit.setText("Unknown");
+				}
+				// Enable invite button
+				Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+				inviteBtn.setEnabled(true);
+			}
+			break;
+		}
+	}
 
 	/**
 	 * Hide progress dialog
@@ -525,9 +524,9 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	}
 
     	// File transferred
-    	public void onFileTransferred(String filename) {
+    	public void onFileTransferred(Uri file) {
     		if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onFileTransferred (filename=" + filename + ")");
+				Log.d(LOGTAG, "onFileTransferred (file=" + file + ")");
 			}
 			handler.post(new Runnable() { 
 				public void run() {
@@ -548,7 +547,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 
 		@Override
 		public void onFileTransferPaused() throws RemoteException {
-			// TODO Auto-generated method stub
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onFileTransferPaused");
 			}
@@ -556,7 +554,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 
 		@Override
 		public void onFileTransferResumed() throws RemoteException {
-			// TODO Auto-generated method stub
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onFileTransferResumed");
 			}

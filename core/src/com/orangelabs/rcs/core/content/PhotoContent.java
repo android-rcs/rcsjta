@@ -31,10 +31,6 @@ import android.net.Uri;
  * @author jexa7410
  */
 public class PhotoContent extends MmContent {
-	/**
-	 * Encoding type
-	 */
-	public static final String ENCODING = "image/";
 
 	/**
 	 * Constructor

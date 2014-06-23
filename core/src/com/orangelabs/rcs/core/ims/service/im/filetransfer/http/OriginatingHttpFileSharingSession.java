@@ -42,8 +42,6 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
-import android.net.Uri;
-
 /**
  * Originating file transfer HTTP session
  *

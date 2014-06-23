@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.ft;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -309,7 +307,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     	 * 
     	 * @param filename Filename including the path of the transferred file
     	 */
-    	public void onFileTransferred(final String filename) {
+    	public void onFileTransferred(final Uri file) {
 			handler.post(new Runnable() { 
 				public void run() {
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
@@ -328,14 +326,12 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 
 			        if (fileType.equals("text/vcard")) {
 			        	// Show the transferred vCard
-			        	File file = new File(filename);
-			    		Uri uri = Uri.fromFile(file);
 			    		Intent intent = new Intent(Intent.ACTION_VIEW);
-			    		intent.setDataAndType(uri, "text/x-vcard");   		
+			    		intent.setDataAndType(file, "text/x-vcard");   		
 			    		startActivity(intent);
 			        } else {
 				        // Show the transferred image
-				        Utils.showPictureAndExit(ReceiveFileTransfer.this, filename);
+				        Utils.showPictureAndExit(ReceiveFileTransfer.this, file);
 			        }
 				}
 			});

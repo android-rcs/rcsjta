@@ -144,7 +144,7 @@ public class FileTransferService extends JoynService {
 	}
 
 	private void persistUriPermissionForClient(Uri file) {
-		ctx.getContentResolver().takePersistableUriPermission(file,
+		 ctx.getContentResolver().takePersistableUriPermission(file,
 				Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 	}
 
@@ -164,7 +164,26 @@ public class FileTransferService extends JoynService {
 	 */
     public FileTransfer transferFile(String contact, Uri file, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	return transferFile(contact, file, false, listener);
-    }    
+    }
+    
+	/**
+	 * Grant permission to the stack and persist access permission
+	 * @param file the file URI
+	 */
+	private void grantAndPersistUriPermission(Uri file) {
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
+			return;
+		}
+		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+			// Granting temporary read Uri permission from client to
+			// stack service if it is a content URI
+			grantUriPermissionToStackServices(file);
+			// Persist Uri access permission for the client
+			// to be able to read the contents from this Uri even
+			// after the client is restarted after device reboot.
+			persistUriPermissionForClient(file);
+		}
+	}
     
 	/**
      * Transfers a file to a contact. The parameter file contains the URI of the
@@ -185,18 +204,20 @@ public class FileTransferService extends JoynService {
 	 * @throws JoynServiceException
 	 * @throws JoynContactFormatException
 	 */
+	/**
+	 * @param contact
+	 * @param file
+	 * @param fileicon
+	 * @param listener
+	 * @return
+	 * @throws JoynServiceException
+	 * @throws JoynContactFormatException
+	 */
 	public FileTransfer transferFile(String contact, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
     	if (api != null) {
 			try {
-				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-					// Granting temporary read Uri permission from client to
-					// stack service if it is a content URI
-					grantUriPermissionToStackServices(file);
-					// Persist Uri access permission for the client
-					// to be able to read the contents from this Uri even
-					// after the client is restarted after device reboot.
-					persistUriPermissionForClient(file);
-				}
+				grantAndPersistUriPermission(file);
+
 				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
@@ -229,15 +250,8 @@ public class FileTransferService extends JoynService {
 			FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-					// Granting temporary read Uri permission from client to
-					// stack service if it is a content URI
-					grantUriPermissionToStackServices(file);
-					// Persist Uri access permission for the client
-					// to be able to read the contents from this Uri even
-					// after the client is restarted after device reboot.
-					persistUriPermissionForClient(file);
-				}
+				grantAndPersistUriPermission(file);
+				
 				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);

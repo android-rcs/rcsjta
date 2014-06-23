@@ -76,6 +76,7 @@ import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -118,8 +119,6 @@ public class InstantMessagingService extends ImsService {
 	
 	private FtHttpResumeManager resumeManager = null;
 
-	private DelayedDisplayNotificationManager delayedDisplayNotificationManager = null;
-	
 	/**
 	 * Store & Forward manager
 	 */
@@ -161,7 +160,7 @@ public class InstantMessagingService extends ImsService {
 
 		// Send delayed displayed notifications for read messages if they were
 		// not sent before already
-		delayedDisplayNotificationManager = new DelayedDisplayNotificationManager(this);
+		new DelayedDisplayNotificationManager(this);
 		// Start resuming FT HTTP
 		resumeManager = new FtHttpResumeManager(this);
 	}
@@ -332,7 +331,7 @@ public class InstantMessagingService extends ImsService {
 			}
 		}
 
-		if (fileicon && (content.getEncoding().startsWith("image/") == false)) {
+		if (fileicon && (MimeManager.isImageType(content.getEncoding()) == false)) {
 			fileicon = false;
 		}
 
@@ -406,12 +405,14 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		GroupChatSession groupChatSession = getGroupChatSession(chatContributionId);
-		String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID() : null;
-
+		if (groupChatSession == null) {
+			throw new CoreException("Cannot transfer file: Group Chat not established");
+		}
+		// TODO Cannot transfer file to group if Group Chat is not established: to implement with CR018
 		// Create a new session
 		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content,
 				fileicon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), contactList,
-				chatSessionId, chatContributionId);
+				groupChatSession.getSessionID(), chatContributionId);
 
 		return session;
 	}

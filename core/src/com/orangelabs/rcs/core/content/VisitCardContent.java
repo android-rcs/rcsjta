@@ -31,19 +31,16 @@ import android.net.Uri;
  * @author vfml3370
  */
 public class VisitCardContent extends MmContent {
-	/**
-	 * Encoding type
-	 */
-	public static final String ENCODING = "text/vcard";
 
 	/**
 	 * Constructor
 	 *
 	 * @param visitCardFile URI
+	 * @param encoding the mime-type encoding
 	 * @param size Content size
 	 * @param fileName The filename
 	 */
-	public VisitCardContent(Uri visitCardFile, long size, String fileName) {
-		super(visitCardFile, ENCODING, size, fileName);
+	public VisitCardContent(Uri visitCardFile, String encoding, long size, String fileName) {
+		super(visitCardFile, encoding, size, fileName);
 	}
 }

@@ -143,7 +143,7 @@ public abstract class FtHttpResume {
 	public FtHttpResume(FtHttpDirection ftHttpDirection,  Uri file, String fileName, String mimeType, long size,
 	        Uri fileicon, String contact, String displayName, String chatId, String fileTransferId,
 	        String chatSessionId, boolean isGroup, Date date) {
-		if (size <= 0 || ftHttpDirection == null || mimeType == null || file == null)
+		if (size <= 0 || ftHttpDirection == null || mimeType == null || file == null || fileName == null)
 			throw new IllegalArgumentException("Null argument");
 		this.date = date;
 		this.ftHttpDirection = ftHttpDirection;

@@ -57,34 +57,34 @@ public class ContentManager{
 	public static Uri generateUriForReceivedContent(String fileName, String mime) {
 		// Generate a file path
 		String path;
-    	if (mime.startsWith("image")) {
+		if (MimeManager.isImageType(mime)) {
 			path = RcsSettings.getInstance().getPhotoRootDirectory();
-        } else
-    	if (mime.startsWith("video")) {
-			path = RcsSettings.getInstance().getVideoRootDirectory();
-    	} else {
-			path = RcsSettings.getInstance().getFileRootDirectory();
-    	}
+		} else {
+			if (MimeManager.isVideoType(mime)) {
+				path = RcsSettings.getInstance().getVideoRootDirectory();
+			} else {
+				path = RcsSettings.getInstance().getFileRootDirectory();
+			}
+		}
 
-    	// Check that the fileName will not overwrite existing file
-    	// We modify it if a file of the same name exists, by appending _1 before the extension
-    	// For example if image.jpeg exists, next file will be image_1.jpeg, then image_2.jpeg etc
-    	String extension = "";
-    	if ((fileName!=null) && (fileName.indexOf('.')!=-1)){
-    		// if extension is present, split it
-    		extension = "." + fileName.substring(fileName.lastIndexOf('.')+1);
-    		fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-    	}
-    	String destination = fileName;
-    	int i = 1;
-    	while(FileFactory.getFactory().fileExists(path + destination + extension)){
-    		destination = fileName + '_' + i;
-    		i++;
-    	}
+		// Check that the fileName will not overwrite existing file
+		// We modify it if a file of the same name exists, by appending _1 before the extension
+		// For example if image.jpeg exists, next file will be image_1.jpeg, then image_2.jpeg etc
+		StringBuilder extension = new StringBuilder("");
+		if ((fileName != null) && (fileName.indexOf('.') != -1)) {
+			// if extension is present, split it
+			extension = new StringBuilder(".").append(fileName.substring(fileName.lastIndexOf('.') + 1));
+			fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+		}
+		String destination = fileName;
+		int i = 1;
+		while (new File(new StringBuilder(path).append(destination).append(extension).toString()).exists()) {
+			destination = new StringBuilder(fileName).append('_').append(i).toString();
+			i++;
+		}
 
-    	// Return free destination url
-    	String filePath = path + destination + extension;
-        return Uri.fromFile(new File(filePath));
+		// Return free destination uri
+		return Uri.fromFile(new File(new StringBuilder(path).append(destination).append(extension).toString()));
 	}
 
 	/**
@@ -142,23 +142,23 @@ public class ContentManager{
 	 */
 	public static MmContent createMmContentFromMime(Uri uri, String mime, long size, String fileName) {
 		if (mime != null) {
-			if (mime.startsWith(PhotoContent.ENCODING)) {
+			if (MimeManager.isImageType(mime)) {
 				// Photo content
 				return new PhotoContent(uri, mime, size, fileName);
 			}
-			if (mime.startsWith(VideoContent.ENCODING)) {
+			if (MimeManager.isVideoType(mime)) {
 				// Video content
 				return new VideoContent(uri, mime, size, fileName);
 			}
-			if (mime.startsWith(AudioContent.ENCODING)) {
+			if (MimeManager.isAudioType(mime)) {
 				// Audio content
 				return new AudioContent(uri, mime, size, fileName);
 			}
-			if (mime.equals(VisitCardContent.ENCODING)) {
+			if (MimeManager.isVCardType(mime)) {
 				// Visit Card content
-				return new VisitCardContent(uri, size, fileName);
+				return new VisitCardContent(uri, mime, size, fileName);
 			}
-			if (mime.equals(GeolocContent.ENCODING)) {
+			if (MimeManager.isGeolocType(mime)) {
 				// Geoloc content
 				return new GeolocContent(uri, size, fileName);
 			}

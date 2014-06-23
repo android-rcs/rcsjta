@@ -23,6 +23,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -273,7 +274,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     	}
 
     	// Image shared
-    	public void onImageShared(final String filename) {
+    	public void onImageShared(final Uri file) {
 			handler.post(new Runnable() { 
 				public void run() {
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
@@ -284,7 +285,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 			        progressBar.setProgress(progressBar.getMax());
 					
 			        // Show the shared image
-			        Utils.showPictureAndExit(ReceiveImageSharing.this, filename);			        
+			        Utils.showPictureAndExit(ReceiveImageSharing.this, file);			        
 				}
 			});
     	}

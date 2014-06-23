@@ -436,6 +436,15 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (Exception e) {
+			
+			if (e instanceof SecurityException) {
+				if (logger.isActivated()) {
+					logger.warn("Unrecoverable SecurityException: File Transfer Upload aborted");
+				}
+				throw e;
+			}
+			e.printStackTrace();
+
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
@@ -651,8 +660,9 @@ public class HttpUploadManager extends HttpTransferManager {
 				return getDownloadInfo(); // The file has already been uploaded completely
 			}
 			try {
-				if (sendPutForResumingUpload(ftResumeInfo) != null)
+				if (sendPutForResumingUpload(ftResumeInfo) != null)  {
 					return getDownloadInfo();
+				}
 				return null;
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -792,6 +802,14 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (Exception e) {
+			if (e instanceof SecurityException) {
+				if (logger.isActivated()) {
+					logger.warn("Unrecoverable SecurityException: File Transfer resume Upload aborted");
+				}
+				throw e;
+			}
+			e.printStackTrace();
+
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
