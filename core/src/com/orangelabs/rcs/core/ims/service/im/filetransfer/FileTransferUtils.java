@@ -255,9 +255,6 @@ public class FileTransferUtils {
 	 * @return Content instance
 	 */
 	public static MmContent createMmContent(Uri uri) {
-		if (uri == null) {
-			return null;
-		}
 		try {
 			FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
 			return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());

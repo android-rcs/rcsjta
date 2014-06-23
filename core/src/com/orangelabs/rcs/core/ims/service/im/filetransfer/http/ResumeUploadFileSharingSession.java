@@ -31,7 +31,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 /**
  * Resuming session of OriginatingHttpFileSharingSession
  *
- * @author Beno”t JOGUET
+ * @author Benoit JOGUET
  */
 public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSession {
 
@@ -49,7 +49,8 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param resumeUpload the data object in DB
      */
 	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
-		super(parent, content, resumeUpload.getContact(), FileTransferUtils.createMmContent(resumeUpload.getFileicon()), resumeUpload.getFileTransferId());
+		super(parent, content, resumeUpload.getContact(), resumeUpload.getFileicon() != null ? FileTransferUtils
+				.createMmContent(resumeUpload.getFileicon()) : null, resumeUpload.getFileTransferId());
 		getUploadManager().setTid(resumeUpload.getTid());
 		this.resumeFT = resumeUpload;
 	}
