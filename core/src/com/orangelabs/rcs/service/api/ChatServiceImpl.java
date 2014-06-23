@@ -837,11 +837,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 	/**
 	 * Set the parameter in order to respond or not to display reports when requested by the remote part.
 	 * 
-	 * @param state true if respond to display reports
+	 * @param enable true if respond to display reports
 	 * @throws ServerApiException
 	 */
 	@Override
-	public void setRespondToDisplayReports(boolean state) throws RemoteException {
-		RcsSettings.getInstance().setRespondToDisplayReports(state);
+	public void setRespondToDisplayReports(boolean enable) throws RemoteException {
+		RcsSettings.getInstance().setRespondToDisplayReports(enable);
 	}
 }

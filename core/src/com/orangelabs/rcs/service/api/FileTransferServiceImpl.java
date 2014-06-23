@@ -268,9 +268,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * @param session File transfer session
 	 */
 	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
-		// Display invitation
-		receiveFileTransferInvitation(session, chatSession.isGroupChat());
-		
 		// Update rich messaging history
 		if (chatSession.isGroupChat()) {
 			MessagingLog.getInstance().updateFileTransferChatId(
@@ -280,6 +277,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
 		addFileTransferSession(sessionApi);
+		
+		// Display invitation
+		receiveFileTransferInvitation(session, chatSession.isGroupChat());
 	}    
 	
     /**

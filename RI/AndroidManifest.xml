@@ -313,6 +313,10 @@
 	 	<activity android:name=".ipcall.IPCallList"/>
 	 	
 	 	<activity android:name=".ipcall.IPCallView"/>
+	 
+	 	<service android:name=".messaging.ft.FileTransferIntentService"
+            android:exported="false" />
+	 	
 </application>
 
 </manifest>

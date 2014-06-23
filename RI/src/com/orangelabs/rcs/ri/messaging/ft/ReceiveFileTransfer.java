@@ -45,7 +45,6 @@ import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
@@ -68,30 +67,10 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	 */
     private FileTransferService ftApi;
     
-	/**
-	 * Transfer ID
-	 */
-    private String transferId;
-    
-    /**
-     * Remote Contact
-     */
-    private String remoteContact;
-   
-    /**
-     * File size
-     */
-    private long fileSize;
-    
-    /**
-     * File type
-     */
-    private String fileType;
-    
     /**
      * File transfer
      */
-    private FileTransfer fileTransfer = null;
+    private FileTransfer fileTransfer;
     
     /**
      * File transfer listener
@@ -102,6 +81,11 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      * File transfer is resuming
      */
     private boolean resuming = false;
+    
+    /**
+     * The File Transfer Data Object 
+     */
+    private FileTransferDAO ftdao;
     
     /**
 	 * The log tag for this class
@@ -127,12 +111,16 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		resumeBtn.setOnClickListener(btnResumeListener);
 		resumeBtn.setEnabled(false);
 		
-        // Get invitation info
-        transferId = getIntent().getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
-		remoteContact = getIntent().getStringExtra(FileTransferIntent.EXTRA_CONTACT);
-		fileSize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, -1);
-		fileType = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILETYPE);
-		String filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
+		// Get invitation info
+		ftdao = (FileTransferDAO) (getIntent().getExtras().getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
+		if (ftdao == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "onCreate cannot read File Transfer invitation");
+			}
+			finish();
+			return;
+		}
+
 		if (getIntent().getAction() != null) {
 			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
 		}
@@ -142,11 +130,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
         
         // Connect API
         ftApi.connect();
-        
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate contact=" + remoteContact + " file=" + filename + " size=" + fileSize + " transferId="
-					+ transferId+ " resume="+resuming);
-		}
 	}
 
 	@Override
@@ -174,8 +157,11 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     public void onServiceConnected() {
 		try {
 			// Get the file transfer session
-    		fileTransfer = ftApi.getFileTransfer(transferId);
+    		fileTransfer = ftApi.getFileTransfer(ftdao.getFtId());
 			if (fileTransfer == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onServiceConnected failed to find session "+ftdao.getFtId());
+				}
 				// Session not found or expired
 				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_session_not_found));
 				return;
@@ -183,23 +169,36 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 			fileTransfer.addEventListener(ftListener);
 			
 			String size;
-	    	if (fileSize != -1) {
-	    		size = getString(R.string.label_file_size, " " + (fileSize/1024), " Kb");
+	    	if (ftdao.getSize() != -1) {
+	    		size = getString(R.string.label_file_size, " " + (ftdao.getSize()/1024), " Kb");
 	    	} else {
 	    		size = getString(R.string.label_file_size_unknown);
 	    	}
 
 	    	// Display transfer infos
     		TextView from = (TextView)findViewById(R.id.from);
-	        from.setText(getString(R.string.label_from) + " " + remoteContact);
+	        from.setText(getString(R.string.label_from) + " " + ftdao.getContact());
 	    	TextView sizeTxt = (TextView)findViewById(R.id.image_size);
 	    	sizeTxt.setText(size);
 
-			// Display accept/reject dialog
-	    	if (resuming || ftApi.getConfiguration().isAutoAcceptEnabled()) {
-	    		// Auto accept. Check capacity
-				isCapacityOk(fileSize);
+	    	// Do not consider acceptance if resuming
+	    	if (resuming) {
+	    		return;
+	    	}
+	    	// TODO Below test if wrong. It does not consider roaming conditions.
+	    	// To be changed with CR018 which will introduce a new state : ACCEPTING.
+	    	// The test is kept in the meantime because it is the only way
+	    	// to know if FT is auto accepted by the stack (at least in normal conditions)
+	    	
+	    	// Check if not already accepted by the stack
+	    	if (ftApi.getConfiguration().isAutoAcceptEnabled()) {	    		
+	    		// File Transfer is auto accepted by the stack. Check capacity
+				isCapacityOk(ftdao.getSize());
 	    	} else {
+	    		// File Transfer must be accepted/rejected by user 
+				if (LogUtils.isActive) {
+					Log.d(LOGTAG, "Wait for user acceptance");
+				}
 	    		// @formatter:off
 
 	    		// The following code is intentionally commented to test the CORE.
@@ -214,7 +213,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_file_transfer);
-				builder.setMessage(getString(R.string.label_from) +	" " + remoteContact + "\n" + size);
+				builder.setMessage(getString(R.string.label_from) +	" " + ftdao.getContact() + "\n" + size);
 				builder.setCancelable(false);
 				builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
 				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
@@ -250,6 +249,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	 */
 	private void acceptInvitation() {
     	try {
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "Accept invitation");
+			}
     		// Accept the invitation
 			fileTransfer.acceptInvitation();
     	} catch(Exception e) {
@@ -265,6 +267,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	 */
 	private void rejectInvitation() {
     	try {
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "Reject invitation");
+			}
     		// Reject the invitation
     		fileTransfer.removeEventListener(ftListener);
 			fileTransfer.rejectInvitation();
@@ -308,6 +313,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     	 * @param filename Filename including the path of the transferred file
     	 */
     	public void onFileTransferred(final Uri file) {
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onFileTransferred file="+file.toString());
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
@@ -324,7 +332,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 					Button resumeBtn = (Button) findViewById(R.id.resume_btn);
 					resumeBtn.setEnabled(false);
 
-			        if (fileType.equals("text/vcard")) {
+			        if (ftdao.getMimeType().equals("text/vcard")) {
 			        	// Show the transferred vCard
 			    		Intent intent = new Intent(Intent.ACTION_VIEW);
 			    		intent.setDataAndType(file, "text/x-vcard");   		
@@ -341,6 +349,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		 * Callback called when the file transfer has been aborted
 		 */
 		public void onTransferAborted() {
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, "onTransferAborted");
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_sharing_aborted));
@@ -355,6 +366,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		 * @see FileTransfer.Error
 		 */
 		public void onTransferError(final int error) {
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, "onTransferError error="+error);
+			}
 			handler.post(new Runnable() { 
 				public void run() {
                     Utils.showMessageAndExit(ReceiveFileTransfer.this,
@@ -381,6 +395,9 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		 * Callback called when the file transfer is started
 		 */
 		public void onTransferStarted() {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferStarted");
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					TextView statusView = (TextView)findViewById(R.id.progress_status);
@@ -391,14 +408,16 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 
 		@Override
 		public void onFileTransferPaused() throws RemoteException {
-			// TODO Auto-generated method stub
-			
+			if (LogUtils.isActive) {
+				Log.i(LOGTAG, "onFileTransferPaused");
+			}
 		}
 
 		@Override
 		public void onFileTransferResumed() throws RemoteException {
-			// TODO Auto-generated method stub
-			
+			if (LogUtils.isActive) {
+				Log.i(LOGTAG, "onFileTransferResumed");
+			}
 		}
     };
 

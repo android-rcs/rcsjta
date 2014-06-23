@@ -132,8 +132,8 @@ public class RcsSettings {
 		try {
 			return Boolean.parseBoolean(readParameter(key));
 		} catch (Exception e) {
+			return defaultValue;
 		}
-		return defaultValue;
 	}
 	
 	/**
@@ -168,8 +168,8 @@ public class RcsSettings {
 			// }
 			return Integer.parseInt(result);
 		} catch (Exception e) {
+			return defaultValue;
 		}
-		return defaultValue;
 	}
 	
 	/**
@@ -183,8 +183,8 @@ public class RcsSettings {
 		try {
 			return readParameter(key);
 		} catch (Exception e) {
+			return null;
 		}
-		return null;
 	}
 	
 	/**
@@ -200,8 +200,8 @@ public class RcsSettings {
 		try {
 			return readParameter(key);
 		} catch (Exception e) {
+			return defaultValue;
 		}
-		return defaultValue;
 	}
 	
 	/**
@@ -236,14 +236,16 @@ public class RcsSettings {
 			c = cr.query(databaseUri, null, WHERE_CLAUSE, whereArg, null);
 			if (c.moveToFirst()) {
 				return c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
+			} else {
+				return null;
 			}
 		} catch (Exception e) {
+			return null;
 		} finally {
 			if (c != null) {
 				c.close();
 			}
 		}
-		return null;
 	}
 
 	/**

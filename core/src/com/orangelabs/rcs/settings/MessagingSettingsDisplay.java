@@ -88,37 +88,36 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
         ftAutoAcceptInRoaming.setDependency("ft_auto_accept");
 	}
 
-    public boolean onPreferenceChange(Preference preference, Object objValue) {
-        if (preference.getKey().equals("filetransfer_invitation_vibration")) {
-        	RcsSettings.getInstance().setPhoneVibrateForFileTransferInvitation((Boolean)objValue);
-        } else
-        if (preference.getKey().equals("chat_invitation_vibration")) {
-        	RcsSettings.getInstance().setPhoneVibrateForChatInvitation((Boolean)objValue);
-        } else
-        if (preference.getKey().equals("chat_displayed_notification")) {
-            RcsSettings.getInstance().setRespondToDisplayReports((Boolean)objValue);
-        } else 
-        if (preference.getKey().equals("image_resize_option")) {
-            // Set the image resize option
-            try {
-            	if (logger.isActivated()) {
-            		logger.debug("setImageResizeOption="+(String)objValue);
-            	}
-            	RcsSettings.getInstance().setImageResizeOption(Integer.parseInt((String)objValue));
-            } catch (Exception e) {
-                // Nothing to do
-            }
-        } else
-        if (preference.getKey().equals("ft_auto_accept")) {
-        	Boolean aa = (Boolean)objValue;
-        	RcsSettings.getInstance().setFileTransferAutoAccepted(aa);
-        	if (!aa) {
-        		RcsSettings.getInstance().setFileTransferAutoAcceptedInRoaming(false);
-        	}
-        } else
-        if (preference.getKey().equals("ft_auto_accept_in_roaming")) {
-            RcsSettings.getInstance().setFileTransferAutoAcceptedInRoaming((Boolean)objValue);
-        } 
-        return true;
-    }
+	public boolean onPreferenceChange(Preference preference, Object objValue) {
+		RcsSettings rcsSettings = RcsSettings.getInstance();
+		if (preference.getKey().equals("filetransfer_invitation_vibration")) {
+			rcsSettings.setPhoneVibrateForFileTransferInvitation((Boolean) objValue);
+		} else {
+			if (preference.getKey().equals("chat_invitation_vibration")) {
+				rcsSettings.setPhoneVibrateForChatInvitation((Boolean) objValue);
+			} else {
+				if (preference.getKey().equals("chat_displayed_notification")) {
+					rcsSettings.setRespondToDisplayReports((Boolean) objValue);
+				} else {
+					if (preference.getKey().equals("image_resize_option")) {
+						// Set the image resize option
+						rcsSettings.setImageResizeOption(Integer.parseInt((String) objValue));
+					} else {
+						if (preference.getKey().equals("ft_auto_accept")) {
+							Boolean aa = (Boolean) objValue;
+							rcsSettings.setFileTransferAutoAccepted(aa);
+							if (!aa) {
+								rcsSettings.setFileTransferAutoAcceptedInRoaming(false);
+							}
+						} else {
+							if (preference.getKey().equals("ft_auto_accept_in_roaming")) {
+								rcsSettings.setFileTransferAutoAcceptedInRoaming((Boolean) objValue);
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
 }

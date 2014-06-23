@@ -42,9 +42,7 @@ interface IChatService {
 	
 	void markMessageAsRead(in String msgId);
 
-
-
 	int getServiceVersion();
 	
-	void setRespondToDisplayReports(in boolean state);
+	void setRespondToDisplayReports(in boolean enable);
 }

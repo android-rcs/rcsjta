@@ -438,14 +438,14 @@ public class ChatService extends JoynService {
 	 * <p>
 	 * Only applicable to one to one chat messages.
 	 * 
-	 * @param state
+	 * @param enable
 	 *            true if respond to display reports
 	 * @throws JoynServiceException
 	 */
-	public void setRespondToDisplayReports(boolean state) throws JoynServiceException {
+	public void setRespondToDisplayReports(boolean enable) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.setRespondToDisplayReports(state);
+				api.setRespondToDisplayReports(enable);
 			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

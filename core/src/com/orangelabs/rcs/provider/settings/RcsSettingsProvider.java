@@ -284,7 +284,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.CONFIGURATION_VALID, 				FALSE);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING,			FALSE);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,			Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ASK));
-            addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,		Integer.toString(RcsSettingsData.VALUE_DEF_MSG_METHOD_JOYN));
+            addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,		Integer.toString(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC));
             addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,			Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ONLY_ABOVE_MAX_SIZE));
         }
 
@@ -454,7 +454,9 @@ public class RcsSettingsProvider extends ContentProvider {
 		default:
 			throw new UnsupportedOperationException("Cannot update URI " + uri);
 		}
-		getContext().getContentResolver().notifyChange(uri, null);
+		if (count != 0) {
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
 		return count;
 	}
 

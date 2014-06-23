@@ -91,7 +91,8 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
 	    		logger.info("Initiate a new file transfer session as terminating");
 	    	}
 
-            if (isFileTransferAutoAccepted()) {
+	    	// Check is file should be auto-accepted depending on settings and roaming conditions
+            if (shouldFileTransferBeAutoAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}

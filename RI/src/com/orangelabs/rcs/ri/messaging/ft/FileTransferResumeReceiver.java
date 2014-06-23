@@ -21,11 +21,6 @@ package com.orangelabs.rcs.ri.messaging.ft;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferIntent;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * File transfer resume receiver
@@ -37,30 +32,13 @@ public class FileTransferResumeReceiver extends BroadcastReceiver {
 	/**
 	 * Action FT is resuming
 	 */
-	public static final String ACTION_FT_RESUME = "FT_RESUME";
-	
-    /**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(FileTransferResumeReceiver.class.getSimpleName());
+	static final String ACTION_FT_RESUME = "FT_RESUME";
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onReceive");
-		}
-		// FT is resuming so already accepted
-		int dir = intent.getIntExtra(FileTransferIntent.EXTRA_DIRECTION,FileTransfer.Direction.INCOMING);
-		Intent intentLocal = new Intent(intent);
-		if (dir == FileTransfer.Direction.INCOMING) {
-			intentLocal.setClass(context, ReceiveFileTransfer.class);
-		} else {
-			intentLocal.setClass(context, InitiateFileTransfer.class);
-		}
-		intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
-		intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-		intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intentLocal.setAction(ACTION_FT_RESUME);
-		context.startActivity(intentLocal);
+		Intent receiverIntent = new Intent(context, FileTransferIntentService.class);
+		receiverIntent.putExtras(intent);
+		receiverIntent.setAction(ACTION_FT_RESUME);
+		context.startService(receiverIntent);
 	}
 }

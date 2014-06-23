@@ -53,7 +53,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
@@ -133,10 +132,19 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 		if (getIntent().getAction() != null) {
 			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
 			if (resuming) {
-				remoteContact = getIntent().getStringExtra(FileTransferIntent.EXTRA_CONTACT);
-				ftId = getIntent().getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
-				filename = getIntent().getStringExtra(FileTransferIntent.EXTRA_FILENAME);
-				filesize = getIntent().getLongExtra(FileTransferIntent.EXTRA_FILESIZE, 0L);
+				// Get resuming info
+				FileTransferDAO ftdao =  (FileTransferDAO)(getIntent().getExtras().getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
+				if (ftdao == null) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "onCreate cannot read File Transfer resuming info");
+					}
+					finish();
+					return;
+				}
+				remoteContact = ftdao.getContact();
+				ftId = ftdao.getFtId();
+				filename = ftdao.getFilename();
+				filesize = ftdao.getSize();
 			}
 		}
 

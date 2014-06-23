@@ -34,9 +34,9 @@ interface IFileTransferService {
 	
 	int getServiceVersion();
 	
-	void setAutoAccept(in boolean mode);
+	void setAutoAccept(in boolean enable);
 	
-	void setAutoAcceptInRoaming(in boolean mode);
+	void setAutoAcceptInRoaming(in boolean enable);
 	
 	void setImageResizeOption(in int option);
 }

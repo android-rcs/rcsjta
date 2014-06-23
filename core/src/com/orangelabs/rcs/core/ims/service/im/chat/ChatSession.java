@@ -955,10 +955,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 
 		// Send data
-		boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
-		if (result && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
-		}
+		sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
 	}
 	    
 	/**
