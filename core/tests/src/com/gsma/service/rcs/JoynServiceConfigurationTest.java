@@ -125,5 +125,4 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 		rcsSettings.setMessagingMode(getMessagingUXSav);
 	}
 	
-
 }
