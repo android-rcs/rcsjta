@@ -533,9 +533,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 			    	// Check if the message needs a delivery report
 	    			boolean imdnDisplayedRequested = false;
 	    			String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+	    			if (dispositionNotification!= null && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
+	    				// Check if respond to displayed delivery report is enabled
+	    				if (RcsSettings.getInstance().isRespondToDisplayReports()) {
+	    					imdnDisplayedRequested = true;
+	    				}
+		    		}
+	    			
                     boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
                     
-
 			    	// Analyze received message thanks to the MIME type 
                     if (isFToHTTP) {
 						// File transfer over HTTP message
@@ -544,13 +550,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 								.getMessageContent().getBytes());
 						if (fileInfo != null) {
 							receiveHttpFileTransfer(remoteUri, fileInfo, cpimMsgId);
+							// Mark the message as waiting a displayed report if needed
+							if (imdnDisplayedRequested) {
+								// TODO set File Transfer status to DISPLAY_REPORT_REQUESTED ??
+							}
 						} else {
 							// TODO : else return error to Originating side
 						}
 					} else {
-						if (dispositionNotification!= null && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
-			    			imdnDisplayedRequested = true;
-			    		}
 						if (ChatUtils.isTextPlainType(contentType)) {
 							// Text message
 							receiveText(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId,
@@ -558,20 +565,29 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
 							// Mark the message as waiting a displayed report if needed
 							if (imdnDisplayedRequested) {
-								// Check if displayed delivery report is enabled
-								if (RcsSettings.getInstance().isRespondToDisplayReports())
-									MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
+								MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
 							}
-						} else if (ChatUtils.isApplicationIsComposingType(contentType)) {
-							// Is composing event
-							receiveIsComposing(number, cpimMsg.getMessageContent().getBytes());
-						} else if (ChatUtils.isMessageImdnType(contentType)) {
-							// Delivery report
-							receiveMessageDeliveryStatus(number, cpimMsg.getMessageContent());
-						} else if (ChatUtils.isGeolocType(contentType)) {
-							// Geoloc message
-							receiveGeoloc(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId,
-									imdnDisplayedRequested, date, pseudo);
+						} else {
+							if (ChatUtils.isApplicationIsComposingType(contentType)) {
+								// Is composing event
+								receiveIsComposing(number, cpimMsg.getMessageContent().getBytes());
+							} else {
+								if (ChatUtils.isMessageImdnType(contentType)) {
+									// Delivery report
+									receiveMessageDeliveryStatus(number, cpimMsg.getMessageContent());
+								} else {
+									if (ChatUtils.isGeolocType(contentType)) {
+										// Geoloc message
+										receiveGeoloc(number, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId,
+												imdnDisplayedRequested, date, pseudo);
+										// Mark the message as waiting a displayed report if needed
+										if (imdnDisplayedRequested) {
+											// Check if displayed delivery report is enabled
+											MessagingLog.getInstance().setChatMessageDeliveryRequested(cpimMsgId);
+										}
+									}
+								}
+							}
 						}
 					}
                    
@@ -957,7 +973,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		// Send data
 		boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
 		if (result && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
+			if (MessagingLog.getInstance().isFileTransfer(msgId)) {
+				//TODO update file transfer status  
+			} else {
+				MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
+			}
 		}
 	}
 	    

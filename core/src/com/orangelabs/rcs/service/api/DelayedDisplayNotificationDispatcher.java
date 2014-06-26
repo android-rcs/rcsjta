@@ -6,7 +6,7 @@ package com.orangelabs.rcs.service.api;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.content.ContentResolver;
