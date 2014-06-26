@@ -152,6 +152,7 @@ public class FileTransferDAO implements Serializable {
 		try {
 			cursor = contentResolver.query(uri, null, WHERE_CLAUSE, whereArgs, null);
 			if (cursor.moveToFirst()) {
+				ftId = fileTransferId;
 				chatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
 				contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT_NUMBER));
 				filename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
