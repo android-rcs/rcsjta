@@ -163,12 +163,12 @@ public class ImageSharingProvider extends ContentProvider {
         int match = uriMatcher.match(uri);
         switch (match) {
 	        case IMAGESHARES:
-	            count = db.update(TABLE, values, where, null);
+	            count = db.update(TABLE, values, where, whereArgs);
 	            break;
             case IMAGESHARE_ID:
                 String segment = uri.getPathSegments().get(1);
                 int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, ImageSharingLog.ID + "=" + id, null);
+                count = db.update(TABLE, values, ImageSharingLog.ID + "=" + id, whereArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
