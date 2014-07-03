@@ -27,6 +27,7 @@ import java.util.Calendar;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 
 import com.gsma.services.rcs.ish.ImageSharing;
@@ -64,6 +65,8 @@ public class RichCallHistory {
 	 * The logger
 	 */
 	private Logger logger = Logger.getLogger(this.getClass().getName());
+	
+	private static final String WHERE_CLAUSE_ISH = new StringBuilder(ImageSharingData.KEY_SESSION_ID).append("=?").toString();
 	
 	/**
 	 * Create instance
@@ -196,9 +199,41 @@ public class RichCallHistory {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_STATUS, status);
-		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
+		if (status == ImageSharing.State.TRANSFERRED) {
+			// Update the size of bytes if fully transferred
+			long total = getImageSharingTotalSize(sessionId);
+			if (total != 0) {
+				values.put(ImageSharingData.KEY_SIZE, total);
+			}
+		}
+		String[] whereArgs = new String[] { sessionId };
+		cr.update(ishDatabaseUri, values, WHERE_CLAUSE_ISH, whereArgs);
 	}
 
+	/**
+     * Read the total size of transferred image
+     *
+     * @param sessionId the session identifier
+     * @return the total size (or 0 if failed)
+     */
+	public long getImageSharingTotalSize(String sessionId ) {
+		Cursor c = null;
+		try {
+			String[] projection = new String[] { ImageSharingData.KEY_TOTAL_SIZE };
+			String[] whereArg = new String[] { sessionId };
+			c = cr.query(ishDatabaseUri, projection, WHERE_CLAUSE_ISH, whereArg, null);
+			if (c.moveToFirst()) {
+				return c.getLong(0);
+			}
+		} catch (Exception e) {
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+		return 0L;
+	}
+	
 	/**
 	 * Update the image sharing progress
 	 * 
@@ -214,7 +249,8 @@ public class RichCallHistory {
 		values.put(ImageSharingData.KEY_SIZE, current);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);
 		values.put(ImageSharingData.KEY_STATUS, ImageSharing.State.STARTED);
-		cr.update(ishDatabaseUri, values, ImageSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
+		String[] whereArgs = new String[] { sessionId };
+		cr.update(ishDatabaseUri, values, WHERE_CLAUSE_ISH, whereArgs);
 	}
 
 	/**

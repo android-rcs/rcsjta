@@ -165,7 +165,9 @@ public class ImageSharingService extends JoynService {
     public ImageSharing shareImage(String contact, Uri file, ImageSharingListener listener) throws JoynServiceException, JoynContactFormatException {
 		if (api != null) {
 			try {
-				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+				// Allow permission to the stack server for content URI if release is KitKat or greater
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT
+						&& ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 					// Granting temporary read Uri permission from client to
 					// stack service if it is a content URI
 					grantUriPermissionToStackServices(file);

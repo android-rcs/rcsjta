@@ -74,6 +74,7 @@ public class FileTransferLog implements IFileTransferLog {
 			GroupChatDeliveryInfoLog groupChatDeliveryInfoLog) {
 		this.cr = cr;
 		this.groupChatLog = groupChatLog;
+		this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
 	}
 
 	@Override
