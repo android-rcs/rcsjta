@@ -51,17 +51,16 @@ public class CapabilityUtils {
 	 * Get supported feature tags for capability exchange
 	 *
 	 * @param richcall Rich call supported
-	 * @param ipcall IP call supported
 	 * @return List of tags
 	 */
- 	public static String[] getSupportedFeatureTags(boolean richcall, boolean ipcall) {
+ 	public static String[] getSupportedFeatureTags(boolean richcall) {
 		List<String> tags = new ArrayList<String>();
 		List<String> icsiTags = new ArrayList<String>();
 		List<String> iariTags = new ArrayList<String>();
 
 		// Video share support
 		if (RcsSettings.getInstance().isVideoSharingSupported() && richcall
-				&& NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G) {
+				&& (NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G)) {
 			tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
 		}
 
@@ -81,7 +80,7 @@ public class CapabilityUtils {
 		}
 
 		// Image share support
-		if (RcsSettings.getInstance().isImageSharingSupported() && (richcall || ipcall)) {
+		if (RcsSettings.getInstance().isImageSharingSupported() && richcall) {
 			iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
 		}
 

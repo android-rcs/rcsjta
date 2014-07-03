@@ -216,17 +216,9 @@ public class ImsServiceDispatcher extends Thread {
 
 	    if (request.getMethod().equals(Request.OPTIONS)) {
 	    	// OPTIONS received
-	    	if (imsModule.getCallManager().isCallConnected()) { 
-		    	// Rich call service
-	    		imsModule.getRichcallService().receiveCapabilityRequest(request);
-	    	} else
-	    	if (imsModule.getIPCallService().isCallConnected()) { 
-		    	// IP call service
-	    		imsModule.getIPCallService().receiveCapabilityRequest(request);
-	    	} else {
-	    		// Capability discovery service
-	    		imsModule.getCapabilityService().receiveCapabilityRequest(request);
-	    	}		    	
+
+	    	// Capability discovery service
+    		imsModule.getCapabilityService().receiveCapabilityRequest(request);
 	    } else		
 	    if (request.getMethod().equals(Request.INVITE)) {
 	    	// INVITE received

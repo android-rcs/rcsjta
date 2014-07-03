@@ -862,16 +862,17 @@ public abstract class IPCallSession extends ImsServiceSession {
 							getRenderer().getLocalVideoRtpPort());		
 	        }
 			
-	        String  sdp =
+	        String sdp =
 	            	"v=0" + SipUtils.CRLF +
 	            	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 	            	"s=-" + SipUtils.CRLF +
 	            	"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 	            	"t=0 0" + SipUtils.CRLF +
-	            	audioSdp + "a=sendrcv" + SipUtils.CRLF +
-	            	videoSdp + "a=sendrcv" + SipUtils.CRLF;
+	            	audioSdp +
+	            	videoSdp +
+	            	"a=sendrcv" + SipUtils.CRLF;
 
-	        	return sdp;
+        	return sdp;
 
 		} catch (RemoteException e) {
 			if (logger.isActivated()) {

@@ -262,21 +262,11 @@ public class CallManager {
      * @return Boolean
      */
 	public boolean isCallConnectedWith(String contact) {
-		return (isCallConnected() && PhoneUtils.compareNumbers(contact, getRemotePhoneNumber()));
-	}
-
-	/**
-	 * Is richcall supported with a given contact
-	 * 
-	 * @param contact Contact
-	 * @return Boolean
-	 */
-	public boolean isRichcallSupportedWith(String contact) {
 		if (this.multipartyCall || this.callHold) {
 			return false;
 		}
 		
-		return isCallConnectedWith(contact);
+		return (isCallConnected() && PhoneUtils.compareNumbers(contact, getRemotePhoneNumber()));
 	}
 	
 	/**
