@@ -711,8 +711,9 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection.setRequestProperty("User-Agent", SipUtils.userAgentString());
 		connection.setRequestProperty("Content-Type", this.content.getEncoding());
 		connection.setRequestProperty("Content-Length", String.valueOf(content.getSize() - (resumeInfo.getEnd()+1)));
-		connection.setRequestProperty("Content-Range", (resumeInfo.getEnd()+1) + "-" + (content.getSize()-1) + "/"
-				+ content.getSize());
+        // according to RFC 2616, section 14.16 the Content-Range header must contain an element bytes-unit
+        connection.setRequestProperty("Content-Range", "bytes " + (resumeInfo.getEnd()+1) + "-" + (content.getSize()-1) + "/"
+                + content.getSize());
 
 		// Construct the Body
 		String body = "";
