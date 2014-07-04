@@ -152,8 +152,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             	 Vector<ChatSession> chatSessions = Core.getInstance().getImService().getImSessionsWith(getRemoteContact());
             	 try {
             		 chatSession = chatSessions.lastElement();
-            		 setChatSessionID(chatSession.getSessionID());
-            		 setContributionID(chatSession.getContributionID());
+            		 if (chatSession.isMediaEstablished()) {
+            			 setChatSessionID(chatSession.getSessionID());
+            			 setContributionID(chatSession.getContributionID());
+            		 } else {
+            			 chatSession = null;
+            		 }
             	 } catch(NoSuchElementException nsee) {
                      chatSession = null;
                  }

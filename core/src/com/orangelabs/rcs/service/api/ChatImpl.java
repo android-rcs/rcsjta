@@ -185,93 +185,93 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      * @param msg Message
      * @return Unique message ID or null in case of error
      */
-    private String sendChatMessage(final InstantMessage msg) {
-    	synchronized(lock) {
+	private String sendChatMessage(final InstantMessage msg) {
+		synchronized (lock) {
 			if (logger.isActivated()) {
 				logger.debug("Send chat message");
 			}
-			
+
 			// Check if a session should be initiated or not
-	    	if ((session == null) || session.getDialogPath().isSessionTerminated()) {
-	    		try {
-	    			if (logger.isActivated()) {
-	    				logger.debug("Core session is not yet established: initiate a new session to send the message");
-	    			}
-	
-	    	    	// Initiate a new session
-					session = (OneOneChatSession)Core.getInstance().getImService().initiateOne2OneChatSession(contact, msg);
-					
+			if ((session == null) || !session.isMediaEstablished()) {
+
+				try {
+					if (logger.isActivated()) {
+						logger.debug("Core session is not yet established: initiate a new session to send the message");
+					}
+					// Initiate a new session
+					session = (OneOneChatSession) Core.getInstance().getImService().initiateOne2OneChatSession(contact, msg);
 					// Update with new session
 					setCoreSession(session);
-	
 					// Start the session
-			        new Thread() {
-			    		public void run() {
+					new Thread() {
+						public void run() {
 							session.startSession();
-			    		}
-			    	}.start();
+						}
+					}.start();
 					return session.getFirstMessage().getMessageId();
-				} catch(Exception e) {
+				} catch (Exception e) {
 					if (logger.isActivated()) {
 						logger.error("Can't send a new chat message", e);
 					}
 					return null;
-				}			
-	    	} else {
+				}
+			} else {
 				if (logger.isActivated()) {
 					logger.debug("Core session is established: use existing one to send the message");
 				}
-	
 				// Generate a message Id
 				final String msgId = IdGenerator.generateMessageID();
-		
 				// Send message
-		        new Thread() {
-		    		public void run() {
+				new Thread() {
+					public void run() {
 						if (msg instanceof GeolocMessage) {
-							session.sendGeolocMessage(msgId, ((GeolocMessage)msg).getGeoloc());
+							session.sendGeolocMessage(msgId, ((GeolocMessage) msg).getGeoloc());
 						} else {
-							session.sendTextMessage(msgId, msg.getTextMessage());					
+							session.sendTextMessage(msgId, msg.getTextMessage());
 						}
-		    		}
-		    	}.start();
+					}
+				}.start();
 				return msgId;
-	    	}
-		}    	
-    }
+			}
+		}
+	}
     
     /**
      * Sends a displayed delivery report for a given message ID
      * 
      * @param msgId Message ID
      */
-    /*package private*/ void sendDisplayedDeliveryReport(final String msgId) {
+	/* package private */void sendDisplayedDeliveryReport(final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
 			}
 
-			// Send delivery status
-			if ((session != null) &&
-					(session.getDialogPath() != null) &&
-						(session.getDialogPath().isSessionEstablished())) { 
+			// Send delivery status: check if media is established
+			if ((session != null) && session.isMediaEstablished()) {
+				if (logger.isActivated()) {
+					logger.info("Use the original session to send the delivery status for " + msgId);
+				}
 				// Send via MSRP
-		        new Thread() {
-		    		public void run() {
-						session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
-		    		}
-		    	}.start();
+				new Thread() {
+					public void run() {
+						session.sendMsrpMessageDeliveryStatus(contact, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+					}
+				}.start();
 			} else {
+				if (logger.isActivated()) {
+					logger.info("No suitable session found to send the delivery status for " + msgId + " : use SIP message");
+				}
 				// Send via SIP MESSAGE
-				Core.getInstance().getImService().getImdnManager().sendMessageDeliveryStatus(
-						session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+				Core.getInstance().getImService().getImdnManager()
+						.sendMessageDeliveryStatus(contact, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.error("Could not send MSRP delivery status",e);
+				logger.error("Could not send MSRP delivery status", e);
 			}
 		}
-    }
+	}
 	
     /**
      * Sends an is-composing event. The status is set to true when
@@ -281,12 +281,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      */
     public void sendIsComposingEvent(final boolean status) {
     	if (session != null) {
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	        		session.sendIsComposingStatus(status);
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
     	}
     }
 	

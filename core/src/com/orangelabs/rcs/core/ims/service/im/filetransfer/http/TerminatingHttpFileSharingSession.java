@@ -324,7 +324,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			}
 
 			ChatSession chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
-			if (chatSession != null && chatSession.getDialogPath().isSessionEstablished()) {
+			if (chatSession != null && chatSession.isMediaEstablished()) {
 				// Send message delivery status via a MSRP
 				chatSession.sendMsrpMessageDeliveryStatus(getRemoteContact(), msgId, status);
 			} else {

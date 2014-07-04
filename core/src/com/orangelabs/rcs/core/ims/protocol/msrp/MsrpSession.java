@@ -203,6 +203,11 @@ public class MsrpSession {
      * Controls if is to map the msgId from transactionId if not present on received MSRP messages
      */
     private boolean mMapMsgIdFromTransationId = false;
+
+	/**
+	 * IsEstablished : set after empty packet is successfully sent
+	 */
+	private boolean isEstablished = false;
     
 	/**
 	 * Constructor
@@ -859,6 +864,7 @@ public class MsrpSession {
 
 		// Test if it's an empty chunk
 		if (data == null) {
+			isEstablished = true;
 			if (logger.isActivated()) {
 				logger.debug("Empty chunk");
 			}
@@ -1207,4 +1213,14 @@ public class MsrpSession {
 
 		}
 	}
+
+	/**
+	 * Is established
+	 * 
+	 * @return true If the empty packet was sent successfully
+	 */
+	public boolean isEstablished() {
+		return isEstablished && !cancelTransfer;
+	}
+	
 }
