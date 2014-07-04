@@ -288,7 +288,8 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setReadTimeout(5000);
-
+		connection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
+		
 		// POST construction
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Connection", "Keep-Alive");

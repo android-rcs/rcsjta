@@ -28,16 +28,9 @@ import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
-import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
-import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
-import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
-import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
-import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -190,48 +183,6 @@ public class IPCallService extends ImsService {
 		// Start the session
 		session.startSession();
 	}
-	
-    /**
-     * Receive a capability request (options procedure)
-     *
-     * @param options Received options message
-     */
-    public void receiveCapabilityRequest(SipRequest options) { 
-    	String contact = SipUtils.getAssertedIdentity(options);
-    	if (logger.isActivated()) {
-			logger.debug("OPTIONS request received from " + contact);
-		}
-
-	    try {
-	    	// Create 200 OK response
-	    	String ipAddress = getImsModule().getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
-			boolean ipcall = getImsModule().getIPCallService().isCallConnectedWith(contact);
-	        SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options,
-	        		getImsModule().getSipManager().getSipStack().getLocalContact(),
-	        		CapabilityUtils.getSupportedFeatureTags(false, ipcall),
-	        		CapabilityUtils.buildSdp(ipAddress, ipcall));
-
-	        // Send 200 OK response
-	        getImsModule().getSipManager().sendSipResponse(resp);
-	    } catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't send 200 OK for OPTIONS", e);
-        	}
-	    }
-
-		// Extract capabilities from the request
-    	Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
-    	if (capabilities.isImSessionSupported()) {
-    		// The contact is RCS capable
-   			ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
-    	} else {
-    		// The contact is not RCS
-    		ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
-    	}
-
-    	// Notify listener
-    	getImsModule().getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
-    }
 	
 	/**
 	 * Abort all pending sessions
