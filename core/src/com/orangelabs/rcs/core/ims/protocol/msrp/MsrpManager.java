@@ -364,4 +364,17 @@ public class MsrpManager {
             msrpSession = null;
     	}
     }
+    
+	/**
+	 * Is established
+	 * 
+	 * @return true If the empty packet was sent successfully
+	 */
+	public boolean isEstablished() {
+		if (msrpSession == null) {
+			return false;
+		}
+		return msrpSession.isEstablished();
+	}
+     
 }

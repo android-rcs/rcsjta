@@ -1117,5 +1117,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         // Check if file transfer supported by remote
         setFileTransferSupportedByRemote(SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_FT) ||
         		SipUtils.isFeatureTagPresent(resp, FeatureTags.FEATURE_RCSE_FT_HTTP));
-    }	
+    }
+    
+	/**
+	 * Is media session established
+	 * 
+	 * @return true If the empty packet was sent successfully
+	 */
+	public boolean isMediaEstablished() {
+		return (getMsrpMgr().isEstablished() && !getDialogPath().isSessionTerminated());
+	}
+
 }
