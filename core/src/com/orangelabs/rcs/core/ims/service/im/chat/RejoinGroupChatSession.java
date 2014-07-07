@@ -20,6 +20,8 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import javax2.sip.header.SubjectHeader;
 
+import android.text.TextUtils;
+
 import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
@@ -49,10 +51,10 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	 * @param groupChatInfo Group Chat information
 	 */
 	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo) {
-		super(parent, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants());
-
+		super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants());
+		
 		// Set subject
-		if ((groupChatInfo.getSubject() != null) && (groupChatInfo.getSubject().length() > 0)) {
+		if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
 			setSubject(groupChatInfo.getSubject());		
 		}
 

@@ -23,6 +23,8 @@ package com.gsma.services.rcs.chat;
 
 import java.util.Date;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -48,13 +50,13 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
      * Constructor for outgoing message
      * 
      * @param messageId Message Id
-     * @param contact Contact
+     * @param contactId Contact Id
      * @param geoloc Geolocation info
      * @param receiptAt Receipt date
      * @hide
 	 */
-	public GeolocMessage(String messageId, String remote, Geoloc geoloc, Date receiptAt) {
-		super(messageId, remote, null, receiptAt);
+	public GeolocMessage(String messageId, ContactId contactId, Geoloc geoloc, Date receiptAt) {
+		super(messageId, contactId, null, receiptAt);
 		
 		this.geoloc = geoloc;
 	}
@@ -67,8 +69,12 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	 */
 	public GeolocMessage(Parcel source) {
 		super(source);
-		
-		this.geoloc = new Geoloc(source);
+		boolean flag = source.readInt() != 0;
+		if (flag) {
+			this.geoloc = new Geoloc(source);
+		} else {
+			this.geoloc = null;
+		}
     }
 	
 	/**
@@ -91,8 +97,12 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	super.writeToParcel(dest, flags);
-    	
-    	geoloc.writeToParcel(dest, flags);
+    	if (geoloc != null) {
+    		dest.writeInt(1);
+    		geoloc.writeToParcel(dest, flags);
+    	} else {
+    		dest.writeInt(0);
+    	}
     }
 
     /**
@@ -120,4 +130,5 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
 	public Geoloc getGeoloc() {
 		return geoloc;
 	}
+
 }

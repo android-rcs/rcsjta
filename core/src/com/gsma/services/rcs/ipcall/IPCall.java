@@ -18,6 +18,7 @@
 package com.gsma.services.rcs.ipcall;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * IP call
@@ -136,12 +137,12 @@ public class IPCall {
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return callInf.getRemoteContact();
 		} catch(Exception e) {

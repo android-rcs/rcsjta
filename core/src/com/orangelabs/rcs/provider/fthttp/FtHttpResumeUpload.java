@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
@@ -68,8 +69,8 @@ public class FtHttpResumeUpload extends FtHttpResume {
      *            the {@code content} content.
 	 * @param tid
 	 *            the {@code tid} value.
-	 * @param contact
-	 *            the {@code contact} value.
+	 * @param contactId
+	 *            the {@code contactId} value.
 	 * @param displayName
 	 *            the {@code displayName} value.
 	 * @param chatId
@@ -81,9 +82,9 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, String contact,
+	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, ContactId contactId,
             String displayName, String chatId, String fileTransferId, String chatSessionId, boolean isGroup) {
-        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contact,
+        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contactId,
                displayName, chatId, fileTransferId, chatSessionId, isGroup);
 		if (tid == null)
 			throw new IllegalArgumentException("Null tid");

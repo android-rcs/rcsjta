@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -34,6 +35,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.FifoBuffer;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -60,7 +62,7 @@ public class ImdnManager extends Thread {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(ImdnManager.class.getSimpleName());
     
     /**
      * Constructor
@@ -123,33 +125,32 @@ public class ImdnManager extends Thread {
 	/**
 	 * Send a message delivery status
 	 * 
-	 * @param contact Contact
+	 * @param contactId Contact identifier
 	 * @param msgId Message ID
 	 * @param status Delivery status
 	 */
-	public void sendMessageDeliveryStatus(String contact, String msgId, String status) {
+	public void sendMessageDeliveryStatus(ContactId contactId, String msgId, String status) {
 		// Add request in the buffer for background processing
-		DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
+		DeliveryStatus delivery = new DeliveryStatus(contactId, msgId, status);
 		buffer.addObject(delivery);
 	}
 
     /**
      * Send a message delivery status immediately
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param msgId Message ID
      * @param status Delivery status
      */
-    public void sendMessageDeliveryStatusImmediately(String contact, String msgId, String status, final String remoteInstanceId) {
+    public void sendMessageDeliveryStatusImmediately(ContactId contactId, String msgId, String status, final String remoteInstanceId) {
         // Execute request in background
-        final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
-        Thread thread = new Thread(){
+        final DeliveryStatus delivery = new DeliveryStatus(contactId, msgId, status);
+        new Thread(){
             public void run() {
                 // Send SIP MESSAGE
                 sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
             }
-        };
-        thread.start();
+        }.start();
     }
 
 	/**
@@ -177,14 +178,15 @@ public class ImdnManager extends Thread {
 		    // Create authentication agent 
        		SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
        		
+       		String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getContact());
        		// Create a dialog path
         	SipDialogPath dialogPath = new SipDialogPath(
         			imsService.getImsModule().getSipManager().getSipStack(),
         			imsService.getImsModule().getSipManager().getSipStack().generateCallId(),
     				1,
-    				deliveryStatus.getContact(),
+    				toUri,
     				ImsModule.IMS_USER_PROFILE.getPublicUri(),
-    				deliveryStatus.getContact(),
+    				toUri,
     				imsService.getImsModule().getSipManager().getSipStack().getServiceRoutePath());        	
             dialogPath.setRemoteSipInstance(remoteInstanceId);
 
@@ -261,17 +263,17 @@ public class ImdnManager extends Thread {
 	 * Delivery status
 	 */
 	private static class DeliveryStatus {
-		private String contact;
+		private ContactId contact;
 		private String msgId;
 		private String status;
 		
-		public DeliveryStatus(String contact, String msgId, String status) {
-			this.contact = contact;
+		public DeliveryStatus(ContactId contactId, String msgId, String status) {
+			this.contact = contactId;
 			this.msgId = msgId;
 			this.status = status;
 		}
 		
-		public String getContact() {
+		public ContactId getContact() {
 			return contact;
 		}
 

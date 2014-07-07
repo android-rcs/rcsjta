@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -71,20 +72,22 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            IMS service
 	 * @param content
 	 *            Content of file to share
-	 * @param contact
-	 *            Remote contact
+	 * @param contactId
+	 *            Remote contact identifier
+	 * @param remoteUri
+	 *            the remote URI
 	 * @param fileicon
 	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileicon) {
-		super(parent, content, contact, null, null, null, IdGenerator.generateMessageID());
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, boolean fileicon) {
+		super(parent, content, contactId, remoteUri, null, null, null, IdGenerator.generateMessageID());
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contactId+ " remoteURI= "+remoteUri);
 		}
 		MmContent fileiconContent = null;
 		if (fileicon) {
 			// Create the fileicon
-			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getSessionID());
+			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getFileTransferId());
 			setFileicon(fileiconContent);
 		}
 		// Instantiate the upload manager
@@ -98,17 +101,19 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            IMS service
 	 * @param content
 	 *            Content of file to share
-	 * @param contact
-	 *            Remote contact
+	 * @param contactId
+	 *            Remote contact identifier
+	 * @param remoteUri
+	 *            Remote URI
 	 * @param fileiconContent
 	 *            Content of fileicon
 	 * @param fileTransferId
 	 *            File transfer Id
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileiconContent, String fileTransferId) {
-		super(parent, content, contact, fileiconContent, null, null, fileTransferId);
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileiconContent, String fileTransferId) {
+		super(parent, content, contactId, remoteUri, fileiconContent, null, null, fileTransferId);
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contactId );
 		}
 		// Instantiate the upload manager
 		uploadManager = new HttpUploadManager(getContent(), getFileicon(), this);
@@ -293,7 +298,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 		resumeFT = new FtHttpResumeUpload(this, tId, fileicon != null ? fileicon.getUri() : null,
 				false);
 		// Insert entry into table only if it does not exist earlier
-		// Incases when the file is uploaded from beginning as a result of
+		// In cases when the file is uploaded from beginning as a result of
 		// resume failure, an entry would have been already present in the
 		// table and duplicate entry should not be made
 		if (FtHttpResumeDaoImpl.getInstance().queryUpload(tId) == null)

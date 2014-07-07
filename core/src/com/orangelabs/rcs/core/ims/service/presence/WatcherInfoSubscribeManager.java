@@ -24,6 +24,7 @@ import javax2.sip.header.SubscriptionStateHeader;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -32,6 +33,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.presence.watcherinfo.Watcher;
 import com.orangelabs.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
 import com.orangelabs.rcs.core.ims.service.presence.watcherinfo.WatcherInfoParser;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -107,18 +109,18 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
 				WatcherInfoParser parser = new WatcherInfoParser(input);
 				WatcherInfoDocument watcherinfo = parser.getWatcherInfo();
 				if (watcherinfo != null) {
-					for (int i=0; i < watcherinfo.getWatcherList().size(); i++) {
-						Watcher w = (Watcher)watcherinfo.getWatcherList().elementAt(i);
-						String contact = w.getUri();
+					for (int i = 0; i < watcherinfo.getWatcherList().size(); i++) {
+						Watcher w = (Watcher) watcherinfo.getWatcherList().elementAt(i);
+						ContactId contact = ContactUtils.createContactId(w.getUri());
 						String status = w.getStatus();
 						String event = w.getEvent();
-						
-						if ((contact != null) && (status != null) && (event != null)) {
+
+						if ((status != null) && (event != null)) {
 							if (status.equalsIgnoreCase("pending")) {
 								// It's an invitation or a new status
 								getImsModule().getCore().getListener().handlePresenceSharingInvitation(contact);
 							}
-							
+
 							// Notify listener
 							getImsModule().getCore().getListener().handlePresenceSharingNotification(contact, status, event);
 						}

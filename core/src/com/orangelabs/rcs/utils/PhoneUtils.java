@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.telephony.PhoneNumberUtils;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 
@@ -91,7 +92,7 @@ public class PhoneUtils {
 			return null;
 		}
 		
-		// Remove spaces
+		// Remove spaces TODO check if necessary
 		number = number.trim();
 
 		// Strip all non digits
@@ -100,7 +101,7 @@ public class PhoneUtils {
 		// Format into international
 		if (phoneNumber.startsWith("00" + COUNTRY_CODE.substring(1))) {
 			// International format
-			phoneNumber = COUNTRY_CODE + phoneNumber.substring(4);
+			phoneNumber = COUNTRY_CODE + phoneNumber.substring(1+COUNTRY_CODE.length());
 		} else
 		if ((COUNTRY_AREA_CODE != null) && (COUNTRY_AREA_CODE.length() > 0) &&
 				phoneNumber.startsWith(COUNTRY_AREA_CODE)) {
@@ -145,14 +146,35 @@ public class PhoneUtils {
 				ImsModule.IMS_USER_PROFILE.getHomeDomain() + ";user=phone";	 
 		}
 	}
+	
+	/**
+	 * Format ContactId to tel or sip Uri
+	 * 
+	 * @param contactId
+	 *            the contact identifier
+	 * @return the Uri
+	 */
+	public static String formatContactIdToUri(ContactId contactId) {
+		if (contactId == null) {
+			throw new IllegalArgumentException("ContactId is null");
+		}
+		if (TEL_URI_SUPPORTED) {
+			// Tel-URI format
+			return new StringBuilder("tel:").append(contactId).toString();
+		} else {
+			// SIP-URI format
+			return new StringBuilder("sip:").append(contactId).append("@").append(ImsModule.IMS_USER_PROFILE.getHomeDomain())
+					.append(";user=phone").toString();
+		}
+	}
 
 	/**
 	 * Extract user part phone number from a SIP-URI or Tel-URI or SIP address
 	 * 
 	 * @param uri SIP or Tel URI
-	 * @return Number or null in case of error
+	 * @return Unformatted Number or null in case of error
 	 */
-	public static String extractNumberFromUri(String uri) {
+	public static String extractNumberFromUriWithoutFormatting(String uri) {
 		if (uri == null) {
 			return null;
 		}
@@ -161,33 +183,44 @@ public class PhoneUtils {
 			// Extract URI from address
 			int index0 = uri.indexOf("<");
 			if (index0 != -1) {
-				uri = uri.substring(index0+1, uri.indexOf(">", index0));
-			}			
-			
+				uri = uri.substring(index0 + 1, uri.indexOf(">", index0));
+			}
+
 			// Extract a Tel-URI
 			int index1 = uri.indexOf("tel:");
 			if (index1 != -1) {
-				uri = uri.substring(index1+4);
+				uri = uri.substring(index1 + 4);
 			}
-			
+
 			// Extract a SIP-URI
 			index1 = uri.indexOf("sip:");
 			if (index1 != -1) {
 				int index2 = uri.indexOf("@", index1);
-				uri = uri.substring(index1+4, index2);
+				uri = uri.substring(index1 + 4, index2);
 			}
-			
+
 			// Remove URI parameters
-			int index2 = uri.indexOf(";"); 
+			int index2 = uri.indexOf(";");
 			if (index2 != -1) {
 				uri = uri.substring(0, index2);
 			}
-			
-			// Format the extracted number (username part of the URI)
-			return formatNumberToInternational(uri);
-		} catch(Exception e) {
+
+			// Returns the extracted number (username part of the URI)
+			return uri;
+		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Extract user part phone number from a SIP-URI or Tel-URI or SIP address
+	 * 
+	 * @param uri SIP or Tel URI
+	 * @return Number or null in case of error
+	 */
+	public static String extractNumberFromUri(String uri) {
+		// Format the extracted number (username part of the URI)
+		return formatNumberToInternational(extractNumberFromUriWithoutFormatting(uri));
 	}
 
 	/**
@@ -205,33 +238,7 @@ public class PhoneUtils {
 		}
 		return number1.equals(number2);
 	}
-	
-	/**
-	 * Check if phone number is valid
-	 * 
-	 * <pre>
-	 * <br>
-	 * It is not valid if : 
-	 * <li>well formatted (not digits only or '+') 
-	 * <li>minimum length
-	 * </pre>
-	 * 
-	 * @param phone
-	 *            Phone number
-	 * @return Boolean true if it is a phone valid number
-	 */
-	public static boolean isGlobalPhoneNumber(final String phone) {
-		if (phone == null) {
-			return false;
-		}
-		if (PhoneNumberUtils.isGlobalPhoneNumber(phone)) {
-			if (phone.length() > PhoneUtils.getCountryCode().length()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+		
 	/**
 	 * get URI from SIP identity header
 	 * 

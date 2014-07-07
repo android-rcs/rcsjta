@@ -28,12 +28,12 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to share geolocation info
@@ -116,18 +116,17 @@ public class GeolocSharingService extends JoynService {
      * or international format, SIP address, SIP-URI or Tel-URI. If the format of the
      * contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param geoloc Geolocation info
      * @param listener Geoloc sharing event listener
      * @return Geoloc sharing
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
 	 * @see Geoloc
      */
-    public GeolocSharing shareGeoloc(String contact, Geoloc geoloc, GeolocSharingListener listener) throws JoynServiceException, JoynContactFormatException {
+    public GeolocSharing shareGeoloc(ContactId contactId, Geoloc geoloc, GeolocSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IGeolocSharing sharingIntf = api.shareGeoloc(contact, geoloc, listener);
+				IGeolocSharing sharingIntf = api.shareGeoloc(contactId, geoloc, listener);
 				if (sharingIntf != null) {
 					return new GeolocSharing(sharingIntf);
 				} else {

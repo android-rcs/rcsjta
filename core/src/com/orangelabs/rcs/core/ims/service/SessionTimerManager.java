@@ -20,6 +20,8 @@ package com.orangelabs.rcs.core.ims.service;
 
 import javax2.sip.Dialog;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
@@ -27,6 +29,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipMessage;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PeriodicRefresher;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -274,8 +277,16 @@ public class SessionTimerManager extends PeriodicRefresher {
                 // Close the session
                 session.abortSession(ImsServiceSession.TERMINATION_BY_TIMEOUT);
 
-                // Request capabilities to the remote
-                session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(session.getDialogPath().getRemoteParty());
+                try {
+        			ContactId remote = ContactUtils.createContactId(session.getDialogPath().getRemoteParty());
+        			// Request capabilities
+        			session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+
+        		} catch (JoynContactFormatException e) {
+        			if (logger.isActivated()) {
+        				logger.warn("Cannot request capabilities for contact "+session.getDialogPath().getRemoteParty() );
+        			}
+        		}
             }
         } else {
             // No response received: timeout
@@ -302,8 +313,16 @@ public class SessionTimerManager extends PeriodicRefresher {
 				// Close the session
 		    	session.abortSession(ImsServiceSession.TERMINATION_BY_TIMEOUT);
 		    	
-	        	// Request capabilities to the remote
-				session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(session.getDialogPath().getRemoteParty());
+				try {
+					ContactId remote = ContactUtils.createContactId(session.getDialogPath().getRemoteParty());
+					// Request capabilities to the remote
+			        session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+				} catch (JoynContactFormatException e) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse contact "+session.getDialogPath().getRemoteParty());
+					}
+				}
+				
 			} else {
 	        	// Success
 				if (logger.isActivated()) {

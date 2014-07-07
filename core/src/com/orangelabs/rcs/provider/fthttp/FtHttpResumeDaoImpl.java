@@ -30,8 +30,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -112,6 +114,17 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					long size = cursor.getLong(sizeColumnIdx);
 					String mimeType = cursor.getString(mimeTypeColumnIdx);
 					String contact = cursor.getString(contactColumnIdx);
+					ContactId contactId = null;
+					if (contact != null) {
+						try {
+							contactId = ContactUtils.createContactId(contact);
+						} catch (Exception e) {
+							if (logger.isActivated()) {
+								logger.error("Cannot parse contact " + contact);
+							}
+							continue;
+						}
+					}
 					String chatId = cursor.getString(chatIdColumnIdx);
 					String file = cursor.getString(fileColumnIdx);
 					String fileName = cursor.getString(fileNameColumnIdx);
@@ -126,13 +139,13 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 						MmContent content = ContentManager.createMmContent(Uri.parse(file), size, fileName);
 						Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
 						result.add(new FtHttpResumeDownload(Uri.parse(downloadServerAddress), Uri
-								.parse(file), fileiconUri, content, contact, displayName, chatId,
+								.parse(file), fileiconUri, content, contactId, displayName, chatId,
 								fileTransferId, chatSessionId, isGroup));
 					} else {
 						String tid = cursor.getString(tidColumnIdx);
 						MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType, size, fileName);
 						Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
-						result.add(new FtHttpResumeUpload(content, fileiconUri, tid, contact, displayName, chatId, fileTransferId,
+						result.add(new FtHttpResumeUpload(content, fileiconUri, tid, contactId, displayName, chatId, fileTransferId,
  								chatSessionId, isGroup));
 					}
 				} while (cursor.moveToNext());
@@ -161,7 +174,9 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 		if (fileiconUri != null) {
 			values.put(FtHttpColumns.FILEICON, fileiconUri.toString());
 		}
-		values.put(FtHttpColumns.CONTACT, ftHttpResume.getContact());
+		if (ftHttpResume.getContact() != null) {
+			values.put(FtHttpColumns.CONTACT, ftHttpResume.getContact().toString());
+		}
 		values.put(FtHttpColumns.DISPLAY_NAME, ftHttpResume.getDisplayName());
 		values.put(FtHttpColumns.CHATID, ftHttpResume.getChatId());
 		values.put(FtHttpColumns.FT_ID, ftHttpResume.getFileTransferId());
@@ -213,6 +228,17 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
 					String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.TYPE));
 					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
+					ContactId contactId = null;
+					if (contact != null) {
+						try {
+							contactId = ContactUtils.createContactId(contact);
+						} catch (Exception e) {
+							if (logger.isActivated()) {
+								logger.error("Cannot parse contact " + contact);
+							}
+							return null;
+						}
+					}
 					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
 					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILE));
 					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
@@ -222,7 +248,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
 					MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType, size, fileName);
 					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
-					return new FtHttpResumeUpload(content, fileiconUri, tid, contact, displayName, chatId, fileTransferId,
+					return new FtHttpResumeUpload(content, fileiconUri, tid, contactId, displayName, chatId, fileTransferId,
  							chatSessionId, isGroup);
 				}
 			}
@@ -249,6 +275,17 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String fileName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILENAME));
 					long size = cursor.getLong(cursor.getColumnIndexOrThrow(FtHttpColumns.SIZE));
 					String contact = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CONTACT));
+					ContactId contactId = null;
+					if (contact != null) {
+						try {
+							contactId = ContactUtils.createContactId(contact);
+						} catch (Exception e) {
+							if (logger.isActivated()) {
+								logger.error("Cannot parse contact " + contact);
+							}
+							return null;
+						}
+					}
 					String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHATID));
 					String file = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.FILE));
 					String displayName = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.DISPLAY_NAME));
@@ -258,7 +295,7 @@ public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 					String chatSessionId = cursor.getString(cursor.getColumnIndexOrThrow(FtHttpColumns.CHAT_SESSION_ID));
 					MmContent content = ContentManager.createMmContent(Uri.parse(file), size, fileName);
 					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
-					return new FtHttpResumeDownload(downloadServerAddress, Uri.parse(file), fileiconUri, content, contact, displayName, chatId, fileTransferId,
+					return new FtHttpResumeDownload(downloadServerAddress, Uri.parse(file), fileiconUri, content, contactId, displayName, chatId, fileTransferId,
  							chatSessionId, isGroup);
 				}
 			}

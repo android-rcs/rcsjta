@@ -1,12 +1,13 @@
 package com.gsma.services.rcs.contacts;
 
 import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Contacts service API
  */
 interface IContactsService {
-	JoynContact getJoynContact(String contactId);
+	JoynContact getJoynContact(in ContactId contactId);
 
 	List<JoynContact> getJoynContacts();
 

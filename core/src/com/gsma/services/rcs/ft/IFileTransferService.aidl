@@ -5,6 +5,7 @@ import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.ft.INewFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * File transfer service API
@@ -22,7 +23,7 @@ interface IFileTransferService {
 	
 	IFileTransfer getFileTransfer(in String transferId);
 
-	IFileTransfer transferFile(in String contact, in Uri file, in boolean fileicon, in IFileTransferListener listener);
+	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean fileicon, in IFileTransferListener listener);
 
 	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean fileicon, in IFileTransferListener listener);
 

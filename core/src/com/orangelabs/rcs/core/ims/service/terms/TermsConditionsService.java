@@ -23,6 +23,8 @@ import java.util.Locale;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -34,6 +36,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -152,61 +155,62 @@ public class TermsConditionsService extends ImsService {
 
 		// Parse received message
 		try {
-		    String lang = Locale.getDefault().getLanguage();
-	    	if (message.getContentType().equals(REQUEST_MIME_TYPE)) {
-		    	// Parse terms request
+			String lang = Locale.getDefault().getLanguage();
+
+			ContactId contactId = ContactUtils.createContactId(getRemoteIdentity(message));
+			if (message.getContentType().equals(REQUEST_MIME_TYPE)) {
+				// Parse terms request
 				InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
 				TermsRequestParser parser = new TermsRequestParser(input, lang);
 
 				// Notify listener
-	    		getImsModule().getCore().getListener().handleUserConfirmationRequest(
-	    				getRemoteIdentity(message),
-	    				parser.getId(),
-	    				parser.getType(),
-	    				parser.getPin(),
-	    				parser.getSubject(),
-	    				parser.getText(),
-                        parser.getButtonAccept(),
-                        parser.getButtonReject(),
-                        parser.getTimeout()
-                        );
-	    	} else
-	    	if (message.getContentType().equals(ACK_MIME_TYPE)) {
-		    	// Parse terms ack
-				InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
-				TermsAckParser parser = new TermsAckParser(input);
+				getImsModule()
+						.getCore()
+						.getListener()
+						.handleUserConfirmationRequest(contactId, parser.getId(), parser.getType(), parser.getPin(),
+								parser.getSubject(), parser.getText(), parser.getButtonAccept(), parser.getButtonReject(),
+								parser.getTimeout());
+			} else {
+				if (message.getContentType().equals(ACK_MIME_TYPE)) {
+					// Parse terms ack
+					InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
+					TermsAckParser parser = new TermsAckParser(input);
 
-                // Notify listener
-                getImsModule().getCore().getListener().handleUserConfirmationAck(
-                        getRemoteIdentity(message),
-                        parser.getId(),
-                        parser.getStatus(),
-                        parser.getSubject(),
-                        parser.getText());
-            } else
-            if (message.getContentType().equals(USER_NOTIFICATION_MIME_TYPE)) {
-                // Parse terms notification
-                InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
-                EndUserNotificationParser parser = new EndUserNotificationParser(input, lang);
+					// Notify listener
+					getImsModule()
+							.getCore()
+							.getListener()
+							.handleUserConfirmationAck(contactId, parser.getId(), parser.getStatus(), parser.getSubject(),
+									parser.getText());
+				} else {
+					if (message.getContentType().equals(USER_NOTIFICATION_MIME_TYPE)) {
+						// Parse terms notification
+						InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
+						EndUserNotificationParser parser = new EndUserNotificationParser(input, lang);
 
-                // Notify listener
-                getImsModule().getCore().getListener().handleUserNotification(
-                        getRemoteIdentity(message),
-                        parser.getId(),
-                        parser.getSubject(),
-                        parser.getText(),
-                        parser.getButtonOk());
-            } else {
-                if (logger.isActivated()) {
-                    logger.warn("Unknown terms request " + message.getContentType());
-                }
-	    	}
-    	} catch(Exception e) {
-    		if (logger.isActivated()) {
-    			logger.error("Can't parse terms request", e);
-    		}
-    	}
-    }
+						// Notify listener
+						getImsModule()
+								.getCore()
+								.getListener()
+								.handleUserNotification(contactId, parser.getId(), parser.getSubject(), parser.getText(),
+										parser.getButtonOk());
+					} else {
+						if (logger.isActivated()) {
+							logger.warn("Unknown terms request " + message.getContentType());
+						}
+					}
+				}
+			}
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.error("Can't parse contact");
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't parse terms request", e);
+			}
+		}
+	}
 
     /**
 	 * Accept terms

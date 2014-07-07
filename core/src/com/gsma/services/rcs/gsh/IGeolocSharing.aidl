@@ -2,6 +2,7 @@ package com.gsma.services.rcs.gsh;
 
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Geoloc sharing interface
@@ -10,7 +11,7 @@ interface IGeolocSharing {
 
 	String getSharingId();
 
-	String getRemoteContact();
+	ContactId getRemoteContact();
 
 	Geoloc getGeoloc();
 

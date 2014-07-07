@@ -68,6 +68,9 @@ public class GroupChatInvitationReceiver extends BroadcastReceiver {
         intent.setAction(chatId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String notifTitle = context.getString(R.string.title_recv_group_chat, contact);
+        if (contact == null) {
+        	notifTitle = context.getString(R.string.title_group_chat);
+        }
 		Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         String msg = context.getString(R.string.label_subject) + " " + subject;

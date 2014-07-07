@@ -18,12 +18,12 @@
 
 package com.orangelabs.rcs.service.api;
 
+import android.os.RemoteCallbackList;
+
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
-
-import android.os.RemoteCallbackList;
-
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -33,7 +33,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStream
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -54,7 +53,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	private RemoteCallbackList<IVideoSharingListener> listeners = new RemoteCallbackList<IVideoSharingListener>();
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private Object lock = new Object();
 
@@ -66,7 +65,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(VideoSharingImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -89,12 +88,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact ID
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 	
 	/**

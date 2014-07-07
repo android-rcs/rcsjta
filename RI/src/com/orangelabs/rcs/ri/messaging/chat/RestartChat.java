@@ -35,6 +35,7 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -261,22 +262,22 @@ public class RestartChat {
     	}
     	
     	// Is-composing event has been received
-    	public void onComposingEvent(String contact, boolean status) {
+    	public void onComposingEvent(ContactId contact, boolean status) {
     		// Not used here
     	}
 
     	// A new participant has joined the group chat
-    	public void onParticipantJoined(String contact, String contactDisplayname) {
+    	public void onParticipantJoined(ContactId contact, String contactDisplayname) {
     		// Not used here
     	}
     	
     	// A participant has left voluntary the group chat
-    	public void onParticipantLeft(String contact) {
+    	public void onParticipantLeft(ContactId contact) {
     		// Not used here
     	}
 
     	// A participant is disconnected from the group chat
-    	public void onParticipantDisconnected(String contact) {
+    	public void onParticipantDisconnected(ContactId contact) {
     		// Not used here
     	}
     	

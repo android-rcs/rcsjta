@@ -28,6 +28,7 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
@@ -42,7 +43,6 @@ import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -74,7 +74,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	/**
 	 * The logger
 	 */
-	private static Logger logger = Logger.getLogger(MultimediaSessionServiceImpl.class.getName());
+	private final static Logger logger = Logger.getLogger(MultimediaSessionServiceImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -226,9 +226,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
 		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
@@ -248,9 +247,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT, number);
+		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
 		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
@@ -276,14 +274,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * contact is not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contact Contact
+     * @param contactId Contact ID
      * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
 	 * @throws ServerApiException
      */
-    public IMultimediaMessagingSession initiateMessagingSession(String serviceId, String contact, IMultimediaMessagingSessionListener listener) throws ServerApiException {
+    public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contactId, IMultimediaMessagingSessionListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a multimedia messaging session with " + contact);
+			logger.info("Initiate a multimedia messaging session with " + contactId);
 		}
 
 		// Test IMS connection
@@ -295,19 +293,18 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Initiate a new session
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			final GenericSipMsrpSession session = Core.getInstance().getSipService().initiateMsrpSession(contact, featureTag);
+			final GenericSipMsrpSession session = Core.getInstance().getSipService().initiateMsrpSession(contactId, featureTag);
 			
 			// Add session listener
 			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 			
 			// Add session in the list
 			MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
@@ -372,14 +369,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contact Contact
+     * @param contact Contact ID
      * @param listener Multimedia streaming session event listener
      * @return Multimedia streaming session
 	 * @throws ServerApiException
      */
-    public IMultimediaStreamingSession initiateStreamingSession(String serviceId, String contact, IMultimediaStreamingSessionListener listener) throws ServerApiException {
+    public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contactId, IMultimediaStreamingSessionListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a multimedia streaming session with " + contact);
+			logger.info("Initiate a multimedia streaming session with " + contactId);
 		}
 
 		// Test IMS connection
@@ -391,19 +388,18 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		try {
 			// Initiate a new session
 			String featureTag = FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-			final GenericSipRtpSession session = Core.getInstance().getSipService().initiateRtpSession(contact, featureTag);
+			final GenericSipRtpSession session = Core.getInstance().getSipService().initiateRtpSession(contactId, featureTag);
 			
 			// Add session listener
 			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 			
 			// Add session in the list
 			MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);

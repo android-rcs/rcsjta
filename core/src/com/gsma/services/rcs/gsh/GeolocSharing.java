@@ -19,6 +19,7 @@ package com.gsma.services.rcs.gsh;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Geoloc sharing
@@ -132,12 +133,12 @@ public class GeolocSharing {
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return sharingInf.getRemoteContact();
 		} catch(Exception e) {

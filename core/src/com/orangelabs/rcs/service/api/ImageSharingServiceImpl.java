@@ -33,6 +33,7 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.IImageSharingService;
@@ -49,7 +50,6 @@ import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -205,11 +205,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			logger.info("Receive image sharing invitation from " + session.getRemoteContact());
 		}
 
-        // Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-
 		// Update rich call history
-		RichCallHistory.getInstance().addImageSharing(number, session.getSessionID(),
+		RichCallHistory.getInstance().addImageSharing(session.getRemoteContact(), session.getSessionID(),
 				ImageSharing.Direction.INCOMING,
 				session.getContent(),
 				ImageSharing.State.INVITED);
@@ -221,7 +218,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, number);
+    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
     	intent.putExtra(ImageSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(ImageSharingIntent.EXTRA_FILENAME, session.getContent().getName());
@@ -262,15 +259,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact ID
      * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws ServerApiException
      */
-    public IImageSharing shareImage(String contact, Uri file, IImageSharingListener listener) throws ServerApiException {
+    public IImageSharing shareImage(ContactId contactId, Uri file, IImageSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an image sharing session with " + contact);
+			logger.info("Initiate an image sharing session with " + contactId);
 		}
 
 		// Test IMS connection
@@ -282,10 +279,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
 
 			// Initiate a sharing session
-			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
+			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contactId, content, null);
 
 			// Update rich call history
-			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
+			RichCallHistory.getInstance().addImageSharing(contactId, session.getSessionID(),
 					ImageSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			ImageSharing.State.INITIATED);

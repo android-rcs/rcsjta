@@ -6,6 +6,7 @@ import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.INewVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Video sharing service API
@@ -23,7 +24,7 @@ interface IVideoSharingService {
 	
 	IVideoSharing getVideoSharing(in String sharingId);
 
-	IVideoSharing shareVideo(in String contact, in IVideoPlayer player, in IVideoSharingListener listener);
+	IVideoSharing shareVideo(in ContactId contact, in IVideoPlayer player, in IVideoSharingListener listener);
 	
 	void addNewVideoSharingListener(in INewVideoSharingListener listener);
 

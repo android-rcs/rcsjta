@@ -18,6 +18,7 @@
 package com.gsma.services.rcs.capability;
 
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * New capabilities event listener
@@ -28,8 +29,8 @@ public abstract class CapabilitiesListener extends ICapabilitiesListener.Stub {
 	/**
 	 * Callback called when new capabilities are received for a given contact
 	 * 
-	 * @param contact Contact
+	 * @param contactId Contact Identifier
 	 * @param capabilities Received capabilities 
 	 */
-	public abstract void onCapabilitiesReceived(String contact, Capabilities capabilities);
+	public abstract void onCapabilitiesReceived(ContactId contactId, Capabilities capabilities);
 }

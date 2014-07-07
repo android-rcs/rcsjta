@@ -23,6 +23,8 @@ package com.gsma.services.rcs.chat;
 
 import java.util.Date;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,6 +32,8 @@ import android.os.Parcelable;
  * Chat message
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class ChatMessage implements Parcelable {
 	/**
@@ -45,7 +49,7 @@ public class ChatMessage implements Parcelable {
 	/**
 	 * Contact who has sent the message
 	 */
-	private String contact;
+	private ContactId contact;
 	
 	/**
 	 * Message content
@@ -64,10 +68,9 @@ public class ChatMessage implements Parcelable {
      * @param contact Contact
      * @param message Message content
      * @param receiptAt Receipt date
-     * @param displayedReportRequested Flag indicating if a displayed report is requested
      * @hide
 	 */
-	public ChatMessage(String messageId, String remote, String message, Date receiptAt) {
+	public ChatMessage(String messageId, ContactId remote, String message, Date receiptAt) {
 		this.id = messageId;
 		this.contact = remote;
 		this.message = message;
@@ -82,7 +85,12 @@ public class ChatMessage implements Parcelable {
 	 */
 	public ChatMessage(Parcel source) {
 		this.id = source.readString();
-		this.contact = source.readString();
+		boolean flag = source.readInt() != 0;
+		if (flag) {
+			this.contact = ContactId.CREATOR.createFromParcel(source);
+		} else {
+			this.contact = null;
+		}
 		this.message = source.readString();
 		this.receiptAt = new Date(source.readLong());
     }
@@ -107,7 +115,12 @@ public class ChatMessage implements Parcelable {
 	 */
     public void writeToParcel(Parcel dest, int flags) {
     	dest.writeString(id);
-    	dest.writeString(contact);
+    	if (contact != null) {
+    		dest.writeInt(1);
+    		contact.writeToParcel(dest, flags);
+    	} else {
+    		dest.writeInt(0);
+    	}
     	dest.writeString(message);
     	dest.writeLong(receiptAt.getTime());
     }
@@ -140,9 +153,9 @@ public class ChatMessage implements Parcelable {
 	/**
 	 * Returns the contact
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getContact() {
+	public ContactId getContact() {
 		return contact;
 	}
 
@@ -163,4 +176,5 @@ public class ChatMessage implements Parcelable {
 	public Date getReceiptDate() {
 		return receiptAt;
 	}
+
 }

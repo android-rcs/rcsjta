@@ -29,6 +29,7 @@ import android.os.RemoteCallbackList;
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
@@ -43,7 +44,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -198,10 +198,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact());
 		}
-
-        // Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-
 		// Add session in the list
 		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session);
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
@@ -209,7 +205,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(GeolocSharingIntent.EXTRA_CONTACT, number);
+    	intent.putExtra(GeolocSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
     	intent.putExtra(GeolocSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -242,7 +238,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return Geoloc sharing
      * @throws ServerApiException
      */
-    public IGeolocSharing shareGeoloc(String contact, Geoloc geoloc, IGeolocSharingListener listener) throws ServerApiException {
+    public IGeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc, IGeolocSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a geoloc sharing session with " + contact);
 		}
@@ -267,12 +263,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			sessionApi.addEventListener(listener);
 
 			// Start the session
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 	    	
 			// Add session in the list
 			addGeolocSharingSession(sessionApi);

@@ -1,6 +1,7 @@
 package com.gsma.services.rcs.ish;
 
 import com.gsma.services.rcs.ish.IImageSharingListener;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Image sharing interface
@@ -9,7 +10,7 @@ interface IImageSharing {
 
 	String getSharingId();
 
-	String getRemoteContact();
+	ContactId getRemoteContact();
 
 	Uri getFile();
 

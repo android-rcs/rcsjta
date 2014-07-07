@@ -49,9 +49,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
@@ -141,7 +144,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 					finish();
 					return;
 				}
-				remoteContact = ftdao.getContact();
+				remoteContact = ftdao.getContact().toString();
 				ftId = ftdao.getFtId();
 				filename = ftdao.getFilename();
 				filesize = ftdao.getSize();
@@ -189,8 +192,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 			TextView sizeEdit = (TextView) findViewById(R.id.size);
 			sizeEdit.setText((filesize / 1024) + " KB");
 			uriEdit.setText(filename);
-
-			
 		} else {
 			// Select the corresponding contact from the intent
 			Intent intent = getIntent();
@@ -361,7 +362,14 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	// Get remote contact
         Spinner spinner = (Spinner)findViewById(R.id.contact);
         MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-        final String remote = cursor.getString(1);
+        ContactUtils contactUtils = ContactUtils.getInstance(this);
+        ContactId remote;
+		try {
+			remote = contactUtils.formatContactId(cursor.getString(1));
+		} catch (JoynContactFormatException e1) {
+			Utils.showMessage(InitiateFileTransfer.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+	    	return;
+		}
 
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
@@ -443,6 +451,9 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 					filesize = FileUtils.getFileSize(this, file) / 1024;
 					sizeEdit.setText(filesize + " KB");
 					uriEdit.setText(filename);
+					if (LogUtils.isActive) {
+						Log.i(LOGTAG,"Select file "+filename+" of size "+filesize+ " file="+file);
+					}
 				} catch (Exception e) {
 					if (LogUtils.isActive) {
 						Log.e(LOGTAG, e.getMessage(), e);

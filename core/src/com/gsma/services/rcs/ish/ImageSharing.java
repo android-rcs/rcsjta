@@ -22,6 +22,7 @@
 package com.gsma.services.rcs.ish;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.net.Uri;
 
@@ -142,12 +143,12 @@ public class ImageSharing {
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return sharingInf.getRemoteContact();
 		} catch(Exception e) {

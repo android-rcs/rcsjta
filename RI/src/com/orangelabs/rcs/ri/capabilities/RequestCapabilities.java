@@ -26,6 +26,7 @@ import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -35,13 +36,17 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -63,7 +68,12 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     /**
      * Capabilities listener
      */
-    private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener(); 
+    private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener();
+    
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(RequestCapabilities.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -155,17 +165,20 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 	     * @param contact Contact
 	     * @param capabilities Capabilities
 	     */
-	    public void onCapabilitiesReceived(final String contact, final Capabilities capabilities) {
-			handler.post(new Runnable(){
-				public void run(){
-					// Check if this intent concerns the current selected contact					
-					if (PhoneNumberUtils.compare(getSelectedContact(), contact)) {
+		public void onCapabilitiesReceived(final ContactId contactId, final Capabilities capabilities) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onCapabilitiesReceived " + contactId);
+			}
+			handler.post(new Runnable() {
+				public void run() {
+					// Check if this intent concerns the current selected contact
+					if (PhoneNumberUtils.compare(getSelectedContact(), contactId.toString())) {
 						// Update UI
 						displayCapabilities(capabilities);
 					}
 				}
 			});
-	    };    
+		};
     }
     
     /**
@@ -177,9 +190,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             try {
 		        // Get selected contact
 				String contact = getContactAtPosition(position);
-				
+				ContactId contactId = ContactUtils.getInstance(RequestCapabilities.this).formatContactId(contact);
 				// Get current capabilities
-				Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contact);
+				Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
 	
 				// Display default capabilities
 		        displayCapabilities(currentCapabilities);
@@ -272,8 +285,9 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 
         // Request capabilities
     	try {
-	        // Request new capabilities 
-	        capabilityApi.requestContactCapabilities(contact);
+	        // Request new capabilities
+    		ContactId contactId = ContactUtils.getInstance(RequestCapabilities.this).formatContactId(contact);
+	        capabilityApi.requestContactCapabilities(contactId);
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));

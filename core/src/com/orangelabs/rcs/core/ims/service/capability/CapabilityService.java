@@ -19,12 +19,15 @@
 package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.database.Cursor;
 import android.os.Build;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.addressbook.AddressBookEventListener;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -34,6 +37,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -173,67 +177,56 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	/**
      * Request contact capabilities
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @return Capabilities
      */
-	public synchronized Capabilities requestContactCapabilities(String contact) {
+	public synchronized Capabilities requestContactCapabilities(ContactId contactId) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities to " + contact);
+    		logger.debug("Request capabilities to " + contactId);
     	}
 
-    	// Extract contact phone number
-		contact = PhoneUtils.extractNumberFromUri(contact);
-
 		// Do not request capabilities for oneself
-		if (contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+		if (PhoneUtils.compareNumbers(contactId.toString(),ImsModule.IMS_USER_PROFILE.getUsername())) {
 			return null;
 		}
-		
-        // Check if if it is a valid RCS number
-        if (!ContactsManager.getInstance().isRcsValidNumber(contact)) {
-            if (logger.isActivated()) {
-                logger.debug(contact + " is not a valid joyn number");
-            }
-            return null;
-        }
 
 		// Read capabilities from the database
-		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
+		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
 		if (capabilities == null) {
 	    	if (logger.isActivated()) {
-	    		logger.debug("No capability exist for " + contact);
+	    		logger.debug("No capability exist for " + contactId);
 	    	}
 
             // New contact: request capabilities from the network
-    		optionsManager.requestCapabilities(contact);
+    		optionsManager.requestCapabilities(contactId);
 		} else {
 	    	if (logger.isActivated()) {
-	    		logger.debug("Capabilities exist for " + contact);
+	    		logger.debug("Capabilities exist for " + contactId);
 	    	}
 			long delta = (System.currentTimeMillis()-capabilities.getTimestamp())/1000;
 			if ((delta >= CAPABILITY_REFRESH_PERIOD) || (delta < 0)) {
 		    	if (logger.isActivated()) {
-		    		logger.debug("Capabilities have expired for " + contact);
+		    		logger.debug("Capabilities have expired for " + contactId);
 		    	}
 
 		    	// Capabilities are too old: request capabilities from the network
-	    		optionsManager.requestCapabilities(contact);
+	    		optionsManager.requestCapabilities(contactId);
 			}
 		}
 		return capabilities;
     }
 
     /**
-     * Request capabilities for a list of contacts
+     * Request capabilities for a set of contacts
      * 
-     * @param contactList List of contacts
+     * @param contactSet Set of contact identifiers
      */
-	public void requestContactCapabilities(List<String> contactList) {
-    	if ((contactList != null) && (contactList.size() > 0)) {
+	public void requestContactCapabilities(Set<ContactId> contactSet) {
+    	if ((contactSet != null) && (contactSet.size() > 0)) {
         	if (logger.isActivated()) {
-        		logger.debug("Request capabilities for " + contactList.size() + " contacts");
+        		logger.debug("Request capabilities for " + contactSet.size() + " contacts");
         	}
-    		optionsManager.requestCapabilities(contactList);
+    		optionsManager.requestCapabilities(contactSet);
     	}
 	}	
 	
@@ -283,25 +276,35 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
                 null);
 
 		// List of unique number that will have to be queried for capabilities
-		ArrayList<String> toBeTreatedNumbers = new ArrayList<String>();
+		Set<ContactId> toBeTreatedNumbers = new HashSet<ContactId>();
 
 		// List of unique number that have already been queried
-		ArrayList<String> alreadyInEabOrInvalidNumbers = new ArrayList<String>();
+		ArrayList<ContactId> alreadyInEabOrInvalidNumbers = new ArrayList<ContactId>();
 
 		// We add "My number" to the numbers that are already RCS, so we don't query it if it is present in the address book
-        alreadyInEabOrInvalidNumbers.add(ImsModule.IMS_USER_PROFILE.getUsername());
+        try {
+			alreadyInEabOrInvalidNumbers.add( ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getUsername()));
+		} catch (JoynContactFormatException e1) {
+		}
 
 		while(phonesCursor.moveToNext()) {
 			// Keep a trace of already treated row. Key is (phone number in international format)
-			String phoneNumber = PhoneUtils.formatNumberToInternational(phonesCursor.getString(1));
+			ContactId phoneNumber;
+			try {
+				phoneNumber = ContactUtils.createContactId(phonesCursor.getString(1));
+			} catch (JoynContactFormatException e) {
+				if (logger.isActivated()) {
+					logger.warn("Cannot parse phone number " + phonesCursor.getString(1));
+				}
+				continue;
+			}
 			if (!alreadyInEabOrInvalidNumbers.contains(phoneNumber)) {
 				// If this number is not considered RCS valid or has already an entry with RCS, skip it
-                if (ContactsManager.getInstance().isRcsValidNumber(phoneNumber)
-						&& !ContactsManager.getInstance().isRcsAssociated(phoneNumber)
+                if (!ContactsManager.getInstance().isRcsAssociated(phoneNumber)
 						&& ( !ContactsManager.getInstance().isOnlySimAssociated(phoneNumber) || (Build.VERSION.SDK_INT > 10))) {
 					// This entry is valid and not already has a RCS raw contact, it can be treated
                     // We exclude the number that comes from SIM only contacts, as those cannot be
-                    // aggregated to RCS raw contacts only if OS version if gingebread or fewer
+                    // aggregated to RCS raw contacts only if OS version if gingerbread or fewer
 					toBeTreatedNumbers.add(phoneNumber);
 				} else {
 					// This entry is either not valid or already RCS, this number is already done
@@ -341,22 +344,22 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	}
 
 	/**
-     * Reset the content sharing capabities for a given contact
+     * Reset the content sharing capabilities for a given contact identifier
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      */
-	public void resetContactCapabilitiesForContentSharing(String contact) {
-		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
+	public void resetContactCapabilitiesForContentSharing(ContactId contactId) {
+		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
 		if (capabilities != null) {
             // Force a reset of content sharing capabilities
 			capabilities.setImageSharingSupport(false);
 			capabilities.setVideoSharingSupport(false);
 
 		 	// Update the database capabilities
-	        ContactsManager.getInstance().setContactCapabilities(contact, capabilities);
+	        ContactsManager.getInstance().setContactCapabilities(contactId, capabilities);
 
 		 	// Notify listener
-		 	getImsModule().getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+		 	getImsModule().getCore().getListener().handleCapabilitiesNotification(contactId, capabilities);
 		}
 	 }
 }

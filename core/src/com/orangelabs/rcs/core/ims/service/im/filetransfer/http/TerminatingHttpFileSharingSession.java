@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax2.sip.header.ContactHeader;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -41,6 +42,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.net.Uri;
@@ -88,13 +90,13 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the File transfer info document
 	 * @param fileTransferId
 	 *            the File transfer Id
-	 * @param contact
-	 *            the remote contact
+	 * @param contactId
+	 *            the remote contact Id
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, String contact) {
+			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contactId) {
 		super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),fileTransferInfo.getFileSize(),fileTransferInfo.getFilename()),
-				chatSession.getRemoteContact(), null, chatSession.getSessionID(),
+				chatSession.getRemoteContact(), chatSession.getRemoteUri(),null, chatSession.getSessionID(),
 				chatSession.getContributionID(), fileTransferId);
 
 		setRemoteDisplayName(chatSession.getRemoteDisplayName());
@@ -130,7 +132,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the Data Object to access FT HTTP table in DB
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
-		super(parent, content, resume.getContact(),
+		super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume.getContact()),
 				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
 						.getFileicon()) : null, resume.getChatSessionId(), resume.getChatId(),
 				resume.getFileTransferId());
@@ -326,7 +328,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			ChatSession chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
 			if (chatSession != null && chatSession.isMediaEstablished()) {
 				// Send message delivery status via a MSRP
-				chatSession.sendMsrpMessageDeliveryStatus(getRemoteContact(), msgId, status);
+				chatSession.sendMsrpMessageDeliveryStatus(getRemoteContact(),msgId, status);
 			} else {
 				// Send message delivery status via a SIP MESSAGE
 				((InstantMessagingService) getImsService()).getImdnManager().sendMessageDeliveryStatusImmediately(

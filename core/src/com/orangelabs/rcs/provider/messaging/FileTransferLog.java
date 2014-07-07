@@ -22,7 +22,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -33,9 +32,9 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -78,17 +77,16 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addFileTransfer(String contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
-		contact = PhoneUtils.extractNumberFromUri(contact);
+	public void addFileTransfer(ContactId contactId, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=").append(fileTransferId).append(", contact=")
-					.append(contact).append(", filename=").append(content.getName()).append(", size=").append(content.getSize())
+					.append(contactId).append(", filename=").append(content.getName()).append(", size=").append(content.getSize())
 					.append(", MIME=").append(content.getEncoding()).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
-		values.put(FileTransferData.KEY_CHAT_ID, contact);
-		values.put(FileTransferData.KEY_CONTACT, contact);
+		values.put(FileTransferData.KEY_CHAT_ID, contactId.toString());
+		values.put(FileTransferData.KEY_CONTACT, contactId.toString());
 		if (direction == FileTransfer.Direction.OUTGOING) {
 			values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		}
@@ -161,35 +159,31 @@ public class FileTransferLog implements IFileTransferLog {
 				groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, fileTransferId, participant.getContact());
 			}
 		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Group file transfer with fileTransferId '" + fileTransferId + "' could not be added to database!", e);
+			}
 			cr.delete(ftDatabaseUri, FileTransferData.KEY_FT_ID + "='" + fileTransferId + "'", null);
 			cr.delete(Uri.withAppendedPath(GroupChatDeliveryInfoData.CONTENT_MSG_URI, fileTransferId), null, null);
 			/* TODO: Throw exception */
-			if (logger.isActivated()) {
-				logger.warn("Group file transfer with fileTransferId '" + fileTransferId + "' could not be added to database!");
-			}
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.lang.String, java.lang.String,
-	 * java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
+	/* (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, String contact, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contactId, String fileTransferId, MmContent content,
 			MmContent thumbnail) {
-		contact = PhoneUtils.extractNumberFromUri(contact);
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=").append(fileTransferId)
-					.append(", chatId=").append(chatId).append(", contact=").append(contact).append(", filename=")
+					.append(", chatId=").append(chatId).append(", contact=").append(contactId).append(", filename=")
 					.append(content.getName()).append(", size=").append(content.getSize()).append(", MIME=")
 					.append(content.getEncoding()).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		values.put(FileTransferData.KEY_CONTACT, contact);
+		values.put(FileTransferData.KEY_CONTACT, contactId.toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.INCOMING);

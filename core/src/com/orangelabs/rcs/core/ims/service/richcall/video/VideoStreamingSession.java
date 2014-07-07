@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -33,6 +35,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -64,17 +67,17 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(VideoStreamingSession.class.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 */
-	public VideoStreamingSession(ImsService parent, MmContent content, String contact) {
-		super(parent, content, contact);
+	public VideoStreamingSession(ImsService parent, MmContent content, ContactId contactId) {
+		super(parent, content, contactId);
 	}
 
 	/**
@@ -173,8 +176,15 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         // Remove the current session
         getImsService().removeSession(this);
 
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+        try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities to the remote
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
+			}
+		}
 
         // Notify listeners
         for (int i = 0; i < getListeners().size(); i++) {

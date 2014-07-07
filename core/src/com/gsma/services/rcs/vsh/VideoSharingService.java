@@ -28,11 +28,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to share live video during a CS call.
@@ -138,22 +138,20 @@ public class VideoSharingService extends JoynService {
 	 * or Tel-URI. If the format of the contact is not supported an exception is
 	 * thrown.
 	 * 
-	 * @param contact
-	 *            Contact
+	 * @param contactId
+	 *            Contact identifier
 	 * @param player
 	 *            Video player
 	 * @param listener
 	 *            Video sharing event listener
 	 * @return Video sharing
 	 * @throws JoynServiceException
-	 * @throws JoynContactFormatException
 	 */
-	public VideoSharing shareVideo(String contact, VideoPlayer player,
-			VideoSharingListener listener) throws JoynServiceException,
-			JoynContactFormatException {
+	public VideoSharing shareVideo(ContactId contactId, VideoPlayer player, VideoSharingListener listener)
+			throws JoynServiceException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.shareVideo(contact, player,
+				IVideoSharing sharingIntf = api.shareVideo(contactId, player,
 						listener);
 				if (sharingIntf != null) {
 					return new VideoSharing(sharingIntf);

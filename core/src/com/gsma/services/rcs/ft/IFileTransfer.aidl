@@ -1,6 +1,7 @@
 package com.gsma.services.rcs.ft;
 
 import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * File transfer interface
@@ -9,7 +10,7 @@ interface IFileTransfer {
 
 	String getTransferId();
 
-	String getRemoteContact();
+	ContactId getRemoteContact();
 
 	String getFileName();
 

@@ -5,6 +5,7 @@ import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.INewImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Image sharing service API
@@ -22,7 +23,7 @@ interface IImageSharingService {
 	
 	IImageSharing getImageSharing(in String sharingId);
 
-	IImageSharing shareImage(in String contact, in Uri file, in IImageSharingListener listener);
+	IImageSharing shareImage(in ContactId contact, in Uri file, in IImageSharingListener listener);
 	
 	void addNewImageSharingListener(in INewImageSharingListener listener);
 

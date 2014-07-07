@@ -53,6 +53,7 @@ import javax2.sip.header.WarningHeader;
 import javax2.sip.message.Request;
 import javax2.sip.message.Response;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
@@ -1135,7 +1136,7 @@ public class SipMessageFactory {
 	 * @return SIP request
 	 * @throws SipException
 	 */
-    public static SipRequest createRefer(SipDialogPath dialog, Set<String> participants, String subject, String contributionId) throws SipException {
+    public static SipRequest createRefer(SipDialogPath dialog, Set<ContactId> participants, String subject, String contributionId) throws SipException {
     	try {
 			// Create the request
 		    Request refer = dialog.getStackDialog().createRequest(Request.REFER);

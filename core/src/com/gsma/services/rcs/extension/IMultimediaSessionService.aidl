@@ -6,6 +6,7 @@ import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Multimedia session service API for extended services
@@ -23,13 +24,13 @@ interface IMultimediaSessionService {
 	
 	IMultimediaMessagingSession getMessagingSession(in String sessionId);
 	
-	IMultimediaMessagingSession initiateMessagingSession(in String serviceId, in String contact, in IMultimediaMessagingSessionListener listener);
+	IMultimediaMessagingSession initiateMessagingSession(in String serviceId, in ContactId contact, in IMultimediaMessagingSessionListener listener);
 	
 	List<IBinder> getStreamingSessions(in String serviceId);
 	
 	IMultimediaStreamingSession getStreamingSession(in String sessionId);
 	
-	IMultimediaStreamingSession initiateStreamingSession(in String serviceId, in String contact, in IMultimediaStreamingSessionListener listener);
+	IMultimediaStreamingSession initiateStreamingSession(in String serviceId, in ContactId contact, in IMultimediaStreamingSessionListener listener);
 
 	int getServiceVersion();
 }

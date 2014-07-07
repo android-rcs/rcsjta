@@ -27,6 +27,7 @@ import javax2.sip.message.Request;
 import javax2.sip.message.Response;
 import android.content.Intent;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -418,13 +419,25 @@ public class ImsServiceDispatcher extends Thread {
 			    		if (logger.isActivated()) {
 			    			logger.debug("Generic SIP session invitation with MSRP media");
 			    		}
-		    			imsModule.getSipService().receiveMsrpSessionInvitation(intent, request);
+			    		try {
+			    			imsModule.getSipService().receiveMsrpSessionInvitation(intent, request);
+			    		} catch (JoynContactFormatException e) {
+			    			if (logger.isActivated()) {
+				    			logger.warn("Cannot parse contact");
+				    		}
+			    		}
 		    		} else
 		    		if (isTagPresent(sdp, "rtp")) {
 			    		if (logger.isActivated()) {
 			    			logger.debug("Generic SIP session invitation with RTP media");
 			    		}
-		    			imsModule.getSipService().receiveRtpSessionInvitation(intent, request);
+			    		try  {
+			    			imsModule.getSipService().receiveRtpSessionInvitation(intent, request);
+			    		} catch (JoynContactFormatException e) {
+			    			if (logger.isActivated()) {
+				    			logger.warn("Cannot parse contact");
+				    		}
+			    		}
 		    		} else {
 			    		if (logger.isActivated()) {
 			    			logger.debug("Media not supported for a generic SIP session");

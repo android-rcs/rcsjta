@@ -19,9 +19,9 @@ package com.orangelabs.rcs.core.ims.service.sip;
 
 
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
-
 import javax2.sip.header.ExtensionHeader;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -32,6 +32,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.capability.CapabilityUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -48,17 +49,17 @@ public abstract class GenericSipSession extends ImsServiceSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(GenericSipSession.class.getSimpleName());
     
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contactId
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipSession(ImsService parent, String contact, String featureTag) {
-		super(parent, contact);
+	public GenericSipSession(ImsService parent, ContactId contactId, String featureTag) {
+		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
 		
 		// Set the service feature tag
 		this.featureTag = featureTag;

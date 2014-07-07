@@ -23,6 +23,7 @@ import java.util.Set;
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
 import javax2.sip.header.WarningHeader;
+import android.text.TextUtils;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
@@ -62,10 +63,10 @@ public class RestartGroupChatSession extends GroupChatSession {
 	 * @param contributionId Contribution ID
 	 */
 	public RestartGroupChatSession(ImsService parent, String conferenceId, String subject, Set<ParticipantInfo> participants, String contributionId) {
-		super(parent, conferenceId, participants);
-
+		super(parent, null, conferenceId, participants);
+		
 		// Set subject
-		if ((subject != null) && (subject.length() > 0)) {
+		if (!TextUtils.isEmpty(subject)) {
 			setSubject(subject);		
 		}
 		

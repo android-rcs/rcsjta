@@ -35,7 +35,9 @@ import org.xml.sax.InputSource;
 
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -52,6 +54,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttp
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -184,12 +187,29 @@ public class ChatUtils {
 	}
 
 	/**
-	 * Get referred identity
+	 * Get referred identity as a ContactId
+	 * 
+	 * @param request SIP request
+	 * @return ContactId
+	 * @throws JoynContactFormatException 
+	 */
+	public static ContactId getReferredIdentityAsContactId(SipRequest request) throws JoynContactFormatException {
+		try {
+			// Use the Referred-By header
+			return ContactUtils.createContactId(SipUtils.getReferredByHeader(request));
+		} catch (Exception e) {
+			// Use the Asserted-Identity header if parsing of Referred-By header failed
+			return ContactUtils.createContactId(SipUtils.getAssertedIdentity(request));
+		}
+	}
+	
+	/**
+	 * Get referred identity as a contact URI
 	 * 
 	 * @param request SIP request
 	 * @return SIP URI
 	 */
-	public static String getReferredIdentity(SipRequest request) {
+	public static String getReferredIdentityAsContactUri(SipRequest request) {
 		String referredBy = SipUtils.getReferredByHeader(request);
 		if (referredBy != null) {
 			// Use the Referred-By header
@@ -276,11 +296,11 @@ public class ChatUtils {
      * @param participants Set of participants
      * @return XML document
      */
-    public static String generateChatResourceList(Set<String> participants) {
+    public static String generateChatResourceList(Set<ContactId> participants) {
 		StringBuilder uriList = new StringBuilder();
-		for (String contact : participants) {
+		for (ContactId contact : participants) {
 			uriList.append(" <entry uri=\"" +
-					PhoneUtils.formatNumberToSipUri(contact) + "\" cp:copyControl=\"to\"/>" 
+					PhoneUtils.formatNumberToSipUri(contact.toString()) + "\" cp:copyControl=\"to\"/>" 
 					+ CRLF);
 		}
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
@@ -399,12 +419,8 @@ public class ChatUtils {
     		return input;    		
     	}
 
-    	// It's a SIP address: remove display name
+    	// It's already a SIP address with display name
 		if (input.startsWith("\"")) {
-			int index1 = input.indexOf("\"", 1);
-			if (index1 > 0) {
-				input = input.substring(index1+2);
-			}
 			return input;
 		}   
 
@@ -522,24 +538,21 @@ public class ChatUtils {
 	 * 
 	 * @param cpim CPIM document
 	 * @return IMDN document
+	 * @throws Exception 
 	 */
-	public static ImdnDocument parseCpimDeliveryReport(String cpim) {
+	public static ImdnDocument parseCpimDeliveryReport(String cpim) throws Exception {
 		ImdnDocument imdn = null;
-    	try {
-    		// Parse CPIM document
-    		CpimParser cpimParser = new CpimParser(cpim);
-    		CpimMessage cpimMsg = cpimParser.getCpimMessage();
-    		if (cpimMsg != null) {
-    			// Check if the content is a IMDN message    		
-    			String contentType = cpimMsg.getContentType();
-    			if ((contentType != null) && ChatUtils.isMessageImdnType(contentType)) {
-    				// Parse the IMDN document
-    				imdn = parseDeliveryReport(cpimMsg.getMessageContent());
-    			}
-    		}
-    	} catch(Exception e) {
-    		imdn = null;
-    	}		
+		// Parse CPIM document
+		CpimParser cpimParser = new CpimParser(cpim);
+		CpimMessage cpimMsg = cpimParser.getCpimMessage();
+		if (cpimMsg != null) {
+			// Check if the content is a IMDN message
+			String contentType = cpimMsg.getContentType();
+			if ((contentType != null) && ChatUtils.isMessageImdnType(contentType)) {
+				// Parse the IMDN document
+				imdn = parseDeliveryReport(cpimMsg.getMessageContent());
+			}
+		}
 		return imdn;
 	}
 
@@ -670,12 +683,12 @@ public class ChatUtils {
 	/**
 	 * Create a text message
 	 * 
-	 * @param remote Remote contact
+	 * @param remote Remote contact identifier
 	 * @param txt Text message
 	 * @param imdn IMDN flag
 	 * @return Text message
 	 */
-	public static InstantMessage createTextMessage(String remote, String msg, boolean imdn) {
+	public static InstantMessage createTextMessage(ContactId remote, String msg, boolean imdn) {
 		String msgId = IdGenerator.generateMessageID();
 		return new InstantMessage(msgId, remote, StringUtils.encodeUTF8(msg), imdn, null);
 	}
@@ -683,14 +696,14 @@ public class ChatUtils {
 	/**
 	 * Create a file transfer message
 	 * 
-	 * @param remote Remote contact
+	 * @param remote Remote contact identifier
 	 * @param file File info
 	 * @param imdn IMDN flag
 	 * @param msgId Message ID
 	 * @param displayName the display name
 	 * @return File message
 	 */
-	public static FileTransferMessage createFileTransferMessage(String remote, String file,
+	public static FileTransferMessage createFileTransferMessage(ContactId remote, String file,
 			boolean imdn, String msgId) {
 		return new FileTransferMessage(msgId, remote, file, imdn, null);
 	}
@@ -704,7 +717,7 @@ public class ChatUtils {
 	 * @param displayName the display name
 	 * @return Geoloc message
 	 */
-	public static GeolocMessage createGeolocMessage(String remote, GeolocPush geoloc, boolean imdn) {
+	public static GeolocMessage createGeolocMessage(ContactId remote, GeolocPush geoloc, boolean imdn) {
 		String msgId = IdGenerator.generateMessageID();
 		return new GeolocMessage(msgId, remote, geoloc, imdn, null);
 	}
@@ -742,38 +755,36 @@ public class ChatUtils {
 	 */
 	private static InstantMessage getFirstMessageFromCpim(SipRequest invite) {
 		CpimMessage cpimMsg = ChatUtils.extractCpimMessage(invite);
-		if (cpimMsg != null) {
-			String remote = ChatUtils.getReferredIdentity(invite);
-			String msgId = ChatUtils.getMessageId(invite);
-			String content = cpimMsg.getMessageContent();
-			Date date = cpimMsg.getMessageDate();
-			String mime = cpimMsg.getContentType();
-			if ((remote != null) && (msgId != null) && (content != null) && (mime != null)) {
-				if (mime.contains(GeolocMessage.MIME_TYPE)) {
-					return new GeolocMessage(msgId,
-							remote,
-							ChatUtils.parseGeolocDocument(content),
-							ChatUtils.isImdnDisplayedRequested(invite),
-							date,null);
-				} else
-				if (mime.contains(FileTransferMessage.MIME_TYPE)) {
-					return new FileTransferMessage(msgId,
-							remote,
-							StringUtils.decodeUTF8(content),
-							ChatUtils.isImdnDisplayedRequested(invite),
-							date, null);
-				} else {
-					return new InstantMessage(msgId,
-							remote,
-							StringUtils.decodeUTF8(content),
-							ChatUtils.isImdnDisplayedRequested(invite),
-							date, null);
-				}
-			} else {
-				return null;
-			}
-		} else {
+		if (cpimMsg == null) {
 			return null;
+		}
+		ContactId remote = null;
+		try {
+			remote = ChatUtils.getReferredIdentityAsContactId(invite);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("getFirstMessageFromCpim: cannot parse contact");
+			}
+			return null;
+		}
+		String msgId = ChatUtils.getMessageId(invite);
+		String content = cpimMsg.getMessageContent();
+		Date date = cpimMsg.getMessageDate();
+		String mime = cpimMsg.getContentType();
+		if ((msgId == null) || (content == null) || (mime == null)) {
+			return null;
+		}
+		if (mime.contains(GeolocMessage.MIME_TYPE)) {
+			return new GeolocMessage(msgId, remote, ChatUtils.parseGeolocDocument(content),
+					ChatUtils.isImdnDisplayedRequested(invite), date, null);
+		} else {
+			if (mime.contains(FileTransferMessage.MIME_TYPE)) {
+				return new FileTransferMessage(msgId, remote, StringUtils.decodeUTF8(content),
+						ChatUtils.isImdnDisplayedRequested(invite), date, null);
+			} else {
+				return new InstantMessage(msgId, remote, StringUtils.decodeUTF8(content),
+						ChatUtils.isImdnDisplayedRequested(invite), date, null);
+			}
 		}
 	}
 	
@@ -785,21 +796,20 @@ public class ChatUtils {
 	 */
 	private static InstantMessage getFirstMessageFromSubject(SipRequest invite) {
 		String subject = invite.getSubject();
-		if ((subject != null) && (subject.length() > 0)) {
-			String remote = ChatUtils.getReferredIdentity(invite);
-			if ((remote != null) && (subject != null)) {
-				return new InstantMessage(IdGenerator.generateMessageID(),
-						remote,
-						StringUtils.decodeUTF8(subject),
-						ChatUtils.isImdnDisplayedRequested(invite),
-						new Date(),
-						null);
-			} else {
-				return null;
-			}
-		} else {
+		if (TextUtils.isEmpty(subject)) {
 			return null;
 		}
+		ContactId remote = null;
+		try {
+			remote = ChatUtils.getReferredIdentityAsContactId(invite);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.debug("getFirstMessageFromSubject: cannot parse contact");
+			}
+			return null;
+		}
+		return new InstantMessage(IdGenerator.generateMessageID(), remote, StringUtils.decodeUTF8(subject),
+				ChatUtils.isImdnDisplayedRequested(invite), new Date(), null);
 	}	
 	
     /**
@@ -836,29 +846,27 @@ public class ChatUtils {
      * @return {@link SetOfParticipant} participant list
      * @author Deutsche Telekom AG
      */
-    public static Set<ParticipantInfo> getListOfParticipants(SipRequest request) {
-        Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
-        try {
-            String content = request.getContent();
-            String boundary = request.getBoundaryContentType();
-            Multipart multi = new Multipart(content, boundary);
-            if (multi.isMultipart()) {
-                // Extract resource-lists
-                String listPart = multi.getPart("application/resource-lists+xml");
-                if (listPart != null) {
-                	// Create list from XML
-                    participants = ParticipantInfoUtils.parseResourceList(listPart);
-
-                    // Include remote contact
-                    String remote = getReferredIdentity(request);
-                    ParticipantInfoUtils.addParticipant(participants, remote);
-                }
-            }
-        } catch (Exception e) {
-	    	// Nothing to do
-        }
-        return participants;
-    }
+	public static Set<ParticipantInfo> getListOfParticipants(SipRequest request)  {
+		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+		String content = request.getContent();
+		String boundary = request.getBoundaryContentType();
+		Multipart multi = new Multipart(content, boundary);
+		if (multi.isMultipart()) {
+			// Extract resource-lists
+			String listPart = multi.getPart("application/resource-lists+xml");
+			if (listPart != null) {
+				// Create list from XML
+				participants = ParticipantInfoUtils.parseResourceList(listPart);
+				try {
+					ContactId remoteContactId = getReferredIdentityAsContactId(request);
+					// Include remote contact if format if correct
+					ParticipantInfoUtils.addParticipant(participants, remoteContactId);
+				} catch (JoynContactFormatException e) {
+				}
+			}
+		}
+		return participants;
+	}
 
     /**
      * Is request is for FToHTTP

@@ -35,11 +35,11 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to transfer image during
@@ -155,14 +155,13 @@ public class ImageSharingService extends JoynService {
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public ImageSharing shareImage(String contact, Uri file, ImageSharingListener listener) throws JoynServiceException, JoynContactFormatException {
+    public ImageSharing shareImage(ContactId contactId, Uri file, ImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				// Allow permission to the stack server for content URI if release is KitKat or greater
@@ -176,7 +175,7 @@ public class ImageSharingService extends JoynService {
 					// after the client is restarted after device reboot.
 					persistUriPermissionForClient(file);
 				}
-				IImageSharing sharingIntf = api.shareImage(contact, file, listener);
+				IImageSharing sharingIntf = api.shareImage(contactId, file, listener);
 				if (sharingIntf != null) {
 					return new ImageSharing(sharingIntf);
 				} else {

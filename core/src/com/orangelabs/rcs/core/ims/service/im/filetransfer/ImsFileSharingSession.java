@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -31,6 +33,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.utils.ContactUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.net.Uri;
@@ -61,12 +65,12 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content of file to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contact identifier
 	 * @param fileicon Content of fileicon
 	 * @param filetransferId File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileicon, String filetransferId) {
-		super(parent, content, contact, fileicon, filetransferId);
+	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contactId, MmContent fileicon, String filetransferId) {
+		super(parent, content, contactId, PhoneUtils.formatContactIdToUri(contactId), fileicon, filetransferId);
 	}
 	
 	/**
@@ -193,9 +197,17 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
             }
         }
 
-        // Request capabilities
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+		try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
 
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot request capabilities for contact "+getDialogPath().getRemoteParty() );
+			}
+		}
+        
         // Remove the current session
         getImsService().removeSession(this);
 

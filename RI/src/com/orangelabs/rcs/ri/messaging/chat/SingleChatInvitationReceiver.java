@@ -25,19 +25,29 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.util.Log;
 
 import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Chat invitation receiver
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class SingleChatInvitationReceiver extends BroadcastReceiver {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(SingleChatInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Display invitation notification
@@ -50,35 +60,47 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
      * @param context Context
      * @param invitation Intent invitation
      */
-    public static void addSingleChatInvitationNotification(Context context, Intent invitation) {
-    	// Get remote contact
-		String contact = invitation.getStringExtra(ChatIntent.EXTRA_CONTACT);
-
+    private static void addSingleChatInvitationNotification(Context context, Intent invitation) {
+    		
 		// Get message		
 		ChatMessage firstMessage = invitation.getParcelableExtra(ChatIntent.EXTRA_MESSAGE);		
+		
+		// Get remote contact
+		String contact = invitation.getStringExtra(ChatIntent.EXTRA_CONTACT);
+
 		
         // Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, SingleChatView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.setAction(contact);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_chat, contact);
-        Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
-        notif.flags = Notification.FLAG_AUTO_CANCEL;
-        String msg;
-        if (firstMessage instanceof GeolocMessage) {
-        	msg = context.getString(R.string.label_geoloc_msg);
-        } else {
-        	msg = firstMessage.getMessage();
-        }
-        notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    	notif.defaults |= Notification.DEFAULT_VIBRATE;
         
-        // Send notification
-		NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
+    	// Do not display notification if activity is on foreground
+    	if (SingleChatView.isDisplayed()) {
+    		if (LogUtils.isActive) {
+    			Log.d(LOGTAG, "start SingleChatView contact=" + contact);
+    		}
+    		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    		context.startActivity(intent);
+		} else {
+			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			String notifTitle = context.getString(R.string.title_recv_chat, contact);
+			Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
+			notif.flags = Notification.FLAG_AUTO_CANCEL;
+			String msg;
+			if (firstMessage instanceof GeolocMessage) {
+				msg = context.getString(R.string.label_geoloc_msg);
+			} else {
+				msg = firstMessage.getMessage();
+			}
+			notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
+			notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			notif.defaults |= Notification.DEFAULT_VIBRATE;
+
+			// Send notification
+			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+			notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
+		}
     }
     
     /**

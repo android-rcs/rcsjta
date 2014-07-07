@@ -26,6 +26,7 @@ import java.io.File;
 import android.net.Uri;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * File transfer
@@ -175,12 +176,12 @@ public class FileTransfer {
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return transferInf.getRemoteContact();
 		} catch(Exception e) {

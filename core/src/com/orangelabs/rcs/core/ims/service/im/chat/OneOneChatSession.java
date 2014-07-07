@@ -28,8 +28,10 @@ import java.util.Set;
 
 import javax2.sip.header.SubjectHeader;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -45,8 +47,10 @@ import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.StringUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract 1-1 chat session
@@ -59,14 +63,20 @@ public abstract class OneOneChatSession extends ChatSession {
 	 */
 	private final static String BOUNDARY_TAG = "boundary1";
 
+	/**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(OneOneChatSession.class.getName());
+    
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contact identifier
+	 * @param remoteUri Remote URI
 	 */
-	public OneOneChatSession(ImsService parent, String contact) {
-		super(parent, contact, OneOneChatSession.generateOneOneParticipants(contact));
+	public OneOneChatSession(ImsService parent, ContactId contactId, String remoteUri) {
+		super(parent, contactId, remoteUri, OneOneChatSession.generateOneOneParticipants(contactId));
 		
 		// Set feature tags
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
@@ -100,21 +110,21 @@ public abstract class OneOneChatSession extends ChatSession {
 	}
 	
 	/**
-	 * Generate the list of participants for a 1-1 chat
+	 * Generate the set of participants for a 1-1 chat
 	 * 
-	 * @param contact Contact
-	 * @return List of participants
+	 * @param contactId ContactId
+	 * @return Set of participants
 	 */
-    private static Set<ParticipantInfo> generateOneOneParticipants(String contact) {
+    private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contactId) {
     	Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
-    	ParticipantInfoUtils.addParticipant(set, contact);
+    	ParticipantInfoUtils.addParticipant(set, contactId);
 		return set;
 	}
 
     /**
-	 * Returns the list of participants currently connected to the session
+	 * Returns the set of participants currently connected to the session
 	 * 
-	 * @return List of participants
+	 * @return Set of participants
 	 */
     public Set<ParticipantInfo> getConnectedParticipants() {
 		return getParticipants();
@@ -327,16 +337,21 @@ public abstract class OneOneChatSession extends ChatSession {
      */
     public abstract String getDirection();
     
-    // Changed by Deutsche Telekom
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError(java.lang.String, java.lang.String, com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
      */
     @Override
     public void msrpTransferError(String msgId, String error, MsrpSession.TypeMsrpChunk typeMsrpChunk) {
     	super.msrpTransferError(msgId, error, typeMsrpChunk);
-    	
-        // Request capabilities
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+        try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities to the remote
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
+			}
+		}
     }
 
 }

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -51,9 +52,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
 
 	/**
-	 * List of missing participants in case of restart 
+	 * Set of missing participants in case of restart 
 	 */
-	Set<String> missingParticipants = null;
+	Set<ContactId> missingParticipants = null;
 	
     /**
      * The logger
@@ -65,9 +66,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+	 * @param contactId remote contact
+	 * @param remoteUri the remote Uri
+	 * @param participants set of participants
 	 */
-	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite) {
-		super(parent, ChatUtils.getReferredIdentity(invite), ChatUtils.getListOfParticipants(invite));
+	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite, ContactId contactId, String remoteUri, Set<ParticipantInfo> participants) {
+		super(parent, contactId, remoteUri, participants);
 
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);
@@ -87,17 +91,17 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			}
 		} else {
 			if (logger.isActivated()) {
-				logger.info("List of invited participants: " + Arrays.toString(getParticipants().toArray()));
+				logger.info("Set of invited participants: " + Arrays.toString(getParticipants().toArray()));
 			}
-			// Detect if it's a restart: retrieve list of initial participants
+			// Detect if it's a restart: retrieve set of initial participants
 			Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance().getGroupChatConnectedParticipants(
 					getContributionID());
 			if (initialParticipants != null && initialParticipants.size() > 0) {
 				if (logger.isActivated()) {
-					logger.info("List of initial participants: " + Arrays.toString(initialParticipants.toArray()));
+					logger.info("Set of initial participants: " + Arrays.toString(initialParticipants.toArray()));
 				}
-				missingParticipants = new HashSet<String>();
-				// Run through the list of initial participants
+				missingParticipants = new HashSet<ContactId>();
+				// Run through the set of initial participants
 				for (ParticipantInfo participantInfo : initialParticipants) {
 					// Is initial participant in the invited list ?
 					if (ParticipantInfoUtils.getItem(getParticipants(), participantInfo.getContact()) == null) {
@@ -338,9 +342,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	 * Invite missing participants.
 	 * 
 	 * @param participants
-	 *            the list of missing participants
+	 *            Set of missing participant identifiers
 	 */
-	private void inviteMissingParticipants(final Set<String> participants) {
+	private void inviteMissingParticipants(final Set<ContactId> participants) {
 		if (logger.isActivated()) {
 			logger.info("Invite missing participants: " + Arrays.toString(missingParticipants.toArray()));
 		}

@@ -28,8 +28,10 @@ import javax2.sip.header.SubscriptionStateHeader;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -46,9 +48,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.platform.registry.RegistryFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PeriodicRefresher;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -181,9 +183,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 					}
 					Vector<User> users = conference.getUsers();
 					for (User user : users) {
-						String entity = PhoneUtils.extractNumberFromUri(user.getEntity());
-						if (StringUtils.isEmpty(entity)) {
-							// Empty entity
+						ContactId entity;
+						try {
+							entity = ContactUtils.createContactId(user.getEntity());
+						} catch (JoynContactFormatException e) {
+							// Invalid entity
 							continue;
 						}
 
@@ -191,8 +195,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 							logger.debug("Conference info notification for " + entity);
 						}
 
-						String me = ImsModule.IMS_USER_PROFILE.getUsername();
-						if (user.isMe() || PhoneUtils.compareNumbers(entity, me)) {
+						if (user.isMe() || PhoneUtils.compareNumbers(entity.toString(), ImsModule.IMS_USER_PROFILE.getUsername())) {
 							// By-pass me
 							continue;
 						}

@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Smileys;
@@ -122,6 +124,20 @@ public class SingleChatView extends ChatView {
         activityDisplayed = false;
     }
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);		
+		// Receiving a new intent
+		// Replace the value of intent
+		setIntent(intent);
+		contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onNewIntent contact=" + contact);
+		}
+		// Load history
+		loadHistory();
+	}
+	
     /**
      * Return true if the activity is currently displayed or not
      *   
@@ -154,7 +170,7 @@ public class SingleChatView extends ChatView {
 //				Log.d(LOGTAG, "onServiceConnected is respond to display reports=" + conf.isRespondToDisplayReportsEnabled());
 //			}
 			// Open chat
-    		chat = chatApi.openSingleChat(contact, chatListener);
+    		chat = chatApi.openSingleChat(ContactUtils.getInstance(this).formatContactId(contact), chatListener);
 							
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);

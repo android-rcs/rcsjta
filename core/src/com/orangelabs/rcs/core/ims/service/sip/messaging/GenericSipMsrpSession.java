@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core.ims.service.sip.messaging;
 import java.io.ByteArrayInputStream;
 import java.util.Vector;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -64,17 +65,17 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(GenericSipMsrpSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipMsrpSession(ImsService parent, String contact, String featureTag) {
-		super(parent, contact, featureTag);
+	public GenericSipMsrpSession(ImsService parent, ContactId contactId, String featureTag) {
+		super(parent, contactId, featureTag);
 
         // Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();

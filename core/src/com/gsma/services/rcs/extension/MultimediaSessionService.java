@@ -29,11 +29,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to initiate and to manage
@@ -132,16 +132,15 @@ public class MultimediaSessionService extends JoynService {
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public MultimediaMessagingSession initiateMessagingSession(String serviceId, String contact, MultimediaMessagingSessionListener listener) throws JoynServiceException, JoynContactFormatException {
+    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contactId, MultimediaMessagingSessionListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact, listener);
+				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contactId, listener);
 				if (sessionIntf != null) {
 					return new MultimediaMessagingSession(sessionIntf);
 				} else {
@@ -235,16 +234,15 @@ public class MultimediaSessionService extends JoynService {
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contact Contact
+     * @param contactId Contact ID
      * @param listener Multimedia streaming session event listener
      * @return Multimedia streaming session
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public MultimediaStreamingSession initiateStreamingSession(String serviceId, String contact, MultimediaStreamingSessionListener listener) throws JoynServiceException, JoynContactFormatException {
+    public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contactId, MultimediaStreamingSessionListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact, listener);
+				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contactId, listener);
 				if (sessionIntf != null) {
 					return new MultimediaStreamingSession(sessionIntf);
 				} else {

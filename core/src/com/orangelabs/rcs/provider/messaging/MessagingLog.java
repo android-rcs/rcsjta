@@ -22,6 +22,7 @@ package com.orangelabs.rcs.provider.messaging;
 import java.util.Set;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
@@ -84,7 +85,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	private MessagingLog(Context ctx) {
 		contentResolver = ctx.getContentResolver();
-		groupChatLog = new GroupChatLog(contentResolver);
+		groupChatLog = new GroupChatLog(ctx);
 		groupChatDeliveryInfoLog = new GroupChatDeliveryInfoLog(contentResolver);
 		messageLog = new MessageLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
 		fileTransferLog = new FileTransferLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
@@ -201,7 +202,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatSystemMessage(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public void addGroupChatSystemMessage(String chatId, String contact, int status) {
+	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status) {
 		messageLog.addGroupChatSystemMessage(chatId, contact, status);
 	}
 
@@ -273,7 +274,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void addFileTransfer(String contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
 		fileTransferLog.addFileTransfer(contact, fileTransferId, direction, content, thumbnail);
 	}
 
@@ -295,7 +296,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, String contact, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
 			MmContent thumbnail) {
 		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content, thumbnail);
 	}
@@ -388,14 +389,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 		contentResolver.delete(GroupChatDeliveryInfoData.CONTENT_URI, null, null);
 	}
 
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry(java.lang.String,
-	 * java.lang.String, java.lang.String)
+	 * java.lang.String, com.gsma.services.rcs.contacts.ContactId)
 	 */
 	@Override
-	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, String contact) {
+	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contact) {
 		return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, msgId, contact);
 	}
 
@@ -403,10 +405,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#updateGroupChatDeliveryInfoStatus(java.lang.String,
-	 * java.lang.String, java.lang.String)
+	 * java.lang.String, com.gsma.services.rcs.contacts.ContactId)
 	 */
 	@Override
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, String contact) {
+	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contact) {
 		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
 	}
 

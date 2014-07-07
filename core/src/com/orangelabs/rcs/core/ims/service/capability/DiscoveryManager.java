@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.capability;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 /**
  * Discovery manager interface
  * 
@@ -26,8 +28,8 @@ public interface DiscoveryManager {
 	/**
      * Request contact capabilities
      * 
-     * @param contact Remote contact
+     * @param contactId Remote contact identifier
      * @return Returns true if success
      */
-    public boolean requestCapabilities(String contact);
+    public boolean requestCapabilities(ContactId contactId);
 }

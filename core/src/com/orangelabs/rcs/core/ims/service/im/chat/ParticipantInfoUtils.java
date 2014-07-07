@@ -24,11 +24,12 @@ import java.util.Set;
 import org.xml.sax.InputSource;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -49,10 +50,10 @@ public class ParticipantInfoUtils {
 	 * 
 	 * @param participantInfos
 	 *            The set of ParticipantInfo
-	 * @return The set of contacts
+	 * @return The set of contact identifiers
 	 */
-	public static Set<String> getContactsFromParticipantInfo(Set<ParticipantInfo> participantInfos) {
-		Set<String> result = new HashSet<String>();
+	public static Set<ContactId> getContactsFromParticipantInfo(Set<ParticipantInfo> participantInfos) {
+		Set<ContactId> result = new HashSet<ContactId>();
 		if (participantInfos == null) {
 			return result;
 		}
@@ -77,13 +78,11 @@ public class ParticipantInfoUtils {
 			ResourceListDocument resList = listParser.getResourceList();
 			if (resList != null) {
 				for (String entry : resList.getEntries()) {
-					String number = PhoneUtils.extractNumberFromUri(entry);
-					if (!PhoneUtils.compareNumbers(number, ImsModule.IMS_USER_PROFILE.getUsername())) {
-						if ((!StringUtils.isEmpty(number))) {
-							if (addParticipant(result, number)) {
-								if (logger.isActivated()) {
-									logger.debug("Add participant " + number + " to the list");
-								}
+					ContactId contactId = ContactUtils.createContactId(entry);
+					if (!PhoneUtils.compareNumbers(contactId.toString(), ImsModule.IMS_USER_PROFILE.getUsername())) {
+						if (addParticipant(result, contactId)) {
+							if (logger.isActivated()) {
+								logger.debug("Add participant " + contactId + " to the list");
 							}
 						}
 					}
@@ -106,12 +105,8 @@ public class ParticipantInfoUtils {
 	 *            the Participant
 	 * @return true if added or if the set is modified
 	 */
-	public static boolean addParticipant(Set<ParticipantInfo> set, String participant) {
-		String number = PhoneUtils.extractNumberFromUri(participant);
-		if (PhoneUtils.isGlobalPhoneNumber(number)) {
-			return addParticipant(set, new ParticipantInfo(number, ParticipantInfo.Status.UNKNOWN));
-		}
-		return false;
+	public static boolean addParticipant(Set<ParticipantInfo> set, ContactId participant) {
+		return addParticipant(set, new ParticipantInfo(participant, ParticipantInfo.Status.UNKNOWN));
 	}
 
 	/**
@@ -148,16 +143,16 @@ public class ParticipantInfoUtils {
 	 * 
 	 * @param set
 	 *            the set of ParticipantInfo
-	 * @param contact
-	 *            the contact
+	 * @param contactId
+	 *            the contact identifier
 	 * @return the ParticipantInfo item or null if does not exist
 	 */
-	public static ParticipantInfo getItem(Set<ParticipantInfo> set, String contact) {
-		if (set == null || contact == null)
+	public static ParticipantInfo getItem(Set<ParticipantInfo> set, ContactId contactId) {
+		if (set == null || contactId == null)
 			return null;
 		// Iterate through the set to seek for item
 		for (ParticipantInfo item : set) {
-			if (item.getContact().equals(contact)) {
+			if (item != null && item.getContact().equals(contactId)) {
 				return item;
 			}
 		}

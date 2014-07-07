@@ -41,8 +41,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingListener;
 import com.gsma.services.rcs.gsh.GeolocSharingService;
@@ -214,7 +218,16 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
             Spinner spinner = (Spinner)findViewById(R.id.contact);
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
             contact = cursor.getString(1);
-            final String remote = contact;
+           // final ContactId remote = contact;
+            
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateGeolocSharing.this);
+            final ContactId remote;
+    		try {
+    			remote = contactUtils.formatContactId(cursor.getString(1));
+    		} catch (JoynContactFormatException e1) {
+    			Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+    	    	return;
+    		}
 
         	try {
                 // Initiate location share

@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
 
@@ -96,9 +97,9 @@ public class ContactInfo {
 	private PresenceInfo presenceInfo = null;
 	
 	/**
-	 * Contact
+	 * Contact identifier
 	 */
-	private String contact = null;
+	private ContactId contactId = null;
 	
 	/**
 	 * Registration state
@@ -127,7 +128,7 @@ public class ContactInfo {
 	 * @param contactInfo
 	 */
 	public ContactInfo(ContactInfo info) {
-		this.contact = info.getContact();
+		this.contactId = info.getContact();
 		this.registrationState = info.getRegistrationState();
 		this.rcsStatus = info.getRcsStatus();
 		this.rcsStatusTimestamp = info.getRcsStatusTimestamp();
@@ -172,21 +173,21 @@ public class ContactInfo {
 	}
 
     /**
-	 * Set the contact
+	 * Set the contact identifier
 	 * 
-	 * @param contact Contact
+	 * @param contactId Contact identifier
 	 */
-	public void setContact(String contact) {
-		this.contact = contact;
+	public void setContact(ContactId contactId) {
+		this.contactId = contactId;
 	}
 	
 	/**
-	 * Returns the contact
+	 * Returns the contact identifier
 	 * 
-	 * @return contact
+	 * @return contactId
 	 */
-	public String getContact(){
-		return contact;
+	public ContactId getContact(){
+		return contactId;
 	}
 	
     /**
@@ -259,7 +260,7 @@ public class ContactInfo {
 	 * @return String
 	 */
 	public String toString() {
-		String result =  "Contact=" + contact +
+		String result =  "Contact=" + contactId +
 			", Status=" + rcsStatus +
 			", State=" + registrationState +
 			", Timestamp=" + rcsStatusTimestamp;

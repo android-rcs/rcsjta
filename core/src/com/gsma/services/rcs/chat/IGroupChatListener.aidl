@@ -3,6 +3,7 @@ package com.gsma.services.rcs.chat;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Group chat event listener
@@ -24,13 +25,13 @@ interface IGroupChatListener {
 
 	void onReportMessageFailed(in String msgId);
 	
-	void onComposingEvent(in String contact, in boolean status);
+	void onComposingEvent(in ContactId contact, in boolean status);
 	
-	void onParticipantJoined(in String contact, in String contactDisplayname);
+	void onParticipantJoined(in ContactId contact, in String contactDisplayname);
 	
-	void onParticipantLeft(in String contact);
+	void onParticipantLeft(in ContactId contact);
 
-	void onParticipantDisconnected(in String contact);
+	void onParticipantDisconnected(in ContactId contact);
 	
 	void onParticipantStatusChanged(in ParticipantInfo participantInfo);
 }

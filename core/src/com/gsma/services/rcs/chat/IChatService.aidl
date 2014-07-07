@@ -7,6 +7,7 @@ import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.INewChatListener;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Chat service API
@@ -20,9 +21,9 @@ interface IChatService {
 
 	ChatServiceConfiguration getConfiguration();
     
-	IChat openSingleChat(in String contact, in IChatListener listener);
+	IChat openSingleChat(in ContactId contactId, in IChatListener listener);
 
-	IGroupChat initiateGroupChat(in List<String> contacts, in String subject, in IGroupChatListener listener);
+	IGroupChat initiateGroupChat(in List<ContactId> contacts, in String subject, in IGroupChatListener listener);
     
 	IGroupChat rejoinGroupChat(in String chatId);
     
@@ -41,7 +42,7 @@ interface IChatService {
 	IGroupChat getGroupChat(in String chatId);
 	
 	void markMessageAsRead(in String msgId);
-
+	
 	int getServiceVersion();
 	
 	void setRespondToDisplayReports(in boolean enable);

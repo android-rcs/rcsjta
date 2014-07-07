@@ -97,6 +97,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			.append(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME).append("','")
 			.append(RcsSettingsData.CONFIGURATION_VALID).append("','")
 			.append(RcsSettingsData.COUNTRY_CODE).append("','")
+			.append(RcsSettingsData.COUNTRY_AREA_CODE).append("','")
 			.append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
 	//@formatter:on
 

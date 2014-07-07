@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 
 /**
  * Group chat event listener
@@ -87,7 +89,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param contact Contact
 	 * @param status Is-composing status
 	 */
-	public abstract void onComposingEvent(String contact, boolean status);
+	public abstract void onComposingEvent(ContactId contact, boolean status);
 
 	/**
 	 * Callback called when a new participant has joined the group chat
@@ -95,21 +97,21 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param contact Contact
 	 * @param contactDisplayname Contact displayname
 	 */
-	public abstract void onParticipantJoined(String contact, String contactDisplayname);
+	public abstract void onParticipantJoined(ContactId contact, String contactDisplayname);
 	
 	/**
 	 * Callback called when a participant has left voluntary the group chat
 	 *  
 	 * @param contact Contact
 	 */
-	public abstract void onParticipantLeft(String contact);
+	public abstract void onParticipantLeft(ContactId contact);
 
 	/**
 	 * Callback called when a participant is disconnected from the group chat
 	 * 
 	 * @param contact Contact
 	 */
-	public abstract void onParticipantDisconnected(String contact);
+	public abstract void onParticipantDisconnected(ContactId contact);
 	
     /**
      * Callback called when a participant status has changed

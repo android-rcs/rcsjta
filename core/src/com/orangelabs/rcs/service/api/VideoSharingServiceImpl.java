@@ -29,6 +29,7 @@ import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.INewVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
@@ -43,7 +44,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -190,12 +190,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     }	
 	
 	/**
-     * Get the remote phone number involved in the current call
+     * Get the remote contact Id involved in the current call
      * 
-     * @return Phone number or null if there is no call in progress
+     * @return ContactId or null if there is no call in progress
      * @throws ServerApiException
      */
-	public String getRemotePhoneNumber() throws ServerApiException {
+	public ContactId getRemotePhoneNumber() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get remote phone number");
 		}
@@ -223,12 +223,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			logger.info("Receive video sharing invitation from " + session.getRemoteContact());
 		}
 
-        // Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-		
 		// Update rich call history
         VideoContent content = (VideoContent)session.getContent();
-		RichCallHistory.getInstance().addVideoSharing(number, session.getSessionID(),
+		RichCallHistory.getInstance().addVideoSharing(session.getRemoteContact(), session.getSessionID(),
 				VideoSharing.Direction.INCOMING,
 				content,
     			VideoSharing.State.INVITED);
@@ -240,7 +237,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, number);
+    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
@@ -281,15 +278,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported
      * an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact ID
      * @param player Video player
      * @param listener Video sharing event listener
      * @return Video sharing
 	 * @throws ServerApiException
      */
-    public IVideoSharing shareVideo(String contact, IVideoPlayer player, IVideoSharingListener listener) throws ServerApiException {
+    public IVideoSharing shareVideo(ContactId contactId, IVideoPlayer player, IVideoSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a live video session with " + contact);
+			logger.info("Initiate a live video session with " + contactId);
 		}
 
 		// Test IMS connection
@@ -302,10 +299,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 		     // Initiate a new session
-            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
+            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contactId, player);
 
 			// Update rich call history
-			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
+			RichCallHistory.getInstance().addVideoSharing(contactId, session.getSessionID(),
 					VideoSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			VideoSharing.State.INITIATED);

@@ -21,12 +21,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import com.gsma.services.rcs.ish.IImageSharing;
-import com.gsma.services.rcs.ish.IImageSharingListener;
-
 import android.net.Uri;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ish.IImageSharing;
+import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -35,7 +35,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -86,12 +85,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 	
 	/**
@@ -425,10 +424,6 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void handleSharingProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.debug("Sharing progress");
-			}
-	
 			// Update rich call history
 			RichCallHistory.getInstance().setImageSharingProgress(session.getSessionID(), currentSize, totalSize);
 

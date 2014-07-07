@@ -28,6 +28,7 @@ import javax2.sip.header.SupportedHeader;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -39,6 +40,7 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.orangelabs.rcs.core.ims.service.presence.rlmi.ResourceInstance;
 import com.orangelabs.rcs.core.ims.service.presence.rlmi.RlmiDocument;
 import com.orangelabs.rcs.core.ims.service.presence.rlmi.RlmiParser;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -127,11 +129,11 @@ public class PresenceSubscribeManager extends SubscribeManager {
 	    					Vector<ResourceInstance> list = rlmiInfo.getResourceList();
 	    					for(int i=0; i < list.size(); i++) {
 	    						ResourceInstance res = (ResourceInstance)list.elementAt(i);
-	    						String contact = res.getUri();
+	    						ContactId contact = ContactUtils.createContactId(res.getUri());
 	    						String state = res.getState();
 	    						String reason = res.getReason();
 	    						
-	    						if ((contact != null) && (state != null) && (reason != null)) {
+	    						if ((state != null) && (reason != null)) {
 	    							if (state.equalsIgnoreCase("terminated") && reason.equalsIgnoreCase("rejected")) {
 	    								// It's a "terminated" event with status "rejected" the contact
 	    								// should be removed from the "rcs" list
@@ -157,10 +159,10 @@ public class PresenceSubscribeManager extends SubscribeManager {
 						InputSource pidfInput = new InputSource(new ByteArrayInputStream(pidfPart.getBytes()));
     					PidfParser pidfParser = new PidfParser(pidfInput);
     					PidfDocument presenceInfo = pidfParser.getPresence();
-    					
-    					// Notify listener
-    			    	getImsModule().getCore().getListener().handlePresenceInfoNotification(
-    			    			presenceInfo.getEntity(), presenceInfo);
+
+						ContactId contactId = ContactUtils.createContactId(presenceInfo.getEntity());
+						// Notify listener
+						getImsModule().getCore().getListener().handlePresenceInfoNotification(contactId, presenceInfo);
 			    	} catch(Exception e) {
 			    		if (logger.isActivated()) {
 			    			logger.error("Can't parse PIDF notification", e);

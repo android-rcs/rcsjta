@@ -19,8 +19,6 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
-
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +41,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
@@ -55,6 +54,8 @@ import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -92,10 +93,6 @@ public class GroupChatView extends ChatView {
 															"DECLINED", 
 															"PENDING" };
 	// @formatter:on
-	/**
-	 * Remote contact
-	 */
-	private String contact;
 
 	/**
 	 * Subject
@@ -115,7 +112,7 @@ public class GroupChatView extends ChatView {
     /**
      * List of participants
      */
-    private List<String> participants = new ArrayList<String>();
+    private Set<ContactId> participants = new HashSet<ContactId>();
 
     /**
      * Group chat listener
@@ -157,14 +154,36 @@ public class GroupChatView extends ChatView {
 	    	    	return;
 	            }     				
 
-		    	// Get remote contact
-				contact = getIntent().getStringExtra(GroupChatView.EXTRA_CONTACT);
-
 				// Get subject
 		        subject = getIntent().getStringExtra(GroupChatView.EXTRA_SUBJECT);
 
 		        // Get participants
-		        participants = getIntent().getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
+		        ContactUtils contactUtils = ContactUtils.getInstance(this);
+		        List<String> contacts = getIntent().getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
+		        if (contacts != null && contacts.size() != 0) {
+		        	for (String _contact : contacts) {
+		        		try {
+		        			participants.add(contactUtils.formatContactId(_contact));
+		        		} catch (JoynContactFormatException e) {
+		        			if (LogUtils.isActive) {
+								Log.e(LOGTAG, "onServiceConnected invalid participant "+_contact);
+							}
+		        		}
+					}
+		        	if (participants.isEmpty()) {
+		        		if (LogUtils.isActive) {
+							Log.e(LOGTAG, "onServiceConnected invalid list of participants");
+						}
+		    			Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invalid_contacts));
+		    			return;
+		        	}
+		        } else {
+		        	if (LogUtils.isActive) {
+						Log.e(LOGTAG, "onServiceConnected invalid list of participants");
+					}
+	    			Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invalid_contacts));
+	    			return;
+		        }
 		        
 		        // Initiate group chat
     			startGroupChat();				
@@ -186,20 +205,17 @@ public class GroupChatView extends ChatView {
     			// Add chat event listener
 				groupChat.addEventListener(chatListener);
 
-				// Get remote contact
-				contact = groupChat.getRemoteContact();
-				
 				// Get subject
 		        subject = groupChat.getSubject();
 
 		        // Set list of participants
-		        participants = getListOfParticipants(groupChat.getParticipants());
+//		        participants = getListOfParticipants(groupChat.getParticipants());
 		        if (LogUtils.isActive) {
-		        	if (participants == null) {
+//		        	if (participants == null) {
 		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"'");
-		        	} else {
-		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"' participants="+Arrays.toString(participants.toArray()));
-		        	}
+//		        	} else {
+//		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"' participants="+Arrays.toString(participants.toArray()));
+//		        	}
 					
 					
 				}
@@ -218,13 +234,13 @@ public class GroupChatView extends ChatView {
 				groupChat.addEventListener(chatListener);
 				
 		    	// Get remote contact
-				contact = groupChat.getRemoteContact();
+				ContactId contact = groupChat.getRemoteContact();
 				
 				// Get subject
 		        subject = groupChat.getSubject();
 
-		        // Set list of participants
-				participants = getListOfParticipants(groupChat.getParticipants());
+//		        // Set list of participants
+//				participants = getListOfParticipants(groupChat.getParticipants());
 				
 				// Display accept/reject dialog
 				// TODO manage new state ACCEPTING and REJECTED
@@ -280,8 +296,8 @@ public class GroupChatView extends ChatView {
 	 * @param setOfParticipant a set of participant info
 	 * @return a list of contact
 	 */
-	private List<String> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
-		List<String> result = new ArrayList<String>();
+	private List<ContactId> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
+		List<ContactId> result = new ArrayList<ContactId>();
 		if (setOfParticipant.size() != 0) {
 			for (ParticipantInfo participantInfo : setOfParticipant) {
 				// TODO consider status ?
@@ -301,7 +317,7 @@ public class GroupChatView extends ChatView {
 		if (setOfParticipant.size() != 0) {
 			for (ParticipantInfo participantInfo : setOfParticipant) {
 				// TODO consider status ?
-				result.add(participantInfo.getContact());
+				result.add(participantInfo.getContact().toString());
 			}
 		}
 		return result;
@@ -356,7 +372,7 @@ public class GroupChatView extends ChatView {
     private void startGroupChat() {
 		// Initiate the chat session in background
     	try {
-    		groupChat = chatApi.initiateGroupChat(new HashSet<String>(participants), subject, chatListener);
+    		groupChat = chatApi.initiateGroupChat(new HashSet<ContactId>(participants), subject, chatListener);
     	} catch(Exception e) {
     		e.printStackTrace();
 			Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed));		
@@ -378,6 +394,9 @@ public class GroupChatView extends ChatView {
 	private void loadHistory() {
 		if (chatId == null) {
 			return;
+		}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "loadHistory chatId" +chatId );
 		}
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, chatId);
 		Cursor cursor = null;
@@ -402,7 +421,9 @@ public class GroupChatView extends ChatView {
 				addMessageHistory(direction, contact, content, contentType, msgId);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Exception loadHistory" + e);
+			}
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -506,12 +527,12 @@ public class GroupChatView extends ChatView {
 	 */
     private void addParticipants() {
     	// Build list of available contacts not already in the conference
-    	List<String> availableParticipants = new ArrayList<String>(); 
+    	Set<ContactId> availableParticipants = new HashSet<ContactId>(); 
 		try {
 			Set<ParticipantInfo> currentContacts = groupChat.getParticipants();
 			Set<JoynContact> contacts = contactsApi.getJoynContacts();
 			for (JoynContact c1 : contacts) {
-				String contact = c1.getContactId();
+				ContactId contact = c1.getContactId();
 				boolean found = false;
 				for(ParticipantInfo c2 : currentContacts) {
 					if (c2.getContact().equals(contact) && isConnected(c2.getStatus())) {
@@ -538,8 +559,9 @@ public class GroupChatView extends ChatView {
 		// Display contacts
     	final List<String> selectedParticipants = new ArrayList<String>(); 
 		final CharSequence[] items = new CharSequence[availableParticipants.size()];
-		for(int i=0; i < availableParticipants.size(); i++) {
-			items[i] = availableParticipants.get(i);
+		int i = 0;
+		for (ContactId contact : availableParticipants) {
+			items[i++] = contact.toString();
 		}
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle(R.string.label_select_contacts);
@@ -570,8 +592,13 @@ public class GroupChatView extends ChatView {
         			// Display a progress dialog
 					progressDialog = Utils.showProgressDialog(GroupChatView.this, getString(R.string.label_command_in_progress));            
 
+					Set<ContactId> contacts = new HashSet<ContactId>();
+					ContactUtils contactUtils = ContactUtils.getInstance(GroupChatView.this);
+					for (String participant : selectedParticipants) {
+						contacts.add(contactUtils.formatContactId(participant));
+					}
 					// Add participants
-					groupChat.addParticipants(new HashSet<String>(selectedParticipants));
+					groupChat.addParticipants(contacts);
 
 					// Hide progress dialog 
 					if (progressDialog != null && progressDialog.isShowing()) {
@@ -775,7 +802,7 @@ public class GroupChatView extends ChatView {
     	}
     	
     	// Callback called when an Is-composing event has been received
-    	public void onComposingEvent(final String contact, final boolean status) {
+    	public void onComposingEvent(final ContactId contact, final boolean status) {
 			handler.post(new Runnable() {
 				public void run(){
 					TextView view = (TextView)findViewById(R.id.isComposingText);
@@ -790,7 +817,7 @@ public class GroupChatView extends ChatView {
     	}
 
     	// Callback called when a new participant has joined the group chat
-    	public void onParticipantJoined(final String contact, String contactDisplayname) {
+    	public void onParticipantJoined(final ContactId contact, String contactDisplayname) {
 			handler.post(new Runnable() {
 				public void run(){
 					addNotifHistory(getString(R.string.label_contact_joined, contact), null);
@@ -799,7 +826,7 @@ public class GroupChatView extends ChatView {
     	}
     	
     	// Callback called when a participant has left voluntary the group chat
-    	public void onParticipantLeft(final String contact) {
+    	public void onParticipantLeft(final ContactId contact) {
 			handler.post(new Runnable() {
 				public void run(){
 					addNotifHistory(getString(R.string.label_contact_left, contact), null);
@@ -808,7 +835,7 @@ public class GroupChatView extends ChatView {
     	}
 
     	// Callback called when a participant is disconnected from the group chat
-    	public void onParticipantDisconnected(final String contact) {
+    	public void onParticipantDisconnected(final ContactId contact) {
 			handler.post(new Runnable() {
 				public void run(){
 					addNotifHistory(getString(R.string.label_contact_disconnected, contact), null);

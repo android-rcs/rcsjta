@@ -22,10 +22,12 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.PhoneUtils;
 
 import android.net.Uri;
 
@@ -45,10 +47,10 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contact Remote contactId
 	 */
-	public ContentSharingSession(ImsService parent, MmContent content, String contact) {
-		super(parent, contact);
+	public ContentSharingSession(ImsService parent, MmContent content, ContactId contactId) {
+		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
 		
 		this.content = content;
 	}

@@ -462,7 +462,7 @@ public class RcsSettingsData {
     /**
      * Country area code
      */
-	public static final String COUNTRY_AREA_CODE = "CountryAreaCode";
+	public static final String COUNTRY_AREA_CODE = JoynServiceConfiguration.Settings.MY_COUNTRY_AREA_CODE;
 	
     /**
      * Msisdn

@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 
 /**
@@ -48,19 +49,19 @@ public interface ChatSessionListener extends ImsSessionListener {
     /**
      * Is composing event
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param status Status
      */
-    public void handleIsComposingEvent(String contact, boolean status);
+    public void handleIsComposingEvent(ContactId contactId, boolean status);
 
     /**
      * New conference event
      * 
-	 * @param contact Contact
+	 * @param contactId Contact identifier
 	 * @param contactDisplayname Contact display name
      * @param state State associated to the contact
      */
-    public void handleConferenceEvent(String contact, String contactDisplayname, String state);
+    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state);
 
     /**
      * New message failure status notifying the failure of sending
@@ -74,9 +75,9 @@ public interface ChatSessionListener extends ImsSessionListener {
      * 
 	 * @param msgId Message ID
      * @param status Delivery status
-     * @param contact the remote contact
+     * @param contactId the remote contact identifier
      */
-    public void handleMessageDeliveryStatus(String msgId, String status, String contact);
+    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId);
     
     /**
      * Request to add participant is successful

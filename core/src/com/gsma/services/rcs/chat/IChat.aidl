@@ -2,12 +2,13 @@ package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Chat interface
  */
 interface IChat {
-	String getRemoteContact();
+	ContactId getRemoteContact();
 	
 	String sendMessage(in String message);
 	

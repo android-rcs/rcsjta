@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.image;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
@@ -71,11 +72,11 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 * @param thumbnail The thumbnail content
 	 */
-	public ImageTransferSession(ImsService parent, MmContent content, String contact, MmContent thumbnail) {
-		super(parent, content, contact);
+	public ImageTransferSession(ImsService parent, MmContent content, ContactId contactId, MmContent thumbnail) {
+		super(parent, content, contactId);
 		
 		this.thumbnail = thumbnail;
 	}

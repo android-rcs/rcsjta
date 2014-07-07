@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -38,7 +40,7 @@ public class StoreAndForwardManager {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class.getSimpleName());
     
     /**
      * Constructor
@@ -53,14 +55,16 @@ public class StoreAndForwardManager {
      * Receive stored messages
      * 
      * @param invite Received invite
+     * @param contactId Contact identifier
+     * @throws JoynContactFormatException 
      */
-    public void receiveStoredMessages(SipRequest invite) {
+    public void receiveStoredMessages(SipRequest invite, ContactId contactId) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored messages");
 		}    	
     	
 		// Create a new session
-    	TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(imsService, invite);
+    	TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(imsService, invite, contactId);
     	
 		// Start the session
 		session.startSession();
@@ -73,16 +77,16 @@ public class StoreAndForwardManager {
      * Receive stored notifications
      * 
      * @param invite Received invite
+     * @param contactId Contact identifier
+     * @throws JoynContactFormatException 
      */
-    public void receiveStoredNotifications(SipRequest invite) {
+    public void receiveStoredNotifications(SipRequest invite, ContactId contactId) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored notifications");
 		}    	
     	
 		// Create a new session
-    	TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(
-    			imsService,
-				invite);
+		TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(imsService, invite, contactId);
 		
 		// Start the session
 		session.startSession();

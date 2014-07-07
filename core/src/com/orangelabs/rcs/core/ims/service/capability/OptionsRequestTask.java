@@ -17,6 +17,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.capability;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -43,7 +44,7 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Remote contact
      */
-    private String contact;
+    private ContactId contact;
     
     /**
      * Feature tags
@@ -69,12 +70,12 @@ public class OptionsRequestTask implements Runnable {
 	 * Constructor
 	 * 
      * @param parent IMS module
-   	 * @param contact Remote contact
+   	 * @param contactId Remote contact identifier
    	 * @param featureTags Feature tags
 	 */
-	public OptionsRequestTask(ImsModule parent, String contact, String[] featureTags) {
+	public OptionsRequestTask(ImsModule parent, ContactId contactId, String[] featureTags) {
         this.imsModule = parent;
-        this.contact = contact;
+        this.contact = contactId;
         this.featureTags = featureTags;
 		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
 	}
@@ -103,7 +104,7 @@ public class OptionsRequestTask implements Runnable {
             }
 
             // Create a dialog path
-        	String contactUri = PhoneUtils.formatNumberToSipUri(contact);
+        	String contactUri = PhoneUtils.formatContactIdToUri(contact);
         	dialogPath = new SipDialogPath(
         			imsModule.getSipManager().getSipStack(),
         			imsModule.getSipManager().getSipStack().generateCallId(),

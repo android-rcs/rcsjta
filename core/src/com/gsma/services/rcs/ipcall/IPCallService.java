@@ -28,11 +28,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to initiate IP calls. Several
@@ -131,18 +131,17 @@ public class IPCallService extends JoynService {
      * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
      * format of the contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param player IP call player
      * @param renderer IP call renderer
      * @param listener IP call event listener
      * @return IP call
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public IPCall initiateCall(String contact, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException, JoynContactFormatException {
+    public IPCall initiateCall(ContactId contactId, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IIPCall callIntf = api.initiateCall(contact, player, renderer, listener);
+				IIPCall callIntf = api.initiateCall(contactId, player, renderer, listener);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {
@@ -161,18 +160,17 @@ public class IPCallService extends JoynService {
      * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the format of
      * the contact is not supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param player IP call player
      * @param renderer IP call renderer
      * @param listener IP call event listener
      * @return IP call
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public IPCall initiateVisioCall(String contact, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException, JoynContactFormatException {
+    public IPCall initiateVisioCall(ContactId contactId, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IIPCall callIntf = api.initiateVisioCall(contact, player, renderer, listener);
+				IIPCall callIntf = api.initiateVisioCall(contactId, player, renderer, listener);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {

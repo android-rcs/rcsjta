@@ -20,16 +20,16 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteCallbackList;
 
-import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -80,12 +80,12 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	}
 
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact ID
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 	
 	/**

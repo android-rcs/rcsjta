@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 
 /**
@@ -35,8 +36,8 @@ public interface IFileTransferLog {
 	/**
 	 * Add outgoing file transfer
 	 * 
-	 * @param contact
-	 *            Contact
+	 * @param contactId
+	 *            Contact ID
 	 * @param fileTransferId
 	 *            File Transfer ID
 	 * @param direction
@@ -46,7 +47,7 @@ public interface IFileTransferLog {
 	 * @param thumbnail
 	 *            Thumbnail content
 	 */
-	public void addFileTransfer(String contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail);
+	public void addFileTransfer(ContactId contactId, String fileTransferId, int direction, MmContent content, MmContent thumbnail);
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
@@ -65,8 +66,8 @@ public interface IFileTransferLog {
 	/**
 	 * Add incoming group file transfer
 	 * 
-	 * @param contact
-	 *            Contact
+	 * @param contactId
+	 *            Contact ID
 	 * @param fileTransferId
 	 *            File transfer ID
 	 * @param chatId
@@ -76,7 +77,7 @@ public interface IFileTransferLog {
 	 * @param thumbnail
 	 *            Thumbnail content
 	 */
-	public void addIncomingGroupFileTransfer(String chatId, String contact, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contactId, String fileTransferId, MmContent content,
 			MmContent thumbnail);
 
 	/**

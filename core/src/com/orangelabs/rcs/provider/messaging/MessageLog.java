@@ -33,12 +33,12 @@ import android.net.Uri;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -108,14 +108,13 @@ public class MessageLog implements IMessageLog {
 	 *            Direction
 	 */
 	private void addChatMessage(InstantMessage msg, int type, int direction) {
-		String contact = PhoneUtils.extractNumberFromUri(msg.getRemote());
 		if (logger.isActivated()) {
-			logger.debug("Add chat message: contact=" + contact + ", msg=" + msg.getMessageId() + ", dir=" + direction);
+			logger.debug("Add chat message: contact=" + msg.getRemote() + ", msg=" + msg.getMessageId() + ", dir=" + direction);
 		}
 		ContentValues values = new ContentValues();
-		values.put(MessageData.KEY_CHAT_ID, contact);
+		values.put(MessageData.KEY_CHAT_ID, msg.getRemote().toString());
 		values.put(MessageData.KEY_MSG_ID, msg.getMessageId());
-		values.put(MessageData.KEY_CONTACT, contact);
+		values.put(MessageData.KEY_CONTACT, msg.getRemote().toString());
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, type);
 		values.put(MessageData.KEY_READ_STATUS, ChatLog.Message.ReadStatus.UNREAD);
@@ -189,13 +188,15 @@ public class MessageLog implements IMessageLog {
 	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction) {
 		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
-			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msgId + ", dir=" + direction);
+			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msgId + ", dir=" + direction+ ", contact="+msg.getRemote());
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MSG_ID, msgId);
-		values.put(MessageData.KEY_CONTACT, PhoneUtils.extractNumberFromUri(msg.getRemote()));
+		if (msg.getRemote() != null) {
+			values.put(MessageData.KEY_CONTACT, msg.getRemote().toString());
+		}
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_READ_STATUS, ChatLog.Message.ReadStatus.UNREAD);
@@ -248,19 +249,16 @@ public class MessageLog implements IMessageLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatSystemMessage(java.lang.String, java.lang.String, int)
-	 */
 	@Override
-	public void addGroupChatSystemMessage(String chatId, String contact, int status) {
+	public void addGroupChatSystemMessage(String chatId, ContactId contactId, int status) {
 		if (logger.isActivated()) {
-			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
+			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contactId + ", status=" + status);
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
-		values.put(MessageData.KEY_CONTACT, contact);
+		if (contactId != null) {
+			values.put(MessageData.KEY_CONTACT, contactId.toString());
+		}
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_DIRECTION, ChatLog.Message.Direction.IRRELEVANT);

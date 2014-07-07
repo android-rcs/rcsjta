@@ -26,6 +26,11 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
+
+import android.content.Context;
 import android.net.Uri;
 
 /**
@@ -91,15 +96,19 @@ public class ChatLog {
         public static final String PARTICIPANTS = "participants";
         
 		/**
-         * Utility method to get list of ParticipantInfo objects from its string representation in the ChatLog provider.
+         * Utility method to get the set of ParticipantInfo objects from its string representation in the ChatLog provider.
          *
          * @param participants
          *            the SET of participant information from the ChatLog provider
          * @return the SET of participant information
          */
-		public static Set<ParticipantInfo> getParticipantInfo(String participants) {
+		public static Set<ParticipantInfo> getParticipantInfo(Context context, String participants) {
 			if (participants == null) {
 				return null;
+			}
+			ContactUtils contactUtils = ContactUtils.getInstance(context);
+			if (contactUtils == null) {
+				throw new IllegalStateException();
 			}
 			String[] tokens = participants.split(",");
 			Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
@@ -112,7 +121,11 @@ public class ChatLog {
 						status = Integer.parseInt(keyValue[1]) % 9;
 					} catch (NumberFormatException e) {
 					}
-					result.add(new ParticipantInfo(contact, status));
+					try {
+						ContactId contactId = contactUtils.formatContactId(contact);
+						result.add(new ParticipantInfo(contactId, status));
+					} catch (JoynContactFormatException e) {
+					}
 				}
 			}
 			return result;

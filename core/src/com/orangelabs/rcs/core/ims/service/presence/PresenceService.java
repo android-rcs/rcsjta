@@ -18,8 +18,10 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
-import java.util.List;
+import java.util.Set;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.addressbook.AddressBookEventListener;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -93,16 +95,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		// Set presence service options
 		this.permanentState = RcsSettings.getInstance().isPermanentStateModeActivated();
 
-		// Instanciate the XDM manager
+		// Instantiate the XDM manager
     	xdm = new XdmManager(parent);
 
-    	// Instanciate the publish manager
+    	// Instantiate the publish manager
         publisher = new PublishManager(parent);
 
-    	// Instanciate the subscribe manager for watcher info
+    	// Instantiate the subscribe manager for watcher info
     	watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent);
 
-    	// Instanciate the subscribe manager for presence
+    	// Instantiate the subscribe manager for presence
         presenceSubscriber = new PresenceSubscribeManager(parent);
 	}
 
@@ -128,19 +130,25 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		// Initialize the XDM interface
 		xdm.initialize();
 
-    	// Add me in the granted list if necessary
-		List<String> grantedContacts = xdm.getGrantedContacts();
-		String me = ImsModule.IMS_USER_PROFILE.getPublicUri();
-		if (!grantedContacts.contains(me)) {
-        	if (logger.isActivated()) {
-        		logger.debug("The enduser is not in the granted list: add it now");
-            }
-			xdm.addContactToGrantedList(me);
-		}
+    	// Add me in the granted set if necessary
+		Set<ContactId> grantedContacts = xdm.getGrantedContacts();
+		try {
+			ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
 
+			if (!grantedContacts.contains(me)) {
+				if (logger.isActivated()) {
+					logger.debug("The enduser is not in the granted set: add it now");
+				}
+				xdm.addContactToGrantedList(me);
+			}
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+        		logger.error("Cannot parse user contact "+ImsModule.IMS_USER_PROFILE.getPublicUri());
+        	}
+		}
 		// It may be necessary to initiate the address book first launch or account check procedure
         if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
-			List<String> blockedContacts = xdm.getBlockedContacts();
+			Set<ContactId> blockedContacts = xdm.getBlockedContacts();
 			firstLaunchOrAccountChangedCheck(grantedContacts, blockedContacts);
 		}
 
@@ -197,7 +205,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param list of granted contacts
      * @param list of blocked contacts
      */
-	public void firstLaunchOrAccountChangedCheck(List<String> grantedContacts, List<String> blockedContacts){
+	private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts, Set<ContactId> blockedContacts){
 		if (logger.isActivated()){
 			logger.debug("First launch or account change check procedure");
 		}
@@ -205,63 +213,67 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		// Flush the address book provider
 		ContactsManager.getInstance().flushContactProvider();
 
+		ContactId me = null;
+		try {
+			me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+        		logger.error("Cannot parse user contact "+ImsModule.IMS_USER_PROFILE.getPublicUri());
+        	}
+		}
 		// Treat the buddy list
-		for(int i=0;i<grantedContacts.size(); i++){
-			String me = ImsModule.IMS_USER_PROFILE.getPublicUri();
-			String contact = grantedContacts.get(i);
-			if (!contact.equalsIgnoreCase(me)){
+		for (ContactId contact : grantedContacts) {
+			if (me != null && !contact.equals(me)) {
 				// For each RCS granted contact, except me
-				String rcsNumber = PhoneUtils.extractNumberFromUri(contact);
-				if (!ContactUtils.isNumberInAddressBook(rcsNumber)){
+				if (!ContactUtils.isNumberInAddressBook(contact)) {
 					// If it is not present in the address book
-					if (logger.isActivated()){
-						logger.debug("The RCS number " + rcsNumber + " was not found in the address book: add it");
+					if (logger.isActivated()) {
+						logger.debug("The RCS number " + contact + " was not found in the address book: add it");
 					}
 
 					// => We create the entry in the regular address book
 					try {
-						ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), rcsNumber);
+						ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), contact);
 					} catch (Exception e) {
-						if (logger.isActivated()){
-							logger.error("Something went wrong when creating contact "+rcsNumber,e);
+						if (logger.isActivated()) {
+							logger.error("Something went wrong when creating contact " + contact, e);
 						}
-                    }
+					}
 				}
 
 				// Add the contact to the rich address book provider
-				ContactsManager.getInstance().modifyRcsContactInProvider(rcsNumber, ContactInfo.RCS_PENDING_OUT);
+				ContactsManager.getInstance().modifyRcsContactInProvider(contact, ContactInfo.RCS_PENDING_OUT);
 			}
 		}
 
 		// Treat the blocked contact list
-		for(int i=0;i<blockedContacts.size(); i++){
-            // For each RCS blocked contact
-			String rcsNumber = PhoneUtils.extractNumberFromUri(blockedContacts.get(i));
-			if (!ContactUtils.isNumberInAddressBook(rcsNumber)){
+		for (ContactId contact : blockedContacts) {
+			// For each RCS blocked contact
+			if (!ContactUtils.isNumberInAddressBook(contact)) {
 				// If it is not present in the address book
-				if (logger.isActivated()){
-					logger.debug("The RCS number " + rcsNumber + " was not found in the address book: add it");
+				if (logger.isActivated()) {
+					logger.debug("The RCS number " + contact + " was not found in the address book: add it");
 				}
 
 				// => We create the entry in the regular address book
 				try {
-					ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), rcsNumber);
+					ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), contact);
 				} catch (Exception e) {
-					if (logger.isActivated()){
-						logger.error("Something went wrong when creating contact "+rcsNumber,e);
+					if (logger.isActivated()) {
+						logger.error("Something went wrong when creating contact " + contact, e);
 					}
-                }
+				}
 				// Set the presence sharing status to blocked
 				try {
-					ContactsManager.getInstance().blockContact(rcsNumber);
+					ContactsManager.getInstance().blockContact(contact);
 				} catch (ContactsManagerException e) {
-					if (logger.isActivated()){
-						logger.error("Something went wrong when blocking contact "+rcsNumber,e);
+					if (logger.isActivated()) {
+						logger.error("Something went wrong when blocking contact " + contact, e);
 					}
 				}
 
 				// Add the contact to the rich address book provider
-				ContactsManager.getInstance().modifyRcsContactInProvider(rcsNumber, ContactInfo.RCS_BLOCKED);
+				ContactsManager.getInstance().modifyRcsContactInProvider(contact, ContactInfo.RCS_BLOCKED);
 			}
 		}
 	}
@@ -783,16 +795,15 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param contact Contact
      * @returns Returns true if XDM request was successful, else false
      */
-    public boolean inviteContactToSharePresence(String contact) {
+    public boolean inviteContactToSharePresence(ContactId contact) {
 		// Remove contact from the blocked contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		xdm.removeContactFromBlockedList(contactUri);
+		xdm.removeContactFromBlockedList(contact);
 
 		// Remove contact from the revoked contacts list
-		xdm.removeContactFromRevokedList(contactUri);
+		xdm.removeContactFromRevokedList(contact);
 
 		// Add contact in the granted contacts list
-		HttpResponse response = xdm.addContactToGrantedList(contactUri);
+		HttpResponse response = xdm.addContactToGrantedList(contact);
         if ((response != null) && response.isSuccessfullResponse()) {
 			return true;
 		} else {
@@ -806,16 +817,15 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param contact Contact
      * @returns Returns true if XDM request was successful, else false
      */
-    public boolean revokeSharedContact(String contact){
+    public boolean revokeSharedContact(ContactId contact){
 		// Add contact in the revoked contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		HttpResponse response = xdm.addContactToRevokedList(contactUri);
+		HttpResponse response = xdm.addContactToRevokedList(contact);
 		if ((response == null) || (!response.isSuccessfullResponse())) {
 			return false;
 		}
 
 		// Remove contact from the granted contacts list
-		response = xdm.removeContactFromGrantedList(contactUri);
+		response = xdm.removeContactFromGrantedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
@@ -824,50 +834,15 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		}
     }
 
-	/**
-     * Accept a presence sharing invitation
-     * 
-     * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
-     */
-	public boolean acceptPresenceSharingInvitation(String contact) {
-		// Add contact in the granted contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		HttpResponse response = xdm.addContactToGrantedList(contactUri);
-        if ((response != null) && response.isSuccessfullResponse()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-     * Block a presence sharing invitation
-     * 
-     * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
-     */
-	public boolean blockPresenceSharingInvitation(String contact){
-		// Add contact in the blocked contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		HttpResponse response = xdm.addContactToBlockedList(contactUri);
-        if ((response != null) && response.isSuccessfullResponse()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
     /**
      * Remove a revoked contact
      * 
      * @param contact Contact
      * @returns Returns true if XDM request was successful, else false
      */
-	public boolean removeRevokedContact(String contact) {
+	public boolean removeRevokedContact(ContactId contact) {
 		// Remove contact from the revoked contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		HttpResponse response = xdm.removeContactFromRevokedList(contactUri);
+		HttpResponse response = xdm.removeContactFromRevokedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
@@ -882,10 +857,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param contact Contact
      * @returns Returns true if XDM request was successful, else false
      */
-	public boolean removeBlockedContact(String contact) {
+	public boolean removeBlockedContact(ContactId contact) {
 		// Remove contact from the blocked contacts list
-		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-		HttpResponse response = xdm.removeContactFromBlockedList(contactUri);
+		HttpResponse response = xdm.removeContactFromBlockedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
@@ -898,70 +872,74 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	 * Address book content has changed
 	 */
 	public void handleAddressBookHasChanged() {
-		// If a contact used to be in a RCS relationship with us but is not in the address book any more, we may have to remove or unblock it
+		// If a contact used to be in a RCS relationship with us but is not in the address book any more, we may have to remove or
+		// unblock it
 		// Get a list of all RCS numbers
-		List<String> rcsNumbers = ContactsManager.getInstance().getRcsContactsWithSocialPresence();
-		for(int i=0;i<rcsNumbers.size(); i++){
-			// For each RCS number
-			String rcsNumber = rcsNumbers.get(i);
-			if (!ContactUtils.isNumberInAddressBook(rcsNumber)){
+		Set<ContactId> rcsNumbers = ContactsManager.getInstance().getRcsContactsWithSocialPresence();
+		// For each RCS number
+		for (ContactId contactId : rcsNumbers) {
+			if (!ContactUtils.isNumberInAddressBook(contactId)) {
 				// If it is not present in the address book
-				if (logger.isActivated()){
-					logger.debug("The RCS number " + rcsNumber + " was not found in the address book any more.");
+				if (logger.isActivated()) {
+					logger.debug("The RCS number " + contactId + " was not found in the address book any more.");
 				}
 
-				if (ContactsManager.getInstance().isNumberShared(rcsNumber)
-						|| ContactsManager.getInstance().isNumberInvited(rcsNumber)){
+				if (ContactsManager.getInstance().isNumberShared(contactId)
+						|| ContactsManager.getInstance().isNumberInvited(contactId)) {
 					// Active or Invited
-					if (logger.isActivated()){
-						logger.debug(rcsNumber + " is either active or invited");
+					if (logger.isActivated()) {
+						logger.debug(contactId + " is either active or invited");
 						logger.debug("We remove it from the buddy list");
 					}
 					// We revoke it
-					boolean result = revokeSharedContact(rcsNumber);
-					if (result){
+					boolean result = revokeSharedContact(contactId);
+					if (result) {
 						// The contact should be automatically unrevoked after a given timeout. Here the
 						// timeout period is 0, so the contact can receive invitations again now
-						result = removeRevokedContact(rcsNumber);
-						if (result){
+						result = removeRevokedContact(contactId);
+						if (result) {
 							// Remove entry from rich address book provider
-							ContactsManager.getInstance().modifyRcsContactInProvider(rcsNumber, ContactInfo.RCS_CAPABLE);
-						}else{
-							if (logger.isActivated()){
+							ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+						} else {
+							if (logger.isActivated()) {
 								logger.error("Something went wrong when revoking shared contact");
 							}
 						}
 					}
-				}else if (ContactsManager.getInstance().isNumberBlocked(rcsNumber)){
+				} else if (ContactsManager.getInstance().isNumberBlocked(contactId)) {
 					// Blocked
-					if (logger.isActivated()){
-						logger.debug(rcsNumber + " is blocked");
+					if (logger.isActivated()) {
+						logger.debug(contactId + " is blocked");
 						logger.debug("We remove it from the blocked list");
 					}
 					// We unblock it
-					boolean result = removeBlockedContact(rcsNumber);
-					if (result){
+					boolean result = removeBlockedContact(contactId);
+					if (result) {
 						// Remove entry from rich address book provider
-						ContactsManager.getInstance().modifyRcsContactInProvider(rcsNumber, ContactInfo.RCS_CAPABLE);
-					}else{
-						if (logger.isActivated()){
+						ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+					} else {
+						if (logger.isActivated()) {
 							logger.error("Something went wrong when removing blocked contact");
 						}
 					}
-				}else if (ContactsManager.getInstance().isNumberWilling(rcsNumber)){
-					// Willing
-					if (logger.isActivated()){
-						logger.debug(rcsNumber + " is willing");
-						logger.debug("Nothing to do");
+				} else {
+					if (ContactsManager.getInstance().isNumberWilling(contactId)) {
+						// Willing
+						if (logger.isActivated()) {
+							logger.debug(contactId + " is willing");
+							logger.debug("Nothing to do");
+						}
+					} else {
+						if (ContactsManager.getInstance().isNumberCancelled(contactId)) {
+							// Cancelled
+							if (logger.isActivated()) {
+								logger.debug(contactId + " is cancelled");
+								logger.debug("We remove it from rich address book provider");
+							}
+							// Remove entry from rich address book provider
+							ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+						}
 					}
-				}else if (ContactsManager.getInstance().isNumberCancelled(rcsNumber)){
-					// Cancelled
-					if (logger.isActivated()){
-						logger.debug(rcsNumber + " is cancelled");
-						logger.debug("We remove it from rich address book provider");
-					}
-					// Remove entry from rich address book provider
-					ContactsManager.getInstance().modifyRcsContactInProvider(rcsNumber, ContactInfo.RCS_CAPABLE);
 				}
 			}
 		}

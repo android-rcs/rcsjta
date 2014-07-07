@@ -20,6 +20,7 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
@@ -29,7 +30,6 @@ import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -50,7 +50,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	private RemoteCallbackList<IMultimediaStreamingSessionListener> listeners = new RemoteCallbackList<IMultimediaStreamingSessionListener>();
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private Object lock = new Object();
 	
@@ -80,12 +80,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	}
 
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact ID
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 	
 	/**

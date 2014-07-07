@@ -7,6 +7,7 @@ import com.gsma.services.rcs.ipcall.INewIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * IP call service API
@@ -24,9 +25,9 @@ interface IIPCallService {
 	
 	IIPCall getIPCall(in String callId);
 
-	IIPCall initiateCall(in String contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
+	IIPCall initiateCall(in ContactId contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
 	
-	IIPCall initiateVisioCall(in String contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
+	IIPCall initiateVisioCall(in ContactId contact, in IIPCallPlayer player, in IIPCallRenderer renderer, in IIPCallListener listener);
 
 	void addNewIPCallListener(in INewIPCallListener listener);
 

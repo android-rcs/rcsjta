@@ -25,6 +25,8 @@ package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -38,6 +40,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.net.Uri;
@@ -56,18 +59,18 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingGeolocTransferSession.class.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
      * @param geoloc Geoloc info
 	 */
-	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, String contact, GeolocPush geoloc) {
-		super(parent, content, contact);
+	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, ContactId contactId, GeolocPush geoloc) {
+		super(parent, content, contactId);
 
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -305,9 +308,16 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
-        // Request capabilities
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
-
+		try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities to the remote
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
+			}
+		}
+		
 		// Remove the current session
     	getImsService().removeSession(this);
 
