@@ -21,6 +21,8 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.io.IOException;
 import java.util.Vector;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -38,6 +40,8 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -56,9 +60,10 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+     * @param contactId the remote contactId 
 	 */
-	public TerminatingOne2OneChatSession(ImsService parent, SipRequest invite) {
-		super(parent, SipUtils.getAssertedIdentity(invite));
+	public TerminatingOne2OneChatSession(ImsService parent, SipRequest invite, ContactId contactId) {
+		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
 
 		// Set first message
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
@@ -87,10 +92,17 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
                 // Check notification disposition
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {
-                    // Send message delivery status via a SIP MESSAGE
-                    getImdnManager().sendMessageDeliveryStatusImmediately(getDialogPath().getRemoteParty(),
-                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                            SipUtils.getRemoteInstanceID(getDialogPath().getInvite()));
+                    try {
+            			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+            			// Send message delivery status via a SIP MESSAGE
+                        getImdnManager().sendMessageDeliveryStatusImmediately(remote,
+                                msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                                SipUtils.getRemoteInstanceID(getDialogPath().getInvite()));
+            		} catch (JoynContactFormatException e) {
+            			if (logger.isActivated()) {
+            				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
+            			}
+            		}
                 }
             }
 

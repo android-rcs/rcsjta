@@ -24,8 +24,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -52,7 +52,7 @@ public class IPCallHistory {
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(IPCallHistory.class.getSimpleName());
 	
 	/**
 	 * Create instance
@@ -88,22 +88,21 @@ public class IPCallHistory {
 	/**
 	 * Add a new entry in the call history 
 	 * 
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 * @param sessionId Session ID
 	 * @param direction Direction 
 	 * @param audiocontent Audio content
 	 * @param videocontent Video content
 	 * @param status Call status
 	 */
-	public Uri addCall(String contact, String sessionId, int direction, MmContent audiocontent, MmContent videocontent, int status) {
+	public Uri addCall(ContactId contactId, String sessionId, int direction, MmContent audiocontent, MmContent videocontent, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new call entry for contact " + contact + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new call entry for contact " + contactId + ": session=" + sessionId + ", status=" + status);
 		}
 
-		contact = PhoneUtils.extractNumberFromUri(contact);
 		ContentValues values = new ContentValues();
 		values.put(IPCallData.KEY_SESSION_ID, sessionId);
-		values.put(IPCallData.KEY_CONTACT, contact);
+		values.put(IPCallData.KEY_CONTACT, contactId.toString());
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATUS, status);

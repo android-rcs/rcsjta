@@ -31,6 +31,7 @@ import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.IChat;
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -43,7 +44,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,7 +55,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	/**
 	 * Remote contact
 	 */
-	private String contact;
+	private ContactId contact;
 	
 	/**
 	 * Core session
@@ -75,29 +75,29 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private final static Logger logger = Logger.getLogger(ChatImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param contact Remote contact
 	 */
-	public ChatImpl(String contact) {
-		this.contact = contact;
-		this.session = null;
+	public ChatImpl(ContactId contact) {
+		this(contact,null);
 	}
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param contact Remote contact
+	 * @param contactId Remote contact ID
 	 * @param session Session
 	 */
-	public ChatImpl(String contact, OneOneChatSession session) {
-		this.contact = contact;
+	public ChatImpl(ContactId contactId, OneOneChatSession session) {
+		this.contact = contactId;
 		this.session = session;
-		
-		session.addListener(this);
+		if (session != null) {
+			session.addListener(this);
+		}
 	}
 	
 	/**
@@ -128,13 +128,14 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 	
     /**
-     * Returns the remote contact
+     * Returns the remote contact identifier
      * 
-     * @return Contact
+     * @return ContactId
+     * @throws Exception 
      */
-    public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(contact);
-    }
+	public ContactId getRemoteContact() {
+		return contact;
+	}
 	
 	/**
      * Sends a plain text message
@@ -239,9 +240,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /**
      * Sends a displayed delivery report for a given message ID
      * 
+     * @param contactId Contact ID
      * @param msgId Message ID
      */
-	/* package private */void sendDisplayedDeliveryReport(final String msgId) {
+    /*package private*/ void sendDisplayedDeliveryReport(final ContactId contactId, final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
@@ -253,11 +255,12 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 					logger.info("Use the original session to send the delivery status for " + msgId);
 				}
 				// Send via MSRP
-				new Thread() {
-					public void run() {
-						session.sendMsrpMessageDeliveryStatus(contact, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
-					}
-				}.start();
+
+		        new Thread() {
+		    		public void run() {
+						session.sendMsrpMessageDeliveryStatus(contactId, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+		    		}
+		    	}.start();
 			} else {
 				if (logger.isActivated()) {
 					logger.info("No suitable session found to send the delivery status for " + msgId + " : use SIP message");
@@ -274,7 +277,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 	
     /**
-     * Sends an Â“is-composingÂ” event. The status is set to true when
+     * Sends an “is-composing” event. The status is set to true when
      * typing a message, else it is set to false.
      * 
      * @param status Is-composing status
@@ -379,7 +382,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     public void handleReceiveMessage(InstantMessage message) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("New IM received");
+				logger.info("New IM received "+message);
 			}
 			
 			// Update rich messaging history
@@ -387,14 +390,14 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			
 			// Create a chat message
         	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
-        			PhoneUtils.extractNumberFromUri(message.getRemote()),
+        			message.getRemote(),
         			message.getTextMessage(),
         			message.getServerDate());
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact().toString());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -432,13 +435,13 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
         			geoloc.getGeoloc().getExpiration());
         	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-        			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+        			geoloc.getRemote(),
         			geolocApi, geoloc.getDate());
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact().toString());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -495,14 +498,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		}
 	}
     
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)
-	 */
 	@Override
-	public void handleIsComposingEvent(String contact, boolean status) {
+	public void handleIsComposingEvent(ContactId contactId, boolean status) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info(contact + " is composing status set to " + status);
+				logger.info(contactId + " is composing status set to " + status);
 			}
 	
 	  		// Notify event listeners
@@ -547,11 +547,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		}
 	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
 	@Override
-	public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
+	public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
@@ -583,11 +580,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    }
     }
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleConferenceEvent(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
-    public void handleConferenceEvent(String contact, String contactDisplayname, String state) {
+    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state) {
     	// Not used here
     }
     

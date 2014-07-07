@@ -3,6 +3,7 @@ package com.gsma.services.rcs.vsh;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Video sharing interface
@@ -11,7 +12,7 @@ interface IVideoSharing {
 
 	String getSharingId();
 
-	String getRemoteContact();
+	ContactId getRemoteContact();
 
 	VideoCodec getVideoCodec();
 

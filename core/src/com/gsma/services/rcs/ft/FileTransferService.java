@@ -35,11 +35,11 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers the main entry point to transfer files and to
@@ -153,17 +153,16 @@ public class FileTransferService extends JoynService {
      * file to be transferred (for a local or a remote file). The parameter 
      * contact supports the following formats: MSISDN in national or 
      * international format, SIP address, SIP-URI or Tel-URI. If the format of 
-     * the contact is not supported an exception is thrown.
+     * the contact is not supported an exception is thrown. 
      * 
-     * @param contact 
+     * @param contactId the remote contact identifier
      * @param file URI of file to transfer
      * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
 	 */
-    public FileTransfer transferFile(String contact, Uri file, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
-    	return transferFile(contact, file, false, listener);
+    public FileTransfer transferFile(ContactId contactId, Uri file, FileTransferListener listener) throws JoynServiceException {
+    	return transferFile(contactId, file, false, listener);
     }
     
 	/**
@@ -192,7 +191,7 @@ public class FileTransferService extends JoynService {
      * international format, SIP address, SIP-URI or Tel-URI. If the format of
      * the contact is not supported an exception is thrown.
 	 * 
-	 * @param contact
+	 * @param contactId the remote contact Identifier
 	 * @param file
 	 *            Uri of file to transfer
 	 * @param fileicon
@@ -202,23 +201,13 @@ public class FileTransferService extends JoynService {
 	 *            File transfer event listener
 	 * @return File transfer
 	 * @throws JoynServiceException
-	 * @throws JoynContactFormatException
 	 */
-	/**
-	 * @param contact
-	 * @param file
-	 * @param fileicon
-	 * @param listener
-	 * @return
-	 * @throws JoynServiceException
-	 * @throws JoynContactFormatException
-	 */
-	public FileTransfer transferFile(String contact, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+	public FileTransfer transferFile(ContactId contactId, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException {
     	if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
 
-				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon, listener);
+				IFileTransfer ftIntf = api.transferFile(contactId, file, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -244,10 +233,9 @@ public class FileTransferService extends JoynService {
 	 * @param listener File transfer event listener
 	 * @return File transfer
 	 * @throws JoynServiceException
-	 * @throws JoynContactFormatException
 	 */
 	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon,
-			FileTransferListener listener) throws JoynServiceException, JoynContactFormatException {
+			FileTransferListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
@@ -271,7 +259,6 @@ public class FileTransferService extends JoynService {
      *
      * @param transferId
      * @throws JoynServiceException
-     * @throws JoynContactFormatException
      */
     public void markFileTransferAsRead(String transferId) throws JoynServiceException {
         if (api != null) {

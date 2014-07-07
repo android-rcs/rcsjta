@@ -25,7 +25,7 @@ import android.os.Parcelable;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ImageSharingServiceConfiguration {
+public class ImageSharingServiceConfiguration implements Parcelable {
 		
 	/**
 	 * Image size limit

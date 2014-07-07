@@ -31,6 +31,8 @@ import android.os.Parcelable;
  * which may be supported by the local user or a remote contact.
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class Capabilities implements Parcelable {
 	/**
@@ -118,9 +120,15 @@ public class Capabilities implements Parcelable {
 		this.videoSharing = source.readInt() != 0;
 		this.imSession = source.readInt() != 0;
 		this.fileTransfer = source.readInt() != 0;
-		List<String> exts = new ArrayList<String>();
-		source.readStringList(exts);
-		this.extensions = new HashSet<String>(exts);	
+		
+		boolean flag = source.readInt() != 0;
+		if (flag) {
+			List<String> exts = new ArrayList<String>();
+			source.readStringList(exts);
+			this.extensions = new HashSet<String>(exts);	
+		} else {
+			this.extensions = null;
+		}
 		this.geolocPush = source.readInt() != 0;
 		this.ipVoiceCall = source.readInt() != 0;
 		this.ipVideoCall = source.readInt() != 0;
@@ -151,10 +159,12 @@ public class Capabilities implements Parcelable {
     	dest.writeInt(imSession ? 1 : 0);
     	dest.writeInt(fileTransfer ? 1 : 0);
 		if (extensions != null) {
-			List<String> exts = new ArrayList<String>();
-			exts.addAll(extensions);
+			dest.writeInt(1);
+			List<String> exts = new ArrayList<String>(extensions);
 			dest.writeStringList(exts);
-		}
+		} else {
+    		dest.writeInt(0);
+    	}
     	dest.writeInt(geolocPush ? 1 : 0);
     	dest.writeInt(ipVoiceCall ? 1 : 0);
     	dest.writeInt(ipVideoCall ? 1 : 0);

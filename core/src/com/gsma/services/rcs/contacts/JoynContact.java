@@ -27,6 +27,8 @@ import com.gsma.services.rcs.capability.Capabilities;
  * Joyn contact
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class JoynContact implements Parcelable {
 	/**
@@ -37,7 +39,7 @@ public class JoynContact implements Parcelable {
 	/**
 	 * Contact ID
 	 */
-	private String contactId = null;
+	private ContactId contactId = null;
 	
 	/**
 	 * Registration state
@@ -52,7 +54,7 @@ public class JoynContact implements Parcelable {
 	 * @param capabilities Capabilities 
      * @hide
 	 */
-	public JoynContact(String contactId, boolean registered, Capabilities capabilities) {
+	public JoynContact(ContactId contactId, boolean registered, Capabilities capabilities) {
 		this.contactId = contactId;
 		this.registered = registered;
 		this.capabilities = capabilities;
@@ -65,11 +67,16 @@ public class JoynContact implements Parcelable {
      * @hide
 	 */
 	public JoynContact(Parcel source) {
-		contactId = source.readString();
-		registered = source.readInt() != 0;
 		boolean flag = source.readInt() != 0;
 		if (flag) {
-			this.capabilities = source.readParcelable(getClass().getClassLoader());
+			contactId = ContactId.CREATOR.createFromParcel(source);
+		} else {
+			contactId = null;
+		}
+		registered = source.readInt() != 0;
+		flag = source.readInt() != 0;
+		if (flag) {
+			this.capabilities = Capabilities.CREATOR.createFromParcel(source);
 		} else {
 			this.capabilities = null;
 		}
@@ -94,11 +101,16 @@ public class JoynContact implements Parcelable {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(contactId);
+    	if (contactId != null) {
+    		dest.writeInt(1);
+    		contactId.writeToParcel(dest, flags);
+    	} else {
+    		dest.writeInt(0);
+    	}
     	dest.writeInt(registered ? 1 : 0);
     	if (capabilities != null) {
         	dest.writeInt(1);
-        	dest.writeParcelable(capabilities, flags);
+        	capabilities.writeToParcel(dest, flags);
     	} else {
         	dest.writeInt(0);
     	}
@@ -125,7 +137,7 @@ public class JoynContact implements Parcelable {
 	 * 
 	 * @return Contact ID
 	 */
-	public String getContactId() {
+	public ContactId getContactId() {
 		return contactId;
 	}
 	
@@ -145,5 +157,10 @@ public class JoynContact implements Parcelable {
 	 */
 	public Capabilities getCapabilities(){
 		return capabilities;
+	}
+
+	@Override
+	public String toString() {
+		return "JoynContact [capabilities=" + capabilities + ", contactId=" + contactId + ", registered=" + registered + "]";
 	}	
 }

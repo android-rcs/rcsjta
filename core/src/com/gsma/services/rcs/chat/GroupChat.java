@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Group chat
@@ -184,7 +185,7 @@ public class GroupChat {
 	 * @return Contact
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return chatInf.getRemoteContact();
 		} catch(Exception e) {
@@ -298,9 +299,9 @@ public class GroupChat {
 	 * @param participants List of participants
 	 * @throws JoynServiceException
 	 */
-	public void addParticipants(Set<String> participants) throws JoynServiceException {
+	public void addParticipants(Set<ContactId> participants) throws JoynServiceException {
 		try {
-			chatInf.addParticipants(new ArrayList<String>(participants));
+			chatInf.addParticipants(new ArrayList<ContactId>(participants));
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}		

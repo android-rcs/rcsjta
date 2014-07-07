@@ -25,6 +25,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 import java.io.IOException;
 import java.util.Vector;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -44,6 +45,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -69,10 +71,11 @@ public class TerminatingFileSharingSession extends ImsFileSharingSession impleme
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+     * @throws JoynContactFormatException 
 	 */
-	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) {
-		super(parent, ContentManager.createMmContentFromSdp(invite), SipUtils.getAssertedIdentity(invite), FileTransferUtils
-				.extractFileIcon(invite), IdGenerator.generateMessageID());
+	public TerminatingFileSharingSession(ImsService parent, SipRequest invite) throws JoynContactFormatException {
+		super(parent, ContentManager.createMmContentFromSdp(invite), ContactUtils.createContactId(SipUtils
+				.getAssertedIdentity(invite)), FileTransferUtils.extractFileIcon(invite), IdGenerator.generateMessageID());
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

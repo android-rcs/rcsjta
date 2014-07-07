@@ -23,14 +23,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.xml.sax.InputSource;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -46,7 +50,9 @@ import com.orangelabs.rcs.core.ims.service.presence.directory.XcapDirectoryParse
 import com.orangelabs.rcs.platform.network.NetworkFactory;
 import com.orangelabs.rcs.platform.network.SocketConnection;
 import com.orangelabs.rcs.utils.Base64;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.HttpUtils;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -765,7 +771,7 @@ public class XdmManager {
 	 * @param contact Contact
 	 * @return Response
 	 */
-	public HttpResponse addContactToGrantedList(String contact) {
+	public HttpResponse addContactToGrantedList(ContactId contact) {
 		try {
 			if (logger.isActivated()){
 				logger.info("Add " + contact + " to granted list");
@@ -775,7 +781,7 @@ public class XdmManager {
 			String url = "/resource-lists/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
 					"/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22" +
-					HttpUtils.encodeURL(contact) + "%22%5D";
+					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 			
 			// Content
 			String content = "<entry uri='" + contact + "'></entry>";
@@ -809,7 +815,7 @@ public class XdmManager {
 	 * @param contact Contact
 	 * @return Response
 	 */
-	public HttpResponse removeContactFromGrantedList(String contact) {
+	public HttpResponse removeContactFromGrantedList(ContactId contact) {
 		try {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from granted list");
@@ -819,7 +825,7 @@ public class XdmManager {
 			String url = "/resource-lists/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
 					"/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22" +
-					HttpUtils.encodeURL(contact) + "%22%5D";
+					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 			
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);
@@ -843,14 +849,30 @@ public class XdmManager {
 			return null;
 		}
 	}
+	
+	private Set<ContactId > convertListOfUrisToSetOfContactId(List<String> uris) {
+		Set<ContactId> result = new HashSet<ContactId>();
+		if (uris != null) {
+			for (String uri : uris) {
+				try {
+					ContactId contactId = ContactUtils.createContactId(uri);
+					result.add(contactId);
+				} catch (JoynContactFormatException e) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse uri "+uri);
+					}
+				}
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Returns the list of granted contacts
 	 * 
 	 * @return List
 	 */
-	public List<String> getGrantedContacts() {
-		List<String> result = new ArrayList<String>();
+	public Set<ContactId> getGrantedContacts() {
 		try {
 			if (logger.isActivated()){
 				logger.info("Get granted contacts list");
@@ -874,7 +896,7 @@ public class XdmManager {
 				// Parse response
 				InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
 				XcapResponseParser parser = new XcapResponseParser(input);
-				result = parser.getUris();
+				return convertListOfUrisToSetOfContactId(parser.getUris());
 			} else {
 				if (logger.isActivated()){
 					logger.info("Can't get granted contacts list: " + response.getResponseCode() + " error");
@@ -885,7 +907,7 @@ public class XdmManager {
 				logger.error("Can't get granted contacts list: unexpected exception", e);
 			}
 		}
-		return result;
+		return new HashSet<ContactId>();
 	}
 
 	/**
@@ -938,7 +960,7 @@ public class XdmManager {
 	 * @param contact Contact
 	 * @return Response
 	 */
-	public HttpResponse removeContactFromBlockedList(String contact) {
+	public HttpResponse removeContactFromBlockedList(ContactId contact) {
 		try {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from blocked list");
@@ -948,7 +970,7 @@ public class XdmManager {
 			String url = "/resource-lists/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
 					"/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22" +
-					HttpUtils.encodeURL(contact) + "%22%5D";
+					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 			
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);
@@ -978,8 +1000,7 @@ public class XdmManager {
 	 * 
 	 * @return List
 	 */
-	public List<String> getBlockedContacts() {
-		List<String> result = new ArrayList<String>();
+	public Set<ContactId> getBlockedContacts() {
 		try {
 			if (logger.isActivated()){
 				logger.info("Get blocked contacts list");
@@ -1003,7 +1024,7 @@ public class XdmManager {
 				// Parse response
 				InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
 				XcapResponseParser parser = new XcapResponseParser(input);
-				result = parser.getUris();
+				return convertListOfUrisToSetOfContactId(parser.getUris());
 			} else {
 				if (logger.isActivated()){
 					logger.info("Can't get blocked contacts list: " + response.getResponseCode() + " error");
@@ -1014,7 +1035,7 @@ public class XdmManager {
 				logger.error("Can't get blocked contacts list: unexpected exception", e);
 			}
 		}
-		return result;
+		return new HashSet<ContactId>();
 	}
 
 	/**
@@ -1023,7 +1044,7 @@ public class XdmManager {
 	 * @param contact Contact
 	 * @return Response
 	 */
-	public HttpResponse addContactToRevokedList(String contact) {
+	public HttpResponse addContactToRevokedList(ContactId contact) {
 		try {
 			if (logger.isActivated()){
 				logger.info("Add " + contact + " to revoked list");
@@ -1033,7 +1054,7 @@ public class XdmManager {
 			String url = "/resource-lists/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
 					"/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22" +
-					HttpUtils.encodeURL(contact) + "%22%5D";
+					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 			
 			// Content
 			String content = "<entry uri='" + contact + "'></entry>";
@@ -1067,7 +1088,7 @@ public class XdmManager {
 	 * @param contact Contact
 	 * @return Response
 	 */
-	public HttpResponse removeContactFromRevokedList(String contact) {
+	public HttpResponse removeContactFromRevokedList(ContactId contact) {
 		try {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from revoked list");
@@ -1077,7 +1098,7 @@ public class XdmManager {
 			String url = "/resource-lists/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
 					"/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22" +
-					HttpUtils.encodeURL(contact) + "%22%5D";
+					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 			
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);

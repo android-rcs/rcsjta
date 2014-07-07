@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 
 /**
@@ -66,12 +67,12 @@ public interface IMessageLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
-	 * @param contact
-	 *            Contact
+	 * @param contactId
+	 *            Contact ID
 	 * @param status
 	 *            Status
 	 */
-	public void addGroupChatSystemMessage(String chatId, String contact, int status);
+	public void addGroupChatSystemMessage(String chatId, ContactId contactId, int status);
 
 	/**
 	 * Update chat message read status

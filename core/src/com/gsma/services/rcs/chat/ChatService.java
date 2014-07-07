@@ -33,11 +33,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Chat service offers the main entry point to initiate chat 1-1 ang group
@@ -137,16 +137,15 @@ public class ChatService extends JoynService {
      * The parameter contact supports the following formats: MSISDN in national
      * or international format, SIP address, SIP-URI or Tel-URI.
      * 
-     * @param contact Contact
+     * @param contactId the ContactId
      * @param listener Chat event listener
      * @return Chat or null 
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public Chat openSingleChat(String contact, ChatListener listener) throws JoynServiceException, JoynContactFormatException {
+    public Chat openSingleChat(ContactId contactId, ChatListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IChat chatIntf = api.openSingleChat(contact, listener);
+				IChat chatIntf = api.openSingleChat(contactId, listener);
 				if (chatIntf != null) {
 					return new Chat(chatIntf);
 				} else {
@@ -164,16 +163,15 @@ public class ChatService extends JoynService {
      * Initiates a group chat with a group of contact and returns a GroupChat
      * instance. The subject is optional and may be null.
      * 
-     * @param contact List of contacts
+     * @param contactIds Set of contact identifiers
      * @param subject Subject
      * @param listener Chat event listener
      * @throws JoynServiceException
-	 * @throws JoynContactFormatException
      */
-    public GroupChat initiateGroupChat(Set<String> contacts, String subject, GroupChatListener listener) throws JoynServiceException, JoynContactFormatException {
+    public GroupChat initiateGroupChat(Set<ContactId> contactIds, String subject, GroupChatListener listener) throws JoynServiceException {
     	if (api != null) {
 			try {
-				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<String>(contacts), subject, listener);
+				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contactIds), subject, listener);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
 				} else {

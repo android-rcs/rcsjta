@@ -5,6 +5,7 @@ import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.gsh.INewGeolocSharingListener;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Geoloc sharing service API
@@ -20,7 +21,7 @@ interface IGeolocSharingService {
 	
 	IGeolocSharing getGeolocSharing(in String sharingId);
 
-	IGeolocSharing shareGeoloc(in String contact, in Geoloc geoloc, in IGeolocSharingListener listener);
+	IGeolocSharing shareGeoloc(in ContactId contact, in Geoloc geoloc, in IGeolocSharingListener listener);
 	
 	void addNewGeolocSharingListener(in INewGeolocSharingListener listener);
 

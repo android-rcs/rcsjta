@@ -18,6 +18,8 @@
 package com.gsma.services.rcs;
 
 import com.gsma.services.rcs.JoynServiceConfiguration.Settings.DefaultMessagingMethods;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -46,8 +48,8 @@ public class JoynServiceConfiguration {
 		try {
 			return Boolean.parseBoolean(getStringValueSetting(ctx, Settings.CONFIGURATION_VALIDITY));
 		} catch (Exception e) {
+			return false;
 		}
-		return false;
 	}
 	
 	/**
@@ -81,10 +83,21 @@ public class JoynServiceConfiguration {
 	 * 
 	 * @param ctx
 	 *            the context
-	 * @return the contact ID
+	 * @return the country code or null if not provisioned
 	 */
 	public static String getMyCountryCode(Context ctx) {
 		return getStringValueSetting(ctx, Settings.MY_COUNTRY_CODE);
+	}
+	
+	/**
+	 * Returns the user country area code.
+	 * 
+	 * @param ctx
+	 *            the context
+	 * @return the country area code or null if not provisioned
+	 */
+	public static String getMyCountryAreaCode(Context ctx) {
+		return getStringValueSetting(ctx, Settings.MY_COUNTRY_AREA_CODE);
 	}
 	
 	/**
@@ -93,11 +106,17 @@ public class JoynServiceConfiguration {
 	 * @param ctx
 	 *            the context
 	 * @return the contact ID
+	 * @throws JoynContactFormatException
 	 */
-	public static String getMyContactId(Context ctx) {
-		return getStringValueSetting(ctx, Settings.MY_CONTACT_ID);
+	public static ContactId getMyContactId(Context ctx) throws JoynContactFormatException {
+		ContactUtils instance = ContactUtils.getInstance(ctx);
+		if (instance == null) {
+			throw new IllegalStateException();
+		}
+		String contact = getStringValueSetting(ctx, Settings.MY_CONTACT_ID);
+		return instance.formatContactId(contact);
 	}
-	
+
 	/**
 	 * Returns the messaging client mode which can be INTEGRATED, CONVERGED, SEAMLESS or NONE.
 	 * 
@@ -109,8 +128,8 @@ public class JoynServiceConfiguration {
 		try {
 			return Integer.parseInt(getStringValueSetting(ctx, Settings.MESSAGING_MODE));
 		} catch (Exception e) {
+			return Settings.MessagingModes.NONE;
 		}
-		return Settings.MessagingModes.NONE;
 	}
 	
 	/**
@@ -124,9 +143,9 @@ public class JoynServiceConfiguration {
 		try {
 			return Integer.parseInt(getStringValueSetting(ctx, Settings.DEFAULT_MESSAGING_METHOD));
 		} catch (Exception e) {
+			// TODO CR026 exception handling : check if appropriate
+			throw new IllegalArgumentException("Default messaging method is invalid");
 		}
-		// TODO CR026 exception handling : check if appropriate
-		throw new IllegalArgumentException("Default messaging method is invalid");
 	}
 	
 	/**
@@ -181,8 +200,9 @@ public class JoynServiceConfiguration {
 				return c.getString(0);
 			}
 		} finally {
-			if (c != null)
+			if (c != null) {
 				c.close();
+			}
 		}
 		return null;
 	}
@@ -192,6 +212,7 @@ public class JoynServiceConfiguration {
      *
      */
 	public static class Settings {
+
 		/**
 		 * Content provider URI for RCS settings
 		 */
@@ -227,6 +248,11 @@ public class JoynServiceConfiguration {
 		 */
 		public static final String MY_COUNTRY_CODE = "MyCountryCode";
 		
+		/**
+		 * Key to get MyCountryAreaCode setting
+		 */
+		public static final String MY_COUNTRY_AREA_CODE = "CountryAreaCode";
+
 		/**
 		 * Key to get MessagingMode setting
 		 */

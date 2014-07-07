@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.orangelabs.rcs.core.content.LiveVideoContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -34,10 +35,10 @@ public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStream
      * @param parent IMS service
      * @param player Media player
      * @param content Content to be shared
-     * @param contact Remote contact
+     * @param contactId Remote contact Id
      */
     public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
-            LiveVideoContent content, String contact) {
-        super(parent, player, content, contact);
+            LiveVideoContent content, ContactId contactId) {
+        super(parent, player, content, contactId);
     }
 }

@@ -19,6 +19,7 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
@@ -32,7 +33,6 @@ import com.orangelabs.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener
 import com.orangelabs.rcs.core.ims.service.ipcall.OriginatingIPCallSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -82,12 +82,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	}
 
 	/**
-	 * Get remote contact
+	 * Get remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 
 	/**

@@ -23,6 +23,7 @@ import java.util.Vector;
 import javax2.sip.header.AcceptHeader;
 import javax2.sip.header.EventHeader;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -54,7 +55,7 @@ public class AnonymousFetchRequestTask {
     /**
      * Remote contact
      */
-    private String contact;
+    private ContactId contact;
     
     /**
      * Dialog path
@@ -69,17 +70,17 @@ public class AnonymousFetchRequestTask {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(AnonymousFetchRequestTask.class.getName());
 
     /**
      * Constructor
      * 
      * @param parent IMS module
-     * @param contact Remote contact
+     * @param contactId Remote contact identifier
      */
-    public AnonymousFetchRequestTask(ImsModule parent, String contact) {
+    public AnonymousFetchRequestTask(ImsModule parent, ContactId contactId) {
         this.imsModule = parent;
-        this.contact = contact;
+        this.contact = contactId;
 		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
     }
     
@@ -100,7 +101,7 @@ public class AnonymousFetchRequestTask {
 
     	try {
 	        // Create a dialog path
-    		String contactUri = PhoneUtils.formatNumberToSipUri(contact);
+    		String contactUri = PhoneUtils.formatContactIdToUri(contact);
 
         	// Set Call-Id
         	String callId = imsModule.getSipManager().getSipStack().generateCallId();

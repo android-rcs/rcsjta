@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 import java.io.IOException;
 import java.util.Vector;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -42,6 +43,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -53,16 +55,17 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(TerminatingStoreAndForwardMsgSession.class.getSimpleName());
 
     /**
      * Constructor
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+	 * @param contactId the remote ContactId
 	 */
-	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite) {
-		super(parent, ChatUtils.getReferredIdentity(invite));
+	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite, ContactId contactId) {
+		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
 
 		// Set feature tags
 		setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());

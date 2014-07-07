@@ -26,6 +26,8 @@ import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -36,6 +38,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -70,9 +73,14 @@ public abstract class ImsServiceSession extends Thread {
     private String sessionId =  SessionIdGenerator.getNewId();
 
 	/**
-	 * Remote contact
+	 * Remote contactId
 	 */
-	private String contact;
+	private ContactId contact;
+		
+	/**
+	 * Remote contactUri
+	 */
+	private String remoteUri;
 
     /**
      * Remote display name
@@ -132,17 +140,19 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param imsService IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Identifier
+	 * @param remoteUri Remote URI
 	 */
-	public ImsServiceSession(ImsService imsService, String contact) {
+	public ImsServiceSession(ImsService imsService, ContactId contactId, String remoteUri) {
         this.imsService = imsService;
-		this.contact = contact;
+		this.contact = contactId;
+		this.remoteUri =  remoteUri;
 		this.authenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
 		this.updateMgr = new UpdateSessionManager(this);
 	}
@@ -162,9 +172,9 @@ public abstract class ImsServiceSession extends Thread {
     			getImsService().getImsModule().getSipManager().getSipStack(),
     			callId,
 				1,
-				getRemoteContact(),
+				remoteUri,
 				ImsModule.IMS_USER_PROFILE.getPublicAddress(),
-				getRemoteContact(),
+				remoteUri,
 				route);
     	
     	// Set the authentication agent in the dialog path 
@@ -320,14 +330,23 @@ public abstract class ImsServiceSession extends Thread {
 	}
 
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contactId
 	 * 
-	 * @return String
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
+	public ContactId getRemoteContact() {
 		return contact;
 	}
 
+	/**
+	 * Returns the remote Uri
+	 * 
+	 * @return remoteUri
+	 */
+	public String getRemoteUri() {
+		return remoteUri;
+	}
+	
 	/**
 	 * Returns display name of the remote contact
 	 * 
@@ -579,9 +598,15 @@ public abstract class ImsServiceSession extends Thread {
     		getListeners().get(i).handleSessionTerminatedByRemote();
         }
 
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getDialogPath().getRemoteParty());
+        try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities to the remote
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.debug("Cannot parse contact "+getDialogPath().getRemoteParty());
+			}
+		}
 	}
 	
 	/**
@@ -637,8 +662,15 @@ public abstract class ImsServiceSession extends Thread {
     		getListeners().get(i).handleSessionTerminatedByRemote();
         }
         
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getDialogPath().getRemoteParty());
+		try {
+			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+			// Request capabilities to the remote
+	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.debug("Cannot parse contact "+getDialogPath().getRemoteParty());
+			}
+		}
 	}
 
 	/**
@@ -695,7 +727,6 @@ public abstract class ImsServiceSession extends Thread {
     		}
     	}
     }
-	
 
     /**
      * Send an error response to the remote party
@@ -1224,9 +1255,8 @@ public abstract class ImsServiceSession extends Thread {
     public void handleReInvite407ProxyAuthent(SipResponse response, int serviceContext){	
     }
  
-    
     public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext){
     	return null;
     }
-  
+ 
 }

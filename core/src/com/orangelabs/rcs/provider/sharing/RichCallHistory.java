@@ -30,9 +30,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -64,7 +64,7 @@ public class RichCallHistory {
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private final static Logger logger = Logger.getLogger(RichCallHistory.class.getSimpleName());
 	
 	private static final String WHERE_CLAUSE_ISH = new StringBuilder(ImageSharingData.KEY_SESSION_ID).append("=?").toString();
 	
@@ -104,21 +104,20 @@ public class RichCallHistory {
 	/**
 	 * Add a new video sharing in the call history 
 	 * 
-	 * @param contact Remote contact
+	 * @param contactId Remote contact ID
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
 	 * @param status Call status
 	 */
-	public Uri addVideoSharing(String contact, String sessionId, int direction, MmContent content, int status) {
+	public Uri addVideoSharing(ContactId contactId, String sessionId, int direction, MmContent content, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new video sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new video sharing for contact " + contactId + ": session=" + sessionId + ", status=" + status);
 		}
 
-		contact = PhoneUtils.extractNumberFromUri(contact);
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SESSION_ID, sessionId);
-		values.put(VideoSharingData.KEY_CONTACT, contact);
+		values.put(VideoSharingData.KEY_CONTACT, contactId.toString());
 		values.put(VideoSharingData.KEY_DIRECTION, direction);
 		values.put(VideoSharingData.KEY_STATUS, status);
 		values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
@@ -161,21 +160,20 @@ public class RichCallHistory {
 	/**
 	 * Add a new image sharing in the call history 
 	 * 
-	 * @param contact Remote contact
+	 * @param contactId Remote contact ID
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
 	 * @param status Call status
 	 */
-	public Uri addImageSharing(String contact, String sessionId, int direction, MmContent content, int status) {
+	public Uri addImageSharing(ContactId contactId, String sessionId, int direction, MmContent content, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new image sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new image sharing for contact " + contactId + ": session=" + sessionId + ", status=" + status);
 		}
 
-		contact = PhoneUtils.extractNumberFromUri(contact);
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SESSION_ID, sessionId);
-		values.put(ImageSharingData.KEY_CONTACT, contact);
+		values.put(ImageSharingData.KEY_CONTACT, contactId.toString());
 		values.put(ImageSharingData.KEY_DIRECTION, direction);
 		values.put(ImageSharingData.KEY_FILE, content.getUri().toString());
 		values.put(ImageSharingData.KEY_NAME, content.getName());
@@ -209,7 +207,7 @@ public class RichCallHistory {
 		String[] whereArgs = new String[] { sessionId };
 		cr.update(ishDatabaseUri, values, WHERE_CLAUSE_ISH, whereArgs);
 	}
-
+	
 	/**
      * Read the total size of transferred image
      *
@@ -242,9 +240,6 @@ public class RichCallHistory {
 	 * @param total Total size
 	 */
 	public void setImageSharingProgress(String sessionId, long current, long total) {
-		if (logger.isActivated()) {
-			logger.debug("Update image sharing progress");
-		}
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SIZE, current);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);

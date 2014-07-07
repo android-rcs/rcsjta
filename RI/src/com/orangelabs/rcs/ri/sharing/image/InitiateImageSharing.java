@@ -41,8 +41,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
@@ -226,8 +229,16 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
             // Get the remote contact
             Spinner spinner = (Spinner)findViewById(R.id.contact);
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-            final String remote = cursor.getString(1);
 
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateImageSharing.this);
+            final ContactId remote;
+    		try {
+    			remote = contactUtils.formatContactId(cursor.getString(1));
+    		} catch (JoynContactFormatException e1) {
+    			Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+    	    	return;
+    		}
+    		
         	try {
                 if (LogUtils.isActive) {
     				Log.d(LOGTAG, "shareImage image="+filename+" size="+filesize);

@@ -124,7 +124,7 @@ public class ContactsService extends JoynService {
      * @throws JoynServiceException
      * @see JoynContact
      */
-	public JoynContact getJoynContact(String contactId) throws JoynServiceException {
+	public JoynContact getJoynContact(ContactId contactId) throws JoynServiceException {
 		if (api != null) {
 			try {
 				return api.getJoynContact(contactId);

@@ -42,8 +42,8 @@ public class RcsSettingsTest extends AndroidTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		cr = mContext.getContentResolver();
-		RcsSettings.createInstance(mContext);
+		cr = getContext().getContentResolver();
+		RcsSettings.createInstance(getContext());
 		rcsSettings = RcsSettings.getInstance();
 	}
 

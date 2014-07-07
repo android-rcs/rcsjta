@@ -62,6 +62,8 @@
 <string name="label_receive_image">Received image %s</string>
 <string name="label_remote">Remote contact:</string>
 <string name="label_select_file">Select file</string>
+<string name="label_invalid_contact">Invalid contact %s</string>
+<string name="label_invalid_contacts">Invalid list of participants</string>
 
 <!-- About menu -->
 <string name="label_about_title">Reference Implementation</string>

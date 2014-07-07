@@ -24,6 +24,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.List;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
@@ -69,15 +70,16 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 	 *
 	 * @param parent IMS service
 	 * @param content Content to share
-	 * @param contact Remote contact
+	 * @param contactId Remote contact identifier
+	 * @param remoteUri the remote URI
 	 * @param fileicon Content of fileicon
 	 * @param chatSessionId Chat session ID
 	 * @param chatContributionId Chat contribution Id
 	 * @param fileTransferId File transfer Id
 	 */
-	public HttpFileTransferSession(ImsService parent, MmContent content, String contact, MmContent fileicon, String chatSessionID,
+	public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileicon, String chatSessionID,
 			String chatContributionId, String fileTransferId) {
-		super(parent, content, contact, fileicon, fileTransferId);
+		super(parent, content, contactId, remoteUri, fileicon, fileTransferId);
 		this.chatSessionId = chatSessionID;
 		setContributionID(chatContributionId);
 		this.sessionState = HttpTransferState.PENDING;
@@ -279,7 +281,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                     .handleFileTransferResumed();
         }
     }
-    
     
 	/**
      * Get session state

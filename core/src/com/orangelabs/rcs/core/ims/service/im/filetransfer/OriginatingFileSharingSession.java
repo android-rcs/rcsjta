@@ -49,6 +49,7 @@ import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.net.Uri;
 
@@ -80,16 +81,16 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	 *            IMS service
 	 * @param content
 	 *            Content to be shared
-	 * @param contact
-	 *            Remote contact
+	 * @param contactId
+	 *            Remote contact identifier
 	 * @param fileicon
 	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, String contact, boolean fileicon) {
-		super(parent, content, contact, null, IdGenerator.generateMessageID());
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, ContactId contactId, boolean fileicon) {
+		super(parent, content, contactId, null, IdGenerator.generateMessageID());
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileicon="+fileicon);
+			logger.debug("OriginatingFileSharingSession contact=" + contactId + " filename="+content.getName()+" fileicon="+fileicon);
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -295,10 +296,8 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
         }
 
         // Notify delivery
-        String fileTransferId = getFileTransferId();
-        String remoteContact = getRemoteContact();
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(fileTransferId, ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteContact);
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(fileTransferId, ImdnDocument.DELIVERY_STATUS_DISPLAYED, remoteContact);
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
 	}
 	
 	/**

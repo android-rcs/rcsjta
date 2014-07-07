@@ -93,13 +93,18 @@ public class FileTransferUtils {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream in = null;
 		try {
-
 			in = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(file);
 			Bitmap bitmap = BitmapFactory.decodeStream(in);
+			if (bitmap == null) {
+				if (logger.isActivated()) {
+					logger.warn("Cannot decode image " + file);
+				}
+				return null;
+			}
 			int width = bitmap.getWidth();
 			int height = bitmap.getHeight();
-			long size = FileUtils.getFileSize(AndroidFactory.getApplicationContext(), file);
 
+			long size = FileUtils.getFileSize(AndroidFactory.getApplicationContext(), file);
 			// Resize the bitmap
 			float scale = 0.05f;
 			Matrix matrix = new Matrix();
@@ -156,7 +161,7 @@ public class FileTransferUtils {
 	 * @return the filename of the fileicon
 	 */
 	public static String buildFileiconUrl(String msgId, String mimeType) {
-		StringBuilder iconName = new StringBuilder("thumnail_");
+		StringBuilder iconName = new StringBuilder("thumbnail_");
 		iconName.append(msgId);
 		String extension = MimeManager.getInstance().getExtensionFromMimeType(mimeType);
 		if (extension != null) {

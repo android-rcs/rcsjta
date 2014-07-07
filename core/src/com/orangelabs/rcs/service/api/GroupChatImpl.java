@@ -37,6 +37,7 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
@@ -52,7 +53,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -103,12 +103,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 	
 	/**
-	 * Get remote contact
+	 * Get remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 */
-	public String getRemoteContact() {
-		return PhoneUtils.extractNumberFromUri(session.getRemoteContact());
+	public ContactId getRemoteContact() {
+		return session.getRemoteContact();
 	}
 	
 	/**
@@ -279,7 +279,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * 
 	 * @param participants Set of participants
 	 */
-	public void addParticipants(final List<String> participants) {
+	public void addParticipants(final List<ContactId> participants) {
 		if (logger.isActivated()) {
 			logger.info("Add " + Arrays.toString(participants.toArray()) + " participants to the session");
 		}
@@ -293,7 +293,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			// Add a list of participants to the session
 			new Thread() {
 				public void run() {
-					session.addParticipants(new HashSet<String>(participants));
+					session.addParticipants(new HashSet<ContactId>(participants));
 				}
 			}.start();
 		} else {
@@ -356,30 +356,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     		}
     	}.start();
 	}
-	
-    /**
-     * Sends a displayed delivery report for a given message ID
-     * 
-     * @param msgId Message ID
-     */
-    public void sendDisplayedDeliveryReport(final String msgId) {
-		try {
-			if (logger.isActivated()) {
-				logger.debug("Set displayed delivery report for " + msgId);
-			}
-			
-			// Send MSRP delivery status
-	         new Thread() {
-	    		public void run() {
-	    			session.sendMsrpMessageDeliveryStatus(session.getRemoteContact(), msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
-	    		}
-	    	}.start();
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Could not send MSRP delivery status",e);
-			}
-		}
-    }	
 	
 	/**
 	 * Adds a listener on chat events
@@ -519,7 +495,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     public void handleReceiveMessage(InstantMessage message) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("New IM received");
+				logger.info("New IM received: "+message);
 			}
 			
 			// Update rich messaging history
@@ -531,7 +507,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	        for (int i=0; i < N; i++) {
 	            try {
 	            	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
-	            			PhoneUtils.extractNumberFromUri(message.getRemote()),
+	            			message.getRemote(),
 	            			message.getTextMessage(),
 	            			message.getServerDate());
 	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
@@ -599,22 +575,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    }
     }
     
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleIsComposingEvent(java.lang.String, boolean)
-	 */
-	public void handleIsComposingEvent(String contact, boolean status) {
+    @Override
+	public void handleIsComposingEvent(ContactId contactId, boolean status) {
     	synchronized(lock) {
-        	contact = PhoneUtils.extractNumberFromUri(contact);
-
         	if (logger.isActivated()) {
-				logger.info(contact + " is composing status set to " + status);
+				logger.info(contactId + " is composing status set to " + status);
 			}
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onComposingEvent(contact, status);
+	            	listeners.getBroadcastItem(i).onComposingEvent(contactId, status);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -625,15 +597,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
 	
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleConferenceEvent(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void handleConferenceEvent(String contact, String contactDisplayname, String state) {
+	@Override
+    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state) {
     	synchronized(lock) {
-        	contact = PhoneUtils.extractNumberFromUri(contact);
-
         	if (logger.isActivated()) {
-				logger.info("New conference event " + state + " for " + contact);
+				logger.info("New conference event " + state + " for " + contactId);
 			}
 			
 	  		// Update history and notify event listeners
@@ -642,24 +610,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            try {
 	            	if (state.equals(User.STATE_CONNECTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.JOINED);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantJoined(contact, contactDisplayname);
+	        			listeners.getBroadcastItem(i).onParticipantJoined(contactId, contactDisplayname);
 	            	} else
 	            	if (state.equals(User.STATE_DISCONNECTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.DISCONNECTED);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contact);
+	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contactId);
 	            	} else
 	            	if (state.equals(User.STATE_DEPARTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.GONE);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantLeft(contact);
+	        			listeners.getBroadcastItem(i).onParticipantLeft(contactId);
 	            	}
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
@@ -698,10 +666,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void handleMessageDeliveryStatus(String msgId, String status, String contact) {
+	@Override
+    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
@@ -709,7 +675,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	
 			// Update rich messaging history
 			MessagingLog messagingLog = MessagingLog.getInstance();
-			messagingLog.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
+			messagingLog.updateGroupChatDeliveryInfoStatus(msgId, status, contactId);
 			// TODO : Listeners to notify group file delivery status for
 			// individual contacts will be implemented as part of CR011. For now,
 			// the same callback is used for sending both per contact group delivery
@@ -819,7 +785,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
 	            			geoloc.getGeoloc().getExpiration());
 	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-	            			PhoneUtils.extractNumberFromUri(geoloc.getRemote()),
+	            			geoloc.getRemote(),
 	            			geolocApi, geoloc.getDate());
 	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
 	            } catch(Exception e) {

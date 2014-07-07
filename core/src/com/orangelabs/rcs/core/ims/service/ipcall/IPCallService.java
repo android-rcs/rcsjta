@@ -20,6 +20,8 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.orangelabs.rcs.core.CoreException;
@@ -28,11 +30,12 @@ import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.PhoneUtils;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -61,7 +64,7 @@ public class IPCallService extends ImsService {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(IPCallService.class.getName());
 
     /**
      * Constructor
@@ -121,14 +124,14 @@ public class IPCallService extends ImsService {
     /**
      * Initiate an IP call session
      *
-     * @param contact Remote contact
+     * @param contactId Remote contact identifier
      * @param video Video
      * @param player Player
      * @param renderer Renderer
      * @return IP call session
      * @throws CoreException
      */
-    public IPCallSession initiateIPCallSession(String contact, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
+    public IPCallSession initiateIPCallSession(ContactId contactId, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call session");
 		}
@@ -148,14 +151,8 @@ public class IPCallService extends ImsService {
 	    	videoContent = ContentManager.createGenericLiveVideoContent();
 	    }
 
-        // Create a new session
-		OriginatingIPCallSession session = new OriginatingIPCallSession(
-				this,
-				PhoneUtils.formatNumberToSipUri(contact),
-				audioContent,
-				videoContent,
-				player,
-				renderer);
+		// Create a new session
+		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contactId, audioContent, videoContent, player, renderer);
 		
 		return session;
 	}
@@ -176,9 +173,19 @@ public class IPCallService extends ImsService {
             sendErrorResponse(invite, 486);
             return;
         } 
-
+        ContactId contact = null;
+        try {
+			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+        } catch (JoynContactFormatException e) {
+        	// Max session
+        	if (logger.isActivated()) {
+                logger.debug("Cannot parse contact: reject the invitation");
+            }
+            sendErrorResponse(invite, 486);
+            return;
+		}
 		// Create a new session    
-        IPCallSession session = new TerminatingIPCallSession(this, invite);
+        IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
         
 		// Start the session
 		session.startSession();
@@ -213,15 +220,15 @@ public class IPCallService extends ImsService {
 	/**
      * Is call connected with a given contact
      * 
-     * @param contact Contact
+     * @param contactId Contact Id
      * @return Boolean
      */
-	public boolean isCallConnectedWith(String contact) {
+	public boolean isCallConnectedWith(ContactId contactId) {
 		boolean connected = false;
 		Vector<IPCallSession> sessions = getIPCallSessions(); 
 		for(int i=0; i < sessions.size(); i++) {
 			IPCallSession session = sessions.get(i);
-			if (PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
+			if (contactId != null && contactId.equals(session.getRemoteContact())) {
 				connected = true;
 				break;
 			}

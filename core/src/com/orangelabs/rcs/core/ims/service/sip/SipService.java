@@ -23,6 +23,8 @@ import java.util.Vector;
 
 import android.content.Intent;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -50,7 +52,7 @@ public class SipService extends ImsService {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(SipService.class.getName());
 
 	/**
 	 * MIME-type for multimedia services
@@ -98,20 +100,17 @@ public class SipService extends ImsService {
     /**
      * Initiate a MSRP session
      * 
-     * @param contact Remote contact
+     * @param contactId Remote contact Id
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
-	public GenericSipMsrpSession initiateMsrpSession(String contact, String featureTag) {
+	public GenericSipMsrpSession initiateMsrpSession(ContactId contactId, String featureTag) {
 		if (logger.isActivated()) {
-			logger.info("Initiate a MSRP session with contact " + contact);
+			logger.info("Initiate a MSRP session with contact " + contactId);
 		}
 		
 		// Create a new session
-		OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(
-				this,
-				PhoneUtils.formatNumberToSipUri(contact),
-				featureTag);
+		OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contactId, featureTag);
 		
 		return session;
 	}
@@ -121,12 +120,11 @@ public class SipService extends ImsService {
      * 
      * @param intent Resolved intent
      * @param invite Initial invite
+     * @throws JoynContactFormatException 
      */
-	public void receiveMsrpSessionInvitation(Intent intent, SipRequest invite) {
+	public void receiveMsrpSessionInvitation(Intent intent, SipRequest invite) throws JoynContactFormatException {
 		// Create a new session
-    	TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(
-					this,
-					invite);
+		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite);
 
 		// Start the session
 		session.startSession();
@@ -142,16 +140,13 @@ public class SipService extends ImsService {
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
-	public GenericSipRtpSession initiateRtpSession(String contact, String featureTag) {
+	public GenericSipRtpSession initiateRtpSession(ContactId contact, String featureTag) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a RTP session with contact " + contact);
 		}
 		
 		// Create a new session
-		OriginatingSipRtpSession session = new OriginatingSipRtpSession(
-				this,
-				PhoneUtils.formatNumberToSipUri(contact),
-				featureTag);
+		OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag);
 		
 		return session;
 	}
@@ -161,12 +156,11 @@ public class SipService extends ImsService {
      * 
      * @param intent Resolved intent
      * @param invite Initial invite
+	 * @throws JoynContactFormatException 
      */
-	public void receiveRtpSessionInvitation(Intent intent, SipRequest invite) {
+	public void receiveRtpSessionInvitation(Intent intent, SipRequest invite) throws JoynContactFormatException {
 		// Create a new session
-    	TerminatingSipRtpSession session = new TerminatingSipRtpSession(
-					this,
-					invite);
+		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite);
 
 		// Start the session
 		session.startSession();
@@ -197,16 +191,16 @@ public class SipService extends ImsService {
 	/**
      * Returns SIP sessions with a given contact
      * 
-     * @param contact Contact
+     * @param contactId Contact Id
      * @return List of sessions
      */
-	public Vector<GenericSipMsrpSession> getSipSessionsWith(String contact) {
+	public Vector<GenericSipMsrpSession> getSipSessionsWith(ContactId contactId) {
 		// Search all SIP sessions
 		Vector<GenericSipMsrpSession> result = new Vector<GenericSipMsrpSession>();
 		Enumeration<ImsServiceSession> list = getSessions();
 		while(list.hasMoreElements()) {
 			ImsServiceSession session = list.nextElement();
-			if ((session instanceof GenericSipMsrpSession) && PhoneUtils.compareNumbers(session.getRemoteContact(), contact)) {
+			if ((session instanceof GenericSipMsrpSession) && session.getRemoteContact().equals(contactId)) {
 				result.add((GenericSipMsrpSession)session);
 			}
 		}

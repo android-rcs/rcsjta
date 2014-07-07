@@ -33,7 +33,6 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -96,7 +95,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 */
 	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean fileicon,
 			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId) {
-		super(parent, content, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
+		super(parent, content, null, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
 		// Set participants involved in the transfer
 		this.participants = participants;
 		

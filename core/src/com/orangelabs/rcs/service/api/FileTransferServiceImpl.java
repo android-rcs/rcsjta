@@ -36,6 +36,7 @@ import android.os.RemoteException;
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
@@ -54,7 +55,6 @@ import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -212,15 +212,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					+ " size=" + session.getContent().getSize());
 		}
 
-		// Extract number from contact 
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
-
 		// Update rich messaging history
 		if (isGroup) {
 			MessagingLog.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
-					number, session.getFileTransferId(), session.getContent(), session.getFileicon());
+					session.getRemoteContact(), session.getFileTransferId(), session.getContent(), session.getFileicon());
 		} else {
-			MessagingLog.getInstance().addFileTransfer(number, session.getFileTransferId(),
+			MessagingLog.getInstance().addFileTransfer(session.getRemoteContact(), session.getFileTransferId(),
 					FileTransfer.Direction.INCOMING, session.getContent(), session.getFileicon());
 		}
 
@@ -231,7 +228,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+    	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
     	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
     	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
@@ -318,7 +315,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * @return File transfer
 	 * @throws ServerApiException
 	 */
-    public IFileTransfer transferFile(String contact, Uri file, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
+    public IFileTransfer transferFile(ContactId contact, Uri file, boolean fileicon, IFileTransferListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Transfer file " + file + " to " + contact + " (fileicon=" + fileicon + ")");
 		}
@@ -330,6 +327,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// Initiate the session
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(), fileDescription.getName());
+			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
+				if (logger.isActivated()) {
+					
+				}
+				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
+			}
 			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon);
 
 			// Add session listener
@@ -355,7 +358,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
-			throw new ServerApiException(e.getMessage());
+
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException)e;
+			}
+			throw new ServerApiException(e);
 		}
     }
 
@@ -383,7 +390,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
 					fileDescription.getName());
-
+			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
+				if (logger.isActivated()) {
+					
+				}
+				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
+			}
 			Set<ParticipantInfo> participants = MessagingLog.getInstance()
 					.getGroupChatConnectedParticipants(chatId);
 			final FileSharingSession session = Core
@@ -416,6 +428,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			// TODO:Handle Security exception in CR026
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
+			}
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException)e;
 			}
 			throw new ServerApiException(e.getMessage());
 		}
@@ -500,7 +515,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param status status of File transfer
      * @param contact contact who received file
      */
-    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact) {
+    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
         if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			// Update rich messaging history
 			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DELIVERED);
@@ -543,7 +558,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileTransferId File transfer Id
      * @param contact contact who received file
      */
-	private void handleGroupFileDeliveryStatusDelivered(String fileTransferId, String contact) {
+	private void handleGroupFileDeliveryStatusDelivered(String fileTransferId, ContactId contact) {
 		// Update rich messaging history
 		MessagingLog messagingLog = MessagingLog.getInstance();
 		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId,
@@ -588,7 +603,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileTransferId File transfer Id
      * @param contact contact who received file
      */
-	private void handleGroupFileDeliveryStatusDisplayed(String fileTransferId, String contact) {
+	private void handleGroupFileDeliveryStatusDisplayed(String fileTransferId, ContactId contact) {
 		// Update rich messaging history
 		MessagingLog messagingLog = MessagingLog.getInstance();
 		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId,
@@ -634,7 +649,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param status status of File transfer
      * @param contact contact who received file
      */
-	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact) {
+	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
 		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			handleGroupFileDeliveryStatusDelivered(fileTransferId, contact);
 		} else if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
@@ -663,8 +678,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Resume outgoing file transfer from " + session.getRemoteContact());
 		}
-		// Extract number from contact
-		String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -672,7 +685,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
 		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
 		if (isGroup) {
@@ -700,10 +713,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (logger.isActivated()) {
             logger.info("Resume incoming file transfer from " + session.getRemoteContact());
         }
-        // TODO FUSION remove chatSessionId
-        
-        // Extract number from contact 
-        String number = PhoneUtils.extractNumberFromUri(session.getRemoteContact());
 
 		// Add session in the list
 		FileTransferImpl sessionApi = new FileTransferImpl(session);
@@ -713,7 +722,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 
-        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, number);
+        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
         intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
         intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
         if (isGroup) {

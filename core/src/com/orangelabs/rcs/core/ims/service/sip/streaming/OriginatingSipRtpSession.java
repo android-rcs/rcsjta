@@ -17,6 +17,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
@@ -31,17 +32,17 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(OriginatingSipRtpSession.class.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 * @param featureTag Feature tag
 	 */
-	public OriginatingSipRtpSession(ImsService parent, String contact, String featureTag) {
-		super(parent, contact, featureTag);
+	public OriginatingSipRtpSession(ImsService parent, ContactId contactId, String featureTag) {
+		super(parent, contactId, featureTag);
 		
 		// Create dialog path
 		createOriginatingDialogPath();

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -83,11 +84,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contactId
+	 * @param remoteUri the remote URI
 	 * @param fileicon Thumbnail
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, String contact, MmContent fileicon, String filetransferId) {
-		super(parent, contact);
+	public FileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileicon, String filetransferId) {
+		super(parent, contactId, remoteUri);
 		
 		this.content = content;
 		this.fileicon = fileicon;

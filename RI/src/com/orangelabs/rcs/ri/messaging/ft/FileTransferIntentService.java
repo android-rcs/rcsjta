@@ -79,7 +79,7 @@ public class FileTransferIntentService extends IntentService {
 				}
 				try {
 					// Get File Transfer from provider
-					FileTransferDAO ftdao = new FileTransferDAO(getContentResolver(), transferId);
+					FileTransferDAO ftdao = new FileTransferDAO(this, transferId);
 					// Save FileTransferDAO into intent
 					Bundle bundle = new Bundle();
 					bundle.putSerializable(BUNDLE_FTDAO_ID, ftdao);

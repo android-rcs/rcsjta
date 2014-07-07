@@ -47,7 +47,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
 import com.gsma.services.rcs.vsh.VideoSharingService;
@@ -268,8 +272,16 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
             // Get the remote contact
             Spinner spinner = (Spinner)findViewById(R.id.contact);
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-            final String remote = cursor.getString(1);
 
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateVideoSharing.this);
+            final ContactId remote;
+    		try {
+    			remote = contactUtils.formatContactId(cursor.getString(1));
+    		} catch (JoynContactFormatException e1) {
+    			Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+    	    	return;
+    		}
+    		
             Thread thread = new Thread() {
             	public void run() {
 		        	try {

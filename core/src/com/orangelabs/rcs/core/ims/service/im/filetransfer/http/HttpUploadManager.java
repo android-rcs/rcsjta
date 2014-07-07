@@ -628,7 +628,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			resp = sendGetUploadInfo();
 		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.warn("Could not get upload info due to " + e.getLocalizedMessage());
+				logger.error("Could not get upload info", e);
 			}
 		}
 		resetParamForResume();

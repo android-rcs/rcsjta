@@ -48,7 +48,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingAdhocGroupChatSession.class.getSimpleName());
 
     /**
 	 * Constructor
@@ -59,7 +59,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	 * @param participants List of invited participants
 	 */
 	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject, Set<ParticipantInfo> participants) {
-		super(parent, conferenceId, participants);
+		super(parent, null, conferenceId, participants);
 
 		// Set subject
 		if ((subject != null) && (subject.length() > 0)) {

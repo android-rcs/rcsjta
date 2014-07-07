@@ -36,6 +36,7 @@ import com.gsma.services.rcs.Intents;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.ft.IFileTransferService;
@@ -80,7 +81,6 @@ import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
 import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
 import com.orangelabs.rcs.utils.AppUtils;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -151,11 +151,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 * Multimedia session API
 	 */
 	private MultimediaSessionServiceImpl sessionApi = null; 
-		
+	
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private final static Logger logger = Logger.getLogger(RcsCoreService.class.getSimpleName());
 
 	@Override
     public void onCreate() {
@@ -209,7 +209,10 @@ public class RcsCoreService extends Service implements CoreListener {
 			// Instantiate the settings manager
             RcsSettings.createInstance(getApplicationContext());
             
-        	// Instanciate API
+            // Instantiate the contactUtils instance (CountryCode is already set)
+            com.gsma.services.rcs.contacts.ContactUtils.getInstance(this);
+            
+        	// Instantiate API
             contactsApi = new ContactsServiceImpl(); 
             capabilityApi = new CapabilityServiceImpl(); 
             chatApi = new ChatServiceImpl(); 
@@ -531,7 +534,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handlePresenceSharingNotification(java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handlePresenceSharingNotification(String contact, String status, String reason) {
+    public void handlePresenceSharingNotification(ContactId contact, String status, String reason) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event presence sharing notification for " + contact + " (" + status + ":" + reason + ")");
 		}
@@ -541,32 +544,23 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handlePresenceInfoNotification(java.lang.String, com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument)
      */
-    public void handlePresenceInfoNotification(String contact, PidfDocument presence) {
+    public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence) {
     	if (logger.isActivated()) {
 			logger.debug("Handle event presence info notification for " + contact);
 		}
 		// Not used
 	}
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handleCapabilitiesNotification(java.lang.String, com.orangelabs.rcs.core.ims.service.capability.Capabilities)
-     */
-    public void handleCapabilitiesNotification(String contact, Capabilities capabilities) {
+    public void handleCapabilitiesNotification(ContactId contactId, Capabilities capabilities) {
     	if (logger.isActivated()) {
-			logger.debug("Handle capabilities update notification for " + contact + " (" + capabilities.toString() + ")");
+			logger.debug("Handle capabilities update notification for " + contactId + " (" + capabilities.toString() + ")");
 		}
 
-		// Extract number from contact 
-		String number = PhoneUtils.extractNumberFromUri(contact);
-
 		// Notify API
-		capabilityApi.receiveCapabilities(number, capabilities);
+		capabilityApi.receiveCapabilities(contactId, capabilities);
     }
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handlePresenceSharingInvitation(java.lang.String)
-     */
-    public void handlePresenceSharingInvitation(String contact) {
+    public void handlePresenceSharingInvitation(ContactId contactId) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event presence sharing invitation");
 		}
@@ -705,41 +699,32 @@ public class RcsCoreService extends Service implements CoreListener {
 		chatApi.receiveOneOneChatInvitation(session);
     }
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void handleMessageDeliveryStatus(String contact, String msgId, String status) {
+    public void handleMessageDeliveryStatus(ContactId contactId, String msgId, String status) {
 		if (logger.isActivated()) {
 			logger.debug("Handle message delivery status");
 		}
     	
 		// Notify listeners
-		chatApi.receiveMessageDeliveryStatus(contact, msgId, status);
+		chatApi.receiveMessageDeliveryStatus(contactId, msgId, status);
     }
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handleFileDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact) {
+    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
     	 if (logger.isActivated()) {
-        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contact);
+        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contactId);
          }
 
         // Notify listeners
-        ftApi.handleFileDeliveryStatus(fileTransferId, status, contact);
+        ftApi.handleFileDeliveryStatus(fileTransferId, status, contactId);
     }
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.CoreListener#handleFileDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
-	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact) {
+	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
 		if (logger.isActivated()) {
 			logger.debug("Handle group file delivery status: fileTransferId=" + fileTransferId + " status="
-					+ status + " contact=" + contact);
+					+ status + " contact=" + contactId);
 		}
 
 		// Notify listeners
-		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
+		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contactId);
 	}
 
     /* (non-Javadoc)
@@ -769,7 +754,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleUserConfirmationRequest(java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
      */
-    public void handleUserConfirmationRequest(String remote, String id,
+    public void handleUserConfirmationRequest(ContactId remote, String id,
     		String type, boolean pin, String subject, String text,
     		String acceptButtonLabel, String rejectButtonLabel, int timeout) {
         if (logger.isActivated()) {
@@ -782,7 +767,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleUserConfirmationAck(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleUserConfirmationAck(String remote, String id, String status, String subject, String text) {
+    public void handleUserConfirmationAck(ContactId remote, String id, String status, String subject, String text) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event user terms confirmation ack");
 		}
@@ -793,7 +778,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.CoreListener#handleUserNotification(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
-    public void handleUserNotification(String remote, String id, String subject, String text, String okButtonLabel) {
+    public void handleUserNotification(ContactId remote, String id, String subject, String text, String okButtonLabel) {
         if (logger.isActivated()) {
             logger.debug("Handle event user terms notification");
         }

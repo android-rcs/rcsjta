@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 import android.net.Uri;
 
 /**
@@ -38,14 +40,14 @@ public interface IGroupChatDeliveryInfoLog {
 	 *            Chat ID of a chat session
 	 * @param msgId
 	 *            Message ID of a chat message
-	 * @param contact
-	 *            Contact phone number
+	 * @param contactId
+	 *            Contact phone identifier
 	 * @param deliverySupported
 	 *            If delivery report is supported
 	 * @param displaySupported
 	 *            If display report is supported
 	 */
-	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, String contact);
+	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contactId);
 
 	/**
 	 * Set delivery status for outgoing group chat messages and files
@@ -54,10 +56,10 @@ public interface IGroupChatDeliveryInfoLog {
 	 *            Message ID
 	 * @param status
 	 *            Delivery status
-	 * @param contact
-	 *            The contact for which the entry is to be updated
+	 * @param contactId
+	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, String contact);
+	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contactId);
 
 	/**
 	 * Check if all recipients have received message

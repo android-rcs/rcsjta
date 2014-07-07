@@ -26,6 +26,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -49,8 +50,9 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param resumeUpload the data object in DB
      */
 	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
-		super(parent, content, resumeUpload.getContact(), resumeUpload.getFileicon() != null ? FileTransferUtils
-				.createMmContent(resumeUpload.getFileicon()) : null, resumeUpload.getFileTransferId());
+		super(parent, content, resumeUpload.getContact(), PhoneUtils.formatContactIdToUri(resumeUpload.getContact()), resumeUpload
+				.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, resumeUpload
+				.getFileTransferId());
 		getUploadManager().setTid(resumeUpload.getTid());
 		this.resumeFT = resumeUpload;
 	}

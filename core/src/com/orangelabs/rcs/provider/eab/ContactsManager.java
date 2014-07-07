@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
@@ -50,7 +52,9 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.StatusUpdates;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactsProvider;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
@@ -61,7 +65,7 @@ import com.orangelabs.rcs.core.ims.service.presence.Geoloc;
 import com.orangelabs.rcs.core.ims.service.presence.PhotoIcon;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.PhoneUtils;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -279,8 +283,15 @@ public final class ContactsManager {
     /**
      * Where clause to query contact number
      */
-    private static final String WHERE_CLAUSE_CONTACT = new StringBuilder(RichAddressBookData.KEY_CONTACT_NUMBER).append("=?").toString();
-    
+	private static final String SELECT_CONTACT = new StringBuilder(RichAddressBookData.KEY_CONTACT_NUMBER).append("=?").toString();
+    /**
+     * Where clause to query raw contact
+     */
+	private static final String SELECTION_RAW_CONTACT_MIMETYPE_DATA1 = new StringBuilder(Data.RAW_CONTACT_ID).append("=? AND ")
+			.append(Data.MIMETYPE).append("=? AND ").append(Data.DATA1).append("=?").toString();
+  
+	private static final String[] PROJECTION_PRESENCE_SHARING_STATUS = new String[] { RichAddressBookData.KEY_PRESENCE_SHARING_STATUS };
+	
 	/**
 	 * The logger
 	 */
@@ -338,15 +349,15 @@ public final class ContactsManager {
     /**
      * Return the row id of a profile number in the EAB
      *
-     * @param number Profile number
+     * @param contactId Profile number
      * @return Row id
      */
-	private int getProfileRowId(String number) {
+	private int getProfileRowId(ContactId contactId) {
 		Cursor cur = null;
 		try {
 			String[] projection = new String[] { RichAddressBookData.KEY_ID };
-			String[] whereArgs = new String[] { number };
-			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, projection, WHERE_CLAUSE_CONTACT, whereArgs, null);
+			String[] whereArgs = new String[] { contactId.toString() };
+			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, projection, SELECT_CONTACT, whereArgs, null);
 			if (cur.moveToFirst()) {
 				return cur.getInt(0);
 			}
@@ -375,13 +386,13 @@ public final class ContactsManager {
 		}
 
 		// May be called from outside the core, so be sure the number format is international before doing the queries
-		String contact = PhoneUtils.extractNumberFromUri(newInfo.getContact());
+		ContactId contact = newInfo.getContact();
 				
 		// Check if we have an entry for the contact
 		boolean hasEntryInRichAddressBook = (getProfileRowId(contact) != INVALID_ID);
 		
 		ContentValues values = new ContentValues();
-		values.put(RichAddressBookData.KEY_CONTACT_NUMBER, contact);
+		values.put(RichAddressBookData.KEY_CONTACT_NUMBER, contact.toString());
 
         // Save RCS status
         values.put(RichAddressBookData.KEY_RCS_STATUS, newInfo.getRcsStatus());
@@ -462,8 +473,8 @@ public final class ContactsManager {
 
         if (hasEntryInRichAddressBook) {
             // Update
-			ctx.getContentResolver().update(RichAddressBookData.CONTENT_URI, values, WHERE_CLAUSE_CONTACT,
-					new String[] { contact });
+			ctx.getContentResolver().update(RichAddressBookData.CONTENT_URI, values, SELECT_CONTACT,
+					new String[] { contact.toString() });
         } else {
             // Insert
             ctx.getContentResolver().insert(RichAddressBookData.CONTENT_URI, values);
@@ -683,10 +694,7 @@ public final class ContactsManager {
 	 * @param contact Contact
 	 * @return Contact info
 	 */
-	public ContactInfo getContactInfo(String contact) {
-		// May be called from outside the core, so be sure the number format is international before doing the queries 
-		contact = PhoneUtils.extractNumberFromUri(contact);
-		
+	public ContactInfo getContactInfo(ContactId contact) {
 		ContactInfo infos = new ContactInfo();
 		infos.setRcsStatus(ContactInfo.NO_INFO);
 		infos.setRcsStatusTimestamp(System.currentTimeMillis());
@@ -698,7 +706,7 @@ public final class ContactsManager {
 
 		Cursor cur = null;
 		try {
-			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, null, WHERE_CLAUSE_CONTACT, new String[] { contact },
+			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, null, SELECT_CONTACT, new String[] { contact.toString() },
 					null);
 			if (cur != null) {
 				if (cur.moveToFirst()) {
@@ -814,18 +822,16 @@ public final class ContactsManager {
 	 * @param contact Contact
 	 * @return Status or -1 if contact not found or in case of error
 	 */
-	private int getContactSharingStatus(String contact) {
+	private int getContactSharingStatus(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Get sharing status for contact " + contact);
 		}
 
-		// May be called from outside the core, so be sure the number format is international before doing the queries
-		contact = PhoneUtils.extractNumberFromUri(contact);
 		Cursor cursor = null;
 		try {
 			// Get this number status in address book provider
 			cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI,
-					new String[] { RichAddressBookData.KEY_PRESENCE_SHARING_STATUS }, WHERE_CLAUSE_CONTACT, new String[] { contact }, null);
+					PROJECTION_PRESENCE_SHARING_STATUS, SELECT_CONTACT, new String[] { contact.toString() }, null);
 			if (cursor.moveToFirst()) {
 				return cursor.getInt(0);
 			}
@@ -847,7 +853,7 @@ public final class ContactsManager {
 	 * @param contact Contact
 	 * @throws ContactsManagerException
 	 */	
-	public void blockContact(String contact) throws ContactsManagerException {
+	public void blockContact(ContactId contact) throws ContactsManagerException {
 		if (logger.isActivated()) {
 			logger.info("Block contact " + contact);
 		}
@@ -879,11 +885,11 @@ public final class ContactsManager {
 	 * @param contactId
 	 * @param RCS status
 	 */
-	public void modifyRcsContactInProvider(String contact, int rcsStatus) {
+	public void modifyRcsContactInProvider(ContactId contact, int rcsStatus) {
 		long contactRowID = getProfileRowId(contact);
 
 		ContentValues values = new ContentValues();
-		values.put(RichAddressBookData.KEY_CONTACT_NUMBER, contact);
+		values.put(RichAddressBookData.KEY_CONTACT_NUMBER, contact.toString());
 		values.put(RichAddressBookData.KEY_PRESENCE_SHARING_STATUS, rcsStatus);
 		values.put(RichAddressBookData.KEY_TIMESTAMP, System.currentTimeMillis());
 		if (contactRowID == INVALID_ID) {
@@ -891,33 +897,37 @@ public final class ContactsManager {
 			ctx.getContentResolver().insert(RichAddressBookData.CONTENT_URI, values);
 		} else {
 			// Contact already present, update
-			ctx.getContentResolver().update(RichAddressBookData.CONTENT_URI, values, WHERE_CLAUSE_CONTACT,
-					new String[] { contact });
+			ctx.getContentResolver().update(RichAddressBookData.CONTENT_URI, values, SELECT_CONTACT,
+					new String[] { contact.toString() });
 		}
 	}
 
 	/**
 	 * Get the RCS contacts in the rich address book provider which have a presence relationship with the user
 	 * 
-	 * @return list containing all RCS contacts, "Me" item excluded 
+	 * @return set containing all RCS contacts, "Me" item excluded 
 	 */
-	public List<String> getRcsContactsWithSocialPresence(){
-		List<String> rcsNumbers = new ArrayList<String>();
+	public Set<ContactId> getRcsContactsWithSocialPresence() {
+		Set<ContactId> rcsNumbers = new HashSet<ContactId>();
 		String[] projection = { RichAddressBookData.KEY_CONTACT_NUMBER };
 		// Filter the rcs status
-        String selection = "(" + RichAddressBookData.KEY_RCS_STATUS + "<>? AND " 
-                + RichAddressBookData.KEY_RCS_STATUS + "<>? AND "
-                + RichAddressBookData.KEY_RCS_STATUS + "<>? )";
-        String[] selectionArgs = {
-                String.valueOf(ContactInfo.NO_INFO),
-                String.valueOf(ContactInfo.RCS_CAPABLE),
-                String.valueOf(ContactInfo.NOT_RCS),
-        };
+		String selection = "(" + RichAddressBookData.KEY_RCS_STATUS + "<>? AND " + RichAddressBookData.KEY_RCS_STATUS + "<>? AND "
+				+ RichAddressBookData.KEY_RCS_STATUS + "<>? )";
+		String[] selectionArgs = { String.valueOf(ContactInfo.NO_INFO), String.valueOf(ContactInfo.RCS_CAPABLE),
+				String.valueOf(ContactInfo.NOT_RCS) };
 		Cursor c = null;
 		try {
 			c = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, projection, selection, selectionArgs, null);
 			while (c.moveToNext()) {
-				rcsNumbers.add(c.getString(0));
+				String contact = c.getString(0);
+				try {
+					ContactId contactId = ContactUtils.createContactId(contact);
+					rcsNumbers.add(contactId);
+				} catch (JoynContactFormatException e1) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse number "+contact);
+					}
+				}
 			}
 		} catch (Exception e) {
 		} finally {
@@ -931,25 +941,26 @@ public final class ContactsManager {
 	/**
 	 * Get the RCS contacts in the contact contract provider
 	 *
-	 * @return list containing all RCS contacts 
+	 * @return set containing all RCS contacts 
 	 */
-	public List<String> getRcsContacts(){
-        List<String> rcsNumbers = new ArrayList<String>();
+	public Set<ContactId> getRcsContacts() {
+		Set<ContactId> rcsNumbers = new HashSet<ContactId>();
 		String[] projection = { RichAddressBookData.KEY_CONTACT_NUMBER };
-        // Filter the rcs status
-        String selection = "(" + RichAddressBookData.KEY_RCS_STATUS + "<>? AND " 
-                + RichAddressBookData.KEY_RCS_STATUS + "<>? )";
-        String[] selectionArgs = {
-                String.valueOf(ContactInfo.NO_INFO),
-                String.valueOf(ContactInfo.NOT_RCS),
-        };
+		// Filter the rcs status
+		String selection = "(" + RichAddressBookData.KEY_RCS_STATUS + "<>? AND " + RichAddressBookData.KEY_RCS_STATUS + "<>? )";
+		String[] selectionArgs = { String.valueOf(ContactInfo.NO_INFO), String.valueOf(ContactInfo.NOT_RCS), };
 		Cursor cur = null;
 		try {
 			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, projection, selection, selectionArgs, null);
 			while (cur.moveToNext()) {
 				String number = cur.getString(0);
-				if (!rcsNumbers.contains(number)) {
-					rcsNumbers.add(number);
+				try {
+					ContactId contactId = ContactUtils.createContactId(number);
+					rcsNumbers.add(contactId);
+				} catch (JoynContactFormatException e1) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse number " + number);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -964,18 +975,22 @@ public final class ContactsManager {
 	/**
 	 * Get all the contacts in the rich address book provider
 	 *
-	 * @return list containing all contacts that have been at least queried once for capabilities
+	 * @return set containing all contacts that have been at least queried once for capabilities
 	 */
-	public List<String> getAllContacts(){
-		List<String> numbers = new ArrayList<String>();
+	public Set<ContactId> getAllContacts() {
+		Set<ContactId> numbers = new HashSet<ContactId>();
 		String[] projection = { RichAddressBookData.KEY_CONTACT_NUMBER };
 		Cursor cur = null;
 		try {
 			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, projection, null, null, null);
 			while (cur.moveToNext()) {
-				String number = cur.getString(0);
-				if (!numbers.contains(number)) {
-					numbers.add(number);
+				String phoneNumber = cur.getString(0);
+				try {
+					numbers.add(ContactUtils.createContactId(phoneNumber));
+				} catch (JoynContactFormatException e1) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse contact " + phoneNumber);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -993,7 +1008,7 @@ public final class ContactsManager {
 	 * @param number Number to check
 	 * @return boolean
 	 */
-	public boolean isNumberBlocked(String number) {
+	public boolean isNumberBlocked(ContactId number) {
 		// Get this number status in address book
 		return (getContactSharingStatus(number) == ContactInfo.RCS_BLOCKED);
 	}
@@ -1004,7 +1019,7 @@ public final class ContactsManager {
 	 * @param number Number to check
 	 * @return boolean
 	 */
-	public boolean isNumberShared(String number) {
+	public boolean isNumberShared(ContactId number) {
 		// Get this number status in address book provider
 		return (getContactSharingStatus(number) == ContactInfo.RCS_ACTIVE);
 	}
@@ -1015,7 +1030,7 @@ public final class ContactsManager {
 	 * @param number Number to check
 	 * @return boolean
 	 */
-	public boolean isNumberInvited(String number) {
+	public boolean isNumberInvited(ContactId number) {
 		// Get this number status in address book provider
 		return (getContactSharingStatus(number) == ContactInfo.RCS_PENDING);
 	}
@@ -1026,7 +1041,7 @@ public final class ContactsManager {
 	 * @param number Number to check
 	 * @return boolean
 	 */
-	public boolean isNumberWilling(String number) {
+	public boolean isNumberWilling(ContactId number) {
 		// Get this number status in address book provider
 		return (getContactSharingStatus(number) == ContactInfo.RCS_PENDING_OUT);
 	}
@@ -1037,7 +1052,7 @@ public final class ContactsManager {
 	 * @param number Number to check
 	 * @return boolean
 	 */
-	public boolean isNumberCancelled(String number) {
+	public boolean isNumberCancelled(ContactId number) {
 		// Get this number status in address book provider
 		return (getContactSharingStatus(number) == ContactInfo.RCS_CANCELLED);
 	}
@@ -1064,7 +1079,7 @@ public final class ContactsManager {
 	 * @param oldContactType 
 	 * @return list of ContentProviderOperation to be done
 	 */
-	private ArrayList<ContentProviderOperation> modifyContactTypeForContact(long rawContactId, String rcsNumber, int newContactType, int oldContactType){
+	private ArrayList<ContentProviderOperation> modifyContactTypeForContact(long rawContactId, ContactId rcsNumber, int newContactType, int oldContactType){
 		if (newContactType==oldContactType){
 			// Nothing to do
 			return new ArrayList<ContentProviderOperation>();
@@ -1138,7 +1153,7 @@ public final class ContactsManager {
 	 * @param oldState True if the capability was enabled, else false
 	 * @return ContentProviderOperation to be done
 	 */
-	private ContentProviderOperation modifyMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType,
+	private ContentProviderOperation modifyMimeTypeForContact(long rawContactId, ContactId rcsNumber, String mimeType,
 			boolean newState, boolean oldState) {
 
 		if (newState == oldState) {
@@ -1162,22 +1177,22 @@ public final class ContactsManager {
      * @param mimeType
      * @return ContentProviderOperation to be done
      */
-    private ContentProviderOperation createMimeTypeForContact(int rawContactId, String rcsNumber, String mimeType) {
+    private ContentProviderOperation createMimeTypeForContact(int rawContactId, ContactId rcsNumber, String mimeType) {
         String mimeTypeDescription = getMimeTypeDescription(mimeType);
         if (mimeTypeDescription != null) {
             // Check if there is a mimetype description to be added
             return ContentProviderOperation.newInsert(Data.CONTENT_URI)
                     .withValueBackReference(Data.RAW_CONTACT_ID, rawContactId)
                     .withValue(Data.MIMETYPE, mimeType)
-                    .withValue(Data.DATA1, rcsNumber)
+                    .withValue(Data.DATA1, rcsNumber.toString())
                     .withValue(Data.DATA2, mimeTypeDescription)
-                    .withValue(Data.DATA3, rcsNumber)
+                    .withValue(Data.DATA3, rcsNumber.toString())
                     .build();
         } else {
             return ContentProviderOperation.newInsert(Data.CONTENT_URI)
                     .withValueBackReference(Data.RAW_CONTACT_ID, rawContactId)
                     .withValue(Data.MIMETYPE, mimeType)
-                    .withValue(Data.DATA1, rcsNumber)
+                    .withValue(Data.DATA1, rcsNumber.toString())
                     .build();
         }
     }
@@ -1190,22 +1205,22 @@ public final class ContactsManager {
      * @param mimeType
      * @return ContentProviderOperation to be done
      */
-    private ContentProviderOperation insertMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType) {
+    private ContentProviderOperation insertMimeTypeForContact(long rawContactId, ContactId rcsNumber, String mimeType) {
         String mimeTypeDescription = getMimeTypeDescription(mimeType);
         if (mimeTypeDescription != null) {
             // Check if there is a mimetype description to be added
             return ContentProviderOperation.newInsert(Data.CONTENT_URI)
                     .withValue(Data.RAW_CONTACT_ID, rawContactId)
                     .withValue(Data.MIMETYPE, mimeType)
-                    .withValue(Data.DATA1, rcsNumber)
+                    .withValue(Data.DATA1, rcsNumber.toString())
                     .withValue(Data.DATA2, mimeTypeDescription)
-                    .withValue(Data.DATA3, rcsNumber)
+                    .withValue(Data.DATA3, rcsNumber.toString())
                     .build();
         } else {
             return ContentProviderOperation.newInsert(Data.CONTENT_URI)
                     .withValue(Data.RAW_CONTACT_ID, rawContactId)
                     .withValue(Data.MIMETYPE, mimeType)
-                    .withValue(Data.DATA1, rcsNumber)
+                    .withValue(Data.DATA1, rcsNumber.toString())
                     .build();
         }
     }
@@ -1218,10 +1233,10 @@ public final class ContactsManager {
 	 * @param mimeType
 	 * @return ContentProviderOperation to be done
 	 */
-	private ContentProviderOperation deleteMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType){
+	private ContentProviderOperation deleteMimeTypeForContact(long rawContactId, ContactId rcsNumber, String mimeType){
 		// We have to remove a data from the raw contact
 		return ContentProviderOperation.newDelete(Data.CONTENT_URI)
-        .withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND "+ Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), mimeType, rcsNumber})
+        .withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), mimeType, rcsNumber.toString()})
         .build();		
 	}
 	
@@ -1236,7 +1251,7 @@ public final class ContactsManager {
 	 * @param oldFreeText
 	 * @return list of ContentProviderOperations to be done
 	 */
-	private ArrayList<ContentProviderOperation> modifyContactRegistrationState(long rawContactId, String rcsNumber, int newRegistrationState, int oldRegistrationState, String newFreeText, String oldFreeText){
+	private ArrayList<ContentProviderOperation> modifyContactRegistrationState(long rawContactId, ContactId rcsNumber, int newRegistrationState, int oldRegistrationState, String newFreeText, String oldFreeText){
 		
 		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 		boolean registrationChanged = true;
@@ -1247,7 +1262,7 @@ public final class ContactsManager {
 		if (registrationChanged){
 			// Modify registration status
 			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{Long.toString(rawContactId), MIMETYPE_REGISTRATION_STATE, rcsNumber})
+					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{Long.toString(rawContactId), MIMETYPE_REGISTRATION_STATE, rcsNumber.toString()})
 					.withValue(Data.DATA2, newRegistrationState)
 					.build());
 		}
@@ -1297,6 +1312,73 @@ public final class ContactsManager {
 	}
 	
 	/**
+	 * Modify the registration state for the contact
+	 * 
+	 * @param rawContactId Raw contact id of the RCS contact
+	 * @param newRegistrationState
+	 * @param oldRegistrationState
+	 * @param newFreeText
+	 * @param oldFreeText
+	 * @return list of ContentProviderOperations to be done
+	 */
+	private ArrayList<ContentProviderOperation> modifyContactRegistrationStateForMyself(long rawContactId,
+			int newRegistrationState, int oldRegistrationState, String newFreeText, String oldFreeText) {
+
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		boolean registrationChanged = true;
+		if ((newRegistrationState == oldRegistrationState || newRegistrationState == ContactInfo.REGISTRATION_STATUS_UNKNOWN)) {
+			registrationChanged = false;
+		}
+
+		if (registrationChanged) {
+			// Modify registration status
+			ops.add(ContentProviderOperation
+					.newUpdate(Data.CONTENT_URI)
+					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1,
+							new String[] { Long.toString(rawContactId), MIMETYPE_REGISTRATION_STATE, MYSELF })
+					.withValue(Data.DATA2, newRegistrationState).build());
+		}
+
+		if (stringsHaveChanged(newFreeText, oldFreeText) || registrationChanged) {
+			int availability = PRESENCE_STATUS_NOT_SET;
+			if (newRegistrationState == ContactInfo.REGISTRATION_STATUS_ONLINE) {
+				availability = PRESENCE_STATUS_ONLINE;
+			} else if (newRegistrationState == ContactInfo.REGISTRATION_STATUS_OFFLINE) {
+				availability = PRESENCE_STATUS_OFFLINE;
+			}
+
+			// Get the id of the status update data linked to this raw contact id
+			String[] projection = { Data._ID, Data.RAW_CONTACT_ID };
+
+			long dataId = INVALID_ID;
+			String selection = new StringBuilder(Data.RAW_CONTACT_ID).append("=?").toString();
+			String[] selectionArgs = { Long.toString(rawContactId) };
+			Cursor cur = null;
+			try {
+				cur = ctx.getContentResolver().query(Data.CONTENT_URI, projection, selection, selectionArgs, null);
+				if (cur.moveToNext()) {
+					dataId = cur.getLong(0);
+				}
+			} catch (Exception e) {
+			} finally {
+				if (cur != null) {
+					cur.close();
+				}
+			}
+
+			ops.add(ContentProviderOperation.newInsert(StatusUpdates.CONTENT_URI).withValue(StatusUpdates.DATA_ID, dataId)
+					.withValue(StatusUpdates.STATUS, newFreeText).withValue(StatusUpdates.STATUS_RES_PACKAGE, ctx.getPackageName())
+					.withValue(StatusUpdates.STATUS_LABEL, R.string.rcs_core_account_id)
+					.withValue(StatusUpdates.STATUS_ICON, R.drawable.rcs_icon).withValue(StatusUpdates.PRESENCE, availability)
+					// Needed for inserting PRESENCE
+					.withValue(StatusUpdates.PROTOCOL, Im.PROTOCOL_CUSTOM).withValue(StatusUpdates.CUSTOM_PROTOCOL,
+					// Intentional left blank
+							" ").withValue(StatusUpdates.STATUS_TIMESTAMP, System.currentTimeMillis()).build());
+		}
+		return ops;
+	}
+	
+	/**
 	 * Modify the RCS extensions capability for the contact
 	 * 
 	 * @param rawContactId Raw contact id of the RCS contact
@@ -1305,7 +1387,7 @@ public final class ContactsManager {
 	 * @param oldExtensions Old extensions capabilities 
 	 * @return list of contentProviderOperation to be done
 	 */
-	private List<ContentProviderOperation> modifyExtensionsCapabilityForContact(long rawContactId, String rcsNumber, ArrayList<String> newExtensions, ArrayList<String> oldExtensions){
+	private List<ContentProviderOperation> modifyExtensionsCapabilityForContact(long rawContactId, ContactId rcsNumber, ArrayList<String> newExtensions, ArrayList<String> oldExtensions){
 
 		List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 		
@@ -1344,7 +1426,7 @@ public final class ContactsManager {
 		
         // Update extensions        
         ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-        		.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS, rcsNumber})
+        		.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS, rcsNumber.toString()})
         		.withValue(Data.DATA2, extension.toString())
         		.build());
 		return ops;
@@ -1359,7 +1441,7 @@ public final class ContactsManager {
 	 * @param oldPresenceInfo
 	 * @return list of ContentProviderOperation to be done
 	 */
-	private ArrayList<ContentProviderOperation> modifyPresenceForContact(long rawContactId, String rcsNumber, PresenceInfo newPresenceInfo, PresenceInfo oldPresenceInfo){
+	private ArrayList<ContentProviderOperation> modifyPresenceForContact(long rawContactId, ContactId rcsNumber, PresenceInfo newPresenceInfo, PresenceInfo oldPresenceInfo){
     	ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
     	if (newPresenceInfo!=null && oldPresenceInfo!=null){
@@ -1375,7 +1457,7 @@ public final class ContactsManager {
 
     			// Modify the presence status
     			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-    					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_STATUS, rcsNumber})
+    					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_STATUS, rcsNumber.toString()})
     					.withValue(Data.DATA2, availability)
     					.build());
     		}
@@ -1383,7 +1465,7 @@ public final class ContactsManager {
     		if (stringsHaveChanged(newPresenceInfo.getFreetext(), oldPresenceInfo.getFreetext())){
     			// Modify the free text
     			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-    					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_FREE_TEXT, rcsNumber})
+    					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_FREE_TEXT, rcsNumber.toString()})
     					.withValue(Data.DATA2, newPresenceInfo.getFreetext())
     					.build());
     		}
@@ -1391,7 +1473,7 @@ public final class ContactsManager {
     		if (stringsHaveChanged(newPresenceInfo.getFavoriteLinkUrl(), oldPresenceInfo.getFavoriteLinkUrl())){
     			// Modify the web link
     			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-    					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_WEBLINK, rcsNumber})
+    					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_WEBLINK, rcsNumber.toString()})
     					.withValue(Data.DATA2, newPresenceInfo.getFavoriteLinkUrl())
     					.build());
     			
@@ -1475,7 +1557,7 @@ public final class ContactsManager {
     		if (oldPresenceInfo.getTimestamp()!=newPresenceInfo.getTimestamp()){
     			// Update the presence timestamp
     			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-    					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber})
+    					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber.toString()})
     					.withValue(Data.DATA2, newPresenceInfo.getTimestamp())
     					.build());
     		}
@@ -1582,7 +1664,7 @@ public final class ContactsManager {
     		if (oldPresenceInfo.getTimestamp()!=newPresenceInfo.getTimestamp()){
     			// Update the presence timestamp
     			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-    					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber})
+    					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber.toString()})
     					.withValue(Data.DATA2, newPresenceInfo.getTimestamp())
     					.build());
     		}
@@ -1601,17 +1683,17 @@ public final class ContactsManager {
     		
     		// Remove presence status
     		ops.add(ContentProviderOperation.newDelete(Data.CONTENT_URI)
-    				.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_STATUS, rcsNumber})
+    				.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_STATUS, rcsNumber.toString()})
     				.build());
 
     		// Remove presence free text        
     		ops.add(ContentProviderOperation.newDelete(Data.CONTENT_URI)
-    				.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_FREE_TEXT, rcsNumber})
+    				.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_FREE_TEXT, rcsNumber.toString()})
     				.build());
     		
     		// Remove presence web link        
     		ops.add(ContentProviderOperation.newDelete(Data.CONTENT_URI)
-    				.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_WEBLINK, rcsNumber})
+    				.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_WEBLINK, rcsNumber.toString()})
     				.build());
 
     		//Remove presence web link in native address book
@@ -1652,7 +1734,7 @@ public final class ContactsManager {
     		
 			// Update the presence timestamp
 			ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
-					.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?", new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber})
+					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{String.valueOf(rawContactId), MIMETYPE_PRESENCE_TIMESTAMP, rcsNumber.toString()})
 					.withValue(Data.DATA2, System.currentTimeMillis())
 					.build());
     	}
@@ -1718,17 +1800,14 @@ public final class ContactsManager {
 	/**
 	 * Set contact capabilities
 	 * 
-	 * @param contact Contact
+	 * @param contactId Contact Id
 	 * @param capabilities Capabilities
 	 * @param contactType Contact type
 	 * @param registrationState Three possible values : online/offline/unknown
 	 */
-	public void setContactCapabilities(String contact, Capabilities capabilities, int contactType, int registrationState) {
-        
-		contact = PhoneUtils.extractNumberFromUri(contact);
-
+	public void setContactCapabilities(ContactId contactId, Capabilities capabilities, int contactType, int registrationState) {
 		// Get the current information on this contact 
-		ContactInfo oldInfo = getContactInfo(contact);
+		ContactInfo oldInfo = getContactInfo(contactId);
 		ContactInfo newInfo = new ContactInfo(oldInfo);
 		
 		// Set the contact type 
@@ -1806,15 +1885,12 @@ public final class ContactsManager {
 	/**
 	 * Set contact capabilities
 	 * 
-	 * @param contact Contact
+	 * @param contactId Contact Id
 	 * @param capabilities Capabilities
 	 */
-	public void setContactCapabilities(String contact, Capabilities capabilities) {
-		
-		contact = PhoneUtils.extractNumberFromUri(contact);
-
+	public void setContactCapabilities(ContactId contactId, Capabilities capabilities) {
 		// Get the current information on this contact 
-		ContactInfo oldInfo = getContactInfo(contact);
+		ContactInfo oldInfo = getContactInfo(contactId);
 		ContactInfo newInfo = new ContactInfo(oldInfo);
 		
 		newInfo.setCapabilities(capabilities);
@@ -1833,11 +1909,11 @@ public final class ContactsManager {
 	 * Get contact capabilities
 	 * <br>If contact has never been enriched with capability, returns null
 	 * 
-	 * @param contact
+	 * @param contactId Contact Id
 	 * @return capabilities
 	 */
-	public Capabilities getContactCapabilities(String contact){
-		ContactInfo contactInfo = getContactInfo(contact);
+	public Capabilities getContactCapabilities(ContactId contactId){
+		ContactInfo contactInfo = getContactInfo(contactId);
 		if (contactInfo.getRcsStatus()==ContactInfo.NO_INFO){
 			return null;
 		} else {
@@ -1848,14 +1924,14 @@ public final class ContactsManager {
 	/**
 	 * Set contact capabilities timestamp
 	 * 
-	 * @param contact
+	 * @param contactId Contact Id
 	 * @param timestamp
 	 */
-	public void setContactCapabilitiesTimestamp(String contact, long timestamp){
+	public void setContactCapabilitiesTimestamp(ContactId contactId, long timestamp){
 		if (logger.isActivated()){
-			logger.debug("Setting contact capabilities timestamp for "+contact +" to "+timestamp);
+			logger.debug("Setting contact capabilities timestamp for "+contactId +" to "+timestamp);
 		}
-		ContactInfo oldInfo = getContactInfo(contact);
+		ContactInfo oldInfo = getContactInfo(contactId);
 		ContactInfo newInfo = new ContactInfo(oldInfo);
 		Capabilities capabilities = newInfo.getCapabilities();
 		capabilities.setTimestamp(timestamp);
@@ -1877,11 +1953,11 @@ public final class ContactsManager {
 	 * @param timestamp New timestamp 
 	 * @return content
 	 */
-	private ContentProviderOperation modifyCapabilityTimestampForContact(long rawContactId, String rcsNumber, long timestamp) {
+	private ContentProviderOperation modifyCapabilityTimestampForContact(long rawContactId, ContactId rcsNumber, long timestamp) {
 		return ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI)
-				.withSelection(Data.RAW_CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?",
-						new String[] { Long.toString(rawContactId), MIMETYPE_CAPABILITY_TIMESTAMP, rcsNumber })
+				.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1,
+						new String[] { Long.toString(rawContactId), MIMETYPE_CAPABILITY_TIMESTAMP, rcsNumber.toString() })
 				.withValue(Data.DATA2, timestamp).build();
 	}
 	
@@ -1895,7 +1971,7 @@ public final class ContactsManager {
     public long createRcsContact(final ContactInfo info, final long rawContactId) {
         // If phone number can't be loosely compared with itself then we don't
         // make the phone number RCS.
-        if (!phoneNumbersEqual(info.getContact(), info.getContact(), false)) {
+        if (!phoneNumbersEqual(info.getContact().toString(), info.getContact().toString(), false)) {
         	if (logger.isActivated()){
         		logger.debug("RCS contact could not be created loose comparison failed");
         	}
@@ -1920,14 +1996,14 @@ public final class ContactsManager {
         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                  .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                  .withValue(Data.MIMETYPE, MIMETYPE_NUMBER)
-                 .withValue(Data.DATA1, info.getContact())
+                 .withValue(Data.DATA1, info.getContact().toString())
                  .build());
         
         // Create RCS status row
         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                 .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                 .withValue(Data.MIMETYPE, ContactsManager.MIMETYPE_RCS_STATUS)
-                .withValue(Data.DATA1, info.getContact())
+                .withValue(Data.DATA1, info.getContact().toString())
                 .withValue(Data.DATA2, info.getRcsStatus())
                 .build());
 
@@ -1935,7 +2011,7 @@ public final class ContactsManager {
         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                 .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                 .withValue(Data.MIMETYPE, ContactsManager.MIMETYPE_RCS_STATUS_TIMESTAMP)
-                .withValue(Data.DATA1, info.getContact())
+                .withValue(Data.DATA1, info.getContact().toString())
                 .withValue(Data.DATA2, System.currentTimeMillis())
                 .build());
         
@@ -1943,7 +2019,7 @@ public final class ContactsManager {
         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                 .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                 .withValue(Data.MIMETYPE, MIMETYPE_PRESENCE_TIMESTAMP)
-                .withValue(Data.DATA1, info.getContact())
+                .withValue(Data.DATA1, info.getContact().toString())
                 .withValue(Data.DATA2, System.currentTimeMillis())
                 .build());
         
@@ -1952,7 +2028,7 @@ public final class ContactsManager {
         	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
         			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
         			.withValue(Data.MIMETYPE, MIMETYPE_FREE_TEXT)
-        			.withValue(Data.DATA1, info.getContact())
+        			.withValue(Data.DATA1, info.getContact().toString())
         			.withValue(Data.DATA2, info.getPresenceInfo().getFreetext())
         			.build());
 
@@ -1960,7 +2036,7 @@ public final class ContactsManager {
         	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
         			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
         			.withValue(Data.MIMETYPE, MIMETYPE_PRESENCE_STATUS)
-        			.withValue(Data.DATA1, info.getContact())
+        			.withValue(Data.DATA1, info.getContact().toString())
         			.withValue(Data.DATA2, info.getPresenceInfo().getPresenceStatus())
         			.build());
         	
@@ -1983,7 +2059,7 @@ public final class ContactsManager {
         	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
         			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
         			.withValue(Data.MIMETYPE, MIMETYPE_FREE_TEXT)
-        			.withValue(Data.DATA1, info.getContact())
+        			.withValue(Data.DATA1, info.getContact().toString())
         			.withValue(Data.DATA2, "")
         			.build());
 
@@ -1991,7 +2067,7 @@ public final class ContactsManager {
         	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
         			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
         			.withValue(Data.MIMETYPE, MIMETYPE_PRESENCE_STATUS)
-        			.withValue(Data.DATA1, info.getContact())
+        			.withValue(Data.DATA1, info.getContact().toString())
         			.withValue(Data.DATA2, PRESENCE_STATUS_NOT_SET)
         			.build());
         }
@@ -2000,7 +2076,7 @@ public final class ContactsManager {
         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                 .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                 .withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_TIMESTAMP)
-                .withValue(Data.DATA1, info.getContact())
+                .withValue(Data.DATA1, info.getContact().toString())
                 .withValue(Data.DATA2, System.currentTimeMillis())
                 .build());
         
@@ -2077,9 +2153,9 @@ public final class ContactsManager {
 		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
 				.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
 				.withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
-				.withValue(Data.DATA1, info.getContact())
+				.withValue(Data.DATA1, info.getContact().toString())
 				.withValue(Data.DATA2, extension.toString())
-				.withValue(Data.DATA3, info.getContact())
+				.withValue(Data.DATA3, info.getContact().toString())
 				.build());
 		if (hasCommonExtensions) {
 			// Insert common extensions item
@@ -2090,7 +2166,7 @@ public final class ContactsManager {
     	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
     			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
     			.withValue(Data.MIMETYPE, MIMETYPE_REGISTRATION_STATE)
-    			.withValue(Data.DATA1, info.getContact())
+    			.withValue(Data.DATA1, info.getContact().toString())
     			.withValue(Data.DATA2, info.getRegistrationState())
     			.build());
 
@@ -2142,7 +2218,7 @@ public final class ContactsManager {
         	ContentValues values = new ContentValues();
         	values.put(AggregationData.KEY_RAW_CONTACT_ID, rawContactId);
         	values.put(AggregationData.KEY_RCS_RAW_CONTACT_ID, rcsRawContactId);
-        	values.put(AggregationData.KEY_RCS_NUMBER, info.getContact());
+        	values.put(AggregationData.KEY_RCS_NUMBER, info.getContact().toString());
 			ctx.getContentResolver().insert(AggregationData.CONTENT_URI, values);
         } catch (RemoteException e) {
         	if (logger.isActivated()){
@@ -2319,7 +2395,7 @@ public final class ContactsManager {
             ops.clear();
             
             // Set default free text to null and availability to online
-    		ArrayList<ContentProviderOperation> registrationStateOps = modifyContactRegistrationState(imsRawContactId, MYSELF, ContactInfo.REGISTRATION_STATUS_ONLINE, -1, "", "");
+    		ArrayList<ContentProviderOperation> registrationStateOps = modifyContactRegistrationStateForMyself(imsRawContactId, ContactInfo.REGISTRATION_STATUS_ONLINE, -1, "", "");
     		for (int i=0;i<registrationStateOps.size();i++){
     			ContentProviderOperation op = registrationStateOps.get(i);
     			if (op!=null){
@@ -2342,14 +2418,14 @@ public final class ContactsManager {
     /**
      * Utility to find the rawContactIds for a specific phone number.
      *
-     * @param phoneNumber the phoneNumber to search for
+     * @param contactId the phoneNumber to search for
      * @return list of contactIds
      */
-    private List<Long> getRawContactIdsFromPhoneNumber(String phoneNumber) {
+    private List<Long> getRawContactIdsFromPhoneNumber(ContactId contactId) {
         List<Long> rawContactsIds = new ArrayList<Long>(); 
     	String[] projection = { Data.RAW_CONTACT_ID };
         String selection = Data.MIMETYPE + "=? AND PHONE_NUMBERS_EQUAL(" + Phone.NUMBER + ", ?)";
-        String[] selectionArgs = { Phone.CONTENT_ITEM_TYPE, phoneNumber };
+        String[] selectionArgs = { Phone.CONTENT_ITEM_TYPE, contactId.toString() };
         String sortOrder = Data.RAW_CONTACT_ID;
 
 		// Starting LOOSE equal
@@ -2379,7 +2455,7 @@ public final class ContactsManager {
          */
         String selectionStrict = Data.MIMETYPE + "=? AND (NOT PHONE_NUMBERS_EQUAL(" + Phone.NUMBER
                 + ", ?) AND PHONE_NUMBERS_EQUAL(" + Phone.NUMBER + ", ?, 1))";
-        String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, phoneNumber, phoneNumber };
+        String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, contactId.toString(), contactId.toString() };
         cur = null;
 		try {
 			cur = ctx.getContentResolver().query(Data.CONTENT_URI, projection, selectionStrict, selectionArgsStrict, sortOrder);
@@ -2409,14 +2485,14 @@ public final class ContactsManager {
      * @param rcsNumber The RCS number
      * @return the id of the associated RCS rawContact
      */
-	public long getAssociatedRcsRawContact(final long rawContactId, final String rcsNumber) {
+	public long getAssociatedRcsRawContact(final long rawContactId, final ContactId rcsNumber) {
 		Cursor cursor = null;
 		try {
 			cursor = ctx.getContentResolver().query(
 					AggregationData.CONTENT_URI,
 					new String[] { AggregationData.KEY_RCS_RAW_CONTACT_ID },
 					AggregationData.KEY_RCS_NUMBER + "=?" + " AND " + AggregationData.KEY_RAW_CONTACT_ID + "=?",
-					new String[] { rcsNumber, String.valueOf(rawContactId) }, null);
+					new String[] { rcsNumber.toString(), String.valueOf(rawContactId) }, null);
 			if (cursor.moveToFirst()) {
 				return cursor.getLong(0);
 			}
@@ -2435,18 +2511,18 @@ public final class ContactsManager {
      * @param phoneNumber The phone number associated to the RCS contact
      * @return true if contact has an entry in the rich address book provider, else false
      */
-    public boolean isRcsAssociated(final String phoneNumber) {
+    public boolean isRcsAssociated(final ContactId phoneNumber) {
     	return (getProfileRowId(phoneNumber) != INVALID_ID);
     }
 
     /**
      * Utility method to check if a raw contact is only associated to a SIM account
      *
-     * @param rawContactId The id associated to the SIM account
+     * @param contactId the contact Identifier
      * @return true if the raw contact is only associated to a SIM account, else false
      */
-    public boolean isOnlySimAssociated(final String phoneNumber) {
-		List<Long> rawContactIds = getRawContactIdsFromPhoneNumber(phoneNumber);
+    public boolean isOnlySimAssociated(final ContactId contactId) {
+		List<Long> rawContactIds = getRawContactIdsFromPhoneNumber(contactId);
 		for (int i = 0; i < rawContactIds.size(); i++) {
 			Cursor rawCur = null;
 			try {
@@ -2674,12 +2750,10 @@ public final class ContactsManager {
      * @param contact
      * @return flag indicating if IM sessions with the contact are enabled or not
      */
-    public boolean isImBlockedForContact(String contact){
-		// May be called from outside the core, so be sure the number format is international before doing the queries
-		contact = PhoneUtils.extractNumberFromUri(contact);
+    public boolean isImBlockedForContact(ContactId contact){
 		String[] projection = { Data.DATA1, Data.MIMETYPE };
-		String selection = Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?";
-		String[] selectionArgs = { MIMETYPE_IM_BLOCKED, contact };
+		String selection = new StringBuilder(Data.MIMETYPE).append("=? AND ").append(Data.DATA1).append("=?").toString();
+		String[] selectionArgs = { MIMETYPE_IM_BLOCKED, contact.toString() };
 		Cursor c = null;
 		try {
 			c = ctx.getContentResolver().query(Data.CONTENT_URI, projection, selection, selectionArgs, null);
@@ -2701,12 +2775,10 @@ public final class ContactsManager {
      * @param contact
      * @return flag indicating if FT sessions with the contact are enabled or not
      */
-    public boolean isFtBlockedForContact(String contact){
-		// May be called from outside the core, so be sure the number format is international before doing the queries
-		contact = PhoneUtils.extractNumberFromUri(contact);
+    public boolean isFtBlockedForContact(ContactId contact){
 		String[] projection = { Data.DATA1, Data.MIMETYPE };
-		String selection = Data.MIMETYPE + "=?" + " AND " + Data.DATA1 + "=?";
-		String[] selectionArgs = { MIMETYPE_FT_BLOCKED, contact };
+		String selection = new StringBuilder(Data.MIMETYPE).append("=? AND ").append(Data.DATA1).append("=?").toString();
+		String[] selectionArgs = { MIMETYPE_FT_BLOCKED, contact.toString() };
 		Cursor c = null;
 		try {
 			c = ctx.getContentResolver().query(Data.CONTENT_URI, projection, selection, selectionArgs, null);
@@ -2862,7 +2934,14 @@ public final class ContactsManager {
     			// Set contact
     			int columnIndex = cursor.getColumnIndex(Data.DATA1);
     			if (columnIndex!=-1){
-    				contactInfo.setContact(cursor.getString(columnIndex));
+    				String contact = cursor.getString(columnIndex);
+					try {
+    					contactInfo.setContact(ContactUtils.createContactId(contact));
+					} catch (JoynContactFormatException e) {
+						if (logger.isActivated()) {
+							logger.warn( "Cannot parse contact "+contact);
+						}
+					}
     			}
     		}
     	}
@@ -3089,12 +3168,19 @@ public final class ContactsManager {
 			while (cursor.moveToNext()) {
 				long rawContactId = cursor.getLong(0);
 				String phoneNumber = cursor.getString(1);
-				if (getRawContactIdsFromPhoneNumber(phoneNumber).isEmpty()) {
-					ops.add(ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
-							.withSelection(RawContacts._ID + "=?", new String[] { Long.toString(rawContactId) }).build());
-					// Also delete the corresponding entries in the aggregation provider
-					ctx.getContentResolver().delete(AggregationData.CONTENT_URI, AggregationData.KEY_RCS_RAW_CONTACT_ID + "=?",
-							new String[] { Long.toString(rawContactId) });
+				try {
+					ContactId contactId = ContactUtils.createContactId(phoneNumber);
+					if (getRawContactIdsFromPhoneNumber(contactId).isEmpty()) {
+						ops.add(ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
+								.withSelection(RawContacts._ID + "=?", new String[] { Long.toString(rawContactId) }).build());
+						// Also delete the corresponding entries in the aggregation provider
+						ctx.getContentResolver().delete(AggregationData.CONTENT_URI, AggregationData.KEY_RCS_RAW_CONTACT_ID + "=?",
+								new String[] { Long.toString(rawContactId) });
+					}
+				} catch (JoynContactFormatException e) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse contact "+phoneNumber);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -3133,9 +3219,16 @@ public final class ContactsManager {
 			// Delete EAB Entry where number is not in the address book anymore
 			while (cursor.moveToNext()) {
 				String phoneNumber = cursor.getString(0);
-				if (getRawContactIdsFromPhoneNumber(phoneNumber).isEmpty()) {
-					String[] selectionArg = { phoneNumber };
-					ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI, WHERE_CLAUSE_CONTACT, selectionArg);
+				try {
+					ContactId contactId = ContactUtils.createContactId(phoneNumber);
+					if (getRawContactIdsFromPhoneNumber(contactId).isEmpty()) {
+						String[] selectionArg = { phoneNumber };
+						ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI, SELECT_CONTACT, selectionArg);
+					}
+				} catch (JoynContactFormatException e) {
+					if (logger.isActivated()) {
+						logger.warn("Cannot parse contact "+phoneNumber);
+					}
 				}
 			}
 		} catch (Exception e) {

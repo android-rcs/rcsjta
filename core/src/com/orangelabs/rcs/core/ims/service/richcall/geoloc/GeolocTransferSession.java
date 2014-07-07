@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
@@ -58,17 +59,17 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(GeolocTransferSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contact Remote contact
+	 * @param contactId Remote contact Id
 	 */
-	public GeolocTransferSession(ImsService parent, MmContent content, String contact) {
-		super(parent, content, contact);
+	public GeolocTransferSession(ImsService parent, MmContent content, ContactId contactId) {
+		super(parent, content, contactId);
 	}
 	
 	/**

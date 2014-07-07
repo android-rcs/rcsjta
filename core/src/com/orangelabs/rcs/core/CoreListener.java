@@ -24,6 +24,7 @@ package com.orangelabs.rcs.core;
 
 import android.content.Intent;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
@@ -75,34 +76,34 @@ public interface CoreListener {
     /**
      * A new presence sharing notification has been received
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param status Status
      * @param reason Reason
      */
-    public void handlePresenceSharingNotification(String contact, String status, String reason);
+    public void handlePresenceSharingNotification(ContactId contactId, String status, String reason);
 
     /**
      * A new presence info notification has been received
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param presense Presence info document
      */
-    public void handlePresenceInfoNotification(String contact, PidfDocument presence);
+    public void handlePresenceInfoNotification(ContactId contactId, PidfDocument presence);
 
     /**
      * Capabilities update notification has been received
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      * @param capabilities Capabilities
      */
-    public void handleCapabilitiesNotification(String contact, Capabilities capabilities);
+    public void handleCapabilitiesNotification(ContactId contactId, Capabilities capabilities);
     
     /**
      * A new presence sharing invitation has been received
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
      */
-    public void handlePresenceSharingInvitation(String contact);
+    public void handlePresenceSharingInvitation(ContactId contactId);
     
     /**
      * A new IP call invitation has been received
@@ -199,29 +200,29 @@ public interface CoreListener {
     /**
      * New message delivery status
      * 
-     * @param contact Contact
+     * @param contactId Contact identifier
 	 * @param msgId Message ID
      * @param status Delivery status
      */
-    public void handleMessageDeliveryStatus(String contact, String msgId, String status);
+    public void handleMessageDeliveryStatus(ContactId contactId, String msgId, String status);
 
     /**
      * New file delivery status
      *
      * @param fileTransferId File transfer Id
      * @param status Delivery status
-     * @param contact who notified status
+     * @param contactId who notified status
      */
-    public void handleFileDeliveryStatus(String fileTransferId, String status, String contact);
+    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contactId);
 
     /**
      * New group file delivery status
      *
      * @param fileTransferId File transfer Id
      * @param status Delivery status
-     * @param contact who notified status
+     * @param contactId who notified status
      */
-    public void handleGroupFileDeliveryStatus(String fileTransferId, String status, String contact);
+    public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contactId);
 
     /**
      * New SIP MSRP session invitation
@@ -252,7 +253,7 @@ public interface CoreListener {
      * @param btnLabelReject Label of Reject button
      * @param timeout Timeout request
      */
-    public void handleUserConfirmationRequest(String remote, String id,
+    public void handleUserConfirmationRequest(ContactId remote, String id,
             String type, boolean pin, String subject, String text,
             String btnLabelAccept, String btnLabelReject, int timeout);
 
@@ -265,7 +266,7 @@ public interface CoreListener {
      * @param subject Subject
      * @param text Text
      */
-    public void handleUserConfirmationAck(String remote, String id, String status, String subject, String text);
+    public void handleUserConfirmationAck(ContactId remote, String id, String status, String subject, String text);
 
     /**
      * User terms notification
@@ -276,7 +277,7 @@ public interface CoreListener {
      * @param text Text
      * @param btnLabel Label of OK button
      */
-    public void handleUserNotification(String remote, String id, String subject, String text, String btnLabel);
+    public void handleUserNotification(ContactId remote, String id, String subject, String text, String btnLabel);
 
     /**
      * SIM has changed

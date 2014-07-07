@@ -20,7 +20,6 @@ package com.orangelabs.rcs.service.api;
 
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Set;
 
 import android.os.RemoteCallbackList;
@@ -30,6 +29,7 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -64,7 +64,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(CapabilityServiceImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -176,16 +176,16 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
      * supported an exception is thrown.
      * 
-     * @param contact Contact
+     * @param contactId ContactId
      * @return Capabilities
      */
-	public Capabilities getContactCapabilities(String contact) {
+	public Capabilities getContactCapabilities(ContactId contactId) {
 		if (logger.isActivated()) {
-			logger.info("Get capabilities for contact " + contact);
+			logger.info("Get capabilities for contact " + contactId);
 		}
 
 		// Read capabilities in the local database
-		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
+		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
 		if (capabilities != null) {
     		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
 			return new Capabilities(
@@ -215,12 +215,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * capability refresh request is provided to all the clients that have registered
 	 * the listener for this event.
 	 * 
-	 * @param contact Contact
+	 * @param contactId ContactId
 	 * @throws ServerApiException
 	 */
-	public void requestContactCapabilities(final String contact) throws ServerApiException {
+	public void requestContactCapabilities(final ContactId contactId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Request capabilities for contact " + contact);
+			logger.info("Request capabilities for contact " + contactId);
 		}
 
 		// Test IMS connection
@@ -228,12 +228,11 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 		// Request contact capabilities
 		try {
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
-					Core.getInstance().getCapabilityService().requestContactCapabilities(contact);
+					Core.getInstance().getCapabilityService().requestContactCapabilities(contactId);
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -245,13 +244,13 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
      * Receive capabilities from a contact
      * 
-     * @param contact Contact
+     * @param contactId ContactId
      * @param capabilities Capabilities
      */
-    public void receiveCapabilities(String contact, com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
+    public void receiveCapabilities(ContactId contactId, com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
     	synchronized(lock) {
     		if (logger.isActivated()) {
-    			logger.info("Receive capabilities for " + contact);
+    			logger.info("Receive capabilities for " + contactId);
     		}
 	
     		// Create capabilities instance
@@ -268,12 +267,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				capabilities.isSipAutomata()); 
 
     		// Notify capabilities listeners
-        	notifyListeners(contact, c, capabilitiesListeners);
+        	notifyListeners(contactId, c, capabilitiesListeners);
 
     		// Notify capabilities listeners for a given contact
-	        RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact);
+	        RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contactId.toString());
 	        if (listeners != null) {
-	        	notifyListeners(contact, c, listeners);
+	        	notifyListeners(contactId, c, listeners);
 	        }
     	}
     }
@@ -281,14 +280,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**
      * Notify listeners
      * 
+     * @param contactId ContactId
      * @param capabilities Capabilities
      * @param listeners Listeners
      */
-    private void notifyListeners(String contact, Capabilities capabilities, RemoteCallbackList<ICapabilitiesListener> listeners) {
+    private void notifyListeners(ContactId contactId, Capabilities capabilities, RemoteCallbackList<ICapabilitiesListener> listeners) {
 		final int N = listeners.beginBroadcast();
         for (int i=0; i < N; i++) {
             try {
-            	listeners.getBroadcastItem(i).onCapabilitiesReceived(contact, capabilities);
+            	listeners.getBroadcastItem(i).onCapabilitiesReceived(contactId, capabilities);
             } catch(Exception e) {
             	if (logger.isActivated()) {
             		logger.error("Can't notify listener", e);
@@ -322,8 +322,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		try {
 	        Thread t = new Thread() {
 	    		public void run() {
-	    			List<String> contactList = ContactsManager.getInstance().getAllContacts();
-	    			Core.getInstance().getCapabilityService().requestContactCapabilities(contactList);
+	    			Set<ContactId> contactSet = ContactsManager.getInstance().getAllContacts();
+	    			Core.getInstance().getCapabilityService().requestContactCapabilities(contactSet);
 	    		}
 	    	};
 	    	t.start();
@@ -368,19 +368,19 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Registers a listener for receiving capabilities of a given contact
 	 * 
-	 * @param contact Contact
+	 * @param contactId ContactId
 	 * @param listener Capabilities listener
 	 */
-	public void addContactCapabilitiesListener(String contact, ICapabilitiesListener listener) {
+	public void addContactCapabilitiesListener(ContactId contactId, ICapabilitiesListener listener) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("Add a listener for contact " + contact);
+				logger.info("Add a listener for contact " + contactId);
 			}
 
-			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact);
+			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contactId.toString());
 			if (listeners == null) {
 				listeners = new RemoteCallbackList<ICapabilitiesListener>();
-				contactCapalitiesListeners.put(contact, listeners);
+				contactCapalitiesListeners.put(contactId.toString(), listeners);
 			}
 			listeners.register(listener);
 		}
@@ -389,16 +389,16 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Unregisters a listener of capabilities for a given contact
 	 * 
-	 * @param contact Contact
+	 * @param contactId ContactId
 	 * @param listener Capabilities listener
 	 */
-	public void removeContactCapabilitiesListener(String contact, ICapabilitiesListener listener) {
+	public void removeContactCapabilitiesListener(ContactId contactId, ICapabilitiesListener listener) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info("Remove a listener for contact " + contact);
+				logger.info("Remove a listener for contact " + contactId);
 			}
 
-			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact);
+			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contactId.toString());
 			if (listeners != null) {
 				listeners.unregister(listener);
 			}

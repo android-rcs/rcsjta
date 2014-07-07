@@ -52,6 +52,7 @@ import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
@@ -165,6 +166,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     public void onClick(View v) {
         sendText();
     }
+    
+    
 
     /**
      * Message composer listener
@@ -310,9 +313,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 * @param msg Instant message
 	 */
     protected void displayReceivedMessage(ChatMessage msg) {
-        String contact = msg.getContact();
-		String txt = msg.getMessage();
-        addMessageHistory(ChatLog.Message.Direction.INCOMING, contact, txt, msg.getId());
+        addMessageHistory(ChatLog.Message.Direction.INCOMING, msg.getContact().toString(), msg.getMessage(), msg.getId());
     }
 
     /**
@@ -322,7 +323,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 */
     protected void displayReceivedGeoloc(GeolocMessage msg) {
     	// Add geoloc to the message history
-		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact(), msg.getGeoloc(), msg.getId());
+		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact().toString(), msg.getGeoloc(), msg.getId());
     }
 
     /**
@@ -685,10 +686,10 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * 
      * @param participant A participant
      */
-    protected void showUsInMap(String participant) {
+    protected void showUsInMap(ContactId participant) {
     	Intent intent = new Intent(this, ShowUsInMap.class);
     	ArrayList<String> list = new ArrayList<String>();
-    	list.add(participant);
+    	list.add(participant.toString());
     	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
     	startActivity(intent);
     }    

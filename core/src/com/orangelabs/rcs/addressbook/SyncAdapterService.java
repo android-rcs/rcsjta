@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.addressbook;
 
 import java.util.List;
+import java.util.Set;
 
 import android.accounts.Account;
 import android.app.Service;
@@ -30,6 +31,7 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.service.api.ServerApiException;
@@ -114,8 +116,8 @@ public class SyncAdapterService extends Service {
         	}
 
         	// Update all contacts capabilities
-    		List<String> contactList = ContactsManager.getInstance().getAllContacts();
-   			Core.getInstance().getCapabilityService().requestContactCapabilities(contactList);
+    		Set<ContactId> contactSet = ContactsManager.getInstance().getAllContacts();
+   			Core.getInstance().getCapabilityService().requestContactCapabilities(contactSet);
         }
     }
 }

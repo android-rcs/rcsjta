@@ -38,6 +38,8 @@ import android.widget.Toast;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
@@ -84,7 +86,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	/**
 	 * Remote contact
 	 */
-    private String contact;
+    private ContactId contact;
 
 	/**
 	 * Service ID
@@ -197,7 +199,8 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	            } 
 	            
 		    	// Get remote contact
-				contact = getIntent().getStringExtra(MessagingSessionView.EXTRA_CONTACT);
+	            ContactUtils contactUtils = ContactUtils.getInstance(this);
+				contact = contactUtils.formatContactId(getIntent().getStringExtra(MessagingSessionView.EXTRA_CONTACT));
 		        
 		        // Initiate session
     			startSession();
@@ -255,7 +258,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	    	TextView featureTagEdit = (TextView)findViewById(R.id.feature_tag);
 	    	featureTagEdit.setText(serviceId);
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
-	    	contactEdit.setText(contact);
+	    	contactEdit.setText(contact.toString());
 			Button sendBtn = (Button)findViewById(R.id.send_btn);
 			if (session != null) {
 				sendBtn.setEnabled(true);

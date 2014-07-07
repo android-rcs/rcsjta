@@ -19,10 +19,12 @@ package com.orangelabs.rcs.ri.messaging.ft;
 
 import java.io.Serializable;
 
-import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransferLog;
 
 /**
@@ -34,7 +36,7 @@ public class FileTransferDAO implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String ftId;
-	private String contact;
+	private ContactId contact;
 	private String filename;
 	private String chatId;
 	private String mimeType;
@@ -103,7 +105,7 @@ public class FileTransferDAO implements Serializable {
 		return ftId;
 	}
 
-	public String getContact() {
+	public ContactId getContact() {
 		return contact;
 	}
 
@@ -145,16 +147,20 @@ public class FileTransferDAO implements Serializable {
 	 *            the unique key field
 	 * @throws Exception 
 	 */
-	public FileTransferDAO(final ContentResolver contentResolver, final String fileTransferId) throws Exception {
+	public FileTransferDAO(final Context context, final String fileTransferId) throws Exception {
 		Uri uri = FileTransferLog.CONTENT_URI;
 		String[] whereArgs = new String[] { fileTransferId };
 		Cursor cursor = null;
 		try {
-			cursor = contentResolver.query(uri, null, WHERE_CLAUSE, whereArgs, null);
+			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
 			if (cursor.moveToFirst()) {
 				ftId = fileTransferId;
 				chatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-				contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT_NUMBER));
+				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT_NUMBER));
+				if (_contact != null) {
+					ContactUtils contactUtils = ContactUtils.getInstance(context);
+					contact = contactUtils.formatContactId(_contact);
+				}
 				filename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
 				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
 				state = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.STATE));

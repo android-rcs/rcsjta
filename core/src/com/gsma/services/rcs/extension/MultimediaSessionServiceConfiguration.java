@@ -29,7 +29,7 @@ import android.os.Parcelable;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionServiceConfiguration {
+public class MultimediaSessionServiceConfiguration implements Parcelable {
 	/**
 	 * Max length of a message
 	 */

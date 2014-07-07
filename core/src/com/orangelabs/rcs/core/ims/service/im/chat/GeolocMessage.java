@@ -19,6 +19,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.Date;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 
 /**
@@ -41,12 +42,12 @@ public class GeolocMessage extends InstantMessage {
      * Constructor for outgoing message
      * 
      * @param messageId Message Id
-     * @param remote Remote user
+     * @param remote Remote user identifier
      * @param geoloc Geoloc info
      * @param imdnDisplayedRequested Flag indicating that an IMDN "displayed" is requested
      * @param displayName the display name of the remote contact
 	 */
-	public GeolocMessage(String messageId, String remote, GeolocPush geoloc, boolean imdnDisplayedRequested, String displayName) {
+	public GeolocMessage(String messageId, ContactId remote, GeolocPush geoloc, boolean imdnDisplayedRequested, String displayName) {
 		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, displayName);
 		
 		this.geoloc = geoloc;
@@ -56,13 +57,13 @@ public class GeolocMessage extends InstantMessage {
      * Constructor for incoming message
      * 
      * @param messageId Message Id
-     * @param remote Remote user
+     * @param remote Remote user identifier
      * @param geoloc Geoloc info
      * @param imdnDisplayedRequested Flag indicating that an IMDN "displayed" is requested
 	 * @param serverReceiptAt Receipt date of the message on the server
 	 * @param displayName the display name of the remote contact
 	 */
-	public GeolocMessage(String messageId, String remote, GeolocPush geoloc, boolean imdnDisplayedRequested, Date serverReceiptAt, String displayName) {
+	public GeolocMessage(String messageId, ContactId remote, GeolocPush geoloc, boolean imdnDisplayedRequested, Date serverReceiptAt, String displayName) {
 		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, serverReceiptAt, displayName);
 		
 		this.geoloc = geoloc;
@@ -76,4 +77,11 @@ public class GeolocMessage extends InstantMessage {
 	public GeolocPush getGeoloc() {
 		return geoloc;
 	}
+
+	@Override
+	public String toString() {
+		return "GeolocMessage [geoloc=" + geoloc + ", " + super.toString() + "]";
+	}
+	
+	
 }

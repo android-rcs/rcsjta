@@ -4,13 +4,15 @@
  */
 package com.orangelabs.rcs.service.api;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
+
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.content.ContentResolver;
-import android.database.Cursor;
 
 /**
  * Delayed Display Notification Dispatcher retrieves those text messages for
@@ -47,22 +49,23 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 	public void run() {
 		Cursor cursor = null;
 		try {
-			cursor = mContentResolver.query(ChatLog.Message.CONTENT_URI, new String[] {
-					ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT_NUMBER
-			}, SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
-					ORDER_BY_TIMESTAMP_ASC);
+			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT_NUMBER };
+			cursor = mContentResolver.query(ChatLog.Message.CONTENT_URI, projection,
+					SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null, ORDER_BY_TIMESTAMP_ASC);
 			while (cursor.moveToNext()) {
-				String msgId = cursor.getString(cursor
-						.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
-				String contactNumber = cursor.getString(cursor
-						.getColumnIndexOrThrow(ChatLog.Message.CONTACT_NUMBER));
-				mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, contactNumber);
+				String msgId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
+				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT_NUMBER));
+				try {
+					mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, ContactUtils.createContactId(contactNumber));
+				} catch (JoynContactFormatException e) {
+					if (logger.isActivated())  {
+						logger.error( "Cannot parse contact "+contactNumber);
+					}
+				}
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.error(
-						"Could not retrieve messages for which delayed display notification should be send!",
-						e);
+				logger.error("Could not retrieve messages for which delayed display notification should be send!", e);
 			}
 		} finally {
 			if (cursor != null) {

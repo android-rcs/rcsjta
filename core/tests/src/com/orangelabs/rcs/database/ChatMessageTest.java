@@ -21,6 +21,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
@@ -29,10 +32,18 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 
 public class ChatMessageTest extends AndroidTestCase {
+	private ContactId remote = null;
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		MessagingLog.createInstance(mContext);
+		MessagingLog.createInstance(getContext());
+		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
+		try {
+			remote = contactUtils.formatContactId("+339000000");
+		} catch (JoynContactFormatException e) {
+			fail( "Cannot create contactID");
+		}
 	}
 
 	protected void tearDown() throws Exception {
@@ -40,7 +51,6 @@ public class ChatMessageTest extends AndroidTestCase {
 	}
 	
 	public void testTextMessage() {
-		String remote = "+339000000";
 		String msgId = "" + System.currentTimeMillis();
 		String txt = "Hello";
 		InstantMessage msg = new InstantMessage(msgId, remote, txt, true, "display");
@@ -49,8 +59,8 @@ public class ChatMessageTest extends AndroidTestCase {
 		MessagingLog.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
 		
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote);		
-    	Cursor cursor = mContext.getContentResolver().query(uri, 
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
+    	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
     				ChatLog.Message.CONTACT_NUMBER,
@@ -74,7 +84,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String id = cursor.getString(5);
     		
     		assertEquals(direction, ChatLog.Message.Direction.OUTGOING);
-    		assertEquals(contact, remote);
+    		assertEquals(contact, remote.toString());
     		assertEquals(readTxt, txt);
     		assertEquals(contentType, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
     		assertEquals(type, ChatLog.Message.Type.CONTENT);
@@ -83,7 +93,6 @@ public class ChatMessageTest extends AndroidTestCase {
 	}
 
 	public void testGeolocMessage() {
-		String remote = "+339000000";
 		String msgId = "" + System.currentTimeMillis();
 		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 2000);
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true,"display");
@@ -92,8 +101,8 @@ public class ChatMessageTest extends AndroidTestCase {
 		MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
 		
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote);		
-    	Cursor cursor = mContext.getContentResolver().query(uri, 
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
+    	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
     				ChatLog.Message.CONTACT_NUMBER,
@@ -119,7 +128,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String id = cursor.getString(5);
     		
     		assertEquals(direction, ChatLog.Message.Direction.OUTGOING);
-    		assertEquals(contact, remote);
+    		assertEquals(contact, remote.toString());
     		assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
     		assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
     		assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());

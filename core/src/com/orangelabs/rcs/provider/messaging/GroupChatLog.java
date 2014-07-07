@@ -28,6 +28,7 @@ import java.util.Set;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -48,7 +49,13 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	private Uri chatDatabaseUri = ChatData.CONTENT_URI;
 
+	private Context context;
 	private ContentResolver cr;
+	
+	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
+
+	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(ChatData.KEY_CHAT_ID).append("=? AND ")
+			.append(ChatData.KEY_STATUS).append("=? AND ").append(ChatData.KEY_REJECT_GC).append("=1").toString();
 
 	/**
 	 * The logger
@@ -61,8 +68,9 @@ public class GroupChatLog implements IGroupChatLog {
 	 * @param cr
 	 *            Content resolver
 	 */
-	/* package private */GroupChatLog(ContentResolver cr) {
-		this.cr = cr;
+	/* package private */GroupChatLog(Context context) {
+		this.context = context;
+		this.cr = context.getContentResolver();
 	}
 
 	/**
@@ -125,13 +133,8 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJECT_GC, "0");
-		// @formatter:off
-		String selection = ChatData.KEY_CHAT_ID + " = ? AND " 
-							+ ChatData.KEY_STATUS + " = ? AND "
-							+ ChatData.KEY_REJECT_GC + " = 1";
-		// @formatter:on
 		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
-		cr.update(chatDatabaseUri, values, selection, selectionArgs);
+		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
 		}
@@ -199,19 +202,19 @@ public class GroupChatLog implements IGroupChatLog {
 		String[] projection = new String[] { ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
 				ChatData.KEY_SUBJECT };
 		// @formatter:on
-		String selection = ChatData.KEY_CHAT_ID + "= ?";
 		String[] selArgs = new String[] { chatId };
 		try {
-			cursor = cr.query(chatDatabaseUri, projection, selection, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			cursor = cr.query(chatDatabaseUri, projection, SELECT_CHAT_ID, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(cursor.getString(2));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(context, cursor.getString(2));
 				result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId, participants, cursor.getString(3));
 			}
 		} catch (Exception e) {
 		} finally {
-			if (cursor != null)
+			if (cursor != null) {
 				cursor.close();
+			}
 		}
 		return result;
 	}
@@ -228,14 +231,13 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 		Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
 		String[] projection = new String[] { ChatData.KEY_PARTICIPANTS };
-		String selection = ChatData.KEY_CHAT_ID + "= ?";
 		String[] selArgs = new String[] { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(chatDatabaseUri, projection, selection, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			cursor = cr.query(chatDatabaseUri, projection, SELECT_CHAT_ID, selArgs, ChatData.KEY_TIMESTAMP + " DESC");
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(cursor.getString(0));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(context, cursor.getString(0));
 				if (participants != null) {
 					for (ParticipantInfo participantInfo : participants) {
 						// Only consider participants who have not declined or left GC
@@ -245,15 +247,18 @@ public class GroupChatLog implements IGroupChatLog {
 							break;
 						default:
 							result.add(participantInfo);
-							break;
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Exception",e);
+			}
 		} finally {
-			if (cursor != null)
+			if (cursor != null) {
 				cursor.close();
+			}
 		}
 		return result;
 	}
@@ -265,20 +270,19 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	@Override
 	public boolean isGroupChatNextInviteRejected(String chatId) {
-		String selection = ChatData.KEY_CHAT_ID + " = ? AND " //
-				+ ChatData.KEY_STATUS + " = ? AND "//
-				+ ChatData.KEY_REJECT_GC + " = 1";
+		String[] projection = { ChatData.KEY_CHAT_ID };
 		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(chatDatabaseUri, null, selection, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");
+			cursor = cr.query(chatDatabaseUri, projection, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");
 			if (cursor.getCount() != 0) {
 				return true;
 			}
 		} catch (Exception e) {
 		} finally {
-			if (cursor != null)
+			if (cursor != null) {
 				cursor.close();
+			}
 		}
 		return false;
 	}

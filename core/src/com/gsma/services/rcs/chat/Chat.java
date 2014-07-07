@@ -22,6 +22,7 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Chat
@@ -46,10 +47,10 @@ public class Chat {
     /**
      * Returns the remote contact
      * 
-     * @return Contact
+     * @return ContactId
 	 * @throws JoynServiceException
      */
-    public String getRemoteContact() throws JoynServiceException {
+    public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return chatInf.getRemoteContact();
 		} catch(Exception e) {

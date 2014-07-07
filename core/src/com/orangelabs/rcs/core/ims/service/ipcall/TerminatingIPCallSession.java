@@ -22,6 +22,7 @@ import java.util.Vector;
 
 import android.os.RemoteException;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -55,8 +56,8 @@ public class TerminatingIPCallSession extends IPCallSession {
      * @param parent IMS service
      * @param invite Initial INVITE request
      */
-    public TerminatingIPCallSession(ImsService parent, SipRequest invite) {
-        super(parent, SipUtils.getAssertedIdentity(invite),
+    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contactId) {
+        super(parent, contactId,
         		ContentManager.createLiveAudioContentFromSdp(invite.getContentBytes()),
         		ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()));
 

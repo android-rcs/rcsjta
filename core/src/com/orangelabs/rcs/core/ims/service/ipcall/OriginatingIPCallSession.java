@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.orangelabs.rcs.core.content.AudioContent;
@@ -37,21 +38,21 @@ public class OriginatingIPCallSession extends IPCallSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(OriginatingIPCallSession.class.getSimpleName());
     
     /**
      * Constructor
      *
      * @param parent IMS service
-     * @param contact Remote contact
+     * @param contactId Remote contact identifier
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param player IP call player
      * @param renderer IP call renderer
      */
-    public OriginatingIPCallSession(ImsService parent, String contact, AudioContent audioContent,
+    public OriginatingIPCallSession(ImsService parent, ContactId contactId, AudioContent audioContent,
     		VideoContent videoContent, IIPCallPlayer player, IIPCallRenderer renderer) {
-    	super(parent, contact, audioContent, videoContent);
+    	super(parent, contactId, audioContent, videoContent);
     	
         // Set the player
         setPlayer(player);

@@ -23,6 +23,8 @@ import java.util.Vector;
 
 import org.xml.sax.InputSource;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
@@ -32,7 +34,7 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.Tuple;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.utils.PhoneUtils;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -63,14 +65,14 @@ public class AnonymousFetchManager implements DiscoveryManager {
 	/**
      * Request contact capabilities
      * 
-     * @param contact Remote contact
+     * @param contactId Remote contact identifier
      * @return Returns true if success
      */
-    public boolean requestCapabilities(String contact) {
+    public boolean requestCapabilities(ContactId contactId) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities in background for " + contact);
+    		logger.debug("Request capabilities in background for " + contactId);
     	}
-		AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(imsModule, contact);
+		AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(imsModule, contactId);
 		task.start();
 		return true;
 	}
@@ -102,7 +104,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
 			    	// We queried via anonymous fetch procedure, so set presence discovery to true
 			    	capabilities.setPresenceDiscoverySupport(true);
 			    	
-		    		String contact = presence.getEntity();
+		    		ContactId contact = ContactUtils.createContactId(presence.getEntity());
 		    		Vector<Tuple> tuples = presence.getTuplesList();
 		    		for(int i=0; i < tuples.size(); i++) {
 		    			Tuple tuple = (Tuple)tuples.elementAt(i);
@@ -140,19 +142,26 @@ public class AnonymousFetchManager implements DiscoveryManager {
 	    		}
 	    	}    	
 	    } else {
-	    	if (logger.isActivated()) {
-	    		logger.debug("Anonymous fetch notification is empty");
-	    	}
-	    	String contact = PhoneUtils.extractNumberFromUri(SipUtils.getAssertedIdentity(notify));
+			try {
+				if (logger.isActivated()) {
+					logger.debug("Anonymous fetch notification is empty");
+				}
+				ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(notify));
 
-	    	// Notify content was empty 
-	    	Capabilities capabilities = new Capabilities();
+				// Notify content was empty
+				Capabilities capabilities = new Capabilities();
 
-	    	// Update capabilities in database
-	    	ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NO_INFO, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+				// Update capabilities in database
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NO_INFO,
+						ContactInfo.REGISTRATION_STATUS_UNKNOWN);
 
-	    	// Notify listener
-	    	imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+				// Notify listener
+				imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+			} catch (JoynContactFormatException e) {
+				if (logger.isActivated()) {
+					logger.error("Cannot get contact from notify");
+				}
+			}
 	    }
     }	
 }

@@ -38,6 +38,8 @@ import android.widget.ToggleButton;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
@@ -86,7 +88,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	/**
 	 * Remote contact
 	 */
-    private String contact;
+    private ContactId contact;
 
 	/**
 	 * Video
@@ -212,7 +214,8 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	            } 
 	            
 		    	// Get remote contact
-				contact = getIntent().getStringExtra(IPCallView.EXTRA_CONTACT);
+	            ContactUtils contactUtils = ContactUtils.getInstance(this);
+				contact = contactUtils.formatContactId(getIntent().getStringExtra(IPCallView.EXTRA_CONTACT));
 		        
 		    	// Get video option
 				video = getIntent().getBooleanExtra(IPCallView.EXTRA_VIDEO_OPTION, false);
@@ -280,7 +283,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 			
 			// Display call info
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
-	    	contactEdit.setText(contact);
+	    	contactEdit.setText(contact.toString());
 	        ToggleButton videoBtn = (ToggleButton)findViewById(R.id.video);
 	        videoBtn.setChecked(video);        
 	        videoBtn.setOnCheckedChangeListener(btnVideoListener);        

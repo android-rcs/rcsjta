@@ -1,6 +1,7 @@
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Multimedia messaging session interface
@@ -8,7 +9,7 @@ import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 interface IMultimediaMessagingSession {
 	String getSessionId();
 	
-	String getRemoteContact();
+	ContactId getRemoteContact();
 	
 	String getServiceId();
 	

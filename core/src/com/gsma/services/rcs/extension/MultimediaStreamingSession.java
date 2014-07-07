@@ -18,6 +18,7 @@
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class maintains the information related to a multimedia
@@ -57,12 +58,12 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	}
 	
 	/**
-	 * Returns the remote contact
+	 * Returns the remote contact identifier
 	 * 
-	 * @return Contact
+	 * @return ContactId
 	 * @throws JoynServiceException
 	 */
-	public String getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws JoynServiceException {
 		try {
 			return sessionIntf.getRemoteContact();
 		} catch(Exception e) {

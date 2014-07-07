@@ -19,6 +19,7 @@ package com.gsma.service.rcs;
 
 import junit.framework.Assert;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynServiceConfiguration;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 
@@ -30,8 +31,9 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		RcsSettings.createInstance(mContext);
+		RcsSettings.createInstance(getContext());
 		rcsSettings = RcsSettings.getInstance();
+		assertNotNull("Cannot instantiate RcsSettings", rcsSettings);
 	}
 
 	protected void tearDown() throws Exception {
@@ -40,77 +42,111 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 
 	public void testSetMyDisplayNameNull() {
 		try {
-			JoynServiceConfiguration.setMyDisplayName(mContext, null);
+			JoynServiceConfiguration.setMyDisplayName(getContext(), null);
 			Assert.fail("Expecting exception but none was thrown.");
 		} catch (Exception e) {
 			if (e instanceof IllegalArgumentException == false) {
-				Assert.fail("Exception was thrown was unexpected.");
+				Assert.fail("Exception thrown was unexpected.");
 			}
 		}
 	}
 
 	public void testSetMyDisplayName() {
 		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		JoynServiceConfiguration.setMyDisplayName(mContext, "mydisplayname");
-		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(mContext), "mydisplayname");
+		JoynServiceConfiguration.setMyDisplayName(getContext(), "mydisplayname");
+		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(getContext()), "mydisplayname");
 		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testSsetMyDisplayNameWithBlank() {
 		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		JoynServiceConfiguration.setMyDisplayName(mContext, "my display name");
-		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(mContext), "my display name");
+		JoynServiceConfiguration.setMyDisplayName(getContext(), "my display name");
+		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(getContext()), "my display name");
 		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testSetMyDisplayNameEmpty() {
 		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		JoynServiceConfiguration.setMyDisplayName(mContext, "");
-		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(mContext), "");
+		JoynServiceConfiguration.setMyDisplayName(getContext(), "");
+		Assert.assertEquals(JoynServiceConfiguration.getMyDisplayName(getContext()), "");
 		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testDefaultMessagingMethod() {
 		int defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
-		JoynServiceConfiguration.setDefaultMessagingMethod(mContext, JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC);
+		JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC);
 		assertEquals(JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC,
-				JoynServiceConfiguration.getDefaultMessagingMethod(mContext));
-		JoynServiceConfiguration.setDefaultMessagingMethod(mContext, JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN);
+				JoynServiceConfiguration.getDefaultMessagingMethod(getContext()));
+		JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN);
 		assertEquals(JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN,
-				JoynServiceConfiguration.getDefaultMessagingMethod(mContext));
+				JoynServiceConfiguration.getDefaultMessagingMethod(getContext()));
 		rcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
 	}
 
 	public void testSetDefaultMessagingInvalidArgument() {
 		try {
-			JoynServiceConfiguration.setDefaultMessagingMethod(mContext, 4);
+			JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), 4);
 		} catch (Exception e) {
 			if (e instanceof IllegalArgumentException == false) {
-				Assert.fail("Exception was thrown was unexpected.");
+				Assert.fail("Exception thrown was unexpected.");
 			}
 		}
 	}
 
 	public void testGetMyCountryCode() {
-		String ccSav = rcsSettings.getCountryCode();
-		rcsSettings.setCountryCode("+44");
-		assertEquals("+44", JoynServiceConfiguration.getMyCountryCode(mContext));
-		rcsSettings.setCountryCode(ccSav);
+		String countryCode = rcsSettings.getCountryCode();
+		assertEquals(countryCode, JoynServiceConfiguration.getMyCountryCode(getContext()));
+	}
+	
+	public void testGetMyCountryAreaCode() {
+		String countryAreaCode = rcsSettings.getCountryAreaCode();
+		assertEquals(countryAreaCode, JoynServiceConfiguration.getMyCountryAreaCode(getContext()));
 	}
 	
 	public void testGetMyContactId() {
 		String contactIdSav = rcsSettings.getUserProfileImsUserName();
 		rcsSettings.setUserProfileImsUserName("+33123456789");
-		assertEquals("+33123456789", JoynServiceConfiguration.getMyContactId(mContext));
+		try {
+			assertEquals("+33123456789", JoynServiceConfiguration.getMyContactId(getContext()).toString());
+		} catch (JoynContactFormatException e) {
+			fail("Failed to getMyContactId");
+		}
+		rcsSettings.setUserProfileImsUserName(contactIdSav);
+	}
+	
+	public void testGetMyContactIdWithoutCC() {
+		String cac = rcsSettings.getCountryAreaCode();
+		String contactIdSav = rcsSettings.getUserProfileImsUserName();
+		rcsSettings.setUserProfileImsUserName(cac+"23456789");
+		String cc = rcsSettings.getCountryCode();
+		try {
+			assertEquals(cc+"23456789",JoynServiceConfiguration.getMyContactId(getContext()).toString());
+		} catch (JoynContactFormatException e) {
+			fail("Failed to testGetMyContactIdWithoutCC");
+		}
+		rcsSettings.setUserProfileImsUserName(contactIdSav);
+	}
+	
+	public void testGetMyContactIdBadFormat() {
+		String contactIdSav = rcsSettings.getUserProfileImsUserName();
+		rcsSettings.setUserProfileImsUserName("1234w56789");
+		try {
+			JoynServiceConfiguration.getMyContactId(getContext());
+			fail("Expecting exception but none was thrown.");
+		} catch (JoynContactFormatException e) {
+			if (e instanceof JoynContactFormatException == false) {
+				Assert.fail("Exception thrown was unexpected.");
+			}
+		}
 		rcsSettings.setUserProfileImsUserName(contactIdSav);
 	}
 	
 	public void testIsConfigValid() {
 		boolean isConfigValidSav = rcsSettings.isConfigurationValid();
 		rcsSettings.setConfigurationValid(false);
-		assertFalse(JoynServiceConfiguration.isConfigValid(mContext));
+		assertFalse(JoynServiceConfiguration.isConfigValid(getContext()));
 		rcsSettings.setConfigurationValid(true);
-		assertTrue(JoynServiceConfiguration.isConfigValid(mContext));
+		assertTrue(JoynServiceConfiguration.isConfigValid(getContext()));
 		rcsSettings.setConfigurationValid(isConfigValidSav);
 	}
 	
@@ -118,10 +154,10 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 		int getMessagingUXSav  = rcsSettings.getMessagingMode();
 		rcsSettings.setMessagingMode(JoynServiceConfiguration.Settings.MessagingModes.CONVERGED);
 		assertEquals(JoynServiceConfiguration.Settings.MessagingModes.CONVERGED,
-				JoynServiceConfiguration.getMessagingUX(mContext));
+				JoynServiceConfiguration.getMessagingUX(getContext()));
 		rcsSettings.setMessagingMode(JoynServiceConfiguration.Settings.MessagingModes.SEAMLESS);
 		assertEquals(JoynServiceConfiguration.Settings.MessagingModes.SEAMLESS,
-				JoynServiceConfiguration.getMessagingUX(mContext));
+				JoynServiceConfiguration.getMessagingUX(getContext()));
 		rcsSettings.setMessagingMode(getMessagingUXSav);
 	}
 	

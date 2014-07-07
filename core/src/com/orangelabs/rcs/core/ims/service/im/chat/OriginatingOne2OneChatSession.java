@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -27,6 +28,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -50,11 +52,11 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contact Remote contact
+	 * @param contactId Remote contact identifier
 	 * @param msg First message of the session
 	 */
-	public OriginatingOne2OneChatSession(ImsService parent, String contact, InstantMessage msg) {
-		super(parent, contact);
+	public OriginatingOne2OneChatSession(ImsService parent, ContactId contactId, InstantMessage msg) {
+		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
 		// Set first message
 		setFirstMesssage(msg);
 		// Create dialog path
