@@ -75,11 +75,6 @@ public class SipInterface implements SipListener {
     private final static String TRACE_SEPARATOR = "-----------------------------------------------------------------------------";
 
     /**
-     * Default SIP port
-     */
-    public final static int DEFAULT_SIP_PORT = 5060;
-
-    /**
      * SIP traces activation
      */
     private boolean sipTraceEnabled = RcsSettings.getInstance().isSipTraceActivated();
@@ -192,7 +187,7 @@ public class SipInterface implements SipListener {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(SipInterface.class.getSimpleName());
 
     /**
      * Constructor

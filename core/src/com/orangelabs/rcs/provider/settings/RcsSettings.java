@@ -1231,7 +1231,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getSipListeningPort() {
-		return readInteger(RcsSettingsData.SIP_DEFAULT_PORT, 5060);
+		return readInteger(RcsSettingsData.SIP_DEFAULT_PORT, 5062);
 	}
 
     /**
