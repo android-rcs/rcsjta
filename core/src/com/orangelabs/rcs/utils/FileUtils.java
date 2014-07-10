@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.utils;
@@ -180,7 +180,7 @@ public class FileUtils {
 	public static String getFileName(Context context, Uri file) throws IllegalArgumentException {
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(file, null, null, null, null, null);
+			cursor = context.getContentResolver().query(file, null, null, null, null);
 			if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 				if (cursor != null && cursor.moveToFirst()) {
 					String displayName = cursor.getString(cursor
@@ -214,7 +214,7 @@ public class FileUtils {
 	public static long getFileSize(Context context, Uri file) throws IllegalArgumentException {
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(file, null, null, null, null, null);
+			cursor = context.getContentResolver().query(file, null, null, null, null);
 			if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 				if (cursor != null && cursor.moveToFirst()) {
 					return Long.valueOf(
