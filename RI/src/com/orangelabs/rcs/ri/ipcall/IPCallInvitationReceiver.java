@@ -24,9 +24,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.util.Log;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -35,6 +38,11 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class IPCallInvitationReceiver extends BroadcastReceiver {
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(IPCallInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
         // Display invitation notification
@@ -49,7 +57,13 @@ public class IPCallInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact
-		String contact = invitation.getStringExtra(IPCallIntent.EXTRA_CONTACT);
+		ContactId contact = invitation.getParcelableExtra(IPCallIntent.EXTRA_CONTACT);
+		if (contact == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "IPCallInvitationReceiver failed: cannot parse contact");
+			}
+			return;
+		}
 
 		// Get call ID
 		String callId = invitation.getStringExtra(IPCallIntent.EXTRA_CALL_ID);
@@ -71,7 +85,7 @@ public class IPCallInvitationReceiver extends BroadcastReceiver {
         }        
 		Notification notif = new Notification(R.drawable.ri_notif_ipcall_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact.toString()), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

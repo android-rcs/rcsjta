@@ -431,4 +431,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	public boolean isDisplayedByAllRecipients(String msgId) {
 		return groupChatDeliveryInfoLog.isDisplayedByAllRecipients(msgId);
 	}
+
+	@Override
+	public boolean isNewMessage(ContactId contact, String msgId) {
+		return messageLog.isNewMessage(contact, msgId);
+	}
 }

@@ -40,14 +40,14 @@ public interface IGroupChatDeliveryInfoLog {
 	 *            Chat ID of a chat session
 	 * @param msgId
 	 *            Message ID of a chat message
-	 * @param contactId
+	 * @param contact
 	 *            Contact phone identifier
 	 * @param deliverySupported
 	 *            If delivery report is supported
 	 * @param displaySupported
 	 *            If display report is supported
 	 */
-	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contactId);
+	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contact);
 
 	/**
 	 * Set delivery status for outgoing group chat messages and files
@@ -56,10 +56,10 @@ public interface IGroupChatDeliveryInfoLog {
 	 *            Message ID
 	 * @param status
 	 *            Delivery status
-	 * @param contactId
+	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contactId);
+	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contact);
 
 	/**
 	 * Check if all recipients have received message

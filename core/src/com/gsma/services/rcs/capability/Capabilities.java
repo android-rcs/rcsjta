@@ -116,23 +116,23 @@ public class Capabilities implements Parcelable {
      * @hide
 	 */
 	public Capabilities(Parcel source) {
-		this.imageSharing = source.readInt() != 0;
-		this.videoSharing = source.readInt() != 0;
-		this.imSession = source.readInt() != 0;
-		this.fileTransfer = source.readInt() != 0;
+		imageSharing = source.readInt() != 0;
+		videoSharing = source.readInt() != 0;
+		imSession = source.readInt() != 0;
+		fileTransfer = source.readInt() != 0;
 		
-		boolean flag = source.readInt() != 0;
-		if (flag) {
+		boolean containsExtension = source.readInt() != 0;
+		if (containsExtension) {
 			List<String> exts = new ArrayList<String>();
 			source.readStringList(exts);
-			this.extensions = new HashSet<String>(exts);	
+			extensions = new HashSet<String>(exts);	
 		} else {
-			this.extensions = null;
+			extensions = null;
 		}
-		this.geolocPush = source.readInt() != 0;
-		this.ipVoiceCall = source.readInt() != 0;
-		this.ipVideoCall = source.readInt() != 0;
-        this.automata = source.readInt() != 0;
+		geolocPush = source.readInt() != 0;
+		ipVoiceCall = source.readInt() != 0;
+		ipVideoCall = source.readInt() != 0;
+        automata = source.readInt() != 0;
     }
 
 	/**
@@ -163,8 +163,8 @@ public class Capabilities implements Parcelable {
 			List<String> exts = new ArrayList<String>(extensions);
 			dest.writeStringList(exts);
 		} else {
-    		dest.writeInt(0);
-    	}
+			dest.writeInt(0);
+		}
     	dest.writeInt(geolocPush ? 1 : 0);
     	dest.writeInt(ipVoiceCall ? 1 : 0);
     	dest.writeInt(ipVideoCall ? 1 : 0);

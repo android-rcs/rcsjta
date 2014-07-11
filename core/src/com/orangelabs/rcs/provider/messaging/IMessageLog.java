@@ -67,12 +67,12 @@ public interface IMessageLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
-	 * @param contactId
+	 * @param contact
 	 *            Contact ID
 	 * @param status
 	 *            Status
 	 */
-	public void addGroupChatSystemMessage(String chatId, ContactId contactId, int status);
+	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status);
 
 	/**
 	 * Update chat message read status
@@ -133,6 +133,17 @@ public interface IMessageLog {
 	 */
 	public boolean isNewMessage(String chatId, String msgId);
 
+	/**
+	 * Check if it's a new message
+	 * 
+	 * @param contact
+	 *            contact ID
+	 * @param msgId
+	 *            message ID
+	 * @return true if new message
+	 */
+	public boolean isNewMessage(ContactId contact, String msgId);
+	
 	/**
 	 * A delivery report "displayed" is requested for a given chat message
 	 * 

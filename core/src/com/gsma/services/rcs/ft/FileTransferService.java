@@ -155,14 +155,14 @@ public class FileTransferService extends JoynService {
      * international format, SIP address, SIP-URI or Tel-URI. If the format of 
      * the contact is not supported an exception is thrown. 
      * 
-     * @param contactId the remote contact identifier
+     * @param contact the remote contact identifier
      * @param file URI of file to transfer
      * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 */
-    public FileTransfer transferFile(ContactId contactId, Uri file, FileTransferListener listener) throws JoynServiceException {
-    	return transferFile(contactId, file, false, listener);
+    public FileTransfer transferFile(ContactId contact, Uri file, FileTransferListener listener) throws JoynServiceException {
+    	return transferFile(contact, file, false, listener);
     }
     
 	/**
@@ -191,7 +191,7 @@ public class FileTransferService extends JoynService {
      * international format, SIP address, SIP-URI or Tel-URI. If the format of
      * the contact is not supported an exception is thrown.
 	 * 
-	 * @param contactId the remote contact Identifier
+	 * @param contact the remote contact Identifier
 	 * @param file
 	 *            Uri of file to transfer
 	 * @param fileicon
@@ -202,12 +202,12 @@ public class FileTransferService extends JoynService {
 	 * @return File transfer
 	 * @throws JoynServiceException
 	 */
-	public FileTransfer transferFile(ContactId contactId, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException {
+	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException {
     	if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
 
-				IFileTransfer ftIntf = api.transferFile(contactId, file, fileicon, listener);
+				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon, listener);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {

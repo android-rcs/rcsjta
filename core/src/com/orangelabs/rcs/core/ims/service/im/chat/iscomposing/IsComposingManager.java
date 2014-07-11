@@ -71,10 +71,10 @@ public class IsComposingManager {
     /**
      * Receive is-composing event
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param event Event 
      */
-    public void receiveIsComposingEvent(ContactId contactId, byte[] event) {
+    public void receiveIsComposingEvent(ContactId contact, byte[] event) {
     	try {
         	// Parse received event
 			InputSource input = new InputSource(new ByteArrayInputStream(event));
@@ -83,23 +83,23 @@ public class IsComposingManager {
 			if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
 				// Send status message to "active"
     	    	for(int j=0; j < session.getListeners().size(); j++) {
-    	    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contactId, true);
+    	    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contact, true);
 				}
 				
 				// Start the expiration timer
 				if (isComposingInfo.getRefreshTime() != 0) {
-					startExpirationTimer(isComposingInfo.getRefreshTime(), contactId);
+					startExpirationTimer(isComposingInfo.getRefreshTime(), contact);
 				} else {
-					startExpirationTimer(timeout, contactId);
+					startExpirationTimer(timeout, contact);
 				}
 			} else {
 				// Send status message to "idle"
     	    	for(int j=0; j < session.getListeners().size(); j++) {
-    	    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contactId, false);
+    	    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contact, false);
 				}
 
 				// Stop the expiration timer
-				stopExpirationTimer(contactId);
+				stopExpirationTimer(contact);
 			}					
     	} catch(Exception e) {
     		if (logger.isActivated()) {
@@ -111,27 +111,27 @@ public class IsComposingManager {
 	/**
 	 * Receive is-composing event
 	 * 
-	 * @param contactIdentifier Contact identifier
+	 * @param contact Contact identifier
 	 * @param state State
 	 */
-	public void receiveIsComposingEvent(ContactId contactIdentifier, boolean state) {
+	public void receiveIsComposingEvent(ContactId contact, boolean state) {
     	// We just received an instant message, so if composing info was active, it must
 		// be changed to idle. If it was already idle, no need to notify listener again
     	for(int j=0; j < session.getListeners().size(); j++) {
-    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contactIdentifier, state);
+    		((ChatSessionListener)session.getListeners().get(j)).handleIsComposingEvent(contact, state);
 		}
 				
 		// Stop the expiration timer
-		stopExpirationTimer(contactIdentifier);
+		stopExpirationTimer(contact);
     }
    
     /**
      * Start the expiration timer for a given contact
      * 
      * @param duration Timer period
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-    public synchronized void startExpirationTimer(long duration, ContactId contactId) {
+    public synchronized void startExpirationTimer(long duration, ContactId contact) {
     	// Remove old timer
 		if (timerTask != null) {
 			timerTask.cancel();
@@ -142,7 +142,7 @@ public class IsComposingManager {
     	if (logger.isActivated()) {
     		logger.debug("Start is-composing timer for " + duration +  "s");
     	}
-    	timerTask = new ExpirationTimer(contactId);
+    	timerTask = new ExpirationTimer(contact);
     	timer = new Timer();
     	timer.schedule(timerTask, duration*1000);
     }
@@ -150,9 +150,9 @@ public class IsComposingManager {
     /**
      * Stop the expiration timer for a given contact
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-    public synchronized void stopExpirationTimer(ContactId contactId) {
+    public synchronized void stopExpirationTimer(ContactId contact) {
     	// Stop timer
     	if (logger.isActivated()) {
     		logger.debug("Stop is-composing timer");

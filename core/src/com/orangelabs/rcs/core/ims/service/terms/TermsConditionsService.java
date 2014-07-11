@@ -157,7 +157,7 @@ public class TermsConditionsService extends ImsService {
 		try {
 			String lang = Locale.getDefault().getLanguage();
 
-			ContactId contactId = ContactUtils.createContactId(getRemoteIdentity(message));
+			ContactId contact = ContactUtils.createContactId(getRemoteIdentity(message));
 			if (message.getContentType().equals(REQUEST_MIME_TYPE)) {
 				// Parse terms request
 				InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
@@ -167,7 +167,7 @@ public class TermsConditionsService extends ImsService {
 				getImsModule()
 						.getCore()
 						.getListener()
-						.handleUserConfirmationRequest(contactId, parser.getId(), parser.getType(), parser.getPin(),
+						.handleUserConfirmationRequest(contact, parser.getId(), parser.getType(), parser.getPin(),
 								parser.getSubject(), parser.getText(), parser.getButtonAccept(), parser.getButtonReject(),
 								parser.getTimeout());
 			} else {
@@ -180,7 +180,7 @@ public class TermsConditionsService extends ImsService {
 					getImsModule()
 							.getCore()
 							.getListener()
-							.handleUserConfirmationAck(contactId, parser.getId(), parser.getStatus(), parser.getSubject(),
+							.handleUserConfirmationAck(contact, parser.getId(), parser.getStatus(), parser.getSubject(),
 									parser.getText());
 				} else {
 					if (message.getContentType().equals(USER_NOTIFICATION_MIME_TYPE)) {
@@ -192,7 +192,7 @@ public class TermsConditionsService extends ImsService {
 						getImsModule()
 								.getCore()
 								.getListener()
-								.handleUserNotification(contactId, parser.getId(), parser.getSubject(), parser.getText(),
+								.handleUserNotification(contact, parser.getId(), parser.getSubject(), parser.getText(),
 										parser.getButtonOk());
 					} else {
 						if (logger.isActivated()) {

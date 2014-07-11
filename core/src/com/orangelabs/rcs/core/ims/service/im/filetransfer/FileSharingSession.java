@@ -27,6 +27,7 @@ import java.util.Set;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -62,7 +63,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
 	 * Fileicon
 	 */
-	private MmContent fileicon = null;
+	private MmContent fileicon;
 	
 	/**
 	 * File transfer paused
@@ -77,19 +78,19 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	/**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(FileSharingSession.class.getName());
+    private static final Logger logger = Logger.getLogger(FileSharingSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contactId
+	 * @param contact Remote contactId
 	 * @param remoteUri the remote URI
 	 * @param fileicon Thumbnail
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileicon, String filetransferId) {
-		super(parent, contactId, remoteUri);
+	public FileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileicon, String filetransferId) {
+		super(parent, contact, remoteUri);
 		
 		this.content = content;
 		this.fileicon = fileicon;
@@ -252,5 +253,21 @@ public abstract class FileSharingSession extends ImsServiceSession {
 		} else {
 			return RcsSettings.getInstance().isFileTransferAutoAccepted();
 		}
+	}
+	
+	@Override
+	public void receiveBye(SipRequest bye) {
+		super.receiveBye(bye);
+		
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
+	
+	@Override
+	public void receiveCancel(SipRequest cancel) {
+		super.receiveCancel(cancel);
+
+		// Request capabilities to the remote
+		getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}
 }

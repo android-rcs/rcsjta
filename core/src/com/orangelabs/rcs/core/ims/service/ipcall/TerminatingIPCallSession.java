@@ -48,7 +48,7 @@ public class TerminatingIPCallSession extends IPCallSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(TerminatingIPCallSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -56,8 +56,8 @@ public class TerminatingIPCallSession extends IPCallSession {
      * @param parent IMS service
      * @param invite Initial INVITE request
      */
-    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contactId) {
-        super(parent, contactId,
+    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact) {
+        super(parent, contact,
         		ContentManager.createLiveAudioContentFromSdp(invite.getContentBytes()),
         		ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()));
 

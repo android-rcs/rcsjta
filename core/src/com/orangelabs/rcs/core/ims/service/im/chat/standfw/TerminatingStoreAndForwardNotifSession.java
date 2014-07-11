@@ -25,6 +25,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 import java.io.IOException;
 import java.util.Vector;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -74,10 +75,10 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-	 * @param contactId the remote ContactId
+	 * @param contact the remote ContactId
 	 */
-	public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 
 		// Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
@@ -316,11 +317,17 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 				if (cpimMsg != null) {
 			    	String contentType = cpimMsg.getContentType();
 			    	String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
-			    	ContactId contactId = ContactUtils.createContactId(from);
-			    	if (ChatUtils.isMessageImdnType(contentType)) {
-						// Receive an IMDN report
-						receiveMessageDeliveryStatus(contactId, cpimMsg.getMessageContent());
-			    	}
+			    	
+					if (ChatUtils.isMessageImdnType(contentType)) {
+						try {
+							ContactId contact = ContactUtils.createContactId(from);
+							// Receive an IMDN report
+							receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
+						} catch (JoynContactFormatException e) {
+							// Receive an IMDN report
+							receiveMessageDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
+						}
+					}
 				}
 	    	} catch(Exception e) {
 		   		if (logger.isActivated()) {
@@ -380,10 +387,10 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 	/**
      * Receive a message delivery status (XML document)
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param xml XML document
      */
-    public void receiveMessageDeliveryStatus(ContactId contactId, String xml) {
+    public void receiveMessageDeliveryStatus(ContactId contact, String xml) {
 		try {
 			// Parse the IMDN document
 			ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
@@ -400,12 +407,12 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 					if (isFileTransfer) {
 						// Notify the file delivery
 						((InstantMessagingService)getImsService()).receiveFileDeliveryStatus(
-								fileTransferId, status, contactId);
+								fileTransferId, status, contact);
 					} else {
 						// Notify the message delivery outside of the chat
 						// session
 						getImsService().getImsModule().getCore().getListener()
-								.handleMessageDeliveryStatus(contactId, msgId, status);
+								.handleMessageDeliveryStatus(contact, msgId, status);
 					}
 				}
 			}

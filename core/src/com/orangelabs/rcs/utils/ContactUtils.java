@@ -65,7 +65,7 @@ public class ContactUtils {
 	 * @param contactId Contact ID
 	 * @return Id or -1 if the contact number does not exist
 	 */
-	public static int getContactId(Context context, ContactId contactId) {
+	private static int getContactIdOfAddressBook(Context context, ContactId contactId) {
 		// Query the Phone API
 		Cursor cursor = null;
 		try {
@@ -95,7 +95,7 @@ public class ContactUtils {
 	 */
 	public static Uri createRcsContactIfNeeded(Context context, ContactId contactId) throws Exception{
 		// Check if contact is already in address book
-		int phoneId = getContactId(context, contactId);
+		int phoneId = getContactIdOfAddressBook(context, contactId);
 		
 		if (phoneId == -1) {
 			// If the contact is not present in address book, create an entry with this number
@@ -175,11 +175,11 @@ public class ContactUtils {
 	/**
 	 * Check if the given number is present in the address book
 	 * 
-	 * @param contactId Contact ID to be checked
+	 * @param contact Contact ID to be checked
 	 * @return boolean indicating if number is present in the address book or not
 	 */
-	public static boolean isNumberInAddressBook(ContactId contactId){
-		String[] selectionArgs = { Phone.CONTENT_ITEM_TYPE, contactId.toString() };
+	public static boolean isNumberInAddressBook(ContactId contact){
+		String[] selectionArgs = { Phone.CONTENT_ITEM_TYPE, contact.toString() };
 		ContentResolver contentResolver = AndroidFactory.getApplicationContext().getContentResolver();
 		
 		// Starting query phone_numbers_equal
@@ -199,7 +199,7 @@ public class ContactUtils {
 		}
 
 		// No match found using LOOSE equals, try using STRICT equals.
-		String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, contactId.toString(), contactId.toString() };
+		String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, contact.toString(), contact.toString() };
 		try {
 			cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID, SELECTION_STRICT, selectionArgsStrict,
 					Data.RAW_CONTACT_ID);

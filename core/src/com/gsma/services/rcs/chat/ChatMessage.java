@@ -85,8 +85,8 @@ public class ChatMessage implements Parcelable {
 	 */
 	public ChatMessage(Parcel source) {
 		this.id = source.readString();
-		boolean flag = source.readInt() != 0;
-		if (flag) {
+		boolean containsContactId = source.readInt() != 0;
+		if (containsContactId) {
 			this.contact = ContactId.CREATOR.createFromParcel(source);
 		} else {
 			this.contact = null;

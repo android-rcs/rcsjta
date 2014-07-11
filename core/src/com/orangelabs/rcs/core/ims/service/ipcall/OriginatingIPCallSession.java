@@ -44,15 +44,15 @@ public class OriginatingIPCallSession extends IPCallSession {
      * Constructor
      *
      * @param parent IMS service
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param player IP call player
      * @param renderer IP call renderer
      */
-    public OriginatingIPCallSession(ImsService parent, ContactId contactId, AudioContent audioContent,
+    public OriginatingIPCallSession(ImsService parent, ContactId contact, AudioContent audioContent,
     		VideoContent videoContent, IIPCallPlayer player, IIPCallRenderer renderer) {
-    	super(parent, contactId, audioContent, videoContent);
+    	super(parent, contact, audioContent, videoContent);
     	
         // Set the player
         setPlayer(player);

@@ -22,14 +22,16 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-
-import android.net.Uri;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Content sharing session
@@ -41,6 +43,12 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * Content to be shared
 	 */
 	private MmContent content;
+	
+	/**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(ContentSharingSession.class.getSimpleName());
+
     
     /**
 	 * Constructor
@@ -49,8 +57,8 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 * @param content Content to be shared
 	 * @param contact Remote contactId
 	 */
-	public ContentSharingSession(ImsService parent, MmContent content, ContactId contactId) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public ContentSharingSession(ImsService parent, MmContent content, ContactId contact) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 		
 		this.content = content;
 	}
@@ -105,5 +113,21 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 */
 	public String getFileTransferId() {
 		return "CSh" + IdGenerator.generateMessageID();
+	}
+	
+	@Override
+	public void receiveBye(SipRequest bye) {
+		super.receiveBye(bye);
+		
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
+	
+    @Override
+    public void receiveCancel(SipRequest cancel) {      
+    	super.receiveCancel(cancel);
+    	
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}
 }

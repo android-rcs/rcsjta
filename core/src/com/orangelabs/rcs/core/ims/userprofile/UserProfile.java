@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core.ims.userprofile;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -38,7 +39,7 @@ public class UserProfile {
 	/**
 	 * User name
 	 */
-	private String username;
+	private ContactId contact;
 
 	/**
 	 * Private ID for HTTP digest
@@ -93,7 +94,7 @@ public class UserProfile {
 	/**
 	 * Constructor
 	 * 
-	 * @param username Username
+	 * @param contact Username
 	 * @param homeDomain Home domain
 	 * @param privateID Private id
 	 * @param password Password
@@ -103,7 +104,7 @@ public class UserProfile {
 	 * @param xdmServerPassword Outbound proxy address
 	 * @param imConferenceUri IM conference factory URI
 	 */
-	public UserProfile(String username,
+	public UserProfile(ContactId contact,
 			String homeDomain,
 			String privateID,
 			String password,
@@ -112,7 +113,7 @@ public class UserProfile {
 			String xdmServerLogin,
 			String xdmServerPassword,
 			String imConferenceUri) {
-		this.username = username;
+		this.contact = contact;
 		this.homeDomain = homeDomain;
 		this.privateID = privateID;
 		this.password = password;
@@ -132,17 +133,17 @@ public class UserProfile {
 	 * 
 	 * @return Username
 	 */
-	public String getUsername() {
-		return username;
+	public ContactId getUsername() {
+		return contact;
 	}
 	
 	/**
 	 * Set the user name
 	 * 
-	 * @param username Username
+	 * @param contact Contact Id
 	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(ContactId contact) {
+		this.contact = contact;
 	}
 	
 	/**
@@ -169,26 +170,14 @@ public class UserProfile {
 		}
 	}
 	
-	// Changed by Deutsche Telekom
     /**
      * Get the user public URI for registration
      * 
      * @return Public URI
      */
-    public String getPublicUriForRegistration() {
-		//***###***AS 2012-09-01: added; only add schema and domain if public_user_identity didn't already contain these
-        // Changed by Deutsche Telekom
-        if (username == null) {
-        	return null;
-        }
-		int index1 = username.indexOf("sip:");
-		int index2 = username.indexOf("@");
-		if ((index1 == -1) && (index2 == -1)) {
-			return "sip:" + username + "@" + homeDomain;
-		} else {
-			return username;
-		}
-    }
+	public String getPublicUriForRegistration() {
+		return "sip:" + contact + "@" + homeDomain;
+	}
     
 	/**
 	 * Get the user public address
@@ -369,7 +358,7 @@ public class UserProfile {
      * @return String
      */
 	public String toString() {
-		String result = "IMS username=" + username + ", " 
+		String result = "IMS username=" + contact + ", " 
 			+ "IMS private ID=" + privateID + ", "
 			+ "IMS password=" + password + ", "
 			+ "IMS home domain=" + homeDomain + ", "

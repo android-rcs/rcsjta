@@ -50,7 +50,6 @@ import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PeriodicRefresher;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -77,7 +76,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath dialogPath;
     
     /**
      * Expire period
@@ -102,7 +101,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	/**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class.getName());
+    private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -183,19 +182,19 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 					}
 					Vector<User> users = conference.getUsers();
 					for (User user : users) {
-						ContactId entity;
+						ContactId contact;
 						try {
-							entity = ContactUtils.createContactId(user.getEntity());
+							contact = ContactUtils.createContactId(user.getEntity());
 						} catch (JoynContactFormatException e) {
 							// Invalid entity
 							continue;
 						}
 
 						if (logger.isActivated()) {
-							logger.debug("Conference info notification for " + entity);
+							logger.debug("Conference info notification for " + contact);
 						}
 
-						if (user.isMe() || PhoneUtils.compareNumbers(entity.toString(), ImsModule.IMS_USER_PROFILE.getUsername())) {
+						if (user.isMe() || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
 							// By-pass me
 							continue;
 						}
@@ -226,14 +225,14 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 						if ((state.equalsIgnoreCase("dialing-out")) || (state.equalsIgnoreCase("dialing-in"))) {
 							state = User.STATE_PENDING;
 						}
-						ParticipantInfo item2add = new ParticipantInfo(entity, getStatus(state));
+						ParticipantInfo item2add = new ParticipantInfo(contact, getStatus(state));
 						// Update the set of participants
 						ParticipantInfoUtils.addParticipant(newSet, item2add);
 						// Check if original set has changed
 						if (participants.contains(item2add) == false) {
 							// Notify session listeners
 							for (int j = 0; j < session.getListeners().size(); j++) {
-								((ChatSessionListener) session.getListeners().get(j)).handleConferenceEvent(entity,
+								((ChatSessionListener) session.getListeners().get(j)).handleConferenceEvent(contact,
 										user.getDisplayName(), state);
 							}
 						}

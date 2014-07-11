@@ -250,14 +250,14 @@ public class MessageLog implements IMessageLog {
 	}
 
 	@Override
-	public void addGroupChatSystemMessage(String chatId, ContactId contactId, int status) {
+	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status) {
 		if (logger.isActivated()) {
-			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contactId + ", status=" + status);
+			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
-		if (contactId != null) {
-			values.put(MessageData.KEY_CONTACT, contactId.toString());
+		if (contact != null) {
+			values.put(MessageData.KEY_CONTACT, contact.toString());
 		}
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
 		values.put(MessageData.KEY_STATUS, status);
@@ -388,6 +388,10 @@ public class MessageLog implements IMessageLog {
 			if (cursor != null)
 				cursor.close();
 		}
+	}
+	
+	public boolean isNewMessage(ContactId contact, String msgId) {
+		return isNewMessage(contact.toString(), msgId);
 	}
 
 	/*

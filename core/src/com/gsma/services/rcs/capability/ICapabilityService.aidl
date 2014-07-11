@@ -27,9 +27,9 @@ interface ICapabilityService {
 
 	void removeCapabilitiesListener(in ICapabilitiesListener listener);
 
-	void addContactCapabilitiesListener(in ContactId contactId, in ICapabilitiesListener listener);
+	void addContactCapabilitiesListener(in ContactId contact, in ICapabilitiesListener listener);
 
-	void removeContactCapabilitiesListener(in ContactId contactId, in ICapabilitiesListener listener);
+	void removeContactCapabilitiesListener(in ContactId contact, in ICapabilitiesListener listener);
 	
 	int getServiceVersion();
 }

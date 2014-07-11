@@ -25,7 +25,6 @@ import javax2.sip.address.SipURI;
 import javax2.sip.address.URI;
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
-
 import android.content.Context;
 import android.telephony.TelephonyManager;
 
@@ -35,6 +34,7 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -136,7 +136,7 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 			}
 			
 			// Update the user profile
-			ImsModule.IMS_USER_PROFILE.setUsername(sipUri.getUser());
+			ImsModule.IMS_USER_PROFILE.setUsername(ContactUtils.createContactId(sipUri.getUser()));
 			ImsModule.IMS_USER_PROFILE.setHomeDomain(sipUri.getHost());
 			ImsModule.IMS_USER_PROFILE.setXdmServerLogin("sip:" + sipUri.getUser() + "@" + sipUri.getHost());
 		} catch(Exception e) {

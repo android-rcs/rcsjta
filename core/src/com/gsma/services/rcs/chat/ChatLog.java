@@ -26,12 +26,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-
 import android.content.Context;
 import android.net.Uri;
+
+import com.gsma.services.rcs.contacts.ContactUtils;
 
 /**
  * Content provider for chat history
@@ -108,7 +106,7 @@ public class ChatLog {
 			}
 			ContactUtils contactUtils = ContactUtils.getInstance(context);
 			if (contactUtils == null) {
-				throw new IllegalStateException();
+				throw new IllegalStateException("Cannot read contact from provider");
 			}
 			String[] tokens = participants.split(",");
 			Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
@@ -121,11 +119,7 @@ public class ChatLog {
 						status = Integer.parseInt(keyValue[1]) % 9;
 					} catch (NumberFormatException e) {
 					}
-					try {
-						ContactId contactId = contactUtils.formatContactId(contact);
-						result.add(new ParticipantInfo(contactId, status));
-					} catch (JoynContactFormatException e) {
-					}
+					result.add(new ParticipantInfo(contactUtils.formatContactId(contact), status));
 				}
 			}
 			return result;

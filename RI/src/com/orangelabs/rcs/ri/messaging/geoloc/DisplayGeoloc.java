@@ -24,6 +24,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -62,7 +63,7 @@ public class DisplayGeoloc extends MapActivity {
 		mapView.invalidate();		
 		
 		// Get geoloc value
-		String contact = getIntent().getStringExtra(EXTRA_CONTACT);
+		ContactId contact = getIntent().getParcelableExtra(EXTRA_CONTACT);
 		Geoloc geoloc = getIntent().getParcelableExtra(EXTRA_GEOLOC);
 		if ((contact == null) || (geoloc == null)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_geoloc_not_found));
@@ -74,7 +75,7 @@ public class DisplayGeoloc extends MapActivity {
 		GeolocOverlay overlay = new GeolocOverlay(this, drawable);
 
 		// Add an overlay item
-		overlay.addOverlayItem(contact, geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAccuracy());
+		overlay.addOverlayItem(contact.toString(), geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAccuracy());
 
 		// Add overlay to the map
 		mapView.getOverlays().add(overlay);

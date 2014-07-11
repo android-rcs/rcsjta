@@ -94,7 +94,7 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
     /**
      * Remote contact
      */
-    private String contact;
+    private ContactId contact;
     
     /**
      * Geoloc sharing listener
@@ -217,13 +217,10 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
             // Get the remote contact
             Spinner spinner = (Spinner)findViewById(R.id.contact);
             MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-            contact = cursor.getString(1);
-           // final ContactId remote = contact;
             
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateGeolocSharing.this);
-            final ContactId remote;
     		try {
-    			remote = contactUtils.formatContactId(cursor.getString(1));
+    			contact = contactUtils.formatContactId(cursor.getString(1));
     		} catch (JoynContactFormatException e1) {
     			Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;
@@ -231,7 +228,7 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
 
         	try {
                 // Initiate location share
-        		geolocSharing = gshApi.shareGeoloc(remote, geoloc, gshListener);
+        		geolocSharing = gshApi.shareGeoloc(contact, geoloc, gshListener);
         	} catch(Exception e) {
         		e.printStackTrace();
 				hideProgressDialog();
@@ -382,7 +379,7 @@ public class InitiateGeolocSharing extends Activity implements JoynServiceListen
 					
 			        // Show the shared geoloc
 					Intent intent = new Intent(InitiateGeolocSharing.this, DisplayGeoloc.class);
-			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, contact);
+			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable)contact);
 			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)geoloc);
 					startActivity(intent);
 				}

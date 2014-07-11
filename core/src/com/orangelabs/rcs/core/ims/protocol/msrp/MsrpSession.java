@@ -205,7 +205,7 @@ public class MsrpSession {
     private boolean mMapMsgIdFromTransationId = false;
 
 	/**
-	 * IsEstablished : set after empty packet is successfully sent
+	 * IsEstablished : set after media is successfully received
 	 */
 	private boolean isEstablished = false;
     
@@ -842,6 +842,9 @@ public class MsrpSession {
 	 */
 	public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag, byte[] data, long totalSize)
 			throws IOException, MsrpException {
+		// Consider media is established when we received something
+		isEstablished = true;
+				
 		// Receive a SEND request
 		if (logger.isActivated()) {
 			logger.debug("SEND request received (flag=" + flag + ", transaction=" + txId + ", totalSize=" + totalSize + ")");
@@ -864,7 +867,6 @@ public class MsrpSession {
 
 		// Test if it's an empty chunk
 		if (data == null) {
-			isEstablished = true;
 			if (logger.isActivated()) {
 				logger.debug("Empty chunk");
 			}
@@ -945,6 +947,9 @@ public class MsrpSession {
 	 * @param headers MSRP headers
 	 */
 	public void receiveMsrpResponse(int code, String txId, Hashtable<String, String> headers) {
+		// Consider media is established when we received something
+		isEstablished = true;
+		
 		if (logger.isActivated()) {
 			logger.info("Response received (code=" + code + ", transaction=" + txId + ")");
 		}
@@ -994,7 +999,6 @@ public class MsrpSession {
 	 * @param headers MSRP headers
 	 * @throws IOException
 	 */
-
 	public void receiveMsrpReport(String txId, Hashtable<String, String> headers) throws IOException {
 		// Changed by Deutsche Telekom
 	    // Example of an MSRP REPORT request:

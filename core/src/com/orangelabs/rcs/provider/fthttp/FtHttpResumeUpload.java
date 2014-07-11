@@ -69,7 +69,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
      *            the {@code content} content.
 	 * @param tid
 	 *            the {@code tid} value.
-	 * @param contactId
+	 * @param contact
 	 *            the {@code contactId} value.
 	 * @param displayName
 	 *            the {@code displayName} value.
@@ -82,9 +82,9 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, ContactId contactId,
+	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, ContactId contact,
             String displayName, String chatId, String fileTransferId, String chatSessionId, boolean isGroup) {
-        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contactId,
+        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contact,
                displayName, chatId, fileTransferId, chatSessionId, isGroup);
 		if (tid == null)
 			throw new IllegalArgumentException("Null tid");

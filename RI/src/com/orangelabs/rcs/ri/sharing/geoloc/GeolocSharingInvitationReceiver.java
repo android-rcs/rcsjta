@@ -25,9 +25,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.util.Log;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -36,6 +39,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author vfml3370
  */
 public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(GeolocSharingInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Display invitation notification
@@ -49,15 +58,21 @@ public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
      * @param intent Intent invitation
      */
 	public static void addGeolocSharingInvitationNotification(Context context, Intent invitation) {
-    	// Get remote contact
-		String contact = invitation.getStringExtra(GeolocSharingIntent.EXTRA_CONTACT);
+		// Get remote contact
+		ContactId contact = invitation.getParcelableExtra(GeolocSharingIntent.EXTRA_CONTACT);
+		if (contact == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "GeolocSharingInvitationReceiver failed: cannot parse contact");
+			}
+			return;
+		}
 
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, ReceiveGeolocSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);		
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_geoloc_sharing, contact);
+        String notifTitle = context.getString(R.string.title_recv_geoloc_sharing, contact.toString());
         Notification notif = new Notification(R.drawable.ri_notif_gsh_icon, notifTitle,	System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context, notifTitle, notifTitle, contentIntent);

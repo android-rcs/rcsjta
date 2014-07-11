@@ -67,23 +67,23 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 
 	/**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingImageTransferSession.class.getName());
+    private static final Logger logger = Logger.getLogger(OriginatingImageTransferSession.class.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param thumbnail Thumbnail content option
 	 */
-	public OriginatingImageTransferSession(ImsService parent, MmContent content, ContactId contactId, MmContent thumbnail) {
-		super(parent, content, contactId, thumbnail);
+	public OriginatingImageTransferSession(ImsService parent, MmContent content, ContactId contact, MmContent thumbnail) {
+		super(parent, content, contact, thumbnail);
 
 		// Create dialog path
 		createOriginatingDialogPath();

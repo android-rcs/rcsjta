@@ -119,15 +119,15 @@ public class ContactsService extends JoynService {
     /**
      * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
      * 
-     * @param contactId Contact ID
-     * @return Contact
+     * @param contact Contact ID
+     * @return JoynContact
      * @throws JoynServiceException
      * @see JoynContact
      */
-	public JoynContact getJoynContact(ContactId contactId) throws JoynServiceException {
+	public JoynContact getJoynContact(ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return api.getJoynContact(contactId);
+				return api.getJoynContact(contact);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

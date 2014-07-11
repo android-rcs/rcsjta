@@ -148,14 +148,14 @@ public class CapabilityService extends JoynService {
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
      * supported an exception is thrown.
      * 
-     * @param contactId Contact Identifier
+     * @param contact Contact Identifier
      * @return Capabilities
      * @throws JoynServiceException
      */
-    public Capabilities getContactCapabilities(ContactId contactId) throws JoynServiceException {
+    public Capabilities getContactCapabilities(ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				return api.getContactCapabilities(contactId);
+				return api.getContactCapabilities(contact);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -176,13 +176,13 @@ public class CapabilityService extends JoynService {
 	 * capability refresh request is provided to all the clients that have registered
 	 * the listener for this event.
    	 * 
-	 * @param contactId Contact Identifier
+	 * @param contact Contact Identifier
 	 * @throws JoynServiceException
 	 */
-	public void requestContactCapabilities(ContactId contactId) throws JoynServiceException {
+	public void requestContactCapabilities(ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.requestContactCapabilities(contactId);
+				api.requestContactCapabilities(contact);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -203,11 +203,11 @@ public class CapabilityService extends JoynService {
      * is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
 	 * 
-	 * @param contactIds Set of contact identifiers
+	 * @param contacts Set of contact identifiers
 	 * @throws JoynServiceException
 	 */
-	public void requestContactCapabilities(Set<ContactId> contactIds) throws JoynServiceException {
-		Iterator<ContactId> values = contactIds.iterator();
+	public void requestContactCapabilities(Set<ContactId> contacts) throws JoynServiceException {
+		Iterator<ContactId> values = contacts.iterator();
 		while(values.hasNext()) {
 			requestContactCapabilities(values.next());
 		}
@@ -276,17 +276,17 @@ public class CapabilityService extends JoynService {
 	/**
 	 * Registers a capabilities listener on a list of contacts
 	 * 
-	 * @param contactIds Set of contact Identifiers
+	 * @param contacts Set of contact Identifiers
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
 	 */
-	public void addCapabilitiesListener(Set<ContactId> contactIds, CapabilitiesListener listener) throws JoynServiceException {
+	public void addCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				Iterator<ContactId> list = contactIds.iterator();
+				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
-					ContactId contactId = list.next();
-					api.addContactCapabilitiesListener(contactId, listener);
+					ContactId contact = list.next();
+					api.addContactCapabilitiesListener(contact, listener);
 				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
@@ -299,17 +299,17 @@ public class CapabilityService extends JoynService {
 	/**
 	 * Unregisters a capabilities listener on a list of contacts
 	 * 
-	 * @param contactIds Set of contact identifiers
+	 * @param contacts Set of contact identifiers
 	 * @param listener Capabilities listener
 	 * @throws JoynServiceException
 	 */
-	public void removeCapabilitiesListener(Set<ContactId> contactIds, CapabilitiesListener listener) throws JoynServiceException {
+	public void removeCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				Iterator<ContactId> list = contactIds.iterator();
+				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
-					ContactId contactId = list.next();
-					api.removeContactCapabilitiesListener(contactId, listener);
+					ContactId contact = list.next();
+					api.removeContactCapabilitiesListener(contact, listener);
 				}
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());

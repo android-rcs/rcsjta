@@ -850,13 +850,12 @@ public class XdmManager {
 		}
 	}
 	
-	private Set<ContactId > convertListOfUrisToSetOfContactId(List<String> uris) {
+	private Set<ContactId> convertListOfUrisToSetOfContactId(List<String> uris) {
 		Set<ContactId> result = new HashSet<ContactId>();
 		if (uris != null) {
 			for (String uri : uris) {
 				try {
-					ContactId contactId = ContactUtils.createContactId(uri);
-					result.add(contactId);
+					result.add(ContactUtils.createContactId(uri));
 				} catch (JoynContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse uri "+uri);

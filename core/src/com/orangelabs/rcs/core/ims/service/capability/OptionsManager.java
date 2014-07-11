@@ -57,7 +57,7 @@ public class OptionsManager implements DiscoveryManager {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(OptionsManager.class.getName());
+    private final static Logger logger = Logger.getLogger(OptionsManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -91,21 +91,21 @@ public class OptionsManager implements DiscoveryManager {
 	/**
      * Request contact capabilities
      * 
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      * @return Returns true if success
      */
-    public boolean requestCapabilities(ContactId contactId) {
+    public boolean requestCapabilities(ContactId contact) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities in background for " + contactId);
+    		logger.debug("Request capabilities in background for " + contact);
     	}
     	
     	// Update capability timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(contactId, System.currentTimeMillis());
+    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(contact, System.currentTimeMillis());
     	
     	// Start request in background
 		try {
-	    	boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contactId);
-	    	OptionsRequestTask task = new OptionsRequestTask(imsModule, contactId, CapabilityUtils.getSupportedFeatureTags(richcall));
+	    	boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
+	    	OptionsRequestTask task = new OptionsRequestTask(imsModule, contact, CapabilityUtils.getSupportedFeatureTags(richcall));
 	    	threadPool.submit(task);
 	    	return true;
 		} catch(Exception e) {
@@ -119,14 +119,14 @@ public class OptionsManager implements DiscoveryManager {
     /**
      * Request capabilities for a set of contacts
      *
-     * @param contactSet Contact set
+     * @param contacts Contact set
      */
-	public void requestCapabilities(Set<ContactId> contactSet) {
+	public void requestCapabilities(Set<ContactId> contacts) {
         if (logger.isActivated()) {
-            logger.debug("Request capabilities for " + contactSet.size() + " contacts");
+            logger.debug("Request capabilities for " + contacts.size() + " contacts");
         }
 
-        for (ContactId contact : contactSet) {
+        for (ContactId contact : contacts) {
 			if (!requestCapabilities(contact)) {
 		    	if (logger.isActivated()) {
 		    		logger.debug("Processing has been stopped");

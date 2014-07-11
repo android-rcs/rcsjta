@@ -551,16 +551,16 @@ public class RcsCoreService extends Service implements CoreListener {
 		// Not used
 	}
     
-    public void handleCapabilitiesNotification(ContactId contactId, Capabilities capabilities) {
+    public void handleCapabilitiesNotification(ContactId contact, Capabilities capabilities) {
     	if (logger.isActivated()) {
-			logger.debug("Handle capabilities update notification for " + contactId + " (" + capabilities.toString() + ")");
+			logger.debug("Handle capabilities update notification for " + contact + " (" + capabilities.toString() + ")");
 		}
 
 		// Notify API
-		capabilityApi.receiveCapabilities(contactId, capabilities);
+		capabilityApi.receiveCapabilities(contact, capabilities);
     }
     
-    public void handlePresenceSharingInvitation(ContactId contactId) {
+    public void handlePresenceSharingInvitation(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event presence sharing invitation");
 		}
@@ -603,16 +603,14 @@ public class RcsCoreService extends Service implements CoreListener {
 		vshApi.receiveVideoSharingInvitation(session);
     }
 	
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.CoreListener#handleFileTransferInvitation(com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession, boolean)
-	 */
-	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup) {
+    @Override
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 
     	// Broadcast the invitation
-		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup);
+		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact);
 	}
     
 	/* (non-Javadoc)
@@ -624,19 +622,17 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(fileSharingSession, one2oneChatSession);
+    	ftApi.receiveFileTransferInvitation(fileSharingSession, one2oneChatSession, one2oneChatSession.getRemoteContact());
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.CoreListener#handleGroupFileTransferInvitation(com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession, com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession)
-	 */
-	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession groupChatSession) {
+
+	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession groupChatSession, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event group file transfer invitation");
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(session, groupChatSession);
+    	ftApi.receiveFileTransferInvitation(session, groupChatSession, contact);
 	}
 
     /* (non-Javadoc)
@@ -699,32 +695,32 @@ public class RcsCoreService extends Service implements CoreListener {
 		chatApi.receiveOneOneChatInvitation(session);
     }
     
-    public void handleMessageDeliveryStatus(ContactId contactId, String msgId, String status) {
+    public void handleMessageDeliveryStatus(ContactId contact, String msgId, String status) {
 		if (logger.isActivated()) {
 			logger.debug("Handle message delivery status");
 		}
     	
 		// Notify listeners
-		chatApi.receiveMessageDeliveryStatus(contactId, msgId, status);
+		chatApi.receiveMessageDeliveryStatus(contact, msgId, status);
     }
     
-    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
+    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
     	 if (logger.isActivated()) {
-        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contactId);
+        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contact);
          }
 
         // Notify listeners
-        ftApi.handleFileDeliveryStatus(fileTransferId, status, contactId);
+        ftApi.handleFileDeliveryStatus(fileTransferId, status, contact);
     }
 
-	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
+	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Handle group file delivery status: fileTransferId=" + fileTransferId + " status="
-					+ status + " contact=" + contactId);
+					+ status + " contact=" + contact);
 		}
 
 		// Notify listeners
-		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contactId);
+		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
 	}
 
     /* (non-Javadoc)

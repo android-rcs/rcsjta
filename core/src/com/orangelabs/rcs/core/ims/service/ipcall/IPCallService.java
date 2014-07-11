@@ -64,7 +64,7 @@ public class IPCallService extends ImsService {
 	/**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(IPCallService.class.getName());
+    private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
 
     /**
      * Constructor
@@ -124,14 +124,14 @@ public class IPCallService extends ImsService {
     /**
      * Initiate an IP call session
      *
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      * @param video Video
      * @param player Player
      * @param renderer Renderer
      * @return IP call session
      * @throws CoreException
      */
-    public IPCallSession initiateIPCallSession(ContactId contactId, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
+    public IPCallSession initiateIPCallSession(ContactId contact, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call session");
 		}
@@ -152,7 +152,7 @@ public class IPCallService extends ImsService {
 	    }
 
 		// Create a new session
-		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contactId, audioContent, videoContent, player, renderer);
+		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact, audioContent, videoContent, player, renderer);
 		
 		return session;
 	}
@@ -220,15 +220,15 @@ public class IPCallService extends ImsService {
 	/**
      * Is call connected with a given contact
      * 
-     * @param contactId Contact Id
+     * @param contact Contact Id
      * @return Boolean
      */
-	public boolean isCallConnectedWith(ContactId contactId) {
+	public boolean isCallConnectedWith(ContactId contact) {
 		boolean connected = false;
 		Vector<IPCallSession> sessions = getIPCallSessions(); 
 		for(int i=0; i < sessions.size(); i++) {
 			IPCallSession session = sessions.get(i);
-			if (contactId != null && contactId.equals(session.getRemoteContact())) {
+			if (contact != null && contact.equals(session.getRemoteContact())) {
 				connected = true;
 				break;
 			}

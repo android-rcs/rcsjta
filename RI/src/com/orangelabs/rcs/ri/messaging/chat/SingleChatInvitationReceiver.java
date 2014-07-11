@@ -30,6 +30,7 @@ import android.util.Log;
 import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -62,29 +63,34 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
      */
     private static void addSingleChatInvitationNotification(Context context, Intent invitation) {
     		
-		// Get message		
+		// Get message
 		ChatMessage firstMessage = invitation.getParcelableExtra(ChatIntent.EXTRA_MESSAGE);		
 		
 		// Get remote contact
-		String contact = invitation.getStringExtra(ChatIntent.EXTRA_CONTACT);
+		ContactId contact = (ContactId)invitation.getParcelableExtra(ChatIntent.EXTRA_CONTACT);
+		if (contact == null) {
+			if (LogUtils.isActive) {
+    			Log.e(LOGTAG, "SingleChatInvitationReceiver failed: cannot parse contact");
+    		}
+			return;
+		}
 
-		
         // Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, SingleChatView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.setAction(contact);
+        intent.setAction(contact.toString());
         
     	// Do not display notification if activity is on foreground
     	if (SingleChatView.isDisplayed()) {
-    		if (LogUtils.isActive) {
-    			Log.d(LOGTAG, "start SingleChatView contact=" + contact);
-    		}
-    		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    		context.startActivity(intent);
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "start SingleChatView contact=" + contact);
+			}
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			context.startActivity(intent);
 		} else {
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			String notifTitle = context.getString(R.string.title_recv_chat, contact);
+			String notifTitle = context.getString(R.string.title_recv_chat, contact.toString());
 			Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
 			notif.flags = Notification.FLAG_AUTO_CANCEL;
 			String msg;
@@ -99,7 +105,7 @@ public class SingleChatInvitationReceiver extends BroadcastReceiver {
 
 			// Send notification
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.notify(contact, Utils.NOTIF_ID_SINGLE_CHAT, notif);
+			notificationManager.notify(contact.toString(), Utils.NOTIF_ID_SINGLE_CHAT, notif);
 		}
     }
     

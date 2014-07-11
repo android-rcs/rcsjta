@@ -50,13 +50,13 @@ public class GeolocMessage extends ChatMessage implements Parcelable {
      * Constructor for outgoing message
      * 
      * @param messageId Message Id
-     * @param contactId Contact Id
+     * @param contact Contact Id
      * @param geoloc Geolocation info
      * @param receiptAt Receipt date
      * @hide
 	 */
-	public GeolocMessage(String messageId, ContactId contactId, Geoloc geoloc, Date receiptAt) {
-		super(messageId, contactId, null, receiptAt);
+	public GeolocMessage(String messageId, ContactId contact, Geoloc geoloc, Date receiptAt) {
+		super(messageId, contact, null, receiptAt);
 		
 		this.geoloc = geoloc;
 	}

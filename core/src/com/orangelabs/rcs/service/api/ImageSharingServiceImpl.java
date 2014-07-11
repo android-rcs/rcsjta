@@ -29,6 +29,7 @@ import java.util.List;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -218,7 +219,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
     	intent.putExtra(ImageSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(ImageSharingIntent.EXTRA_FILENAME, session.getContent().getName());
@@ -259,15 +260,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws ServerApiException
      */
-    public IImageSharing shareImage(ContactId contactId, Uri file, IImageSharingListener listener) throws ServerApiException {
+    public IImageSharing shareImage(ContactId contact, Uri file, IImageSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an image sharing session with " + contactId);
+			logger.info("Initiate an image sharing session with " + contact);
 		}
 
 		// Test IMS connection
@@ -279,10 +280,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
 
 			// Initiate a sharing session
-			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contactId, content, null);
+			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
 
 			// Update rich call history
-			RichCallHistory.getInstance().addImageSharing(contactId, session.getSessionID(),
+			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
 					ImageSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			ImageSharing.State.INITIATED);

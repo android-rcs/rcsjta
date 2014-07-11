@@ -105,18 +105,18 @@ public class ParticipantInfo implements Parcelable {
 	/**
 	 * Constructor
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            contact identifier
 	 * @hide
 	 */
-	public ParticipantInfo(ContactId contactId) {
-		this(contactId, Status.UNKNOWN);
+	public ParticipantInfo(ContactId contact) {
+		this(contact, Status.UNKNOWN);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            ContactId
 	 * @param status
 	 *            Status
@@ -210,11 +210,11 @@ public class ParticipantInfo implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		if (contact != null) {
-    		dest.writeInt(1);
-    		contact.writeToParcel(dest, flags);
-    	} else {
-    		dest.writeInt(0);
-    	}
+			dest.writeInt(1);
+			contact.writeToParcel(dest, flags);
+		} else {
+			dest.writeInt(0);
+		}
 		dest.writeInt(status);
 	}
 
@@ -229,20 +229,27 @@ public class ParticipantInfo implements Parcelable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ParticipantInfo other = (ParticipantInfo) obj;
 		if (contact == null) {
-			if (other.contact != null)
+			if (other.contact != null) {
 				return false;
-		} else if (!contact.equals(other.contact))
+			}
+		} else {
+			if (!contact.equals(other.contact))
+				return false;
+		}
+		if (status != other.status) {
 			return false;
-		if (status != other.status)
-			return false;
+		}
 		return true;
 	}
 

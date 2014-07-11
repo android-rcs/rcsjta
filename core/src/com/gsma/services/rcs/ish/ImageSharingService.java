@@ -155,13 +155,13 @@ public class ImageSharingService extends JoynService {
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param file Uri of file to share
      * @param listener Image sharing event listener
      * @return Image sharing
      * @throws JoynServiceException
      */
-    public ImageSharing shareImage(ContactId contactId, Uri file, ImageSharingListener listener) throws JoynServiceException {
+    public ImageSharing shareImage(ContactId contact, Uri file, ImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				// Allow permission to the stack server for content URI if release is KitKat or greater
@@ -175,7 +175,7 @@ public class ImageSharingService extends JoynService {
 					// after the client is restarted after device reboot.
 					persistUriPermissionForClient(file);
 				}
-				IImageSharing sharingIntf = api.shareImage(contactId, file, listener);
+				IImageSharing sharingIntf = api.shareImage(contact, file, listener);
 				if (sharingIntf != null) {
 					return new ImageSharing(sharingIntf);
 				} else {

@@ -25,6 +25,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -204,7 +205,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		ServerApiUtils.testCore();
 
 		try {
-			return Core.getInstance().getImsModule().getCallManager().getRemoteParty();
+			return Core.getInstance().getImsModule().getCallManager().getContact();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -237,7 +238,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
@@ -278,15 +279,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported
      * an exception is thrown.
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param player Video player
      * @param listener Video sharing event listener
      * @return Video sharing
 	 * @throws ServerApiException
      */
-    public IVideoSharing shareVideo(ContactId contactId, IVideoPlayer player, IVideoSharingListener listener) throws ServerApiException {
+    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player, IVideoSharingListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a live video session with " + contactId);
+			logger.info("Initiate a live video session with " + contact);
 		}
 
 		// Test IMS connection
@@ -299,10 +300,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 		     // Initiate a new session
-            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contactId, player);
+            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
 
 			// Update rich call history
-			RichCallHistory.getInstance().addVideoSharing(contactId, session.getSessionID(),
+			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
 					VideoSharing.Direction.OUTGOING,
 	    			session.getContent(),
 	    			VideoSharing.State.INITIATED);

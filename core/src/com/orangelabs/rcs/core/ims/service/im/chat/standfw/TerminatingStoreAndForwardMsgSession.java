@@ -62,10 +62,10 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-	 * @param contactId the remote ContactId
+	 * @param contact the remote ContactId
 	 */
-	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 
 		// Set feature tags
 		setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());

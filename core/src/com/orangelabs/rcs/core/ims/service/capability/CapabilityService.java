@@ -20,6 +20,7 @@ package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.database.Cursor;
@@ -38,7 +39,6 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -92,13 +92,13 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	public CapabilityService(ImsModule parent) throws CoreException {
         super(parent, true);
 
-    	// Instanciate the polling manager
+    	// Instantiate the polling manager
         pollingManager = new PollingManager(this);
 
-    	// Instanciate the options manager
+    	// Instantiate the options manager
 		optionsManager = new OptionsManager(parent);
 
-    	// Instanciate the anonymous fetch manager
+    	// Instantiate the anonymous fetch manager
     	anonymousFetchManager = new AnonymousFetchManager(parent);
 	}
 
@@ -177,40 +177,40 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	/**
      * Request contact capabilities
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @return Capabilities
      */
-	public synchronized Capabilities requestContactCapabilities(ContactId contactId) {
+	public synchronized Capabilities requestContactCapabilities(ContactId contact) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities to " + contactId);
+    		logger.debug("Request capabilities to " + contact);
     	}
 
 		// Do not request capabilities for oneself
-		if (PhoneUtils.compareNumbers(contactId.toString(),ImsModule.IMS_USER_PROFILE.getUsername())) {
+		if (contact == null || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
 			return null;
 		}
 
 		// Read capabilities from the database
-		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
+		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
 		if (capabilities == null) {
 	    	if (logger.isActivated()) {
-	    		logger.debug("No capability exist for " + contactId);
+	    		logger.debug("No capability exist for " + contact);
 	    	}
 
             // New contact: request capabilities from the network
-    		optionsManager.requestCapabilities(contactId);
+    		optionsManager.requestCapabilities(contact);
 		} else {
 	    	if (logger.isActivated()) {
-	    		logger.debug("Capabilities exist for " + contactId);
+	    		logger.debug("Capabilities exist for " + contact);
 	    	}
 			long delta = (System.currentTimeMillis()-capabilities.getTimestamp())/1000;
 			if ((delta >= CAPABILITY_REFRESH_PERIOD) || (delta < 0)) {
 		    	if (logger.isActivated()) {
-		    		logger.debug("Capabilities have expired for " + contactId);
+		    		logger.debug("Capabilities have expired for " + contact);
 		    	}
 
 		    	// Capabilities are too old: request capabilities from the network
-	    		optionsManager.requestCapabilities(contactId);
+	    		optionsManager.requestCapabilities(contact);
 			}
 		}
 		return capabilities;
@@ -219,14 +219,14 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
     /**
      * Request capabilities for a set of contacts
      * 
-     * @param contactSet Set of contact identifiers
+     * @param contacts Set of contact identifiers
      */
-	public void requestContactCapabilities(Set<ContactId> contactSet) {
-    	if ((contactSet != null) && (contactSet.size() > 0)) {
+	public void requestContactCapabilities(Set<ContactId> contacts) {
+    	if ((contacts != null) && (contacts.size() > 0)) {
         	if (logger.isActivated()) {
-        		logger.debug("Request capabilities for " + contactSet.size() + " contacts");
+        		logger.debug("Request capabilities for " + contacts.size() + " contacts");
         	}
-    		optionsManager.requestCapabilities(contactSet);
+    		optionsManager.requestCapabilities(contacts);
     	}
 	}	
 	
@@ -279,13 +279,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 		Set<ContactId> toBeTreatedNumbers = new HashSet<ContactId>();
 
 		// List of unique number that have already been queried
-		ArrayList<ContactId> alreadyInEabOrInvalidNumbers = new ArrayList<ContactId>();
+		List<ContactId> alreadyInEabOrInvalidNumbers = new ArrayList<ContactId>();
 
 		// We add "My number" to the numbers that are already RCS, so we don't query it if it is present in the address book
-        try {
-			alreadyInEabOrInvalidNumbers.add( ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getUsername()));
-		} catch (JoynContactFormatException e1) {
-		}
+		alreadyInEabOrInvalidNumbers.add( ImsModule.IMS_USER_PROFILE.getUsername());
 
 		while(phonesCursor.moveToNext()) {
 			// Keep a trace of already treated row. Key is (phone number in international format)
@@ -346,20 +343,20 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	/**
      * Reset the content sharing capabilities for a given contact identifier
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-	public void resetContactCapabilitiesForContentSharing(ContactId contactId) {
-		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
+	public void resetContactCapabilitiesForContentSharing(ContactId contact) {
+		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
 		if (capabilities != null) {
             // Force a reset of content sharing capabilities
 			capabilities.setImageSharingSupport(false);
 			capabilities.setVideoSharingSupport(false);
 
 		 	// Update the database capabilities
-	        ContactsManager.getInstance().setContactCapabilities(contactId, capabilities);
+	        ContactsManager.getInstance().setContactCapabilities(contact, capabilities);
 
 		 	// Notify listener
-		 	getImsModule().getCore().getListener().handleCapabilitiesNotification(contactId, capabilities);
+		 	getImsModule().getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
 		}
 	 }
 }

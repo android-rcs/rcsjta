@@ -73,7 +73,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 *            the {@code fileicon} value.
 	 * @param content
 	 *            the {@code content} content.
-	 * @param contactId
+	 * @param contact
 	 *            the {@code contactId} value.
 	 * @param displayName
 	 *            the {@code displayName} value.
@@ -86,9 +86,9 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileicon, MmContent content, ContactId contactId,
+	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileicon, MmContent content, ContactId contact,
 			String displayName, String chatId, String filetransferId, String chatSessionId, boolean isGroup) {
-		super(FtHttpDirection.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contactId, displayName, chatId, filetransferId, chatSessionId, isGroup);
+		super(FtHttpDirection.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contact, displayName, chatId, filetransferId, chatSessionId, isGroup);
 		this.downloadServerAddress = downloadServerAddress;
 		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");

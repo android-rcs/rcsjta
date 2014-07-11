@@ -25,9 +25,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -36,6 +39,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatInvitationReceiver extends BroadcastReceiver {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(GroupChatInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Display invitation notification
@@ -50,8 +59,14 @@ public class GroupChatInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addGroupChatInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact
-		String contact = invitation.getStringExtra(GroupChatIntent.EXTRA_CONTACT);
-
+		ContactId contact = (ContactId)invitation.getParcelableExtra(GroupChatIntent.EXTRA_CONTACT);
+		if (contact == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "GroupChatInvitationReceiver failed: cannot parse contact");
+			}
+			return;
+		}
+		
 		// Get chat ID
 		String chatId = invitation.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
 
@@ -67,9 +82,11 @@ public class GroupChatInvitationReceiver extends BroadcastReceiver {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(chatId);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_group_chat, contact);
+        String notifTitle;
         if (contact == null) {
         	notifTitle = context.getString(R.string.title_group_chat);
+        } else {
+        	notifTitle = context.getString(R.string.title_recv_group_chat, contact.toString());
         }
 		Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;

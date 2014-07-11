@@ -138,7 +138,7 @@ public class VideoSharingService extends JoynService {
 	 * or Tel-URI. If the format of the contact is not supported an exception is
 	 * thrown.
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            Contact identifier
 	 * @param player
 	 *            Video player
@@ -147,11 +147,11 @@ public class VideoSharingService extends JoynService {
 	 * @return Video sharing
 	 * @throws JoynServiceException
 	 */
-	public VideoSharing shareVideo(ContactId contactId, VideoPlayer player, VideoSharingListener listener)
+	public VideoSharing shareVideo(ContactId contact, VideoPlayer player, VideoSharingListener listener)
 			throws JoynServiceException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.shareVideo(contactId, player,
+				IVideoSharing sharingIntf = api.shareVideo(contact, player,
 						listener);
 				if (sharingIntf != null) {
 					return new VideoSharing(sharingIntf);

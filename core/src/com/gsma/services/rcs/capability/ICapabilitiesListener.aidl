@@ -7,5 +7,5 @@ import com.gsma.services.rcs.capability.Capabilities;
  * Callback method for new capabilities
  */
 interface ICapabilitiesListener {
-	void onCapabilitiesReceived(in ContactId contactId, in Capabilities capabilities);
+	void onCapabilitiesReceived(in ContactId contact, in Capabilities capabilities);
 }

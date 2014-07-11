@@ -29,8 +29,8 @@ public abstract class CapabilitiesListener extends ICapabilitiesListener.Stub {
 	/**
 	 * Callback called when new capabilities are received for a given contact
 	 * 
-	 * @param contactId Contact Identifier
+	 * @param contact Contact Identifier
 	 * @param capabilities Received capabilities 
 	 */
-	public abstract void onCapabilitiesReceived(ContactId contactId, Capabilities capabilities);
+	public abstract void onCapabilitiesReceived(ContactId contact, Capabilities capabilities);
 }

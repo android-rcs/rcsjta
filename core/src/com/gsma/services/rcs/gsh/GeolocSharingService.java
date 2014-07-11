@@ -116,17 +116,17 @@ public class GeolocSharingService extends JoynService {
      * or international format, SIP address, SIP-URI or Tel-URI. If the format of the
      * contact is not supported an exception is thrown.
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param geoloc Geolocation info
      * @param listener Geoloc sharing event listener
      * @return Geoloc sharing
      * @throws JoynServiceException
 	 * @see Geoloc
      */
-    public GeolocSharing shareGeoloc(ContactId contactId, Geoloc geoloc, GeolocSharingListener listener) throws JoynServiceException {
+    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc, GeolocSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IGeolocSharing sharingIntf = api.shareGeoloc(contactId, geoloc, listener);
+				IGeolocSharing sharingIntf = api.shareGeoloc(contact, geoloc, listener);
 				if (sharingIntf != null) {
 					return new GeolocSharing(sharingIntf);
 				} else {

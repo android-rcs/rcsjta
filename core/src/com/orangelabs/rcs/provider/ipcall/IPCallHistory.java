@@ -88,21 +88,21 @@ public class IPCallHistory {
 	/**
 	 * Add a new entry in the call history 
 	 * 
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param sessionId Session ID
 	 * @param direction Direction 
 	 * @param audiocontent Audio content
 	 * @param videocontent Video content
 	 * @param status Call status
 	 */
-	public Uri addCall(ContactId contactId, String sessionId, int direction, MmContent audiocontent, MmContent videocontent, int status) {
+	public Uri addCall(ContactId contact, String sessionId, int direction, MmContent audiocontent, MmContent videocontent, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new call entry for contact " + contactId + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new call entry for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(IPCallData.KEY_SESSION_ID, sessionId);
-		values.put(IPCallData.KEY_CONTACT, contactId.toString());
+		values.put(IPCallData.KEY_CONTACT, contact.toString());
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATUS, status);

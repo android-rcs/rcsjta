@@ -54,7 +54,7 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	/**
 	 * Geoloc info
 	 */
-	private GeolocPush geoloc = null;
+	private GeolocPush geoloc;
 	
 	/**
      * The logger
@@ -66,10 +66,10 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 */
-	public GeolocTransferSession(ImsService parent, MmContent content, ContactId contactId) {
-		super(parent, content, contactId);
+	public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact) {
+		super(parent, content, contact);
 	}
 	
 	/**
@@ -104,15 +104,6 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 */
 	public boolean isGeolocTransfered() {
 		return geolocTransfered; 
-	}
-
-	/**
-	 * Receive BYE request 
-	 * 
-	 * @param bye BYE request
-	 */
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
 	}
 
     /**

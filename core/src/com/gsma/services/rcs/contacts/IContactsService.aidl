@@ -7,7 +7,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * Contacts service API
  */
 interface IContactsService {
-	JoynContact getJoynContact(in ContactId contactId);
+	JoynContact getJoynContact(in ContactId contact);
 
 	List<JoynContact> getJoynContacts();
 

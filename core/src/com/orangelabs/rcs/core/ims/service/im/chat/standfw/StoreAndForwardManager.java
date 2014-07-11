@@ -55,16 +55,16 @@ public class StoreAndForwardManager {
      * Receive stored messages
      * 
      * @param invite Received invite
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @throws JoynContactFormatException 
      */
-    public void receiveStoredMessages(SipRequest invite, ContactId contactId) {
+    public void receiveStoredMessages(SipRequest invite, ContactId contact) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored messages");
 		}    	
     	
 		// Create a new session
-    	TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(imsService, invite, contactId);
+    	TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(imsService, invite, contact);
     	
 		// Start the session
 		session.startSession();
@@ -77,16 +77,16 @@ public class StoreAndForwardManager {
      * Receive stored notifications
      * 
      * @param invite Received invite
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @throws JoynContactFormatException 
      */
-    public void receiveStoredNotifications(SipRequest invite, ContactId contactId) {
+    public void receiveStoredNotifications(SipRequest invite, ContactId contact) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored notifications");
 		}    	
     	
 		// Create a new session
-		TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(imsService, invite, contactId);
+		TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(imsService, invite, contact);
 		
 		// Start the session
 		session.startSession();

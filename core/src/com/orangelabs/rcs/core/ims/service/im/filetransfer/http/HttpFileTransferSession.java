@@ -48,7 +48,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * Chat session ID
      */
-    private String chatSessionId = null;
+    private String chatSessionId;
 
     /**
      * Session state
@@ -58,28 +58,28 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * Data object to access the resume FT instance in DB
      */
-    protected FtHttpResume resumeFT = null;
+    protected FtHttpResume resumeFT;
 
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(HttpFileTransferSession.class.getName());
+    private static final Logger logger = Logger.getLogger(HttpFileTransferSession.class.getSimpleName());
     
     /**
 	 * Constructor
 	 *
 	 * @param parent IMS service
 	 * @param content Content to share
-	 * @param contactId Remote contact identifier
+	 * @param contact Remote contact identifier
 	 * @param remoteUri the remote URI
 	 * @param fileicon Content of fileicon
 	 * @param chatSessionId Chat session ID
 	 * @param chatContributionId Chat contribution Id
 	 * @param fileTransferId File transfer Id
 	 */
-	public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileicon, String chatSessionID,
+	public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileicon, String chatSessionID,
 			String chatContributionId, String fileTransferId) {
-		super(parent, content, contactId, remoteUri, fileicon, fileTransferId);
+		super(parent, content, contact, remoteUri, fileicon, fileTransferId);
 		this.chatSessionId = chatSessionID;
 		setContributionID(chatContributionId);
 		this.sessionState = HttpTransferState.PENDING;

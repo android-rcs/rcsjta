@@ -56,10 +56,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      *
      * @param parent IMS service
      * @param invite Initial INVITE request
-     * @param contactId Contact Id
+     * @param contact Contact Id
      */
-	public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()), contactId);
+	public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()), contact);
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

@@ -131,7 +131,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		String remoteContact = null;
+		ContactId remoteContact = null;
 		if (getIntent().getAction() != null) {
 			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
 			if (resuming) {
@@ -144,7 +144,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 					finish();
 					return;
 				}
-				remoteContact = ftdao.getContact().toString();
+				remoteContact = ftdao.getContact();
 				ftId = ftdao.getFtId();
 				filename = ftdao.getFilename();
 				filesize = ftdao.getSize();
@@ -186,7 +186,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 
 		if (resuming) {
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
-					new String[] { remoteContact });
+					new String[] { remoteContact.toString() });
 			spinner.setAdapter(adapter);
 			TextView uriEdit = (TextView) findViewById(R.id.uri);
 			TextView sizeEdit = (TextView) findViewById(R.id.size);

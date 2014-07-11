@@ -22,12 +22,16 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -75,8 +79,15 @@ public class InitiateIPCall extends Activity {
 			// Get remote contact
 			Spinner spinner = (Spinner)findViewById(R.id.contact);
 			MatrixCursor cursor = (MatrixCursor) spinner.getSelectedItem();
-            String remoteContact = cursor.getString(1);
-
+            ContactId contact = null;
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateIPCall.this);
+    		try {
+    			contact = contactUtils.formatContactId(cursor.getString(1));
+    		} catch (JoynContactFormatException e1) {
+    			Utils.showMessage(InitiateIPCall.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+    	    	return;
+    		}
+    		
             // Get video option
 	        CheckBox videoCheck = (CheckBox)findViewById(R.id.video);
             
@@ -84,7 +95,7 @@ public class InitiateIPCall extends Activity {
 			Intent intent = new Intent(InitiateIPCall.this, IPCallView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	intent.putExtra(IPCallView.EXTRA_MODE, IPCallView.MODE_OUTGOING);
-        	intent.putExtra(IPCallView.EXTRA_CONTACT, remoteContact);
+        	intent.putExtra(IPCallView.EXTRA_CONTACT, (Parcelable)contact);
         	intent.putExtra(IPCallView.EXTRA_VIDEO_OPTION, videoCheck.isChecked());
 			startActivity(intent);
 			

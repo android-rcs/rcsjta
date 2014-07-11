@@ -146,12 +146,12 @@ public abstract class ImsServiceSession extends Thread {
 	 * Constructor
 	 * 
 	 * @param imsService IMS service
-	 * @param contactId Remote contact Identifier
+	 * @param contact Remote contact Identifier
 	 * @param remoteUri Remote URI
 	 */
-	public ImsServiceSession(ImsService imsService, ContactId contactId, String remoteUri) {
+	public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri) {
         this.imsService = imsService;
-		this.contact = contactId;
+		this.contact = contact;
 		this.remoteUri =  remoteUri;
 		this.authenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
 		this.updateMgr = new UpdateSessionManager(this);
@@ -598,78 +598,69 @@ public abstract class ImsServiceSession extends Thread {
     		getListeners().get(i).handleSessionTerminatedByRemote();
         }
 
-        try {
+		try {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
-	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+			getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
-				logger.debug("Cannot parse contact "+getDialogPath().getRemoteParty());
+				logger.debug("Cannot parse contact " + getDialogPath().getRemoteParty());
 			}
 		}
 	}
 	
 	/**
-	 * Receive CANCEL request 
+	 * Receive CANCEL request
 	 * 
-	 * @param cancel CANCEL request
+	 * @param cancel
+	 *            CANCEL request
 	 */
 	public void receiveCancel(SipRequest cancel) {
-    	if (logger.isActivated()) {
-    		logger.info("Receive a CANCEL message from the remote");
-    	}
+		if (logger.isActivated()) {
+			logger.info("Receive a CANCEL message from the remote");
+		}
 
 		if (getDialogPath().isSigEstablished()) {
-	    	if (logger.isActivated()) {
-	    		logger.info("Ignore the received CANCEL message from the remote (session already established)");
-	    	}
+			if (logger.isActivated()) {
+				logger.info("Ignore the received CANCEL message from the remote (session already established)");
+			}
 			return;
 		}
 
-    	// Close media session
-    	closeMediaSession();
-    	
-    	// Update dialog path
+		// Close media session
+		closeMediaSession();
+
+		// Update dialog path
 		getDialogPath().sessionCancelled();
 
 		// Send a 487 Request terminated
-    	try {
-	    	if (logger.isActivated()) {
-	    		logger.info("Send 487 Request terminated");
-	    	}
-	        SipResponse terminatedResp = SipMessageFactory.createResponse(getDialogPath().getInvite(),
-	        		getDialogPath().getLocalTag(), 487);
-	        getImsService().getImsModule().getSipManager().sendSipResponse(terminatedResp);
-		} catch(Exception e) {
-	    	if (logger.isActivated()) {
-	    		logger.error("Can't send 487 error response", e);
-	    	}
+		try {
+			if (logger.isActivated()) {
+				logger.info("Send 487 Request terminated");
+			}
+			SipResponse terminatedResp = SipMessageFactory.createResponse(getDialogPath().getInvite(), getDialogPath()
+					.getLocalTag(), 487);
+			getImsService().getImsModule().getSipManager().sendSipResponse(terminatedResp);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send 487 error response", e);
+			}
 		}
-		
-    	// Remove the current session
-    	getImsService().removeSession(this);
 
-        // Set invitation status
-        invitationStatus = ImsServiceSession.INVITATION_CANCELED;
+		// Remove the current session
+		getImsService().removeSession(this);
 
-        // Unblock semaphore
-        synchronized(waitUserAnswer) {
-            waitUserAnswer.notifyAll();
-        }
+		// Set invitation status
+		invitationStatus = ImsServiceSession.INVITATION_CANCELED;
+
+		// Unblock semaphore
+		synchronized (waitUserAnswer) {
+			waitUserAnswer.notifyAll();
+		}
 
 		// Notify listeners
-    	for(int i=0; i < getListeners().size(); i++) {
-    		getListeners().get(i).handleSessionTerminatedByRemote();
-        }
-        
-		try {
-			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-			// Request capabilities to the remote
-	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
-			if (logger.isActivated()) {
-				logger.debug("Cannot parse contact "+getDialogPath().getRemoteParty());
-			}
+		for (int i = 0; i < getListeners().size(); i++) {
+			getListeners().get(i).handleSessionTerminatedByRemote();
 		}
 	}
 

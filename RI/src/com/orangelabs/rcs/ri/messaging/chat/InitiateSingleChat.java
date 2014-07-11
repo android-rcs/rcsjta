@@ -25,22 +25,36 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.ContactsContract.Data;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate chat
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class InitiateSingleChat extends Activity {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(InitiateSingleChat.class.getSimpleName());
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,13 +110,22 @@ public class InitiateSingleChat extends Activity {
             // Build participant list
         	Spinner spinner = (Spinner)findViewById(R.id.contact);
         	MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-            String remoteContact = cursor.getString(1);
-            
+            String phoneNumber = cursor.getString(1);
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
+            ContactId contact;
+			try {
+				contact = contactUtils.formatContactId(phoneNumber);
+			} catch (JoynContactFormatException e) {
+				if (LogUtils.isActive) {
+	    			Log.e(LOGTAG, "Cannot parse contact "+phoneNumber);
+	    		}
+				return;
+			}
             // Display chat view
         	Intent intent = new Intent(InitiateSingleChat.this, SingleChatView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	intent.putExtra(SingleChatView.EXTRA_MODE, SingleChatView.MODE_OUTGOING);
-        	intent.putExtra(SingleChatView.EXTRA_CONTACT, remoteContact);
+        	intent.putExtra(SingleChatView.EXTRA_CONTACT, (Parcelable)contact);
         	startActivity(intent);
         	
         	// Exit activity

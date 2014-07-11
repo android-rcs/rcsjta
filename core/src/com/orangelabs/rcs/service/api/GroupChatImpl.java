@@ -576,17 +576,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
     
     @Override
-	public void handleIsComposingEvent(ContactId contactId, boolean status) {
+	public void handleIsComposingEvent(ContactId contact, boolean status) {
     	synchronized(lock) {
         	if (logger.isActivated()) {
-				logger.info(contactId + " is composing status set to " + status);
+				logger.info(contact + " is composing status set to " + status);
 			}
 	
 	  		// Notify event listeners
 			final int N = listeners.beginBroadcast();
 	        for (int i=0; i < N; i++) {
 	            try {
-	            	listeners.getBroadcastItem(i).onComposingEvent(contactId, status);
+	            	listeners.getBroadcastItem(i).onComposingEvent(contact, status);
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
 	            		logger.error("Can't notify listener", e);
@@ -598,10 +598,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 	
 	@Override
-    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state) {
+    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state) {
     	synchronized(lock) {
         	if (logger.isActivated()) {
-				logger.info("New conference event " + state + " for " + contactId);
+				logger.info("New conference event " + state + " for " + contact);
 			}
 			
 	  		// Update history and notify event listeners
@@ -610,24 +610,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	            try {
 	            	if (state.equals(User.STATE_CONNECTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.JOINED);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantJoined(contactId, contactDisplayname);
+	        			listeners.getBroadcastItem(i).onParticipantJoined(contact, contactDisplayname);
 	            	} else
 	            	if (state.equals(User.STATE_DISCONNECTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.DISCONNECTED);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contactId);
+	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contact);
 	            	} else
 	            	if (state.equals(User.STATE_DEPARTED)) {
 	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contactId, ChatLog.Message.Status.System.GONE);
+	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
 
 	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantLeft(contactId);
+	        			listeners.getBroadcastItem(i).onParticipantLeft(contact);
 	            	}
 	            } catch(Exception e) {
 	            	if (logger.isActivated()) {
@@ -667,7 +667,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	@Override
-    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId) {
+    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
@@ -675,7 +675,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	
 			// Update rich messaging history
 			MessagingLog messagingLog = MessagingLog.getInstance();
-			messagingLog.updateGroupChatDeliveryInfoStatus(msgId, status, contactId);
+			messagingLog.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
 			// TODO : Listeners to notify group file delivery status for
 			// individual contacts will be implemented as part of CR011. For now,
 			// the same callback is used for sending both per contact group delivery

@@ -89,17 +89,17 @@ public class ContactInfo {
 	/**
 	 * Capabilities
 	 */
-	private Capabilities capabilities = null;
+	private Capabilities capabilities;
 	
 	/**
 	 * Presence info, relevant only if social info is activated for this contact
 	 */
-	private PresenceInfo presenceInfo = null;
+	private PresenceInfo presenceInfo;
 	
 	/**
 	 * Contact identifier
 	 */
-	private ContactId contactId = null;
+	private ContactId mContact;
 	
 	/**
 	 * Registration state
@@ -128,12 +128,12 @@ public class ContactInfo {
 	 * @param contactInfo
 	 */
 	public ContactInfo(ContactInfo info) {
-		this.contactId = info.getContact();
-		this.registrationState = info.getRegistrationState();
-		this.rcsStatus = info.getRcsStatus();
-		this.rcsStatusTimestamp = info.getRcsStatusTimestamp();
-		this.capabilities = info.capabilities;
-		this.presenceInfo = info.getPresenceInfo();		
+		mContact = info.getContact();
+		registrationState = info.getRegistrationState();
+		rcsStatus = info.getRcsStatus();
+		rcsStatusTimestamp = info.getRcsStatusTimestamp();
+		capabilities = info.capabilities;
+		presenceInfo = info.getPresenceInfo();		
 	}
 
     /**
@@ -160,7 +160,7 @@ public class ContactInfo {
 	 * @param info Presence info
 	 */
 	public void setPresenceInfo(PresenceInfo info) {
-		this.presenceInfo = info;
+		presenceInfo = info;
 	}
 	
 	/**
@@ -175,10 +175,10 @@ public class ContactInfo {
     /**
 	 * Set the contact identifier
 	 * 
-	 * @param contactId Contact identifier
+	 * @param contact Contact identifier
 	 */
-	public void setContact(ContactId contactId) {
-		this.contactId = contactId;
+	public void setContact(ContactId contact) {
+		mContact = contact;
 	}
 	
 	/**
@@ -187,7 +187,7 @@ public class ContactInfo {
 	 * @return contactId
 	 */
 	public ContactId getContact(){
-		return contactId;
+		return mContact;
 	}
 	
     /**
@@ -260,7 +260,7 @@ public class ContactInfo {
 	 * @return String
 	 */
 	public String toString() {
-		String result =  "Contact=" + contactId +
+		String result =  "Contact=" + mContact +
 			", Status=" + rcsStatus +
 			", State=" + registrationState +
 			", Timestamp=" + rcsStatusTimestamp;

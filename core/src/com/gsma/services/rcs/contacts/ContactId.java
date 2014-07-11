@@ -37,7 +37,7 @@ public class ContactId implements Parcelable, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * The contactId formatted in the international representation of the phone number “<CC><NDCCS><SN>” <br>
+	 * The ContactId formatted in the international representation of the phone number “<CC><NDCCS><SN>” <br>
 	 * with:
 	 * <ul>
 	 * <li>- CC : the country code with a leading ‘+’ character
@@ -49,7 +49,7 @@ public class ContactId implements Parcelable, Serializable {
 	 * If this number needs to be displayed in the UI with some particular UI formatting, it is in the scope of UI code to format
 	 * that. This class will never hold specific UI formatted numbers since they need to be unique.
 	 */
-	private String contactId;
+	private String mContactId;
 
 	/**
 	 * Constructor
@@ -58,7 +58,7 @@ public class ContactId implements Parcelable, Serializable {
 	 *            the contact number (valid characters are digits, space, ‘-‘, leading ‘+’)
 	 */
 	/* package private */ContactId(String contact) {
-		this.contactId = contact;
+		mContactId = contact;
 	}
 
 	/**
@@ -69,12 +69,12 @@ public class ContactId implements Parcelable, Serializable {
 	 * @hide
 	 */
 	public ContactId(Parcel source) {
-		contactId = source.readString();
+		mContactId = source.readString();
 	}
 
 	@Override
 	public String toString() {
-		return contactId;
+		return mContactId;
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class ContactId implements Parcelable, Serializable {
 	 */
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(contactId);
+		dest.writeString(mContactId);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class ContactId implements Parcelable, Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
+		result = prime * result + ((mContactId == null) ? 0 : mContactId.hashCode());
 		return result;
 	}
 
@@ -137,18 +137,23 @@ public class ContactId implements Parcelable, Serializable {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ContactId other = (ContactId) obj;
-		if (contactId == null) {
-			if (other.contactId != null)
+		if (mContactId == null) {
+			if (other.mContactId != null) {
 				return false;
-		} else if (!contactId.equals(other.contactId))
+			}
+		} else if (!mContactId.equals(other.mContactId)) {
 			return false;
+		}
 		return true;
 	}
 }

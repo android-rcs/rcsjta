@@ -54,7 +54,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	/**
 	 * Set of missing participants in case of restart 
 	 */
-	Set<ContactId> missingParticipants = null;
+	Set<ContactId> missingParticipants;
 	
     /**
      * The logger
@@ -66,12 +66,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-	 * @param contactId remote contact
+	 * @param contact remote contact
 	 * @param remoteUri the remote Uri
 	 * @param participants set of participants
 	 */
-	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite, ContactId contactId, String remoteUri, Set<ParticipantInfo> participants) {
-		super(parent, contactId, remoteUri, participants);
+	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite, ContactId contact, String remoteUri, Set<ParticipantInfo> participants) {
+		super(parent, contact, remoteUri, participants);
 
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);

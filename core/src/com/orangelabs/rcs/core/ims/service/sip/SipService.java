@@ -52,7 +52,7 @@ public class SipService extends ImsService {
 	/**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(SipService.class.getName());
+    private final static Logger logger = Logger.getLogger(SipService.class.getSimpleName());
 
 	/**
 	 * MIME-type for multimedia services
@@ -100,17 +100,17 @@ public class SipService extends ImsService {
     /**
      * Initiate a MSRP session
      * 
-     * @param contactId Remote contact Id
+     * @param contact Remote contact Id
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
-	public GenericSipMsrpSession initiateMsrpSession(ContactId contactId, String featureTag) {
+	public GenericSipMsrpSession initiateMsrpSession(ContactId contact, String featureTag) {
 		if (logger.isActivated()) {
-			logger.info("Initiate a MSRP session with contact " + contactId);
+			logger.info("Initiate a MSRP session with contact " + contact);
 		}
 		
 		// Create a new session
-		OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contactId, featureTag);
+		OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact, featureTag);
 		
 		return session;
 	}
@@ -191,16 +191,16 @@ public class SipService extends ImsService {
 	/**
      * Returns SIP sessions with a given contact
      * 
-     * @param contactId Contact Id
+     * @param contact Contact Id
      * @return List of sessions
      */
-	public Vector<GenericSipMsrpSession> getSipSessionsWith(ContactId contactId) {
+	public Vector<GenericSipMsrpSession> getSipSessionsWith(ContactId contact) {
 		// Search all SIP sessions
 		Vector<GenericSipMsrpSession> result = new Vector<GenericSipMsrpSession>();
 		Enumeration<ImsServiceSession> list = getSessions();
 		while(list.hasMoreElements()) {
 			ImsServiceSession session = list.nextElement();
-			if ((session instanceof GenericSipMsrpSession) && session.getRemoteContact().equals(contactId)) {
+			if ((session instanceof GenericSipMsrpSession) && session.getRemoteContact().equals(contact)) {
 				result.add((GenericSipMsrpSession)session);
 			}
 		}

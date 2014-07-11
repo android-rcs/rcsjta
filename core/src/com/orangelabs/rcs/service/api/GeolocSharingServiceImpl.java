@@ -24,6 +24,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -205,7 +206,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(GeolocSharingIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    	intent.putExtra(GeolocSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
     	intent.putExtra(GeolocSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);

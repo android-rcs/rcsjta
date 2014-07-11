@@ -25,7 +25,9 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,6 +39,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -44,7 +47,10 @@ import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -65,6 +71,12 @@ public class ChatList extends Activity implements JoynServiceListener {
 	 * API connection state
 	 */
 	private boolean apiEnabled = false;
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ChatList.class.getSimpleName());
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -237,7 +249,17 @@ public class ChatList extends Activity implements JoynServiceListener {
     		Intent intent = new Intent(ChatList.this, SingleChatView.class);
         	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	intent.putExtra(SingleChatView.EXTRA_MODE, SingleChatView.MODE_OPEN);
-        	intent.putExtra(SingleChatView.EXTRA_CONTACT, cache.contact);
+        	ContactUtils contactUtils = ContactUtils.getInstance(ChatList.this);
+        	ContactId contact;
+			try {
+				contact = contactUtils.formatContactId(cache.contact);
+			} catch (JoynContactFormatException e) {
+				if (LogUtils.isActive) {
+	    			Log.e(LOGTAG, "Cannot parse contact "+cache.contact);
+	    		}
+				return;
+			}
+        	intent.putExtra(SingleChatView.EXTRA_CONTACT, (Parcelable)contact);
     		startActivity(intent);
 		}
     };

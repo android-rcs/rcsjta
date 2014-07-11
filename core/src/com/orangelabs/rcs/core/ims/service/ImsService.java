@@ -97,7 +97,7 @@ public abstract class ImsService {
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
 
     /**
      * Constructor
@@ -151,16 +151,16 @@ public abstract class ImsService {
     /**
      * Returns sessions associated to a contact
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @return List of sessions
      */
-	public Enumeration<ImsServiceSession> getSessions(ContactId contactId) {
+	public Enumeration<ImsServiceSession> getSessions(ContactId contact) {
 		Vector<ImsServiceSession> result = new Vector<ImsServiceSession>();
         synchronized(sessions) {
             Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
             while(list.hasMoreElements()) {
                 ImsServiceSession session = list.nextElement();
-                if (contactId!= null && contactId.equals(session.getRemoteContact())) {
+                if (contact!= null && contact.equals(session.getRemoteContact())) {
                     result.add(session);
                 }
             }
@@ -171,16 +171,16 @@ public abstract class ImsService {
     /**
      * Returns the number of sessions in progress associated to a contact
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @return number of sessions
      */
-    public int getNumberOfSessions(ContactId contactId) {
+    public int getNumberOfSessions(ContactId contact) {
         int result = 0;
         synchronized(sessions) {
             Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
             while (list.hasMoreElements()) {
                 ImsServiceSession session = list.nextElement();
-                if (contactId != null && contactId.equals(session.getRemoteContact())) {
+                if (contact != null && contact.equals(session.getRemoteContact())) {
                     result++;
                 }
             }

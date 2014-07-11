@@ -35,10 +35,10 @@ public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStream
      * @param parent IMS service
      * @param player Media player
      * @param content Content to be shared
-     * @param contactId Remote contact Id
+     * @param contact Remote contact Id
      */
     public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
-            LiveVideoContent content, ContactId contactId) {
-        super(parent, player, content, contactId);
+            LiveVideoContent content, ContactId contact) {
+        super(parent, player, content, contact);
     }
 }

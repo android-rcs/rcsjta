@@ -64,12 +64,12 @@ public class GenericSipRtpSession extends GenericSipSession implements RtpStream
 	/**
 	 * RTP receiver
 	 */
-	private MediaRtpReceiver rtpReceiver = null;
+	private MediaRtpReceiver rtpReceiver;
 	
 	/**
 	 * RTP sender
 	 */
-	private MediaRtpSender rtpSender = null;
+	private MediaRtpSender rtpSender;
 	
 	/**
 	 * Startup flag
@@ -85,11 +85,11 @@ public class GenericSipRtpSession extends GenericSipSession implements RtpStream
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipRtpSession(ImsService parent, ContactId contactId, String featureTag) {
-		super(parent, contactId, featureTag);
+	public GenericSipRtpSession(ImsService parent, ContactId contact, String featureTag) {
+		super(parent, contact, featureTag);
 
 		// Get local port
 		localRtpPort = NetworkRessourceManager.generateLocalRtpPort();

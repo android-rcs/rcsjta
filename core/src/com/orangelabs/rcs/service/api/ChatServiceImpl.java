@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
@@ -72,10 +73,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
 
 	/**
-	 * List of chat sessions
+	 * List of one to one chat sessions
 	 */
 	// TODO : This change is only temporary. Will be changed with the implementation of CR018
-	private static Hashtable<String, ChatImpl> chatSessions = new Hashtable<String, ChatImpl>();
+	private static Hashtable<ContactId, ChatImpl> one2oneChatSessions = new Hashtable<ContactId, ChatImpl>();
 
 	/**
 	 * List of group chat sessions
@@ -121,20 +122,19 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Tries to send a displayed delivery report
 	 *
 	 * @param msgId Message ID
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 */
-	public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contactId) {
+	public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contact) {
 		try {
-			ChatImpl chatImpl = chatSessions.get(contactId);
+			ChatImpl chatImpl = one2oneChatSessions.get(contact);
 			if (chatImpl != null) {
-				chatImpl.sendDisplayedDeliveryReport(contactId, msgId);
+				chatImpl.sendDisplayedDeliveryReport(contact, msgId);
 				return;
 			}
 			Core.getInstance()
 					.getImService()
 					.getImdnManager()
-//					.sendMessageDeliveryStatus(PhoneUtils.formatNumberToSipUri(contactNumber),
-					.sendMessageDeliveryStatus(contactId,
+					.sendMessageDeliveryStatus(contact,
 							msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 		} catch (Exception ignore) {
 			/*
@@ -150,7 +150,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
 	public void close() {
 		// Clear list of sessions
-		chatSessions.clear();
+		one2oneChatSessions.clear();
 		groupChatSessions.clear();
 		
 		if (logger.isActivated()) {
@@ -243,7 +243,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ChatIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	InstantMessage msg = session.getFirstMessage();
     	ChatMessage msgApi;
@@ -290,9 +290,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return Chat
 	 * @throws ServerApiException
      */
-    public IChat openSingleChat(ContactId contactId, IChatListener listener) throws ServerApiException {
+    public IChat openSingleChat(ContactId contact, IChatListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Open a 1-1 chat session with " + contactId);
+			logger.info("Open a 1-1 chat session with " + contact);
 		}
 
 		// Test IMS connection
@@ -300,10 +300,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 		
 		try {
 			// Check if there is an existing chat or not
-			ChatImpl sessionApi = (ChatImpl)ChatServiceImpl.getChatSession(contactId);
+			ChatImpl sessionApi = (ChatImpl)ChatServiceImpl.getChatSession(contact);
 			if (sessionApi != null) {
 				if (logger.isActivated()) {
-					logger.debug("Chat session already exists for " + contactId);
+					logger.debug("Chat session already exists for " + contact);
 				}
 				
 				// Add session listener
@@ -345,15 +345,15 @@ public class ChatServiceImpl extends IChatService.Stub {
 				}
 			} else {
 				if (logger.isActivated()) {
-					logger.debug("Create a new chat session with " + contactId);
+					logger.debug("Create a new chat session with " + contact);
 				}
 
 				// Add session listener
-				sessionApi = new ChatImpl(contactId);
+				sessionApi = new ChatImpl(contact);
 				sessionApi.addEventListener(listener);
 	
 				// Add session in the list
-				ChatServiceImpl.addChatSession(contactId, sessionApi);
+				ChatServiceImpl.addChatSession(contact, sessionApi);
 			}
 		
 			return sessionApi;
@@ -369,21 +369,21 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Receive message delivery status
      * 
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param msgId Message ID
      * @param status Delivery status
      */
-    public void receiveMessageDeliveryStatus(ContactId contactId, String msgId, String status) {
+    public void receiveMessageDeliveryStatus(ContactId contact, String msgId, String status) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("Receive message delivery status for message " + msgId + ", status " + status);
 			}
 	
 	  		// Notify message delivery listeners
-			ChatImpl chat = (ChatImpl)ChatServiceImpl.getChatSession(contactId);
+			ChatImpl chat = (ChatImpl)ChatServiceImpl.getChatSession(contact);
 			if (chat != null) {
 				// TODO FUSION check if correct ?
-            	chat.handleMessageDeliveryStatus(msgId, status, contactId);
+            	chat.handleMessageDeliveryStatus(msgId, status, contact);
 			} else {
 				// Update rich messaging history
 				MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId,
@@ -398,43 +398,43 @@ public class ChatServiceImpl extends IChatService.Stub {
 	/**
 	 * Add a chat session in the list
 	 * 
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param session Chat session
 	 */
-	public static void addChatSession(ContactId contactId, ChatImpl session) {
+	public static void addChatSession(ContactId contact, ChatImpl session) {
+		int sizeBefore = one2oneChatSessions.size();
+		one2oneChatSessions.put(contact, session);
+		int sizeAfter = one2oneChatSessions.size();
 		if (logger.isActivated()) {
-			logger.debug("Add a chat session in the list (size=" + chatSessions.size() + ") for " + contactId);
+			logger.debug("Add " + (sizeAfter - sizeBefore) + " chat session to list (size=" + sizeAfter + ") for " + contact);
 		}
-		
-		chatSessions.put(contactId.toString(), session);
 	}
 
 	/**
 	 * Get a chat session from the list for a given contact
 	 * 
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param GroupChat session
 	 */
-	protected static IChat getChatSession(ContactId contactId) {
+	protected static IChat getChatSession(ContactId contact) {
 		if (logger.isActivated()) {
-			logger.debug("Get a chat session for " + contactId);
+			logger.debug("Get a chat session for " + contact);
 		}
 		
-		return chatSessions.get(contactId.toString());
+		return one2oneChatSessions.get(contact);
 	}
 
 	/**
 	 * Remove a chat session from the list
 	 * 
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 */
-	protected static void removeChatSession(String contactId) {
+	protected static void removeChatSession(ContactId contact) {
+		int sizeBefore = one2oneChatSessions.size();
+		one2oneChatSessions.remove(contact);
+		int sizeAfter = one2oneChatSessions.size();
 		if (logger.isActivated()) {
-			logger.debug("Remove a chat session from the list (size=" + chatSessions.size() + ") for " + contactId);
-		}
-		
-		if ((chatSessions != null) && (contactId != null)) {
-			chatSessions.remove(contactId);
+			logger.debug("Remove " + (sizeBefore - sizeAfter) + " chat session from list (size=" + sizeAfter + ") for " + contact);
 		}
 	}
 	
@@ -450,8 +450,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(chatSessions.size());
-			for (Enumeration<ChatImpl> e = chatSessions.elements() ; e.hasMoreElements() ;) {
+			ArrayList<IBinder> result = new ArrayList<IBinder>(one2oneChatSessions.size());
+			for (Enumeration<ChatImpl> e = one2oneChatSessions.elements() ; e.hasMoreElements() ;) {
 				IChat sessionApi = e.nextElement() ;
 				result.add(sessionApi.asBinder());
 			}
@@ -467,17 +467,13 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Returns a chat in progress from its unique ID
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @return Chat or null if not found
      * @throws ServerApiException
      */
-    public IChat getChat(String contactId) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get chat session with " + contactId);
-		}
-
+    public IChat getChat(ContactId contact) throws ServerApiException {
 		// Return a session instance
-		return chatSessions.get(contactId);
+		return one2oneChatSessions.get(contact);
     }
     
     /**
@@ -502,7 +498,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     	Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
     	if (session.getRemoteContact() != null) {
-    		intent.putExtra(GroupChatIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    		intent.putExtra(GroupChatIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
     	}
     	intent.putExtra(GroupChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
@@ -531,11 +527,12 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param session Chat session
 	 */
 	protected static void addGroupChatSession(GroupChatImpl session) {
-		if (logger.isActivated()) {
-			logger.debug("Add a group chat session in the list (size=" + groupChatSessions.size() + ")");
-		}
-		
+		int sizeBefore = groupChatSessions.size();
 		groupChatSessions.put(session.getChatId(), session);
+		int sizeAfter = groupChatSessions.size();
+		if (logger.isActivated()) {
+			logger.debug("Add " + (sizeAfter - sizeBefore) + " GC session to list (size=" + sizeAfter + ") for chatId "+session.getChatId() );
+		}
 	}
 
 	/**
@@ -544,11 +541,12 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param chatId Chat ID
 	 */
 	protected static void removeGroupChatSession(String chatId) {
-		if (logger.isActivated()) {
-			logger.debug("Remove a group chat session from the list (size=" + groupChatSessions.size() + ")");
-		}
-		
+		int sizeBefore = groupChatSessions.size();
 		groupChatSessions.remove(chatId);
+		int sizeAfter = groupChatSessions.size();
+		if (logger.isActivated()) {
+			logger.debug("Remove " + (sizeBefore - sizeAfter) + " GC session to list (size=" + sizeAfter + ") for chatId "+chatId );
+		}
 	}
 
 	/**
@@ -713,10 +711,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws ServerApiException
      */
     public IGroupChat getGroupChat(String chatId) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get group chat session " + chatId);
-		}
-
 		// Return a session instance
 		return groupChatSessions.get(chatId);
 	}

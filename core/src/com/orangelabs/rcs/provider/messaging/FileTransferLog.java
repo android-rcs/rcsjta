@@ -77,16 +77,16 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addFileTransfer(ContactId contactId, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=").append(fileTransferId).append(", contact=")
-					.append(contactId).append(", filename=").append(content.getName()).append(", size=").append(content.getSize())
+					.append(contact).append(", filename=").append(content.getName()).append(", size=").append(content.getSize())
 					.append(", MIME=").append(content.getEncoding()).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
-		values.put(FileTransferData.KEY_CHAT_ID, contactId.toString());
-		values.put(FileTransferData.KEY_CONTACT, contactId.toString());
+		values.put(FileTransferData.KEY_CHAT_ID, contact.toString());
+		values.put(FileTransferData.KEY_CONTACT, contact.toString());
 		if (direction == FileTransfer.Direction.OUTGOING) {
 			values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		}
@@ -172,18 +172,18 @@ public class FileTransferLog implements IFileTransferLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contactId, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
 			MmContent thumbnail) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=").append(fileTransferId)
-					.append(", chatId=").append(chatId).append(", contact=").append(contactId).append(", filename=")
+					.append(", chatId=").append(chatId).append(", contact=").append(contact).append(", filename=")
 					.append(content.getName()).append(", size=").append(content.getSize()).append(", MIME=")
 					.append(content.getEncoding()).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		values.put(FileTransferData.KEY_CONTACT, contactId.toString());
+		values.put(FileTransferData.KEY_CONTACT, contact.toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, FileTransfer.Direction.INCOMING);

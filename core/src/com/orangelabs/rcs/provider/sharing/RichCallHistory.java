@@ -44,7 +44,7 @@ public class RichCallHistory {
 	/**
 	 * Current instance
 	 */
-	private static RichCallHistory instance = null;
+	private static RichCallHistory instance;
 
 	/**
 	 * Content resolver
@@ -104,20 +104,20 @@ public class RichCallHistory {
 	/**
 	 * Add a new video sharing in the call history 
 	 * 
-	 * @param contactId Remote contact ID
+	 * @param contact Remote contact ID
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
 	 * @param status Call status
 	 */
-	public Uri addVideoSharing(ContactId contactId, String sessionId, int direction, MmContent content, int status) {
+	public Uri addVideoSharing(ContactId contact, String sessionId, int direction, MmContent content, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new video sharing for contact " + contactId + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new video sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SESSION_ID, sessionId);
-		values.put(VideoSharingData.KEY_CONTACT, contactId.toString());
+		values.put(VideoSharingData.KEY_CONTACT, contact.toString());
 		values.put(VideoSharingData.KEY_DIRECTION, direction);
 		values.put(VideoSharingData.KEY_STATUS, status);
 		values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
@@ -160,20 +160,20 @@ public class RichCallHistory {
 	/**
 	 * Add a new image sharing in the call history 
 	 * 
-	 * @param contactId Remote contact ID
+	 * @param contact Remote contact ID
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
 	 * @param status Call status
 	 */
-	public Uri addImageSharing(ContactId contactId, String sessionId, int direction, MmContent content, int status) {
+	public Uri addImageSharing(ContactId contact, String sessionId, int direction, MmContent content, int status) {
 		if(logger.isActivated()){
-			logger.debug("Add new image sharing for contact " + contactId + ": session=" + sessionId + ", status=" + status);
+			logger.debug("Add new image sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SESSION_ID, sessionId);
-		values.put(ImageSharingData.KEY_CONTACT, contactId.toString());
+		values.put(ImageSharingData.KEY_CONTACT, contact.toString());
 		values.put(ImageSharingData.KEY_DIRECTION, direction);
 		values.put(ImageSharingData.KEY_FILE, content.getUri().toString());
 		values.put(ImageSharingData.KEY_NAME, content.getName());

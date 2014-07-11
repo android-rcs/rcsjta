@@ -55,7 +55,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 	
 	/**
 	 * Max message size
@@ -71,11 +71,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipMsrpSession(ImsService parent, ContactId contactId, String featureTag) {
-		super(parent, contactId, featureTag);
+	public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
+		super(parent, contact, featureTag);
 
         // Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();

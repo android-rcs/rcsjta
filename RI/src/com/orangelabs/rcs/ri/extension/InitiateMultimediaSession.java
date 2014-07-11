@@ -21,12 +21,17 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -35,6 +40,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public abstract class InitiateMultimediaSession extends Activity {
+
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(InitiateMultimediaSession.class.getSimpleName());
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,15 +79,23 @@ public abstract class InitiateMultimediaSession extends Activity {
 	private OnClickListener btnInitiateListener = new OnClickListener() {
 		public void onClick(View v) {
 			// Get remote contact
-			Spinner spinner = (Spinner)findViewById(R.id.contact);
+			Spinner spinner = (Spinner) findViewById(R.id.contact);
 			MatrixCursor cursor = (MatrixCursor) spinner.getSelectedItem();
-            String remoteContact = cursor.getString(1);
 
-			// Initiate session
-            initiateSession(remoteContact);
-			
-        	// Exit activity
-        	finish();     
+			try {
+				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
+				ContactId contact = contactUtils.formatContactId(cursor.getString(1));
+				// Initiate session
+				initiateSession(contact);
+			} catch (JoynContactFormatException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot parse contact " + cursor.getString(1));
+				}
+				return;
+			} finally {
+				// Exit activity
+				finish();
+			}
 		}
 	};
 	
@@ -85,5 +104,5 @@ public abstract class InitiateMultimediaSession extends Activity {
 	 * 
 	 * @param contact Remote contact
 	 */
-	public abstract void initiateSession(String contact);
+	public abstract void initiateSession(ContactId contact);
 }

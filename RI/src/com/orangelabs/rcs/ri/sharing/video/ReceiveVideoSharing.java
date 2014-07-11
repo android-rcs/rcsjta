@@ -36,6 +36,7 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingIntent;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
@@ -66,7 +67,7 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
     /**
      * Remote Contact
      */
-    private String remoteContact;
+    private ContactId remoteContact;
     
     /**
 	 * Video sharing API
@@ -126,7 +127,7 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 
         // Get invitation info
         sharingId = getIntent().getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getStringExtra(VideoSharingIntent.EXTRA_CONTACT);
+		remoteContact = getIntent().getParcelableExtra(VideoSharingIntent.EXTRA_CONTACT);
 
         // Create the live video view
         videoView = (VideoSurfaceView)findViewById(R.id.video_view);

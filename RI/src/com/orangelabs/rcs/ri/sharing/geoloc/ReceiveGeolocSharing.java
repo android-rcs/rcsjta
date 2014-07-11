@@ -39,6 +39,7 @@ import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.GeolocSharingListener;
@@ -66,7 +67,7 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
     /**
      * Remote Contact
      */
-    private String remoteContact;
+    private ContactId remoteContact;
 
     /**
 	 * Geoloc sharing API
@@ -96,7 +97,7 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 
         // Get invitation info
         sharingId = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_CONTACT);
+		remoteContact = getIntent().getParcelableExtra(GeolocSharingIntent.EXTRA_CONTACT);
 
         // Instanciate API
 		gshApi = new GeolocSharingService(getApplicationContext(), this);
@@ -275,7 +276,7 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 					
 			        // Show the shared geoloc
 					Intent intent = new Intent(ReceiveGeolocSharing.this, DisplayGeoloc.class);
-			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, remoteContact);
+			    	intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable)remoteContact);
 			    	intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)geoloc);
 					startActivity(intent);
 				}

@@ -38,7 +38,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.StartService;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.DateUtils;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -132,20 +131,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     	// Add me in the granted set if necessary
 		Set<ContactId> grantedContacts = xdm.getGrantedContacts();
-		try {
-			ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
 
-			if (!grantedContacts.contains(me)) {
-				if (logger.isActivated()) {
-					logger.debug("The enduser is not in the granted set: add it now");
-				}
-				xdm.addContactToGrantedList(me);
-			}
-		} catch (JoynContactFormatException e) {
+		ContactId me = ImsModule.IMS_USER_PROFILE.getUsername();
+
+		if (!grantedContacts.contains(me)) {
 			if (logger.isActivated()) {
-        		logger.error("Cannot parse user contact "+ImsModule.IMS_USER_PROFILE.getPublicUri());
-        	}
+				logger.debug("The enduser is not in the granted set: add it now");
+			}
+			xdm.addContactToGrantedList(me);
 		}
+		
 		// It may be necessary to initiate the address book first launch or account check procedure
         if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
 			Set<ContactId> blockedContacts = xdm.getBlockedContacts();
@@ -877,67 +872,67 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		// Get a list of all RCS numbers
 		Set<ContactId> rcsNumbers = ContactsManager.getInstance().getRcsContactsWithSocialPresence();
 		// For each RCS number
-		for (ContactId contactId : rcsNumbers) {
-			if (!ContactUtils.isNumberInAddressBook(contactId)) {
+		for (ContactId contact : rcsNumbers) {
+			if (!ContactUtils.isNumberInAddressBook(contact)) {
 				// If it is not present in the address book
 				if (logger.isActivated()) {
-					logger.debug("The RCS number " + contactId + " was not found in the address book any more.");
+					logger.debug("The RCS number " + contact + " was not found in the address book any more.");
 				}
 
-				if (ContactsManager.getInstance().isNumberShared(contactId)
-						|| ContactsManager.getInstance().isNumberInvited(contactId)) {
+				if (ContactsManager.getInstance().isNumberShared(contact)
+						|| ContactsManager.getInstance().isNumberInvited(contact)) {
 					// Active or Invited
 					if (logger.isActivated()) {
-						logger.debug(contactId + " is either active or invited");
+						logger.debug(contact + " is either active or invited");
 						logger.debug("We remove it from the buddy list");
 					}
 					// We revoke it
-					boolean result = revokeSharedContact(contactId);
+					boolean result = revokeSharedContact(contact);
 					if (result) {
 						// The contact should be automatically unrevoked after a given timeout. Here the
 						// timeout period is 0, so the contact can receive invitations again now
-						result = removeRevokedContact(contactId);
+						result = removeRevokedContact(contact);
 						if (result) {
 							// Remove entry from rich address book provider
-							ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+							ContactsManager.getInstance().modifyRcsContactInProvider(contact, ContactInfo.RCS_CAPABLE);
 						} else {
 							if (logger.isActivated()) {
 								logger.error("Something went wrong when revoking shared contact");
 							}
 						}
 					}
-				} else if (ContactsManager.getInstance().isNumberBlocked(contactId)) {
+				} else if (ContactsManager.getInstance().isNumberBlocked(contact)) {
 					// Blocked
 					if (logger.isActivated()) {
-						logger.debug(contactId + " is blocked");
+						logger.debug(contact + " is blocked");
 						logger.debug("We remove it from the blocked list");
 					}
 					// We unblock it
-					boolean result = removeBlockedContact(contactId);
+					boolean result = removeBlockedContact(contact);
 					if (result) {
 						// Remove entry from rich address book provider
-						ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+						ContactsManager.getInstance().modifyRcsContactInProvider(contact, ContactInfo.RCS_CAPABLE);
 					} else {
 						if (logger.isActivated()) {
 							logger.error("Something went wrong when removing blocked contact");
 						}
 					}
 				} else {
-					if (ContactsManager.getInstance().isNumberWilling(contactId)) {
+					if (ContactsManager.getInstance().isNumberWilling(contact)) {
 						// Willing
 						if (logger.isActivated()) {
-							logger.debug(contactId + " is willing");
+							logger.debug(contact + " is willing");
 							logger.debug("Nothing to do");
 						}
 					} else {
-						if (ContactsManager.getInstance().isNumberCancelled(contactId)) {
+						if (ContactsManager.getInstance().isNumberCancelled(contact)) {
 							// Cancelled
 							if (logger.isActivated()) {
-								logger.debug(contactId + " is cancelled");
+								logger.debug(contact + " is cancelled");
 								logger.debug("We remove it from rich address book provider");
 							}
 							// Remove entry from rich address book provider
-							ContactsManager.getInstance().modifyRcsContactInProvider(contactId, ContactInfo.RCS_CAPABLE);
+							ContactsManager.getInstance().modifyRcsContactInProvider(contact, ContactInfo.RCS_CAPABLE);
 						}
 					}
 				}

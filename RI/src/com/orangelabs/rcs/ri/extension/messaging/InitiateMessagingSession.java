@@ -19,7 +19,9 @@ package com.orangelabs.rcs.ri.extension.messaging;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 
@@ -42,12 +44,12 @@ public class InitiateMessagingSession extends InitiateMultimediaSession {
 	 * 
 	 * @param contact Remote contact
 	 */
-	public void initiateSession(String contact) {
+	public void initiateSession(ContactId contact) {
 		// Display session view
 		Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
     	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
-    	intent.putExtra(MessagingSessionView.EXTRA_CONTACT, contact);
+    	intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable)contact);
 		startActivity(intent);
 	}
 }

@@ -37,6 +37,7 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.gsma.services.rcs.ish.ImageSharingListener;
@@ -63,7 +64,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     /**
      * Remote Contact
      */
-    private String remoteContact;
+    private ContactId remoteContact;
     
     /**
      * Image size
@@ -98,7 +99,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 
         // Get invitation info
         sharingId = getIntent().getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
+		remoteContact = getIntent().getParcelableExtra(ImageSharingIntent.EXTRA_CONTACT);
 		imageSize = getIntent().getLongExtra(ImageSharingIntent.EXTRA_FILESIZE, -1);
 
         // Instanciate API

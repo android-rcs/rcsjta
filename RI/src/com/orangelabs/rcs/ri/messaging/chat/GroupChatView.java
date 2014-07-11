@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -161,12 +162,12 @@ public class GroupChatView extends ChatView {
 		        ContactUtils contactUtils = ContactUtils.getInstance(this);
 		        List<String> contacts = getIntent().getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
 		        if (contacts != null && contacts.size() != 0) {
-		        	for (String _contact : contacts) {
+		        	for (String contact : contacts) {
 		        		try {
-		        			participants.add(contactUtils.formatContactId(_contact));
+		        			participants.add(contactUtils.formatContactId(contact));
 		        		} catch (JoynContactFormatException e) {
 		        			if (LogUtils.isActive) {
-								Log.e(LOGTAG, "onServiceConnected invalid participant "+_contact);
+								Log.e(LOGTAG, "onServiceConnected invalid participant "+contact);
 							}
 		        		}
 					}
@@ -209,14 +210,13 @@ public class GroupChatView extends ChatView {
 		        subject = groupChat.getSubject();
 
 		        // Set list of participants
-//		        participants = getListOfParticipants(groupChat.getParticipants());
+		        participants = getListOfParticipants(groupChat.getParticipants());
 		        if (LogUtils.isActive) {
-//		        	if (participants == null) {
+		        	if (participants == null) {
 		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"'");
-//		        	} else {
-//		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"' participants="+Arrays.toString(participants.toArray()));
-//		        	}
-					
+		        	} else {
+		        		Log.d(LOGTAG, "onServiceConnected chatId=" + chatId+" subject='"+subject+"' participants="+Arrays.toString(participants.toArray()));
+		        	}
 					
 				}
 			} else {
@@ -239,8 +239,8 @@ public class GroupChatView extends ChatView {
 				// Get subject
 		        subject = groupChat.getSubject();
 
-//		        // Set list of participants
-//				participants = getListOfParticipants(groupChat.getParticipants());
+		        // Set list of participants
+				participants = getListOfParticipants(groupChat.getParticipants());
 				
 				// Display accept/reject dialog
 				// TODO manage new state ACCEPTING and REJECTED
@@ -296,8 +296,8 @@ public class GroupChatView extends ChatView {
 	 * @param setOfParticipant a set of participant info
 	 * @return a list of contact
 	 */
-	private List<ContactId> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
-		List<ContactId> result = new ArrayList<ContactId>();
+	private Set<ContactId> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
+		Set<ContactId> result = new HashSet<ContactId>();
 		if (setOfParticipant.size() != 0) {
 			for (ParticipantInfo participantInfo : setOfParticipant) {
 				// TODO consider status ?

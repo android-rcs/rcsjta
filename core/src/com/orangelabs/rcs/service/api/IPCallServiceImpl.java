@@ -24,6 +24,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -219,7 +220,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(IPCallIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+		intent.putExtra(IPCallIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
 		intent.putExtra(IPCallIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
     	intent.putExtra(IPCallIntent.EXTRA_AUDIO_ENCODING, audiocontent.getEncoding());
@@ -250,16 +251,16 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * formats: MSISDN in national or international format, SIP address, SIP-URI or
      * el-URI. If the format of the contact is not supported an exception is thrown.
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param player IP call player
      * @param renderer IP call renderer
      * @param listener IP call event listener
      * @return IP call
 	 * @throws ServerApiException 
      */
-    public IIPCall initiateCall(ContactId contactId, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
+    public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an IP call audio session with " + contactId);
+			logger.info("Initiate an IP call audio session with " + contact);
 		}
 
 		// Test IMS connection
@@ -272,10 +273,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contactId, false, player, renderer);
+			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
 
 			// Update IP call history
-			IPCallHistory.getInstance().addCall(contactId, session.getSessionID(),
+			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
 					IPCall.Direction.OUTGOING,
 					session.getAudioContent(), session.getVideoContent(),
 					IPCall.State.INITIATED);
@@ -305,16 +306,16 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the format of
      * the contact is not supported an exception is thrown.
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param player IP call player
      * @param renderer IP call renderer
      * @param listener IP call event listener
      * @return IP call
 	 * @throws ServerApiException 
      */
-    public IIPCall initiateVisioCall(ContactId contactId, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
+    public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate an IP call visio session with " + contactId);
+			logger.info("Initiate an IP call visio session with " + contact);
 		}
 
 		// Test IMS connection
@@ -327,10 +328,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contactId, true, player, renderer);
+			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
 
 			// Update IP call history
-			IPCallHistory.getInstance().addCall(contactId, session.getSessionID(),
+			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
 					IPCall.Direction.OUTGOING,
 					session.getAudioContent(), session.getVideoContent(),
 					IPCall.State.INITIATED);

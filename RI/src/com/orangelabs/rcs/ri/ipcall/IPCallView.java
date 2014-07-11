@@ -39,7 +39,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
@@ -214,8 +213,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	            } 
 	            
 		    	// Get remote contact
-	            ContactUtils contactUtils = ContactUtils.getInstance(this);
-				contact = contactUtils.formatContactId(getIntent().getStringExtra(IPCallView.EXTRA_CONTACT));
+				contact = getIntent().getParcelableExtra(IPCallView.EXTRA_CONTACT);
 		        
 		    	// Get video option
 				video = getIntent().getBooleanExtra(IPCallView.EXTRA_VIDEO_OPTION, false);

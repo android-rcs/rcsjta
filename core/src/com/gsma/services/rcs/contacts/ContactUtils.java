@@ -43,12 +43,12 @@ public class ContactUtils {
 	/**
 	 * The country code of the device (read from settings provider: is null before first provisioning)
 	 */
-	private String countryCode = null;
+	private String mCountryCode = null;
 
 	/**
 	 * The country area code(read from settings provider)
 	 */
-	private String countryAreaCode = null;
+	private String mCountryAreaCode = null;
 
 	/**
 	 * Regular expression to validate phone numbers
@@ -88,16 +88,16 @@ public class ContactUtils {
 					if (context == null) {
 						throw new IllegalArgumentException("Context is null");
 					}
-					String _countryCode = JoynServiceConfiguration.getMyCountryCode(context);
-					if (_countryCode != null) {
+					String countryCode = JoynServiceConfiguration.getMyCountryCode(context);
+					if (countryCode != null) {
 						// Check for Country Code validity
-						Matcher matcher = PATTERN_COUNTRY_CODE.matcher(_countryCode);
+						Matcher matcher = PATTERN_COUNTRY_CODE.matcher(countryCode);
 						if (matcher.find()) {
 							instance = new ContactUtils();
-							instance.countryCode = _countryCode;
-							instance.countryAreaCode = JoynServiceConfiguration.getMyCountryAreaCode(context);
+							instance.mCountryCode = countryCode;
+							instance.mCountryAreaCode = JoynServiceConfiguration.getMyCountryAreaCode(context);
 							instance.msisdnWithPrefixAndCountryCode = new StringBuilder(MSISDN_PREFIX_INTERNATIONAL).append(
-									_countryCode.substring(1)).toString();
+									countryCode.substring(1)).toString();
 						}
 					}
 				}
@@ -130,54 +130,53 @@ public class ContactUtils {
 	 * 
 	 * @param contact
 	 *            the contact number
-	 * @return Returns true if the given contactId have the syntax of valid Joyn contactId.
+	 * @return Returns true if the given ContactId have the syntax of valid Joyn ContactId.
 	 */
 	public boolean isValidContact(String contact) {
 		return (!TextUtils.isEmpty(stripSeparators(contact)));
 	}
 
 	/**
-	 * Formats the given contactId to uniquely represent a Joyn contact.
+	 * Formats the given ContactId to uniquely represent a Joyn contact.
 	 * <p>
-	 * May throw an exception if the string contact parameter is not enabled to produce a valid ContactId.
+	 * May throw a JoynContactFormatException exception if the string contact parameter is not enabled to produce a valid ContactId.
 	 * 
 	 * @param contact
 	 *            the contact number
-	 * @return the contactId
-	 * @throws JoynContactFormatException
+	 * @return the ContactId
 	 */
-	public ContactId formatContactId(String contact) throws JoynContactFormatException {
+	public ContactId formatContactId(String contact) {
 		contact = stripSeparators(contact);
 		if (!TextUtils.isEmpty(contact)) {
 			// Is Country Code provided ?
 			if (contact.charAt(0) != '+') {
 				// CC not provided, does it exists in provider ?
-				if (countryCode == null) {
-					throw new JoynContactFormatException();
+				if (mCountryCode == null) {
+					throw new JoynContactFormatException("Country code is unknown");
 				}
 				// International numbering with prefix ?
 				if (contact.startsWith(msisdnWithPrefixAndCountryCode)) {
-					contact = new StringBuilder(countryCode).append(contact.substring(msisdnWithPrefixAndCountryCode.length()))
+					contact = new StringBuilder(mCountryCode).append(contact.substring(msisdnWithPrefixAndCountryCode.length()))
 							.toString();
 				} else {
 					// Local numbering ?
-					if (!TextUtils.isEmpty(countryAreaCode)) {
+					if (!TextUtils.isEmpty(mCountryAreaCode)) {
 						// Local number must start with Country Area Code
-						if (contact.startsWith(countryAreaCode)) {
+						if (contact.startsWith(mCountryAreaCode)) {
 							// Remove Country Area Code and add Country Code
-							contact = new StringBuilder(countryCode).append(contact.substring(countryAreaCode.length())).toString();
+							contact = new StringBuilder(mCountryCode).append(contact.substring(mCountryAreaCode.length())).toString();
 						} else {
-							throw new JoynContactFormatException();
+							throw new JoynContactFormatException("Local phone number should be prefixed with Country Area Code");
 						}
 					} else {
 						// No Country Area Code, add Country code to local number
-						contact = new StringBuilder(countryCode).append(contact).toString();
+						contact = new StringBuilder(mCountryCode).append(contact).toString();
 					}
 				}
 			}
 			return new ContactId(contact);
 		}
-		throw new JoynContactFormatException();
+		throw new JoynContactFormatException("Input parameter is null or empty");
 	}
 
 }

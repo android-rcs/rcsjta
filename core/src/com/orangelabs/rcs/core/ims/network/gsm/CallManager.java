@@ -72,9 +72,9 @@ public class CallManager {
     private int callState = UNKNOWN;
 
     /**
-     * Remote party
+     * Remote contact
      */
-    private static ContactId remoteParty = null;
+    private static ContactId mContact;
     
     /**
      * Multiparty call
@@ -150,7 +150,7 @@ public class CallManager {
 
 				// Set remote party
 				try {
-					remoteParty = ContactUtils.createContactId(incomingNumber);
+					mContact = ContactUtils.createContactId(incomingNumber);
 					// Phone is ringing: this state is only used for incoming call
 					callState = CallManager.RINGING;
 				} catch (JoynContactFormatException e) {
@@ -163,7 +163,7 @@ public class CallManager {
 
 			case TelephonyManager.CALL_STATE_IDLE:
 				if (logger.isActivated()) {
-					logger.debug("Call is IDLE: last number=" + remoteParty);
+					logger.debug("Call is IDLE: last number=" + mContact);
 				}
 
 				// No more call in progress
@@ -174,16 +174,16 @@ public class CallManager {
 				// Abort pending richcall sessions
 				imsModule.getRichcallService().abortAllSessions();
 
-				if (remoteParty != null) {
+				if (mContact != null) {
 					// Disable content sharing capabilities
-					imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(remoteParty);
+					imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(mContact);
 
 					// Request capabilities to the remote
-					imsModule.getCapabilityService().requestContactCapabilities(remoteParty);
+					imsModule.getCapabilityService().requestContactCapabilities(mContact);
 				}
 
 				// Reset remote party
-				remoteParty = null;
+				mContact = null;
 				break;
 
 			case TelephonyManager.CALL_STATE_OFFHOOK:
@@ -196,7 +196,7 @@ public class CallManager {
 				}
 
 				if (logger.isActivated()) {
-					logger.debug("Call is CONNECTED: connected number=" + remoteParty);
+					logger.debug("Call is CONNECTED: connected number=" + mContact);
 				}
 
 				// Both parties are connected
@@ -208,7 +208,7 @@ public class CallManager {
 					@Override
 					public void run() {
 						// Request capabilities
-						requestCapabilities(remoteParty);
+						requestCapabilities(mContact);
 					}
 				}, 2000);
 				break;
@@ -229,7 +229,7 @@ public class CallManager {
      */
 	public static void setRemoteParty(String number) {
 		try {
-			CallManager.remoteParty = ContactUtils.createContactId(number);
+			CallManager.mContact = ContactUtils.createContactId(number);
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("Cannot parse remote party "+number);
@@ -238,25 +238,25 @@ public class CallManager {
 	}
 
 	/**
-     * Get the remote phone number
+     * Get the remote connected phone number
      * 
-     * @return Phone number
+     * @return Phone number or null is disconnected
      */
-	private ContactId getRemotePhoneNumber() {
+	private ContactId getPhoneNumberOfConntectedRemote() {
 		if (callState == CallManager.DISCONNECTED) {
 			return null;
 		} else {
-			return remoteParty;
+			return mContact;
 		}
 	}
 
 	/**
-     * Returns the calling remote party identifier
+     * Returns the calling remote contact identifier
      * 
      * @return MSISDN
      */
-	public ContactId getRemoteParty() {
-		return remoteParty;
+	public ContactId getContact() {
+		return mContact;
 	}
 
 	/**
@@ -271,16 +271,16 @@ public class CallManager {
 	/**
      * Is call connected with a given contact
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @return Boolean
      */
 
-	public boolean isCallConnectedWith(ContactId contactId) {
+	public boolean isCallConnectedWith(ContactId contact) {
 		if (this.multipartyCall || this.callHold) {
 			return false;
 		}
 		
-		return (isCallConnected() && contactId != null && contactId.equals(getRemotePhoneNumber()));
+		return (isCallConnected() && contact != null && contact.equals(getPhoneNumberOfConntectedRemote()));
 	}
 	
 	/**
@@ -304,11 +304,11 @@ public class CallManager {
 	/**
      * Request capabilities to a given contact
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-	private void requestCapabilities(ContactId contactId) {
+	private void requestCapabilities(ContactId contact) {
         if (imsModule.getCapabilityService().isServiceStarted()) {
-			imsModule.getCapabilityService().requestContactCapabilities(contactId);
+			imsModule.getCapabilityService().requestContactCapabilities(contact);
 		 }
     }
 	
@@ -322,7 +322,7 @@ public class CallManager {
     	}
 		
 		// Request new capabilities
-    	requestCapabilities(remoteParty);
+    	requestCapabilities(mContact);
 	}
 	
 	/**
@@ -359,7 +359,7 @@ public class CallManager {
 	 * @param connected Connection state
 	 */
 	public void connectionEvent(boolean connected) {
-		if (remoteParty == null) {
+		if (mContact == null) {
 			return;
 		}
 		
@@ -369,14 +369,14 @@ public class CallManager {
 			}
 
 			// Update content sharing capabilities
-			requestCapabilities(remoteParty);
+			requestCapabilities(mContact);
 		} else {
 			if (logger.isActivated()) {
 				logger.info("Connectivity changed: disable content sharing capabilities");
 			}
 
 			// Disable content sharing capabilities
-			imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(remoteParty);
+			imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(mContact);
 		}
 	}
 }

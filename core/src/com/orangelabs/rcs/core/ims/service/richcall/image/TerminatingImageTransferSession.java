@@ -60,7 +60,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 	
 	/**
      * The logger
@@ -72,9 +72,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+	 * @param contact Contact ID
 	 */
-	public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, ContentManager.createMmContentFromSdp(invite), contactId, FileTransferUtils.extractFileIcon(invite));
+	public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, ContentManager.createMmContentFromSdp(invite), contact, FileTransferUtils.extractFileIcon(invite));
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

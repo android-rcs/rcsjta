@@ -73,27 +73,27 @@ public abstract class IPCallSession extends ImsServiceSession {
 	/**
 	 * Live audio content to be streamed
 	 */
-	private AudioContent audioContent = null;
+	private AudioContent audioContent;
 
 	/**
 	 * Video content to be streamed
 	 */
-	private VideoContent videoContent = null;
+	private VideoContent videoContent;
 
 	/**
 	 * IP call renderer
 	 */
-	private IIPCallRenderer renderer = null;
+	private IIPCallRenderer renderer;
 
 	/**
 	 * IP call player
 	 */
-	private IIPCallPlayer player = null;
+	private IIPCallPlayer player;
 	
 	/**
 	 * Call hold manager
 	 */
-	private CallHoldManager holdMgr = null;
+	private CallHoldManager holdMgr;
 
 	/**
 	 * The logger
@@ -104,12 +104,12 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contactId
+	 * @param contact Remote contactId
 	 * @param audioContent Audio content
 	 * @param videoContent Video content
 	 */
-	public IPCallSession(ImsService imsService, ContactId contactId, AudioContent audioContent, VideoContent videoContent) {
-		super(imsService, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public IPCallSession(ImsService imsService, ContactId contact, AudioContent audioContent, VideoContent videoContent) {
+		super(imsService, contact, PhoneUtils.formatContactIdToUri(contact));
 
 		this.audioContent = audioContent;
 		this.videoContent = videoContent;
@@ -328,6 +328,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 */
 	public void receiveBye(SipRequest bye) {
 		super.receiveBye(bye);
+		
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}
 
 	/**
@@ -1332,4 +1335,12 @@ public abstract class IPCallSession extends ImsServiceSession {
     		}
         }
     }
+    
+    @Override
+    public void receiveCancel(SipRequest cancel) {      
+    	super.receiveCancel(cancel);
+        
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
 }

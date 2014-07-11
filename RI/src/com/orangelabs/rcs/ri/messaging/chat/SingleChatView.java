@@ -40,7 +40,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Smileys;
@@ -76,7 +76,7 @@ public class SingleChatView extends ChatView {
 	/**
 	 * Remote contact
 	 */
-	private String contact;
+	private ContactId contact;
     
     /**
      * Chat 
@@ -95,10 +95,10 @@ public class SingleChatView extends ChatView {
         int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
 		if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
 			// Open chat
-			contact = getIntent().getStringExtra(SingleChatView.EXTRA_CONTACT);				
+			contact = (ContactId)getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);				
 		} else {
 			// Incoming chat from its Intent
-			contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
+			contact = (ContactId)getIntent().getParcelableExtra(ChatIntent.EXTRA_CONTACT);
 		}
 		
 		// Set title
@@ -130,7 +130,7 @@ public class SingleChatView extends ChatView {
 		// Receiving a new intent
 		// Replace the value of intent
 		setIntent(intent);
-		contact = getIntent().getStringExtra(ChatIntent.EXTRA_CONTACT);
+		contact = (ContactId)getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onNewIntent contact=" + contact);
 		}
@@ -170,7 +170,7 @@ public class SingleChatView extends ChatView {
 //				Log.d(LOGTAG, "onServiceConnected is respond to display reports=" + conf.isRespondToDisplayReportsEnabled());
 //			}
 			// Open chat
-    		chat = chatApi.openSingleChat(ContactUtils.getInstance(this).formatContactId(contact), chatListener);
+    		chat = chatApi.openSingleChat(contact, chatListener);
 							
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
@@ -199,7 +199,7 @@ public class SingleChatView extends ChatView {
      * Load history
      */
 	private void loadHistory() {
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact);
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact.toString());
 		Cursor cursor = null;
 		try {
 			// @formatter:off

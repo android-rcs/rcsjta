@@ -18,7 +18,11 @@
 
 package com.orangelabs.rcs.core.ims.userprofile;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * User profile read from RCS settings database
@@ -26,6 +30,12 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * @author JM. Auffret
  */
 public class SettingsUserProfileInterface extends UserProfileInterface {
+	
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(SettingsUserProfileInterface.class.getSimpleName());
+	
 	/**
 	 * Constructor
 	 */
@@ -40,17 +50,23 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
 	 */
 	public UserProfile read() {
 		// Read profile info from the database settings
-		String username = RcsSettings.getInstance().getUserProfileImsUserName(); 
-		String homeDomain = RcsSettings.getInstance().getUserProfileImsDomain();
-		String privateID = RcsSettings.getInstance().getUserProfileImsPrivateId();
-		String password = RcsSettings.getInstance().getUserProfileImsPassword();
-		String realm = RcsSettings.getInstance().getUserProfileImsRealm();
-		String xdmServer = RcsSettings.getInstance().getXdmServer();
-		String xdmLogin = RcsSettings.getInstance().getXdmLogin();
-		String xdmPassword = RcsSettings.getInstance().getXdmPassword();
-		String imConfUri = RcsSettings.getInstance().getImConferenceUri();
+		try {
+			ContactId contact = ContactUtils.createContactId(RcsSettings.getInstance().getUserProfileImsUserName());
+			String homeDomain = RcsSettings.getInstance().getUserProfileImsDomain();
+			String privateID = RcsSettings.getInstance().getUserProfileImsPrivateId();
+			String password = RcsSettings.getInstance().getUserProfileImsPassword();
+			String realm = RcsSettings.getInstance().getUserProfileImsRealm();
+			String xdmServer = RcsSettings.getInstance().getXdmServer();
+			String xdmLogin = RcsSettings.getInstance().getXdmLogin();
+			String xdmPassword = RcsSettings.getInstance().getXdmPassword();
+			String imConfUri = RcsSettings.getInstance().getImConferenceUri();
 
-		return new UserProfile(username, homeDomain, privateID, password, realm,
-				xdmServer, xdmLogin, xdmPassword, imConfUri);
+			return new UserProfile(contact, homeDomain, privateID, password, realm, xdmServer, xdmLogin, xdmPassword, imConfUri);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.error("cannot parse UserProfileImsUserName " +RcsSettings.getInstance().getUserProfileImsUserName());
+			}
+			return null;
+		}
 	}
 }

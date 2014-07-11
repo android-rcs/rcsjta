@@ -137,15 +137,15 @@ public class ChatService extends JoynService {
      * The parameter contact supports the following formats: MSISDN in national
      * or international format, SIP address, SIP-URI or Tel-URI.
      * 
-     * @param contactId the ContactId
+     * @param contact the ContactId
      * @param listener Chat event listener
      * @return Chat or null 
      * @throws JoynServiceException
      */
-    public Chat openSingleChat(ContactId contactId, ChatListener listener) throws JoynServiceException {
+    public Chat openSingleChat(ContactId contact, ChatListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IChat chatIntf = api.openSingleChat(contactId, listener);
+				IChat chatIntf = api.openSingleChat(contact, listener);
 				if (chatIntf != null) {
 					return new Chat(chatIntf);
 				} else {
@@ -163,15 +163,15 @@ public class ChatService extends JoynService {
      * Initiates a group chat with a group of contact and returns a GroupChat
      * instance. The subject is optional and may be null.
      * 
-     * @param contactIds Set of contact identifiers
+     * @param contacts Set of contact identifiers
      * @param subject Subject
      * @param listener Chat event listener
      * @throws JoynServiceException
      */
-    public GroupChat initiateGroupChat(Set<ContactId> contactIds, String subject, GroupChatListener listener) throws JoynServiceException {
+    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject, GroupChatListener listener) throws JoynServiceException {
     	if (api != null) {
 			try {
-				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contactIds), subject, listener);
+				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contacts), subject, listener);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
 				} else {
@@ -260,40 +260,16 @@ public class ChatService extends JoynService {
     /**
      * Returns a chat in progress with a given contact
      * 
-     * @param contact Contact
+     * @param contact ContactId
      * @return Chat or null if not found
      * @throws JoynServiceException
      */
-    public Chat getChat(String contact) throws JoynServiceException {
+    public Chat getChat(ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
 				IChat chatIntf = api.getChat(contact);
 				if (chatIntf != null) {
 					return new Chat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
-    
-    /**
-     * Returns a single chat from its invitation Intent
-     * 
-     * @param intent Invitation Intent
-     * @return Chat or null if not found
-     * @throws JoynServiceException
-     */
-    public Chat getChatFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String contact = intent.getStringExtra(ChatIntent.EXTRA_CONTACT);
-				if (contact != null) {
-					return getChat(contact);
 				} else {
 					return null;
 				}

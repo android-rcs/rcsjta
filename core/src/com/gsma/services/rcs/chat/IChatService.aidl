@@ -21,7 +21,7 @@ interface IChatService {
 
 	ChatServiceConfiguration getConfiguration();
     
-	IChat openSingleChat(in ContactId contactId, in IChatListener listener);
+	IChat openSingleChat(in ContactId contact, in IChatListener listener);
 
 	IGroupChat initiateGroupChat(in List<ContactId> contacts, in String subject, in IGroupChatListener listener);
     
@@ -33,7 +33,7 @@ interface IChatService {
     
 	void removeNewChatListener(in INewChatListener listener);
     
-	IChat getChat(in String contact);
+	IChat getChat(in ContactId contact);
 
 	List<IBinder> getChats();
 

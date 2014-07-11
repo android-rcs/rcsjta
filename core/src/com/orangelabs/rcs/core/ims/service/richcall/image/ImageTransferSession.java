@@ -60,23 +60,23 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	/**
 	 * Thumbnail
 	 */
-	MmContent thumbnail = null;
+	MmContent thumbnail;
     
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(ImageTransferSession.class.getName());
+    private static final Logger logger = Logger.getLogger(ImageTransferSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param thumbnail The thumbnail content
 	 */
-	public ImageTransferSession(ImsService parent, MmContent content, ContactId contactId, MmContent thumbnail) {
-		super(parent, content, contactId);
+	public ImageTransferSession(ImsService parent, MmContent content, ContactId contact, MmContent thumbnail) {
+		super(parent, content, contact);
 		
 		this.thumbnail = thumbnail;
 	}
@@ -95,15 +95,6 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	 */
 	public boolean isImageTransfered() {
 		return imageTransfered; 
-	}
-
-	/**
-	 * Receive BYE request 
-	 * 
-	 * @param bye BYE request
-	 */
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
 	}
 	
 	/**

@@ -81,12 +81,12 @@ public abstract class GroupChatSession extends ChatSession {
 	 * Constructor for originating side
 	 * 
 	 * @param parent IMS service
-	 * @param contactid remote contact identifier
+	 * @param contact remote contact identifier
 	 * @param conferenceId Conference id
 	 * @param participants Set of invited participants
 	 */
-    public GroupChatSession(ImsService parent, ContactId contactid, String conferenceId, Set<ParticipantInfo> participants) {
-		super(parent, contactid, conferenceId, participants);
+    public GroupChatSession(ImsService parent, ContactId contact, String conferenceId, Set<ParticipantInfo> participants) {
+		super(parent, contact, conferenceId, participants);
 		
 		conferenceSubscriber = new ConferenceEventSubscribeManager(this); 
 		
@@ -178,6 +178,22 @@ public abstract class GroupChatSession extends ChatSession {
 		super.terminateSession(reason);
 	}	
 	
+	/**
+	 * Request capabilities to contact
+	 * @param contact
+	 */
+	private void requestContactCapabilities(String contact) {
+		try {
+			ContactId remote = ContactUtils.createContactId(contact);
+			// Request capabilities to the remote
+			getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+		} catch (JoynContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.debug("Failed to request capabilities: cannot parse contact " + contact);
+			}
+		}
+	}
+	
     /**
      * Receive BYE request 
      * 
@@ -189,6 +205,9 @@ public abstract class GroupChatSession extends ChatSession {
         
         // Receive BYE request
         super.receiveBye(bye);
+        
+        // Request capabilities if remote contact is valid
+        requestContactCapabilities(getDialogPath().getRemoteParty());
     }
     
     /**
@@ -200,8 +219,10 @@ public abstract class GroupChatSession extends ChatSession {
         // Stop conference subscription
         conferenceSubscriber.terminate();
         
-        // Receive CANCEL request
         super.receiveCancel(cancel);
+        
+        // Request capabilities if remote contact is valid 
+        requestContactCapabilities(getDialogPath().getRemoteParty());
 	}	
 	
     /* (non-Javadoc)
@@ -309,9 +330,9 @@ public abstract class GroupChatSession extends ChatSession {
 	}
 
     @Override
-    public void sendMsrpMessageDeliveryStatus(ContactId remoteId, String msgId, String status) {
+    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status) {
 		// Send status in CPIM + IMDN headers
-		String to = (remoteId != null) ? remoteId.toString() : ChatUtils.ANOMYNOUS_URI;
+		String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
 		sendMsrpMessageDeliveryStatus(null, to, msgId, status);
     }
     
@@ -594,7 +615,7 @@ public abstract class GroupChatSession extends ChatSession {
 		// Update the activity manager
 		getActivityManager().updateActivity();
 
-		if ((data == null) || (data.length == 0)) {
+		if (data == null || data.length == 0) {
 			// By-pass empty data
 			if (logger.isActivated()) {
 				logger.debug("By-pass received empty data");
@@ -612,121 +633,122 @@ public abstract class GroupChatSession extends ChatSession {
 			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date(), null);
 			return;
 		}
-		if (ChatUtils.isMessageCpimType(mimeType)) {
-			// Receive a CPIM message
-			CpimParser cpimParser = null;
-			try {
-				cpimParser = new CpimParser(data);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't parse the CPIM message", e);
-				}
-				return;
-			}
-			CpimMessage cpimMsg = cpimParser.getCpimMessage();
-			if (cpimMsg != null) {
-				Date date = cpimMsg.getMessageDate();
-				String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
-				if (cpimMsgId == null) {
-					cpimMsgId = msgId;
-				}
-
-				String contentType = cpimMsg.getContentType();
-				ContactId remoteId = getRemoteContact();
-				String pseudo = null;
-				// In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI
-				// Extract URI and optional display name to get pseudo and remoteId
-				try {
-					CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
-					pseudo = cpimIdentity.getDisplayName();
-					remoteId = ContactUtils.createContactId(cpimIdentity.getUri());
-					if (logger.isActivated()) {
-						logger.info("Cpim FROM Identity: " + cpimIdentity);
-					}
-				} catch (Exception e) {
-					if (logger.isActivated()) {
-						logger.warn("Cannot parse FROM Cpim Identity: " + cpimMsg.getHeader(CpimMessage.HEADER_FROM));
-					}
-				}
-				// Extract local contactId from "TO" header
-				ContactId localId = null;
-				try {
-					CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
-					localId = ContactUtils.createContactId(cpimIdentity.getUri());
-					if (logger.isActivated()) {
-						logger.info("Cpim TO Identity: " + cpimIdentity);
-					}
-				} catch (Exception e) {
-				}
-
-				// Check if the message needs a delivery report
-				String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-
-				boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
-
-				// Analyze received message thanks to the MIME type
-				if (isFToHTTP) {
-					// File transfer over HTTP message
-					// Parse HTTP document
-					FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg
-							.getMessageContent().getBytes());
-					if (fileInfo != null) {
-						receiveHttpFileTransfer(remoteId, fileInfo, cpimMsgId);
-					} else {
-						// TODO : else return error to Originating side
-					}
-				} else {
-					if (ChatUtils.isTextPlainType(contentType)) {
-						// Text message
-						receiveText(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false, date, pseudo);
-					} else {
-						if (ChatUtils.isApplicationIsComposingType(contentType)) {
-							// Is composing event
-							receiveIsComposing(remoteId, cpimMsg.getMessageContent().getBytes());
-						} else {
-							if (ChatUtils.isMessageImdnType(contentType)) {
-								// Delivery report
-								try {
-									ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
-									// Only consider delivery report if sent to me
-									if (localId != null && localId.equals(me)) {
-										receiveMessageDeliveryStatus(remoteId, cpimMsg.getMessageContent());
-									} else {
-										if (logger.isActivated()) {
-											logger.debug("Discard delivery report send to "+localId);
-										}
-									}
-								} catch (JoynContactFormatException e) {
-								}
-							} else {
-								if (ChatUtils.isGeolocType(contentType)) {
-									// Geoloc message
-									receiveGeoloc(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false,
-											date, pseudo);
-								}
-							}
-						}
-					}
-				}
-				// Process delivery request
-				if (isFToHTTP) {
-					sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
-				} else {
-					if (dispositionNotification != null) {
-						if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
-							// Positive delivery requested, send MSRP message with status "delivered"
-							sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
-						}
-					}
-				}
-			}
-		} else {
+		if (!ChatUtils.isMessageCpimType(mimeType)) {
 			// Not supported content
 			if (logger.isActivated()) {
 				logger.debug("Not supported content " + mimeType + " in chat session");
 			}
+			return;
+		}
+			
+		// Receive a CPIM message
+		CpimParser cpimParser = null;
+		try {
+			cpimParser = new CpimParser(data);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't parse the CPIM message", e);
+			}
+			return;
+		}
+		CpimMessage cpimMsg = cpimParser.getCpimMessage();
+		if (cpimMsg == null) {
+			return;
+		}
+		Date date = cpimMsg.getMessageDate();
+		String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
+		if (cpimMsgId == null) {
+			cpimMsgId = msgId;
+		}
+
+		String contentType = cpimMsg.getContentType();
+		ContactId remoteId = getRemoteContact();
+		String pseudo = null;
+		// In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI
+		// Extract URI and optional display name to get pseudo and remoteId
+		try {
+			CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
+			pseudo = cpimIdentity.getDisplayName();
+			remoteId = ContactUtils.createContactId(cpimIdentity.getUri());
+			if (logger.isActivated()) {
+				logger.info("Cpim FROM Identity: " + cpimIdentity);
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse FROM Cpim Identity: " + cpimMsg.getHeader(CpimMessage.HEADER_FROM));
+			}
+		}
+		// Extract local contactId from "TO" header
+		ContactId localId = null;
+		try {
+			CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
+			localId = ContactUtils.createContactId(cpimIdentity.getUri());
+			if (logger.isActivated()) {
+				logger.info("Cpim TO Identity: " + cpimIdentity);
+			}
+		} catch (Exception e) {
+			// Purposely left blank
+		}
+
+		// Check if the message needs a delivery report
+		String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+
+		boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
+
+		// Analyze received message thanks to the MIME type
+		if (isFToHTTP) {
+			// File transfer over HTTP message
+			// Parse HTTP document
+			FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg.getMessageContent()
+					.getBytes());
+			if (fileInfo != null) {
+				receiveHttpFileTransfer(remoteId, fileInfo, cpimMsgId);
+			} else {
+				// TODO : else return error to Originating side
+			}
+			// Process delivery request
+			sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+		} else {
+			if (ChatUtils.isTextPlainType(contentType)) {
+				// Text message
+				receiveText(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false, date, pseudo);
+			} else {
+				if (ChatUtils.isApplicationIsComposingType(contentType)) {
+					// Is composing event
+					receiveIsComposing(remoteId, cpimMsg.getMessageContent().getBytes());
+				} else {
+					if (ChatUtils.isMessageImdnType(contentType)) {
+						// Delivery report
+						try {
+							ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
+							// Only consider delivery report if sent to me
+							if (localId != null && localId.equals(me)) {
+								receiveMessageDeliveryStatus(remoteId, cpimMsg.getMessageContent());
+							} else {
+								if (logger.isActivated()) {
+									logger.debug("Discard delivery report send to " + localId);
+								}
+							}
+						} catch (JoynContactFormatException e) {
+							// Purposely left blank
+						}
+					} else {
+						if (ChatUtils.isGeolocType(contentType)) {
+							// Geoloc message
+							receiveGeoloc(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false, date,
+									pseudo);
+						}
+					}
+				}
+			}
+			// Process delivery request
+			if (dispositionNotification != null) {
+				if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
+					// Positive delivery requested, send MSRP message with status "delivered"
+					sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+				}
+			}
 		}
 	}
-
 
 }

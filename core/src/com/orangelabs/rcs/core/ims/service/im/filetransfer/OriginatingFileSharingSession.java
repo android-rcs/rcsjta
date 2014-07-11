@@ -67,12 +67,12 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 	
 	/**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingFileSharingSession.class.getName());
+    private static final Logger logger = Logger.getLogger(OriginatingFileSharingSession.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -81,16 +81,16 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
 	 *            IMS service
 	 * @param content
 	 *            Content to be shared
-	 * @param contactId
+	 * @param contact
 	 *            Remote contact identifier
 	 * @param fileicon
 	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingFileSharingSession(ImsService parent, MmContent content, ContactId contactId, boolean fileicon) {
-		super(parent, content, contactId, null, IdGenerator.generateMessageID());
+	public OriginatingFileSharingSession(ImsService parent, MmContent content, ContactId contact, boolean fileicon) {
+		super(parent, content, contact, null, IdGenerator.generateMessageID());
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contactId + " filename="+content.getName()+" fileicon="+fileicon);
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileicon="+fileicon);
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -294,10 +294,10 @@ public class OriginatingFileSharingSession extends ImsFileSharingSession impleme
     	for(int j=0; j < getListeners().size(); j++) {
     		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent());
         }
-
+    	InstantMessagingService imService = ((InstantMessagingService) getImsService());
         // Notify delivery
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
+    	imService.receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
+    	imService.receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
 	}
 	
 	/**

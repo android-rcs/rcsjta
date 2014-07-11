@@ -38,7 +38,7 @@ public class FileUtils {
 	public static String getFileName(Context context, Uri file) throws IllegalArgumentException {
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(file, null, null, null, null, null);
+			cursor = context.getContentResolver().query(file, null, null, null, null);
 			if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 				if (cursor != null && cursor.moveToFirst()) {
 					String displayName = cursor.getString(cursor
@@ -72,7 +72,7 @@ public class FileUtils {
 	public static long getFileSize(Context context, Uri file) throws IllegalArgumentException {
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(file, null, null, null, null, null);
+			cursor = context.getContentResolver().query(file, null, null, null, null);
 			if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 				if (cursor != null && cursor.moveToFirst()) {
 					return Long.valueOf(

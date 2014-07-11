@@ -22,6 +22,7 @@
 package com.orangelabs.rcs.service.api;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.chat.ChatIntent;
@@ -89,11 +90,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	/**
 	 * Constructor
 	 * 
-	 * @param contactId Remote contact ID
+	 * @param contact Remote contact ID
 	 * @param session Session
 	 */
-	public ChatImpl(ContactId contactId, OneOneChatSession session) {
-		this.contact = contactId;
+	public ChatImpl(ContactId contact, OneOneChatSession session) {
+		this.contact = contact;
 		this.session = session;
 		if (session != null) {
 			session.addListener(this);
@@ -240,10 +241,10 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     /**
      * Sends a displayed delivery report for a given message ID
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param msgId Message ID
      */
-    /*package private*/ void sendDisplayedDeliveryReport(final ContactId contactId, final String msgId) {
+    /*package private*/ void sendDisplayedDeliveryReport(final ContactId contact, final String msgId) {
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Set displayed delivery report for " + msgId);
@@ -258,7 +259,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 
 		        new Thread() {
 		    		public void run() {
-						session.sendMsrpMessageDeliveryStatus(contactId, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+						session.sendMsrpMessageDeliveryStatus(contact, msgId, ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 		    		}
 		    	}.start();
 			} else {
@@ -353,7 +354,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    	// Nothing done in database
 	        
 	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getContributionID());
+	        ChatServiceImpl.removeChatSession(session.getRemoteContact());
 	    }
     }
     
@@ -371,7 +372,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    	// Nothing done in database
 			
 	        // Remove session from the list
-			ChatServiceImpl.removeChatSession(session.getContributionID());
+			ChatServiceImpl.removeChatSession(session.getRemoteContact());
 	    }
     }
     
@@ -397,7 +398,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact().toString());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)msgApi.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -441,7 +442,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, msgApi.getContact().toString());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)msgApi.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
@@ -494,15 +495,15 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				break;
 			}
 			// Remove session from the list
-			ChatServiceImpl.removeChatSession(session.getContributionID());
+			ChatServiceImpl.removeChatSession(session.getRemoteContact());
 		}
 	}
     
 	@Override
-	public void handleIsComposingEvent(ContactId contactId, boolean status) {
+	public void handleIsComposingEvent(ContactId contact, boolean status) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
-				logger.info(contactId + " is composing status set to " + status);
+				logger.info(contact + " is composing status set to " + status);
 			}
 	
 	  		// Notify event listeners
@@ -548,7 +549,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 
 	@Override
-	public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId) {
+	public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact) {
     	synchronized(lock) {
 			if (logger.isActivated()) {
 				logger.info("New message delivery status for message " + msgId + ", status " + status);
@@ -581,7 +582,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
     
     @Override
-    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state) {
+    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state) {
     	// Not used here
     }
     

@@ -34,28 +34,28 @@ public class JoynContact implements Parcelable {
 	/**
 	 * Capabilities
 	 */
-	private Capabilities capabilities = null;
+	private Capabilities capabilities;
 	
 	/**
 	 * Contact ID
 	 */
-	private ContactId contactId = null;
+	private ContactId mContact;
 	
 	/**
 	 * Registration state
 	 */
-	private boolean registered = false;
+	private boolean registered;
 	
     /**
 	 * Constructor
 	 * 
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param registered Registration state
 	 * @param capabilities Capabilities 
      * @hide
 	 */
-	public JoynContact(ContactId contactId, boolean registered, Capabilities capabilities) {
-		this.contactId = contactId;
+	public JoynContact(ContactId contact, boolean registered, Capabilities capabilities) {
+		mContact = contact;
 		this.registered = registered;
 		this.capabilities = capabilities;
 	}
@@ -67,15 +67,15 @@ public class JoynContact implements Parcelable {
      * @hide
 	 */
 	public JoynContact(Parcel source) {
-		boolean flag = source.readInt() != 0;
-		if (flag) {
-			contactId = ContactId.CREATOR.createFromParcel(source);
+		boolean containsContact = source.readInt() != 0;
+		if (containsContact) {
+			mContact = ContactId.CREATOR.createFromParcel(source);
 		} else {
-			contactId = null;
+			mContact = null;
 		}
 		registered = source.readInt() != 0;
-		flag = source.readInt() != 0;
-		if (flag) {
+		boolean	containsCapabilities = source.readInt() != 0;
+		if (containsCapabilities) {
 			this.capabilities = Capabilities.CREATOR.createFromParcel(source);
 		} else {
 			this.capabilities = null;
@@ -101,9 +101,9 @@ public class JoynContact implements Parcelable {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	if (contactId != null) {
+    	if (mContact != null) {
     		dest.writeInt(1);
-    		contactId.writeToParcel(dest, flags);
+    		mContact.writeToParcel(dest, flags);
     	} else {
     		dest.writeInt(0);
     	}
@@ -138,7 +138,7 @@ public class JoynContact implements Parcelable {
 	 * @return Contact ID
 	 */
 	public ContactId getContactId() {
-		return contactId;
+		return mContact;
 	}
 	
 	/**
@@ -161,6 +161,6 @@ public class JoynContact implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "JoynContact [capabilities=" + capabilities + ", contactId=" + contactId + ", registered=" + registered + "]";
+		return "JoynContact [capabilities=" + capabilities + ", contact=" + mContact + ", registered=" + registered + "]";
 	}	
 }

@@ -222,22 +222,6 @@ public class PhoneUtils {
 		// Format the extracted number (username part of the URI)
 		return formatNumberToInternational(extractNumberFromUriWithoutFormatting(uri));
 	}
-
-	/**
-	 * Compare phone number between two contacts
-	 * 
-	 * @param contact1 First contact
-	 * @param contact2 Second contact
-	 * @return Returns true if numbers are equals
-	 */
-	public static boolean compareNumbers(String contact1, String contact2) {
-		String number1 = PhoneUtils.extractNumberFromUri(contact1);
-		String number2 = PhoneUtils.extractNumberFromUri(contact2);
-		if ((number1 == null) || (number2 == null)) {
-			return false;
-		}
-		return number1.equals(number2);
-	}
 		
 	/**
 	 * get URI from SIP identity header

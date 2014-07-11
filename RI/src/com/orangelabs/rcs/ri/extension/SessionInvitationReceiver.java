@@ -24,12 +24,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.util.Log;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
 import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -38,6 +41,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class SessionInvitationReceiver extends BroadcastReceiver {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(SessionInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
         // Display invitation notification
@@ -52,14 +61,20 @@ public class SessionInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addSessionInvitationNotification(Context context, Intent invitation) {
     	// Get remote contact and session
-		String contact = null;
+		ContactId contact = null;
 		String sessionId = null;
 		if (invitation.getAction().equals(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
-			contact = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
+			contact = invitation.getParcelableExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT);
 			sessionId = invitation.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 		} else {
-			contact = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT);
+			contact = invitation.getParcelableExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT);
 			sessionId = invitation.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+		}
+		if (contact == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "SessionInvitationReceiver failed: cannot parse contact");
+			}
+			return;
 		}
 		
 		// Create notification
@@ -79,7 +94,7 @@ public class SessionInvitationReceiver extends BroadcastReceiver {
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
-        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact), contentIntent);
+        notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact.toString()), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     	notif.defaults |= Notification.DEFAULT_VIBRATE;
         

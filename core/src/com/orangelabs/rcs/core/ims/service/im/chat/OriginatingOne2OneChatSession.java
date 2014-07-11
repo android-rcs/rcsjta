@@ -52,11 +52,11 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contact identifier
+	 * @param contact Remote contact identifier
 	 * @param msg First message of the session
 	 */
-	public OriginatingOne2OneChatSession(ImsService parent, ContactId contactId, InstantMessage msg) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public OriginatingOne2OneChatSession(ImsService parent, ContactId contact, InstantMessage msg) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 		// Set first message
 		setFirstMesssage(msg);
 		// Create dialog path

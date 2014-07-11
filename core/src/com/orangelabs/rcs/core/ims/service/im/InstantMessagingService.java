@@ -118,9 +118,9 @@ public class InstantMessagingService extends ImsService {
 	/**
 	 * IMDN manager
 	 */
-	private ImdnManager imdnMgr = null;	
+	private ImdnManager imdnMgr;	
 	
-	private FtHttpResumeManager resumeManager = null;
+	private FtHttpResumeManager resumeManager;
 
 	/**
 	 * Store & Forward manager
@@ -142,9 +142,9 @@ public class InstantMessagingService extends ImsService {
 	public InstantMessagingService(ImsModule parent) throws CoreException {
         super(parent, true);
 
-		this.maxChatSessions = RcsSettings.getInstance().getMaxChatSessions();
-        this.maxFtSessions = RcsSettings.getInstance().getMaxFileTransferSessions();
-        this.maxFtSize = FileSharingSession.getMaxFileSharingSize();
+		maxChatSessions = RcsSettings.getInstance().getMaxChatSessions();
+        maxFtSessions = RcsSettings.getInstance().getMaxFileTransferSessions();
+        maxFtSize = FileSharingSession.getMaxFileSharingSize();
 	}
 
 	/**
@@ -229,16 +229,16 @@ public class InstantMessagingService extends ImsService {
 	/**
      * Returns IM sessions with a given contact
      * 
-     * @param contactId Contact
+     * @param contact Contact
      * @return List of sessions
      */
-	public Vector<ChatSession> getImSessionsWith(ContactId contactId) {
+	public Vector<ChatSession> getImSessionsWith(ContactId contact) {
 		// Search all IM sessions
 		Vector<ChatSession> result = new Vector<ChatSession>();
 		Enumeration<ImsServiceSession> list = getSessions();
 		while(list.hasMoreElements()) {
 			ImsServiceSession session = list.nextElement();
-			if ((session instanceof OneOneChatSession) && contactId != null && contactId.equals(session.getRemoteContact())) {
+			if ((session instanceof OneOneChatSession) && contact != null && contact.equals(session.getRemoteContact())) {
 				result.add((ChatSession)session);
 			}
 		}
@@ -288,7 +288,7 @@ public class InstantMessagingService extends ImsService {
 	/**
 	 * Initiate a file transfer session
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            Remote contact identifier
 	 * @param content
 	 *            Content of file to sent
@@ -297,9 +297,9 @@ public class InstantMessagingService extends ImsService {
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateFileTransferSession(ContactId contactId, MmContent content, boolean fileicon) throws CoreException {
+	public FileSharingSession initiateFileTransferSession(ContactId contact, MmContent content, boolean fileicon) throws CoreException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a file transfer session with contact " + contactId + ", file " + content.toString());
+			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
 
 		// Test number of sessions
@@ -320,7 +320,7 @@ public class InstantMessagingService extends ImsService {
 
 		// Check contact capabilities
 		boolean isFToHttpSupportedByRemote = false;
-		Capabilities capability = ContactsManager.getInstance().getContactCapabilities(contactId);
+		Capabilities capability = ContactsManager.getInstance().getContactCapabilities(contact);
 		if (capability != null) {
 			isFToHttpSupportedByRemote = capability.isFileTransferHttpSupported();
 		}
@@ -342,7 +342,7 @@ public class InstantMessagingService extends ImsService {
 		FileSharingSession session;
 		if (isHttpProtocol) {
 			// Create a new session
-			session = new OriginatingHttpFileSharingSession(this, content, contactId, PhoneUtils.formatContactIdToUri(contactId),fileicon);
+			session = new OriginatingHttpFileSharingSession(this, content, contact, PhoneUtils.formatContactIdToUri(contact),fileicon);
 		} else {
 			if (fileicon) {
 				// Check thumbnail capabilities
@@ -360,7 +360,7 @@ public class InstantMessagingService extends ImsService {
 				}
 			}
 			// Create a new session
-			session = new OriginatingFileSharingSession(this, content, contactId, fileicon);
+			session = new OriginatingFileSharingSession(this, content, contact, fileicon);
 		}
 		return session;
 	}
@@ -369,7 +369,7 @@ public class InstantMessagingService extends ImsService {
 	 * Initiate a group file transfer session
 	 * 
 	 * @param contacts
-	 *            List of remote contacts
+	 *            Set of remote contacts
 	 * @param content
 	 *            The file content to be sent
 	 * @param fileicon
@@ -379,10 +379,10 @@ public class InstantMessagingService extends ImsService {
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> contactList, MmContent content, boolean fileicon,
+	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> participants, MmContent content, boolean fileicon,
 			String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
-			logger.info("Send file " + content.toString() + " to " + contactList.size() + " contacts");
+			logger.info("Send file " + content.toString() + " to " + participants.size() + " contacts");
 		}
 
 		// Select default protocol
@@ -414,7 +414,7 @@ public class InstantMessagingService extends ImsService {
 		// TODO Cannot transfer file to group if Group Chat is not established: to implement with CR018
 		// Create a new session
 		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content,
-				fileicon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), contactList,
+				fileicon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), participants,
 				groupChatSession.getSessionID(), chatContributionId);
 
 		return session;
@@ -461,7 +461,7 @@ public class InstantMessagingService extends ImsService {
 			session.startSession();
 
 			// Notify listener
-			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false);
+			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote);
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact from FT invitation");
@@ -472,15 +472,15 @@ public class InstantMessagingService extends ImsService {
     /**
      * Initiate a one-to-one chat session
      * 
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      * @param firstMsg First message
      * @return IM session
      * @throws CoreException
      */
-	public ChatSession initiateOne2OneChatSession(ContactId contactId, InstantMessage firstMsg)
+	public ChatSession initiateOne2OneChatSession(ContactId contact, InstantMessage firstMsg)
 			throws CoreException {
 		if (logger.isActivated()) {
-			logger.info("Initiate 1-1 chat session with " + contactId);
+			logger.info("Initiate 1-1 chat session with " + contact);
 		}
 		// Test number of sessions
 		if ((maxChatSessions != 0) && (getImSessions().size() >= maxChatSessions)) {
@@ -490,7 +490,7 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Max chat sessions achieved");
 		}
 		// Create a new session
-		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, contactId, firstMsg);
+		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, contact, firstMsg);
 		// Save the message
 		if (firstMsg != null) {
 			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
@@ -515,7 +515,7 @@ public class InstantMessagingService extends ImsService {
 			if (firstMsg != null) {
 				String msgId = ChatUtils.getMessageId(invite);
 				if (msgId != null) {
-					if (MessagingLog.getInstance().isNewMessage(remote.toString(), msgId) == false) {
+					if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
 						// Send a 603 Decline response
 						sendErrorResponse(invite, Response.DECLINE);
 						return;
@@ -632,15 +632,15 @@ public class InstantMessagingService extends ImsService {
 		if (logger.isActivated()) {
 			logger.info("Receive an ad-hoc group chat session invitation");
 		}
-		ContactId contactId = null;
+		ContactId contact = null;
 		String remoteUri = null;
-		Set<ParticipantInfo> participants = null;
+		
 		try {
-			contactId = ChatUtils.getReferredIdentityAsContactId(invite);
+			contact = ChatUtils.getReferredIdentityAsContactId(invite);
 			// Test if the contact is blocked
-			if (ContactsManager.getInstance().isImBlockedForContact(contactId)) {
+			if (ContactsManager.getInstance().isImBlockedForContact(contact)) {
 				if (logger.isActivated()) {
-					logger.debug("Contact " + contactId + " is blocked: automatically reject the chat invitation");
+					logger.debug("Contact " + contact + " is blocked: automatically reject the chat invitation");
 				}
 
 				// Send a 486 Busy response
@@ -654,7 +654,7 @@ public class InstantMessagingService extends ImsService {
 				logger.info("Receive a forward GC invitation from "+remoteUri);
 			}
 		}
-		participants = ChatUtils.getListOfParticipants(invite);
+		Set<ParticipantInfo> participants = ChatUtils.getListOfParticipants(invite);
 
 		// Test number of sessions
 		if ((maxChatSessions != 0) && (getImSessions().size() >= maxChatSessions)) {
@@ -668,7 +668,7 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		// Create a new session
-		TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this, invite, contactId, remoteUri, participants);
+		TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this, invite, contact, remoteUri, participants);
 
 		/*--
 		 * 6.3.3.1 Leaving a Group Chat that is idle
@@ -880,11 +880,11 @@ public class InstantMessagingService extends ImsService {
      *
      * @param fileTransferId
      * @param status
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-    public void receiveFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
+    public void receiveFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
         // Notify the file delivery outside of the chat session
-        getImsModule().getCore().getListener().handleFileDeliveryStatus(fileTransferId, status, contactId);
+        getImsModule().getCore().getListener().handleFileDeliveryStatus(fileTransferId, status, contact);
     }
 
 	/**
@@ -892,11 +892,11 @@ public class InstantMessagingService extends ImsService {
 	 *
 	 * @param fileTransferId
 	 * @param status
-	 * @param contactId Contact identifier
+	 * @param contact Contact identifier
 	 */
-	public void receiveGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contactId) {
+	public void receiveGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
 		getImsModule().getCore().getListener()
-				.handleGroupFileDeliveryStatus(fileTransferId, status, contactId);
+				.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
 	}
 
     /**
@@ -922,7 +922,7 @@ public class InstantMessagingService extends ImsService {
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (MessagingLog.getInstance().isNewMessage(remote.toString(), msgId) == false) {
+				if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;

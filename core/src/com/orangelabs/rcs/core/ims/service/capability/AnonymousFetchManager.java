@@ -65,14 +65,14 @@ public class AnonymousFetchManager implements DiscoveryManager {
 	/**
      * Request contact capabilities
      * 
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      * @return Returns true if success
      */
-    public boolean requestCapabilities(ContactId contactId) {
+    public boolean requestCapabilities(ContactId contact) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities in background for " + contactId);
+    		logger.debug("Request capabilities in background for " + contact);
     	}
-		AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(imsModule, contactId);
+		AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(imsModule, contact);
 		task.start();
 		return true;
 	}

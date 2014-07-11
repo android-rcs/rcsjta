@@ -54,7 +54,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 	
 	/**
      * The logger
@@ -66,11 +66,11 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
      * @param geoloc Geoloc info
 	 */
-	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, ContactId contactId, GeolocPush geoloc) {
-		super(parent, content, contactId);
+	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, ContactId contact, GeolocPush geoloc) {
+		super(parent, content, contact);
 
 		// Create dialog path
 		createOriginatingDialogPath();

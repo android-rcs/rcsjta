@@ -39,7 +39,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
@@ -199,8 +198,7 @@ public class StreamingSessionView extends Activity implements JoynServiceListene
 	            } 
 	            
 		    	// Get remote contact
-	            ContactUtils contactUtils = ContactUtils.getInstance(this);
-				contact = contactUtils.formatContactId(getIntent().getStringExtra(StreamingSessionView.EXTRA_CONTACT));
+				contact = getIntent().getParcelableExtra(StreamingSessionView.EXTRA_CONTACT);
 		        
 		        // Initiate session
     			startSession();

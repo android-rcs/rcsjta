@@ -160,9 +160,9 @@ public class PresenceSubscribeManager extends SubscribeManager {
     					PidfParser pidfParser = new PidfParser(pidfInput);
     					PidfDocument presenceInfo = pidfParser.getPresence();
 
-						ContactId contactId = ContactUtils.createContactId(presenceInfo.getEntity());
+						ContactId contact = ContactUtils.createContactId(presenceInfo.getEntity());
 						// Notify listener
-						getImsModule().getCore().getListener().handlePresenceInfoNotification(contactId, presenceInfo);
+						getImsModule().getCore().getListener().handlePresenceInfoNotification(contact, presenceInfo);
 			    	} catch(Exception e) {
 			    		if (logger.isActivated()) {
 			    			logger.error("Can't parse PIDF notification", e);

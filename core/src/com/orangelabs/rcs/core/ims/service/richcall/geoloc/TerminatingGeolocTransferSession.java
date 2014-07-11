@@ -56,7 +56,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
 	
 	/**
      * The logger
@@ -68,10 +68,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-	 * @param contactId Contact Id
+	 * @param contact Contact Id
 	 */
-	public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, ContentManager.createMmContentFromSdp(invite), contactId);
+	public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, ContentManager.createMmContentFromSdp(invite), contact);
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);

@@ -57,12 +57,12 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	/**
 	 * Video renderer
 	 */
-	private IVideoRenderer renderer = null;
+	private IVideoRenderer renderer;
 
     /**
      * Video renderer
      */
-    private IVideoPlayer player = null;
+    private IVideoPlayer player;
 
     /**
      * The logger
@@ -74,10 +74,10 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @param parent IMS service
 	 * @param content Content to be shared
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 */
-	public VideoStreamingSession(ImsService parent, MmContent content, ContactId contactId) {
-		super(parent, content, contactId);
+	public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact) {
+		super(parent, content, contact);
 	}
 
 	/**
@@ -133,15 +133,6 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
     public void setVideoPlayer(IVideoPlayer player) {
         this.player = player;
     }
-
-	/**
-	 * Receive BYE request 
-	 * 
-	 * @param bye BYE request
-	 */
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
-	}
 
     /**
      * Create an INVITE request

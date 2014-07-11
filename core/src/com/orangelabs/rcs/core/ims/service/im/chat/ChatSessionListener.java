@@ -49,19 +49,19 @@ public interface ChatSessionListener extends ImsSessionListener {
     /**
      * Is composing event
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param status Status
      */
-    public void handleIsComposingEvent(ContactId contactId, boolean status);
+    public void handleIsComposingEvent(ContactId contact, boolean status);
 
     /**
      * New conference event
      * 
-	 * @param contactId Contact identifier
+	 * @param contact Contact identifier
 	 * @param contactDisplayname Contact display name
      * @param state State associated to the contact
      */
-    public void handleConferenceEvent(ContactId contactId, String contactDisplayname, String state);
+    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state);
 
     /**
      * New message failure status notifying the failure of sending
@@ -75,9 +75,9 @@ public interface ChatSessionListener extends ImsSessionListener {
      * 
 	 * @param msgId Message ID
      * @param status Delivery status
-     * @param contactId the remote contact identifier
+     * @param contact the remote contact identifier
      */
-    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contactId);
+    public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact);
     
     /**
      * Request to add participant is successful

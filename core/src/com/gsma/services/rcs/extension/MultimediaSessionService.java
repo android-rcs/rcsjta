@@ -132,15 +132,15 @@ public class MultimediaSessionService extends JoynService {
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
      * @throws JoynServiceException
      */
-    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contactId, MultimediaMessagingSessionListener listener) throws JoynServiceException {
+    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact, MultimediaMessagingSessionListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contactId, listener);
+				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact, listener);
 				if (sessionIntf != null) {
 					return new MultimediaMessagingSession(sessionIntf);
 				} else {
@@ -234,15 +234,15 @@ public class MultimediaSessionService extends JoynService {
      * not supported an exception is thrown.
      * 
      * @param serviceId Service ID
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @param listener Multimedia streaming session event listener
      * @return Multimedia streaming session
      * @throws JoynServiceException
      */
-    public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contactId, MultimediaStreamingSessionListener listener) throws JoynServiceException {
+    public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact, MultimediaStreamingSessionListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contactId, listener);
+				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact, listener);
 				if (sessionIntf != null) {
 					return new MultimediaStreamingSession(sessionIntf);
 				} else {

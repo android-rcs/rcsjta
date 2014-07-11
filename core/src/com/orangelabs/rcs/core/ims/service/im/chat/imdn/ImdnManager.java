@@ -125,26 +125,26 @@ public class ImdnManager extends Thread {
 	/**
 	 * Send a message delivery status
 	 * 
-	 * @param contactId Contact identifier
+	 * @param contact Contact identifier
 	 * @param msgId Message ID
 	 * @param status Delivery status
 	 */
-	public void sendMessageDeliveryStatus(ContactId contactId, String msgId, String status) {
+	public void sendMessageDeliveryStatus(ContactId contact, String msgId, String status) {
 		// Add request in the buffer for background processing
-		DeliveryStatus delivery = new DeliveryStatus(contactId, msgId, status);
+		DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
 		buffer.addObject(delivery);
 	}
 
     /**
      * Send a message delivery status immediately
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param msgId Message ID
      * @param status Delivery status
      */
-    public void sendMessageDeliveryStatusImmediately(ContactId contactId, String msgId, String status, final String remoteInstanceId) {
+    public void sendMessageDeliveryStatusImmediately(ContactId contact, String msgId, String status, final String remoteInstanceId) {
         // Execute request in background
-        final DeliveryStatus delivery = new DeliveryStatus(contactId, msgId, status);
+        final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
         new Thread(){
             public void run() {
                 // Send SIP MESSAGE
@@ -267,8 +267,8 @@ public class ImdnManager extends Thread {
 		private String msgId;
 		private String status;
 		
-		public DeliveryStatus(ContactId contactId, String msgId, String status) {
-			this.contact = contactId;
+		public DeliveryStatus(ContactId contact, String msgId, String status) {
+			this.contact = contact;
 			this.msgId = msgId;
 			this.status = status;
 		}

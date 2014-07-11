@@ -76,34 +76,34 @@ public interface CoreListener {
     /**
      * A new presence sharing notification has been received
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param status Status
      * @param reason Reason
      */
-    public void handlePresenceSharingNotification(ContactId contactId, String status, String reason);
+    public void handlePresenceSharingNotification(ContactId contact, String status, String reason);
 
     /**
      * A new presence info notification has been received
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param presense Presence info document
      */
-    public void handlePresenceInfoNotification(ContactId contactId, PidfDocument presence);
+    public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence);
 
     /**
      * Capabilities update notification has been received
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      * @param capabilities Capabilities
      */
-    public void handleCapabilitiesNotification(ContactId contactId, Capabilities capabilities);
+    public void handleCapabilitiesNotification(ContactId contact, Capabilities capabilities);
     
     /**
      * A new presence sharing invitation has been received
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
      */
-    public void handlePresenceSharingInvitation(ContactId contactId);
+    public void handlePresenceSharingInvitation(ContactId contact);
     
     /**
      * A new IP call invitation has been received
@@ -138,8 +138,9 @@ public interface CoreListener {
 	 * 
 	 * @param fileSharingSession File transfer session
 	 * @param isGroup is Group file transfer
+	 * @param contact Contact ID
 	 */
-	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup);
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact);
 
 	/**
 	 * A new file transfer invitation has been received
@@ -154,8 +155,9 @@ public interface CoreListener {
 	 * 
 	 * @param session File transfer session
 	 * @param chatSession Group chat session
+	 * @param contact Contact ID
 	 */
-	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession chatSession);
+	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession chatSession, ContactId contact);
 
     /**
      * An incoming file transfer has been resumed
@@ -200,29 +202,29 @@ public interface CoreListener {
     /**
      * New message delivery status
      * 
-     * @param contactId Contact identifier
+     * @param contact Contact identifier
 	 * @param msgId Message ID
      * @param status Delivery status
      */
-    public void handleMessageDeliveryStatus(ContactId contactId, String msgId, String status);
+    public void handleMessageDeliveryStatus(ContactId contact, String msgId, String status);
 
     /**
      * New file delivery status
      *
      * @param fileTransferId File transfer Id
      * @param status Delivery status
-     * @param contactId who notified status
+     * @param contact who notified status
      */
-    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contactId);
+    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact);
 
     /**
      * New group file delivery status
      *
      * @param fileTransferId File transfer Id
      * @param status Delivery status
-     * @param contactId who notified status
+     * @param contact who notified status
      */
-    public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contactId);
+    public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contact);
 
     /**
      * New SIP MSRP session invitation
@@ -243,7 +245,7 @@ public interface CoreListener {
     /**
      * User terms confirmation request
      *
-     * @param remote Remote server
+     * @param contact Remote server
      * @param id Request ID
      * @param type Type of request
      * @param pin PIN number requested
@@ -253,31 +255,31 @@ public interface CoreListener {
      * @param btnLabelReject Label of Reject button
      * @param timeout Timeout request
      */
-    public void handleUserConfirmationRequest(ContactId remote, String id,
+    public void handleUserConfirmationRequest(ContactId contact, String id,
             String type, boolean pin, String subject, String text,
             String btnLabelAccept, String btnLabelReject, int timeout);
 
     /**
      * User terms confirmation acknowledge
      * 
-     * @param remote Remote server
+     * @param contact Remote server
      * @param id Request ID
      * @param status Status
      * @param subject Subject
      * @param text Text
      */
-    public void handleUserConfirmationAck(ContactId remote, String id, String status, String subject, String text);
+    public void handleUserConfirmationAck(ContactId contact, String id, String status, String subject, String text);
 
     /**
      * User terms notification
      *
-     * @param remote Remote server
+     * @param contact Remote server
      * @param id Request ID
      * @param subject Subject
      * @param text Text
      * @param btnLabel Label of OK button
      */
-    public void handleUserNotification(ContactId remote, String id, String subject, String text, String btnLabel);
+    public void handleUserNotification(ContactId contact, String id, String subject, String text, String btnLabel);
 
     /**
      * SIM has changed

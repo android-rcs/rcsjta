@@ -88,9 +88,9 @@ public class PollingManager extends PeriodicRefresher {
     	}
     	
     	// Update all contacts capabilities if refresh timeout has not expired
-		Set<ContactId> contactSet = ContactsManager.getInstance().getAllContacts();
-		for (ContactId contactId : contactSet) {
-			requestContactCapabilities(contactId);
+		Set<ContactId> contacts = ContactsManager.getInstance().getAllContacts();
+		for (ContactId contact : contacts) {
+			requestContactCapabilities(contact);
 		}
 		
 		// Restart timer
@@ -100,39 +100,39 @@ public class PollingManager extends PeriodicRefresher {
 	/**
 	 * Request contact capabilities 
 	 * 
-	 * @param contactId Contact identifier
+	 * @param contact Contact identifier
 	 */
-	private void requestContactCapabilities(ContactId contactId) {
+	private void requestContactCapabilities(ContactId contact) {
     	if (logger.isActivated()) {
-    		logger.debug("Request capabilities for " + contactId);
+    		logger.debug("Request capabilities for " + contact);
     	}
 
 		// Read capabilities from the database
-		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contactId);
+		Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
 		if (capabilities == null) {
 	    	if (logger.isActivated()) {
-	    		logger.debug("No capability exist for " + contactId);
+	    		logger.debug("No capability exist for " + contact);
 	    	}
 
             // New contact: request capabilities from the network
-    		imsService.getOptionsManager().requestCapabilities(contactId);
+    		imsService.getOptionsManager().requestCapabilities(contact);
 		} else {
 	    	if (logger.isActivated()) {
-	    		logger.debug("Capabilities exist for " + contactId);
+	    		logger.debug("Capabilities exist for " + contact);
 	    	}
 			long delta = (System.currentTimeMillis()-capabilities.getTimestamp())/1000;
 			if ((delta >= CAPABILITY_EXPIRY_PERIOD) || (delta < 0)) {
 		    	if (logger.isActivated()) {
-		    		logger.debug("Capabilities have expired for " + contactId);
+		    		logger.debug("Capabilities have expired for " + contact);
 		    	}
 
 		    	// Capabilities are too old: request capabilities from the network
 		    	if (capabilities.isPresenceDiscoverySupported()) {
 			    	// If contact supports capability discovery via presence, use the selected discoveryManager
-		    		imsService.getAnonymousFetchManager().requestCapabilities(contactId);
+		    		imsService.getAnonymousFetchManager().requestCapabilities(contact);
 		    	} else {
 		    		// The contact only supports OPTIONS requests
-		    		imsService.getOptionsManager().requestCapabilities(contactId);
+		    		imsService.getOptionsManager().requestCapabilities(contact);
 		    	}
 			}
 		}

@@ -1303,8 +1303,7 @@ public class ProvisioningParser {
                 if (publicUserIdentity == null) {
                     if ((publicUserIdentity = getValueByParamName("Public_User_Identity", childnode, TYPE_TXT)) != null) {
                     	String username = extractUserNamePart(publicUserIdentity);
-                    	RcsSettings.getInstance().writeParameter(
-                                RcsSettingsData.USERPROFILE_IMS_USERNAME, username);
+                    	RcsSettings.getInstance().setUserProfileImsUserName(username);
                         continue;
                     }
                 }

@@ -58,19 +58,19 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(ImsFileSharingSession.class.getSimpleName());
 
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
 	 * @param content Content of file to be shared
-	 * @param contactId Remote contact identifier
+	 * @param contact Remote contact identifier
 	 * @param fileicon Content of fileicon
 	 * @param filetransferId File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contactId, MmContent fileicon, String filetransferId) {
-		super(parent, content, contactId, PhoneUtils.formatContactIdToUri(contactId), fileicon, filetransferId);
+	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact, MmContent fileicon, String filetransferId) {
+		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileicon, filetransferId);
 	}
 	
 	/**
@@ -105,15 +105,6 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * Receive BYE request 
-	 * 
-	 * @param bye BYE request
-	 */
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
 	}
 
     /**

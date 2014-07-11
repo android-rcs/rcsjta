@@ -106,9 +106,9 @@ public abstract class FtHttpResume {
 	 * @see #FtHttpResume(FtHttpDirection,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
 	 */
 	public FtHttpResume(FtHttpDirection ftHttpDirection, Uri file, String fileName, String mimeType, long size,
-            Uri fileicon, ContactId contactId, String displayName, String chatId, String fileTransferId,
+            Uri fileicon, ContactId contact, String displayName, String chatId, String fileTransferId,
             String chatSessionId, boolean isGroup) {
-        this(ftHttpDirection, file, fileName, mimeType, size, fileicon, contactId, displayName, chatId,
+        this(ftHttpDirection, file, fileName, mimeType, size, fileicon, contact, displayName, chatId,
         		fileTransferId, chatSessionId, isGroup, null);
 	}
 
@@ -127,7 +127,7 @@ public abstract class FtHttpResume {
      *            the {@code size} value.
 	 * @param fileicon
 	 *            the {@code fileicon} value.
-	 * @param contactId
+	 * @param contact
 	 *            the {@code contactId} value.
 	 * @param displayName
 	 *            the {@code displayName} value.
@@ -143,7 +143,7 @@ public abstract class FtHttpResume {
 	 *            the {@code date} value.
 	 */
 	public FtHttpResume(FtHttpDirection ftHttpDirection,  Uri file, String fileName, String mimeType, long size,
-	        Uri fileicon, ContactId contactId, String displayName, String chatId, String fileTransferId,
+	        Uri fileicon, ContactId contact, String displayName, String chatId, String fileTransferId,
 	        String chatSessionId, boolean isGroup, Date date) {
 		if (size <= 0 || ftHttpDirection == null || mimeType == null || file == null || fileName == null)
 			throw new IllegalArgumentException("Null argument");
@@ -154,7 +154,7 @@ public abstract class FtHttpResume {
         this.mimeType = mimeType;
         this.size = size;
 		this.fileicon = fileicon;
-		this.contact = contactId;
+		this.contact = contact;
 		this.displayName = displayName;
 		this.chatId = chatId;
 		this.fileTransferId = fileTransferId;

@@ -55,7 +55,7 @@ public class AnonymousFetchRequestTask {
     /**
      * Remote contact
      */
-    private ContactId contact;
+    private ContactId mContact;
     
     /**
      * Dialog path
@@ -76,12 +76,12 @@ public class AnonymousFetchRequestTask {
      * Constructor
      * 
      * @param parent IMS module
-     * @param contactId Remote contact identifier
+     * @param contact Remote contact identifier
      */
-    public AnonymousFetchRequestTask(ImsModule parent, ContactId contactId) {
-        this.imsModule = parent;
-        this.contact = contactId;
-		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
+    public AnonymousFetchRequestTask(ImsModule parent, ContactId contact) {
+        imsModule = parent;
+        mContact = contact;
+		authenticationAgent = new SessionAuthenticationAgent(imsModule);
     }
     
 	/**
@@ -96,12 +96,12 @@ public class AnonymousFetchRequestTask {
 	 */
 	private void sendSubscribe() {
     	if (logger.isActivated()) {
-    		logger.info("Send SUBSCRIBE request to " + contact);
+    		logger.info("Send SUBSCRIBE request to " + mContact);
     	}
 
     	try {
 	        // Create a dialog path
-    		String contactUri = PhoneUtils.formatContactIdToUri(contact);
+    		String contactUri = PhoneUtils.formatContactIdToUri(mContact);
 
         	// Set Call-Id
         	String callId = imsModule.getSipManager().getSipStack().generateCallId();
@@ -263,7 +263,7 @@ public class AnonymousFetchRequestTask {
     	}
 
     	// We update the database capabilities timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(contact, System.currentTimeMillis());
+    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(mContact, System.currentTimeMillis());
 	}
 
 	/**
@@ -278,6 +278,6 @@ public class AnonymousFetchRequestTask {
         
 		// We update the database with empty capabilities
     	Capabilities capabilities = new Capabilities();
-    	ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+    	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
 	}
 }

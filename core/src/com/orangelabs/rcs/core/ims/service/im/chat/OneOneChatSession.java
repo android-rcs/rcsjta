@@ -66,17 +66,17 @@ public abstract class OneOneChatSession extends ChatSession {
 	/**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(OneOneChatSession.class.getName());
+    private final static Logger logger = Logger.getLogger(OneOneChatSession.class.getSimpleName());
     
     /**
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contact identifier
+	 * @param contact Remote contact identifier
 	 * @param remoteUri Remote URI
 	 */
-	public OneOneChatSession(ImsService parent, ContactId contactId, String remoteUri) {
-		super(parent, contactId, remoteUri, OneOneChatSession.generateOneOneParticipants(contactId));
+	public OneOneChatSession(ImsService parent, ContactId contact, String remoteUri) {
+		super(parent, contact, remoteUri, OneOneChatSession.generateOneOneParticipants(contact));
 		
 		// Set feature tags
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
@@ -112,12 +112,12 @@ public abstract class OneOneChatSession extends ChatSession {
 	/**
 	 * Generate the set of participants for a 1-1 chat
 	 * 
-	 * @param contactId ContactId
+	 * @param contact ContactId
 	 * @return Set of participants
 	 */
-    private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contactId) {
+    private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contact) {
     	Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
-    	ParticipantInfoUtils.addParticipant(set, contactId);
+    	ParticipantInfoUtils.addParticipant(set, contact);
 		return set;
 	}
 
@@ -353,5 +353,20 @@ public abstract class OneOneChatSession extends ChatSession {
 			}
 		}
     }
+    
+    @Override
+    public void receiveBye(SipRequest bye) {
+		super.receiveBye(bye);
+		
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
 
+    @Override
+    public void receiveCancel(SipRequest cancel) {      
+    	super.receiveCancel(cancel);
+        
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
 }

@@ -106,15 +106,14 @@ public class JoynServiceConfiguration {
 	 * @param ctx
 	 *            the context
 	 * @return the contact ID
-	 * @throws JoynContactFormatException
 	 */
-	public static ContactId getMyContactId(Context ctx) throws JoynContactFormatException {
-		ContactUtils instance = ContactUtils.getInstance(ctx);
-		if (instance == null) {
-			throw new IllegalStateException();
+	public static ContactId getMyContactId(Context ctx) {
+		ContactUtils contactUtilsInstance = ContactUtils.getInstance(ctx);
+		if (contactUtilsInstance == null) {
+			throw new IllegalStateException("Cannot instantiate ContactUtils");
 		}
 		String contact = getStringValueSetting(ctx, Settings.MY_CONTACT_ID);
-		return instance.formatContactId(contact);
+		return contactUtilsInstance.formatContactId(contact);
 	}
 
 	/**
@@ -143,7 +142,7 @@ public class JoynServiceConfiguration {
 		try {
 			return Integer.parseInt(getStringValueSetting(ctx, Settings.DEFAULT_MESSAGING_METHOD));
 		} catch (Exception e) {
-			// TODO CR026 exception handling : check if appropriate
+			// TODO CR0?? exception handling : check if appropriate
 			throw new IllegalArgumentException("Default messaging method is invalid");
 		}
 	}

@@ -39,11 +39,11 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contact Id
+	 * @param contact Remote contact Id
 	 * @param featureTag Feature tag
 	 */
-	public OriginatingSipMsrpSession(ImsService parent, ContactId contactId, String featureTag) {
-		super(parent, contactId, featureTag);
+	public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
+		super(parent, contact, featureTag);
 		
 		// Create dialog path
 		createOriginatingDialogPath();

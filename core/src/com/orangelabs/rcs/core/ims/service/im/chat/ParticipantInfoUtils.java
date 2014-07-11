@@ -29,7 +29,6 @@ import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.orangelabs.rcs.utils.ContactUtils;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -53,14 +52,14 @@ public class ParticipantInfoUtils {
 	 * @return The set of contact identifiers
 	 */
 	public static Set<ContactId> getContactsFromParticipantInfo(Set<ParticipantInfo> participantInfos) {
-		Set<ContactId> result = new HashSet<ContactId>();
+		Set<ContactId> contacts = new HashSet<ContactId>();
 		if (participantInfos == null) {
-			return result;
+			return contacts;
 		}
 		for (ParticipantInfo participant : participantInfos) {
-			result.add(participant.getContact());
+			contacts.add(participant.getContact());
 		}
-		return result;
+		return contacts;
 	}
 
 	/**
@@ -78,11 +77,11 @@ public class ParticipantInfoUtils {
 			ResourceListDocument resList = listParser.getResourceList();
 			if (resList != null) {
 				for (String entry : resList.getEntries()) {
-					ContactId contactId = ContactUtils.createContactId(entry);
-					if (!PhoneUtils.compareNumbers(contactId.toString(), ImsModule.IMS_USER_PROFILE.getUsername())) {
-						if (addParticipant(result, contactId)) {
+					ContactId contact = ContactUtils.createContactId(entry);
+					if (!contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+						if (addParticipant(result, contact)) {
 							if (logger.isActivated()) {
-								logger.debug("Add participant " + contactId + " to the list");
+								logger.debug("Add participant " + contact + " to the list");
 							}
 						}
 					}
@@ -143,16 +142,16 @@ public class ParticipantInfoUtils {
 	 * 
 	 * @param set
 	 *            the set of ParticipantInfo
-	 * @param contactId
+	 * @param contact
 	 *            the contact identifier
 	 * @return the ParticipantInfo item or null if does not exist
 	 */
-	public static ParticipantInfo getItem(Set<ParticipantInfo> set, ContactId contactId) {
-		if (set == null || contactId == null)
+	public static ParticipantInfo getItem(Set<ParticipantInfo> set, ContactId contact) {
+		if (set == null || contact == null)
 			return null;
 		// Iterate through the set to seek for item
 		for (ParticipantInfo item : set) {
-			if (item != null && item.getContact().equals(contactId)) {
+			if (item != null && item.getContact().equals(contact)) {
 				return item;
 			}
 		}

@@ -36,7 +36,7 @@ public interface IFileTransferLog {
 	/**
 	 * Add outgoing file transfer
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            Contact ID
 	 * @param fileTransferId
 	 *            File Transfer ID
@@ -47,7 +47,7 @@ public interface IFileTransferLog {
 	 * @param thumbnail
 	 *            Thumbnail content
 	 */
-	public void addFileTransfer(ContactId contactId, String fileTransferId, int direction, MmContent content, MmContent thumbnail);
+	public void addFileTransfer(ContactId contact, String fileTransferId, int direction, MmContent content, MmContent thumbnail);
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
@@ -66,7 +66,7 @@ public interface IFileTransferLog {
 	/**
 	 * Add incoming group file transfer
 	 * 
-	 * @param contactId
+	 * @param contact
 	 *            Contact ID
 	 * @param fileTransferId
 	 *            File transfer ID
@@ -77,7 +77,7 @@ public interface IFileTransferLog {
 	 * @param thumbnail
 	 *            Thumbnail content
 	 */
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contactId, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
 			MmContent thumbnail);
 
 	/**

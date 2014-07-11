@@ -64,17 +64,17 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     /**
      * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
      * 
-     * @param contactId Contact ID
+     * @param contact Contact ID
      * @return Contact
      * @throws ServerApiException
      */
-	public JoynContact getJoynContact(ContactId contactId) throws ServerApiException {
+	public JoynContact getJoynContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get joyn contact " + contactId);
+			logger.info("Get joyn contact " + contact);
 		}
 
 		// Read capabilities in the local database
-		ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contactId);
+		ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 		if (contactInfo !=  null) {
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
     		Set<String> exts = new HashSet<String>();
@@ -93,7 +93,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     				exts,
     				capabilities.isSipAutomata()); 
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			return new JoynContact(contactId, registered, capaApi);
+			return new JoynContact(contact, registered, capaApi);
 		} else {
 			return null;
 		}
@@ -113,8 +113,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 
 		// Read capabilities in the local database
 		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contactId : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contactId);
+		for (ContactId contact : contacts) {
+			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
 			Capabilities capaApi = null;
 			if (capabilities != null) {
@@ -135,7 +135,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	    				capabilities.isSipAutomata()); 
 			}
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			result.add(new JoynContact(contactId, registered, capaApi));
+			result.add(new JoynContact(contact, registered, capaApi));
 		}
 		
 		return result;
@@ -155,8 +155,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 
 		// Read capabilities in the local database
 		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contactId : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contactId);
+		for (ContactId contact : contacts) {
+			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
 			if (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE) {			
 				Capabilities capaApi = null;
@@ -174,7 +174,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		    				capabilities.isSipAutomata()); 
 				}
 				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-				result.add(new JoynContact(contactId, registered, capaApi));
+				result.add(new JoynContact(contact, registered, capaApi));
 			}
 		}
 		
@@ -197,8 +197,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 
 		// Read capabilities in the local database
 		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contactId : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contactId);
+		for (ContactId contact : contacts) {
+			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
 			Capabilities capaApi = null;
 			if (capabilities != null) {
@@ -217,7 +217,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			    				new HashSet<String>(capabilities.getSupportedExtensions()),
 			    				capabilities.isSipAutomata()); 
 						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-						result.add(new JoynContact(contactId, registered, capaApi));
+						result.add(new JoynContact(contact, registered, capaApi));
 					}
 				}
 			}

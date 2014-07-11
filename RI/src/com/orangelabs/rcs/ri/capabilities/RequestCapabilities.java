@@ -25,7 +25,6 @@ import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,6 +35,7 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
@@ -165,14 +165,14 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 	     * @param contact Contact
 	     * @param capabilities Capabilities
 	     */
-		public void onCapabilitiesReceived(final ContactId contactId, final Capabilities capabilities) {
+		public void onCapabilitiesReceived(final ContactId contact, final Capabilities capabilities) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onCapabilitiesReceived " + contactId);
+				Log.d(LOGTAG, "onCapabilitiesReceived " + contact);
 			}
 			handler.post(new Runnable() {
 				public void run() {
 					// Check if this intent concerns the current selected contact
-					if (PhoneNumberUtils.compare(getSelectedContact(), contactId.toString())) {
+					if (contact != null && contact.equals(getSelectedContact())) {
 						// Update UI
 						displayCapabilities(capabilities);
 					}
@@ -211,7 +211,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 		        }      	
 		    	
 		    	// Update capabilities
-				updateCapabilities(contact);
+				updateCapabilities(contactId);
 		    } catch(JoynServiceNotAvailableException e) {
 		    	e.printStackTrace();
 				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
@@ -241,13 +241,20 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     /**
      * Returns the selected contact
      * 
-     * @param position Position in the adapter
      * @return Contact
      */
-    private String getSelectedContact() {
+    private ContactId getSelectedContact() {
 	    Spinner spinner = (Spinner)findViewById(R.id.contact);
 	    MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-	    return cursor.getString(1);
+	    ContactUtils contactUtils = ContactUtils.getInstance(RequestCapabilities.this);
+		try {
+			return contactUtils.formatContactId(cursor.getString(1));
+		} catch (JoynContactFormatException e) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "getSelectedContact cannot parse contact " + cursor.getString(1));
+			}
+			return null;
+		}
     }
 
     /**
@@ -268,9 +275,11 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     	    	Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
     	    	return;
             }  
-            
-            // Update capabilities
-    		updateCapabilities(getSelectedContact());
+
+			ContactId contact = getSelectedContact();
+			if (contact != null) {
+				updateCapabilities(contact);
+			}
         }
     };
 
@@ -279,15 +288,14 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
      * 
      * @param contact Contact
      */
-    private void updateCapabilities(final String contact) {
+    private void updateCapabilities(ContactId contact) {
         // Display info
         Utils.displayLongToast(RequestCapabilities.this, getString(R.string.label_request_in_background, contact));
 
         // Request capabilities
     	try {
 	        // Request new capabilities
-    		ContactId contactId = ContactUtils.getInstance(RequestCapabilities.this).formatContactId(contact);
-	        capabilityApi.requestContactCapabilities(contactId);
+	        capabilityApi.requestContactCapabilities(contact);
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));

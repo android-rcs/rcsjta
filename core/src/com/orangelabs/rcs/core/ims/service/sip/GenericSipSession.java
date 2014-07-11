@@ -55,11 +55,11 @@ public abstract class GenericSipSession extends ImsServiceSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param contactId Remote contactId
+	 * @param contact Remote contactId
 	 * @param featureTag Feature tag
 	 */
-	public GenericSipSession(ImsService parent, ContactId contactId, String featureTag) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public GenericSipSession(ImsService parent, ContactId contact, String featureTag) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 		
 		// Set the service feature tag
 		this.featureTag = featureTag;
@@ -183,5 +183,21 @@ public abstract class GenericSipSession extends ImsServiceSession {
             ((SipSessionListener) getListeners().get(j))
                     .handleSessionError(new SipSessionError(error));
         }
-    }    
+    }
+    
+    @Override
+	public void receiveBye(SipRequest bye) {
+		super.receiveBye(bye);
+		
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
+	
+    @Override
+    public void receiveCancel(SipRequest cancel) {      
+    	super.receiveCancel(cancel);
+        
+		// Request capabilities to the remote
+	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
+	}
 }

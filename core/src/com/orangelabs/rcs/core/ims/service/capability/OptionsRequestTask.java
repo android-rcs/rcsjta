@@ -44,7 +44,7 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Remote contact
      */
-    private ContactId contact;
+    private ContactId mContact;
     
     /**
      * Feature tags
@@ -70,12 +70,12 @@ public class OptionsRequestTask implements Runnable {
 	 * Constructor
 	 * 
      * @param parent IMS module
-   	 * @param contactId Remote contact identifier
+   	 * @param contact Remote contact identifier
    	 * @param featureTags Feature tags
 	 */
-	public OptionsRequestTask(ImsModule parent, ContactId contactId, String[] featureTags) {
+	public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags) {
         this.imsModule = parent;
-        this.contact = contactId;
+        this.mContact = contact;
         this.featureTags = featureTags;
 		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
 	}
@@ -92,7 +92,7 @@ public class OptionsRequestTask implements Runnable {
 	 */
 	private void sendOptions() {
     	if (logger.isActivated()) {
-    		logger.info("Send an OPTIONS message to " + contact);                
+    		logger.info("Send an OPTIONS message to " + mContact);                
     	}
 
         try {
@@ -104,7 +104,7 @@ public class OptionsRequestTask implements Runnable {
             }
 
             // Create a dialog path
-        	String contactUri = PhoneUtils.formatContactIdToUri(contact);
+        	String contactUri = PhoneUtils.formatContactIdToUri(mContact);
         	dialogPath = new SipDialogPath(
         			imsModule.getSipManager().getSipStack(),
         			imsModule.getSipManager().getSipStack().generateCallId(),
@@ -186,22 +186,22 @@ public class OptionsRequestTask implements Runnable {
 	private void handleUserNotRegistered(SipTransactionContext ctx) {
         // 408 or 480 response received
         if (logger.isActivated()) {
-            logger.info("User " + contact + " is not registered");
+            logger.info("User " + mContact + " is not registered");
         }
 
-        ContactInfo info = ContactsManager.getInstance().getContactInfo(contact);
+        ContactInfo info = ContactsManager.getInstance().getContactInfo(mContact);
         if (info.getRcsStatus() == ContactInfo.NO_INFO) {
         	// If we do not have already some info on this contact
         	// We update the database with empty capabilities
         	Capabilities capabilities = new Capabilities();
-        	ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NO_INFO, ContactInfo.REGISTRATION_STATUS_OFFLINE);
+        	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NO_INFO, ContactInfo.REGISTRATION_STATUS_OFFLINE);
     	} else {
     		// We have some info on this contact
     		// We update the database with its previous infos and set the registration state to offline
-    		ContactsManager.getInstance().setContactCapabilities(contact, info.getCapabilities(), info.getRcsStatus(), ContactInfo.REGISTRATION_STATUS_OFFLINE);
+    		ContactsManager.getInstance().setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(), ContactInfo.REGISTRATION_STATUS_OFFLINE);
     		
         	// Notify listener
-        	imsModule.getCore().getListener().handleCapabilitiesNotification(contact, info.getCapabilities());
+        	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, info.getCapabilities());
     	}
 	}
 	
@@ -213,15 +213,15 @@ public class OptionsRequestTask implements Runnable {
 	private void handleUserNotFound(SipTransactionContext ctx) {
         // 404 response received
         if (logger.isActivated()) {
-            logger.info("User " + contact + " is not found");
+            logger.info("User " + mContact + " is not found");
         }
 
         // The contact is not RCS
         Capabilities capabilities = new Capabilities();
-        ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+        ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
         
     	// Notify listener
-    	imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+    	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class OptionsRequestTask implements Runnable {
 	private void handle200OK(SipTransactionContext ctx) {
         // 200 OK response received
         if (logger.isActivated()) {
-            logger.info("200 OK response received for " + contact);
+            logger.info("200 OK response received for " + mContact);
         }
     	
     	// Read capabilities
@@ -242,14 +242,14 @@ public class OptionsRequestTask implements Runnable {
     	// Update the database capabilities
     	if (capabilities.isImSessionSupported()) {
     		// The contact is RCS capable
-   			ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
+   			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
     	} else {
     		// The contact is not RCS
-    		ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+    		ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
     	}
 
     	// Notify listener
-    	imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+    	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
 	}	
 	
 	/**
@@ -293,10 +293,10 @@ public class OptionsRequestTask implements Runnable {
 	private void handleError(CapabilityError error) {
         // Error
     	if (logger.isActivated()) {
-    		logger.info("Options has failed for contact " + contact + ": " + error.getErrorCode() + ", reason=" + error.getMessage());
+    		logger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode() + ", reason=" + error.getMessage());
     	}
     	
     	// We update the database capabilities timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(contact, System.currentTimeMillis());
+    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(mContact, System.currentTimeMillis());
 	}	
 }

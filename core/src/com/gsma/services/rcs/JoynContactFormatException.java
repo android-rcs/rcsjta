@@ -28,7 +28,7 @@ package com.gsma.services.rcs;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class JoynContactFormatException extends JoynServiceException {
+public class JoynContactFormatException extends RuntimeException {
 	static final long serialVersionUID = 1L;
 	
 	/**
@@ -37,4 +37,9 @@ public class JoynContactFormatException extends JoynServiceException {
 	public JoynContactFormatException() {
 		super("joyn contact format not supported");
 	}
+	
+	public JoynContactFormatException(String message) {
+		super(message);
+	}
+	
 }

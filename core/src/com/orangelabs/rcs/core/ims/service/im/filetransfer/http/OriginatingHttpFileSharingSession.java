@@ -72,17 +72,17 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            IMS service
 	 * @param content
 	 *            Content of file to share
-	 * @param contactId
+	 * @param contact
 	 *            Remote contact identifier
 	 * @param remoteUri
 	 *            the remote URI
 	 * @param fileicon
 	 *            true if the stack must try to attach fileicon
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, boolean fileicon) {
-		super(parent, content, contactId, remoteUri, null, null, null, IdGenerator.generateMessageID());
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, boolean fileicon) {
+		super(parent, content, contact, remoteUri, null, null, null, IdGenerator.generateMessageID());
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contactId+ " remoteURI= "+remoteUri);
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contact+ " remoteURI= "+remoteUri);
 		}
 		MmContent fileiconContent = null;
 		if (fileicon) {
@@ -101,7 +101,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            IMS service
 	 * @param content
 	 *            Content of file to share
-	 * @param contactId
+	 * @param contact
 	 *            Remote contact identifier
 	 * @param remoteUri
 	 *            Remote URI
@@ -110,10 +110,10 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 * @param fileTransferId
 	 *            File transfer Id
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contactId, String remoteUri, MmContent fileiconContent, String fileTransferId) {
-		super(parent, content, contactId, remoteUri, fileiconContent, null, null, fileTransferId);
+	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileiconContent, String fileTransferId) {
+		super(parent, content, contact, remoteUri, fileiconContent, null, null, fileTransferId);
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contactId );
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}
 		// Instantiate the upload manager
 		uploadManager = new HttpUploadManager(getContent(), getFileicon(), this);

@@ -30,6 +30,7 @@ import java.util.Set;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
@@ -205,8 +206,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * 
 	 * @param session File transfer session
 	 * @param isGroup is group file transfer
+	 * @param contact Contact ID
 	 */
-    public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup) {
+    public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Receive FT invitation from " + session.getRemoteContact() + " file=" + session.getContent().getName()
 					+ " size=" + session.getContent().getSize());
@@ -228,7 +230,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+    	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)contact);
     	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
     	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
@@ -264,7 +266,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 *
 	 * @param session File transfer session
 	 */
-	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession) {
+	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession, ContactId contact) {
 		// Update rich messaging history
 		if (chatSession.isGroupChat()) {
 			MessagingLog.getInstance().updateFileTransferChatId(
@@ -276,7 +278,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		addFileTransferSession(sessionApi);
 		
 		// Display invitation
-		receiveFileTransferInvitation(session, chatSession.isGroupChat());
+		receiveFileTransferInvitation(session, chatSession.isGroupChat(), contact);
 	}    
 	
     /**
@@ -328,9 +330,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(), fileDescription.getName());
 			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
-				if (logger.isActivated()) {
-					
-				}
 				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
 			}
 			final FileSharingSession session = Core.getInstance().getImService().initiateFileTransferSession(contact, content, fileicon);
@@ -391,9 +390,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
 					fileDescription.getName());
 			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
-				if (logger.isActivated()) {
-					
-				}
 				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
 			}
 			Set<ParticipantInfo> participants = MessagingLog.getInstance()
@@ -685,7 +681,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
 		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
 		if (isGroup) {
@@ -722,7 +718,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 
-        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, session.getRemoteContact().toString());
+        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
         intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
         intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
         if (isGroup) {

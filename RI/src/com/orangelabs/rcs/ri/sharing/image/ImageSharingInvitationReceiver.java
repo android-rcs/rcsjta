@@ -25,9 +25,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.util.Log;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -36,6 +39,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingInvitationReceiver extends BroadcastReceiver {
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ImageSharingInvitationReceiver.class.getSimpleName());
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Display invitation notification
@@ -49,9 +58,13 @@ public class ImageSharingInvitationReceiver extends BroadcastReceiver {
      * @param intent Intent invitation
      */
 	public static void addImageSharingInvitationNotification(Context context, Intent invitation) {
-    	// Get remote contact
-		String contact = invitation.getStringExtra(ImageSharingIntent.EXTRA_CONTACT);
-
+		ContactId contact = invitation.getParcelableExtra(ImageSharingIntent.EXTRA_CONTACT);
+		if (contact == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "ImageSharingInvitationReceiver failed: cannot parse contact");
+			}
+			return;
+		}
     	// Get filename
 		String filename = invitation.getStringExtra(ImageSharingIntent.EXTRA_FILENAME);
 
@@ -60,7 +73,7 @@ public class ImageSharingInvitationReceiver extends BroadcastReceiver {
 		intent.setClass(context, ReceiveImageSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);		
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String notifTitle = context.getString(R.string.title_recv_image_sharing, contact);
+        String notifTitle = context.getString(R.string.title_recv_image_sharing, contact.toString());
         Notification notif = new Notification(R.drawable.ri_notif_csh_icon, notifTitle,	System.currentTimeMillis());
         notif.flags = Notification.FLAG_AUTO_CANCEL;
         notif.setLatestEventInfo(context, notifTitle, filename, contentIntent);

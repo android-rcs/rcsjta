@@ -90,11 +90,11 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the File transfer info document
 	 * @param fileTransferId
 	 *            the File transfer Id
-	 * @param contactId
+	 * @param contact
 	 *            the remote contact Id
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contactId) {
+			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contact) {
 		super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),fileTransferInfo.getFileSize(),fileTransferInfo.getFilename()),
 				chatSession.getRemoteContact(), chatSession.getRemoteUri(),null, chatSession.getSessionID(),
 				chatSession.getContributionID(), fileTransferId);

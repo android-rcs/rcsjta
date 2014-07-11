@@ -300,7 +300,7 @@ public class ChatUtils {
 		StringBuilder uriList = new StringBuilder();
 		for (ContactId contact : participants) {
 			uriList.append(" <entry uri=\"" +
-					PhoneUtils.formatNumberToSipUri(contact.toString()) + "\" cp:copyControl=\"to\"/>" 
+					PhoneUtils.formatContactIdToUri(contact) + "\" cp:copyControl=\"to\"/>" 
 					+ CRLF);
 		}
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + CRLF +
@@ -771,7 +771,7 @@ public class ChatUtils {
 		String content = cpimMsg.getMessageContent();
 		Date date = cpimMsg.getMessageDate();
 		String mime = cpimMsg.getContentType();
-		if ((msgId == null) || (content == null) || (mime == null)) {
+		if (msgId == null || content == null || mime == null) {
 			return null;
 		}
 		if (mime.contains(GeolocMessage.MIME_TYPE)) {
@@ -858,9 +858,9 @@ public class ChatUtils {
 				// Create list from XML
 				participants = ParticipantInfoUtils.parseResourceList(listPart);
 				try {
-					ContactId remoteContactId = getReferredIdentityAsContactId(request);
+					ContactId remote = getReferredIdentityAsContactId(request);
 					// Include remote contact if format if correct
-					ParticipantInfoUtils.addParticipant(participants, remoteContactId);
+					ParticipantInfoUtils.addParticipant(participants, remote);
 				} catch (JoynContactFormatException e) {
 				}
 			}

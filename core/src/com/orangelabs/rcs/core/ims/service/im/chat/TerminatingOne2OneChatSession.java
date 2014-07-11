@@ -53,17 +53,17 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	/**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(TerminatingOne2OneChatSession.class.getName());
+    private final static Logger logger = Logger.getLogger(TerminatingOne2OneChatSession.class.getSimpleName());
 
     /**
      * Constructor
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-     * @param contactId the remote contactId 
+     * @param contact the remote contactId 
 	 */
-	public TerminatingOne2OneChatSession(ImsService parent, SipRequest invite, ContactId contactId) {
-		super(parent, contactId, PhoneUtils.formatContactIdToUri(contactId));
+	public TerminatingOne2OneChatSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 
 		// Set first message
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
