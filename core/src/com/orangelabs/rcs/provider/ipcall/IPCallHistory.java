@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.ipcall;
 
@@ -25,7 +29,9 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -95,7 +101,8 @@ public class IPCallHistory {
 	 * @param videocontent Video content
 	 * @param status Call status
 	 */
-	public Uri addCall(ContactId contact, String sessionId, int direction, MmContent audiocontent, MmContent videocontent, int status) {
+	public Uri addCall(ContactId contact, String sessionId, int direction, AudioContent audiocontent,
+			VideoContent videocontent, int status) {
 		if(logger.isActivated()){
 			logger.debug("Add new call entry for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
@@ -106,6 +113,10 @@ public class IPCallHistory {
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATUS, status);
+		values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
+		values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
+		values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
+		values.put(IPCallData.KEY_HEIGHT, videocontent.getHeight());
 		
 		return cr.insert(databaseUri, values);
 	}

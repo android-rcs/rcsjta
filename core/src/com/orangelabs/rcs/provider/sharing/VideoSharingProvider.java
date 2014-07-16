@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.sharing;
 
@@ -70,7 +74,7 @@ public class VideoSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 2;
+        private static final int DATABASE_VERSION = 3;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -85,7 +89,10 @@ public class VideoSharingProvider extends ContentProvider {
         			+ VideoSharingData.KEY_STATUS + " integer,"
         			+ VideoSharingData.KEY_DIRECTION + " integer,"
         			+ VideoSharingData.KEY_TIMESTAMP + " long,"
-        			+ VideoSharingData.KEY_DURATION + " long);");
+        			+ VideoSharingData.KEY_DURATION + " long,"
+        			+ VideoSharingData.KEY_VIDEO_ENCODING + " TEXT,"
+        			+ VideoSharingData.KEY_WIDTH + " integer,"
+        			+ VideoSharingData.KEY_HEIGHT + " integer);");
         }
 
         @Override

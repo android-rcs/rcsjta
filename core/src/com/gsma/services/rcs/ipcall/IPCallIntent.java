@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
@@ -27,45 +31,13 @@ public class IPCallIntent {
      * Broadcast action: a new IP call invitation has been received.
      * <p>Intent includes the following extras:
      * <ul>
-     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
-     *  sending the invitation.
-     * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
-     *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_CALL_ID} containing the unique ID of the IP call.
-     * <li> {@link #EXTRA_AUDIO_ENCODING} containing the audio encoding.
-     * <li> {@link #EXTRA_VIDEO_ENCODING} containing the video encoding.
-     * <li> {@link #EXTRA_VIDEO_FORMAT} containing the video format.
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ipcall.action.NEW_CALL";
 
 	/**
-	 * MSISDN of the contact sending the invitation
-	 */
-	public final static String EXTRA_CONTACT = "contact";
-	
-	/**
-	 * Display name of the contact sending the invitation
-	 */
-	public final static String EXTRA_DISPLAY_NAME = "displayname";
-
-	/**
 	 * Unique ID of the call
 	 */
 	public final static String EXTRA_CALL_ID = "callId";
-	
-	/**
-	 * Audio encoding (e.g. AMR)
-	 */
-	public final static String EXTRA_AUDIO_ENCODING = "audioEncoding";
-
-	/**
-	 * Video encoding (e.g. H264)
-	 */
-	public final static String EXTRA_VIDEO_ENCODING = "videoEncoding";
-
-	/**
-	 * Video format (e.g. QCIF)
-	 */
-	public final static String EXTRA_VIDEO_FORMAT = "videoFormat";
 }

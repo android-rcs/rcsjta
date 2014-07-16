@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 import android.util.Pair;
 
@@ -52,6 +53,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -70,6 +72,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -458,11 +461,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
     	synchronized(lock) {
 			// Update rich messaging history
-			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
-					message, ChatLog.Message.Direction.INCOMING);
-
-			// TODO : Broadcast appropriate intent on receiving new chat
-			// message on group chat
+			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(), message,
+					ChatLog.Message.Direction.INCOMING);
+			// TODO : Update displayName of remote contact
+			/*
+			 * ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(),
+			 * session.getRemoteDisplayName());
+			 */
+			// Broadcast intent related to the received message
+			Intent intent = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
+			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+			intent.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	    }
     }
     
@@ -662,9 +672,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
 					geoloc, ChatLog.Message.Direction.INCOMING);
-
-			// TODO : Broadcast appropriate intent on receiving new geoloc
-			// message on group chat
+			// TODO : Update displayName of remote contact
+			/*
+			 * ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(),
+			 * session.getRemoteDisplayName());
+			 */
+			// Broadcast intent related to the received message
+			Intent intent = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
+			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+			intent.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	    }
     }
 

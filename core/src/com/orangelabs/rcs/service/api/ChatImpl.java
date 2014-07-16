@@ -357,20 +357,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     	synchronized(lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addChatMessage(message, INCOMING);
-			// Create a chat message
-        	ChatMessage chatMsg = new ChatMessage(message.getMessageId(),
-        			message.getRemote(),
-        			message.getTextMessage(),
-        			message.getServerDate());
-
-        	// Broadcast intent related to the received invitation
-	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
-	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)chatMsg.getContact());
-	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, chatMsg);
-	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-
+			// Broadcast intent related to the received message
+			Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+			intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	    }
     }
     
@@ -385,22 +376,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     	synchronized(lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addChatMessage(geoloc, INCOMING);
-			// Create a geoloc message
-        	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
-        			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-        			geoloc.getGeoloc().getExpiration());
-        	com.gsma.services.rcs.chat.GeolocMessage geolocMsg = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-        			geoloc.getRemote(),
-        			geolocApi, geoloc.getDate());
-
-        	// Broadcast intent related to the received invitation
-	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
-	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)geolocMsg.getContact());
-	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, geolocMsg);
-	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-
+			// Broadcast intent related to the received message
+			Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+			intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	    }
     }
     

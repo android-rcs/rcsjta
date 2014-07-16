@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
@@ -27,25 +31,20 @@ public class GroupChatIntent {
      * Broadcast action: a new group chat invitation has been received.
      * <p>Intent includes the following extras:
      * <ul>
-     * <li> {@link #EXTRA_CONTACT} containing the MSISDN of the remote contact
-     *  sending the invitation.
-     * <li> {@link #EXTRA_DISPLAY_NAME} containing the display name of the
-     *  contact sending the invitation (extracted from the SIP address).
      * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
-     * <li> {@link #EXTRA_SUBJECT} containing the subject associated to the conversation.
      * </ul>
      */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT";
 
 	/**
-	 * MSISDN of the contact sending the invitation
+	 * Broadcast action: a new group chat message has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of chat message.
+	 * </ul>
 	 */
-	public final static String EXTRA_CONTACT = "contact";
-	
-	/**
-	 * Display name of the contact sending the invitation (extracted from the SIP address)
-	 */
-	public final static String EXTRA_DISPLAY_NAME = "displayname";
+	public final static String ACTION_NEW_GROUP_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE";
 
 	/**
 	 * Unique ID of the chat conversation
@@ -53,7 +52,8 @@ public class GroupChatIntent {
 	public final static String EXTRA_CHAT_ID = "chatId";
 
 	/**
-	 * Subject associated to the conversation (optional)
+	 * Message ID of received message
+	 *
 	 */
-	public final static String EXTRA_SUBJECT = "subject";
+	public final static String EXTRA_MESSAGE_ID = "messageId";
 }

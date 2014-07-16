@@ -309,4 +309,32 @@ public class IPCall {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns the video codec used during sharing
+	 *
+	 * @return VideoCodec
+	 * @throws JoynServiceException
+	 */
+	public VideoCodec getVideoCodec() throws JoynServiceException {
+		try {
+			return callInf.getVideoCodec();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the audio codec used during sharing
+	 *
+	 * @return AudioCodec
+	 * @throws JoynServiceException
+	 */
+	public AudioCodec getAudioCodec() throws JoynServiceException {
+		try {
+			return callInf.getAudioCodec();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 }

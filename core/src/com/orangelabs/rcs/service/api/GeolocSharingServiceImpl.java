@@ -187,17 +187,21 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact());
 		}
+		// TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
 		// Add session in the list
 		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
-    	
+
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(GeolocSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-    	intent.putExtra(GeolocSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent intent = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
     
     /**

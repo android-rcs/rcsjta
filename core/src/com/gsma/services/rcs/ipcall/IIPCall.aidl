@@ -3,6 +3,8 @@ package com.gsma.services.rcs.ipcall;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.gsma.services.rcs.ipcall.AudioCodec;
 
 /**
  * IP call interface
@@ -34,4 +36,8 @@ interface IIPCall {
 	void holdCall();
 
 	void continueCall();
+
+	VideoCodec getVideoCodec();
+
+	AudioCodec getAudioCodec();
 }

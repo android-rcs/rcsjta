@@ -195,21 +195,20 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 				ImageSharing.Direction.INCOMING,
 				session.getContent(),
 				ImageSharing.State.INVITED);
-
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
 		// Add session in the list
 		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
-    	
+
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, (Parcelable)contact);
-    	intent.putExtra(ImageSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-    	intent.putExtra(ImageSharingIntent.EXTRA_FILENAME, session.getContent().getName());
-    	intent.putExtra(ImageSharingIntent.EXTRA_FILESIZE, session.getContent().getSize());
-    	intent.putExtra(ImageSharingIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
-    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 
     /**

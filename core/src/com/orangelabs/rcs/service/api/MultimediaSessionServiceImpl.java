@@ -223,11 +223,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
 				mMultimediaMessagingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
-		
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
+
 		// Broadcast intent related to the received invitation
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
@@ -245,11 +248,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
 				mMultimediaStreamingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
-		
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
+
 		// Broadcast intent related to the received invitation
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation

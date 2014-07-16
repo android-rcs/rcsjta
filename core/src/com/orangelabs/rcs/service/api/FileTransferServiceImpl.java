@@ -213,13 +213,20 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Update rich messaging history
+		String fileTransferId = session.getFileTransferId();
 		if (isGroup) {
 			MessagingLog.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
-					contact, session.getFileTransferId(), session.getContent(), session.getFileicon());
+					contact, fileTransferId, session.getContent(), session.getFileicon());
 		} else {
-			MessagingLog.getInstance().addFileTransfer(contact, session.getFileTransferId(),
+			MessagingLog.getInstance().addFileTransfer(contact, fileTransferId,
 					FileTransfer.Direction.INCOMING, session.getContent(), session.getFileicon());
 		}
+
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
 
 		// Add session in the list
 		if (isGroup) {
@@ -233,22 +240,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)contact);
-    	intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
-    	intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
-    	intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
-    	intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
-    	/* TODO if (session instanceof HttpFileTransferSession) {
-    	    intent.putExtra("chatSessionId", ((HttpFileTransferSession)session).getChatSessionID());
-    	    if (isGroup) {
-    	        intent.putExtra("chatId", ((HttpFileTransferSession)session).getContributionID());
-    	    }
-    	    intent.putExtra("isGroupTransfer", isGroup);
-    	}*/
-    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 
     /**
@@ -621,18 +616,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-		intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-		intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
-		if (isGroup) {
-			intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, session.getContributionID());
-		}
-		intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
-		intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
-		intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
-		// TODO FUSION change thumbnail byte array to filename
-		// intent.putExtra(FileTransferIntent.EXTRA_FILEICON, session.getThumbnail());
-		intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.OUTGOING);
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	}
 
@@ -660,22 +644,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			FileTransferServiceImpl.addFileTransferSession(sessionApi);
 		}
 
-        // Broadcast intent, we reuse the File transfer invitation intent
-        Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-
-        intent.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-        intent.putExtra(FileTransferIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-        intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
-        if (isGroup) {
-            intent.putExtra(FileTransferIntent.EXTRA_CHAT_ID, chatId);
-        }
-        intent.putExtra(FileTransferIntent.EXTRA_FILENAME, session.getContent().getName());
-        intent.putExtra(FileTransferIntent.EXTRA_FILESIZE, session.getContent().getSize());
-        intent.putExtra(FileTransferIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
-        intent.putExtra(FileTransferIntent.EXTRA_DIRECTION, FileTransfer.Direction.INCOMING);
-
-        AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		// Broadcast intent, we reuse the File transfer invitation intent
+		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 	
 	/**

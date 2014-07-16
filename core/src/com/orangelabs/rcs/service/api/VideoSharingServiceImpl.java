@@ -219,21 +219,20 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 				VideoSharing.Direction.INCOMING,
 				content,
     			VideoSharing.State.INVITED);
-
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
 		// Add session in the list
 		VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
 		VideoSharingServiceImpl.addVideoSharingSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, (Parcelable)contact);
-    	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-    	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
-        intent.putExtra(VideoSharingIntent.EXTRA_WIDTH, session.getVideoWidth());
-        intent.putExtra(VideoSharingIntent.EXTRA_HEIGHT, session.getVideoHeight());
-        AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
     
     /**
@@ -277,9 +276,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 			// Update rich call history
 			RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
-					VideoSharing.Direction.OUTGOING,
-	    			session.getContent(),
-	    			VideoSharing.State.INITIATED);
+					VideoSharing.Direction.OUTGOING, (VideoContent)session.getContent(),
+					VideoSharing.State.INITIATED);
 
 			// Add session listener
 			VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);

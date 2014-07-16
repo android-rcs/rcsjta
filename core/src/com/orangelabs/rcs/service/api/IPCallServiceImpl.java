@@ -209,17 +209,9 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(IPCallIntent.EXTRA_CONTACT, (Parcelable)contact);
-		intent.putExtra(IPCallIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 		intent.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
-    	intent.putExtra(IPCallIntent.EXTRA_AUDIO_ENCODING, audiocontent.getEncoding());
-    	if (videocontent != null) {
-	    	intent.putExtra(IPCallIntent.EXTRA_VIDEO_ENCODING, videocontent.getEncoding());
-	        intent.putExtra(IPCallIntent.EXTRA_VIDEO_FORMAT, ""); // TODO
-    	}
-        AndroidFactory.getApplicationContext().sendBroadcast(intent);
-
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
 	}
 
     /**

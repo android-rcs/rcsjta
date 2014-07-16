@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
@@ -74,4 +78,28 @@ public class IPCallLog {
 	 * @see IPCall.State
      */
     public static final String STATE = "state";    
+
+    /**
+     * The name of the column containing the encoding type of video
+     * <P>Type: INTEGER</P>
+     */
+    public static final String VIDEO_ENCODING = "videoEncoding";
+
+    /**
+     * The name of the column containing the encoding type of audio
+     * <P>Type: INTEGER</P>
+     */
+    public static final String AUDIO_ENCODING = "audioEncoding";
+
+    /**
+     * The name of the column containing the width of video
+     * <P>Type: INTEGER</P>
+     */
+    public static final String WIDTH = "width";
+
+    /**
+     * The name of the column containing the height of video
+     * <P>Type: INTEGER</P>
+     */
+    public static final String HEIGHT = "height";
 }

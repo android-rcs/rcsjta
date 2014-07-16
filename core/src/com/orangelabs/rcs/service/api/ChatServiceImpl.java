@@ -215,43 +215,24 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param session Chat session
 	 */
     public void receiveOneOneChatInvitation(OneOneChatSession session) {
-		if (logger.isActivated()) {
-			logger.info("Receive chat invitation from " + session.getRemoteContact());
-		}
-
-
-		// Update rich messaging history
-		// Nothing done in database
-
-		// Add session in the list
 		ContactId contact = session.getRemoteContact();
+		if (logger.isActivated()) {
+			logger.info("Receive chat invitation from " + contact);
+		}
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
+		// Add session in the list
 		ChatImpl sessionApi = new ChatImpl(contact, session, mOneToOneChatEventBroadcaster);
 		ChatServiceImpl.addChatSession(contact, sessionApi);
 
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)contact);
-    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	InstantMessage msg = session.getFirstMessage();
-    	ChatMessage msgApi;
-    	if (msg instanceof GeolocMessage) {
-    		GeolocMessage geoloc = (GeolocMessage)msg;
-        	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
-        			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-        			geoloc.getGeoloc().getExpiration());
-        	msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-        			geoloc.getRemote(),
-        			geolocApi, geoloc.getDate());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
-    	} else {
-        	msgApi = new ChatMessage(msg.getMessageId(),
-        			msg.getRemote(),
-        			msg.getTextMessage(), msg.getServerDate());
-        	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);    		
-    	}
-    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-
+		Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage().getMessageId());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
     
     /**
@@ -458,21 +439,20 @@ public class ChatServiceImpl extends IChatService.Stub {
 		// Update rich messaging history
 		MessagingLog.getInstance().addGroupChat(session.getContributionID(),
 				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
-		
+		// TODO : Update displayName of remote contact
+		/*
+		 * ContactsManager.getInstance().setContactDisplayName(contact,
+		 * session.getRemoteDisplayName());
+		 */
 		// Add session in the list
 		GroupChatImpl sessionApi = new GroupChatImpl(session, mGroupChatEventBroadcaster);
 		ChatServiceImpl.addGroupChatSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-    	Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	if (session.getRemoteContact() != null) {
-    		intent.putExtra(GroupChatIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
-    	}
-    	intent.putExtra(GroupChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-    	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
-    	intent.putExtra(GroupChatIntent.EXTRA_SUBJECT, sessionApi.getSubject());
-    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
+		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+		intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
+		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 	
 	/**

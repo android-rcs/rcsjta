@@ -29,13 +29,17 @@ import static com.gsma.services.rcs.ipcall.IPCall.State.HOLD;
 import static com.gsma.services.rcs.ipcall.IPCall.State.INVITED;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
+import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
@@ -330,6 +334,40 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public boolean isOnHold() {
 		// TODO
 		return false;
+	}
+
+	/**
+	 * Returns the video codec used during sharing
+	 *
+	 * @return VideoCodec
+	 * @throws JoynServiceException
+	 */
+	public VideoCodec getVideoCodec() {
+		try {
+			return session.getPlayer().getVideoCodec();
+		} catch (RemoteException e) {
+			if (logger.isActivated()) {
+				logger.info("Unable to retrieve the video codec!");
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the audio codec used during sharing
+	 *
+	 * @return AudioCodec
+	 * @throws JoynServiceException
+	 */
+	public AudioCodec getAudioCodec() {
+		try {
+			return session.getPlayer().getAudioCodec();
+		} catch (RemoteException e) {
+			if (logger.isActivated()) {
+				logger.info("Unable to retrieve the audio codec!");
+			}
+			return null;
+		}
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
