@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -173,15 +173,16 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinId(java.lang.String, java.lang.String)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void updateGroupChatRejoinId(String chatId, String rejoingId) {
+	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId) {
 		if (logger.isActivated()) {
-			logger.debug("Update group chat rejoin ID to " + rejoingId);
+			logger.debug("Update group chat rejoin ID to " + rejoinId);
 		}
 		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_REJOIN_ID, rejoingId);
+		values.put(ChatData.KEY_REJOIN_ID, rejoinId);
+		values.put(ChatData.KEY_STATUS, GroupChat.State.STARTED);
 		cr.update(chatDatabaseUri, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 

@@ -82,12 +82,12 @@ public interface IGroupChatLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
-	 * @param rejoingId
+	 * @param rejoinId
 	 *            Rejoin ID
 	 * @param status
 	 *            Status
 	 */
-	public void updateGroupChatRejoinId(String chatId, String rejoingId);
+	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId);
 
 	/**
 	 * Get the group chat info

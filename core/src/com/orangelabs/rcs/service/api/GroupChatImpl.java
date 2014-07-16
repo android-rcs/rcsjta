@@ -387,15 +387,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     	if (logger.isActivated()) {
 			logger.info("Session started");
 		}
-    	synchronized(lock) {
+		synchronized (lock) {
 			// Update rich messaging history
-	    	String chatId = getChatId();
-	    	MessagingLog.getInstance().updateGroupChatStatus(chatId, STARTED);
-	    	MessagingLog.getInstance().updateGroupChatRejoinId(chatId, session.getImSessionIdentity());
-			
+			String chatId = getChatId();
+			MessagingLog.getInstance().updateGroupChatRejoinIdOnSessionStart(chatId,
+					session.getImSessionIdentity());
 			// Notify event listeners
-	    	mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, STARTED);
-	    }
+			mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, STARTED);
+		}
     }
     
     /* (non-Javadoc)

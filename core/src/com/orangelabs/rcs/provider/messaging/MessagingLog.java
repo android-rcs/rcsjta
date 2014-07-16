@@ -139,11 +139,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinId(java.lang.String, java.lang.String)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void updateGroupChatRejoinId(String chatId, String rejoingId) {
-		groupChatLog.updateGroupChatRejoinId(chatId, rejoingId);
+	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId) {
+		groupChatLog.updateGroupChatRejoinIdOnSessionStart(chatId, rejoinId);
 	}
 
 	/*
