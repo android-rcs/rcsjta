@@ -151,13 +151,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
     }
 
 	/**
-     * Returns the complete filename including the path of the file icon
-     *
-     * @return Filename
-     */
-	public String getFileIconName() {
-		// TODO
-		return null; //session.getThumbnail();
+	 * Returns the Uri of the file icon
+	 *
+	 * @return Uri
+	 */
+	public Uri getFileIcon() {
+		MmContent fileIcon = session.getFileicon();
+		return fileIcon != null ? fileIcon.getUri() : null;
 	}
 
 	/**

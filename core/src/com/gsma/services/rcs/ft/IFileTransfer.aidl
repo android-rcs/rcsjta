@@ -19,7 +19,7 @@ interface IFileTransfer {
 
 	String getFileType();
 
-	String getFileIconName();
+	Uri getFileIcon();
 
 	Uri getFile();
 

@@ -148,13 +148,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	}
 
 	/**
-	 * Returns the complete filename including the path of the file icon
+	 * Returns the Uri of the file icon
 	 *
-	 * @return Filename
+	 * @return Uri
 	 */
-	public String getFileIconName() {
-		// TODO
-		return null; // session.getThumbnail();
+	public Uri getFileIcon() {
+		MmContent fileIcon = session.getFileicon();
+		return fileIcon != null ? fileIcon.getUri() : null;
 	}
 
 	/**

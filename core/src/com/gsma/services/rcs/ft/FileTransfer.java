@@ -246,18 +246,14 @@ public class FileTransfer {
     }
     
 	/**
-	 * Returns the URI of the file icon
+	 * Returns the Uri of the file icon
 	 * 
-	 * @return the URI of the file icon or thumbnail
+	 * @return the Uri of the file icon or thumbnail
 	 * @throws JoynServiceException
 	 */
 	public Uri getFileIcon() throws JoynServiceException {
 		try {
-			String fileIconName = transferInf.getFileIconName();
-			if (fileIconName != null) {
-				return Uri.fromFile(new File(fileIconName));
-			}
-			return null;
+			return transferInf.getFileIcon();
 		} catch (Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
