@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
+
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * This class offers callback methods on multimedia streaming session events
@@ -24,32 +30,20 @@ package com.gsma.services.rcs.extension;
  */
 public abstract class MultimediaStreamingSessionListener extends IMultimediaStreamingSessionListener.Stub {
 	/**
-	 * Callback called when the session is pending.
+	 * Callback called when the multimedia messaging session state is changed
+	 *
+	 * @param contact Contact ID
+	 * @param sessionId
+	 * @param state
 	 */
-	public abstract void onSessionRinging();
-	
-	/**
-	 * Callback called when the session is started
-	 */
-	public abstract void onSessionStarted();
-	
-	/**
-	 * Callback called when the session has been aborted or terminated
-	 */
-	public abstract void onSessionAborted();
-	
-	/**
-	 * Callback called when the session has failed
-	 * 
-	 * @param error Error
-	 * @see MultimediaSession.Error
-	 */
-	public abstract void onSessionError(int error);
-	
+	public abstract void onMultimediaStreamingStateChanged(ContactId contact, String sessionId, int state);
+
 	/**
 	 * Callback called when a new payload has been received
-	 * 
+	 *
+	 * @param contact Contact ID
+	 * @param sessionId
 	 * @param content Payload content
 	 */
-	public abstract void onNewPayload(byte[] content);
+	public abstract void onNewPayload(ContactId contact, String sessionId, byte[] content);
 }

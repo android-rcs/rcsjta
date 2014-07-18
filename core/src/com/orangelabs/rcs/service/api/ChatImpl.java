@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DELIVERED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DISPLAYED;
+import static com.gsma.services.rcs.chat. ChatLog.Message.Direction.INCOMING;
+
 import android.content.Intent;
 import android.os.Parcelable;
 import android.os.RemoteCallbackList;
+import android.util.Pair;
 
 import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -44,6 +50,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -62,45 +69,45 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	 * Core session
 	 */
 	private OneOneChatSession session;
-	
-	/**
-	 * List of listeners
-	 */
-	private RemoteCallbackList<IChatListener> listeners = new RemoteCallbackList<IChatListener>();
+
+	private final IOneToOneChatEventBroadcaster mChatEventBroadcaster;
 
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(ChatImpl.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param contact Remote contact
-	 */
-	public ChatImpl(ContactId contact) {
-		this(contact,null);
-	}
-	
 	/**
 	 * Constructor
 	 * 
 	 * @param contact Remote contact ID
 	 * @param session Session
+	 * @param broadcaster IChatEventBroadcaster
 	 */
-	public ChatImpl(ContactId contact, OneOneChatSession session) {
+	public ChatImpl(ContactId contact, OneOneChatSession session,
+			IOneToOneChatEventBroadcaster broadcaster) {
 		this.contact = contact;
 		this.session = session;
-		if (session != null) {
-			session.addListener(this);
-		}
+		mChatEventBroadcaster = broadcaster;
+
+		session.addListener(this);
 	}
-	
+
+	/**
+	 * Constructor
+	 *
+	 * @param contact Remote contact
+	 * @param chatEventBroadcaster IChatEventBroadcaster
+	 */
+	public ChatImpl(ContactId contact, IOneToOneChatEventBroadcaster chatEventBroadcaster) {
+		this(contact, null, chatEventBroadcaster);
+	}
+
 	/**
 	 * Set core session
 	 * 
@@ -278,7 +285,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 	
     /**
-     * Sends an “is-composing” event. The status is set to true when
+     * Sends an Â“is-composingÂ” event. The status is set to true when
      * typing a message, else it is set to false.
      * 
      * @param status Is-composing status
@@ -292,105 +299,66 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	    	}.start();
     	}
     }
-	
-    /**
-     * Adds a listener on chat events
-     *  
-     * @param listener Chat event listener
-     */
-    public void addEventListener(IChatListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Add an event listener");
-		}
 
-    	synchronized(lock) {
-    		listeners.register(listener);
-    	}
-    }
-	
-    /**
-     * Removes a listener on chat events
-     * 
-     * @param listener Chat event listener
-     */
-    public void removeEventListener(IChatListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Remove an event listener");
-		}
-
-    	synchronized(lock) {
-    		listeners.unregister(listener);
-    	}
-    }
-    
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
      */
     @Override
-    public void handleSessionStarted() {
-    	synchronized(lock) {
-	    	if (logger.isActivated()) {
-				logger.info("Session started");
-			}
-
-			// Update rich messaging history
-	    	// Nothing done in database
-	    }
-    }
+	public void handleSessionStarted() {
+		if (logger.isActivated()) {
+			logger.info("Session started");
+		}
+		// Update rich messaging history
+		// Nothing done in database
+	}
     
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted(int)
      */
     @Override
-    public void handleSessionAborted(int reason) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session aborted (reason " + reason + ")");
-			}
-	
+	public void handleSessionAborted(int reason) {
+		if (logger.isActivated()) {
+			logger.info("Session aborted (reason " + reason + ")");
+		}
+		synchronized (lock) {
 			// Update rich messaging history
-	    	// Nothing done in database
-	        
-	        // Remove session from the list
-	        ChatServiceImpl.removeChatSession(session.getRemoteContact());
-	    }
-    }
+			// Nothing done in database
+			// Remove session from the list
+			ChatServiceImpl.removeChatSession(session.getRemoteContact());
+		}
+	}
     
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
     @Override
-    public void handleSessionTerminatedByRemote() {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session terminated by remote");
-			}
-	
+	public void handleSessionTerminatedByRemote() {
+		if (logger.isActivated()) {
+			logger.info("Session terminated by remote");
+		}
+		synchronized (lock) {
 			// Update rich messaging history
-	    	// Nothing done in database
-			
-	        // Remove session from the list
+			// Nothing done in database
+			// Remove session from the list
 			ChatServiceImpl.removeChatSession(session.getRemoteContact());
-	    }
-    }
+		}
+	}
     
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
      */
     @Override
     public void handleReceiveMessage(InstantMessage message) {
+		if (logger.isActivated()) {
+			logger.info("New IM received "+message);
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New IM received "+message);
-			}
-			
 			// Update rich messaging history
-			MessagingLog.getInstance().addChatMessage(message, ChatLog.Message.Direction.INCOMING);
-			
+			MessagingLog.getInstance().addChatMessage(message, INCOMING);
 			// Create a chat message
-        	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
+        	ChatMessage chatMsg = new ChatMessage(message.getMessageId(),
         			message.getRemote(),
         			message.getTextMessage(),
         			message.getServerDate());
@@ -398,23 +366,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)msgApi.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)chatMsg.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, chatMsg);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
 
-	    	// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
 	    }
     }
     
@@ -423,42 +379,28 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      */
     @Override
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
+		if (logger.isActivated()) {
+			logger.info("New geoloc received");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New geoloc received");
-			}
-			
 			// Update rich messaging history
-			MessagingLog.getInstance().addChatMessage(geoloc, ChatLog.Message.Direction.INCOMING);
-			
+			MessagingLog.getInstance().addChatMessage(geoloc, INCOMING);
 			// Create a geoloc message
         	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
         			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
         			geoloc.getGeoloc().getExpiration());
-        	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
+        	com.gsma.services.rcs.chat.GeolocMessage geolocMsg = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
         			geoloc.getRemote(),
         			geolocApi, geoloc.getDate());
 
         	// Broadcast intent related to the received invitation
 	    	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
 	    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)msgApi.getContact());
+	    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)geolocMsg.getContact());
 	    	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
-	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);
+	    	intent.putExtra(ChatIntent.EXTRA_MESSAGE, geolocMsg);
 	    	AndroidFactory.getApplicationContext().sendBroadcast(intent);
 
-	    	// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
 	    }
     }
     
@@ -467,32 +409,21 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
      */
     @Override
     public void handleImError(ChatError error) {
+		if (logger.isActivated()) {
+			logger.info("IM error " + error.getErrorCode());
+		}
 		synchronized (lock) {
-			if (logger.isActivated()) {
-				logger.info("IM error " + error.getErrorCode());
-			}
-
 			// Update rich messaging history
 			switch (error.getErrorCode()) {
-			case ChatError.SESSION_INITIATION_FAILED:
-			case ChatError.SESSION_INITIATION_CANCELLED:
-				MessagingLog.getInstance().updateChatMessageStatus(session.getFirstMessage().getMessageId(),
-						ChatLog.Message.Status.Content.FAILED);
-				// notify listener
-				final int N = listeners.beginBroadcast();
-				for (int i = 0; i < N; i++) {
-					try {
-						listeners.getBroadcastItem(i).onReportMessageFailed(session.getFirstMessage().getMessageId());
-					} catch (Exception e) {
-						if (logger.isActivated()) {
-							logger.error("Can't notify listener", e);
-						}
-					}
-				}
-				listeners.finishBroadcast();
-				break;
-			default:
-				break;
+				case ChatError.SESSION_INITIATION_FAILED:
+				case ChatError.SESSION_INITIATION_CANCELLED:
+					String msgId = session.getFirstMessage().getMessageId();
+					MessagingLog.getInstance().updateChatMessageStatus(msgId, FAILED);
+					// notify listener
+					mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId, FAILED);
+					break;
+				default:
+					break;
 			}
 			// Remove session from the list
 			ChatServiceImpl.removeChatSession(session.getRemoteContact());
@@ -501,83 +432,51 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     
 	@Override
 	public void handleIsComposingEvent(ContactId contact, boolean status) {
+		if (logger.isActivated()) {
+			logger.info(contact + " is composing status set to " + status);
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info(contact + " is composing status set to " + status);
-			}
-	
 	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onComposingEvent(status);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+			mChatEventBroadcaster.broadcastComposingEvent(contact, status);
 		}
 	}
 
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String)
      */
+	@Override
 	public void handleSendMessageFailure(String msgId) {
+		if (logger.isActivated()) {
+			logger.info("New message failure status for message " + msgId);
+		}
 		synchronized (lock) {
-			if (logger.isActivated()) {
-				logger.info("New message failure status for message " + msgId);
-			}
-
 			// Update rich messaging history
-			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, FAILED);
 
 			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-			for (int i = 0; i < N; i++) {
-				try {
-					listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-				} catch (Exception e) {
-					if (logger.isActivated()) {
-						logger.error("Can't notify listener", e);
-					}
-				}
-			}
-			listeners.finishBroadcast();
+			mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId, FAILED);
 		}
 	}
 
 	@Override
 	public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact) {
+		if (logger.isActivated()) {
+			logger.info("New message delivery status for message " + msgId + ", status " + status);
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New message delivery status for message " + msgId + ", status " + status);
-			}
-	
 			// Update rich messaging history
 			MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
-			
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-				try {
-					if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
-					} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-					} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
-							|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
-							|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-					}
-				} catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+
+			// Notify event listeners
+			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId, DELIVERED);
+			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId, DISPLAYED);
+			} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+					|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+					|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId, FAILED);
+			}
 	    }
     }
     
@@ -587,18 +486,18 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
     }
     
     /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful()
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful(com.gsma.services.rcs.contact.ContactId)
      */
     @Override
-    public void handleAddParticipantSuccessful() {
+    public void handleAddParticipantSuccessful(ContactId contact) {
     	// Not used in single chat
     }
     
     /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantFailed(java.lang.String)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantFailed(com.gsma.services.rcs.contact.ContactId, java.lang.String)
      */
     @Override
-    public void handleAddParticipantFailed(String reason) {
+    public void handleAddParticipantFailed(ContactId contact, String reason) {
     	// Not used in single chat
     }
 

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
@@ -38,7 +38,6 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.IImageSharingService;
-import com.gsma.services.rcs.ish.INewImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
@@ -51,6 +50,8 @@ import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.service.broadcaster.ImageSharingEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -59,25 +60,20 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingServiceImpl extends IImageSharingService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
 
 	/**
 	 * List of image sharing sessions
 	 */
-	private static Hashtable<String, IImageSharing> ishSessions = new Hashtable<String, IImageSharing>();  
+	private static Hashtable<String, IImageSharing> ishSessions = new Hashtable<String, IImageSharing>();
 
-	/**
-	 * List of image sharing invitation listeners
-	 */
-	private RemoteCallbackList<INewImageSharingListener> listeners = new RemoteCallbackList<INewImageSharingListener>();
+	private final ImageSharingEventBroadcaster mImageSharingEventBroadcaster = new ImageSharingEventBroadcaster();
+
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
 
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(ImageSharingServiceImpl.class.getName());
+	private static final Logger logger = Logger.getLogger(ImageSharingServiceImpl.class.getSimpleName());
 
 	/**
 	 * Lock used for synchronization
@@ -139,63 +135,51 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     public boolean isServiceRegistered() {
     	return ServerApiUtils.isImsConnected();
     }
-    
+
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
-			}
-			
-			serviceListeners.unregister(listener);
-    	}	
-	}    
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
+	}
 
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }	
-	
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+			}
+		}
+	}
+
     /**
      * Receive a new image sharing invitation
      * 
@@ -205,42 +189,27 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Receive image sharing invitation from " + session.getRemoteContact());
 		}
-
+		ContactId contact = session.getRemoteContact();
 		// Update rich call history
-		RichCallHistory.getInstance().addImageSharing(session.getRemoteContact(), session.getSessionID(),
+		RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
 				ImageSharing.Direction.INCOMING,
 				session.getContent(),
 				ImageSharing.State.INVITED);
 
 		// Add session in the list
-		ImageSharingImpl sessionApi = new ImageSharingImpl(session);
+		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
     	
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
+    	intent.putExtra(ImageSharingIntent.EXTRA_CONTACT, (Parcelable)contact);
     	intent.putExtra(ImageSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(ImageSharingIntent.EXTRA_FILENAME, session.getContent().getName());
     	intent.putExtra(ImageSharingIntent.EXTRA_FILESIZE, session.getContent().getSize());
     	intent.putExtra(ImageSharingIntent.EXTRA_FILETYPE, session.getContent().getEncoding());
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-    	
-    	// Notify image sharing invitation listeners
-    	synchronized(lock) {
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewImageSharing(session.getSessionID());
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }
     }
 
     /**
@@ -262,11 +231,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * 
      * @param contact Contact ID
      * @param file Uri of file to share
-     * @param listener Image sharing event listener
      * @return Image sharing
      * @throws ServerApiException
      */
-    public IImageSharing shareImage(ContactId contact, Uri file, IImageSharingListener listener) throws ServerApiException {
+    public IImageSharing shareImage(ContactId contact, Uri file) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an image sharing session with " + contact);
 		}
@@ -289,8 +257,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	    			ImageSharing.State.INITIATED);
 
 			// Add session listener
-			ImageSharingImpl sessionApi = new ImageSharingImpl(session);
-			sessionApi.addEventListener(listener);
+			ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 
 			// Start the session
 	        new Thread() {
@@ -350,33 +317,33 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
 		return ishSessions.get(sharingId);
     }    
-    
-    /**
-	 * Registers an image sharing invitation listener
+
+	/**
+	 * Adds an event listener on image sharing events
 	 * 
-	 * @param listener New image sharing listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void addNewImageSharingListener(INewImageSharingListener listener) throws ServerApiException {
+	public void addEventListener(IImageSharingListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Add an image sharing invitation listener");
+			logger.info("Add an Image sharing event listener");
 		}
-		
-		listeners.register(listener);
+		synchronized (lock) {
+			mImageSharingEventBroadcaster.addEventListener(listener);
+		}
 	}
 
 	/**
-	 * Unregisters an image sharing invitation listener
+	 * Removes an event listener on image sharing events
 	 * 
-	 * @param listener New image sharing listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void removeNewImageSharingListener(INewImageSharingListener listener) throws ServerApiException {
+	public void removeEventListener(IImageSharingListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Remove an image sharing invitation listener");
+			logger.info("Remove an Image sharing event listener");
 		}
-		
-		listeners.unregister(listener);
+		synchronized (lock) {
+			mImageSharingEventBroadcaster.removeEventListener(listener);
+		}
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.gsh;
 
-import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -24,8 +23,4 @@ interface IGeolocSharing {
 	void rejectInvitation();
 
 	void abortSharing();
-	
-	void addEventListener(in IGeolocSharingListener listener);
-
-	void removeEventListener(in IGeolocSharingListener listener);
 }

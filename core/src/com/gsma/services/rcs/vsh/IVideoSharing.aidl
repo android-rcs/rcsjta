@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.vsh;
 
-import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -25,8 +24,4 @@ interface IVideoSharing {
 	void rejectInvitation();
 
 	void abortSharing();
-	
-	void addEventListener(in IVideoSharingListener listener);
-
-	void removeEventListener(in IVideoSharingListener listener);
 }

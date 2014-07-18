@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -341,7 +341,7 @@ public class MessageLog implements IMessageLog {
 		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
 			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.DELIVERED);
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			markMessageAsRead(msgId);
+			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.DISPLAYED);
 		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)) {
 			updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
 		} else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)) {

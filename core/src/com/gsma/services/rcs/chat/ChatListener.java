@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
+
+import com.gsma.services.rcs.contacts.ContactId;
 
 
 /**
@@ -25,47 +31,20 @@ package com.gsma.services.rcs.chat;
  */
 public abstract class ChatListener extends IChatListener.Stub {
 	/**
-	 * Callback called when a new message has been received
-	 * 
-	 * @param message Chat message
-	 * @see ChatMessage
+	 * Callback called when a message status/reasonCode is changed.
+	 *
+	 * @param contact Contact ID
+	 * @param msgId Message Id
+	 * @param status Status
 	 */
-	public abstract void onNewMessage(ChatMessage message);
-	
-	/**
-	 * Callback called when a new geoloc has been received
-	 * 
-	 * @param message Geoloc message
-	 * @see GeolocMessage
-	 */
-	public abstract void onNewGeoloc(GeolocMessage message);
-
-	/**
-	 * Callback called when a message has been delivered to the remote
-	 * 
-	 * @param msgId Message ID
-	 */
-	public abstract void onReportMessageDelivered(String msgId);
-
-	/**
-	 * Callback called when a message has been displayed by the remote
-	 * 
-	 * @param msgId Message ID
-	 */
-	public abstract void onReportMessageDisplayed(String msgId);
-
-	/**
-	 * Callback called when a message has failed to be delivered to the remote
-	 * 
-	 * @param msgId Message ID
-	 */
-	public abstract void onReportMessageFailed(String msgId);
+	public abstract void onMessageStatusChanged(ContactId contact, String msgId, int status);
 
 	/**
 	 * Callback called when an Is-composing event has been received. If the
 	 * remote is typing a message the status is set to true, else it is false.
-	 * 
+	 *
+	 * @param contact Contact ID
 	 * @param status Is-composing status
 	 */
-	public abstract void onComposingEvent(boolean status);
+	public abstract void onComposingEvent(ContactId contact, boolean status);
 }

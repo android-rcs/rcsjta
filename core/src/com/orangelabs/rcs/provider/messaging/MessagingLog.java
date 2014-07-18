@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provider.messaging;
@@ -30,6 +33,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.util.Pair;
 
 /**
  * Class to interface the Instant Messaging tables
@@ -389,7 +393,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 		contentResolver.delete(GroupChatDeliveryInfoData.CONTENT_URI, null, null);
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -408,8 +411,19 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * java.lang.String, com.gsma.services.rcs.contacts.ContactId)
 	 */
 	@Override
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contact) {
-		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
+	public void updateGroupChatDeliveryInfoStatus(String msgId, int status, int reasonCode, ContactId contact) {
+		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatus(msgId, status, reasonCode, contact);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#getGroupChatDeliveryInfoStatus(java.lang.String,
+	 * com.gsma.services.rcs.contacts.ContactId)
+	 */
+	@Override
+	public Pair<Integer, Integer> getGroupChatDeliveryInfoStatus(String msgId, ContactId contact) {
+		return groupChatDeliveryInfoLog.getGroupChatDeliveryInfoStatus(msgId, contact);
 	}
 
 	/*

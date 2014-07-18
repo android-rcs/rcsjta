@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.vsh;
 
@@ -142,17 +146,13 @@ public class VideoSharingService extends JoynService {
 	 *            Contact identifier
 	 * @param player
 	 *            Video player
-	 * @param listener
-	 *            Video sharing event listener
 	 * @return Video sharing
 	 * @throws JoynServiceException
 	 */
-	public VideoSharing shareVideo(ContactId contact, VideoPlayer player, VideoSharingListener listener)
-			throws JoynServiceException {
+	public VideoSharing shareVideo(ContactId contact, VideoPlayer player) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.shareVideo(contact, player,
-						listener);
+				IVideoSharing sharingIntf = api.shareVideo(contact, player);
 				if (sharingIntf != null) {
 					return new VideoSharing(sharingIntf);
 				} else {
@@ -245,17 +245,15 @@ public class VideoSharingService extends JoynService {
 	}
 
 	/**
-	 * Registers a new video sharing invitation listener
+	 * Adds an event listener on video sharing events
 	 * 
-	 * @param listener
-	 *            New video sharing listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewVideoSharingListener(NewVideoSharingListener listener)
-			throws JoynServiceException {
+	public void addEventListener(VideoSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.addNewVideoSharingListener(listener);
+				api.addEventListener(listener);
 			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -265,17 +263,15 @@ public class VideoSharingService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a new video sharing invitation listener
+	 * Removes an event listener from video sharing
 	 * 
-	 * @param listener
-	 *            New video sharing listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewVideoSharingListener(NewVideoSharingListener listener)
-			throws JoynServiceException {
+	public void removeEventListener(VideoSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.removeNewVideoSharingListener(listener);
+				api.removeEventListener(listener);
 			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

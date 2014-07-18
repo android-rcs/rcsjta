@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
@@ -138,14 +138,13 @@ public class ChatService extends JoynService {
      * or international format, SIP address, SIP-URI or Tel-URI.
      * 
      * @param contact the ContactId
-     * @param listener Chat event listener
      * @return Chat or null 
      * @throws JoynServiceException
      */
-    public Chat openSingleChat(ContactId contact, ChatListener listener) throws JoynServiceException {
+    public Chat openSingleChat(ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IChat chatIntf = api.openSingleChat(contact, listener);
+				IChat chatIntf = api.openSingleChat(contact);
 				if (chatIntf != null) {
 					return new Chat(chatIntf);
 				} else {
@@ -165,13 +164,12 @@ public class ChatService extends JoynService {
      * 
      * @param contacts Set of contact identifiers
      * @param subject Subject
-     * @param listener Chat event listener
      * @throws JoynServiceException
      */
-    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject, GroupChatListener listener) throws JoynServiceException {
+    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws JoynServiceException {
     	if (api != null) {
 			try {
-				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contacts), subject, listener);
+				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contacts), subject);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
 				} else {
@@ -371,42 +369,6 @@ public class ChatService extends JoynService {
         }
     }
 
-    /**
-	 * Registers a chat invitation listener
-	 * 
-	 * @param listener New chat listener
-	 * @throws JoynServiceException
-	 */
-	public void addNewChatListener(NewChatListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.addNewChatListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}
-
-	/**
-	 * Unregisters a chat invitation listener
-	 * 
-	 * @param listener New chat listener
-	 * @throws JoynServiceException
-	 */
-	public void removeNewChatListener(NewChatListener listener) throws JoynServiceException {
-		if (api != null) {
-			try {
-				api.removeNewChatListener(listener);
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}
-
 	/**
 	 * Set the parameter that controls whether to respond or not to display reports when requested by the remote.
 	 * <p>
@@ -420,6 +382,79 @@ public class ChatService extends JoynService {
 		if (api != null) {
 			try {
 				api.setRespondToDisplayReports(enable);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Adds an event listener for group chat events
+	 *
+	 * @param listener Group chat event listener
+	 * @throws JoynServiceException
+	 */
+	public void addGroupChatEventListener(GroupChatListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addGroupChatEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Removes an event listener for group chat events
+	 *
+	 * @param listener Group chat event listener
+	 * @throws JoynServiceException
+	 */
+	public void removeGroupChatEventListener(GroupChatListener listener)
+			throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeGroupChatEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Adds a listener for OneToOne chat events
+	 *
+	 * @param listener OneToOne Chat event listener
+	 * @throws JoynServiceException
+	 */
+	public void addOneToOneChatEventListener(ChatListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addOneToOneChatEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Removes a listener for OneToOne chat events
+	 *
+	 * @param listener OneToOne Chat event listener
+	 * @throws JoynServiceException
+	 */
+	public void removeOneToOneChatEventListener(ChatListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeOneToOneChatEventListener(listener);
 			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}

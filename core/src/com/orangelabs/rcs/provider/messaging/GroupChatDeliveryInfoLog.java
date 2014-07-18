@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -143,28 +143,16 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 	 *            Message ID
 	 * @param deliveryStatus
 	 *            Delivery status of entry
+	 * @param reasonCode
+	 *            Reason code for status
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	private void updateGroupChatDeliveryInfoStatus(String msgId, int deliveryStatus, ContactId contact) {
+	public void updateGroupChatDeliveryInfoStatus(String msgId, int deliveryStatus, int reasonCode, ContactId contact) {
 		ContentValues values = new ContentValues();
 		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, deliveryStatus);
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-		if (deliveryStatus == ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED) {
-			Pair<Integer, Integer> statusAndReasonCode = getGroupChatDeliveryInfoStatus(msgId, contact);
-			int status = statusAndReasonCode.first;
-			int reasonCode = statusAndReasonCode.second;
-			if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED == status) {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DISPLAY_ERROR);
-			} else if (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED == status
-					&& ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR == reasonCode) {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DELIVERY_ERROR);
-			} else {
-				values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, DELIVERY_ERROR);
-			}
-		} else {
-			values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, NONE);
-		}
+		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, reasonCode);
 		String[] selectionArgs = new String[] { msgId, contact.toString() };
 		if (cr.update(GroupChatDeliveryInfoDatabaseUri, values, SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
 			/* TODO: Throw exception */
@@ -172,21 +160,6 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 				logger.warn("There was not group chat delivery into for msgId '" + msgId + "' and contact '" + contact
 						+ "' to update!");
 			}
-		}
-	}
-
-	@Override
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contact) {
-		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-			updateGroupChatDeliveryInfoStatus(msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED, contact);
-		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			updateGroupChatDeliveryInfoStatus(msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED, contact);
-		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)) {
-			updateGroupChatDeliveryInfoStatus(msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED, contact);
-		} else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)) {
-			updateGroupChatDeliveryInfoStatus(msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED, contact);
-		} else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-			updateGroupChatDeliveryInfoStatus(msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED, contact);
 		}
 	}
 

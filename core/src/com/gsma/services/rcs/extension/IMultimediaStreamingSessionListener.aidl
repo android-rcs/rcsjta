@@ -1,16 +1,13 @@
 package com.gsma.services.rcs.extension;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 /**
  * Callback methods for multimedia streaming session events
  */
 interface IMultimediaStreamingSessionListener {
-	void onSessionStarted();
-	
-	void onSessionRinging();
 
-	void onSessionAborted();
+	void onMultimediaStreamingStateChanged(in ContactId contact, in String sessionId, in int state);
 
-	void onSessionError(in int error);
-
-	void onNewPayload(in byte[] content);
+	void onNewPayload(in ContactId contact, in String sessionId, in byte[] content);
 }

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -416,7 +416,7 @@ public abstract class GroupChatSession extends ChatSession {
                 	
         			// Notify listeners
         	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful();
+        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
         	        }
                 } else {
                     // Error
@@ -426,7 +426,7 @@ public abstract class GroupChatSession extends ChatSession {
                     
         			// Notify listeners
         	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(ctx.getReasonPhrase());
+        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
         	        }
                 }
             } else
@@ -438,7 +438,7 @@ public abstract class GroupChatSession extends ChatSession {
             	
     			// Notify listeners
     	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful();
+    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
     	        }
 	        } else {
 	            // Error responses
@@ -448,7 +448,7 @@ public abstract class GroupChatSession extends ChatSession {
             	
     			// Notify listeners
     	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(ctx.getReasonPhrase());
+    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
     	        }
 	        }
         } catch(Exception e) {
@@ -458,7 +458,7 @@ public abstract class GroupChatSession extends ChatSession {
         	
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(e.getMessage());
+	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, e.getMessage());
 	        }
         }
 	}
@@ -524,20 +524,26 @@ public abstract class GroupChatSession extends ChatSession {
                 		logger.debug("20x OK response received");
                 	}
                 	
-        			// Notify listeners
-        	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful();
-        	        }
+                    // Notify listeners
+                    for (ContactId participant : participants) {
+                        for (int i = 0; i < getListeners().size(); i++) {
+                            ((ChatSessionListener)getListeners().get(i))
+                                    .handleAddParticipantSuccessful(participant);
+                        }
+                    }
                 } else {
                     // Error
                     if (logger.isActivated()) {
                     	logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
                     }
                     
-        			// Notify listeners
-        	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(ctx.getReasonPhrase());
-        	        }
+                    // Notify listeners
+                    for (ContactId participant : participants) {
+                        for (int i = 0; i < getListeners().size(); i++) {
+                            ((ChatSessionListener)getListeners().get(i))
+                                    .handleAddParticipantFailed(participant, ctx.getReasonPhrase());
+                        }
+                    }
                 }
             } else
             if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
@@ -546,30 +552,39 @@ public abstract class GroupChatSession extends ChatSession {
             		logger.debug("20x OK response received");
             	}
             	
-    			// Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful();
-    	        }
+                // Notify listeners
+                for (ContactId participant : participants) {
+                    for (int i = 0; i < getListeners().size(); i++) {
+                        ((ChatSessionListener)getListeners().get(i))
+                                .handleAddParticipantSuccessful(participant);
+                    }
+                }
 	        } else {
 	            // Error responses
             	if (logger.isActivated()) {
             		logger.debug("No response received");
             	}
             	
-    			// Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(ctx.getReasonPhrase());
-    	        }
+                // Notify listeners
+                for (ContactId participant : participants) {
+                    for (int i = 0; i < getListeners().size(); i++) {
+                        ((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(
+                                participant, ctx.getReasonPhrase());
+                    }
+                }
 	        }
         } catch(Exception e) {
         	if (logger.isActivated()) {
         		logger.error("REFER request has failed", e);
         	}
         	
-			// Notify listeners
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(e.getMessage());
-	        }
+            // Notify listeners
+            for (ContactId participant : participants) {
+                for (int i = 0; i < getListeners().size(); i++) {
+                    ((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(
+                            participant, e.getMessage());
+                }
+            }
         }
 	}
 	

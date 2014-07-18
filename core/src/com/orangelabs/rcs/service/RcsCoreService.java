@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -713,14 +713,14 @@ public class RcsCoreService extends Service implements CoreListener {
         ftApi.handleFileDeliveryStatus(fileTransferId, status, contact);
     }
 
-	public void handleGroupFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
+	public void handleGroupFileDeliveryStatus(String chatId, String fileTransferId, String status, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Handle group file delivery status: fileTransferId=" + fileTransferId + " status="
 					+ status + " contact=" + contact);
 		}
 
 		// Notify listeners
-		ftApi.handleGroupFileDeliveryStatus(fileTransferId, status, contact);
+		ftApi.handleGroupFileDeliveryStatus(chatId, fileTransferId, status, contact);
 	}
 
     /* (non-Javadoc)

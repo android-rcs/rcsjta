@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
@@ -168,32 +172,4 @@ public class MultimediaStreamingSession extends MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
     }    
-
-	/**
-	 * Adds a listener on session events
-	 * 
-	 * @param listener Session event listener
-	 * @throws JoynServiceException
-	 */
-	public void addEventListener(MultimediaStreamingSessionListener listener) throws JoynServiceException {
-		try {
-			sessionIntf.addEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Removes a listener on session events
-	 * 
-	 * @param listener Session event listener
-	 * @throws JoynServiceException
-	 */
-	public void removeEventListener(MultimediaStreamingSessionListener listener) throws JoynServiceException {
-		try {
-			sessionIntf.removeEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
 }

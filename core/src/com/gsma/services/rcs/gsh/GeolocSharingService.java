@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.gsh;
 
@@ -118,15 +122,14 @@ public class GeolocSharingService extends JoynService {
      * 
      * @param contact Contact identifier
      * @param geoloc Geolocation info
-     * @param listener Geoloc sharing event listener
      * @return Geoloc sharing
      * @throws JoynServiceException
 	 * @see Geoloc
      */
-    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc, GeolocSharingListener listener) throws JoynServiceException {
+    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IGeolocSharing sharingIntf = api.shareGeoloc(contact, geoloc, listener);
+				IGeolocSharing sharingIntf = api.shareGeoloc(contact, geoloc);
 				if (sharingIntf != null) {
 					return new GeolocSharing(sharingIntf);
 				} else {
@@ -211,18 +214,18 @@ public class GeolocSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
-    
-    /**
-	 * Registers a new geoloc sharing invitation listener
-	 * 
-	 * @param listener New geoloc sharing listener
+
+	/**
+	 * Adds an event listener on geoloc sharing events
+	 *
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewGeolocSharingListener(NewGeolocSharingListener listener) throws JoynServiceException {
+	public void addEventListener(GeolocSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.addNewGeolocSharingListener(listener);
-			} catch(Exception e) {
+				api.addEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {
@@ -231,16 +234,16 @@ public class GeolocSharingService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a new geoloc sharing invitation listener
-	 * 
-	 * @param listener New geoloc sharing listener
+	 * Removes an event listener on geoloc sharing
+	 *
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewGeolocSharingListener(NewGeolocSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(GeolocSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.removeNewGeolocSharingListener(listener);
-			} catch(Exception e) {
+				api.removeEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {

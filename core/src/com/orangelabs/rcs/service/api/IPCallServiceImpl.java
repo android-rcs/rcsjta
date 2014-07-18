@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
@@ -35,7 +39,6 @@ import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IIPCallService;
-import com.gsma.services.rcs.ipcall.INewIPCallListener;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
@@ -46,6 +49,8 @@ import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.service.broadcaster.IPCallEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -54,20 +59,15 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class IPCallServiceImpl extends IIPCallService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
+
+	private final IPCallEventBroadcaster mIPCallEventBroadcaster = new IPCallEventBroadcaster();
+
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
 
 	/**
 	 * List of IP call sessions
 	 */
 	private static Hashtable<String, IIPCall> ipCallSessions = new Hashtable<String, IIPCall>();
-
-	/**
-	 * List of IP call invitation listeners
-	 */
-	private RemoteCallbackList<INewIPCallListener> listeners = new RemoteCallbackList<INewIPCallListener>();
 
 	/**
 	 * The logger
@@ -77,7 +77,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * Constructor
@@ -135,72 +135,62 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
     public boolean isServiceRegistered() {
     	return ServerApiUtils.isImsConnected();
     }
-    
+
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
-			}
-			
-			serviceListeners.unregister(listener);
-    	}	
-	}    
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
+	}
 
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }	
-	
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+			}
+		}
+	}
+
 	/**
      * Receive a new IP call invitation
      * 
      * @param session IP call session
      */
 	public void receiveIPCallInvitation(IPCallSession session) {
+		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.info("Receive IP call invitation from " + session.getRemoteContact());
+			logger.info("Receive IP call invitation from " + contact);
 		}
+
 		// Get audio encoding
 		AudioContent audiocontent = session.getAudioContent();
 		
@@ -208,19 +198,19 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		VideoContent videocontent = session.getVideoContent();
 
 		// Update IP call history
-		IPCallHistory.getInstance().addCall(session.getRemoteContact(), session.getSessionID(),
+		IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
 				IPCall.Direction.INCOMING,
 				audiocontent, videocontent,
 				IPCall.State.INVITED);
 
 		// Add session in the list
-		IPCallImpl sessionApi = new IPCallImpl(session);
+		IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 		IPCallServiceImpl.addIPCallSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
 		Intent intent = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(IPCallIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
+		intent.putExtra(IPCallIntent.EXTRA_CONTACT, (Parcelable)contact);
 		intent.putExtra(IPCallIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
 		intent.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
     	intent.putExtra(IPCallIntent.EXTRA_AUDIO_ENCODING, audiocontent.getEncoding());
@@ -230,20 +220,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
     	}
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
 
-    	// Notify IP call invitation listeners
-    	synchronized(lock) {
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewCall(session.getSessionID());
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }
 	}
 
     /**
@@ -254,11 +230,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param contact Contact ID
      * @param player IP call player
      * @param renderer IP call renderer
-     * @param listener IP call event listener
      * @return IP call
 	 * @throws ServerApiException 
      */
-    public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
+    public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call audio session with " + contact);
 		}
@@ -282,9 +257,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 					IPCall.State.INITIATED);
 
 			// Add session in the list
-			IPCallImpl sessionApi = new IPCallImpl(session);
-			sessionApi.addEventListener(listener);
-			
+			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
+
 			// Start the session
 	        Thread t = new Thread() {
 	    		public void run() {
@@ -309,11 +283,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param contact Contact ID
      * @param player IP call player
      * @param renderer IP call renderer
-     * @param listener IP call event listener
      * @return IP call
 	 * @throws ServerApiException 
      */
-    public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer, IIPCallListener listener) throws ServerApiException {
+    public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call visio session with " + contact);
 		}
@@ -337,9 +310,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 					IPCall.State.INITIATED);
 
 			// Add session in the list
-			IPCallImpl sessionApi = new IPCallImpl(session);
-			sessionApi.addEventListener(listener);
-			
+			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
+
 			// Start the session
 	        Thread t = new Thread() {
 	    		public void run() {
@@ -406,33 +378,33 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
     	return new IPCallServiceConfiguration(
     			RcsSettings.getInstance().isIPVoiceCallBreakoutAA() || RcsSettings.getInstance().isIPVoiceCallBreakoutAA());    	
 	}
-    
-    /**
-	 * Registers an IP call invitation listener
+
+	/**
+	 * Adds an event listener on IP call events
 	 * 
-	 * @param listener New IP call listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void addNewIPCallListener(INewIPCallListener listener) throws ServerApiException {
+	public void addEventListener(IIPCallListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Add an IP call invitation listener");
+			logger.info("Add an IP call event listener");
 		}
-		
-		listeners.register(listener);
+		synchronized (lock) {
+			mIPCallEventBroadcaster.addEventListener(listener);
+		}
 	}
 
 	/**
-	 * Unregisters an IP call invitation listener
+	 * Removes an event listener from IP call events
 	 * 
-	 * @param listener New IP call listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void removeNewIPCallListener(INewIPCallListener listener) throws ServerApiException {
+	public void removeEventListener(IIPCallListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Remove an IP call invitation listener");
+			logger.info("Remove an IP call event listener");
 		}
-		
-		listeners.unregister(listener);
+		synchronized (lock) {
+			mIPCallEventBroadcaster.removeEventListener(listener);
+		}
 	}
 
 	/**

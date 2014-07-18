@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,50 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
-import android.net.Uri;
-
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * File transfer event listener
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public abstract class FileTransferListener extends IFileTransferListener.Stub {
 	/**
-	 * Callback called when the file transfer is started
+	 * Callback called when the file transfer status/reasonCode is changed.
+	 *
+	 * @param contact Contact ID
+	 * @param transferId Id of file transfer
+	 * @param state State of the file transfer
 	 */
-	public abstract void onTransferStarted();
-	
-	/**
-	 * Callback called when the file transfer has been aborted
-	 */
-	public abstract void onTransferAborted();
+	public abstract void onTransferStateChanged(ContactId contact, String transferId, int state);
 
 	/**
-	 * Callback called when the transfer has failed
-	 * 
-	 * @param error Error
-	 * @see FileTransfer.Error
-	 */
-	public abstract void onTransferError(int error);
-	
-	/**
-	 * Callback called during the transfer progress
-	 * 
+	 * Callback called during the file transfer progress.
+	 *
+	 * @param contact Contact ID
+	 * @param transferId Id of file transfer
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
-	public abstract void onTransferProgress(long currentSize, long totalSize);
-
-	/**
-	 * Callback called when the file has been transferred
-	 * 
-	 * @param file URI of the transferred file transferred (local or a remote file)
-	 */
-	public abstract void onFileTransferred(Uri file);
+	public abstract void onTransferProgress(ContactId contact, String transferId, long currentSize, long totalSize);
 }

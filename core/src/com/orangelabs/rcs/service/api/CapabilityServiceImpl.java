@@ -19,10 +19,7 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
-
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -33,6 +30,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.service.broadcaster.CapabilitiesBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -41,30 +40,20 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class CapabilityServiceImpl extends ICapabilityService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
 
-	/**
-	 * List of capabilities listeners
-	 */
-	private RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
 
-	/**
-	 * List of listeners per contact
-	 */
-	private Hashtable<String, RemoteCallbackList<ICapabilitiesListener>> contactCapalitiesListeners = new Hashtable<String, RemoteCallbackList<ICapabilitiesListener>>();
+	private final CapabilitiesBroadcaster mCapabilitiesBroadcaster = new CapabilitiesBroadcaster();
 
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
     /**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(CapabilityServiceImpl.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
 	 * Constructor
@@ -95,60 +84,48 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
-			}
-			
-			serviceListeners.unregister(listener);
-    	}	
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
 	}
-	
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }
-    
+
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+			}
+		}
+	}
+
     /**
      * Returns the capabilities supported by the local end user. The supported
      * capabilities are fixed by the MNO and read during the provisioning.
@@ -171,7 +148,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Returns the capabilities of a given contact from the local database. This
-     * method doesn’t request any network update to the remote contact. The parameter
+     * method doesnï¿½t request any network update to the remote contact. The parameter
      * contact supports the following formats: MSISDN in national or international
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
      * supported an exception is thrown.
@@ -266,38 +243,22 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     				exts,
     				capabilities.isSipAutomata()); 
 
-    		// Notify capabilities listeners
-        	notifyListeners(contact, c, capabilitiesListeners);
-
-    		// Notify capabilities listeners for a given contact
-	        RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact.toString());
-	        if (listeners != null) {
-	        	notifyListeners(contact, c, listeners);
-	        }
+			// Notify capabilities listeners
+			notifyListeners(contact, c);
     	}
     }
-	
-    /**
-     * Notify listeners
-     * 
-     * @param contact ContactId
-     * @param capabilities Capabilities
-     * @param listeners Listeners
-     */
-    private void notifyListeners(ContactId contact, Capabilities capabilities, RemoteCallbackList<ICapabilitiesListener> listeners) {
-		final int N = listeners.beginBroadcast();
-        for (int i=0; i < N; i++) {
-            try {
-            	listeners.getBroadcastItem(i).onCapabilitiesReceived(contact, capabilities);
-            } catch(Exception e) {
-            	if (logger.isActivated()) {
-            		logger.error("Can't notify listener", e);
-            	}
-            }
-        }
-        listeners.finishBroadcast();
-    }
-    
+
+	/**
+	 * Notify listeners
+	 *
+	 * @param contact ContactId
+	 * @param capabilities Capabilities
+	 */
+	private void notifyListeners(ContactId contact, Capabilities capabilities) {
+		mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact,
+				capabilities);
+	}
+
     /**
 	 * Requests capabilities for all contacts existing in the local address book. This
 	 * method initiates in background new capability requests for each contact of the
@@ -337,72 +298,60 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 	/**
 	 * Registers a capabilities listener on any contact
-	 * 
+	 *
 	 * @param listener Capabilities listener
 	 */
 	public void addCapabilitiesListener(ICapabilitiesListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a listener");
-			}
-
-			capabilitiesListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a listener");
+		}
+		synchronized (lock) {
+			mCapabilitiesBroadcaster.addCapabilitiesListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a capabilities listener
-	 * 
+	 *
 	 * @param listener Capabilities listener
 	 */
 	public void removeCapabilitiesListener(ICapabilitiesListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a listener");
-			}
-			
-			capabilitiesListeners.unregister(listener);
-    	}	
+		if (logger.isActivated()) {
+			logger.info("Remove a listener");
+		}
+		synchronized (lock) {
+			mCapabilitiesBroadcaster.removeCapabilitiesListener(listener);
+		}
 	}
-	
+
 	/**
 	 * Registers a listener for receiving capabilities of a given contact
-	 * 
+	 *
 	 * @param contact ContactId
 	 * @param listener Capabilities listener
 	 */
 	public void addContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a listener for contact " + contact);
-			}
-
-			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact.toString());
-			if (listeners == null) {
-				listeners = new RemoteCallbackList<ICapabilitiesListener>();
-				contactCapalitiesListeners.put(contact.toString(), listeners);
-			}
-			listeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a listener for contact " + contact);
+		}
+		synchronized (lock) {
+			mCapabilitiesBroadcaster.addContactCapabilitiesListener(contact, listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener of capabilities for a given contact
-	 * 
+	 *
 	 * @param contact ContactId
 	 * @param listener Capabilities listener
 	 */
 	public void removeContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a listener for contact " + contact);
-			}
-
-			RemoteCallbackList<ICapabilitiesListener> listeners = contactCapalitiesListeners.get(contact.toString());
-			if (listeners != null) {
-				listeners.unregister(listener);
-			}
-		}	
+		if (logger.isActivated()) {
+			logger.info("Remove a listener for contact " + contact);
+		}
+		synchronized (lock) {
+			mCapabilitiesBroadcaster.removeContactCapabilitiesListener(contact, listener);
+		}
 	}
 
 	/**

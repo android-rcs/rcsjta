@@ -1,16 +1,13 @@
 package com.gsma.services.rcs.ish;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 /**
  * Callback methods for image sharing events
  */
 interface IImageSharingListener {
-	void onSharingStarted();
-	
-	void onSharingAborted();
 
-	void onSharingError(in int error);
-	
-	void onSharingProgress(in long currentSize, in long totalSize);
+	void onImageSharingStateChanged(in ContactId contact, in String sharingId, in int state);
 
-	void onImageShared(in Uri file);
+	void onImageSharingProgress(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
 }

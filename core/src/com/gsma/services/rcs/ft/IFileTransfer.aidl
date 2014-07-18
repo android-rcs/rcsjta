@@ -1,12 +1,13 @@
 package com.gsma.services.rcs.ft;
 
-import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * File transfer interface
  */
 interface IFileTransfer {
+
+	String getChatId();
 
 	String getTransferId();
 
@@ -35,8 +36,4 @@ interface IFileTransfer {
 	void pauseTransfer();
 	
 	void resumeTransfer();
-
-	void addEventListener(in IFileTransferListener listener);
-
-	void removeEventListener(in IFileTransferListener listener);
 }

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
@@ -153,16 +153,15 @@ public class FileTransferService extends JoynService {
      * file to be transferred (for a local or a remote file). The parameter 
      * contact supports the following formats: MSISDN in national or 
      * international format, SIP address, SIP-URI or Tel-URI. If the format of 
-     * the contact is not supported an exception is thrown. 
+     * the contact is not supported an exception is thrown.
      * 
      * @param contact the remote contact identifier
      * @param file URI of file to transfer
-     * @param listener File transfer event listener
      * @return File transfer
      * @throws JoynServiceException
 	 */
-    public FileTransfer transferFile(ContactId contact, Uri file, FileTransferListener listener) throws JoynServiceException {
-    	return transferFile(contact, file, false, listener);
+    public FileTransfer transferFile(ContactId contact, Uri file) throws JoynServiceException {
+    	return transferFile(contact, file, false);
     }
     
 	/**
@@ -197,17 +196,15 @@ public class FileTransferService extends JoynService {
 	 * @param fileicon
 	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be attached if file is not an
 	 *            image or if local or remote contact does not support fileicon.
-	 * @param listener
-	 *            File transfer event listener
 	 * @return File transfer
 	 * @throws JoynServiceException
 	 */
-	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon, FileTransferListener listener) throws JoynServiceException {
+	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon) throws JoynServiceException {
     	if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
 
-				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon, listener);
+				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -230,17 +227,16 @@ public class FileTransferService extends JoynService {
 	 *            fileicon. Fileicon may not be attached if file is not an
 	 *            image or if local or remote contact does not support
 	 *            fileicon.
-	 * @param listener File transfer event listener
 	 * @return File transfer
 	 * @throws JoynServiceException
 	 */
-	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon,
-			FileTransferListener listener) throws JoynServiceException {
+	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon)
+			throws JoynServiceException {
 		if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
 				
-				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon, listener);
+				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -344,15 +340,15 @@ public class FileTransferService extends JoynService {
     }     
     
     /**
-	 * Registers a file transfer invitation listener
+	 * Registers a file transfer event listener
 	 * 
-	 * @param listener New file transfer listener
+	 * @param listener OneToOne File transfer listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewFileTransferListener(NewFileTransferListener listener) throws JoynServiceException {
+	public void addOneToOneFileTransferListener(FileTransferListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.addNewFileTransferListener(listener);
+				api.addOneToOneFileTransferListener(listener);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -362,15 +358,15 @@ public class FileTransferService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a file transfer invitation listener
+	 * Unregisters a file transfer event listener
 	 * 
-	 * @param listener New file transfer listener
+	 * @param listener File transfer listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewFileTransferListener(NewFileTransferListener listener) throws JoynServiceException {
+	public void removeOneToOneFileTransferListener(FileTransferListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.removeNewFileTransferListener(listener);
+				api.removeOneToOneFileTransferListener(listener);
 			} catch(Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
@@ -378,7 +374,43 @@ public class FileTransferService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
 	}
-	
+
+	/**
+	 * Registers a group file transfer event listener
+	 *
+	 * @param listener Group file transfer listener
+	 * @throws JoynServiceException
+	 */
+	public void addGroupFileTransferListener(GroupFileTransferListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addGroupFileTransferListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Unregisters a group file transfer event listener
+	 *
+	 * @param listener Group file transfer listener
+	 * @throws JoynServiceException
+	 */
+	public void removeGroupFileTransferListener(GroupFileTransferListener listener) throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeGroupFileTransferListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
 	/**
 	 * set the Auto Accept Mode of a File Transfer configuration.
 	 * <p>

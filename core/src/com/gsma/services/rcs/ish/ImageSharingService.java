@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ish;
@@ -157,11 +157,10 @@ public class ImageSharingService extends JoynService {
      * 
      * @param contact Contact identifier
      * @param file Uri of file to share
-     * @param listener Image sharing event listener
      * @return Image sharing
      * @throws JoynServiceException
      */
-    public ImageSharing shareImage(ContactId contact, Uri file, ImageSharingListener listener) throws JoynServiceException {
+    public ImageSharing shareImage(ContactId contact, Uri file) throws JoynServiceException {
 		if (api != null) {
 			try {
 				// Allow permission to the stack server for content URI if release is KitKat or greater
@@ -175,7 +174,7 @@ public class ImageSharingService extends JoynService {
 					// after the client is restarted after device reboot.
 					persistUriPermissionForClient(file);
 				}
-				IImageSharing sharingIntf = api.shareImage(contact, file, listener);
+				IImageSharing sharingIntf = api.shareImage(contact, file);
 				if (sharingIntf != null) {
 					return new ImageSharing(sharingIntf);
 				} else {
@@ -260,18 +259,18 @@ public class ImageSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
-    
-    /**
-	 * Registers a new image sharing invitation listener
+
+	/**
+	 * Adds an event listener on image sharing events
 	 * 
-	 * @param listener New image sharing listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewImageSharingListener(NewImageSharingListener listener) throws JoynServiceException {
+	public void addEventListener(ImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.addNewImageSharingListener(listener);
-			} catch(Exception e) {
+				api.addEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {
@@ -280,16 +279,16 @@ public class ImageSharingService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a new image sharing invitation listener
+	 * Removes an event listener from image sharing
 	 * 
-	 * @param listener New image sharing listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewImageSharingListener(NewImageSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(ImageSharingListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.removeNewImageSharingListener(listener);
-			} catch(Exception e) {
+				api.removeEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {

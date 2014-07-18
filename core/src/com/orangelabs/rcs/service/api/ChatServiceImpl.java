@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
@@ -47,7 +47,6 @@ import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
-import com.gsma.services.rcs.chat.INewChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
@@ -59,6 +58,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.service.broadcaster.GroupChatEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -67,11 +69,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class ChatServiceImpl extends IChatService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
-
 	/**
 	 * List of one to one chat sessions
 	 */
@@ -86,20 +83,21 @@ public class ChatServiceImpl extends IChatService.Stub {
 	private final static Executor mDisplayNotificationProcessor = Executors
 			.newSingleThreadExecutor();
 
-	/**
-	 * List of file chat invitation listeners
-	 */
-	private RemoteCallbackList<INewChatListener> listeners = new RemoteCallbackList<INewChatListener>();
+	private final OneToOneChatEventBroadcaster mOneToOneChatEventBroadcaster  = new OneToOneChatEventBroadcaster();
+
+	private final GroupChatEventBroadcaster mGroupChatEventBroadcaster = new GroupChatEventBroadcaster();
+
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
 
 	/**
 	 * The logger
 	 */
-	private static Logger logger = Logger.getLogger(ChatServiceImpl.class.getName());
+	private static final Logger logger = Logger.getLogger(ChatServiceImpl.class.getSimpleName());
 
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * Constructor
@@ -169,59 +167,47 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
+	}
+
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
 			}
-			
-			serviceListeners.unregister(listener);
-    	}	
-	}    
-    
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }
+		}
+	}
     
     /**
 	 * Receive a new chat invitation
@@ -233,17 +219,19 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.info("Receive chat invitation from " + session.getRemoteContact());
 		}
 
+
 		// Update rich messaging history
 		// Nothing done in database
 
 		// Add session in the list
-		ChatImpl sessionApi = new ChatImpl(session.getRemoteContact(), session);
-		ChatServiceImpl.addChatSession(session.getRemoteContact(), sessionApi);
+		ContactId contact = session.getRemoteContact();
+		ChatImpl sessionApi = new ChatImpl(contact, session, mOneToOneChatEventBroadcaster);
+		ChatServiceImpl.addChatSession(contact, sessionApi);
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(ChatIntent.ACTION_NEW_CHAT);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
+    	intent.putExtra(ChatIntent.EXTRA_CONTACT, (Parcelable)contact);
     	intent.putExtra(ChatIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	InstantMessage msg = session.getFirstMessage();
     	ChatMessage msgApi;
@@ -263,21 +251,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         	intent.putExtra(ChatIntent.EXTRA_MESSAGE, msgApi);    		
     	}
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-    	
-    	// Notify chat invitation listeners
-    	synchronized(lock) {
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewSingleChat(session.getRemoteContact(), msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }    	    	
+
     }
     
     /**
@@ -286,11 +260,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      * or international format, SIP address, SIP-URI or Tel-URI.
      * 
      * @param contact Contact
-     * @param listener Chat event listener
      * @return Chat
 	 * @throws ServerApiException
      */
-    public IChat openSingleChat(ContactId contact, IChatListener listener) throws ServerApiException {
+    public IChat openSingleChat(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Open a 1-1 chat session with " + contact);
 		}
@@ -305,9 +278,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 				if (logger.isActivated()) {
 					logger.debug("Chat session already exists for " + contact);
 				}
-				
-				// Add session listener
-				sessionApi.addEventListener(listener);
 
 				// Check core session state
 				final OneOneChatSession coreSession = sessionApi.getCoreSession();
@@ -349,9 +319,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 				}
 
 				// Add session listener
-				sessionApi = new ChatImpl(contact);
-				sessionApi.addEventListener(listener);
-	
+				sessionApi = new ChatImpl(contact, mOneToOneChatEventBroadcaster);
+
 				// Add session in the list
 				ChatServiceImpl.addChatSession(contact, sessionApi);
 			}
@@ -491,7 +460,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
 		
 		// Add session in the list
-		GroupChatImpl sessionApi = new GroupChatImpl(session);
+		GroupChatImpl sessionApi = new GroupChatImpl(session, mGroupChatEventBroadcaster);
 		ChatServiceImpl.addGroupChatSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
@@ -504,21 +473,6 @@ public class ChatServiceImpl extends IChatService.Stub {
     	intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
     	intent.putExtra(GroupChatIntent.EXTRA_SUBJECT, sessionApi.getSubject());
     	AndroidFactory.getApplicationContext().sendBroadcast(intent);
-    	
-    	// Notify chat invitation listeners
-    	synchronized(lock) {
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewGroupChat(sessionApi.getChatId());
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }    	
     }
 	
 	/**
@@ -556,12 +510,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 *            List of contact IDs
 	 * @param subject
 	 *            Subject
-	 * @param listener
-	 *            Chat event listener
 	 * @throws ServerApiException
 	 *             Note: List is used instead of Set because AIDL does only support List
 	 */
-    public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject, IGroupChatListener listener) throws ServerApiException {
+    public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an ad-hoc group chat session");
 		}
@@ -574,8 +526,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			final ChatSession session = Core.getInstance().getImService().initiateAdhocGroupChatSession(contacts, subject);
 
 			// Add session listener
-			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
-			sessionApi.addEventListener(listener);
+			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session, mGroupChatEventBroadcaster);
 
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChat(session.getContributionID(),
@@ -628,7 +579,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	    	t.start();
 
 			// Add session in the list
-			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
+			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session, mGroupChatEventBroadcaster);
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
@@ -666,7 +617,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	    	}.start();
 			
 			// Add session in the list
-			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session);
+			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session, mGroupChatEventBroadcaster);
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
@@ -714,35 +665,65 @@ public class ChatServiceImpl extends IChatService.Stub {
 		// Return a session instance
 		return groupChatSessions.get(chatId);
 	}
-    
-    /**
-     * Adds a listener on new chat invitation events
-     * 
-     * @param listener Chat invitation listener
-     * @throws ServerApiException
-     */
-    public void addEventListener(INewChatListener listener) throws ServerApiException {
+
+	/**
+	 * Adds an event listener for OneToOne chat events
+	 *
+	 * @param listener Chat event listener
+	 */
+	public void addOneToOneChatEventListener(IChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
-			logger.info("Add a chat invitation listener");
+			logger.info("Add an OneToOne chat event listener");
 		}
-		
-		listeners.register(listener);
-    }
-    
-    /**
-     * Removes a listener on new chat invitation events
-     * 
-     * @param listener Chat invitation listener
-     * @throws ServerApiException
-     */
-    public void removeEventListener(INewChatListener listener) throws ServerApiException {
+		synchronized (lock) {
+			mOneToOneChatEventBroadcaster.addOneToOneChatEventListener(listener);
+		}
+	}
+
+	/**
+	 * Removes an event listener for OneToOne chat events
+	 *
+	 * @param listener Chat event listener
+	 */
+	public void removeOneToOneChatEventListener(IChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
-			logger.info("Remove a chat invitation listener");
+			logger.info("Remove an OneToOne chat event listener");
 		}
-		
-		listeners.unregister(listener);
-    }
-    
+		synchronized (lock) {
+			mOneToOneChatEventBroadcaster.removeOneToOneChatEventListener(listener);
+		}
+	}
+
+	/**
+	 * Adds a listener on group chat events
+	 *
+	 * @param listener Chat invitation listener
+	 * @throws ServerApiException
+	 */
+	public void addGroupChatEventListener(IGroupChatListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Add a Group chat event listener");
+		}
+		synchronized (lock) {
+			mGroupChatEventBroadcaster.addGroupChatEventListener(listener);
+		}
+	}
+
+	/**
+	 * Removes a listener on group chat events
+	 *
+	 * @param listener Chat invitation listener
+	 * @throws ServerApiException
+	 */
+	public void removeGroupChatEventListener(IGroupChatListener listener) throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Remove a group chat event listener");
+		}
+		synchronized (lock) {
+			mGroupChatEventBroadcaster.removeGroupChatEventListener(listener);
+		}
+	}
+
     /**
      * Returns the configuration of the chat service
      * 
@@ -765,34 +746,6 @@ public class ChatServiceImpl extends IChatService.Stub {
     			settings.getMaxGeolocLabelLength(),
     			settings.getGeolocExpirationTime());
 	}    
-
-    /**
-	 * Registers a new chat invitation listener
-	 * 
-	 * @param listener New file transfer listener
-	 * @throws ServerApiException
-	 */
-	public void addNewChatListener(INewChatListener listener) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Add a new chat invitation listener");
-		}
-		
-		listeners.register(listener);
-	}
-
-	/**
-	 * Unregisters a chat invitation listener
-	 * 
-	 * @param listener New file transfer listener
-	 * @throws ServerApiException
-	 */
-	public void removeNewChatListener(INewChatListener listener) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Remove a chat invitation listener");
-		}
-		
-		listeners.unregister(listener);
-	}
 
 	/**
 	 * Mark a received message as read (ie. displayed in the UI)

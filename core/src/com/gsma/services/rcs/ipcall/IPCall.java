@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
@@ -70,6 +74,11 @@ public class IPCall {
     	 * Call on hold 
     	 */
     	public final static int HOLD = 8;
+
+        /**
+    	 * Call ringing
+    	 */
+    	public final static int RINGING = 9;
 
     	private State() {
         }    	
@@ -296,34 +305,6 @@ public class IPCall {
 	public void continueCall() throws JoynServiceException {
 		try {
 			callInf.continueCall();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Adds a listener on IP call events
-	 * 
-	 * @param listener Listener
-	 * @throws JoynServiceException
-	 */
-	public void addEventListener(IPCallListener listener) throws JoynServiceException {
-		try {
-			callInf.addEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Removes a listener from IP call events
-	 * 
-	 * @param listener Listener
-	 * @throws JoynServiceException
-	 */
-	public void removeEventListener(IPCallListener listener) throws JoynServiceException {
-		try {
-			callInf.removeEventListener(listener);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}

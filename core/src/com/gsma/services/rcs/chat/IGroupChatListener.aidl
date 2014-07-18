@@ -9,29 +9,14 @@ import com.gsma.services.rcs.contacts.ContactId;
  * Group chat event listener
  */
 interface IGroupChatListener {
-	void onSessionStarted();
-	
-	void onSessionAborted();
 
-	void onSessionError(in int reason);
-		
-	void onNewMessage(in ChatMessage message);
+	void onGroupChatStateChanged(in String chatId, in int state);
 
-	void onNewGeoloc(in GeolocMessage message);
+	void onComposingEvent(String chatId, in ContactId contact, in boolean status);
 
-	void onReportMessageDelivered(in String msgId);
+	void onMessageStatusChanged(in String chatId, in String msgId, in int status);
 
-	void onReportMessageDisplayed(in String msgId);
+	void onDeliveryInfoStatusChanged(in String chatId, in ContactId contact, in String msgId, in int status, in int reasonCode);
 
-	void onReportMessageFailed(in String msgId);
-	
-	void onComposingEvent(in ContactId contact, in boolean status);
-	
-	void onParticipantJoined(in ContactId contact, in String contactDisplayname);
-	
-	void onParticipantLeft(in ContactId contact);
-
-	void onParticipantDisconnected(in ContactId contact);
-	
-	void onParticipantStatusChanged(in ParticipantInfo participantInfo);
+	void onParticipantInfoStatusChanged(in String chatId, in ParticipantInfo info);
 }

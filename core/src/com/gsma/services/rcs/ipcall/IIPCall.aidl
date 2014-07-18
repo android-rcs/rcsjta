@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.ipcall;
 
-import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -35,8 +34,4 @@ interface IIPCall {
 	void holdCall();
 
 	void continueCall();
-	
-	void addEventListener(in IIPCallListener listener);
-
-	void removeEventListener(in IIPCallListener listener);
 }

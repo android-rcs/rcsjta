@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service.api;
@@ -44,6 +48,9 @@ import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.MultimediaStreamingSessionEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -52,10 +59,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
 
 	/**
 	 * List of messaging sessions
@@ -67,15 +70,21 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	private static Hashtable<String, IMultimediaStreamingSession> streamingSessions = new Hashtable<String, IMultimediaStreamingSession>();  
 
+	private final MultimediaMessagingSessionEventBroadcaster mMultimediaMessagingSessionEventBroadcaster = new MultimediaMessagingSessionEventBroadcaster();
+
+	private final MultimediaStreamingSessionEventBroadcaster mMultimediaStreamingSessionEventBroadcaster = new MultimediaStreamingSessionEventBroadcaster();
+
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
+
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 	
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(MultimediaSessionServiceImpl.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(MultimediaSessionServiceImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -161,60 +170,48 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
-			}
-			
-			serviceListeners.unregister(listener);
-    	}	
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
 	}
 
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }	
-	
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+			}
+		}
+	}
+
 	/**
 	 * Receive a new SIP session invitation with MRSP media
 	 * 
@@ -223,7 +220,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	public void receiveSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
 		// Add session in the list
-		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
+		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
+				mMultimediaMessagingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
@@ -244,7 +242,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	public void receiveSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
 		// Add session in the list
-		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
+		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
+				mMultimediaStreamingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
 		
 		// Broadcast intent related to the received invitation
@@ -276,11 +275,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param serviceId Service ID
      * @param contact Contact ID
-     * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
 	 * @throws ServerApiException
      */
-    public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact, IMultimediaMessagingSessionListener listener) throws ServerApiException {
+    public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia messaging session with " + contact);
 		}
@@ -297,8 +295,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			final GenericSipMsrpSession session = Core.getInstance().getSipService().initiateMsrpSession(contact, featureTag);
 			
 			// Add session listener
-			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session);
-			sessionApi.addEventListener(listener);
+			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
+					mMultimediaMessagingSessionEventBroadcaster);
 
 			// Start the session
 	        new Thread() {
@@ -371,11 +369,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param serviceId Service ID
      * @param contact Contact ID
-     * @param listener Multimedia streaming session event listener
      * @return Multimedia streaming session
 	 * @throws ServerApiException
      */
-    public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact, IMultimediaStreamingSessionListener listener) throws ServerApiException {
+    public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a multimedia streaming session with " + contact);
 		}
@@ -392,8 +389,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			final GenericSipRtpSession session = Core.getInstance().getSipService().initiateRtpSession(contact, featureTag);
 			
 			// Add session listener
-			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session);
-			sessionApi.addEventListener(listener);
+			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
+					mMultimediaStreamingSessionEventBroadcaster);
 
 			// Start the session
 	        new Thread() {
@@ -466,5 +463,63 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
+	}
+
+	/**
+	 * Adds an event listener on messaging session events
+	 *
+	 * @param listener Session event listener
+	 */
+	public void addMultimediaMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+		if (logger.isActivated()) {
+			logger.info("Add an event listener");
+		}
+
+		synchronized (lock) {
+			mMultimediaMessagingSessionEventBroadcaster.addMultimediaMessagingEventListener(listener);
+		}
+	}
+
+	/**
+	 * Removes an event listener on messaging session events
+	 *
+	 * @param listener Session event listener
+	 */
+	public void removeMultimediaMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+		if (logger.isActivated()) {
+			logger.info("Remove an event listener");
+		}
+		synchronized (lock) {
+			mMultimediaMessagingSessionEventBroadcaster.removeMultimediaMessagingEventListener(listener);
+		}
+	}
+
+	/**
+	 * Adds an event listener on streaming session events
+	 *
+	 * @param listener Session event listener
+	 */
+	public void addMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+		if (logger.isActivated()) {
+			logger.info("Add an event listener");
+		}
+		synchronized (lock) {
+			mMultimediaStreamingSessionEventBroadcaster.addMultimediaStreamingEventListener(listener);
+		}
+	}
+
+	/**
+	 * Removes an event listener on messaging session events
+	 *
+	 * @param listener Session event listener
+	 */
+	public void removeMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+		if (logger.isActivated()) {
+			logger.info("Remove an event listener");
+		}
+
+		synchronized (lock) {
+			mMultimediaStreamingSessionEventBroadcaster.removeMultimediaStreamingEventListener(listener);
+		}
 	}
 }

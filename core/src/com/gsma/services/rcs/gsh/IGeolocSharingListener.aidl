@@ -1,18 +1,14 @@
 package com.gsma.services.rcs.gsh;
 
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Callback methods for geoloc sharing events
  */
 interface IGeolocSharingListener {
-	void onSharingStarted();
-	
-	void onSharingAborted();
 
-	void onSharingError(in int error);
-	
-	void onSharingProgress(in long currentSize, in long totalSize);
+	void onGeolocSharingStateChanged(in ContactId contact, in String sharingId, in int state);
 
-	void onGeolocShared(in Geoloc geoloc);
+	void onGeolocSharingProgress(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
 }

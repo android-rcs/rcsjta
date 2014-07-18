@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.ish;
 
-import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -29,8 +28,4 @@ interface IImageSharing {
 	void rejectInvitation();
 
 	void abortSharing();
-	
-	void addEventListener(in IImageSharingListener listener);
-
-	void removeEventListener(in IImageSharingListener listener);
 }

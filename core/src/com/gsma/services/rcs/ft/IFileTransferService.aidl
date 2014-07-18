@@ -3,7 +3,7 @@ package com.gsma.services.rcs.ft;
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
-import com.gsma.services.rcs.ft.INewFileTransferListener;
+import com.gsma.services.rcs.ft.IGroupFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -11,6 +11,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * File transfer service API
  */
 interface IFileTransferService {
+
 	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
@@ -23,15 +24,19 @@ interface IFileTransferService {
 	
 	IFileTransfer getFileTransfer(in String transferId);
 
-	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean fileicon, in IFileTransferListener listener);
+	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean fileicon);
 
-	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean fileicon, in IFileTransferListener listener);
+	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean fileicon);
 
 	void markFileTransferAsRead(in String transferId);
 	
-	void addNewFileTransferListener(in INewFileTransferListener listener);
+	void addOneToOneFileTransferListener(in IFileTransferListener listener);
 
-	void removeNewFileTransferListener(in INewFileTransferListener listener);
+	void removeOneToOneFileTransferListener(in IFileTransferListener listener);
+
+	void addGroupFileTransferListener(in IGroupFileTransferListener listener);
+
+	void removeGroupFileTransferListener(in IGroupFileTransferListener listener);
 	
 	int getServiceVersion();
 	

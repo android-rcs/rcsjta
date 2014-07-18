@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service.api;
@@ -31,7 +35,6 @@ import android.os.RemoteCallbackList;
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.vsh.INewVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
@@ -45,6 +48,8 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.VideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -53,10 +58,10 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
-	/**
-	 * List of service event listeners
-	 */
-	private RemoteCallbackList<IJoynServiceRegistrationListener> serviceListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
+
+	private final VideoSharingEventBroadcaster mVideoSharingEventBroadcaster = new VideoSharingEventBroadcaster();
+
+	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
 
 	/**
 	 * List of video sharing sessions
@@ -64,19 +69,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     private static Hashtable<String, IVideoSharing> videoSharingSessions = new Hashtable<String, IVideoSharing>();
 
 	/**
-	 * List of video sharing invitation listeners
-	 */
-	private RemoteCallbackList<INewVideoSharingListener> listeners = new RemoteCallbackList<INewVideoSharingListener>();
-
-	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * The logger
 	 */
-	private static Logger logger = Logger.getLogger(VideoSharingServiceImpl.class.getName());
+	private static final  Logger logger = Logger.getLogger(VideoSharingServiceImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -136,60 +136,48 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 	/**
 	 * Registers a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add a service listener");
-			}
-
-			serviceListeners.register(listener);
+		if (logger.isActivated()) {
+			logger.info("Add a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener on service registration events
-	 * 
+	 *
 	 * @param listener Service registration listener
 	 */
 	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Remove a service listener");
-			}
-			
-			serviceListeners.unregister(listener);
-    	}	
+		if (logger.isActivated()) {
+			logger.info("Remove a service listener");
+		}
+		synchronized (lock) {
+			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+		}
 	}
 
-    /**
-     * Receive registration event
-     * 
-     * @param state Registration state
-     */
-    public void notifyRegistrationEvent(boolean state) {
-    	// Notify listeners
-    	synchronized(lock) {
-			final int N = serviceListeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state) {
-	            		serviceListeners.getBroadcastItem(i).onServiceRegistered();
-	            	} else {
-	            		serviceListeners.getBroadcastItem(i).onServiceUnregistered();
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        serviceListeners.finishBroadcast();
-	    }    	    	
-    }	
-	
+	/**
+	 * Receive registration event
+	 *
+	 * @param state Registration state
+	 */
+	public void notifyRegistrationEvent(boolean state) {
+		// Notify listeners
+		synchronized (lock) {
+			if (state) {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+			} else {
+				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+			}
+		}
+	}
+
 	/**
      * Get the remote contact Id involved in the current call
      * 
@@ -220,46 +208,32 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param session Video sharing session
      */
     public void receiveVideoSharingInvitation(VideoStreamingSession session) {
+		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.info("Receive video sharing invitation from " + session.getRemoteContact());
+			logger.info("Receive video sharing invitation from " + contact);
 		}
 
 		// Update rich call history
         VideoContent content = (VideoContent)session.getContent();
-		RichCallHistory.getInstance().addVideoSharing(session.getRemoteContact(), session.getSessionID(),
+		RichCallHistory.getInstance().addVideoSharing(contact, session.getSessionID(),
 				VideoSharing.Direction.INCOMING,
 				content,
     			VideoSharing.State.INVITED);
 
 		// Add session in the list
-		VideoSharingImpl sessionApi = new VideoSharingImpl(session);
+		VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
 		VideoSharingServiceImpl.addVideoSharingSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
     	Intent intent = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
     	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, (Parcelable)session.getRemoteContact());
+    	intent.putExtra(VideoSharingIntent.EXTRA_CONTACT, (Parcelable)contact);
     	intent.putExtra(VideoSharingIntent.EXTRA_DISPLAY_NAME, session.getRemoteDisplayName());
     	intent.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
     	intent.putExtra(VideoSharingIntent.EXTRA_ENCODING, content.getEncoding());
         intent.putExtra(VideoSharingIntent.EXTRA_WIDTH, session.getVideoWidth());
         intent.putExtra(VideoSharingIntent.EXTRA_HEIGHT, session.getVideoHeight());
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
-        
-    	// Notify video sharing invitation listeners
-    	synchronized(lock) {
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onNewVideoSharing(session.getSessionID());
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    }        
     }
     
     /**
@@ -281,11 +255,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param contact Contact ID
      * @param player Video player
-     * @param listener Video sharing event listener
      * @return Video sharing
 	 * @throws ServerApiException
      */
-    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player, IVideoSharingListener listener) throws ServerApiException {
+    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a live video session with " + contact);
 		}
@@ -309,8 +282,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	    			VideoSharing.State.INITIATED);
 
 			// Add session listener
-			VideoSharingImpl sessionApi = new VideoSharingImpl(session);
-			sessionApi.addEventListener(listener);
+			VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
 			
 			// Start the session
 	        Thread t = new Thread() {
@@ -370,33 +342,33 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			throw new ServerApiException(e.getMessage());
 		}		
 	}
-    
-    /**
-	 * Registers an video sharing invitation listener
+
+	/**
+	 * Adds an event listener on video sharing events
 	 * 
-	 * @param listener New video sharing listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void addNewVideoSharingListener(INewVideoSharingListener listener) throws ServerApiException {
+	public void addEventListener(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Add an video sharing invitation listener");
+			logger.info("Add a video sharing event listener");
 		}
-		
-		listeners.register(listener);
+		synchronized (lock) {
+			mVideoSharingEventBroadcaster.addEventListener(listener);
+		}
 	}
 
 	/**
-	 * Unregisters an video sharing invitation listener
+	 * Removes an event listener from video sharing events
 	 * 
-	 * @param listener New video sharing listener
-	 * @throws ServerApiException
+	 * @param listener Listener
 	 */
-	public void removeNewVideoSharingListener(INewVideoSharingListener listener) throws ServerApiException {
+	public void removeEventListener(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
-			logger.info("Remove an video sharing invitation listener");
+			logger.info("Remove a video sharing event listener");
 		}
-		
-		listeners.unregister(listener);
+		synchronized (lock) {
+			mVideoSharingEventBroadcaster.removeEventListener(listener);
+		}
 	}
 
 	/**

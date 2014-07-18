@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service.api;
+
+import static com.gsma.services.rcs.vsh.VideoSharing.State.FAILED;
+import static com.gsma.services.rcs.vsh.VideoSharing.State.ABORTED;
+import static com.gsma.services.rcs.vsh.VideoSharing.State.STARTED;
+import static com.gsma.services.rcs.vsh.VideoSharing.State.TERMINATED;
 
 import android.os.RemoteCallbackList;
 
@@ -33,6 +42,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStream
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -46,16 +56,13 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * Core session
 	 */
 	private VideoStreamingSession session;
-	
-	/**
-	 * List of listeners
-	 */
-	private RemoteCallbackList<IVideoSharingListener> listeners = new RemoteCallbackList<IVideoSharingListener>();
+
+	private final IVideoSharingEventBroadcaster mVideoSharingEventBroadcaster;
 
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * Started at
@@ -65,16 +72,19 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(VideoSharingImpl.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param session Session
+	 * @param broadcaster IVideoSharingEventBroadcaster
 	 */
-	public VideoSharingImpl(VideoStreamingSession session) {
+	public VideoSharingImpl(VideoStreamingSession session,
+			IVideoSharingEventBroadcaster broadcaster) {
 		this.session = session;
-		
+		mVideoSharingEventBroadcaster = broadcaster;
+
 		session.addListener(this);
 	}
 	
@@ -221,97 +231,45 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     	t.start();	
 	}
 
-	/**
-	 * Adds a listener on video sharing events
-	 * 
-	 * @param listener Listener
-	 */
-	public void addEventListener(IVideoSharingListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Add an event listener");
-		}
-
-    	synchronized(lock) {
-    		listeners.register(listener);
-    	}
-	}
-
-	/**
-	 * Removes a listener from video sharing events
-	 * 
-	 * @param listener Listener
-	 */
-	public void removeEventListener(IVideoSharingListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Remove an event listener");
-		}
-
-    	synchronized(lock) {
-    		listeners.unregister(listener);
-    	}
-	}
-
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**
 	 * Session is started
 	 */
     public void handleSessionStarted() {
+		if (logger.isActivated()) {
+			logger.info("Session started");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session started");
-			}
-	
 			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.STARTED);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), STARTED);
 			startedAt = System.currentTimeMillis();
 			
 			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSharingStarted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), STARTED);
 	    }
     }
-    
+
     /**
      * Session has been aborted
      * 
 	 * @param reason Termination reason
 	 */
     public void handleSessionAborted(int reason) {
+		if (logger.isActivated()) {
+			logger.info("Session aborted (reason " + reason + ")");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session aborted (reason " + reason + ")");
-			}
-	
 			// Update rich call history
 			if (session.getDialogPath().isSessionCancelled()) {
-				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.ABORTED);
+				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), ABORTED);
 			} else {
-				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+				RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), TERMINATED);
 				RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
 			}
 			
 	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSharingAborted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), ABORTED);
 	        
 	        // Remove session from the list
 	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
@@ -322,73 +280,50 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * Session has been terminated by remote
      */
     public void handleSessionTerminatedByRemote() {
+		if (logger.isActivated()) {
+			logger.info("Session terminated by remote");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session terminated by remote");
-			}
-	
 			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.TERMINATED);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), TERMINATED);
 			RichCallHistory.getInstance().setVideoSharingDuration(session.getSessionID(), (System.currentTimeMillis()-startedAt)/100);
 
 			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSharingAborted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), TERMINATED);
 	        
 	        // Remove session from the list
 	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
 	    }
     }
-    
+
     /**
      * Content sharing error
      * 
      * @param error Error
      */
     public void handleSharingError(ContentSharingError error) {
+		if (logger.isActivated()) {
+			logger.info("Sharing error " + error.getErrorCode());
+		}
     	synchronized(lock) {
 			if (error.getErrorCode() == ContentSharingError.SESSION_INITIATION_CANCELLED) {
 				// Do nothing here, this is an aborted event
 				return;
 			}
-
-			if (logger.isActivated()) {
-				logger.info("Sharing error " + error.getErrorCode());
-			}
-	
 			// Update rich call history
-			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), VideoSharing.State.FAILED);
+			RichCallHistory.getInstance().setVideoSharingStatus(session.getSessionID(), FAILED);
 			
 	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	int code;
-	            	switch(error.getErrorCode()) {
-            			case ContentSharingError.SESSION_INITIATION_DECLINED:
-	            			code = VideoSharing.Error.INVITATION_DECLINED;
-	            			break;
-	            		default:
-	            			code = VideoSharing.Error.SHARING_FAILED;
-	            	}
-	            	listeners.getBroadcastItem(i).onSharingError(code);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	        
+			switch (error.getErrorCode()) {
+				case ContentSharingError.SESSION_INITIATION_DECLINED:
+					// TODO : Handle reason code in CR009
+					mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, VideoSharing.Error.INVITATION_DECLINED*/);
+					break;
+				default:
+					// TODO : Handle reason code in CR009
+					mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, VideoSharing.Error.SHARING_FAILED*/);
+			}
+	
 	        // Remove session from the list
 	        VideoSharingServiceImpl.removeVideoSharingSession(session.getSessionID());
 	    }
@@ -400,18 +335,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param width Video width
      * @param height Video height
      */
-    public void handleVideoResized(int width, int height) {
-    	// Notify event listeners
-		final int N = listeners.beginBroadcast();
-        for (int i=0; i < N; i++) {
-            try {
-            	// TODO listeners.getBroadcastItem(i).handleVideoResized(width, height);
-            } catch(Exception e) {
-            	if (logger.isActivated()) {
-            		logger.error("Can't notify listener", e);
-            	}
-            }
-        }
-        listeners.finishBroadcast();
-    }
+	public void handleVideoResized(int width, int height) {
+		// TODO : Check if new callback needed
+	}
 }

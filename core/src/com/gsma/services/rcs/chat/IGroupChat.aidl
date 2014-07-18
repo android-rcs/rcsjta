@@ -11,6 +11,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * Group chat interface
  */
 interface IGroupChat {
+
 	String getChatId();
 
 	int getDirection();
@@ -36,10 +37,6 @@ interface IGroupChat {
 	int getMaxParticipants();
 	
 	void quitConversation();
-	
-	void addEventListener(in IGroupChatListener listener);
-	
-	void removeEventListener(in IGroupChatListener listener);
 
 	String sendGeoloc(in Geoloc geoloc);
 }

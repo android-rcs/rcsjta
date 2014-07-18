@@ -24,6 +24,7 @@ package com.orangelabs.rcs.provider.messaging;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.net.Uri;
+import android.util.Pair;
 
 /**
  * Interface for the deliveryinfo table
@@ -56,10 +57,12 @@ public interface IGroupChatDeliveryInfoLog {
 	 *            Message ID
 	 * @param status
 	 *            Delivery status
+	 * @param reasonCode
+	 *            Delivery status reason code
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatus(String msgId, String status, ContactId contact);
+	public void updateGroupChatDeliveryInfoStatus(String msgId, int status, int reasonCode, ContactId contact);
 
 	/**
 	 * Check if all recipients have received message
@@ -78,4 +81,15 @@ public interface IGroupChatDeliveryInfoLog {
 	 * @return true If it is last contact to display message
 	 */
 	public boolean isDisplayedByAllRecipients(String msgId);
+
+	/**
+	 * Get status for individual contact
+	 *
+	 * @param msgId
+	 *            Message ID
+	 * @param contact
+	 *            Contact ID for which the status should be retrieved
+	 * @return Pair with integers: status and reasonCode
+	 */
+	public Pair<Integer, Integer> getGroupChatDeliveryInfoStatus(String msgId, ContactId contact);
 }

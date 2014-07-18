@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
+
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.JOINED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.DISCONNECTED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.GONE;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
+import static com.gsma.services.rcs.chat.ParticipantInfo.Status.CONNECTED;
+import static com.gsma.services.rcs.chat.ParticipantInfo.Status.DEPARTED;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR;
+import static com.gsma.services.rcs.chat.GroupChat.State.TERMINATED;
+import static com.gsma.services.rcs.chat.GroupChat.State.ABORTED;
+import static com.gsma.services.rcs.chat.GroupChat.State.CLOSED_BY_USER;
+import static com.gsma.services.rcs.chat.GroupChat.State.STARTED;
+import static com.gsma.services.rcs.chat.GroupChat.State.INVITED;
+import static com.gsma.services.rcs.chat.GroupChat.State.INITIATED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.os.RemoteCallbackList;
+import android.util.Pair;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
@@ -52,6 +71,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -66,30 +86,29 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * Core session
 	 */
 	private GroupChatSession session;
-	
-	/**
-	 * List of listeners
-	 */
-	private RemoteCallbackList<IGroupChatListener> listeners = new RemoteCallbackList<IGroupChatListener>();
+
+	private final IGroupChatEventBroadcaster mGroupChatEventBroadcaster;
 
 	/**
 	 * Lock used for synchronization
 	 */
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(GroupChatImpl.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param session Session
+	 * @param broadcaster IGroupChatEventBroadcaster
 	 */
-	public GroupChatImpl(GroupChatSession session) {
+	public GroupChatImpl(GroupChatSession session,
+			IGroupChatEventBroadcaster broadcaster) {
 		this.session = session;
-		
+		mGroupChatEventBroadcaster = broadcaster;
 		session.addListener(this);
 	}
 	
@@ -137,23 +156,23 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
 				// Session canceled
-				result = GroupChat.State.ABORTED;
+				result = ABORTED;
 			} else
 			if (dialogPath.isSessionEstablished()) {
 				// Session started
-				result = GroupChat.State.STARTED;
+				result = STARTED;
 			} else
 			if (dialogPath.isSessionTerminated()) {
 				// Session terminated
-				result = GroupChat.State.TERMINATED;
+				result = TERMINATED;
 			} else {
 				// Session pending
 				if ((session instanceof OriginatingAdhocGroupChatSession) ||
 						(session instanceof RestartGroupChatSession) ||
 						(session instanceof RejoinGroupChatSession)) {
-					result = GroupChat.State.INITIATED;
+					result = INITIATED;
 				} else {
-					result = GroupChat.State.INVITED;
+					result = INVITED;
 				}
 			}
 		}
@@ -298,7 +317,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}.start();
 		} else {
 			// Max participants achieved
-			handleAddParticipantFailed("Maximum number of participants reached");
+			for (ContactId participant : participants) {
+				handleAddParticipantFailed(participant, "Maximum number of participants reached");
+			}
 		}
 	}
 	
@@ -356,64 +377,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     		}
     	}.start();
 	}
-	
-	/**
-	 * Adds a listener on chat events
-	 * 
-	 * @param listener Group chat event listener 
-	 */
-	public void addEventListener(IGroupChatListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Add an event listener");
-		}
 
-    	synchronized(lock) {
-    		listeners.register(listener);
-    	}
-	}
-	
-	/**
-	 * Removes a listener on chat events
-	 * 
-	 * @param listener Group chat event listener 
-	 */
-	public void removeEventListener(IGroupChatListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Remove an event listener");
-		}
-
-    	synchronized(lock) {
-    		listeners.unregister(listener);
-    	}
-	}
-	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
-	
+
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
      */
     public void handleSessionStarted() {
+    	if (logger.isActivated()) {
+			logger.info("Session started");
+		}
     	synchronized(lock) {
-	    	if (logger.isActivated()) {
-				logger.info("Session started");
-			}
-
 			// Update rich messaging history
-	    	MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.STARTED);
-	    	MessagingLog.getInstance().updateGroupChatRejoinId(getChatId(), session.getImSessionIdentity());
+	    	String chatId = getChatId();
+	    	MessagingLog.getInstance().updateGroupChatStatus(chatId, STARTED);
+	    	MessagingLog.getInstance().updateGroupChatRejoinId(chatId, session.getImSessionIdentity());
 			
 			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSessionStarted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+	    	mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, STARTED);
 	    }
     }
     
@@ -421,34 +402,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted(int)
      */
     public void handleSessionAborted(int reason) {
+		if (logger.isActivated()) {
+			logger.info("Session aborted (reason " + reason + ")");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session aborted (reason " + reason + ")");
-			}
-	
 			// Update rich messaging history
+			String chatId = getChatId();
 			if (reason == ImsServiceSession.TERMINATION_BY_USER) {
-				MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.CLOSED_BY_USER);
+				MessagingLog.getInstance().updateGroupChatStatus(chatId, CLOSED_BY_USER);
 			} else {
 				if (session.getDialogPath().isSessionCancelled()) {
-					MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+					MessagingLog.getInstance().updateGroupChatStatus(chatId, ABORTED);
 				} else {
-					MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+					MessagingLog.getInstance().updateGroupChatStatus(chatId, TERMINATED);
 				}
 			}
 			
 	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSessionAborted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+			mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, ABORTED);
 	        
 	        // Remove session from the list
 	        ChatServiceImpl.removeGroupChatSession(getChatId());
@@ -459,30 +430,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
     public void handleSessionTerminatedByRemote() {
+		if (logger.isActivated()) {
+			logger.info("Session terminated by remote");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Session terminated by remote");
-			}
-	
 			// Update rich messaging history
+			String chatId = getChatId();
 			if (session.getDialogPath().isSessionCancelled()) {
-				MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.ABORTED);
+				MessagingLog.getInstance().updateGroupChatStatus(chatId, ABORTED);
 			} else {
-				MessagingLog.getInstance().updateGroupChatStatus(getChatId(), GroupChat.State.TERMINATED);
+				MessagingLog.getInstance().updateGroupChatStatus(chatId, TERMINATED);
 			}
 			
 	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onSessionAborted();
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+			mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, TERMINATED);
 	        
 	        // Remove session from the list
 	        ChatServiceImpl.removeGroupChatSession(getChatId());
@@ -493,31 +454,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
      */
     public void handleReceiveMessage(InstantMessage message) {
+		if (logger.isActivated()) {
+			logger.info("New IM received: "+message);
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New IM received: "+message);
-			}
-			
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
 					message, ChatLog.Message.Direction.INCOMING);
-			
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	ChatMessage msgApi = new ChatMessage(message.getMessageId(),
-	            			message.getRemote(),
-	            			message.getTextMessage(),
-	            			message.getServerDate());
-	            	listeners.getBroadcastItem(i).onNewMessage(msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
+
+			// TODO : Broadcast appropriate intent on receiving new chat
+			// message on group chat
 	    }
     }
     
@@ -525,16 +471,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError(com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
      */
     public void handleImError(ChatError error) {
+		if (logger.isActivated()) {
+			logger.info("IM error " + error.getErrorCode());
+		}
     	synchronized(lock) {
 			if (error.getErrorCode() == ChatError.SESSION_INITIATION_CANCELLED) {
 				// Do nothing here, this is an aborted event
 				return;
 			}
-    		
-			if (logger.isActivated()) {
-				logger.info("IM error " + error.getErrorCode());
-			}
-			
+			String chatId = getChatId();
 			// Update rich messaging history
 			switch(error.getErrorCode()){
 	    		case ChatError.SESSION_NOT_FOUND:
@@ -542,100 +487,71 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	    			// These errors are not logged
 	    			break;
 		    	default:
-		    		MessagingLog.getInstance().updateGroupChatStatus(session.getContributionID(), GroupChat.State.FAILED);
+		    		MessagingLog.getInstance().updateGroupChatStatus(chatId, FAILED);
 		    		break;
 	    	}
-	    	
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	int code;
-	            	switch(error.getErrorCode()) {
-            			case ChatError.SESSION_INITIATION_DECLINED:
-	            			code = GroupChat.Error.INVITATION_DECLINED;
-	            			break;
-            			case ChatError.SESSION_NOT_FOUND:
-	            			code = GroupChat.Error.CHAT_NOT_FOUND;
-	            			break;
-	            		default:
-	            			code = GroupChat.Error.CHAT_FAILED;
-	            	}
-	            	listeners.getBroadcastItem(i).onSessionError(code);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
-	    	
+
+			// Notify event listeners
+			switch (error.getErrorCode()) {
+				case ChatError.SESSION_INITIATION_DECLINED:
+					// TODO : Add appropriate reason code as part of CR009
+					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, FAILED/*, GroupChat.Error.INVITATION_DECLINED*/);
+					break;
+				case ChatError.SESSION_NOT_FOUND:
+					// TODO : Add appropriate reason code as part of CR009
+					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, FAILED/*, GroupChat.Error.CHAT_NOT_FOUND*/);
+					break;
+				default:
+					// TODO : Add appropriate reason code as part of CR009
+					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId, FAILED /*, GroupChat.Error.CHAT_FAILED*/);
+			}
+
 	        // Remove session from the list
-	        ChatServiceImpl.removeGroupChatSession(getChatId());
+	        ChatServiceImpl.removeGroupChatSession(chatId);
 	    }
     }
     
-    @Override
+	@Override
 	public void handleIsComposingEvent(ContactId contact, boolean status) {
+     	if (logger.isActivated()) {
+			logger.info(contact + " is composing status set to " + status);
+		}
     	synchronized(lock) {
-        	if (logger.isActivated()) {
-				logger.info(contact + " is composing status set to " + status);
-			}
-	
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onComposingEvent(contact, status);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
+			// Notify event listeners
+			mGroupChatEventBroadcaster.broadcastComposingEvent(getChatId(), contact, status);
 		}
 	}
 	
 	@Override
     public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state) {
+    	if (logger.isActivated()) {
+			logger.info("New conference event " + state + " for " + contact);
+		}
     	synchronized(lock) {
-        	if (logger.isActivated()) {
-				logger.info("New conference event " + state + " for " + contact);
+			String chatId = getChatId();
+			// Update history and notify event listeners
+			if (state.equals(User.STATE_CONNECTED)) {
+				// Update rich messaging history
+				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
+						contact, JOINED);
+				// Notify event listener
+				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
+						new ParticipantInfo(contact, CONNECTED));
+			} else if (state.equals(User.STATE_DISCONNECTED)) {
+				// Update rich messaging history
+				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
+						contact, DISCONNECTED);
+				// Notify event listener
+				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
+						new ParticipantInfo(contact, ParticipantInfo.Status.DISCONNECTED));
+			} else if (state.equals(User.STATE_DEPARTED)) {
+				// Update rich messaging history
+				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
+						contact, GONE);
+				// Notify event listener
+				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
+						new ParticipantInfo(contact, DEPARTED));
 			}
-			
-	  		// Update history and notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	if (state.equals(User.STATE_CONNECTED)) {
-	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.JOINED);
-
-	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantJoined(contact, contactDisplayname);
-	            	} else
-	            	if (state.equals(User.STATE_DISCONNECTED)) {
-	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.DISCONNECTED);
-
-	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantDisconnected(contact);
-	            	} else
-	            	if (state.equals(User.STATE_DEPARTED)) {
-	        			// Update rich messaging history
-	            		MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(), contact, ChatLog.Message.Status.System.GONE);
-
-	        	  		// Notify event listener
-	        			listeners.getBroadcastItem(i).onParticipantLeft(contact);
-	            	}
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();
 	    }
     }
 
@@ -643,124 +559,96 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageDeliveryStatus(java.lang.String, java.lang.String)
      */
 	public void handleSendMessageFailure(String msgId) {
+		if (logger.isActivated()) {
+			logger.info("New message failure status for message " + msgId);
+		}
 		synchronized (lock) {
-			if (logger.isActivated()) {
-				logger.info("New message failure status for message " + msgId);
-			}
-
 			// Update rich messaging history
-			MessagingLog.getInstance().updateChatMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED);
+			MessagingLog.getInstance().updateChatMessageStatus(msgId, FAILED);
 
 			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-			for (int i = 0; i < N; i++) {
-				try {
-					listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-				} catch (Exception e) {
-					if (logger.isActivated()) {
-						logger.error("Can't notify listener", e);
-					}
-				}
-			}
-			listeners.finishBroadcast();
+			mGroupChatEventBroadcaster.broadcastMessageStatusChanged(getChatId(), msgId, FAILED);
 		}
 	}
 
 	@Override
     public void handleMessageDeliveryStatus(String msgId, String status, ContactId contact) {
+		if (logger.isActivated()) {
+			logger.info("New message delivery status for message " + msgId + ", status " + status);
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New message delivery status for message " + msgId + ", status " + status);
-			}
-	
-			// Update rich messaging history
+			// Update message log and notify event listeners
+			String chatId = getChatId();
 			MessagingLog messagingLog = MessagingLog.getInstance();
-			messagingLog.updateGroupChatDeliveryInfoStatus(msgId, status, contact);
-			// TODO : Listeners to notify group file delivery status for
-			// individual contacts will be implemented as part of CR011. For now,
-			// the same callback is used for sending both per contact group delivery
-			// status and for the whole group message delivery status.
-			// Notify event listeners
-			final int N = listeners.beginBroadcast();
-			for (int i = 0; i < N; i++) {
-				try {
-					if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
-					} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-					} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
-							|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
-							|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-						listeners.getBroadcastItem(i).onReportMessageFailed(msgId);
-					}
-				} catch (Exception e) {
-					if (logger.isActivated()) {
-						logger.error("Can't notify listener", e);
-					}
+			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+				messagingLog.updateGroupChatDeliveryInfoStatus(msgId, DELIVERED, NONE, contact);
+				mGroupChatEventBroadcaster.broadcastDeliveryInfoStatusChanged(chatId, contact,
+						msgId, DELIVERED, NONE);
+			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+				messagingLog.updateGroupChatDeliveryInfoStatus(msgId, DISPLAYED, NONE, contact);
+				mGroupChatEventBroadcaster.broadcastDeliveryInfoStatusChanged(chatId, contact,
+						msgId, DISPLAYED, NONE);
+			} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+					|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+					|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+				int reasonCode = NONE;
+
+				Pair<Integer, Integer> statusAndReasonCode = messagingLog
+						.getGroupChatDeliveryInfoStatus(msgId, contact);
+				int oldStatus = statusAndReasonCode.first;
+				int oldReasonCode = statusAndReasonCode.second;
+				if (DELIVERED == oldStatus
+						|| (ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED == oldStatus && DELIVERY_ERROR == oldReasonCode)) {
+					reasonCode = DISPLAY_ERROR;
+				} else {
+					reasonCode = DELIVERY_ERROR;
 				}
+				messagingLog.updateGroupChatDeliveryInfoStatus(msgId,
+						ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED, reasonCode, contact);
+				mGroupChatEventBroadcaster.broadcastDeliveryInfoStatusChanged(chatId, contact,
+						msgId, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.FAILED, reasonCode);
 			}
-			listeners.finishBroadcast();
 			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)
 					&& messagingLog.isDeliveredToAllRecipients(msgId)) {
 				messagingLog.updateOutgoingChatMessageDeliveryStatus(msgId, status);
-				final int P = listeners.beginBroadcast();
-				for (int i = 0; i < P; i++) {
-					try {
-						listeners.getBroadcastItem(i).onReportMessageDelivered(msgId);
-					} catch (Exception e) {
-						if (logger.isActivated()) {
-							logger.error("Can't notify listener", e);
-						}
-					}
-				}
-				listeners.finishBroadcast();
+				mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, msgId, DELIVERED);
 
 			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)
 					&& messagingLog.isDisplayedByAllRecipients(msgId)) {
 				messagingLog.updateOutgoingChatMessageDeliveryStatus(msgId, status);
-				final int Q = listeners.beginBroadcast();
-				for (int i = 0; i < Q; i++) {
-					try {
-						listeners.getBroadcastItem(i).onReportMessageDisplayed(msgId);
-					} catch (Exception e) {
-						if (logger.isActivated()) {
-							logger.error("Can't notify listener", e);
-						}
-					}
-				}
-				listeners.finishBroadcast();
 			}
 
 		}
 	}
     
     /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful()
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful(com.gsma.services.rcs.contact.ContactId)
      */
-    public void handleAddParticipantSuccessful() {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add participant request is successful");
-			}
-	
-			// TODO: nothing send over API?
-	    }
-    }
-    
+	public void handleAddParticipantSuccessful(ContactId contact) {
+		if (logger.isActivated()) {
+			logger.info("Add participant request is successful");
+		}
+		synchronized (lock) {
+			mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(getChatId(),
+					new ParticipantInfo(contact, CONNECTED));
+		}
+	}
+
     /**
      * Request to add participant has failed
-     * 
+     *
+     * @param contact Contact ID
      * @param reason Error reason
      */
-    public void handleAddParticipantFailed(String reason) {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("Add participant request has failed " + reason);
-			}
-	
-			// TODO: nothing send over API?
-	    }  
-    }
+	public void handleAddParticipantFailed(ContactId contact, String reason) {
+		if (logger.isActivated()) {
+			logger.info("Add participant request has failed " + reason);
+		}
+		synchronized (lock) {
+			mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(getChatId(),
+					new ParticipantInfo(contact, ParticipantInfo.Status.FAILED));
+		}
+	}
 
     /**
      * New geoloc message received
@@ -768,58 +656,30 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @param geoloc Geoloc message
      */
     public void handleReceiveGeoloc(GeolocMessage geoloc) {
+		if (logger.isActivated()) {
+			logger.info("New geoloc received");
+		}
     	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("New geoloc received");
-			}
-			
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
 					geoloc, ChatLog.Message.Direction.INCOMING);
-			
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	Geoloc geolocApi = new Geoloc(geoloc.getGeoloc().getLabel(),
-	            			geoloc.getGeoloc().getLatitude(), geoloc.getGeoloc().getLongitude(),
-	            			geoloc.getGeoloc().getExpiration());
-	            	com.gsma.services.rcs.chat.GeolocMessage msgApi = new com.gsma.services.rcs.chat.GeolocMessage(geoloc.getMessageId(),
-	            			geoloc.getRemote(),
-	            			geolocApi, geoloc.getDate());
-	            	listeners.getBroadcastItem(i).onNewGeoloc(msgApi);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
+
+			// TODO : Broadcast appropriate intent on receiving new geoloc
+			// message on group chat
 	    }
     }
 
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleParticipantStatusChanged(com.gsma.services.rcs.chat.ParticipantInfo)
      */
-    public void handleParticipantStatusChanged(ParticipantInfo participantInfo)
-    {
-    	synchronized(lock) {
-			if (logger.isActivated()) {
-				logger.info("handleParticipantStatusChanged "+participantInfo);
-			}
-	  		// Notify event listeners
-			final int N = listeners.beginBroadcast();
-	        for (int i=0; i < N; i++) {
-	            try {
-	            	listeners.getBroadcastItem(i).onParticipantStatusChanged(participantInfo);
-	            } catch(Exception e) {
-	            	if (logger.isActivated()) {
-	            		logger.error("Can't notify listener", e);
-	            	}
-	            }
-	        }
-	        listeners.finishBroadcast();		
-	    }
-    }
+	public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
+		if (logger.isActivated()) {
+			logger.info("handleParticipantStatusChanged " + participantInfo);
+		}
+		synchronized (lock) {
+			mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(getChatId(),
+					participantInfo);
+		}
+	}
 
 }

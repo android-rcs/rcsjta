@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
@@ -134,14 +138,13 @@ public class IPCallService extends JoynService {
      * @param contact Contact identifier
      * @param player IP call player
      * @param renderer IP call renderer
-     * @param listener IP call event listener
      * @return IP call
      * @throws JoynServiceException
      */
-    public IPCall initiateCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException {
+    public IPCall initiateCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IIPCall callIntf = api.initiateCall(contact, player, renderer, listener);
+				IIPCall callIntf = api.initiateCall(contact, player, renderer);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {
@@ -163,14 +166,13 @@ public class IPCallService extends JoynService {
      * @param contact Contact identifier
      * @param player IP call player
      * @param renderer IP call renderer
-     * @param listener IP call event listener
      * @return IP call
      * @throws JoynServiceException
      */
-    public IPCall initiateVisioCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer, IPCallListener listener) throws JoynServiceException {
+    public IPCall initiateVisioCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IIPCall callIntf = api.initiateVisioCall(contact, player, renderer, listener);
+				IIPCall callIntf = api.initiateVisioCall(contact, player, renderer);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {
@@ -255,18 +257,18 @@ public class IPCallService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }     
-    
-    /**
-	 * Registers a new IP call invitation listener
+
+	/**
+	 * Adds an event listener on IP call events
 	 * 
-	 * @param listener New IP call listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void addNewIPCallListener(NewIPCallListener listener) throws JoynServiceException {
+	public void addEventListener(IPCallListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.addNewIPCallListener(listener);
-			} catch(Exception e) {
+				api.addEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {
@@ -275,16 +277,16 @@ public class IPCallService extends JoynService {
 	}
 
 	/**
-	 * Unregisters a new IP call invitation listener
+	 * Removes an event listener from IP call events
 	 * 
-	 * @param listener New IP call listener
+	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void removeNewIPCallListener(NewIPCallListener listener) throws JoynServiceException {
+	public void removeEventListener(IPCallListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
-				api.removeNewIPCallListener(listener);
-			} catch(Exception e) {
+				api.removeEventListener(listener);
+			} catch (Exception e) {
 				throw new JoynServiceException(e.getMessage());
 			}
 		} else {

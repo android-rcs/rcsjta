@@ -12,6 +12,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * Multimedia session service API for extended services
  */
 interface IMultimediaSessionService {
+
 	boolean isServiceRegistered();
 
 	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
@@ -24,15 +25,23 @@ interface IMultimediaSessionService {
 	
 	IMultimediaMessagingSession getMessagingSession(in String sessionId);
 	
-	IMultimediaMessagingSession initiateMessagingSession(in String serviceId, in ContactId contact, in IMultimediaMessagingSessionListener listener);
+	IMultimediaMessagingSession initiateMessagingSession(in String serviceId, in ContactId contact);
 	
 	List<IBinder> getStreamingSessions(in String serviceId);
 	
 	IMultimediaStreamingSession getStreamingSession(in String sessionId);
 	
-	IMultimediaStreamingSession initiateStreamingSession(in String serviceId, in ContactId contact, in IMultimediaStreamingSessionListener listener);
+	IMultimediaStreamingSession initiateStreamingSession(in String serviceId, in ContactId contact);
 
 	int getServiceVersion();
+
+	void addMultimediaMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+
+	void removeMultimediaMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+
+	void addMultimediaStreamingEventListener(in IMultimediaStreamingSessionListener listener);
+
+	void removeMultimediaStreamingEventListener(in IMultimediaStreamingSessionListener listener);
 }
 
 

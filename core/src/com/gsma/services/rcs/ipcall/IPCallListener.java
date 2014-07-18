@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * IP call event listener
@@ -25,35 +30,11 @@ package com.gsma.services.rcs.ipcall;
  */
 public abstract class IPCallListener extends IIPCallListener.Stub {
 	/**
-	 * Callback called when the call is pending.
+	 * Callback called when the call state is changed
+	 *
+	 * @param contact Contact ID
+	 * @param callId ID of the call
+	 * @param state State of the call
 	 */
-	public abstract void onCallRinging();
-	
-	/**
-	 * Callback called when the call is started
-	 */
-	public abstract void onCallStarted();
-	
-	/**
-	 * Callback called when the call has been aborted or terminated
-	 */
-	public abstract void onCallAborted();
-
-	/**
-	 * Callback called when the call has failed
-	 * 
-	 * @param error Error
-	 * @see IPCall.Error
-	 */
-	public abstract void onCallError(int error);
-
-	/**
-	 * Callback called when the call has been held
-	 */
-	public abstract void onCallHeld();
-
-	/**
-	 * Callback called when the call continues after on hold
-	 */
-	public abstract void onCallContinue();
+	public abstract void onIPCallStateChanged(ContactId contact, String callId, int state);
 }

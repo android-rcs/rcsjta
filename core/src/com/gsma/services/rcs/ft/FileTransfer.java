@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
@@ -160,6 +160,20 @@ public class FileTransfer {
     public FileTransfer(IFileTransfer transferIntf) {
     	this.transferInf = transferIntf;
     }
+
+	/**
+	 * Returns the chat ID if this file transfer is a group file transfer
+	 *
+	 * @return Chat ID
+	 * @throws JoynServiceException
+	 */
+	public String getChatId() throws JoynServiceException {
+		try {
+			return transferInf.getChatId();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
     	
     /**
 	 * Returns the file transfer ID of the file transfer
@@ -353,34 +367,6 @@ public class FileTransfer {
 	public void resumeTransfer() throws JoynServiceException {
 		try {
 			transferInf.resumeTransfer();
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-
-	/**
-	 * Adds a listener on file transfer events
-	 * 
-	 * @param listener Listener
-	 * @throws JoynServiceException
-	 */
-	public void addEventListener(FileTransferListener listener) throws JoynServiceException {
-		try {
-			transferInf.addEventListener(listener);
-		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Removes a listener from file transfer
-	 * 
-	 * @param listener Listener
-	 * @throws JoynServiceException
-	 */
-	public void removeEventListener(FileTransferListener listener) throws JoynServiceException {
-		try {
-			transferInf.removeEventListener(listener);
 		} catch(Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}

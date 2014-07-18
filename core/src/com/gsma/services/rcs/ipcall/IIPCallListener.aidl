@@ -1,18 +1,11 @@
 package com.gsma.services.rcs.ipcall;
 
+import com.gsma.services.rcs.contacts.ContactId;
+
 /**
  * Callback methods for IP call events
  */
 interface IIPCallListener {
-	void onCallRinging();
 
-	void onCallStarted();
-	
-	void onCallAborted();
-
-	void onCallHeld();
-
-	void onCallContinue();
-
-	void onCallError(in int error);
+	void onIPCallStateChanged(in ContactId contact, in String callId, in int state);
 }

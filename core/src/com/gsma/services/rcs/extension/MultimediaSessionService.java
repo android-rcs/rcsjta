@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs.extension;
@@ -133,14 +137,13 @@ public class MultimediaSessionService extends JoynService {
      * 
      * @param serviceId Service ID
      * @param contact Contact identifier
-     * @param listener Multimedia messaging session event listener
      * @return Multimedia messaging session
      * @throws JoynServiceException
      */
-    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact, MultimediaMessagingSessionListener listener) throws JoynServiceException {
+    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact, listener);
+				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact);
 				if (sessionIntf != null) {
 					return new MultimediaMessagingSession(sessionIntf);
 				} else {
@@ -235,14 +238,13 @@ public class MultimediaSessionService extends JoynService {
      * 
      * @param serviceId Service ID
      * @param contact Contact ID
-     * @param listener Multimedia streaming session event listener
      * @return Multimedia streaming session
      * @throws JoynServiceException
      */
-    public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact, MultimediaStreamingSessionListener listener) throws JoynServiceException {
+    public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact, listener);
+				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact);
 				if (sessionIntf != null) {
 					return new MultimediaStreamingSession(sessionIntf);
 				} else {
@@ -326,5 +328,81 @@ public class MultimediaSessionService extends JoynService {
 		} else {
 			throw new JoynServiceNotAvailableException();
 		}
-    }     
+    }
+
+	/**
+	 * Adds an event listener on session events
+	 *
+	 * @param listener Multimedia messaging session event listener
+	 * @throws JoynServiceException
+	 */
+	public void addMultimediaMessagingEventListener(MultimediaMessagingSessionListener listener)
+			throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addMultimediaMessagingEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Removes an event listener on session events
+	 *
+	 * @param listener Multimedia messaging session event listener
+	 * @throws JoynServiceException
+	 */
+	public void removeMultimediaMessagingEventListener(MultimediaMessagingSessionListener listener)
+			throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeMultimediaMessagingEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Adds a listener on session events
+	 *
+	 * @param listener Session event listener
+	 * @throws JoynServiceException
+	 */
+	public void addMultimediaStreamingEventListener(MultimediaStreamingSessionListener listener)
+			throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.addMultimediaStreamingEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+
+	/**
+	 * Removes a listener on session events
+	 *
+	 * @param listener Session event listener
+	 * @throws JoynServiceException
+	 */
+	public void removeMultimediaStreamingEventListener(MultimediaStreamingSessionListener listener)
+			throws JoynServiceException {
+		if (api != null) {
+			try {
+				api.removeMultimediaStreamingEventListener(listener);
+			} catch (Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
 }

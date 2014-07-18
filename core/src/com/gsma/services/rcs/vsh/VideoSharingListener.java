@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.vsh;
+
+import com.gsma.services.rcs.contacts.ContactId;
 
 
 /**
@@ -25,20 +31,11 @@ package com.gsma.services.rcs.vsh;
  */
 public abstract class VideoSharingListener extends IVideoSharingListener.Stub {
 	/**
-	 * Callback called when the sharing is started
+	 * Callback called when the sharing state is changed
+	 *
+	 * @param contact Contact ID
+	 * @param sharingId ID of video sharing
+	 * @param state State of video sharing
 	 */
-	public abstract void onSharingStarted();
-	
-	/**
-	 * Callback called when the sharing has been aborted or terminated
-	 */
-	public abstract void onSharingAborted();
-
-	/**
-	 * Callback called when the sharing has failed
-	 * 
-	 * @param error Error
-	 * @see VideoSharing.Error
-	 */
-	public abstract void onSharingError(int error);
+	public abstract void onVideoSharingStateChanged(ContactId contact, String sharingId, int state);
 }
