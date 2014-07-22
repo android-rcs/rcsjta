@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
@@ -38,7 +39,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	/**
 	 * The FT HTTP Transfer Id
 	 */
-	final private String tid;
+	final private String mTId;
 
 	/**
 	 * Creates a FT HTTP resume upload data object
@@ -46,16 +47,17 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 * 
 	 * @param session
 	 *            the {@code session} value.
-	 * @param tid
-	 *            the {@code tid} value.
+	 * @param tId
+	 *            the {@code tId} value.
 	 * @param fileicon
 	 *            the {@code fileicon} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(HttpFileTransferSession session, String tid, Uri fileicon, boolean isGroup) {
-		this(session.getContent(), fileicon, tid, (isGroup) ? null : session.getRemoteContact(), session.getRemoteDisplayName(), session
-				.getContributionID(), session.getFileTransferId(), session.getChatSessionID(), isGroup);
+	public FtHttpResumeUpload(HttpFileTransferSession session, String tId, Uri fileicon,
+			boolean isGroup) {
+		this(session.getContent(), fileicon, tId, (isGroup) ? null : session.getRemoteContact(),
+				session.getContributionID(), session.getFileTransferId(), isGroup);
 	}
 
 	/**
@@ -67,39 +69,33 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 *            the {@code fileicon} value.
 	 * @param content
      *            the {@code content} content.
-	 * @param tid
-	 *            the {@code tid} value.
+	 * @param tId
+	 *            the {@code tId} value.
 	 * @param contact
 	 *            the {@code contactId} value.
-	 * @param displayName
-	 *            the {@code displayName} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
-	 * @param sessionId
-	 *            the {@code sessionId} value.
-	 * @param chatSessionId
-	 *            the {@code chatSessionId} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tid, ContactId contact,
-            String displayName, String chatId, String fileTransferId, String chatSessionId, boolean isGroup) {
-        super(FtHttpDirection.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file.getSize(), fileicon, contact,
-               displayName, chatId, fileTransferId, chatSessionId, isGroup);
-		if (tid == null)
-			throw new IllegalArgumentException("Null tid");
-		this.tid = tid;
+	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tId, ContactId contact,
+			String chatId, String fileTransferId, boolean isGroup) {
+		super(FileTransfer.Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file
+				.getSize(), fileicon, contact, chatId, fileTransferId, isGroup);
+		if (tId == null)
+			throw new IllegalArgumentException("Null tId");
+		mTId = tId;
 	}
 
-	public String getTid() {
-		return tid;
+	public String getTId() {
+		return mTId;
 	}
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeUpload [tid=" + tid + ", file=" + getFileUri() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
+		return "FtHttpResumeUpload [tId=" + mTId + ", file=" + getFile() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
 				+ ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
-				+ ", getFileTransferId()=" + getFileTransferId() + ", getChatSessionId()=" + getChatSessionId() + ", isGroup()=" + isGroup()
+				+ ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroup()
 				+ "]";
 	}
 

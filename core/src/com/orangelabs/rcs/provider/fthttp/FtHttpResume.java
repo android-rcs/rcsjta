@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
@@ -40,9 +40,11 @@ public abstract class FtHttpResume {
 	final private Date date;
 
 	/**
-	 * The direction
+	 * The direction TODO : The type of direction is temporarily changed to an
+	 * int now and will be changed to an enum as part of the implementation of
+	 * CR031.
 	 */
-	final private FtHttpDirection ftHttpDirection;
+	final private int direction;
 
 	/**
 	 * Uri of file
@@ -75,11 +77,6 @@ public abstract class FtHttpResume {
 	final private ContactId contact;
 
 	/**
-	 * the display name
-	 */
-	final private String displayName;
-
-	/**
 	 * the Chat Id
 	 */
 	final private String chatId;
@@ -90,32 +87,27 @@ public abstract class FtHttpResume {
 	final private String fileTransferId;
 
 	/**
-	 * the Chat session Id
-	 */
-	final private String chatSessionId;
-
-	/**
 	 * Is FT initiated from Group Chat
 	 */
 	final private boolean isGroup;
 
 	/**
-	 * Works just like FtHttpResume(FtHttpDirection,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date) except the date
+	 * Works just like FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date) except the date
 	 * is always null
 	 * 
-	 * @see #FtHttpResume(FtHttpDirection,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
+	 * @see #FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
 	 */
-	public FtHttpResume(FtHttpDirection ftHttpDirection, Uri file, String fileName, String mimeType, long size,
-            Uri fileicon, ContactId contact, String displayName, String chatId, String fileTransferId,
-            String chatSessionId, boolean isGroup) {
-        this(ftHttpDirection, file, fileName, mimeType, size, fileicon, contact, displayName, chatId,
-        		fileTransferId, chatSessionId, isGroup, null);
+	public FtHttpResume(int direction, Uri file, String fileName,
+			String mimeType, long size, Uri fileicon, ContactId contact, String chatId,
+			String fileTransferId, boolean isGroup) {
+		this(direction, file, fileName, mimeType, size, fileicon, contact, chatId,
+				fileTransferId, isGroup, null);
 	}
 
 	/**
 	 * Creates an instance of FtHttpResume Data Object
 	 * 
-	 * @param ftHttpDirection
+	 * @param direction
 	 *            the {@code direction} value.
 	 * @param file
 	 *            the {@code Uri of file} value.
@@ -129,36 +121,30 @@ public abstract class FtHttpResume {
 	 *            the {@code fileicon} value.
 	 * @param contact
 	 *            the {@code contactId} value.
-	 * @param displayName
-	 *            the {@code displayName} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
 	 * @param fileTransferId
 	 *            the {@code fileTransferId} value.
-	 * @param chatSessionId
-	 *            the {@code chatSessionId} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 * @param date
 	 *            the {@code date} value.
 	 */
-	public FtHttpResume(FtHttpDirection ftHttpDirection,  Uri file, String fileName, String mimeType, long size,
-	        Uri fileicon, ContactId contact, String displayName, String chatId, String fileTransferId,
-	        String chatSessionId, boolean isGroup, Date date) {
-		if (size <= 0 || ftHttpDirection == null || mimeType == null || file == null || fileName == null)
+	public FtHttpResume(int direction, Uri file, String fileName, String mimeType, long size,
+	        Uri fileicon, ContactId contact, String chatId, String fileTransferId,
+	        boolean isGroup, Date date) {
+		if (size <= 0 || mimeType == null || file == null || fileName == null)
 			throw new IllegalArgumentException("Null argument");
 		this.date = date;
-		this.ftHttpDirection = ftHttpDirection;
+		this.direction = direction;
 		this.file = file;
 		this.fileName = fileName;
         this.mimeType = mimeType;
         this.size = size;
 		this.fileicon = fileicon;
 		this.contact = contact;
-		this.displayName = displayName;
 		this.chatId = chatId;
 		this.fileTransferId = fileTransferId;
-		this.chatSessionId = chatSessionId;
 		this.isGroup = isGroup;
 	}
 
@@ -166,11 +152,11 @@ public abstract class FtHttpResume {
 		return date;
 	}
 
-	public FtHttpDirection getDirection() {
-		return ftHttpDirection;
+	public int getDirection() {
+		return direction;
 	}
 
-	public Uri getFileUri() {
+	public Uri getFile() {
 		return file;
 	}
 
@@ -194,10 +180,6 @@ public abstract class FtHttpResume {
 		return contact;
 	}
 
-	public String getDisplayName() {
-		return displayName;
-	}
-
 	public String getChatId() {
 		return chatId;
 	}
@@ -206,17 +188,13 @@ public abstract class FtHttpResume {
 		return fileTransferId;
 	}
 
-	public String getChatSessionId() {
-		return chatSessionId;
-	}
-
 	public boolean isGroup() {
 		return isGroup;
 	}
 
 	@Override
 	public String toString() {
-		return "FtHttpResume [date=" + date + ", dir=" + ftHttpDirection + ", file=" + file + ", fileName=" + fileName + ",fileicon="+fileicon+"]";
+		return "FtHttpResume [date=" + date + ", dir=" + direction + ", file=" + file + ", fileName=" + fileName + ",fileicon="+fileicon+"]";
 	}
 
 }

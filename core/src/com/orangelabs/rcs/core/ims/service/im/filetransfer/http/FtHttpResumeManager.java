@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
+
+import static com.gsma.services.rcs.ft.FileTransfer.Direction.INCOMING;
+import static com.gsma.services.rcs.ft.FileTransfer.Direction.OUTGOING;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -119,7 +122,7 @@ public class FtHttpResumeManager {
 		switch (ftHttpResume.getDirection()) {
 		case INCOMING:
 			FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-			MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFileUri(),downloadInfo.getSize(),downloadInfo.getFileName());
+			MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),downloadInfo.getSize(),downloadInfo.getFileName());
 			// Creates the Resume Download session object
 			final ResumeDownloadFileSharingSession resumeDownload = new ResumeDownloadFileSharingSession(
                     imsService, downloadContent, downloadInfo);
@@ -144,7 +147,7 @@ public class FtHttpResumeManager {
             if (!ftHttpResume.isGroup()) {
                 // Get upload content
                     MmContent uploadContent = ContentManager.createMmContentFromMime(
-                            uploadInfo.getFileUri(), uploadInfo.getMimetype(),
+                            uploadInfo.getFile(), uploadInfo.getMimetype(),
                             uploadInfo.getSize(), uploadInfo.getFileName());
 
                 // Create Resume Upload session 

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -40,8 +40,8 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -134,9 +134,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
 		super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume.getContact()),
 				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
-						.getFileicon()) : null, resume.getChatSessionId(), resume.getChatId(),
+						.getFileicon()) : null, null, resume.getChatId(),
 				resume.getFileTransferId());
-		setRemoteDisplayName(resume.getDisplayName());
 		this.isGroup = resume.isGroup();
 		this.resumeFT = resume;
 		// Instantiate the download manager
@@ -227,15 +226,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			Uri file = downloadManager.getDownloadedFileUri();
 			Uri downloadServerAddress = downloadManager.getHttpServerAddr();
 
-			// Create download entry in fthttp table
-			if (getFileicon() != null) {
-				resumeFT = new FtHttpResumeDownload(this, downloadServerAddress, file, getFileTransferId(), getFileicon()
-						.getUri(), isGroup);
-			} else {
-				resumeFT = new FtHttpResumeDownload(this, downloadServerAddress, file, getFileTransferId(), null, isGroup);
-			}
-
-            FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
+			MessagingLog.getInstance().setFileDownloadAddress(getFileTransferId(), downloadServerAddress);
 			// Download file from the HTTP server
 			if (downloadManager.downloadFile()) {
 				if (logger.isActivated()) {
@@ -295,21 +286,11 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	@Override
 	public void handleError(ImsServiceError error) {
 		super.handleError(error);
-		if (fired.compareAndSet(false, true)) {
-            if (resumeFT != null) {
-                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
-            }
-		}
 	}
 
 	@Override
 	public void handleFileTransfered() {
 		super.handleFileTransfered();
-		if (fired.compareAndSet(false, true)) {
-            if (resumeFT != null) {
-                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
-            }
-		}
 	}
 
 	/**

@@ -67,11 +67,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     private ChatSession chatSession= null;
 
     /**
-     * fired a boolean value updated atomically to notify only once
-     */
-	private AtomicBoolean fired = new AtomicBoolean(false);
-	
-    /**
      * The logger
      */
     private static final Logger logger = Logger.getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
@@ -93,9 +88,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 *            Chat session ID
 	 * @param chatContributionId
 	 *            Chat contribution Id
+	 * @param tId
+	 *            TID of the upload
 	 */
 	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content, boolean fileicon,
-			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId) {
+			String conferenceId, Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId, String tId) {
 		super(parent, content, null, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
 		// Set participants involved in the transfer
 		this.participants = participants;
@@ -107,7 +104,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 			setFileicon(fileiconContent);
 		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), fileiconContent, this);
+		uploadManager = new HttpUploadManager(getContent(), fileiconContent, this, tId);
 	}
 
 	/**
@@ -134,21 +131,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	@Override
 	public void handleError(ImsServiceError error) {
 		super.handleError(error);
-		if (fired.compareAndSet(false, true)) {
-            if (resumeFT != null) {
-                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
-            }
-		}
 	}
 
 	@Override
 	public void handleFileTransfered() {
 		super.handleFileTransfered();
-		if (fired.compareAndSet(false, true)) {
-            if (resumeFT != null) {
-                FtHttpResumeDaoImpl.getInstance().delete(resumeFT);
-            }
-		}
 	}
 
 	@Override
@@ -241,7 +228,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					FtHttpResumeUpload upload = FtHttpResumeDaoImpl.getInstance().queryUpload(uploadManager.getTid());
+					FtHttpResumeUpload upload = FtHttpResumeDaoImpl.getInstance().queryUpload(uploadManager.getTId());
 					if (upload != null) {
 						sendResultToContact(uploadManager.resumeUpload());
 					} else {

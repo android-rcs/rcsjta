@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.util.List;
 import java.util.Set;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -29,6 +30,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -449,5 +452,25 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public boolean isNewMessage(ContactId contact, String msgId) {
 		return messageLog.isNewMessage(contact, msgId);
+	}
+
+	@Override
+	public void setFileUploadTId(String fileTransferId, String tId) {
+		fileTransferLog.setFileUploadTId(fileTransferId, tId);
+	}
+
+	@Override
+	public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
+		fileTransferLog.setFileDownloadAddress(fileTransferId, downloadAddress);
+	}
+
+	@Override
+	public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
+		return fileTransferLog.retrieveFileTransfersPausedBySystem();
+	}
+
+	@Override
+	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
+		return fileTransferLog.retrieveFtHttpResumeUpload(tId);
 	}
 }

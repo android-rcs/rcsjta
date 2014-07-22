@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
@@ -342,7 +343,9 @@ public class InstantMessagingService extends ImsService {
 		FileSharingSession session;
 		if (isHttpProtocol) {
 			// Create a new session
-			session = new OriginatingHttpFileSharingSession(this, content, contact, PhoneUtils.formatContactIdToUri(contact),fileicon);
+			session = new OriginatingHttpFileSharingSession(this, content, contact,
+					PhoneUtils.formatContactIdToUri(contact), fileicon, UUID.randomUUID()
+							.toString());
 		} else {
 			if (fileicon) {
 				// Check thumbnail capabilities
@@ -415,7 +418,8 @@ public class InstantMessagingService extends ImsService {
 		// Create a new session
 		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content,
 				fileicon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), participants,
-				groupChatSession.getSessionID(), chatContributionId);
+				groupChatSession.getSessionID(), chatContributionId, UUID.randomUUID()
+				.toString());
 
 		return session;
 	}

@@ -112,12 +112,12 @@ public class HttpUploadManager extends HttpTransferManager {
 	/**
 	 * TID of the upload
 	 */
-	private String tid;
+	private String mTId;
 
 	/**
 	 * TID flag
 	 */
-	private boolean tidFlag = true;
+	private boolean tIdFlag = true;
 
 	/**
 	 * Authentication flag
@@ -152,12 +152,15 @@ public class HttpUploadManager extends HttpTransferManager {
 	 *            content of fileicon
 	 * @param listener
 	 *            HTTP transfer event listener
+	 * @param tId
+	 *            TID of the upload
 	 */
-	public HttpUploadManager(MmContent content, MmContent fileicon, HttpUploadTransferEventListener listener) {
+	public HttpUploadManager(MmContent content, MmContent fileicon,
+			HttpUploadTransferEventListener listener, String tId) {
 		super(listener);
 		this.content = content;
 		this.fileicon = fileicon;
-		tid = UUID.randomUUID().toString();
+		mTId = tId;
 	}
 
 	/**
@@ -300,7 +303,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		String body = "";
 
 		// Add tid
-		if (tidFlag) {
+		if (tIdFlag) {
 			body += generateTidMultipart();
 		}
 
@@ -510,9 +513,9 @@ public class HttpUploadManager extends HttpTransferManager {
 		String tidPartHeader = twoHyphens + BOUNDARY_TAG + lineEnd;
 		tidPartHeader += "Content-Disposition: form-data; name=\"tid\"" + lineEnd;
 		tidPartHeader += "Content-Type: text/plain" + lineEnd;
-		tidPartHeader += "Content-Length: " + tid.length();
+		tidPartHeader += "Content-Length: " + mTId.length();
 
-		return tidPartHeader + lineEnd + lineEnd + tid + lineEnd;
+		return tidPartHeader + lineEnd + lineEnd + mTId + lineEnd;
 	}
 
 	/**
@@ -876,7 +879,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		String serviceRoot = url.getPath();
 
 		// Build POST request
-		HttpGet get = new HttpGet(new URI(protocol + "://" + host + serviceRoot + "?tid=" + tid + suffix));
+		HttpGet get = new HttpGet(new URI(protocol + "://" + host + serviceRoot + "?tid=" + mTId + suffix));
 		get.addHeader("User-Agent", SipUtils.userAgentString());
 		if (authRequired && auth != null) {
 			get.addHeader("Authorization", auth.generateAuthorizationHeaderValue(get.getMethod(), get.getURI().toString(), ""));
@@ -980,11 +983,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		return sendGetInfo(UPLOAD_INFO_REQUEST, false);
 	}
 
-	public String getTid() {
-		return tid;
-	}
-
-	public void setTid(String tid) {
-		this.tid = tid;
+	public String getTId() {
+		return mTId;
 	}
 }

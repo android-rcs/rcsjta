@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -24,6 +24,12 @@ package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+
+import android.net.Uri;
+
+import java.util.List;
 
 /**
  * Interface for the ft table
@@ -145,4 +151,35 @@ public interface IFileTransferLog {
 	 */
 	public void updateFileTransferChatId(String fileTransferId, String chatId);
 
+	/**
+	 * Set file upload TID
+	 *
+	 * @param fileTransferId
+	 *            File transfer ID
+	 * @param tId
+	 *            TID
+	 */
+	public void setFileUploadTId(String fileTransferId, String tId);
+
+	/**
+	 * Set file download server uri
+	 *
+	 * @param fileTransferId
+	 *            File transfer ID
+	 * @param downloadAddress
+	 *            Download Address
+	 */
+	public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress);
+
+	/**
+	 * Retrieve file transfers paused by SYSTEM on connection loss
+	 */
+	public List<FtHttpResume> retrieveFileTransfersPausedBySystem();
+
+	/**
+	 * Retrieve resumable file upload
+	 *
+	 * @param tId Unique Id used while uploading
+	 */
+	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 }

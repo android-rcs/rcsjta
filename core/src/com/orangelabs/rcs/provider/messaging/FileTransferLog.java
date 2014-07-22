@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Set;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Class to interface the ft table
- * 
+ *
  */
 public class FileTransferLog implements IFileTransferLog {
 
@@ -49,6 +57,10 @@ public class FileTransferLog implements IFileTransferLog {
 	private Uri ftDatabaseUri = FileTransferData.CONTENT_URI;
 
 	private static final String SELECTION_FILE_BY_FT_ID = new StringBuilder(FileTransferData.KEY_FT_ID).append("=?").toString();
+
+	private static final String SELECTION_FILE_BY_T_ID = new StringBuilder(FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
+
+	private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
 	/**
 	 * Content resolver
@@ -63,7 +75,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param cr
 	 *            Content resolver
 	 * @param groupChatLog
@@ -121,7 +133,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addOutgoingGroupFileTransfer(java.lang.String, java.lang.String,
 	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
@@ -206,7 +218,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferStatus(java.lang.String, int)
 	 */
 	@Override
@@ -229,7 +241,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#markFileTransferAsRead(java.lang.String)
 	 */
 	@Override
@@ -250,7 +262,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long, long)
 	 */
 	@Override
@@ -279,7 +291,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#isFileTransfer(java.lang.String)
 	 */
 	@Override
@@ -304,7 +316,7 @@ public class FileTransferLog implements IFileTransferLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferChatId(java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -317,4 +329,185 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#setFileUploadTId(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setFileUploadTId(String fileTransferId, String tId) {
+		if (logger.isActivated()) {
+			logger.debug("updateFileUploadTId (tId=" + tId + ") (fileTransferId=" + fileTransferId
+					+ ")");
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_UPLOAD_TID, tId);
+		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] {
+			fileTransferId
+		});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#setFileDownloadAddress(java.lang.String, android.net.Uri)
+	 */
+	@Override
+	public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
+		if (logger.isActivated()) {
+			logger.debug("updateFileDownloadAddress (downloadAddress=" + downloadAddress
+					+ ") (fileTransferId=" + fileTransferId + ")");
+		}
+		ContentValues values = new ContentValues();
+		values.put(FileTransferData.KEY_DOWNLOAD_URI, downloadAddress.toString());
+		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] {
+			fileTransferId
+		});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#retrieveFileTransfersPausedBySystemOnConnectionLoss()
+	 */
+	@Override
+	public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
+		Cursor cursor = null;
+		try {
+			// TODO : With implementation of CR009, use reason code to retrieve
+			// only those that were paused
+			// due to network interruptions - PAUSED_BY_SYSTEM
+			cursor = cr.query(ftDatabaseUri, null, FileTransferData.KEY_STATUS + "="
+					+ FileTransfer.State.PAUSED, null, ORDER_BY_TIMESTAMP_ASC);
+			if (!cursor.moveToFirst()) {
+				return new ArrayList<FtHttpResume>();
+			}
+
+			int sizeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_SIZE);
+			int mimeTypeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE);
+			int contactColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
+			int chatIdColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID);
+			int fileColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE);
+			int fileNameColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_NAME);
+			int directionColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION);
+			int fileTransferIdColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
+			int fileiconColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON);
+			int downloadServerAddressColumnIdx = cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI);
+			int tIdColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID);
+
+			List<FtHttpResume> fileTransfers = new ArrayList<FtHttpResume>();
+			do {
+				long size = cursor.getLong(sizeColumnIdx);
+				String mimeType = cursor.getString(mimeTypeColumnIdx);
+				String fileTransferId = cursor.getString(fileTransferIdColumnIdx);
+				ContactId contact = null;
+				String phoneNumber = cursor.getString(contactColumnIdx);
+				try {
+					contact = ContactUtils.createContactId(phoneNumber);
+				} catch (Exception e) {
+					if (logger.isActivated()) {
+						logger.error("Cannot parse contact '" + phoneNumber
+								+ "' for file transfer with transfer ID '" + fileTransferId + "'");
+					}
+					continue;
+				}
+				String chatId = cursor.getString(chatIdColumnIdx);
+				String file = cursor.getString(fileColumnIdx);
+				String fileName = cursor.getString(fileNameColumnIdx);
+				int direction = cursor.getInt(directionColumnIdx);
+				String fileicon = cursor.getString(fileiconColumnIdx);
+				boolean isGroup = !contact.toString().equals(chatId);
+				if (direction == FileTransfer.Direction.INCOMING) {
+					String downloadServerAddress = cursor.getString(downloadServerAddressColumnIdx);
+					MmContent content = ContentManager.createMmContent(Uri.parse(file), size,
+							fileName);
+					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+					fileTransfers.add(new FtHttpResumeDownload(Uri.parse(downloadServerAddress),
+							Uri.parse(file), fileiconUri, content, contact, chatId, fileTransferId,
+							isGroup));
+				} else {
+					String tId = cursor.getString(tIdColumnIdx);
+					MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file),
+							mimeType, size, fileName);
+					Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+					fileTransfers.add(new FtHttpResumeUpload(content, fileiconUri, tId, contact,
+							chatId, fileTransferId, isGroup));
+				}
+			} while (cursor.moveToNext());
+			return fileTransfers;
+
+		} catch (SQLException e) {
+			if (logger.isActivated()) {
+				logger.error("Unable to retrieve resumable file transfers!", e);
+			}
+			return new ArrayList<FtHttpResume>();
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#retrieveFtHttpResumeUpload()
+	 */
+	@Override
+	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(ftDatabaseUri, null, SELECTION_FILE_BY_T_ID, new String[] {
+				tId
+			}, null);
+
+			if (!cursor.moveToFirst()) {
+				return null;
+			}
+			String fileName = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_NAME));
+			long size = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferData.KEY_SIZE));
+			String mimeType = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
+			String fileTransferId = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID));
+			ContactId contact = null;
+			String phoneNumber = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
+			try {
+				contact = ContactUtils.createContactId(phoneNumber);
+			} catch (Exception e) {
+				if (logger.isActivated()) {
+					logger.error("Cannot parse contact '" + phoneNumber
+							+ "' for file transfer with transfer ID '" + fileTransferId + "'");
+				}
+				return null;
+
+			}
+			String chatId = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
+			String file = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE));
+			String fileicon = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
+			boolean isGroup = !contact.toString().equals(chatId);
+			MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType,
+					size, fileName);
+			Uri fileiconUri = fileicon != null ? Uri.parse(fileicon) : null;
+			return new FtHttpResumeUpload(content, fileiconUri, tId, contact, chatId,
+					fileTransferId, isGroup);
+
+		} catch (SQLException e) {
+			if (logger.isActivated()) {
+				logger.error(e.getMessage(), e);
+			}
+			return null;
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
 }
