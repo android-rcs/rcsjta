@@ -21,6 +21,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DELIVERED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DISPLAYED;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -323,27 +326,23 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param msgId Message ID
      * @param status Delivery status
      */
-    public void receiveMessageDeliveryStatus(ContactId contact, String msgId, String status) {
-    	synchronized(lock) {
+	public void receiveMessageDeliveryStatus(ContactId contact, String msgId, String status) {
+		synchronized (lock) {
 			if (logger.isActivated()) {
-				logger.info("Receive message delivery status for message " + msgId + ", status " + status);
+				logger.info("Receive message delivery status for message " + msgId + ", status "
+						+ status);
 			}
-	
-	  		// Notify message delivery listeners
-			ChatImpl chat = (ChatImpl)ChatServiceImpl.getChatSession(contact);
-			if (chat != null) {
-				// TODO FUSION check if correct ?
-            	chat.handleMessageDeliveryStatus(msgId, status, contact);
-			} else {
-				// Update rich messaging history
-				MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId,
-						status);
-
-				// TODO : Callbacks for delivery notifications received outside
-				// session will be implemented as part of CR011.
+			MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
+			// Notify message delivery listeners
+			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
+						DELIVERED);
+			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
+						DISPLAYED);
 			}
-    	}
-    }
+		}
+	}
     
 	/**
 	 * Add a chat session in the list
