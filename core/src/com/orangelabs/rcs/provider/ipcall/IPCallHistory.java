@@ -113,11 +113,12 @@ public class IPCallHistory {
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATUS, status);
-		values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
 		values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
-		values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
-		values.put(IPCallData.KEY_HEIGHT, videocontent.getHeight());
-		
+		if (videocontent != null) {
+			values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
+			values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
+			values.put(IPCallData.KEY_HEIGHT, videocontent.getHeight());
+		}
 		return cr.insert(databaseUri, values);
 	}
 
