@@ -19,8 +19,6 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 
 import java.util.Vector;
 
-import android.media.MediaCodec;
-
 import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
@@ -140,8 +138,8 @@ public class VideoSdpBuilder {
 
 
     /**
-     * Builds the {@link MediaCodec} SDP for a SIP INVITE response. If the SIP
-     * INVITE SDP doesn't have the orientation extension then the response SDP
+     * Builds the SDP for a SIP INVITE response. If the SIP INVITE SDP
+     * doesn't have the orientation extension then the response SDP
      * also shouldn't have.
      * 
      * @param codec Media Codec
