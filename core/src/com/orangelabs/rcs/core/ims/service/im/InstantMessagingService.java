@@ -66,8 +66,8 @@ import com.orangelabs.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManage
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingMsrpFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingMsrpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
@@ -360,7 +360,7 @@ public class InstantMessagingService extends ImsService {
 				}
 			}
 			// Create a new session
-			session = new OriginatingFileSharingSession(this, content, contact, fileicon);
+			session = new OriginatingMsrpFileSharingSession(this, content, contact, fileicon);
 		}
 		return session;
 	}
@@ -455,7 +455,7 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create a new session
-			FileSharingSession session = new TerminatingFileSharingSession(this, invite);
+			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite);
 
 			// Start the session
 			session.startSession();

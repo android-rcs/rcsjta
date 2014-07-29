@@ -22,6 +22,7 @@ import static com.gsma.services.rcs.ft.FileTransfer.State.TRANSFERRED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.INVITED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.INITIATED;
+import static com.gsma.services.rcs.ft.FileTransfer.State.INACTIVE;
 
 import android.net.Uri;
 import android.os.RemoteCallbackList;
@@ -37,10 +38,12 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingMsrpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -163,63 +166,32 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	 * @return State
 	 */
 	public int getState() {
-		int result = FileTransfer.State.INACTIVE;
-		if (session instanceof HttpFileTransferSession) {
-			// HTTP transfer
-			int state = ((HttpFileTransferSession)session).getSessionState();
-			switch (state) {
-				case HttpTransferState.CANCELLED:
-					// Session canceled
-					result = ABORTED;
-					break;
-				case HttpTransferState.ESTABLISHED:
-					// Session started
-					result = STARTED;
-					break;
-				case HttpTransferState.TERMINATED:
-					if (session.isFileTransfered()) {
-						result = TRANSFERRED;
-					} else {
-						result = ABORTED;
-					}
-					break;
-				case HttpTransferState.PENDING:
-					// Session pending
-					if (session instanceof OriginatingHttpFileSharingSession) {
-						result = INITIATED;
-					} else {
-						result = INVITED;
-					}
-					break;
-			}
-		} else {
-			// MSRP transfer
-			SipDialogPath dialogPath = session.getDialogPath();
-			if (dialogPath != null) {
-				if (dialogPath.isSessionCancelled()) {
-					// Session canceled
-					result = ABORTED;
-				} else if (dialogPath.isSessionEstablished()) {
-					// Session started
-					result = STARTED;
-				} else if (dialogPath.isSessionTerminated()) {
-					// Session terminated
-					if (session.isFileTransfered()) {
-						result = TRANSFERRED;
-					} else {
-						result = ABORTED;
-					}
-				} else {
-					// Session pending
-					if (session instanceof OriginatingFileSharingSession) {
-						result = INITIATED;
-					} else {
-						result = INVITED;
-					}
+		int state = ((HttpFileTransferSession)session).getSessionState();
+		switch (state) {
+			case HttpTransferState.CANCELLED:
+				// Session canceled
+				return ABORTED;
+
+			case HttpTransferState.ESTABLISHED:
+				// Session started
+				return STARTED;
+
+			case HttpTransferState.TERMINATED:
+				if (session.isFileTransfered()) {
+					return TRANSFERRED;
 				}
-			}
+				return ABORTED;
+
+			case HttpTransferState.PENDING:
+				// Session pending
+				if (session instanceof OriginatingHttpGroupFileSharingSession) {
+					return INITIATED;
+				}
+				return INVITED;
+
+			default:
+				return INACTIVE;
 		}
-		return result;
 	}
 
 	/**
@@ -229,7 +201,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	 * @see FileTransfer.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingFileSharingSession) {
+		if (session instanceof IOriginatingFileSharingSession) {
 			return FileTransfer.Direction.OUTGOING;
 		} else {
 			return FileTransfer.Direction.INCOMING;

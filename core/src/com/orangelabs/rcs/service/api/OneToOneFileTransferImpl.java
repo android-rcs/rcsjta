@@ -41,7 +41,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingMsrpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
@@ -215,7 +216,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 					}
 				} else {
 					// Session pending
-					if (session instanceof OriginatingFileSharingSession) {
+					if (session instanceof OriginatingMsrpFileSharingSession) {
 						result = FileTransfer.State.INITIATED;
 					} else {
 						result = FileTransfer.State.INVITED;
@@ -233,7 +234,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @see FileTransfer.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingFileSharingSession) {
+		if (session instanceof IOriginatingFileSharingSession) {
 			return FileTransfer.Direction.OUTGOING;
 		} else {
 			return FileTransfer.Direction.INCOMING;
