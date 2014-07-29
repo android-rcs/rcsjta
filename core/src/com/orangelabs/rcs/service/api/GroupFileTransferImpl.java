@@ -23,7 +23,6 @@ import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.INVITED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.INITIATED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.INACTIVE;
-
 import android.net.Uri;
 import android.os.RemoteCallbackList;
 
@@ -39,11 +38,11 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingMsrpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSharingSession;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -63,14 +62,14 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	private final IGroupFileTransferBroadcaster mGroupFileTransferBroadcaster;
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private final Object lock = new Object();
 
 	/**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final static Logger logger = Logger.getLogger(GroupFileTransferImpl.class.getSimpleName());
 
 	/**
 	 * Constructor

@@ -67,13 +67,13 @@ import com.orangelabs.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManage
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingMsrpFileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingMsrpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpFileSharingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
