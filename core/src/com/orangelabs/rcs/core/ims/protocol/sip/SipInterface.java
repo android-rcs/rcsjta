@@ -74,6 +74,11 @@ public class SipInterface implements SipListener {
      */
     private final static String TRACE_SEPARATOR = "-----------------------------------------------------------------------------";
 
+    /** 		
+    * Default SIP port 		
+    */ 		
+    public final static int DEFAULT_SIP_PORT = 5062;
+    
     /**
      * SIP traces activation
      */

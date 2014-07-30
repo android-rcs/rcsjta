@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.orangelabs.rcs.core.ims.protocol.sip.SipInterface;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -1231,7 +1232,7 @@ public class RcsSettings {
      * @return Port
      */
 	public int getSipListeningPort() {
-		return readInteger(RcsSettingsData.SIP_DEFAULT_PORT, 5062);
+		return readInteger(RcsSettingsData.SIP_DEFAULT_PORT, SipInterface.DEFAULT_SIP_PORT);
 	}
 
     /**
