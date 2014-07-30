@@ -99,9 +99,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, contact.toString());
 		values.put(FileTransferData.KEY_CONTACT, contact.toString());
-		if (direction == FileTransfer.Direction.OUTGOING) {
-			values.put(FileTransferData.KEY_FILE, content.getUri().toString());
-		}
+		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(FileTransferData.KEY_DIRECTION, direction);
@@ -195,6 +193,7 @@ public class FileTransferLog implements IFileTransferLog {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_FT_ID, fileTransferId);
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
+		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_CONTACT, contact.toString());
 		values.put(FileTransferData.KEY_NAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
@@ -283,7 +282,6 @@ public class FileTransferLog implements IFileTransferLog {
 			logger.debug("updateFileTransferUri (fileTransferId=" + fileTransferId + ") (uri=" + content.getUri() + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_STATUS, FileTransfer.State.TRANSFERRED);
 		values.put(FileTransferData.KEY_SIZE,content.getSize());
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
