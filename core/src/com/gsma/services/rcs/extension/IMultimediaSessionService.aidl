@@ -35,13 +35,13 @@ interface IMultimediaSessionService {
 
 	int getServiceVersion();
 
-	void addMultimediaMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+	void addMessagingEventListener(in IMultimediaMessagingSessionListener listener);
 
-	void removeMultimediaMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+	void removeMessagingEventListener(in IMultimediaMessagingSessionListener listener);
 
-	void addMultimediaStreamingEventListener(in IMultimediaStreamingSessionListener listener);
+	void addStreamingEventListener(in IMultimediaStreamingSessionListener listener);
 
-	void removeMultimediaStreamingEventListener(in IMultimediaStreamingSessionListener listener);
+	void removeStreamingEventListener(in IMultimediaStreamingSessionListener listener);
 }
 
 
