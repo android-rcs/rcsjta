@@ -152,30 +152,12 @@ public class Geoloc implements Parcelable, Serializable {
     }
 
     /**
-     * Set the label
-     *
-     * @param label Label
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    /**
      * Returns the latitude
      *
      * @return Latitude
      */
     public double getLatitude() {
         return latitude;
-    }
-
-    /**
-     * Set the latitude
-     *
-     * @param latitude Latitude
-     */
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
     }
 
     /**
@@ -188,15 +170,6 @@ public class Geoloc implements Parcelable, Serializable {
     }
 
     /**
-     * Set the longitude
-     *
-     * @param longitude Longitude
-     */
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    /**
      * Returns the expiration date of the geolocation
      *
      * @return Expiration date. 0 means no expiration date has been defined.
@@ -204,16 +177,7 @@ public class Geoloc implements Parcelable, Serializable {
     public long getExpiration() {
         return expiration;
     }
- 
-    /**
-     * Set the expiration date of the geolocation
-     *
-     * @param expiration Expiration
-     */
-    public void setExpiration(long expiration) {
-        this.expiration = expiration;
-    }
- 
+
     /**
      * Returns the accuracy
      *
@@ -222,14 +186,4 @@ public class Geoloc implements Parcelable, Serializable {
     public float getAccuracy() {
         return accuracy;
     }
- 
-    /**
-     * Set the accuracy
-     *
-     * @param accuracy Accuracy in meters
-     */
-    public void setAcuracy(float accuracy) {
-        this.accuracy = accuracy;
-    }
-
 }
