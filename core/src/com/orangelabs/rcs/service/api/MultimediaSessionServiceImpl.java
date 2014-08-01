@@ -28,8 +28,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -476,7 +474,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 *
 	 * @param listener Session event listener
 	 */
-	public void addMultimediaMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+	public void addMessagingEventListener(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an event listener");
 		}
@@ -491,7 +489,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 *
 	 * @param listener Session event listener
 	 */
-	public void removeMultimediaMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+	public void removeMessagingEventListener(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an event listener");
 		}
@@ -505,7 +503,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 *
 	 * @param listener Session event listener
 	 */
-	public void addMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+	public void addStreamingEventListener(IMultimediaStreamingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an event listener");
 		}
@@ -515,11 +513,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
 	/**
-	 * Removes an event listener on messaging session events
+	 * Removes an event listener on streaming session events
 	 *
 	 * @param listener Session event listener
 	 */
-	public void removeMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+	public void removeStreamingEventListener(IMultimediaStreamingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an event listener");
 		}

@@ -21,15 +21,12 @@
  ******************************************************************************/
 
 package com.orangelabs.rcs.service.api;
-import static com.gsma.services.rcs.extension.MultimediaSession.State.FAILED;
 import static com.gsma.services.rcs.extension.MultimediaSession.State.ABORTED;
+import static com.gsma.services.rcs.extension.MultimediaSession.State.FAILED;
 import static com.gsma.services.rcs.extension.MultimediaSession.State.STARTED;
-
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
-import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
