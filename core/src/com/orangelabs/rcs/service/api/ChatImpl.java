@@ -45,6 +45,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -348,15 +349,16 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		if (logger.isActivated()) {
 			logger.info("New IM received "+message);
 		}
-    	synchronized(lock) {
+		synchronized (lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addChatMessage(message, INCOMING);
 			// Broadcast intent related to the received message
-			Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-			intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(intent);
-	    }
+			Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
+			newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+		}
     }
     
     /* (non-Javadoc)
@@ -367,15 +369,16 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		if (logger.isActivated()) {
 			logger.info("New geoloc received");
 		}
-    	synchronized(lock) {
+		synchronized (lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addChatMessage(geoloc, INCOMING);
 			// Broadcast intent related to the received message
-			Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-			intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(intent);
-	    }
+			Intent newOneToOneGeolocMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneGeolocMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneGeolocMessage);
+			newOneToOneGeolocMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneGeolocMessage);
+		}
     }
     
     /* (non-Javadoc)

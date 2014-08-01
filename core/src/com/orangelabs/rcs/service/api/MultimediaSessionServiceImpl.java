@@ -49,6 +49,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.MultimediaStreamingSessionEventBroadcaster;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -216,7 +217,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param intent Resolved intent
      * @param session SIP session
 	 */
-	public void receiveSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
+	public void receiveSipMsrpSessionInvitation(Intent msrpSessionInvite, GenericSipMsrpSession session) {
 		// Add session in the list
 		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
 				mMultimediaMessagingSessionEventBroadcaster);
@@ -228,11 +229,12 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		 */
 
 		// Broadcast intent related to the received invitation
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(msrpSessionInvite);
+		IntentUtils.tryToSetReceiverForegroundFlag(msrpSessionInvite);
+		msrpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
+		AndroidFactory.getApplicationContext().sendBroadcast(msrpSessionInvite);
 	}
 	
 	/**
@@ -241,7 +243,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param intent Resolved intent
      * @param session SIP session
 	 */
-	public void receiveSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
+	public void receiveSipRtpSessionInvitation(Intent rtpSessionInvite, GenericSipRtpSession session) {
 		// Add session in the list
 		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
 				mMultimediaStreamingSessionEventBroadcaster);
@@ -253,11 +255,13 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		 */
 
 		// Broadcast intent related to the received invitation
-    	intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID, session.getSessionID());
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
+		IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
+		rtpSessionInvite.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID,
+				session.getSessionID());
 		
 		// Broadcast intent related to the received invitation
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);    	
+		AndroidFactory.getApplicationContext().sendBroadcast(rtpSessionInvite);
 	}
 
     /**

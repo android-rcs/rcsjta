@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service;
@@ -49,6 +53,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.provisioning.https.HttpsProvisioningService;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -290,7 +295,9 @@ public class StartService extends Service {
     }
 
 	private void broadcastServiceProvisioned() {
-		getApplicationContext().sendBroadcast(new Intent(JoynService.ACTION_SERVICE_PROVISIONED));
+		Intent serviceProvisioned = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
+		IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
+		getApplicationContext().sendBroadcast(serviceProvisioned);
 	}
 
     /**

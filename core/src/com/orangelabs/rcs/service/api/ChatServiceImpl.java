@@ -58,6 +58,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupChatEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -226,10 +227,12 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ChatServiceImpl.addChatSession(contact, sessionApi);
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage().getMessageId());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
+		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
+		newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage()
+				.getMessageId());
+		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
     }
     
     /**
@@ -442,10 +445,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ChatServiceImpl.addGroupChatSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newInvitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
 	
 	/**

@@ -49,6 +49,7 @@ import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.IPCallEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -206,10 +207,11 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		IPCallServiceImpl.addIPCallSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newInvitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
     /**

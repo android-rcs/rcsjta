@@ -57,6 +57,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -234,10 +235,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newInvitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
 
     /**
@@ -588,9 +590,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
+		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
+		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID,
+				session.getFileTransferId());
+		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
 	}
 
 	
@@ -618,10 +623,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Broadcast intent, we reuse the File transfer invitation intent
-		Intent intent = new Intent(FileTransferIntent.ACTION_RESUME);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, session.getFileTransferId());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
+		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
+		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID,
+				session.getFileTransferId());
+		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
     }
 	
 	/**

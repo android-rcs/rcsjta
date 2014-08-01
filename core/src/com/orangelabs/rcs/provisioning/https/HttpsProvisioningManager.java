@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.https;
@@ -75,6 +79,7 @@ import com.orangelabs.rcs.provisioning.ProvisioningParser;
 import com.orangelabs.rcs.provisioning.TermsAndConditionsRequest;
 import com.orangelabs.rcs.service.LauncherUtils;
 import com.orangelabs.rcs.utils.HttpUtils;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.NetworkUtils;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -794,10 +799,11 @@ public class HttpsProvisioningManager {
 							}
 						}
 					}
-					
+
 					// Send service provisioning intent
-					Intent intent = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
-					context.sendBroadcast(intent);
+					Intent serviceProvisioned = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
+					IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
+					context.sendBroadcast(serviceProvisioned);
 				} else {
 					if (logger.isActivated()) {
 						logger.debug("Can't parse provisioning document");
