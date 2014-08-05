@@ -54,7 +54,8 @@
 	            <action android:name="com.gsma.services.rcs.vsh.IVideoSharingService"/>
 	            <action android:name="com.gsma.services.rcs.ish.IImageSharingService"/>
 	            <action android:name="com.gsma.services.rcs.gsh.IGeolocSharingService"/>
-				<action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService"/>
+	            <action android:name="com.gsma.services.rcs.fsh.IFileSharingService"/>
+	            				<action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService"/>
 				<action android:name="com.gsma.services.rcs.ipcall.IIPCallService"/>
 	        </intent-filter>
 	    </service>
