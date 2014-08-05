@@ -11,9 +11,6 @@
         <meta-data android:name="com.gsma.services.rcs.capability.EXTENSION"
              android:value="ext.game" />
         
-        <meta-data android:name="com.gsma.services.rcs.capability.EXTENSION"
-             android:value="ext.game2" />
-        
         <activity android:name=".Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
