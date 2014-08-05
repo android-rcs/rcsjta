@@ -18,13 +18,18 @@
 
 package com.orangelabs.rcs.core.ims.service.capability;
 
-import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+
+import com.gsma.services.rcs.capability.CapabilityService;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * External capability monitoring
@@ -32,12 +37,39 @@ import android.content.Intent;
  * @author jexa7410
  */
 public class ExternalCapabilityMonitoring extends BroadcastReceiver {
+	/**
+     * The logger
+     */
+    private static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class.getName());
+	
     @Override
 	public void onReceive(Context context, Intent intent) {
-    	// Instanciate the settings manager
-    	RcsSettings.createInstance(context);
-    	
-    	// Check if there are new RCS extensions installed or removed
-    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext());
+    	try {
+	    	// Instanciate the settings manager
+	    	RcsSettings.createInstance(context);
+	    	
+	    	// Get Intent parameters
+	        String packageName = intent.getData().getSchemeSpecificPart();
+	        String action = intent.getAction();
+	        if (logger.isActivated()) {
+	        	logger.debug("App install event: " + action + " " + packageName);
+	        }
+	
+	        // Get application parameter
+	        PackageManager pm = context.getPackageManager();
+	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+	        Bundle appMeta = appInfo.metaData;
+	        String ext = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+	        if (ext == null) {
+	        	// Not a RCS extension
+	        	return;
+	        } else {
+		        // Update the supported RCS extensions
+		    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext(),
+		    			action,	ext, packageName);
+	        }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
     }
 }

@@ -17,12 +17,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.extension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.text.TextUtils;
 
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -41,55 +41,102 @@ public class ServiceExtensionManager {
     private static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getName());
 	   
 	/**
-	 * Update supported extensions after third party application installation  
+	 * Update supported extensions after installing or removing a third
+	 * party application on the device  
 	 * 
 	 * @param context Context
+	 * @param action Action
+	 * @param ext Extension
+	 * @param package Package name
 	 */
-	public static void updateSupportedExtensions(Context context) {
+	public static void updateSupportedExtensions(Context context, String action, String ext, String packageName) {
 		try {
-			// Intent query on current installed activities
-			PackageManager packageManager = context.getPackageManager();
-			Intent intent = new Intent(com.gsma.services.rcs.capability.CapabilityService.INTENT_EXTENSIONS);
-			String mime = com.gsma.services.rcs.capability.CapabilityService.EXTENSION_MIME_TYPE + "/*"; 
-			intent.setType(mime);			
-			List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
-			StringBuffer extensions = new StringBuffer();
-			for(int i=0; i < list.size(); i++) {
-				ResolveInfo info = list.get(i);
-				for(int j =0; j < info.filter.countDataTypes(); j++) {
-					String tag = info.filter.getDataType(j);
-					String[] value = tag.split("/");
-					String ext = value[1];
-					if (isExtensionAuthorized(context, info, ext)) {
-						// Add the extension in the supported list
-						extensions.append("," + ext);
+    		if (logger.isActivated()) {
+    			logger.debug("Update supported extensions: " + action + " " + ext);
+    		}
+            
+            // Read current extensions in the database
+    		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
+    		String[] extensions = new String[0];
+    		if (!TextUtils.isEmpty(exts)) {
+    			extensions = exts.split(",");
+    		}
+    		List<String> listExts = new ArrayList<String>(); 
+			for(int i=0; i < extensions.length; i++) {
+				listExts.add(extensions[i]);
+			}
+    		
+			// Update the current extensions with the new one
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                // Add an extension
+				if (isExtensionAuthorized(context, ext) &&
+						!listExts.contains(ext)) {
+					// Add the extension in the supported list if authorized
+					// and not yet in the list
+					listExts.add(ext);
+					if (logger.isActivated()) {
+						logger.debug("Extension " + ext + " is added");
 					}
 				}
-			}
-			if ((extensions.length() > 0) && (extensions.charAt(0) == ',')) {
-				extensions.deleteCharAt(0);
-			}
-	
-			// Save extensions in the local supported capabilities
-			RcsSettings.getInstance().setSupportedRcsExtensions(extensions.toString());
+            } else
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                // Remove an extension
+            	listExts.remove(ext);
+				if (logger.isActivated()) {
+					logger.debug("Extension " + ext + " is removed");
+				}
+            }
+			
+			// Update current extensions in database
+            StringBuffer result = new StringBuffer();
+            for(int i =0; i < listExts.size(); i++) {
+            	result.append("," + listExts.get(i));
+            }
+            if (result.length() > 0) {
+            	result.deleteCharAt(0);
+            }
+			RcsSettings.getInstance().setSupportedRcsExtensions(result.toString());
 		} catch(Exception e) {
-			e.printStackTrace();
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
 		}
 	}    
     
 	/**
+	 * Update supported extensions at boot
+	 * 
+	 * @param context Context
+	 */
+	public static void updateSupportedExtensions(Context context) {
+		if (logger.isActivated()) {
+			logger.debug("Update supported extensions");
+		}
+		// TODO
+		
+        // Read current extensions in the database
+		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
+		String[] extensions = new String[0];
+		if (!TextUtils.isEmpty(exts)) {
+			extensions = exts.split(",");
+		}
+		List<String> listExts = new ArrayList<String>(); 
+		for(int i=0; i < extensions.length; i++) {
+			listExts.add(extensions[i]);
+			if (logger.isActivated()) {
+				logger.debug("Extension " + extensions[i] + " is loaded");
+			}
+		}
+	}	
+	
+	/**
 	 * Is extension authorized
 	 * 
 	 * @param context Context
-	 * @param appInfo Application info
 	 * @param ext Extension ID
 	 * @return Boolean
 	 */
-	public static boolean isExtensionAuthorized(Context context, ResolveInfo appInfo, String ext) {
-		if ((appInfo == null) || (appInfo.activityInfo== null)) {
-			return false;
-		}
-
+	public static boolean isExtensionAuthorized(Context context, String ext) {
 		try {
 			if (!RcsSettings.getInstance().isExtensionsAllowed()) {
 				if (logger.isActivated()) {
