@@ -39,6 +39,7 @@ import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
+import com.gsma.services.rcs.fsh.IFileSharingService;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
@@ -74,6 +75,7 @@ import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
+import com.orangelabs.rcs.service.api.FileSharingServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
 import com.orangelabs.rcs.service.api.GeolocSharingServiceImpl;
 import com.orangelabs.rcs.service.api.IPCallServiceImpl;
@@ -141,6 +143,11 @@ public class RcsCoreService extends Service implements CoreListener {
 	 * Geoloc sharing API
 	 */
     private GeolocSharingServiceImpl gshApi = null; 
+
+    /**
+	 * File sharing API
+	 */
+    private FileSharingServiceImpl fshApi = null; 
 
     /**
 	 * IP call API
@@ -220,6 +227,7 @@ public class RcsCoreService extends Service implements CoreListener {
             vshApi = new VideoSharingServiceImpl(); 
             ishApi = new ImageSharingServiceImpl(); 
             gshApi = new GeolocSharingServiceImpl(); 
+            fshApi = new FileSharingServiceImpl(); 
             ipcallApi = new IPCallServiceImpl(); 
         	sessionApi = new MultimediaSessionServiceImpl();             
             
@@ -375,6 +383,12 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Geoloc sharing service API binding");
     		}
             return gshApi;
+        } else
+        if (IFileSharingService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("File sharing service API binding");
+    		}
+            return fshApi;
         } else
         if (IIPCallService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
