@@ -179,7 +179,7 @@ public class ImageSharingService extends JoynService {
 
     /**
      * Shares an image with a contact. The parameter file contains the URI
-     * of the image to be shared(for a local or a remote image). An exception if thrown if there is
+     * of the image to be shared (for a local or a remote image). An exception if thrown if there is
      * no ongoing CS call. The parameter contact supports the following formats: MSISDN
      * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
      * of the contact is not supported an exception is thrown.

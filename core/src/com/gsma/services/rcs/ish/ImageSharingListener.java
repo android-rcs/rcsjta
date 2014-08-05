@@ -30,7 +30,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
-	 * Callback called when the sharing sharing state changes
+	 * Callback called when the sharing state changes
 	 *
 	 * @param contactId Contact ID
 	 * @param sharingId ID of image sharing
