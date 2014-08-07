@@ -119,7 +119,7 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Set file URI
 	 *
-	 * @param fileUri
+	 * @param file
 	 */
 	public void setFileUri(Uri file) {
 		this.file = file;

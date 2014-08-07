@@ -126,7 +126,7 @@ public class MessageLog implements IMessageLog {
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else if (msg instanceof FileTransferMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, msg.getMimeType());
 			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
@@ -208,7 +208,7 @@ public class MessageLog implements IMessageLog {
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else if (msg instanceof FileTransferMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, FileTransferMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, msg.getMimeType());
 			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);

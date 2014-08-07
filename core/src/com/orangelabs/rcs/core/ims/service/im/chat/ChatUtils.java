@@ -50,6 +50,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
@@ -376,7 +377,7 @@ public class ChatUtils {
 		    	}
 			}
 		} catch(Exception e) {
-			result = false;;
+			result = false;
 		}
 		return result;
     }
@@ -684,7 +685,7 @@ public class ChatUtils {
 	 * Create a text message
 	 * 
 	 * @param remote Remote contact identifier
-	 * @param txt Text message
+	 * @param msg Text message
 	 * @param imdn IMDN flag
 	 * @return Text message
 	 */
@@ -700,12 +701,12 @@ public class ChatUtils {
 	 * @param file File info
 	 * @param imdn IMDN flag
 	 * @param msgId Message ID
-	 * @param displayName the display name
+     * @param mime MIME type
 	 * @return File message
 	 */
 	public static FileTransferMessage createFileTransferMessage(ContactId remote, String file,
-			boolean imdn, String msgId) {
-		return new FileTransferMessage(msgId, remote, file, imdn, null);
+			boolean imdn, String msgId, String mime) {
+		return new FileTransferMessage(msgId, remote, file, mime, imdn, null);
 	}
 	
 	/**
@@ -714,7 +715,6 @@ public class ChatUtils {
 	 * @param remote Remote contact
 	 * @param geoloc Geoloc info
 	 * @param imdn IMDN flag
-	 * @param displayName the display name
 	 * @return Geoloc message
 	 */
 	public static GeolocMessage createGeolocMessage(ContactId remote, GeolocPush geoloc, boolean imdn) {
@@ -778,9 +778,10 @@ public class ChatUtils {
 			return new GeolocMessage(msgId, remote, ChatUtils.parseGeolocDocument(content),
 					ChatUtils.isImdnDisplayedRequested(invite), date, null);
 		} else {
-			if (mime.contains(FileTransferMessage.MIME_TYPE)) {
+			if (mime.contains(FileTransferHttpInfoDocument.MIME_TYPE)) {
+                FileTransferHttpInfoDocument fileTransferInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(content);
 				return new FileTransferMessage(msgId, remote, StringUtils.decodeUTF8(content),
-						ChatUtils.isImdnDisplayedRequested(invite), date, null);
+                        fileTransferInfoDoc.getFileType(), ChatUtils.isImdnDisplayedRequested(invite), date, null);
 			} else {
 				return new InstantMessage(msgId, remote, StringUtils.decodeUTF8(content),
 						ChatUtils.isImdnDisplayedRequested(invite), date, null);
@@ -842,9 +843,9 @@ public class ChatUtils {
     /**
      * Get list of participants from 'resource-list' present in XML document and
      * include the 'remote' as participant.
-     * 
-     * @return {@link SetOfParticipant} participant list
-     * @author Deutsche Telekom AG
+     *
+     * @param request Request
+     * @return {@link Set<ParticipantInfo>} participant list
      */
 	public static Set<ParticipantInfo> getListOfParticipants(SipRequest request)  {
 		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
@@ -871,7 +872,7 @@ public class ChatUtils {
     /**
      * Is request is for FToHTTP
      *
-     * @param request
+     * @param request SIP request
      * @return true if FToHTTP
      */
     public static boolean isFileTransferOverHttp(SipRequest request) {

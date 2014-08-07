@@ -169,7 +169,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 			catch(NumberFormatException nfe)
 			{
 				if (logger.isActivated()) {
-					logger.error("Could not parse tranfer validity:"+validity);
+					logger.error("Could not parse transfer validity:"+validity);
 				}
 				return java.lang.System.currentTimeMillis()+300000;	// TODO default validity ?
 			}

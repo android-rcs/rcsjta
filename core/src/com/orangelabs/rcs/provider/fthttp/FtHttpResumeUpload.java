@@ -67,14 +67,14 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 *            the {@code file} value.
 	 * @param fileicon
 	 *            the {@code fileicon} value.
-	 * @param content
-     *            the {@code content} content.
 	 * @param tId
 	 *            the {@code tId} value.
 	 * @param contact
 	 *            the {@code contactId} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
+     * @param fileTransferId
+     *            the {@code fileTransferId} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */

@@ -70,6 +70,11 @@ public class InstantMessage {
 	 */
 	private boolean imdnDisplayedRequested = false;
 
+    /**
+     * Instance MIME type
+     */
+    protected String mimeType;
+
 	/**
 	 * Constructor for outgoing message
 	 * 
@@ -93,6 +98,7 @@ public class InstantMessage {
 		this.receiptAt = date;
 		this.serverReceiptAt = date;	
 		this.displayName = displayName;
+        this.mimeType = InstantMessage.MIME_TYPE;
 	}
 	
 	/**
@@ -183,14 +189,23 @@ public class InstantMessage {
 		return displayName;
 	}
 
+    /**
+     * Returns the MIME type of the message
+     *
+     * @return The MIME type of the message
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
 	@Override
 	public String toString() {
 		if (message != null && message.length() < 30) {
 			return "IM [from=" + remote + ", pseudo='" + displayName + "', msg='" + message + "', msgId=" + msgId
-				+ ", imdnDisplayedRequested=" + imdnDisplayedRequested + "]";
+				+ ", imdnDisplayedRequested=" + imdnDisplayedRequested  + ", mimeType=" + mimeType + "]";
 		} else {
 			return "IM [from=" + remote + ", pseudo='" + displayName + "', msgId=" + msgId
-					+ ", imdnDisplayedRequested=" + imdnDisplayedRequested + "]";
+					+ ", imdnDisplayedRequested=" + imdnDisplayedRequested  + ", mimeType=" + mimeType + "]";
 		}
 	}
 	

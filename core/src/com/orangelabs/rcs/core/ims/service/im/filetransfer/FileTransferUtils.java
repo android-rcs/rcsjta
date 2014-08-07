@@ -235,7 +235,19 @@ public class FileTransferUtils {
 		}
 	}
 
-	/**
+    /**
+     * Parse a file transfer over HTTP document
+     *
+     * @param xml
+     *            XML document
+     * @return File transfer document
+     */
+    public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(String xml) {
+        byte[] bytes = xml.getBytes();
+        return parseFileTransferHttpDocument(bytes);
+    }
+
+    /**
 	 * Get the HTTP file transfer info document
 	 * 
 	 * @param request

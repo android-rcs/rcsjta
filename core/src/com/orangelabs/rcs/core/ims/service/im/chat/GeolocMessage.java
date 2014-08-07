@@ -48,9 +48,7 @@ public class GeolocMessage extends InstantMessage {
      * @param displayName the display name of the remote contact
 	 */
 	public GeolocMessage(String messageId, ContactId remote, GeolocPush geoloc, boolean imdnDisplayedRequested, String displayName) {
-		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, displayName);
-		
-		this.geoloc = geoloc;
+		this(messageId, remote, geoloc, imdnDisplayedRequested, null, displayName);
 	}
 	
 	/**
@@ -67,6 +65,7 @@ public class GeolocMessage extends InstantMessage {
 		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, serverReceiptAt, displayName);
 		
 		this.geoloc = geoloc;
+        this.mimeType = GeolocMessage.MIME_TYPE;
 	}
 
     /**

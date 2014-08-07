@@ -23,7 +23,6 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.NoSuchElementException;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
@@ -149,7 +148,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         	return;
         }
 
-        if ((result != null) && (FileTransferUtils.parseFileTransferHttpDocument(result) != null)) {
+        FileTransferHttpInfoDocument fileTransferInfoDoc;
+        if ((result != null) && ((fileTransferInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result)) != null)) {
         	String fileInfo = new String(result);
             if (logger.isActivated()) {
                 logger.debug("Upload done with success: " + fileInfo);
@@ -193,7 +193,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via a new chat session");
                 }
-                FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false, msgId);
+                FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false, msgId, fileTransferInfoDoc.getFileType());
                 // Initiate a new chat session to send file transfer info in the first message, session does not need to be retrieved since it is not used
                 try {
 					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), firstMsg);
