@@ -19,32 +19,28 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.fsh;
-
-import com.gsma.services.rcs.contacts.ContactId;
+package com.gsma.services.rcs.ext.upload;
 
 /**
- * File sharing event listener
+ * File upload event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class FileSharingListener extends IFileSharingListener.Stub {
+public abstract class FileUploadListener extends IFileUploadListener.Stub {
 	/**
-	 * Callback called when the sharing state changes
+	 * Callback called when the upload state changes
 	 *
-	 * @param contactId Contact ID
-	 * @param sharingId ID of file sharing
-	 * @param state State of file sharing 
+	 * @param uploadId ID of upload
+	 * @param state State of upload 
 	 */
-	public abstract void onFileSharingStateChanged(ContactId contact, String sharingId, int state);
+	public abstract void onFileUploadStateChanged(String uploadId, int state);
 
 	/**
-	 * Callback called during the sharing progress
+	 * Callback called during the upload progress
 	 *
-	 * @param contactId Contact ID
-	 * @param sharingId ID of file sharing
+	 * @param sharingId ID of upload
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
-	public abstract void onFileSharingProgress(ContactId contact, String sharingId, long currentSize, long totalSize);
+	public abstract void onFileUploadProgress(String uploadId, long currentSize, long totalSize);
 }
