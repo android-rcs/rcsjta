@@ -90,16 +90,8 @@ public class InstantMessage {
 	 *            the name to display or null if unknown
 	 */
 	public InstantMessage(String messageId, ContactId remote, String message, boolean imdnDisplayedRequested, String displayName) {
-		this.msgId = messageId;
-		this.remote = remote;
-		this.message = message;
-		this.imdnDisplayedRequested = imdnDisplayedRequested;
-		Date date = new Date();
-		this.receiptAt = date;
-		this.serverReceiptAt = date;	
-		this.displayName = displayName;
-        this.mimeType = InstantMessage.MIME_TYPE;
-	}
+		this(messageId, remote, message, imdnDisplayedRequested, null, displayName);
+    }
 	
 	/**
 	 * Constructor for incoming message
@@ -123,8 +115,9 @@ public class InstantMessage {
 		this.message = message;
 		this.imdnDisplayedRequested = imdnDisplayedRequested;
 		this.receiptAt = new Date();
-		this.serverReceiptAt = serverReceiptAt;
+		this.serverReceiptAt = (serverReceiptAt != null ? serverReceiptAt : this.receiptAt);
 		this.displayName = displayName;
+        this.mimeType = InstantMessage.MIME_TYPE;
 	}
 
 	/**
