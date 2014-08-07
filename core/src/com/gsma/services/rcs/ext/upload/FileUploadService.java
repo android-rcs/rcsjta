@@ -19,7 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.fsh;
+package com.gsma.services.rcs.ext.upload;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -40,19 +40,14 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * This class offers the main entry point to share file link during
- * a CS call. Several applications may connect/disconnect to the API.
- * 
- * The parameter contact in the API supports the following formats:
- * MSISDN in national or international format, SIP address, SIP-URI
- * or Tel-URI.
+ * This class offers the main entry point to upload a file to the RCS content
+ * server. Several applications may connect/disconnect to the API.
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FileSharingService extends JoynService {
+public class FileUploadService extends JoynService {
 
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
@@ -63,7 +58,7 @@ public class FileSharingService extends JoynService {
 	/**
 	 * API
 	 */
-	private IFileSharingService api = null;
+	private IFileUploadService api = null;
 	
     /**
      * Constructor
@@ -71,7 +66,7 @@ public class FileSharingService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public FileSharingService(Context ctx, JoynServiceListener listener) {
+    public FileUploadService(Context ctx, JoynServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -79,7 +74,7 @@ public class FileSharingService extends JoynService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IFileSharingService.class.getName()), apiConnection, 0);
+    	ctx.bindService(new Intent(IFileUploadService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -101,7 +96,7 @@ public class FileSharingService extends JoynService {
     protected void setApi(IInterface api) {
     	super.setApi(api);
     	
-        this.api = (IFileSharingService)api;
+        this.api = (IFileUploadService)api;
     }
     
     /**
@@ -109,7 +104,7 @@ public class FileSharingService extends JoynService {
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(IFileSharingService.Stub.asInterface(service));
+        	setApi(IFileUploadService.Stub.asInterface(service));
         	if (serviceListener != null) {
         		serviceListener.onServiceConnected();
         	}
@@ -124,9 +119,9 @@ public class FileSharingService extends JoynService {
     };
 
 	private void grantUriPermissionToStackServices(Uri file) {
-		Intent fileSharingServiceIntent = new Intent(IFileSharingService.class.getName());
+		Intent fileUploadServiceIntent = new Intent(IFileUploadService.class.getName());
 		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
-				fileSharingServiceIntent, 0);
+				fileUploadServiceIntent, 0);
 		for (ResolveInfo stackService : stackServices) {
 			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
 					Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -160,18 +155,15 @@ public class FileSharingService extends JoynService {
 	}
 
     /**
-     * Shares a file or its link with a contact. The parameter file contains the URI
-     * of the file to be shared (for a local or a remote file). An exception if thrown if there is
-     * no ongoing CS call. The parameter contact supports the following formats: MSISDN
-     * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
-     * of the contact is not supported an exception is thrown.
+     * Uploads a file to the RCS content server. The parameter file contains the URI
+     * of the file to be uploaded (for a local or a remote file).
      * 
-     * @param contact Contact identifier
-     * @param file Uri of file to share
-     * @return File sharing
+     * @param file Uri of file to upload
+	 * @param fileicon File icon option. If true and if it's an image, a file icon is attached.
+     * @return File upload
      * @throws JoynServiceException
      */
-    public FileSharing shareFile(ContactId contact, Uri file) throws JoynServiceException {
+    public FileUpload uploadFile(Uri file, boolean fileicon) throws JoynServiceException {
 		if (api != null) {
 			try {
 				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
@@ -183,9 +175,9 @@ public class FileSharingService extends JoynService {
 					// after the client is restarted after device reboot.
 					persistUriPermissionForClient(file);
 				}
-				IFileSharing sharingIntf = api.shareFile(contact, file);
-				if (sharingIntf != null) {
-					return new FileSharing(sharingIntf);
+				IFileUpload uploadIntf = api.uploadFile(file, fileicon);
+				if (uploadIntf != null) {
+					return new FileUpload(uploadIntf);
 				} else {
 					return null;
 				}
@@ -198,19 +190,19 @@ public class FileSharingService extends JoynService {
     }    
     
     /**
-     * Returns the list of file sharings in progress
+     * Returns the list of file uploads in progress
      * 
-     * @return List of file sharings
+     * @return List of file uploads
      * @throws JoynServiceException
      */
-    public Set<FileSharing> getFileSharings() throws JoynServiceException {
+    public Set<FileUpload> getFileUploads() throws JoynServiceException {
 		if (api != null) {
 			try {
-	    		Set<FileSharing> result = new HashSet<FileSharing>();
-				List<IBinder> ishList = api.getFileSharings();
+	    		Set<FileUpload> result = new HashSet<FileUpload>();
+				List<IBinder> ishList = api.getFileUploads();
 				for (IBinder binder : ishList) {
-					FileSharing sharing = new FileSharing(IFileSharing.Stub.asInterface(binder));
-					result.add(sharing);
+					FileUpload upload = new FileUpload(IFileUpload.Stub.asInterface(binder));
+					result.add(upload);
 				}
 				return result;
 			} catch(Exception e) {
@@ -222,18 +214,18 @@ public class FileSharingService extends JoynService {
     }    
 
     /**
-     * Returns a current file sharing from its unique ID
+     * Returns a current file upload from its unique ID
      * 
-     * @param sharingId Sharing ID
-     * @return File sharing or null if not found
+     * @param uploadId Upload ID
+     * @return File upload or null if not found
      * @throws JoynServiceException
      */
-    public FileSharing getFileSharing(String sharingId) throws JoynServiceException {
+    public FileUpload getFileUpload(String uploadId) throws JoynServiceException {
 		if (api != null) {
 			try {
-				IFileSharing sharingIntf = api.getFileSharing(sharingId);
-				if (sharingIntf != null) {
-					return new FileSharing(sharingIntf);
+				IFileUpload uploadIntf = api.getFileUpload(uploadId);
+				if (uploadIntf != null) {
+					return new FileUpload(uploadIntf);
 				} else {
 					return null;
 				}
@@ -244,38 +236,14 @@ public class FileSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }    
-    
-    /**
-     * Returns a current file sharing from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return File sharing or null if not found
-     * @throws JoynServiceException
-     */
-    public FileSharing getFileSharingFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sharingId = intent.getStringExtra(FileSharingIntent.EXTRA_SHARING_ID);
-				if (sharingId != null) {
-					return getFileSharing(sharingId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
-
+ 
 	/**
-	 * Adds an event listener on file sharing events
+	 * Adds an event listener on file upload events
 	 * 
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void addEventListener(IFileSharingListener listener) throws JoynServiceException {
+	public void addEventListener(IFileUploadListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.addEventListener(listener);
@@ -288,12 +256,12 @@ public class FileSharingService extends JoynService {
 	}
 
 	/**
-	 * Removes an event listener from file sharing
+	 * Removes an event listener from file upload
 	 * 
 	 * @param listener Listener
 	 * @throws JoynServiceException
 	 */
-	public void removeEventListener(FileSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(FileUploadListener listener) throws JoynServiceException {
 		if (api != null) {
 			try {
 				api.removeEventListener(listener);

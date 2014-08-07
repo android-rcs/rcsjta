@@ -21,63 +21,59 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.fsh.IFileSharingListener;
+import com.gsma.services.rcs.ext.upload.IFileUploadListener;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.os.RemoteCallbackList;
 
 /**
- * FileSharingEventBroadcaster maintains the registering and unregistering of
- * IFileSharingListener and also performs broadcast events on these listeners upon the
+ * FileUploadEventBroadcaster maintains the registering and unregistering of
+ * IFileUploadListener and also performs broadcast events on these listeners upon the
  * trigger of corresponding callbacks.
  */
-public class FileSharingEventBroadcaster implements IFileSharingEventBroadcaster {
+public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 
-	private final RemoteCallbackList<IFileSharingListener> mFileSharingListeners = new RemoteCallbackList<IFileSharingListener>();
+	private final RemoteCallbackList<IFileUploadListener> mFileUploadListeners = new RemoteCallbackList<IFileUploadListener>();
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public FileSharingEventBroadcaster() {
+	public FileUploadEventBroadcaster() {
 	}
 
-	public void addEventListener(IFileSharingListener listener) {
-		mFileSharingListeners.register(listener);
+	public void addEventListener(IFileUploadListener listener) {
+		mFileUploadListeners.register(listener);
 	}
 
-	public void removeEventListener(IFileSharingListener listener) {
-		mFileSharingListeners.unregister(listener);
+	public void removeEventListener(IFileUploadListener listener) {
+		mFileUploadListeners.unregister(listener);
 	}
 
-	public void broadcastFileSharingStateChanged(ContactId contact, String sharingId, int state) {
-		final int N = mFileSharingListeners.beginBroadcast();
+	public void broadcastFileUploadStateChanged(String uploadId, int state) {
+		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				// TODO : Handle reason code in CR009
-				mFileSharingListeners.getBroadcastItem(i).onFileSharingStateChanged(contact,
-						sharingId, state);
+				mFileUploadListeners.getBroadcastItem(i).onFileUploadStateChanged(uploadId, state);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
 				}
 			}
 		}
-		mFileSharingListeners.finishBroadcast();
+		mFileUploadListeners.finishBroadcast();
 	}
 
-	public void broadcastFileSharingProgress(ContactId contact, String sharingId, long currentSize,
-			long totalSize) {
-		final int N = mFileSharingListeners.beginBroadcast();
+	public void broadcastFileUploadProgress(String uploadId, long currentSize, long totalSize) {
+		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mFileSharingListeners.getBroadcastItem(i).onFileSharingProgress(contact,
-						sharingId, currentSize, totalSize);
+				mFileUploadListeners.getBroadcastItem(i).onFileUploadProgress(uploadId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
 				}
 			}
 		}
-		mFileSharingListeners.finishBroadcast();
+		mFileUploadListeners.finishBroadcast();
 	}
 }

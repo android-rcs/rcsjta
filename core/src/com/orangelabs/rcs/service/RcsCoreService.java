@@ -38,8 +38,8 @@ import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
+import com.gsma.services.rcs.ext.upload.IFileUploadService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
-import com.gsma.services.rcs.fsh.IFileSharingService;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
@@ -75,7 +75,7 @@ import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
-import com.orangelabs.rcs.service.api.FileSharingServiceImpl;
+import com.orangelabs.rcs.service.api.FileUploadServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
 import com.orangelabs.rcs.service.api.GeolocSharingServiceImpl;
 import com.orangelabs.rcs.service.api.IPCallServiceImpl;
@@ -145,11 +145,6 @@ public class RcsCoreService extends Service implements CoreListener {
     private GeolocSharingServiceImpl gshApi = null; 
 
     /**
-	 * File sharing API
-	 */
-    private FileSharingServiceImpl fshApi = null; 
-
-    /**
 	 * IP call API
 	 */
     private IPCallServiceImpl ipcallApi = null; 
@@ -159,7 +154,12 @@ public class RcsCoreService extends Service implements CoreListener {
 	 */
 	private MultimediaSessionServiceImpl sessionApi = null; 
 	
-	/**
+    /**
+	 * File upload API
+	 */
+    private FileUploadServiceImpl uploadApi = null; 
+
+    /**
 	 * The logger
 	 */
 	private final static Logger logger = Logger.getLogger(RcsCoreService.class.getSimpleName());
@@ -227,9 +227,9 @@ public class RcsCoreService extends Service implements CoreListener {
             vshApi = new VideoSharingServiceImpl(); 
             ishApi = new ImageSharingServiceImpl(); 
             gshApi = new GeolocSharingServiceImpl(); 
-            fshApi = new FileSharingServiceImpl(); 
             ipcallApi = new IPCallServiceImpl(); 
         	sessionApi = new MultimediaSessionServiceImpl();             
+            uploadApi = new FileUploadServiceImpl(); 
             
             // Set the logger properties
     		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
@@ -384,12 +384,6 @@ public class RcsCoreService extends Service implements CoreListener {
     		}
             return gshApi;
         } else
-        if (IFileSharingService.class.getName().equals(intent.getAction())) {
-    		if (logger.isActivated()) {
-    			logger.debug("File sharing service API binding");
-    		}
-            return fshApi;
-        } else
         if (IIPCallService.class.getName().equals(intent.getAction())) {
     		if (logger.isActivated()) {
     			logger.debug("IP call service API binding");
@@ -401,6 +395,12 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Multimedia session API binding");
     		}
             return sessionApi;
+        } else
+        if (IFileUploadService.class.getName().equals(intent.getAction())) {
+    		if (logger.isActivated()) {
+    			logger.debug("File upload service API binding");
+    		}
+            return uploadApi;
         } else {
         	return null;
         }

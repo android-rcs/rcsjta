@@ -21,15 +21,12 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.contacts.ContactId;
-
 /**
- * Interface to perform broadcast events on FileSharingListeners
+ * Interface to perform broadcast events on FileUploadListeners
  */
-public interface IFileSharingEventBroadcaster {
+public interface IFileUploadEventBroadcaster {
 
-	public void broadcastFileSharingStateChanged(ContactId contact, String sharingId, int status);
+	public void broadcastFileUploadStateChanged(String uploadId, int status);
 
-	public void broadcastFileSharingProgress(ContactId contact, String sharingId, long currentSize,
-			long totalSize);
+	public void broadcastFileUploadProgress(String uploadId, long currentSize, long totalSize);
 }
