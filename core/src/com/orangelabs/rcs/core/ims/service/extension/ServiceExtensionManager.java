@@ -21,9 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -34,97 +37,105 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class ServiceExtensionManager {
-	
 	/**
      * The logger
      */
     private static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getName());
-	   
+    
 	/**
-	 * Update supported extensions after installing or removing a third
-	 * party application on the device  
+	 * Save supported extensions in database
 	 * 
-	 * @param context Context
-	 * @param action Action
-	 * @param ext Extension
-	 * @param package Package name
+	 * @param supportedExts List of supported extensions
 	 */
-	public static void updateSupportedExtensions(Context context, String action, String ext, String packageName) {
+	private static void saveSupportedExtensions(List<String> supportedExts) {
 		try {
-    		if (logger.isActivated()) {
-    			logger.debug("Update supported extensions: " + action + " " + ext);
-    		}
-            
-            // Read current extensions in the database
-    		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-    		String[] extensions = new String[0];
-    		if (!TextUtils.isEmpty(exts)) {
-    			extensions = exts.split(",");
-    		}
-    		List<String> listExts = new ArrayList<String>(); 
-			for(int i=0; i < extensions.length; i++) {
-				listExts.add(extensions[i]);
-			}
-    		
-			// Update the current extensions with the new one
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-                // Add an extension
-				if (isExtensionAuthorized(context, ext) &&
-						!listExts.contains(ext)) {
-					// Add the extension in the supported list if authorized
-					// and not yet in the list
-					listExts.add(ext);
-					if (logger.isActivated()) {
-						logger.debug("Extension " + ext + " is added");
-					}
-				}
-            } else
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                // Remove an extension
-            	listExts.remove(ext);
-				if (logger.isActivated()) {
-					logger.debug("Extension " + ext + " is removed");
-				}
-            }
-			
-			// Update current extensions in database
-            StringBuffer result = new StringBuffer();
-            for(int i =0; i < listExts.size(); i++) {
-            	result.append("," + listExts.get(i));
-            }
-            if (result.length() > 0) {
-            	result.deleteCharAt(0);
-            }
+			// Update supported extensions in database
+		    StringBuffer result = new StringBuffer();
+		    for(int i =0; i < supportedExts.size(); i++) {
+		    	result.append(";" + supportedExts.get(i));
+		    }
+		    if (result.length() > 0) {
+		    	result.deleteCharAt(0);
+		    }
 			RcsSettings.getInstance().setSupportedRcsExtensions(result.toString());
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 		}
-	}    
-    
+	}
+	
+	/**
+	 * Check if the extensions are valid. Each valid extension is saved in the cache.  
+	 * 
+	 * @param context Context
+	 * @param supportedExts List of supported extensions
+	 * @param newExts New extensions to be checked
+	 * @return Returns true if at least one valid extension has been found
+	 */
+	private static boolean checkExtensions(Context context, List<String> supportedExts, String newExts) {
+		boolean result = false;
+		try {
+			// Check each new extension
+    		String[] extensions = new String[0];
+    		if (!TextUtils.isEmpty(newExts)) {
+    			extensions = newExts.split(";");
+    		}
+    		for(int i=0; i < extensions.length; i++) {
+    			if (isExtensionAuthorized(context, extensions[i])) {
+    				if (supportedExts.contains(extensions[i])) {
+	    				if (logger.isActivated()) {
+	    					logger.debug("Extension " + extensions[i] + " is already in the list");
+	    				}
+    				} else {
+	    				// Add the extension in the supported list if authorized and not yet in the list
+    					supportedExts.add(extensions[i]);
+	    				if (logger.isActivated()) {
+	    					logger.debug("Extension " + extensions[i] + " is added in the list");
+	    				}
+    				}
+    			}
+    		}
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+		}
+		return result;
+	}	
+	
 	/**
 	 * Update supported extensions at boot
 	 * 
 	 * @param context Context
 	 */
 	public static void updateSupportedExtensions(Context context) {
-		if (logger.isActivated()) {
-			logger.debug("Update supported extensions");
-		}
-		// TODO
-		
-        // Read current extensions in the database
-		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-		String[] extensions = new String[0];
-		if (!TextUtils.isEmpty(exts)) {
-			extensions = exts.split(",");
-		}
-		List<String> listExts = new ArrayList<String>(); 
-		for(int i=0; i < extensions.length; i++) {
-			listExts.add(extensions[i]);
+		try {
 			if (logger.isActivated()) {
-				logger.debug("Extension " + extensions[i] + " is loaded");
+				logger.debug("Update supported extensions");
+			}
+
+			List<String> supportedExts = new ArrayList<String>(); 
+			
+			// Intent query on current installed activities
+    		PackageManager pm = context.getPackageManager();
+    		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+    		for (ApplicationInfo appInfo : apps) {
+				Bundle appMeta = appInfo.metaData;
+				if (appMeta != null) {
+		    		String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+		    		if (exts != null) {
+			    		// Check extensions
+			    		checkExtensions(context, supportedExts, exts);    		
+		    		}
+				}
+			}
+			
+			// Update supported extensions in database
+    		saveSupportedExtensions(supportedExts);
+		} catch(Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
 			}
 		}
 	}	
@@ -156,5 +167,23 @@ public class ServiceExtensionManager {
 			}
 			return false;
 		}
+	}
+	
+	/**
+	 * Remove supported extensions  
+	 * 
+	 * @param context Context
+	 */
+	public static void removeSupportedExtensions(Context context) {
+		updateSupportedExtensions(context);
+	}
+	
+	/**
+	 * Add supported extensions  
+	 * 
+	 * @param context Context
+	 */
+	public static void addNewSupportedExtensions(Context context) {
+		updateSupportedExtensions(context);
 	}
 }

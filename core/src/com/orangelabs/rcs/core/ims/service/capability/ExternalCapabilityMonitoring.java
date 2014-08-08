@@ -49,25 +49,39 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
 	    	RcsSettings.createInstance(context);
 	    	
 	    	// Get Intent parameters
-	        String packageName = intent.getData().getSchemeSpecificPart();
 	        String action = intent.getAction();
-	        if (logger.isActivated()) {
-	        	logger.debug("App install event: " + action + " " + packageName);
-	        }
-	
-	        // Get application parameter
-	        PackageManager pm = context.getPackageManager();
-	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-	        Bundle appMeta = appInfo.metaData;
-	        String ext = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-	        if (ext == null) {
-	        	// Not a RCS extension
-	        	return;
-	        } else {
-		        // Update the supported RCS extensions
-		    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext(),
-		    			action,	ext, packageName);
-	        }
+	    	Integer uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+	    	if (uid == -1) {
+	    		return;
+	    	}
+	    	
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+            	// Get extensions associated to the new application
+    	        PackageManager pm = context.getPackageManager();
+    	        String packageName = intent.getData().getSchemeSpecificPart();
+    	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+    	        Bundle appMeta = appInfo.metaData;
+    	        String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+    	        if (exts == null) {
+    	        	// No RCS extension
+    	        	return;
+    	        }
+    	        
+            	if (logger.isActivated()) {
+            		logger.debug("Add extensions " + exts + " for application " + uid);
+            	}
+
+    	        // Add the new extension in the supported RCS extensions
+		    	ServiceExtensionManager.addNewSupportedExtensions(AndroidFactory.getApplicationContext());
+            } else
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            	if (logger.isActivated()) {
+            		logger.debug("Remove extensions for application " + uid);
+            	}
+
+            	// Remove the extensions in the supported RCS extensions
+		    	ServiceExtensionManager.removeSupportedExtensions(AndroidFactory.getApplicationContext());
+            }
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
