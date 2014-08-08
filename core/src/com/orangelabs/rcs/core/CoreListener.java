@@ -150,15 +150,6 @@ public interface CoreListener {
 	 */
 	public void handle1to1FileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession one2oneChatSession);
 
-	/**
-	 * A new file transfer invitation has been received and creating a chat session
-	 * 
-	 * @param session File transfer session
-	 * @param chatSession Group chat session
-	 * @param contact Contact ID
-	 */
-	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession chatSession, ContactId contact);
-
     /**
      * An incoming file transfer has been resumed
      * 

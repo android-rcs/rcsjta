@@ -622,17 +622,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(fileSharingSession, one2oneChatSession, one2oneChatSession.getRemoteContact());
-	}
-	
-
-	public void handleGroupFileTransferInvitation(FileSharingSession session, TerminatingAdhocGroupChatSession groupChatSession, ContactId contact) {
-		if (logger.isActivated()) {
-			logger.debug("Handle event group file transfer invitation");
-		}
-		
-    	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(session, groupChatSession, contact);
+    	ftApi.receiveFileTransferInvitation(fileSharingSession, false, one2oneChatSession.getRemoteContact());
 	}
 
     /* (non-Javadoc)

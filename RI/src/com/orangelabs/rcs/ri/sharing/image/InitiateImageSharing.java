@@ -43,6 +43,7 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -50,7 +51,9 @@ import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -81,7 +84,6 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 	 */
 	private Uri file;
 	
-	
 	/**
 	 * Selected filesize (kB)
 	 */
@@ -95,24 +97,115 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 	/**
      * Image sharing
      */
-    private ImageSharing imageSharing = null;
+    private ImageSharing imageSharing;
     
-    /**
-     * Image sharing listener
-     */
-    private MyImageSharingListener ishListener = new MyImageSharingListener();    
+	/**
+	 * Array of Image sharing states
+	 */
+	private static final String[] ISH_STATES = RiApplication.getContext().getResources().getStringArray(R.array.ish_states);
 
-    /**
+	/**
+	 * Array of Image sharing reason codes
+	 */
+	private static final String[] ISH_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.ish_reason_codes);
+	
+	/**
      * Progress dialog
      */
-    private Dialog progressDialog = null;
+    private Dialog progressDialog;
+    
+    private boolean serviceConnected = false;
+    
+    /**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
     
     /**
    	 * The log tag for this class
    	 */
    	private static final String LOGTAG = LogUtils.getTag(InitiateImageSharing.class.getSimpleName());
-    
-    
+   	
+    /**
+     * Image sharing listener
+     */
+	private ImageSharingListener ishListener = new ImageSharingListener() {
+
+		@Override
+		public void onImageSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+			handler.post(new Runnable() {
+				public void run() {
+					// Display sharing progress
+					updateProgressBar(currentSize, totalSize);
+				}
+			});
+		}
+
+		@Override
+		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+			}
+			if (state > ISH_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onImageSharingStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = ISH_REASON_CODES[0];
+			final String notif = getString(R.string.label_ish_state_changed, ISH_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					TextView statusView = (TextView) findViewById(R.id.progress_status);
+					switch (state) {
+					case ImageSharing.State.STARTED:
+						// Session is established: hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						statusView.setText("started");
+						break;
+
+					case ImageSharing.State.ABORTED:
+						// Session is aborted: hide progress dialog then exit
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						break;
+
+					// Add states
+					// case ImageSharing.State.REJECTED:
+					// Hide progress dialog
+					// hideProgressDialog();
+					// Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_declined));
+					// break;
+
+					case ImageSharing.State.FAILED:
+						// Session is failed: exit
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						break;
+
+					case ImageSharing.State.TRANSFERRED:
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display transfer progress
+						statusView.setText("transferred");
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onImageSharingStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+	};
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -149,23 +242,23 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     @Override
     public void onDestroy() {
     	super.onDestroy();
-
-        // Remove image sharing listener
-        if (imageSharing != null) {
-        	try {
-        		imageSharing.removeEventListener(ishListener);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        }
-
-        // Disconnect API
-        ishApi.disconnect();
+		if (serviceConnected) {
+			// Remove image sharing listener
+			try {
+				ishApi.removeEventListener(ishListener);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
+			}
+			// Disconnect API
+			ishApi.disconnect();
+		}
     }
     
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
@@ -177,6 +270,16 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
         	dialBtn.setEnabled(true);
         	selectBtn.setEnabled(true);
         }
+		// Add service listener
+		try {
+			ishApi.addEventListener(ishListener);
+			serviceConnected = true;
+		} catch (JoynServiceException e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to add listener", e);
+			}
+			Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_failed), exitOnce);
+		}
     }
     
     /**
@@ -187,7 +290,8 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_disabled), exitOnce);
     }    
     
     /**
@@ -215,9 +319,7 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		if ((ishApi != null) && ishApi.isServiceRegistered()) {
-        			registered = true;
-        		}
+        		registered = ishApi.isServiceRegistered();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -244,11 +346,11 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     				Log.d(LOGTAG, "shareImage image="+filename+" size="+filesize);
     			}
                 // Initiate sharing
-        		imageSharing = ishApi.shareImage(remote, file, ishListener);
+        		imageSharing = ishApi.shareImage(remote, file);
         	} catch(Exception e) {
         		e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed));
+				Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed), exitOnce);
         	}
 
             // Display a progress dialog
@@ -332,81 +434,6 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
     }       
     
     /**
-     * Image sharing event listener
-     */
-    private class MyImageSharingListener extends ImageSharingListener {
-    	// Sharing started
-    	public void onSharingStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display session status
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("started");
-				}
-			});
-    	}
-    	
-    	// Sharing aborted
-    	public void onSharingAborted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display session status
-					Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted));
-				}
-			});
-    	}
-
-    	// Sharing error
-    	public void onSharingError(final int error) {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display error
-                    if (error == ImageSharing.Error.INVITATION_DECLINED) {
-                        Utils.showMessageAndExit(InitiateImageSharing.this,
-                                getString(R.string.label_sharing_declined));
-                    } else {
-                        Utils.showMessageAndExit(InitiateImageSharing.this,
-                                getString(R.string.label_sharing_failed, error));
-                    }
-				}
-			});
-    	}
-    	
-    	// Sharing progress
-    	public void onSharingProgress(final long currentSize, final long totalSize) {
-			handler.post(new Runnable() { 
-    			public void run() {
-					// Display sharing progress
-    				updateProgressBar(currentSize, totalSize);
-    			}
-    		});
-    	}
-
-    	// Image shared
-    	public void onImageShared(Uri file) {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Display sharing progress
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transferred");
-				}
-			});
-    	}
-    };
-    
-    /**
      * Show the sharing progress
      * 
      * @param currentSize Current size transferred
@@ -438,7 +465,6 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
 		// Stop session
     	try {
             if (imageSharing != null) {
-            	imageSharing.removeEventListener(ishListener);
             	imageSharing.abortSharing();
             }
     	} catch(Exception e) {

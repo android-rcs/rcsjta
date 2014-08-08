@@ -26,6 +26,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -44,8 +45,11 @@ import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
 import com.gsma.services.rcs.ipcall.IPCallService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallPlayer;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallRenderer;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -97,28 +101,114 @@ public class IPCallView extends Activity implements JoynServiceListener {
     /**
 	 * IP call
 	 */
-	private IPCall call = null;
+	private IPCall call;
 
-    /**
-     * IP call listener
-     */
-    private MyCallListener callListener = new MyCallListener();    
-	
     /**
 	 * IP call player
 	 */
-	private MyIPCallPlayer player = null;
+	private MyIPCallPlayer player;
 
     /**
 	 * IP call renderer
 	 */
-	private MyIPCallRenderer renderer = null;
+	private MyIPCallRenderer renderer;
 
+	private boolean serviceConnected = false;
+	
+    /**
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
+	
 	/**
 	 * Progress dialog
 	 */
-	private Dialog progressDialog = null;
+	private Dialog progressDialog;
+	
+	 /**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(IPCallView.class.getSimpleName());
 
+   	/**
+     * Array of IPCall states
+     */
+    private static final String[] IPCALL_STATES = RiApplication.getContext().getResources().getStringArray(R.array.ipcall_states);
+    
+    /**
+     * Array of IPCall reason codes
+     */
+	private static final String[] IPCALL_REASON_CODES = RiApplication.getContext().getResources().getStringArray(R.array.ipcall_reason_codes);
+	
+	 /**
+     * IP call listener
+     */
+    private IPCallListener callListener = new IPCallListener() {
+
+		@Override
+		public void onIPCallStateChanged(ContactId contact, String callId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onIPCallStateChanged contact=" + contact + " callId=" + callId + " state="
+						+ state);
+			}
+			if (state > IPCALL_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onIPCallStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = IPCALL_REASON_CODES[0 % (IPCALL_REASON_CODES.length + 1)];
+			final String notif = getString(R.string.label_ipcall_state_changed, IPCALL_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					
+					ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+					switch (state) {
+					case IPCall.State.STARTED:
+						// Session is established: hide progress dialog
+						hideProgressDialog();
+				        holdBtn.setChecked(false);
+						break;
+						
+					case IPCall.State.HOLD:
+						// Update UI
+				        holdBtn.setChecked(true);
+						break;
+						
+					case IPCall.State.ABORTED:
+						// Session is aborted: hide progress dialog then exit
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted, reason), exitOnce);
+						break;
+
+					// Add states
+					// case IPCall.State.REJECTED:
+					// Hide progress dialog
+					// hideProgressDialog();
+					// Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_declined));
+					// break;
+
+					case IPCall.State.FAILED:
+						// Session is failed: exit
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, reason), exitOnce);
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onIPCallStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+    	
+    };    
+   
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,7 +224,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
         Button hangupBtn = (Button)findViewById(R.id.hangup_btn);
         hangupBtn.setOnClickListener(btnHangupListener);
 
-        // Instanciate API
+        // Instantiate API
         ipcallApi = new IPCallService(getApplicationContext(), this);
         
         // Connect API
@@ -144,17 +234,18 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-		// Remove session listener
-		if (call != null) {
+		if (serviceConnected) {
+			// Remove service listener
 			try {
-				call.removeEventListener(callListener);
+				ipcallApi.removeEventListener(callListener);
 			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "removeEventListener failed", e);
+				}
 			}
+			// Disconnect API
+			ipcallApi.disconnect();
 		}
-
-        // Disconnect API
-        ipcallApi.disconnect();
 	}
 	
 	/**
@@ -162,7 +253,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	 */
 	private void acceptInvitation() {
     	try {
-    		// Instanciate player and renderer
+    		// Instantiate player and renderer
     		player = new MyIPCallPlayer();
     		renderer = new MyIPCallRenderer();
 
@@ -170,7 +261,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 			call.acceptInvitation(player, renderer);
     	} catch(Exception e) {
     		e.printStackTrace();
-			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));
+			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed), exitOnce);
     	}
 	}
 	
@@ -180,7 +271,6 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	private void rejectInvitation() {
     	try {
     		// Reject the invitation
-    		call.removeEventListener(callListener);
 			call.rejectInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -189,26 +279,23 @@ public class IPCallView extends Activity implements JoynServiceListener {
     
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
 		try {
+			// Add service listener
+	        ipcallApi.addEventListener(callListener);
+	        serviceConnected = true;
+	        
 	        int mode = getIntent().getIntExtra(IPCallView.EXTRA_MODE, -1);
 			if (mode == IPCallView.MODE_OUTGOING) {
 				// Outgoing call
 
 	            // Check if the service is available
-	        	boolean registered = false;
-	        	try {
-	        		if ((ipcallApi != null) && ipcallApi.isServiceRegistered()) {
-	        			registered = true;
-	        		}
-	        	} catch(Exception e) {
-	        		e.printStackTrace();
-	        	}
+	        	boolean registered = ipcallApi.isServiceRegistered();
 	            if (!registered) {
-	    	    	Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_service_not_available));
+	    	    	Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_service_not_available), exitOnce);
 	    	    	return;
 	            } 
 	            
@@ -220,63 +307,58 @@ public class IPCallView extends Activity implements JoynServiceListener {
 
 				// Initiate call
     			startCall();
-			} else
-			if (mode == IPCallView.MODE_OPEN) {
-				// Open an existing session
-				
-				// Incoming call
-		        callId = getIntent().getStringExtra(IPCallView.EXTRA_CALL_ID);
-
-		    	// Get the call
-	    		call = ipcallApi.getIPCall(callId);
-				if (call == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_has_expired));
-					return;
-				}
-				
-		    	// Get video option
-				video = call.isVideo();
-				
-    			// Add call event listener
-				call.addEventListener(callListener);
-				
-		    	// Get remote contact
-				contact = call.getRemoteContact();
 			} else {
-				// Incoming session from its Intent
-		        callId = getIntent().getStringExtra(IPCallIntent.EXTRA_CALL_ID);
+				if (mode == IPCallView.MODE_OPEN) {
+					// Open an existing session
 
-		    	// Get the call
-	    		call = ipcallApi.getIPCall(callId);
-				if (call == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_has_expired));
-					return;
-				}
-				
-    			// Add call event listener
-				call.addEventListener(callListener);
-				
-		    	// Get remote contact
-				contact = call.getRemoteContact();
-		
-		    	// Get video option
-				video = call.isVideo();
+					// Incoming call
+					callId = getIntent().getStringExtra(IPCallView.EXTRA_CALL_ID);
 
-				// Manual accept
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				if (video) {
-					builder.setTitle(R.string.title_ipcall_video);
+					// Get the call
+					call = ipcallApi.getIPCall(callId);
+					if (call == null) {
+						// Session not found or expired
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_has_expired), exitOnce);
+						return;
+					}
+
+					// Get video option
+					video = call.isVideo();
+
+					// Get remote contact
+					contact = call.getRemoteContact();
 				} else {
-					builder.setTitle(R.string.title_ipcall);
+					// Incoming session from its Intent
+					callId = getIntent().getStringExtra(IPCallIntent.EXTRA_CALL_ID);
+
+					// Get the call
+					call = ipcallApi.getIPCall(callId);
+					if (call == null) {
+						// Session not found or expired
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_has_expired), exitOnce);
+						return;
+					}
+
+					// Get remote contact
+					contact = call.getRemoteContact();
+
+					// Get video option
+					video = call.isVideo();
+
+					// Manual accept
+					AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					if (video) {
+						builder.setTitle(R.string.title_ipcall_video);
+					} else {
+						builder.setTitle(R.string.title_ipcall);
+					}
+					builder.setMessage(getString(R.string.label_from) + " " + contact);
+					builder.setCancelable(false);
+					builder.setIcon(R.drawable.ri_notif_ipcall_icon);
+					builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+					builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+					builder.show();
 				}
-				builder.setMessage(getString(R.string.label_from) +	" " + contact);
-				builder.setCancelable(false);
-				builder.setIcon(R.drawable.ri_notif_ipcall_icon);
-				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-				builder.show();
 			}
 			
 			// Display call info
@@ -290,7 +372,7 @@ public class IPCallView extends Activity implements JoynServiceListener {
 	        holdBtn.setOnCheckedChangeListener(btnHoldListener);        
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -302,30 +384,31 @@ public class IPCallView extends Activity implements JoynServiceListener {
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_api_disabled), exitOnce);
     }    
 	
     /**
      * Start session
      */
     private void startCall() {
-		// Initiate the chat session in background
+		// Initiate the IP call session in background
     	try {
-    		// Instanciate player and renderer
+    		// Instantiate player and renderer
     		player = new MyIPCallPlayer();
     		renderer = new MyIPCallRenderer();
     		
 			// Initiate session
     		if (video) {
     			// Visio call
-    			call = ipcallApi.initiateVisioCall(contact, player, renderer, callListener);
+    			call = ipcallApi.initiateVisioCall(contact, player, renderer);
     		} else {
     			// Audio call
-    			call = ipcallApi.initiateCall(contact, player, renderer, callListener);
+    			call = ipcallApi.initiateCall(contact, player, renderer);
     		}
     	} catch(Exception e) {
     		e.printStackTrace();
-			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed));		
+			Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_invitation_failed), exitOnce);		
     	}
 
         // Display a progress dialog
@@ -371,79 +454,6 @@ public class IPCallView extends Activity implements JoynServiceListener {
         }
     };
     
-    /**
-     * Call event listener
-     */
-    private class MyCallListener extends IPCallListener {
-    	// Call ringing
-    	public void onCallRinging() {
-    		// TODO: play ringtone
-    	}
-
-    	// Call started
-    	public void onCallStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-				}
-			});
-    	}
-    	
-    	// Call held
-    	public void onCallHeld() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Update UI
-			        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
-			        holdBtn.setChecked(true);
-				}
-			});
-    	}
-    	
-    	// Call continue
-    	public void onCallContinue() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Update UI
-			        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
-			        holdBtn.setChecked(false);
-				}
-			});
-    	}
-
-    	// Call aborted
-    	public void onCallAborted() {
-			handler.post(new Runnable(){
-				public void run(){
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Show info
-					Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted));
-				}
-			});
-    	}
-
-    	// Call error
-    	public void onCallError(final int error) {
-			handler.post(new Runnable() {
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display error
-					if (error == IPCall.Error.INVITATION_DECLINED) {
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_declined));
-					} else {
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, error));
-					}					
-				}
-			});
-			
-    	}
-    };
-        
 	/**
      * Quit the session
      */
@@ -451,7 +461,6 @@ public class IPCallView extends Activity implements JoynServiceListener {
 		// Stop session
         if (call != null) {
         	try {
-        		call.removeEventListener(callListener);
         		call.abortCall();
         	} catch(Exception e) {
         		e.printStackTrace();

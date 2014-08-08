@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -49,6 +50,7 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -59,14 +61,18 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoPlayer;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate video sharing.
  *
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
  */
 public class InitiateVideoSharing extends Activity implements JoynServiceListener, SurfaceHolder.Callback {
 
@@ -83,22 +89,17 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 	/**
 	 * Video sharing
 	 */
-	private VideoSharing videoSharing = null;
+	private VideoSharing videoSharing;
 
-    /**
-     * Video sharing listener
-     */
-    private MyVideoSharingListener vshListener = new MyVideoSharingListener();    
-    
     /**
      * Video player
      */
-    private MyVideoPlayer videoPlayer = null;
+    private MyVideoPlayer videoPlayer;
 
     /**
      * Camera of the device
      */
-    private Camera camera = null;
+    private Camera camera;
     
     /**
      * Opened camera id
@@ -138,7 +139,90 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
     /**
      * Progress dialog
      */
-    private Dialog progressDialog = null; 
+    private Dialog progressDialog;
+    
+	private boolean serviceConnected = false;
+	
+	/**
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
+    
+    /**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(InitiateVideoSharing.class.getSimpleName());
+   	
+	/**
+	 * Array of Video sharing states
+	 */
+	private static final String[] VSH_STATES = RiApplication.getContext().getResources().getStringArray(R.array.vsh_states);
+
+	/**
+	 * Array of Video sharing reason codes
+	 */
+	private static final String[] VSH_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.vsh_reason_codes);
+	
+   	/**
+     * Video sharing listener
+     */
+	private VideoSharingListener vshListener = new VideoSharingListener() {
+
+		@Override
+		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+			}
+			if (state > VSH_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = VSH_REASON_CODES[0];
+			final String notif = getString(R.string.label_vsh_state_changed, VSH_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					switch (state) {
+					case VideoSharing.State.STARTED:
+						// Session is established : hide progress dialog
+						hideProgressDialog();
+						break;
+
+					case VideoSharing.State.ABORTED:
+						// Release the camera
+						closeCamera();
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						break;
+
+					// Add states
+					// case VideoSharing.State.REJECTED:
+					// Hide progress dialog
+					// hideProgressDialog();
+					// Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_declined), exitOnce);
+					// break;
+
+					case VideoSharing.State.FAILED:
+						// Session is failed: exit
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onVideoSharingStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+	};
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -150,7 +234,6 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.video_sharing_initiate);
 
         // Set title
@@ -184,33 +267,37 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         surface.setKeepScreenOn(true);
         surface.addCallback(this);
         
-        // Instanciate API
+        // Instantiate API
         vshApi = new VideoSharingService(getApplicationContext(), this);
 		
 		// Connect API
-        vshApi.connect();                
+        vshApi.connect();
+        
+        if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate initiate video sharing");
+		}
     }
 
     @Override
-    public void onDestroy() {
-    	super.onDestroy();
-    	
-        // Remove file transfer listener
-        if (videoSharing != null) {
-        	try {
-        		videoSharing.removeEventListener(vshListener);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        }    	
-    	
-        // Disconnect API
-        vshApi.disconnect();
-    }
+	public void onDestroy() {
+		super.onDestroy();
+		if (serviceConnected) {
+			// Remove video sharing listener
+			try {
+				vshApi.removeEventListener(vshListener);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
+			}
+			// Disconnect API
+			vshApi.disconnect();
+		}
+	}
 
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
@@ -220,6 +307,16 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         if (spinner.getAdapter().getCount() != 0) {
         	dialBtn.setEnabled(true);
         }
+		// Add service listener
+		try {
+			vshApi.addEventListener(vshListener);
+			serviceConnected = true;
+		} catch (JoynServiceException e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to add listener", e);
+			}
+			Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_api_failed), exitOnce);
+		}
     }
     
     /**
@@ -230,7 +327,8 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_api_disabled), exitOnce);
     }    
     
     /**
@@ -258,9 +356,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		if ((vshApi != null) && vshApi.isServiceRegistered()) {
-        			registered = true;
-        		}
+        		registered = vshApi.isServiceRegistered();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -292,13 +388,13 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 		        		openCamera();
 		
 		        		// Initiate sharing
-		        		videoSharing = vshApi.shareVideo(remote, videoPlayer, vshListener);
+		        		videoSharing = vshApi.shareVideo(remote, videoPlayer);
 		        	} catch(Exception e) {
 		        		e.printStackTrace();
 	            		handler.post(new Runnable() { 
 	    					public void run() {
 								hideProgressDialog();
-								Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_invitation_failed));
+								Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_invitation_failed), exitOnce);
 	    		        	}
 		    			});
 		        	}
@@ -340,59 +436,6 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
     }     
     
     /**
-     * Video sharing event listener
-     */
-    private class MyVideoSharingListener extends VideoSharingListener {
-    	// Sharing started
-    	public void onSharingStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-				}
-			});
-    	}
-    	
-    	// Sharing aborted
-    	public void onSharingAborted() {
-			handler.post(new Runnable() { 
-				public void run() {
-	        		// Release the camera
-	            	closeCamera();
-
-	            	// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display session status
-					Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted));
-				}
-			});
-    	}
-
-    	// Sharing error
-    	public void onSharingError(final int error) {
-			handler.post(new Runnable() { 
-				public void run() {
-	        		// Release the camera
-	            	closeCamera();
-
-	            	// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display error
-                    if (error == VideoSharing.Error.INVITATION_DECLINED) {
-                        Utils.showMessageAndExit(InitiateVideoSharing.this,
-                                getString(R.string.label_sharing_declined));
-                    } else {
-                        Utils.showMessageAndExit(InitiateVideoSharing.this,
-                                getString(R.string.label_sharing_failed, error));
-                    }
-				}
-			});
-    	}
-    };
-
-    /**
      * Quit the session
      */
     private void quitSession() {
@@ -402,7 +445,6 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
     	// Stop the sharing
     	try {
             if (videoSharing != null) {
-            	videoSharing.removeEventListener(vshListener);
             	videoSharing.abortSharing();
             }
     	} catch(Exception e) {
