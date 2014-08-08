@@ -94,8 +94,9 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		this.contact = contact;
 		this.session = session;
 		mChatEventBroadcaster = broadcaster;
-
-		session.addListener(this);
+		if (session != null)  {
+			session.addListener(this);
+		}
 	}
 
 	/**

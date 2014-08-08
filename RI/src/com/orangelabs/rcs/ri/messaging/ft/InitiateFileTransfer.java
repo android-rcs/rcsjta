@@ -31,7 +31,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.provider.ContactsContract.Data;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
@@ -59,7 +58,9 @@ import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -74,6 +75,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	 * Activity result constants
 	 */
 	private final static int SELECT_IMAGE = 0;
+	private final static int SELECT_TEXT_FILE = 1;
 	
 	/**
 	 * UI handler
@@ -103,18 +105,32 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     /**
      * File transfer
      */
-    private FileTransfer fileTransfer = null;
+    private FileTransfer fileTransfer;
+    
+    private boolean serviceConnected = false;
     
     /**
-     * File transfer listener
-     */
-    private MyFileTransferListener ftListener = new MyFileTransferListener();
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
     
     /**
      * Progress dialog
      */
-    private Dialog progressDialog = null;
+    private Dialog progressDialog;
     
+	/**
+	 * Array of file transfer states
+	 */
+	private static final String[] FT_STATES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.file_transfer_states);
+
+	/**
+	 * Array of file transfer reason codes
+	 */
+	private static final String[] FT_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.file_transfer_reason_codes);
+	
     /**
    	 * The log tag for this class
    	 */
@@ -125,8 +141,88 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     private boolean resuming = false;
     
-    private String ftId = null;
-    
+    private String ftId;
+   
+	/**
+	 * File transfer listener
+	 */
+	private FileTransferListener ftListener = new FileTransferListener() {
+
+		@Override
+		public void onTransferProgress(ContactId contact, String transferId, final long currentSize, final long totalSize) {
+			handler.post(new Runnable() {
+				public void run() {
+					// Display transfer progress
+					updateProgressBar(currentSize, totalSize);
+				}
+			});
+		}
+
+		@Override
+		public void onTransferStateChanged(ContactId contact, String transferId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state);
+			}
+			if (state > FT_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = FT_REASON_CODES[0];
+			final String notif = getString(R.string.label_ft_state_changed, FT_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					TextView statusView = (TextView) findViewById(R.id.progress_status);
+					switch (state) {
+					case FileTransfer.State.STARTED:
+						// Session is well established : hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						statusView.setText("started");
+						break;
+
+					case FileTransfer.State.ABORTED:
+						// Session is aborted: hide progress dialog then exit
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display message
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_aborted, reason), exitOnce);
+						break;
+
+					// Add states
+					// case FileTransfer.State.REJECTED:
+					// Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_declined));
+					// break;
+
+					case FileTransfer.State.FAILED:
+						// Session is failed: exit
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_failed, reason), exitOnce);
+						break;
+
+					case FileTransfer.State.TRANSFERRED:
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display transfer progress
+						statusView.setText("transferred");
+						// Hide buttons Pause and Resume
+						Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+						pauseBtn.setVisibility(View.INVISIBLE);
+						Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+						resumeBtn.setVisibility(View.INVISIBLE);
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onTransferStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+	};
+	
     @Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -145,7 +241,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 					return;
 				}
 				remoteContact = ftdao.getContact();
-				ftId = ftdao.getFtId();
+				ftId = ftdao.getTransferId();
 				filename = ftdao.getFilename();
 				filesize = ftdao.getSize();
 			}
@@ -225,25 +321,25 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 		}
 	}
     
-    @Override
-    public void onDestroy() {
-    	if (LogUtils.isActive) {
+	@Override
+	public void onDestroy() {
+		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onDestroy");
 		}
-    	super.onDestroy();
-
-        // Remove file transfer listener
-        if (fileTransfer != null) {
-        	try {
-        		fileTransfer.removeEventListener(ftListener);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        }
-
-        // Disconnect API
-        ftApi.disconnect();
-    }
+		super.onDestroy();
+		if (serviceConnected) {
+			// Remove file transfer listener
+			try {
+				ftApi.removeOneToOneFileTransferListener(ftListener);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
+			}
+			// Disconnect API
+			ftApi.disconnect();
+		}
+	}
     
     /**
      * Callback called when service is connected. This method is called when the
@@ -251,51 +347,37 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
-		if (resuming) {
-			try {
+		try {
+			// Add service listener
+			ftApi.addOneToOneFileTransferListener(ftListener);
+			serviceConnected = true;
+			
+			if (resuming) {
+
 				// Get the file transfer session
 				fileTransfer = ftApi.getFileTransfer(ftId);
 				if (fileTransfer == null) {
-					if (LogUtils.isActive) {
-						Log.d(LOGTAG, "FT Session not found or expired");
-					}
 					// Session not found or expired
-					Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_session_has_expired));
+					Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_session_has_expired), exitOnce);
 					return;
 				}
-				fileTransfer.addEventListener(ftListener);
+
 				Button pauseBtn = (Button) findViewById(R.id.pause_btn);
 				pauseBtn.setEnabled(true);
-			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Exception occurred", e);
-				}
-				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_failed));
-			}
-		} else  {
-			// Enable button if contact available
-			Spinner spinner = (Spinner) findViewById(R.id.contact);
-			if (spinner.getAdapter().getCount() != 0) {
-				Button selectBtn = (Button) findViewById(R.id.select_btn);
-				selectBtn.setEnabled(true);
-			}
 
-			// Enable thumbnail option if supported
-			try {
-				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-				if (ftApi.getConfiguration().isFileIconSupported()) {
-					ftThumb.setEnabled(true);
+			} else {
+				// Enable button if contact available
+				Spinner spinner = (Spinner) findViewById(R.id.contact);
+				if (spinner.getAdapter().getCount() != 0) {
+					Button selectBtn = (Button) findViewById(R.id.select_btn);
+					selectBtn.setEnabled(true);
 				}
-//				if (LogUtils.isActive) {
-//					FileTransferServiceConfiguration conf = ftApi.getConfiguration();
-//					Log.d(LOGTAG, "onServiceConnected imageResizeOption="+conf.getImageResizeOption());
-//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptModeChangeable="+conf.isAutoAcceptModeChangeable());
-//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptEnabled="+conf.isAutoAcceptEnabled());
-//					Log.d(LOGTAG, "onServiceConnected isAutoAcceptInRoamingEnabled="+conf.isAutoAcceptInRoamingEnabled());
-//				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Exception occurred", e);
+			}
+			Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -307,7 +389,8 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_api_disabled), exitOnce);
     }   
     
     /**
@@ -345,19 +428,17 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 	 * Initiate transfer
 	 */
     private void initiateTransfer() {
-        // Check if the service is available
-    	boolean registered = false;
-    	try {
-    		if ((ftApi != null) && ftApi.isServiceRegistered()) {
-    			registered = true;
-    		}
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-        if (!registered) {
-	    	Utils.showMessage(InitiateFileTransfer.this, getString(R.string.label_service_not_available));
-	    	return;
-        }     	    	
+		// Check if the service is available
+		boolean registered = false;
+		try {
+			registered = ftApi.isServiceRegistered();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (!registered) {
+			Utils.showMessage(InitiateFileTransfer.this, getString(R.string.label_service_not_available));
+			return;
+		}    	    	
     	
     	// Get remote contact
         Spinner spinner = (Spinner)findViewById(R.id.contact);
@@ -374,10 +455,14 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
         
-        // Initiate session in background
-    	try {
+        try {
+        	boolean tryToSendFileicon = ftThumb.isChecked();
+        	String mimeType = getContentResolver().getType(file);
+        	if (tryToSendFileicon && mimeType != null && !mimeType.toLowerCase().startsWith("image")) {
+        		tryToSendFileicon = false;
+        	}
     		// Initiate transfer
-    		fileTransfer = ftApi.transferFile(remote, file, ftThumb.isChecked(), ftListener);
+    		fileTransfer = ftApi.transferFile(remote, file, tryToSendFileicon);
     		
             Button pauseBtn = (Button)findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);
@@ -403,7 +488,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
     	} catch(Exception e) {
     		e.printStackTrace();
 			hideProgressDialog();
-			Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed));
+			Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_invitation_failed), exitOnce);
     	}
     }
        
@@ -412,18 +497,41 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      */
     private OnClickListener btnSelectListener = new OnClickListener() {
         public void onClick(View v) {
-        	Intent pictureShareIntent;
-        	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-        		pictureShareIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
-        	} else {
-        		pictureShareIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        	}
-			pictureShareIntent.addCategory(Intent.CATEGORY_OPENABLE);
-			pictureShareIntent.setType("image/*");
-			startActivityForResult(pictureShareIntent, SELECT_IMAGE);
+        	selectDocument();
         }
     };
         
+    /**
+     * Display a alert dialog to select the kind of file to transfer
+     */
+	private void selectDocument() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.label_select_file);
+		builder.setCancelable(true);
+		builder.setItems(R.array.select_filetotransfer, new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Intent intent;
+				if (Build.VERSION.SDK_INT < 19) { // Build.VERSION_CODES.KITKAT
+					intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+				} else {
+					intent = new Intent("android.intent.action.OPEN_DOCUMENT");
+				}
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				if (which == SELECT_IMAGE) {
+					intent.setType("image/*");
+					startActivityForResult(intent, SELECT_IMAGE);
+				} else {
+					intent.setType("text/plain");
+					startActivityForResult(intent, SELECT_TEXT_FILE);
+				}
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+	
     /**
      * On activity result
      * 
@@ -432,40 +540,40 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
      * @param data Data
      */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_OK) {
+		if (resultCode != RESULT_OK || (data == null) || (data.getData() == null)) {
 			return;
 		}
-
+		file = data.getData();
+		TextView uriEdit = (TextView) findViewById(R.id.uri);
+		TextView sizeEdit = (TextView) findViewById(R.id.size);
+		Button inviteBtn = (Button) findViewById(R.id.invite_btn);
 		switch (requestCode) {
 		case SELECT_IMAGE:
-			if ((data != null) && (data.getData() != null)) {
-				// Get selected photo URI
-				file = data.getData();
-				// Display file info
-				TextView uriEdit = (TextView) findViewById(R.id.uri);
-				TextView sizeEdit = (TextView) findViewById(R.id.size);
-				// Display the selected filename attribute
-				try {
-					// Get image filename and size
-					filename = FileUtils.getFileName(this, file);
-					filesize = FileUtils.getFileSize(this, file) / 1024;
-					sizeEdit.setText(filesize + " KB");
-					uriEdit.setText(filename);
-					if (LogUtils.isActive) {
-						Log.i(LOGTAG,"Select file "+filename+" of size "+filesize+ " file="+file);
-					}
-				} catch (Exception e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, e.getMessage(), e);
-					}
-					filesize = -1;
-					sizeEdit.setText("Unknown");
-					uriEdit.setText("Unknown");
-				}
-				// Enable invite button
-				Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-				inviteBtn.setEnabled(true);
+		case SELECT_TEXT_FILE:
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "Selected file uri:" + file);
 			}
+			// Display file info
+			// Display the selected filename attribute
+			try {
+				// Get image filename and size
+				filename = FileUtils.getFileName(this, file);
+				filesize = FileUtils.getFileSize(this, file) / 1024;
+				sizeEdit.setText(filesize + " KB");
+				uriEdit.setText(filename);
+				if (LogUtils.isActive) {
+					Log.i(LOGTAG, "Select file " + filename + " of size " + filesize + " file=" + file);
+				}
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, e.getMessage(), e);
+				}
+				filesize = -1;
+				sizeEdit.setText("Unknown");
+				uriEdit.setText("Unknown");
+			}
+			// Enable invite button
+			inviteBtn.setEnabled(true);
 			break;
 		}
 	}
@@ -479,112 +587,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 			progressDialog = null;
 		}
     }    
-    
-    /**
-     * File transfer event listener
-     */
-    private class MyFileTransferListener extends FileTransferListener {
-    	// File transfer started
-    	public void onTransferStarted() {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStarted");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display session status
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("started");
-				}
-			});
-    	}
-    	
-    	// File transfer aborted
-    	public void onTransferAborted() {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onTransferAborted");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Display message
-					Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_sharing_aborted));
-				}
-			});
-    	}
-
-    	// File transfer error
-    	public void onTransferError(final int error) {
-    		if (LogUtils.isActive) {
-				Log.w(LOGTAG, "handleTransferError (error=" + error + ")");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-                    // Display error
-                    if (error == FileTransfer.Error.INVITATION_DECLINED) {
-                        Utils.showMessageAndExit(InitiateFileTransfer.this,
-                                getString(R.string.label_transfer_declined));
-                    } else {
-                        Utils.showMessageAndExit(InitiateFileTransfer.this,
-                                getString(R.string.label_transfer_failed, error));
-                    }
-				}
-			});
-    	}
-    	
-    	// File transfer progress
-    	public void onTransferProgress(final long currentSize, final long totalSize) {
-			handler.post(new Runnable() { 
-    			public void run() {
-					// Display transfer progress
-    				updateProgressBar(currentSize, totalSize);
-    			}
-    		});
-    	}
-
-    	// File transferred
-    	public void onFileTransferred(Uri file) {
-    		if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onFileTransferred (file=" + file + ")");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Display transfer progress
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transferred");
-					// Hide buttons Pause and Resume
-			        Button pauseBtn = (Button)findViewById(R.id.pause_btn);
-			        pauseBtn.setVisibility(View.INVISIBLE);
-			        Button resumeBtn = (Button)findViewById(R.id.resume_btn);
-			        resumeBtn.setVisibility(View.INVISIBLE);
-				}
-			});
-    	}
-
-		@Override
-		public void onFileTransferPaused() throws RemoteException {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onFileTransferPaused");
-			}
-		}
-
-		@Override
-		public void onFileTransferResumed() throws RemoteException {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onFileTransferResumed");
-			}
-		}
-    };
     
     /**
      * Show the transfer progress
@@ -621,7 +623,6 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 		// Stop session
     	try {
             if (fileTransfer != null) {
-            	fileTransfer.removeEventListener(ftListener);
             	fileTransfer.abortTransfer();
             }
     	} catch(Exception e) {
@@ -677,7 +678,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 			} catch (JoynServiceException e) {
 				e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_pause_failed));
+				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_pause_failed), exitOnce);
 			}
 		}
 	};
@@ -696,7 +697,7 @@ public class InitiateFileTransfer extends Activity implements JoynServiceListene
 			} catch (JoynServiceException e) {
 				e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_resume_failed));
+				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_resume_failed), exitOnce);
 			}
 		}
 	};

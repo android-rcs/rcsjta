@@ -27,7 +27,6 @@ import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
@@ -35,9 +34,10 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
+ * File transfer intent service
  * 
  * @author YPLO6403
- *
+ * 
  */
 public class FileTransferIntentService extends IntentService {
 
@@ -80,24 +80,24 @@ public class FileTransferIntentService extends IntentService {
 				}
 				try {
 					// Get File Transfer from provider
-					FileTransferDAO ftdao = new FileTransferDAO(this, transferId);
+					FileTransferDAO ftDao = new FileTransferDAO(this, transferId);
 					// Save FileTransferDAO into intent
 					Bundle bundle = new Bundle();
-					bundle.putSerializable(BUNDLE_FTDAO_ID, ftdao);
+					bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
 					intent.putExtras(bundle);
 					if (intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)) {
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "File Transfer invitation filename=" + ftdao.getFilename() + " size=" + ftdao.getSize());
+							Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size=" + ftDao.getSize());
 						}
 						// TODO check File Transfer state to know if rejected
 						// TODO check validity of direction, etc ...
-						addFileTransferInvitationNotification(this, intent);
+						addFileTransferInvitationNotification(this, intent, ftDao);
 					} else {
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
 						}
 						Intent intentLocal = new Intent(intent);
-						if (ftdao.getDirection() == FileTransfer.Direction.INCOMING) {
+						if (ftDao.getDirection() == FileTransfer.Direction.INCOMING) {
 							intentLocal.setClass(this, ReceiveFileTransfer.class);
 						} else {
 							intentLocal.setClass(this, InitiateFileTransfer.class);
@@ -124,43 +124,31 @@ public class FileTransferIntentService extends IntentService {
 	 *            Context
 	 * @param invitation
 	 *            Intent invitation
+	 * @param ftDao
+	 * 				the file transfer data object
 	 */
-	public static void addFileTransferInvitationNotification(Context context, Intent invitation) {
-		// Get remote contact
-		ContactId contact = invitation.getParcelableExtra(FileTransferIntent.EXTRA_CONTACT);
-
-		// Get filename
-		String filename = invitation.getStringExtra(FileTransferIntent.EXTRA_FILENAME);
-
+	private static void addFileTransferInvitationNotification(Context context, Intent invitation, FileTransferDAO ftDao) {
+		if (ftDao.getContact() == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "addFileTransferInvitationNotification failed: cannot parse contact");
+			}
+			return;
+		}
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(context, ReceiveFileTransfer.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		String notifTitle = context.getString(R.string.title_recv_file_transfer, contact.toString());
+		String notifTitle = context.getString(R.string.title_recv_file_transfer, ftDao.getContact().toString());
 		Notification notif = new Notification(R.drawable.ri_notif_file_transfer_icon, notifTitle, System.currentTimeMillis());
 		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle, filename, contentIntent);
+		notif.setLatestEventInfo(context, notifTitle, ftDao.getFilename(), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		notif.defaults |= Notification.DEFAULT_VIBRATE;
 
 		// Send notification
-		String transferId = invitation.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(transferId, Utils.NOTIF_ID_FT, notif);
-	}
-
-	/**
-	 * Remove file transfer notification
-	 * 
-	 * @param context
-	 *            Context
-	 * @param transferId
-	 *            Transfer ID
-	 */
-	public static void removeFileTransferNotification(Context context, String transferId) {
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(transferId, Utils.NOTIF_ID_FT);
+		notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif);
 	}
 
 }

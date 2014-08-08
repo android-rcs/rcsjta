@@ -15,26 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.orangelabs.rcs.ri;
 
-package com.orangelabs.rcs.ri.sharing.image;
-
-import android.content.BroadcastReceiver;
+import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 
 /**
- * Image sharing invitation receiver
+ * This subclass of Application allows to get a resource content from a static context
  * 
- * @author Jean-Marc AUFFRET
  * @author YPLO6403
+ * 
  */
-public class ImageSharingInvitationReceiver extends BroadcastReceiver {
-	
+public class RiApplication extends Application {
+
+	private static Context mContext;
+
 	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent receiverIntent = new Intent(context, ImageSharingIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(intent.getAction());
-		context.startService(receiverIntent);
-    }
+	public void onCreate() {
+		super.onCreate();
+		mContext = this;
+	}
+
+	public static Context getContext() {
+		return mContext;
+	}
+
 }

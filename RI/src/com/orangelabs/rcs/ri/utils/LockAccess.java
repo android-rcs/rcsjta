@@ -15,26 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.orangelabs.rcs.ri.utils;
 
-package com.orangelabs.rcs.ri.sharing.image;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Image sharing invitation receiver
+ * An object to lock access to a resource
  * 
- * @author Jean-Marc AUFFRET
  * @author YPLO6403
+ *
  */
-public class ImageSharingInvitationReceiver extends BroadcastReceiver {
+public class LockAccess {
 	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent receiverIntent = new Intent(context, ImageSharingIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(intent.getAction());
-		context.startService(receiverIntent);
-    }
+	/**
+	 * The locker object
+	 */
+	AtomicBoolean locker = new AtomicBoolean();
+
+	/**
+	 * Acquires the lock only if it is not already locked at the time of invocation
+	 * 
+	 * @return true is resource is unlocked
+	 */
+	public boolean tryLock() {
+		return locker.compareAndSet(false, true);
+	}
 }

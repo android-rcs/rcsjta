@@ -38,9 +38,11 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.SendGroupFile;
 
 /**
  * Utility functions
@@ -86,8 +88,13 @@ public class Utils {
 	/**
 	 * Notification ID for IP call
 	 */
-	public static int NOTIF_ID_IP_CALL = 1007; 
-
+	public static int NOTIF_ID_IP_CALL = 1007;
+	
+	/**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
+	
 	/**
 	 * Returns the application version from manifest file 
 	 * 
@@ -262,24 +269,46 @@ public class Utils {
 	 * @param activity Activity
 	 * @param msg Message to be displayed
 	 */
-    public static void showMessageAndExit(final Activity activity, String msg) {
-        if (activity.isFinishing()) {
-        	return;
-        }
+	public static void showMessageAndExit(final Activity activity, String msg) {
+		showMessageAndExit(activity, msg, null);
+	}
+    
+	/**
+	 * Show a message and exit activity
+	 * 
+	 * @param activity
+	 *            Activity
+	 * @param msg
+	 *            Message to be displayed
+	 * @param locker
+	 *            a locker to only execute once
+	 */
+	public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
+		// Do not execute if activity is Fishing 
+		if (activity.isFinishing()) {
+			return;
+		}
+		// Do not execute if already executed once 
+		if (locker != null && !locker.tryLock()) {
+			return;
+		}
 
+		if (LogUtils.isActive) {
+			Log.w(LOGTAG, "Exit activity " + activity.getLocalClassName()+ " "+msg);
+		}
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setMessage(msg);
 		builder.setTitle(R.string.title_msg);
 		builder.setCancelable(false);
-		builder.setPositiveButton(activity.getString(R.string.label_ok),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						activity.finish();
-					}
-				});
+		builder.setPositiveButton(activity.getString(R.string.label_ok), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				activity.finish();
+			}
+		});
 		AlertDialog alert = builder.create();
 		alert.show();
-    }
+	}
 
 	/**
 	 * Show an message
@@ -289,6 +318,9 @@ public class Utils {
 	 * @return Dialog
 	 */
     public static AlertDialog showMessage(Activity activity, String msg) {
+    	if (LogUtils.isActive) {
+			Log.w(LOGTAG, "Activity " + activity.getLocalClassName()+ " message="+msg);
+		}
     	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
     	builder.setMessage(msg);
     	builder.setTitle(R.string.title_msg);

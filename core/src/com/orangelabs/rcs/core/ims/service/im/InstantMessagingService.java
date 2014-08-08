@@ -352,7 +352,7 @@ public class InstantMessagingService extends ImsService {
 						logger.warn("Thumbnail not supported by remote");
 					}
 				}
-				if (myCapability.isFileTransferThumbnailSupported() == false) {
+				if (fileicon && myCapability.isFileTransferThumbnailSupported() == false) {
 					fileicon = false;
 					if (logger.isActivated()) {
 						logger.warn("Thumbnail not supported !");

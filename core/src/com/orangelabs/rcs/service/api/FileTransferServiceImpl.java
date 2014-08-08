@@ -247,29 +247,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
-	 * Receive a new HTTP file transfer invitation outside of an existing chat session
-	 *
-	 * @param session File transfer session
-	 */
-	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession, ContactId contact) {
-		// Update rich messaging history
-		if (chatSession.isGroupChat()) {
-			MessagingLog.getInstance().updateFileTransferChatId(
-					chatSession.getFirstMessage().getMessageId(), chatSession.getContributionID());
-			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(session,
-					mGroupFileTransferBroadcaster);
-			addFileTransferSession(groupFileTransfer);
-		} else {
-			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
-			addFileTransferSession(oneToOneFileTransfer);
-		}
-
-		// Display invitation
-		receiveFileTransferInvitation(session, chatSession.isGroupChat(), contact);
-	}    
-	
-    /**
      * Returns the configuration of the file transfer service
      * 
      * @return Configuration

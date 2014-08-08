@@ -188,19 +188,23 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         // Open the MSRP session
         msrpMgr.openMsrpSession();
 
-        try {
-            // Start sending data chunks
-            byte[] data = getContent().getData();
-            InputStream stream = new ByteArrayInputStream(data);
-            msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.GeoLocation);
-        } catch(Exception e) {
-            // Unexpected error
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-            handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
-        }
+		new Thread() {
+			public void run() {
+				try {
+					// Start sending data chunks
+					byte[] data = getContent().getData();
+					InputStream stream = new ByteArrayInputStream(data);
+					msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize(),
+							TypeMsrpChunk.GeoLocation);
+				} catch (Exception e) {
+					// Unexpected error
+					if (logger.isActivated()) {
+						logger.error("Session initiation has failed", e);
+					}
+					handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+				}
+			}
+		}.start();
     }
 
     /**
