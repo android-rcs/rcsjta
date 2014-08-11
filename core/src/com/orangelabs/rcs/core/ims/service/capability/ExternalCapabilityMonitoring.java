@@ -18,13 +18,18 @@
 
 package com.orangelabs.rcs.core.ims.service.capability;
 
-import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+
+import com.gsma.services.rcs.capability.CapabilityService;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * External capability monitoring
@@ -32,12 +37,53 @@ import android.content.Intent;
  * @author jexa7410
  */
 public class ExternalCapabilityMonitoring extends BroadcastReceiver {
+	/**
+     * The logger
+     */
+    private static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class.getName());
+	
     @Override
 	public void onReceive(Context context, Intent intent) {
-    	// Instanciate the settings manager
-    	RcsSettings.createInstance(context);
-    	
-    	// Check if there are new RCS extensions installed or removed
-    	ServiceExtensionManager.updateSupportedExtensions(AndroidFactory.getApplicationContext());
+    	try {
+	    	// Instanciate the settings manager
+	    	RcsSettings.createInstance(context);
+	    	
+	    	// Get Intent parameters
+	        String action = intent.getAction();
+	    	Integer uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+	    	if (uid == -1) {
+	    		return;
+	    	}
+	    	
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+            	// Get extensions associated to the new application
+    	        PackageManager pm = context.getPackageManager();
+    	        String packageName = intent.getData().getSchemeSpecificPart();
+    	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+    	        Bundle appMeta = appInfo.metaData;
+    	        String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+    	        if (exts == null) {
+    	        	// No RCS extension
+    	        	return;
+    	        }
+    	        
+            	if (logger.isActivated()) {
+            		logger.debug("Add extensions " + exts + " for application " + uid);
+            	}
+
+    	        // Add the new extension in the supported RCS extensions
+		    	ServiceExtensionManager.addNewSupportedExtensions(AndroidFactory.getApplicationContext());
+            } else
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            	if (logger.isActivated()) {
+            		logger.debug("Remove extensions for application " + uid);
+            	}
+
+            	// Remove the extensions in the supported RCS extensions
+		    	ServiceExtensionManager.removeSupportedExtensions(AndroidFactory.getApplicationContext());
+            }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
     }
 }

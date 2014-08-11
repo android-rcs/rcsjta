@@ -8,18 +8,14 @@
 		android:targetSdkVersion="15"/>
 	
     <application android:icon="@drawable/app_icon" android:label="@string/label_app_name">
+        <meta-data android:name="com.gsma.services.rcs.capability.EXTENSION"
+             android:value="ext.game1;ext.game2" />
+        
         <activity android:name=".Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <!-- Declare the joyn extension -->
-           	<intent-filter>
-                <action android:name="com.gsma.services.rcs.capability.EXTENSION"/>
-                <data android:mimeType="com.gsma.services.rcs/ext.game"/>
-            </intent-filter>            
         </activity>
-
     </application>
 </manifest>
