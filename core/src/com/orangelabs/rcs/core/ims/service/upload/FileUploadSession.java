@@ -161,7 +161,22 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         	return;
         }
 
-        // Parse the result
+        // Parse the result:
+        // <?xml version="1.0" encoding="UTF-8"?>
+        // <file>
+        // 	<file-info type="thumbnail">
+        // 	  <file-size>6208</file-size>
+        // 	  <content-type>image/jpeg</content-type>
+        // 	  <data url = "https://ftcontentserver.rcs/download?id=001" until="2014-08-13T17:42:10.000+02:00"/>
+        // 	</file-info>
+        // 	
+        // 	<file-info type="file">
+        // 	  <file-size>1699846</file-size>
+        // 	  <file-name>IMG_20140805_134311.jpg</file-name>
+        // 	  <content-type>image/jpeg</content-type>
+        // 	  <data url = "https://ftcontentserver.rcs/download?id=abb" until="2014-08-13T17:42:10.000+02:00"/>
+        // 	</file-info>
+        // </file>
         if (result != null) {
         	fileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result);
         }
