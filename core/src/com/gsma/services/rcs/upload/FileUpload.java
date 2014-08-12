@@ -19,11 +19,12 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.ext.upload;
+package com.gsma.services.rcs.upload;
 
 import android.net.Uri;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.upload.IFileUpload;
 
 /**
  * File upload
@@ -64,19 +65,6 @@ public class FileUpload {
         private State() {
         }    	
     }
-    
-    /**
-     * File upload error
-     */
-    public static class Error {
-    	/**
-    	 * Transfer has failed
-    	 */
-    	public final static int TRANSFER_FAILED = 0;
-    	
-        private Error() {
-        }    	
-    }
 
     /**
      * File upload interface
@@ -93,7 +81,7 @@ public class FileUpload {
     }
     	
     /**
-	 * Returns the upload ID of the file
+	 * Returns the upload ID of the upload
 	 * 
 	 * @return Upload ID
 	 * @throws JoynServiceException
@@ -107,7 +95,7 @@ public class FileUpload {
 	}
 	
 	/**
-	 * Returns the URI of the uploaded file
+	 * Returns the URI of the file to be uploaded
 	 *
 	 * @return Uri
 	 * @throws JoynServiceException
@@ -121,7 +109,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * Returns info related to upload file
+	 * Returns info related to the uploaded file on the content server
 	 *
 	 * @return Upload info or null if not yet upload or in case of error
 	 * @see FileUploadInfo

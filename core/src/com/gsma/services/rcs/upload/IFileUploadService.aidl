@@ -1,8 +1,8 @@
-package com.gsma.services.rcs.ext.upload;
+package com.gsma.services.rcs.upload;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.ext.upload.IFileUpload;
-import com.gsma.services.rcs.ext.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.IFileUpload;
+import com.gsma.services.rcs.upload.IFileUploadListener;
 
 /**
  * File uploadservice API

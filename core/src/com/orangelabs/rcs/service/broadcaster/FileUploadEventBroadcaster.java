@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.ext.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.IFileUploadListener;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.os.RemoteCallbackList;
@@ -53,7 +53,7 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		for (int i = 0; i < N; i++) {
 			try {
 				// TODO : Handle reason code in CR009
-				mFileUploadListeners.getBroadcastItem(i).onFileUploadStateChanged(uploadId, state);
+				mFileUploadListeners.getBroadcastItem(i).onUploadStateChanged(uploadId, state);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -67,7 +67,7 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mFileUploadListeners.getBroadcastItem(i).onFileUploadProgress(uploadId, currentSize, totalSize);
+				mFileUploadListeners.getBroadcastItem(i).onUploadProgress(uploadId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

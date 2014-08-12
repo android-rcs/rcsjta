@@ -1,6 +1,6 @@
-package com.gsma.services.rcs.ext.upload;
+package com.gsma.services.rcs.upload;
 
-import com.gsma.services.rcs.ext.upload.FileUploadInfo;
+import com.gsma.services.rcs.upload.FileUploadInfo;
 
 /**
  * File upload interface

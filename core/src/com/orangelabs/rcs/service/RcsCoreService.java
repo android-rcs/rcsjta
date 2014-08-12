@@ -38,7 +38,7 @@ import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
-import com.gsma.services.rcs.ext.upload.IFileUploadService;
+import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;

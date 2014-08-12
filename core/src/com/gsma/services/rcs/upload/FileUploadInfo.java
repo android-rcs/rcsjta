@@ -19,7 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.ext.upload;
+package com.gsma.services.rcs.upload;
 
 import android.net.Uri;
 import android.os.Parcel;
