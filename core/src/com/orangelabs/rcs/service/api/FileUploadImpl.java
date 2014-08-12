@@ -27,6 +27,7 @@ import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.orangelabs.rcs.service.broadcaster.IFileUploadEventBroadcaster;
@@ -94,18 +95,31 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	 */
 	public FileUploadInfo getUploadInfo() {
 		if (session != null) {
-			FileTransferHttpInfoDocument info = session.getFileInfoDocument();
-			return new FileUploadInfo(
-					info.getFileUri(),
-					info.getTransferValidity(),
-					info.getFilename(),
-					info.getFileSize(),
-					info.getFileType(),
-					Uri.EMPTY, // TODO: add fileicon
-					0,
-					0,
-					"");
-			
+			FileTransferHttpInfoDocument file = session.getFileInfoDocument();
+			FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
+			if (fileicon != null) {
+				return new FileUploadInfo(
+						file.getFileUri(),
+						file.getTransferValidity(),
+						file.getFilename(),
+						file.getFileSize(),
+						file.getFileType(),
+						fileicon.getThumbnailUri(),
+						fileicon.getThumbnailValidity(),
+						fileicon.getThumbnailSize(),
+						fileicon.getThumbnailType());
+			} else {
+				return new FileUploadInfo(
+						file.getFileUri(),
+						file.getTransferValidity(),
+						file.getFilename(),
+						file.getFileSize(),
+						file.getFileType(),
+						Uri.EMPTY,
+						0,
+						0,
+						"");
+			}
 		} else {
 			return null;
 		}
