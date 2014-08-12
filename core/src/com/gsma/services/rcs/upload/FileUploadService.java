@@ -19,7 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.ext.upload;
+package com.gsma.services.rcs.upload;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -40,6 +40,9 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.upload.IFileUpload;
+import com.gsma.services.rcs.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.IFileUploadService;
 
 /**
  * This class offers the main entry point to upload a file to the RCS content
@@ -119,9 +122,9 @@ public class FileUploadService extends JoynService {
     };
 
 	private void grantUriPermissionToStackServices(Uri file) {
-		Intent fileUploadServiceIntent = new Intent(IFileUploadService.class.getName());
+		Intent fileTransferServiceIntent = new Intent(IFileUploadService.class.getName());
 		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
-				fileUploadServiceIntent, 0);
+				fileTransferServiceIntent, 0);
 		for (ResolveInfo stackService : stackServices) {
 			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
 					Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -132,7 +135,7 @@ public class FileUploadService extends JoynService {
 	 * Using reflection to persist Uri permission in order to support backward
 	 * compatibility since this API is available only from Kitkat onwards.
 	 *
-	 * @param file Uri of file to share
+	 * @param file Uri of file to transfer
 	 * @throws JoynServiceException
 	 */
 	private void persistUriPermissionForClient(Uri file) throws JoynServiceException {
@@ -152,6 +155,23 @@ public class FileUploadService extends JoynService {
 		} catch (Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
+	}    
+    
+	/**
+	 * Grant permission to the stack and persist access permission
+	 * @param file the file URI
+	 * @throws JoynServiceException
+	 */
+	private void grantAndPersistUriPermission(Uri file) throws JoynServiceException {
+		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+			// Granting temporary read Uri permission from client to
+			// stack service if it is a content URI
+			grantUriPermissionToStackServices(file);
+			// Persist Uri access permission for the client
+			// to be able to read the contents from this Uri even
+			// after the client is restarted after device reboot.
+			persistUriPermissionForClient(file);
+		}
 	}
 
     /**
@@ -166,15 +186,8 @@ public class FileUploadService extends JoynService {
     public FileUpload uploadFile(Uri file, boolean fileicon) throws JoynServiceException {
 		if (api != null) {
 			try {
-				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-					// Granting temporary read Uri permission from client to
-					// stack service if it is a content URI
-					grantUriPermissionToStackServices(file);
-					// Persist Uri access permission for the client
-					// to be able to read the contents from this Uri even
-					// after the client is restarted after device reboot.
-					persistUriPermissionForClient(file);
-				}
+				grantAndPersistUriPermission(file);
+				
 				IFileUpload uploadIntf = api.uploadFile(file, fileicon);
 				if (uploadIntf != null) {
 					return new FileUpload(uploadIntf);

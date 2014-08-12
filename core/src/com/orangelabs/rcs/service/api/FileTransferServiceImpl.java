@@ -33,8 +33,6 @@ import java.util.Set;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;

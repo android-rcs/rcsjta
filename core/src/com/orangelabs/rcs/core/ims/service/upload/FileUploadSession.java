@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010 France Telecom S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.upload;
 
 import java.util.UUID;
@@ -13,7 +30,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FileUploadSession extends Thread {
+public class FileUploadSession extends Thread implements HttpUploadTransferEventListener {
 
 	/**
 	 * Upload ID
@@ -36,10 +53,15 @@ public class FileUploadSession extends Thread {
     protected HttpUploadManager uploadManager;
     
     /**
-     * HTTP upload listener
+     * Upload listener
      */
-    private HttpUploadTransferEventListener uploadListener = null;
-
+    private FileUploadSessionListener listener = null;
+    
+    /**
+     * File info
+     */
+    private String fileInfo = null;
+    
     /**
      * The logger
      */
@@ -58,14 +80,14 @@ public class FileUploadSession extends Thread {
 		this.fileicon = fileicon;
 		this.uploadId = UUID.randomUUID().toString();
 	}
-
+	
 	/**
-	 * Add a listener on upload events
+	 * Add a listener event
 	 * 
 	 * @param listener Listener
 	 */
-	public void addListener(HttpUploadTransferEventListener listener) {
-		this.uploadListener = listener;
+	public void addListener(FileUploadSessionListener listener) {
+		this.listener = listener;		
 	}
 	
 	/**
@@ -103,7 +125,7 @@ public class FileUploadSession extends Thread {
 			}
 			
 			// Instantiate the upload manager
-			uploadManager = new HttpUploadManager(file, fileiconContent, uploadListener, uploadId);
+			uploadManager = new HttpUploadManager(file, fileiconContent, this, uploadId);
 	    	
 	    	// Upload the file to the HTTP server 
             byte[] result = uploadManager.uploadFile();
@@ -112,8 +134,9 @@ public class FileUploadSession extends Thread {
 	    	if (logger.isActivated()) {
 	    		logger.error("File transfer has failed", e);
 	    	}
+	    	
         	// Unexpected error
-			// TODO handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+	    	listener.handleUploadError(-1);
 		}
 	}
 
@@ -124,26 +147,22 @@ public class FileUploadSession extends Thread {
         }
 
         if ((result != null) && (FileTransferUtils.parseFileTransferHttpDocument(result) != null)) {
-        	String fileInfo = new String(result);
+            // File uploaded
+        	fileInfo = new String(result);
             if (logger.isActivated()) {
                 logger.debug("Upload done with success: " + fileInfo);
             }
 
-            // TODO: set file info
-
-            // File transfered
-            // TODO handleFileTransfered();
+        	// Notify listener
+	    	listener.handleUploadTerminated(fileInfo);
 		} else {
-            // Don't call handleError in case of Pause or Cancel
-            if (uploadManager.isCancelled() || uploadManager.isPaused()) {
-                return;
-            }
-
+			// Upload error
             if (logger.isActivated()) {
                 logger.debug("Upload has failed");
             }
-            // Upload error
-            // TODO handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
+            
+        	// Notify listener
+	    	listener.handleUploadError(-1);
 		}
 	}
 	
@@ -155,5 +174,51 @@ public class FileUploadSession extends Thread {
 
 		// Interrupt the upload
 		uploadManager.interrupt();
+
+		if (fileInfo == null) {
+			// Notify listener
+			listener.handleUploadAborted();
+		}
 	}
+    
+	/**
+	 * Notify the start of the HTTP Upload transfer (once the thumbnail transfer is done).
+	 * <br>The upload resume is only possible once thumbnail is transferred 
+	 */
+    public void uploadStarted() {
+		// Not used
+	}
+	
+    /**
+     * HTTP transfer started
+     */
+    public void httpTransferStarted() {
+    	// Notify listener
+    	listener.handleUploadStarted();
+    }
+    
+    /**
+     * HTTP transfer paused
+     */
+    public void httpTransferPaused() {
+		// Not used
+    }
+    
+    /**
+     * HTTP transfer resumed
+     */
+    public void httpTransferResumed() {
+		// Not used
+    }
+
+    /**
+     * HTTP transfer progress
+     *
+     * @param currentSize Current transfered size in bytes
+     * @param totalSize Total size in bytes
+     */
+    public void httpTransferProgress(long currentSize, long totalSize) {
+    	// Notify listener
+    	listener.handleUploadProgress(currentSize, totalSize);
+    }	    
 }

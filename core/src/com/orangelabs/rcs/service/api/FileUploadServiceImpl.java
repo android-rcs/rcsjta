@@ -31,9 +31,9 @@ import android.os.IBinder;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.ext.upload.IFileUpload;
-import com.gsma.services.rcs.ext.upload.IFileUploadListener;
-import com.gsma.services.rcs.ext.upload.IFileUploadService;
+import com.gsma.services.rcs.upload.IFileUpload;
+import com.gsma.services.rcs.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.IFileUploadService;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;

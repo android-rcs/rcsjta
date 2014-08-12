@@ -56,7 +56,7 @@
 	            <action android:name="com.gsma.services.rcs.gsh.IGeolocSharingService"/>
    				<action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService"/>
 				<action android:name="com.gsma.services.rcs.ipcall.IIPCallService"/>
-	            <action android:name="com.gsma.services.rcs.ext.upload.IFileUploadService"/>
+	            <action android:name="com.gsma.services.rcs.upload.IFileUploadService"/>
 			</intent-filter>
 	    </service>
 	

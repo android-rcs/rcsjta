@@ -23,11 +23,11 @@ package com.orangelabs.rcs.service.api;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.ext.upload.FileUpload;
-import com.gsma.services.rcs.ext.upload.FileUploadInfo;
-import com.gsma.services.rcs.ext.upload.IFileUpload;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpUploadTransferEventListener;
+import com.gsma.services.rcs.upload.FileUpload;
+import com.gsma.services.rcs.upload.FileUploadInfo;
+import com.gsma.services.rcs.upload.IFileUpload;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
+import com.orangelabs.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.orangelabs.rcs.service.broadcaster.IFileUploadEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -36,7 +36,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FileUploadImpl extends IFileUpload.Stub implements HttpUploadTransferEventListener {
+public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessionListener {
 	
 	/**
 	 * Core session
@@ -130,51 +130,68 @@ public class FileUploadImpl extends IFileUpload.Stub implements HttpUploadTransf
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
     
-	/**
-	 * Notify the start of the HTTP Upload transfer (once the thumbnail transfer is done).
-	 * <br>The upload resume is only possible once thumbnail is transferred 
-	 */
-    public void uploadStarted() {
-		// Not used
-	}
-	
     /**
-     * HTTP transfer started
+     * Upload started
      */
-    public void httpTransferStarted() {
+    public void handleUploadStarted() {
     	synchronized(lock) {
     		state = FileUpload.State.STARTED;
 
     		// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(),
-					FileUpload.State.STARTED);
+			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
 	    }
     }
-    
-    /**
-     * HTTP transfer paused
-     */
-    public void httpTransferPaused() {
-		// Not supported
-    }
-    
-    /**
-     * HTTP transfer resumed
-     */
-    public void httpTransferResumed() {
-		// Not supported
-    }
 
-    /**
-     * HTTP transfer progress
-     *
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
-    public void httpTransferProgress(long currentSize, long totalSize) {
+	/**
+	 * Upload progress
+	 * 
+	 * @param currentSize Data size transfered 
+	 * @param totalSize Total size to be transfered
+	 */
+    public void handleUploadProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
 			// Notify event listeners
 			mFileUploadEventBroadcaster.broadcastFileUploadProgress(getUploadId(), currentSize, totalSize);
 	     }
-    }	
+    }
+    
+    /**
+     * Upload terminated with success
+     * 
+     * @param info File info
+     */
+    public void handleUploadTerminated(String info) {
+    	synchronized(lock) {
+    		state = FileUpload.State.TRANSFERRED;
+
+    		// Notify event listeners
+			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+	    }
+    }
+
+    /**
+     * Upload error
+     * 
+     * @param error Error
+     */
+    public void handleUploadError(int error) {
+    	synchronized(lock) {
+    		state = FileUpload.State.FAILED;
+
+    		// Notify event listeners
+			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+	    }
+    }
+
+    /**
+     * Upload aborted
+     */
+    public void handleUploadAborted() {
+    	synchronized(lock) {
+    		state = FileUpload.State.ABORTED;
+
+    		// Notify event listeners
+			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+	    }
+    }
 }

@@ -2,7 +2,6 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +14,45 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * NOTE: This file has been modified by Sony Mobile Communications Inc.
- * Modifications are licensed under the License.
  ******************************************************************************/
-package com.gsma.services.rcs.ext.upload;
+package com.orangelabs.rcs.core.ims.service.upload;
 
 /**
- * File upload event listener
+ * File upload session listener
  * 
  * @author Jean-Marc AUFFRET
+ *
  */
-public abstract class FileUploadListener extends IFileUploadListener.Stub {
-	/**
-	 * Callback called when the upload state changes
-	 *
-	 * @param uploadId ID of upload
-	 * @param state State of upload 
-	 */
-	public abstract void onFileUploadStateChanged(String uploadId, int state);
+public interface FileUploadSessionListener {
+    /**
+     * Upload started
+     */
+    public void handleUploadStarted();
 
 	/**
-	 * Callback called during the upload progress
-	 *
-	 * @param sharingId ID of upload
-	 * @param currentSize Current transferred size in bytes
-	 * @param totalSize Total size to transfer in bytes
+	 * Upload progress
+	 * 
+	 * @param currentSize Data size transfered 
+	 * @param totalSize Total size to be transfered
 	 */
-	public abstract void onFileUploadProgress(String uploadId, long currentSize, long totalSize);
+    public void handleUploadProgress(long currentSize, long totalSize);
+    
+    /**
+     * Upload terminated with success
+     * 
+     * @param info File info
+     */
+    public void handleUploadTerminated(String info);
+
+    /**
+     * Upload error
+     * 
+     * @param error Error
+     */
+    public void handleUploadError(int error);    
+
+    /**
+     * Upload aborted
+     */
+    public void handleUploadAborted();    
 }
