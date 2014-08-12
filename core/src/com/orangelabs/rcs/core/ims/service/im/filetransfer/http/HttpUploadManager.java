@@ -36,7 +36,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -349,7 +348,8 @@ public class HttpUploadManager extends HttpTransferManager {
 			writeFileMultipart(outputStream, file);
 			if (!isCancelled()) {
 				// if the upload is cancelled, we don't send the last boundary to get bad request
-				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens); 
+				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
+				
 				// Check response status code
 				int responseCode = connection.getResponseCode();
 				if (logger.isActivated()) {

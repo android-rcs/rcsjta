@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpUploadManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpUploadTransferEventListener;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -60,7 +61,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * File info
      */
-    private String fileInfo = null;
+    private FileTransferHttpInfoDocument fileInfoDoc = null;
     
     /**
      * The logger
@@ -107,6 +108,15 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	public MmContent getContent() {
 		return file;
 	}
+	
+	/**
+	 * Returns the file info document of the uploaded file on the content server
+	 * 
+	 * @return XML document
+	 */
+	public FileTransferHttpInfoDocument getFileInfoDocument() {
+		return fileInfoDoc;
+	}	
 
 	/**
 	 * Background processing
@@ -114,7 +124,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	public void run() {
 		try {
 	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new HTTP upload");
+	    		logger.info("Initiate a new HTTP upload " + uploadId);
 	    	}
 
 	    	// Create fileicon content is requested
@@ -140,21 +150,29 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 		}
 	}
 
-    protected void storeResult(byte[] result){
+	/**
+	 * Analyse the result
+	 * 
+	 * @param result Byte array result
+	 */
+    private void storeResult(byte[] result){
 		// Check if upload has been cancelled
         if (uploadManager.isCancelled()) {
         	return;
         }
 
-        if ((result != null) && (FileTransferUtils.parseFileTransferHttpDocument(result) != null)) {
-            // File uploaded
-        	fileInfo = new String(result);
+        // Parse the result
+        if (result != null) {
+        	fileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result);
+        }
+        if (fileInfoDoc != null) {
+            // File uploaded with success
             if (logger.isActivated()) {
-                logger.debug("Upload done with success: " + fileInfo);
+                logger.debug("Upload done with success: " + fileInfoDoc.getFileUri().toString());
             }
 
         	// Notify listener
-	    	listener.handleUploadTerminated(fileInfo);
+	    	listener.handleUploadTerminated(fileInfoDoc);
 		} else {
 			// Upload error
             if (logger.isActivated()) {
@@ -175,7 +193,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 		// Interrupt the upload
 		uploadManager.interrupt();
 
-		if (fileInfo == null) {
+		if (fileInfoDoc == null) {
 			// Notify listener
 			listener.handleUploadAborted();
 		}

@@ -26,6 +26,7 @@ import android.net.Uri;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUpload;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.orangelabs.rcs.service.broadcaster.IFileUploadEventBroadcaster;
@@ -43,6 +44,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	 */
 	private FileUploadSession session;
 
+	/**
+	 * File upload listener
+	 */
 	private final IFileUploadEventBroadcaster mFileUploadEventBroadcaster;
 	
 	/**
@@ -89,8 +93,22 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	 * @see FileUploadInfo
 	 */
 	public FileUploadInfo getUploadInfo() {
-		// TODO
-		return null;
+		if (session != null) {
+			FileTransferHttpInfoDocument info = session.getFileInfoDocument();
+			return new FileUploadInfo(
+					info.getFileUri(),
+					info.getTransferValidity(),
+					info.getFilename(),
+					info.getFileSize(),
+					info.getFileType(),
+					Uri.EMPTY, // TODO: add fileicon
+					0,
+					0,
+					"");
+			
+		} else {
+			return null;
+		}
 	}	
 	
 	/**
@@ -135,6 +153,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
      */
     public void handleUploadStarted() {
     	synchronized(lock) {
+	    	if (logger.isActivated()) {
+	    		logger.debug("File upload started");
+	    	}
     		state = FileUpload.State.STARTED;
 
     		// Notify event listeners
@@ -150,7 +171,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	 */
     public void handleUploadProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
-			// Notify event listeners
+	    	// Notify event listeners
 			mFileUploadEventBroadcaster.broadcastFileUploadProgress(getUploadId(), currentSize, totalSize);
 	     }
     }
@@ -158,10 +179,13 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
     /**
      * Upload terminated with success
      * 
-     * @param info File info
+     * @param info File info document
      */
-    public void handleUploadTerminated(String info) {
+    public void handleUploadTerminated(FileTransferHttpInfoDocument info) {
     	synchronized(lock) {
+	    	if (logger.isActivated()) {
+	    		logger.debug("File upload terminated");
+	    	}
     		state = FileUpload.State.TRANSFERRED;
 
     		// Notify event listeners
@@ -176,6 +200,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
      */
     public void handleUploadError(int error) {
     	synchronized(lock) {
+	    	if (logger.isActivated()) {
+	    		logger.debug("File upload failed");
+	    	}
     		state = FileUpload.State.FAILED;
 
     		// Notify event listeners
@@ -188,6 +215,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
      */
     public void handleUploadAborted() {
     	synchronized(lock) {
+	    	if (logger.isActivated()) {
+	    		logger.debug("File upload aborted");
+	    	}
     		state = FileUpload.State.ABORTED;
 
     		// Notify event listeners

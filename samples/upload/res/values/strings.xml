@@ -40,6 +40,8 @@
 <string name="label_file_thumb">Thumbnail</string>
 <string name="label_upload_failed">File upload has failed</string>
 <string name="label_upload_aborted">File upload has been aborted</string>
+<string name="label_file_upload">File upload at %s</string>
+<string name="label_show_upload">Show upload</string>
 
 </resources>
 
