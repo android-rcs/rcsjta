@@ -180,7 +180,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public IFileUpload uploadFile(Uri file, boolean fileicon) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a file upload session");
+			logger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
 		}
 
 		// Test IMS connection

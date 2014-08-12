@@ -73,7 +73,7 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
     private FileUploadService uploadApi;
     
 	/**
-     * File upload
+     * File upload session
      */
     private FileUpload upload = null;
     
@@ -97,6 +97,9 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
         Button uploadBtn = (Button)findViewById(R.id.upload_btn);
         uploadBtn.setOnClickListener(btnUploadListener);
         uploadBtn.setEnabled(false);
+        Button showBtn = (Button)findViewById(R.id.show_btn);
+        showBtn.setOnClickListener(btnShowListener);
+        showBtn.setEnabled(false);
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
@@ -161,6 +164,8 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
         		
             	// Initiate upload
         		upload = uploadApi.uploadFile(file, thumbnail);
+        		
+        		
         	} catch(Exception e) {
         		e.printStackTrace();
 				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed));
@@ -168,7 +173,9 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
 
             // Hide buttons
             Button uploadBtn = (Button)findViewById(R.id.upload_btn);
-            uploadBtn.setVisibility(View.INVISIBLE);
+            uploadBtn.setVisibility(View.GONE);
+            Button selectBtn = (Button)findViewById(R.id.select_btn);
+            selectBtn.setVisibility(View.GONE);
         }
     };
     
@@ -188,6 +195,24 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
 			startActivityForResult(intent, SELECT_IMAGE);
         }
     };
+    
+    /**
+     * Show uploaded file button listener
+     */
+    private OnClickListener btnShowListener = new OnClickListener() {
+        public void onClick(View v) {
+        	// Show upload info
+        	try {
+        		Intent intent = new Intent(Intent.ACTION_VIEW);
+        		intent.setData(upload.getUploadInfo().getFile());
+        		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        		startActivity(intent);
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        		Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_failed));
+        	}
+        }
+    };    
 	
     /**
      * On activity result
@@ -239,19 +264,23 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
 						statusView.setText("started");
 					} else
 					if (state == FileUpload.State.FAILED) {
-						// Display error
-	                    Utils.showMessageAndExit(InitiateFileUpload.this,
+						// Display sharing status
+	                    Utils.showMessage(InitiateFileUpload.this,
 							getString(R.string.label_upload_failed));
 					} else
 					if (state == FileUpload.State.ABORTED) {
-						// Display session status
-						Utils.showMessageAndExit(InitiateFileUpload.this,
+						// Display sharing status
+	                    Utils.showMessage(InitiateFileUpload.this,
 							getString(R.string.label_upload_aborted));
 					} else
 					if (state == FileUpload.State.TRANSFERRED) {
-						// Display sharing progress
+						// Display sharing status
 						TextView statusView = (TextView)findViewById(R.id.progress_status);
 						statusView.setText("transferred");
+						
+						// Activate show button
+				        Button showBtn = (Button)findViewById(R.id.show_btn);
+				        showBtn.setEnabled(true);
 					}						
 				}
 			});
@@ -285,7 +314,7 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
     	TextView statusView = (TextView)findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
     	
-		String value = "" + (currentSize/1024);
+		String value = "" + Math.min(currentSize/1024, totalSize);
 		if (totalSize != 0) {
 			value += "/" + (totalSize/1024);
 		}

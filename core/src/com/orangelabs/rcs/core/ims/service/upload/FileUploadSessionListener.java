@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.upload;
 
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+
 /**
  * File upload session listener
  * 
@@ -40,9 +42,9 @@ public interface FileUploadSessionListener {
     /**
      * Upload terminated with success
      * 
-     * @param info File info
+     * @param info File info document
      */
-    public void handleUploadTerminated(String info);
+    public void handleUploadTerminated(FileTransferHttpInfoDocument info);
 
     /**
      * Upload error

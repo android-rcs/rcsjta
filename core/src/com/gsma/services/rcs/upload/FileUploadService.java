@@ -21,7 +21,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs.upload;
 
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +39,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
-import com.gsma.services.rcs.upload.IFileUpload;
-import com.gsma.services.rcs.upload.IFileUploadListener;
-import com.gsma.services.rcs.upload.IFileUploadService;
 
 /**
  * This class offers the main entry point to upload a file to the RCS content
@@ -51,13 +47,6 @@ import com.gsma.services.rcs.upload.IFileUploadService;
  * @author Jean-Marc AUFFRET
  */
 public class FileUploadService extends JoynService {
-
-	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
-
-	private static final Class[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
-			Uri.class, int.class
-	};
-
 	/**
 	 * API
 	 */
@@ -131,38 +120,16 @@ public class FileUploadService extends JoynService {
 		}
 	}
 
-	/**
-	 * Using reflection to persist Uri permission in order to support backward
-	 * compatibility since this API is available only from Kitkat onwards.
-	 *
-	 * @param file Uri of file to transfer
-	 * @throws JoynServiceException
-	 */
-	private void persistUriPermissionForClient(Uri file) throws JoynServiceException {
-		try {
-			ContentResolver contentResolver = ctx.getContentResolver();
-			Method takePersistableUriPermissionMethod = contentResolver.getClass()
-					.getDeclaredMethod(TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
-							TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
-			if (takePersistableUriPermissionMethod == null) {
-				return;
-			}
-			Object[] methodArgs = new Object[] {
-					file,
-					Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-			};
-			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
-		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
-		}
+	private void persistUriPermissionForClient(Uri file) {
+		ctx.getContentResolver().takePersistableUriPermission(file,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 	}    
     
-	/**
-	 * Grant permission to the stack and persist access permission
-	 * @param file the file URI
-	 * @throws JoynServiceException
-	 */
-	private void grantAndPersistUriPermission(Uri file) throws JoynServiceException {
+	private void grantAndPersistUriPermission(Uri file) {
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
+			return;
+		}
+		
 		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 			// Granting temporary read Uri permission from client to
 			// stack service if it is a content URI
