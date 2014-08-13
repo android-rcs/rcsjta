@@ -237,7 +237,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 		if (serviceConnected) {
 			// Remove service listener
 			try {
-				sessionApi.removeMultimediaMessagingEventListener(serviceListener);
+				sessionApi.removeMessagingEventListener(serviceListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -282,7 +282,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
     public void onServiceConnected() {
 		try {
     		// Add service listener
-			sessionApi.addMultimediaMessagingEventListener(serviceListener);
+			sessionApi.addMessagingEventListener(serviceListener);
 			serviceConnected = true;
 			
 	        int mode = getIntent().getIntExtra(MessagingSessionView.EXTRA_MODE, -1);

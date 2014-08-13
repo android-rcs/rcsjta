@@ -239,7 +239,7 @@ public class StreamingSessionView extends Activity implements JoynServiceListene
 		if (serviceConnected) {
 			// Remove service listener
 			try {
-				sessionApi.removeMultimediaStreamingEventListener(serviceListener);
+				sessionApi.removeStreamingEventListener(serviceListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -284,7 +284,7 @@ public class StreamingSessionView extends Activity implements JoynServiceListene
     public void onServiceConnected() {
 		try {
     		// Add service listener
-    		sessionApi.addMultimediaStreamingEventListener(serviceListener);
+    		sessionApi.addStreamingEventListener(serviceListener);
     		serviceConnected = true;
     		
 	        int mode = getIntent().getIntExtra(StreamingSessionView.EXTRA_MODE, -1);
