@@ -676,7 +676,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
 	public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
 		if (logger.isActivated()) {
-			logger.info("handleParticipantStatusChanged " + participantInfo);
+			logger.info("handleParticipantStatusChanged ParticipantInfo [contact=" + participantInfo.getContact() + ", status="
+					+ participantInfo.getStatus() + "]");
 		}
 		synchronized (lock) {
 			mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(getChatId(),

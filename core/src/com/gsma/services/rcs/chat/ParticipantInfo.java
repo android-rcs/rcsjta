@@ -167,18 +167,6 @@ public class ParticipantInfo implements Parcelable {
 	public int getStatus() {
 		return status;
 	}
-
-	/**
-	 * Sets the status
-	 * 
-	 * @param status
-	 *            the new status
-	 * @see Status
-	 * @hide
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
 	
 	/**
 	 * Returns the contact number
@@ -251,15 +239,6 @@ public class ParticipantInfo implements Parcelable {
 			return false;
 		}
 		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 * @hide
-	 */
-	@Override
-	public String toString() {
-		return "ParticipantInfo [contact=" + contact+ ", status=" + status+ "]";
 	}
 	
 }
