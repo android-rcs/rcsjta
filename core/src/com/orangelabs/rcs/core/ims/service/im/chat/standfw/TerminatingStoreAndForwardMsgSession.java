@@ -310,4 +310,9 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
     public String getDirection() {
         return SdpUtils.DIRECTION_RECVONLY;
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }

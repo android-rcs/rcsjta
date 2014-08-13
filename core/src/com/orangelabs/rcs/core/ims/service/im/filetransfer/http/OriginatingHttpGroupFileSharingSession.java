@@ -22,7 +22,6 @@
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.Core;
@@ -36,7 +35,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -49,7 +47,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  * @author vfml3370
  */
-public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener, IOriginatingFileSharingSession {
+public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener {
 
     /**
      * HTTP upload manager
@@ -248,5 +246,10 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 //        // Create upload entry in fthttp table
 //        resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail(),false);
 //        FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
+	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
 	}
 }

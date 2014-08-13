@@ -154,10 +154,10 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	 * @see GeolocSharing.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingGeolocTransferSession) {
-			return GeolocSharing.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return GeolocSharing.Direction.INCOMING;
+		} else {
+			return GeolocSharing.Direction.OUTGOING;
 		}
 	}		
 		

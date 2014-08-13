@@ -23,7 +23,6 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.NoSuchElementException;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
@@ -38,7 +37,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -50,7 +48,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  * @author vfml3370
  */
-public class OriginatingHttpFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener, IOriginatingFileSharingSession {
+public class OriginatingHttpFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener {
 
     /**
      * HTTP upload manager
@@ -291,5 +289,10 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
 	public HttpUploadManager getUploadManager() {
 		return uploadManager;
+	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
 	}
 }

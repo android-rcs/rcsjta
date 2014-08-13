@@ -131,10 +131,10 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 * @see MultimediaSession.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingSipRtpSession) {
-			return MultimediaSession.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return MultimediaSession.Direction.INCOMING;
+		} else {
+			return MultimediaSession.Direction.OUTGOING;
 		}
 	}		
 	

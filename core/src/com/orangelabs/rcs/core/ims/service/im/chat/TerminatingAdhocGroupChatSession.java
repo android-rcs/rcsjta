@@ -360,5 +360,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			}
 		}.start();
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 	
 }

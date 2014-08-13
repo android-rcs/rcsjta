@@ -135,12 +135,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return Direction
 	 */
 	public int getDirection() {
-		if ((session instanceof OriginatingAdhocGroupChatSession) ||
-				(session instanceof RejoinGroupChatSession) ||
-					(session instanceof RestartGroupChatSession)) {
-			return GroupChat.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return GroupChat.Direction.INCOMING;
+		} else {
+			return GroupChat.Direction.OUTGOING;
 		}
 	}		
 	

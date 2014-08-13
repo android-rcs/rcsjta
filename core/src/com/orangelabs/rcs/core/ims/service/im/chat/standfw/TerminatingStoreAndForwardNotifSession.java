@@ -429,4 +429,9 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
         return SdpUtils.DIRECTION_RECVONLY;
     }
 
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
+
 }

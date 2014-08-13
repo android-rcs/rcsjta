@@ -215,4 +215,9 @@ public class RestartGroupChatSession extends GroupChatSession {
     public void handle404SessionNotFound(SipResponse resp) {
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

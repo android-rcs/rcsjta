@@ -21,17 +21,14 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.ish.ImageSharing.State.FAILED;
 import static com.gsma.services.rcs.ish.ImageSharing.State.ABORTED;
+import static com.gsma.services.rcs.ish.ImageSharing.State.FAILED;
 import static com.gsma.services.rcs.ish.ImageSharing.State.STARTED;
 import static com.gsma.services.rcs.ish.ImageSharing.State.TRANSFERRED;
-
 import android.net.Uri;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
-import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -58,7 +55,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	private final IImageSharingEventBroadcaster mImageSharingEventBroadcaster;
 
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private final Object lock = new Object();
 
@@ -178,10 +175,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	 * @see ImageSharing.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingImageTransferSession) {
-			return ImageSharing.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return ImageSharing.Direction.INCOMING;
+		} else {
+			return ImageSharing.Direction.OUTGOING;
 		}
 	}		
 		

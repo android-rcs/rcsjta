@@ -402,5 +402,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             }
     	}
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
 

@@ -508,4 +508,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
         }
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }

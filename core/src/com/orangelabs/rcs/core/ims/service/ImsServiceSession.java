@@ -1250,4 +1250,10 @@ public abstract class ImsServiceSession extends Thread {
     	return null;
     }
  
+	/**
+	 * Verify if session is initiated by remote part
+	 * 
+	 * @return true if session is initiated by remote part
+	 */
+    abstract public boolean isInitiatedByRemote();
 }

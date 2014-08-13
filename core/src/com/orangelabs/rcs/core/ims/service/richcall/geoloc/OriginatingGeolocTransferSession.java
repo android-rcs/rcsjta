@@ -330,4 +330,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
         }
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

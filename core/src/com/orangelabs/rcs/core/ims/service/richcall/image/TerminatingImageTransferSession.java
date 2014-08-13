@@ -558,5 +558,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             }
         }
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
 

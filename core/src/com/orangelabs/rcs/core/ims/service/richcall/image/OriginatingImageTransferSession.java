@@ -380,4 +380,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             }
         }
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

@@ -129,4 +129,9 @@ public class OriginatingIPCallSession extends IPCallSession {
 		}
 
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

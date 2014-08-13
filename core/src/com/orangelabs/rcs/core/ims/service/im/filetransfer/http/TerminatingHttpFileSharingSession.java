@@ -22,9 +22,9 @@
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax2.sip.header.ContactHeader;
+
+import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
@@ -44,8 +44,6 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.net.Uri;
 
 /**
  * Terminating file transfer HTTP session
@@ -74,11 +72,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	protected boolean isGroup = false;
 		
-	/**
-	 * fired a boolean value updated atomically to notify only once
-	 */
-	private AtomicBoolean fired = new AtomicBoolean(false);
-
 	/**
 	 * Constructor
 	 * 
@@ -366,6 +359,11 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		fileTransferPaused();
 		interruptSession();
 		downloadManager.pauseTransfer();
+	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
 	}
 
 
