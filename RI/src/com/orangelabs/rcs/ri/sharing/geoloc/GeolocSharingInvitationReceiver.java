@@ -59,7 +59,8 @@ public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
      */
 	public static void addGeolocSharingInvitationNotification(Context context, Intent invitation) {
 		// Get remote contact
-		ContactId contact = invitation.getParcelableExtra(GeolocSharingIntent.EXTRA_CONTACT);
+		// TODO CR025 implement provider for geolocation sharing
+		ContactId contact = invitation.getParcelableExtra("TODO");
 		if (contact == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "GeolocSharingInvitationReceiver failed: cannot parse contact");

@@ -30,6 +30,7 @@ import android.util.Log;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.GroupChatDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -46,7 +47,8 @@ public class FileTransferIntentService extends IntentService {
 	 */
 	private static final String LOGTAG = LogUtils.getTag(FileTransferIntentService.class.getSimpleName());
 
-	static final String BUNDLE_FTDAO_ID = "ftdao";
+	/* package private */static final String BUNDLE_FTDAO_ID = "ftdao";
+	/* package private */static final String EXTRA_GROUP_FILE = "group_file";
 
 	public FileTransferIntentService(String name) {
 		super(name);
@@ -70,49 +72,65 @@ public class FileTransferIntentService extends IntentService {
 			return;
 		}
 		// Check action from incoming intent
-		if (intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)
-				|| intent.getAction().equalsIgnoreCase(FileTransferResumeReceiver.ACTION_FT_RESUME)) {
-			//  Gets data from the incoming Intent
-			String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
-			if (transferId != null) {
+		if (!intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)
+				&& !intent.getAction().equalsIgnoreCase(FileTransferResumeReceiver.ACTION_FT_RESUME)) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Unknown action " + intent.getAction());
+			}
+			return;
+		}
+		// Gets data from the incoming Intent
+		String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
+		if (transferId == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot read transfer ID");
+			}
+			return;
+		}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onHandleIntent file transfer with ID " + transferId);
+		}
+		try {
+			// Get File Transfer from provider
+			FileTransferDAO ftDao = new FileTransferDAO(this, transferId);
+			try {
+				// Check if a Group Chat session exists for this file transfer
+				new GroupChatDAO(this, ftDao.getChatId());
+				intent.putExtra(EXTRA_GROUP_FILE, true);
+			} catch (Exception e) {
+				// Purposely left blank
+			}
+			
+			// Save FileTransferDAO into intent
+			Bundle bundle = new Bundle();
+			bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
+			intent.putExtras(bundle);
+			if (intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)) {
 				if (LogUtils.isActive) {
-					Log.d(LOGTAG, "onHandleIntent file transfer with ID " + transferId);
+					Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size=" + ftDao.getSize());
 				}
-				try {
-					// Get File Transfer from provider
-					FileTransferDAO ftDao = new FileTransferDAO(this, transferId);
-					// Save FileTransferDAO into intent
-					Bundle bundle = new Bundle();
-					bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
-					intent.putExtras(bundle);
-					if (intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)) {
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size=" + ftDao.getSize());
-						}
-						// TODO check File Transfer state to know if rejected
-						// TODO check validity of direction, etc ...
-						addFileTransferInvitationNotification(this, intent, ftDao);
-					} else {
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
-						}
-						Intent intentLocal = new Intent(intent);
-						if (ftDao.getDirection() == FileTransfer.Direction.INCOMING) {
-							intentLocal.setClass(this, ReceiveFileTransfer.class);
-						} else {
-							intentLocal.setClass(this, InitiateFileTransfer.class);
-						}
-						intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
-						intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-						intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
-						startActivity(intentLocal);
-					}
-				} catch (Exception e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Cannot read FT data from provider", e);
-					}
+				// TODO check File Transfer state to know if rejected
+				// TODO check validity of direction, etc ...
+				addFileTransferInvitationNotification(this, intent, ftDao);
+			} else {
+				if (LogUtils.isActive) {
+					Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
 				}
+				Intent intentLocal = new Intent(intent);
+				if (ftDao.getDirection() == FileTransfer.Direction.INCOMING) {
+					intentLocal.setClass(this, ReceiveFileTransfer.class);
+				} else {
+					intentLocal.setClass(this, InitiateFileTransfer.class);
+				}
+				intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
+				intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+				intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
+				startActivity(intentLocal);
+			}
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot read FT data from provider", e);
 			}
 		}
 	}
@@ -127,7 +145,7 @@ public class FileTransferIntentService extends IntentService {
 	 * @param ftDao
 	 * 				the file transfer data object
 	 */
-	private static void addFileTransferInvitationNotification(Context context, Intent invitation, FileTransferDAO ftDao) {
+	private void addFileTransferInvitationNotification(Context context, Intent invitation, FileTransferDAO ftDao) {
 		if (ftDao.getContact() == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "addFileTransferInvitationNotification failed: cannot parse contact");

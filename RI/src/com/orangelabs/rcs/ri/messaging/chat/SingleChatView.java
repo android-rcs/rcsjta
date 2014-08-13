@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
@@ -31,7 +32,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Chat;
-import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -46,23 +46,10 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SingleChatView extends ChatView {
 	/**
-	 * View modes
-	 */
-	public final static int MODE_INCOMING = 0;
-	public final static int MODE_OUTGOING = 1;
-	public final static int MODE_OPEN = 2;
-
-	/**
 	 * Intent parameters
 	 */
-	public final static String EXTRA_MODE = "mode";
-	public final static String EXTRA_CONTACT = "contact";
+	/* package private */ final static String EXTRA_CONTACT = "contact";
 
-	/**
-	 * Activity displayed status
-	 */
-	private static boolean activityDisplayed = false;
-	
 	/**
 	 * The log tag for this class
 	 */
@@ -127,48 +114,120 @@ public class SingleChatView extends ChatView {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
-		if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
-			// Open chat
-			contact = (ContactId)getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);				
-		} else {
-			// Incoming chat from its Intent
-			contact = (ContactId)getIntent().getParcelableExtra(ChatIntent.EXTRA_CONTACT);
-		}
-		
-		// Set title
-		setTitle(getString(R.string.title_chat) + " " +	contact);	
-		
-		// Load history
-		unreadMessageIDs = loadHistory(contact.toString());
-		
+        processIntent(true);
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onCreate contact=" + contact);
 		}
     }
     
-    @Override
-	protected void onResume() {
-        super.onResume();
-        activityDisplayed = true;
-    }
-
-    @Override
-	protected void onPause() {
-        super.onStart();
-        activityDisplayed = false;
-    }
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		// Replace the value of intent
+		setIntent(intent);
+		processIntent(false);
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onNewIntent contact=" + contact);
+		}
+	}
 	
-    /**
-     * Return true if the activity is currently displayed or not
-     *   
-     * @return Boolean
-     */
-    public static boolean isDisplayed() {
-    	return activityDisplayed;
-    }
-    
+	/**
+	 * Process intent
+	 * @param loadHistory the history must be (re)loaded
+	 */
+	private void processIntent(boolean loadHistory) {
+    	ChatMessageDAO messageDao = null;
+    	if (getIntent() == null) {
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, "processIntent invalid intent");
+			}
+    		return;
+    	}
+        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
+		switch (mode) {
+		case ChatView.MODE_OPEN:
+		case ChatView.MODE_OUTGOING:
+			// Open chat
+			contact = (ContactId) getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);
+			loadHistory = true;
+			break;
+
+		case ChatView.MODE_INCOMING:
+			// Get Incoming chat from its Intent
+			messageDao = (ChatMessageDAO) (getIntent().getExtras()
+					.getParcelable(ChatIntentService.BUNDLE_CHATMESSAGE_DAO_ID));
+			if (messageDao == null || messageDao.getContact() == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent invalid chat message");
+				}
+				return;
+			}
+			// Are we switching to a new conversation ?
+			if (!messageDao.getContact().equals(contact)) {
+				// Force reload of history
+				loadHistory = true;
+				// Save new contactId
+				contact = messageDao.getContact();
+			}
+			break;
+
+		default:
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "processIntent invalid mode "+mode);
+			}
+			return;
+		}
+		keyChat = contact;
+		// Set title
+		setTitle(getString(R.string.title_chat) + " " +	contact);
+		if (loadHistory) {
+			// Activity is new or switch to new contact: load history
+			unreadMessageIDs = loadHistory(contact.toString());
+			if (serviceConnected) {
+				try {
+					for (String msgId : unreadMessageIDs) {
+						chatApi.markMessageAsRead(msgId);
+					}
+					unreadMessageIDs.clear();
+				} catch (JoynServiceException e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "processIntent failed to mark chat message as read");
+					}
+				}
+			}
+		} else {
+			// Activity is created: display new message
+			if (messageDao.getMimeType() == null|| messageDao.getBody() == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent invalid chat message");
+				}
+				return;
+			}
+			try {
+				TextMessageItem message = new TextMessageItem(messageDao);
+				// Add chat message to history
+				addMessageHistory(message);
+				if (serviceConnected) {
+					try {
+						chatApi.markMessageAsRead(messageDao.getMsgId());
+					} catch (JoynServiceException e) {
+						if (LogUtils.isActive) {
+							Log.e(LOGTAG, "onNewIntent failed to mark chat message as read");
+						}
+					}
+				} else {
+					// Message will be marked as read upon connection
+					unreadMessageIDs.add(message.getMessageId());
+				}
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent failed to decode chat message", e);
+				}
+				return;
+			}			
+		}
+	}
+	
     /**
      * Callback called when service is connected. This method is called when the
      * service is well connected to the RCS service (binding procedure successful):
@@ -203,6 +262,7 @@ public class SingleChatView extends ChatView {
 			for (String msgId : unreadMessageIDs) {
 				chatApi.markMessageAsRead(msgId);
 			}
+			unreadMessageIDs.clear();
 			
 			// Open chat
     		chat = chatApi.openSingleChat(contact);
@@ -230,8 +290,8 @@ public class SingleChatView extends ChatView {
 		serviceConnected = false;
 		Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled), exitOnce);
     }    
-    
-    /**
+
+	/**
      * Send a text message
      * 
      * @param msg Message
@@ -277,7 +337,6 @@ public class SingleChatView extends ChatView {
      */
     protected void quitSession() {
     	chat = null;
-        
         // Exit activity
 		finish();        
     }        	

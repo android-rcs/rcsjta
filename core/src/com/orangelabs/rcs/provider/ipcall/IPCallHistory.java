@@ -30,7 +30,6 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.AudioContent;
-import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -43,7 +42,7 @@ public class IPCallHistory {
 	/**
 	 * Current instance
 	 */
-	private static IPCallHistory instance = null;
+	private static IPCallHistory instance;
 
 	/**
 	 * Content resolver
@@ -113,11 +112,13 @@ public class IPCallHistory {
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATUS, status);
-		values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
 		if (videocontent != null) {
 			values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
 			values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
 			values.put(IPCallData.KEY_HEIGHT, videocontent.getHeight());
+		}
+		if (audiocontent != null) {
+			values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
 		}
 		return cr.insert(databaseUri, values);
 	}

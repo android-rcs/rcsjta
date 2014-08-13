@@ -515,13 +515,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
 					// Check if the message needs a delivery report
 	    			boolean imdnDisplayedRequested = false;
+	    				
 	    			String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-	    			if (dispositionNotification!= null && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
-	    				// Check if respond to displayed delivery report is enabled
-	    				if (RcsSettings.getInstance().isRespondToDisplayReports()) {
-	    					imdnDisplayedRequested = true;
-	    				}
-		    		}
+					if (!isGroupChat()) {
+						// There is no display notification in Group Chat
+						if (dispositionNotification != null && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
+							// Check if respond to displayed delivery report is enabled
+							if (RcsSettings.getInstance().isRespondToDisplayReports()) {
+								imdnDisplayedRequested = true;
+							}
+						}
+					}
 	    			
                     boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
                     

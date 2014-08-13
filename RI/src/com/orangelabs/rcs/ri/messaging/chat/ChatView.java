@@ -73,9 +73,21 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public abstract class ChatView extends ListActivity implements OnClickListener, OnKeyListener, JoynServiceListener {	
 	/**
+	 * View modes
+	 */
+	/* package private */ final static int MODE_INCOMING = 0;
+	/* package private */ final static int MODE_OUTGOING = 1;
+	/* package private */ final static int MODE_OPEN = 2;
+	
+	/**
+	 * Intent parameters
+	 */
+	/* package private */ final static String EXTRA_MODE = "mode";
+	
+	/**
 	 * Activity result constant
 	 */
-	public final static int SELECT_GEOLOCATION = 0;
+	private final static int SELECT_GEOLOCATION = 0;
 
 	/**
      * UI handler
@@ -128,6 +140,16 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 * A locker to exit only once
 	 */
 	protected LockAccess exitOnce = new LockAccess();
+	
+	/**
+	 * Activity displayed status
+	 */
+	private static boolean activityDisplayed = false;
+	
+	/**
+	 * Key for chat : ContactId for one to one chat or ChatId for Group chat
+	 */
+	protected static Object keyChat;
 	
 	/**
 	 * Smileys
@@ -196,6 +218,27 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         }
     }
     
+    @Override
+	protected void onResume() {
+        super.onResume();
+        activityDisplayed = true;
+    }
+
+    @Override
+	protected void onPause() {
+        super.onStart();
+        activityDisplayed = false;
+    }
+	
+    /**
+     * Return true if the activity is currently displayed or not
+     *   
+     * @return Boolean
+     */
+    public static boolean isDisplayed() {
+    	return activityDisplayed;
+    }
+    
     /**
      * Message composer listener
      * 
@@ -257,6 +300,14 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      */
     protected void addMessageHistory(int direction, String contact, String text, String msgId) {
 		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
+		this.addMessageHistory(item);
+    }
+    
+    /**
+     * Add a text message in the message history
+     * 
+     */
+    protected void addMessageHistory(TextMessageItem item) {
 		msgListAdapter.add(item);
     }
     
@@ -267,7 +318,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected void addGeolocHistory(int direction, String contact, Geoloc geoloc, String msgId) {
     	String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
 		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
-		msgListAdapter.add(item);
+		this.addMessageHistory(item);
     }
 
     /**
@@ -541,13 +592,39 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	/**
 	 * Text message item
 	 */
-	private class TextMessageItem extends MessageItem {
+	protected class TextMessageItem extends MessageItem {
 	    private String text;
 	    
 	    public TextMessageItem(int direction, String contact, String text, String messageId) {
 	    	super(direction, contact, messageId);
 	    	this.text = text;
 	    }
+	    
+		/**
+		 * Constructor
+		 * 
+		 * @param dao
+		 *            the message Data Object (either text or geolocation message)
+		 */
+		public TextMessageItem(ChatMessageDAO dao) {
+			super(dao.getDirection(), dao.getContact().toString(), dao.getMsgId());
+			if (dao.getMimeType() == null)
+				throw new IllegalArgumentException("mime-type is null");
+			if (dao.getMimeType().equals(GeolocMessage.MIME_TYPE)) {
+				Geoloc geoloc = ChatLog.getGeoloc(dao.getBody());
+				if (geoloc == null) {
+					throw new IllegalArgumentException("Cannot decode geolocation");
+				} else {
+					this.text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
+				}
+			} else {
+				if (dao.getMimeType().equals(ChatMessage.MIME_TYPE)) {
+					this.text = dao.getBody();
+				} else {
+					throw new IllegalArgumentException("Invalid mime-type "+dao.getMimeType());
+				}
+			}
+		}
 	    
 	    public String getText() {
 	    	return text;
@@ -735,6 +812,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "loadHistory key" + key);
 		}
+		msgListAdapter.clear();
 		Set<String> unReadMessageIDs = new HashSet<String>();
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, key);
 		Cursor cursor = null;

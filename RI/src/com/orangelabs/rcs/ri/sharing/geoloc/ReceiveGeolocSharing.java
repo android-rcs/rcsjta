@@ -191,7 +191,8 @@ public class ReceiveGeolocSharing extends Activity implements JoynServiceListene
 
         // Get invitation info
         sharingId = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getParcelableExtra(GeolocSharingIntent.EXTRA_CONTACT);
+        // TODO CR025 implement provider for geolocation sharing
+		remoteContact = getIntent().getParcelableExtra("TODO");
 
         // Instantiate API
 		gshApi = new GeolocSharingService(getApplicationContext(), this);

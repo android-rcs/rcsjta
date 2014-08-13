@@ -69,33 +69,35 @@ public class VideoSharingIntentService extends IntentService {
 			return;
 		}
 		// Check action from incoming intent
-		if (intent.getAction().equalsIgnoreCase(VideoSharingIntent.ACTION_NEW_INVITATION)) {
-			// Gets data from the incoming Intent
-			String sharingId = intent.getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
-			if (sharingId != null) {
+		if (!intent.getAction().equalsIgnoreCase(VideoSharingIntent.ACTION_NEW_INVITATION)) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Unknown action " + intent.getAction());
+			}
+			return;
+		}
+		// Gets data from the incoming Intent
+		String sharingId = intent.getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
+		if (sharingId != null) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onHandleIntent video sharing with ID " + sharingId);
+			}
+			try {
+				// Get Video Sharing from provider
+				VideoSharingDAO vshDao = new VideoSharingDAO(this, sharingId);
+				// Save VideoSharingDAO into intent
+				Bundle bundle = new Bundle();
+				bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
+				intent.putExtras(bundle);
 				if (LogUtils.isActive) {
-					Log.d(LOGTAG, "onHandleIntent video sharing with ID " + sharingId);
+					Log.d(LOGTAG, "Video sharing invitation " + vshDao);
 				}
-				try {
-					// Get File Transfer from provider
-					VideoSharingDAO vshDao = new VideoSharingDAO(this, sharingId);
-					// Save FileTransferDAO into intent
-					Bundle bundle = new Bundle();
-					bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
-					intent.putExtras(bundle);
-					if (intent.getAction().equalsIgnoreCase(VideoSharingIntent.ACTION_NEW_INVITATION)) {
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "Video sharing invitation " + vshDao);
-						}
-						// TODO check VSH state to know if rejected
-						// TODO check validity of direction, etc ...
-						// Display invitation notification
-						addVideoSharingInvitationNotification(this, intent, vshDao);
-					}
-				} catch (Exception e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Cannot read ISH data from provider", e);
-					}
+				// TODO check VSH state to know if rejected
+				// TODO check validity of direction, etc ...
+				// Display invitation notification
+				addVideoSharingInvitationNotification(this, intent, vshDao);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot read VSH data from provider", e);
 				}
 			}
 		}

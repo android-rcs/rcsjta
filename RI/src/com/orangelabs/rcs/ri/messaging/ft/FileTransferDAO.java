@@ -198,6 +198,8 @@ public class FileTransferDAO implements Parcelable {
 				if (fileicon != null) {
 					thumbnail = Uri.parse(fileicon);
 				}
+			} else {
+				throw new IllegalArgumentException("Filetransfer ID not found"); 
 			}
 		} catch (Exception e) {
 			throw e;
