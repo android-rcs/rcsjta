@@ -172,6 +172,8 @@ public class ImageSharingDAO implements Parcelable {
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
 				sizeTransferred = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
 				size = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+			} else {
+				throw new IllegalArgumentException("Sharing ID not found");
 			}
 		} catch (Exception e) {
 			throw e;

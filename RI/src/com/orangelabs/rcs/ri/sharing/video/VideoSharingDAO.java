@@ -115,6 +115,8 @@ public class VideoSharingDAO implements Parcelable {
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
 				duration = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION));
+			} else {
+				throw new Exception("Sharing ID not found" );
 			}
 		} catch (Exception e) {
 			throw e;

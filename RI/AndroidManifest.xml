@@ -158,11 +158,11 @@
         
 		<receiver android:name=".messaging.chat.SingleChatInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_CHAT"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_ONE2ONE_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         
-        <activity android:name=".messaging.chat.SingleChatView"/>
+        <activity android:name=".messaging.chat.SingleChatView" android:launchMode="singleTop"/>
 				
         <activity android:name=".messaging.chat.ChatList"/>
         
@@ -177,13 +177,19 @@
             </intent-filter>
 		</activity>        
 
+        <receiver android:name="com.orangelabs.rcs.ri.messaging.chat.GroupChatMessageReceiver">
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE"/>
+            </intent-filter>
+        </receiver>
+        
 		<receiver android:name=".messaging.chat.GroupChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 		
-        <activity android:name=".messaging.chat.GroupChatView"/>
+        <activity android:name=".messaging.chat.GroupChatView" android:launchMode="singleTop"/>
                 
         <activity android:name=".messaging.chat.GroupChatList"/>
         
@@ -257,6 +263,8 @@
         
         <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
         
+        <activity android:name="com.orangelabs.rcs.ri.extension.ReceiveMultiMediaSession"/>
+        
         <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
         
         <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"/>
@@ -314,15 +322,16 @@
 	 	
 	 	<activity android:name=".ipcall.IPCallView"/>
 	 
-	 	<service android:name=".messaging.ft.FileTransferIntentService"
-            android:exported="false" />
+	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
 	 	
-	 	<service android:name=".sharing.image.ImageSharingIntentService"
-            android:exported="false" />
+	 	<service android:name=".sharing.image.ImageSharingIntentService" android:exported="false" />
 	 	
-	 	<service android:name=".sharing.video.VideoSharingIntentService"
-            android:exported="false" />
+	 	<service android:name=".sharing.video.VideoSharingIntentService" android:exported="false" />
 	 	
+	 	<service android:name=".ipcall.IPCallIntentService" android:exported="false" />
+	 	
+	 	<service android:name=".messaging.chat.ChatIntentService" android:exported="false" />
+	 		 	
 </application>
 
 </manifest>

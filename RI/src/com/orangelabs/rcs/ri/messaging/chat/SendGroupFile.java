@@ -67,7 +67,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	/**
 	 * Intent parameters
 	 */
-	public final static String EXTRA_CHAT_ID = "chat_id";
+	/* package private */ final static String EXTRA_CHAT_ID = "chat_id";
 
 	/**
 	 * Activity result constants
@@ -214,7 +214,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 					// Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_declined), exitOnce);
 					// break;
 
-					case GroupChat.State.FAILED:
+					case FileTransfer.State.FAILED:
 						// Session is failed: exit
 						// Hide progress dialog
 						hideProgressDialog();
@@ -252,7 +252,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
         selectBtn.setEnabled(false);
                
         // Instantiate API
-        chatApi = new ChatService(getApplicationContext(), this);
+        chatApi = new ChatService(getApplicationContext(), null);
         ftApi = new FileTransferService(getApplicationContext(), this);
         
         // Connect API
@@ -302,6 +302,9 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 			serviceConnected = true;
 			
         } catch(Exception e) {
+        	if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to connect", e);
+			}
 			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_api_failed), exitOnce);
         }
     }

@@ -62,16 +62,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 	 */
     private ChatService chatApi;
     
-	/**
-	 * Rejoin chat manager
-	 */
-	private RejoinChat rejoinChat = null;
-
-	/**
-	 * Restart chat manager
-	 */
-	private RestartChat restartChat = null;
-
     /**
 	 * API connection state
 	 */
@@ -111,14 +101,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		
-		if (rejoinChat != null) {
-			rejoinChat.stop();
-		}
-		
-		if (restartChat != null) {
-			restartChat.stop();
-		}
 
         // Disconnect API
         chatApi.disconnect();
@@ -252,19 +234,7 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 		    		startActivity(intent);				
 				} else {
 					// Rejoin or restart the session
-					int state = cache.state;
-					if (state == GroupChat.State.CLOSED_BY_USER) {
-						Utils.showMessage(GroupChatList.this, getString(R.string.label_restart_not_authorized));
-					} else
-					if (state == GroupChat.State.TERMINATED) {
-						// The session was terminated: only a restart may be done
-						restartChat = new RestartChat(GroupChatList.this, chatApi, cache.chatId);
-						restartChat.start();
-					} else {					
-						// Session terminated on the device: try to rejoin the session
-						rejoinChat = new RejoinChat(GroupChatList.this, chatApi, cache.chatId);
-						rejoinChat.start();
-					}
+					// TODO CR018
 				}
 		    } catch(JoynServiceNotAvailableException e) {
 		    	e.printStackTrace();

@@ -364,16 +364,16 @@
     <item>TRANSFERRED</item>
     <item>ABORTED</item>
     <item>FAILED</item>
+    <item>DELIVERED</item>
+    <item>DISPLAYED</item>
     <item>PAUSED</item>
     <item>REJECTED</item>
     <item>ACCEPTING</item>
-    <item>DELIVERED</item>
-    <item>DISPLAYED</item>
     <item>QUEUED</item>
 </string-array>
 
 <string-array name="file_transfer_reason_codes">
-    <item>UNSPECIFIED</item>
+    <item></item>
     <item>ABORTED_BY_USER</item>
     <item>ABORTED_BY_REMOTE</item>
     <item>ABORTED_BY_SYSTEM</item>
@@ -414,7 +414,7 @@
 </string-array>
 
 <string-array name="delivery_reason_codes">
-    <item>UNSPECIFIED</item>
+    <item></item>
     <item>FAILED_DELIVERY</item>
     <item>FAILED_DISPLAY</item>
 </string-array>
@@ -433,7 +433,7 @@
 </string-array>
 
 <string-array name="group_chat_reason_codes">
-    <item>UNSPECIFIED</item>
+    <item></item>
     <item>ABORTED_BY_USER</item>
     <item>ABORTED_BY_REMOTE</item>
     <item>ABORTED_BY_SYSTEM</item>
@@ -459,7 +459,7 @@
 </string-array>
 
 <string-array name="message_reason_codes">
-    <item>UNSPECIFIED</item>
+    <item></item>
     <item>FAILED_SEND</item>
     <item>FAILED_DELIVERY</item>
     <item>FAILED_DISPLAY</item>
@@ -479,7 +479,7 @@
 </string-array>
 
 <string-array name="ish_reason_codes">
-	<item>UNSPECIFIED</item>
+	<item></item>
 	<item>ABORTED_BY_USER</item>
 	<item>ABORTED_BY_REMOTE</item>    
 	<item>ABORTED_BY_SYSTEM</item>
@@ -508,7 +508,7 @@
 </string-array>
 
 <string-array name="vsh_reason_codes">
-	<item>UNSPECIFIED</item>
+	<item></item>
 	<item>ABORTED_BY_USER</item>
 	<item>ABORTED_BY_REMOTE</item>    
 	<item>ABORTED_BY_SYSTEM</item>
@@ -534,7 +534,7 @@
 </string-array>
 
 <string-array name="gsh_reason_codes">
-	<item>UNSPECIFIED</item>
+	<item></item>
 	<item>ABORTED_BY_USER</item>
 	<item>ABORTED_BY_REMOTE</item>    
 	<item>ABORTED_BY_SYSTEM</item>
@@ -560,7 +560,7 @@
 </string-array>
 
 <string-array name="mms_reason_codes">
-	<item>UNSPECIFIED</item>
+	<item></item>
 	<item>REJECTED_BY_USER</item>
 	<item>REJECTED_BY_REMOTE</item>
 	<item>FAILED_SESSION</item>
@@ -582,7 +582,7 @@
 </string-array>
 
 <string-array name="ipcall_reason_codes">
-	<item>UNSPECIFIED</item>
+	<item></item>
 	<item>ABORTED_BY_USER</item>
 	<item>ABORTED_BY_REMOTE</item>
 	<item>ABORTED_BY_SYSTEM</item>

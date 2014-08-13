@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.sharing.image;
+package com.orangelabs.rcs.ri.ipcall;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -27,32 +27,32 @@ import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.gsma.services.rcs.ish.ImageSharingIntent;
+import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Image sharing intent service
+ * IP Call sharing intent service
  * 
  * @author YPLO6403
  * 
  */
-public class ImageSharingIntentService extends IntentService {
+public class IPCallIntentService extends IntentService {
 
 	/**
 	 * The log tag for this class
 	 */
-	private static final String LOGTAG = LogUtils.getTag(ImageSharingIntentService.class.getSimpleName());
+	private static final String LOGTAG = LogUtils.getTag(IPCallIntentService.class.getSimpleName());
 
-	static final String BUNDLE_ISHDAO_ID = "ishdao";
+	/* package private */static final String BUNDLE_IPCALLDAO_ID = "ipcalldao";
 
-	public ImageSharingIntentService(String name) {
+	public IPCallIntentService(String name) {
 		super(name);
 	}
 
-	public ImageSharingIntentService() {
-		super("ImageSharingIntentService");
+	public IPCallIntentService() {
+		super("IPCallIntentService");
 	}
 
 	@Override
@@ -69,72 +69,83 @@ public class ImageSharingIntentService extends IntentService {
 			return;
 		}
 		// Check action from incoming intent
-		if (!intent.getAction().equalsIgnoreCase(ImageSharingIntent.ACTION_NEW_INVITATION)) {
+		if (!intent.getAction().equalsIgnoreCase(IPCallIntent.ACTION_NEW_INVITATION)) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Unknown action " + intent.getAction());
 			}
 			return;
 		}
 		// Gets data from the incoming Intent
-		String sharingId = intent.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
-		if (sharingId == null) {
+		String callId = intent.getStringExtra(IPCallIntent.EXTRA_CALL_ID);
+		if (callId == null) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Cannot read sharing ID");
+				Log.e(LOGTAG, "Cannot read call ID");
 			}
 			return;
 		}
 		try {
-			// Get Image sharing from provider
-			ImageSharingDAO ishDao = new ImageSharingDAO(this, sharingId);
-			// Save ImageSharingDAO into intent
+			// Get IP Call from provider
+			IPCallDAO ipCallDao = new IPCallDAO(this, callId);
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onHandleIntent IP Call DAO " + ipCallDao);
+			}
+			// Save IPCallDAO into intent
 			Bundle bundle = new Bundle();
-			bundle.putParcelable(BUNDLE_ISHDAO_ID, ishDao);
+			bundle.putParcelable(BUNDLE_IPCALLDAO_ID, ipCallDao);
 			intent.putExtras(bundle);
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "ISH invitation " + ishDao);
+				Log.d(LOGTAG, "IP Call invitation " + ipCallDao);
 			}
-			// TODO check ISH state to know if rejected
+			// TODO check state to know if rejected
 			// TODO check validity of direction, etc ...
 			// Display invitation notification
-			addImageSharingInvitationNotification(this, intent, ishDao);
+			addIPCallInvitationNotification(this, intent, ipCallDao);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Cannot read ISH data from provider", e);
+				Log.e(LOGTAG, "Cannot read IP Call data from provider", e);
 			}
 		}
 	}
 
 	/**
-	 * Add image share notification
+	 * Add IP Call notification
 	 * 
 	 * @param context
 	 *            Context
 	 * @param intent
 	 *            Intent invitation
-	 * @param ishDao
-	 *            the image sharing data object
+	 * @param ipCallDao
+	 *            the IP Call data object
 	 */
-	private void addImageSharingInvitationNotification(Context context, Intent invitation, ImageSharingDAO ishDao) {
-		if (ishDao.getContact() == null) {
+	private void addIPCallInvitationNotification(Context context, Intent invitation, IPCallDAO ipCallDao) {
+		if (ipCallDao.getContact() == null) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "addImageSharingInvitationNotification failed: cannot parse contact");
+				Log.e(LOGTAG, "addIPCallInvitationNotification failed: cannot parse contact");
 			}
 			return;
 		}
+
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, ReceiveImageSharing.class);
+		intent.setClass(context, IPCallView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.setAction(ipCallDao.getCallId());
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		String notifTitle = context.getString(R.string.title_recv_image_sharing, ishDao.getContact().toString());
-		Notification notif = new Notification(R.drawable.ri_notif_csh_icon, notifTitle, System.currentTimeMillis());
+		String notifTitle;
+		if (ipCallDao.getVideoEncoding() != null) {
+			notifTitle = context.getString(R.string.title_recv_ipcall_video);
+		} else {
+			notifTitle = context.getString(R.string.title_recv_ipcall);
+		}
+		Notification notif = new Notification(R.drawable.ri_notif_ipcall_icon, notifTitle, System.currentTimeMillis());
 		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle, ishDao.getFilename(), contentIntent);
+		notif.setLatestEventInfo(context, notifTitle,
+				context.getString(R.string.label_session_from, ipCallDao.getContact().toString()), contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		notif.defaults |= Notification.DEFAULT_VIBRATE;
 
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif);
+		notificationManager.notify(ipCallDao.getCallId(), Utils.NOTIF_ID_IP_CALL, notif);
 	}
 }
