@@ -204,6 +204,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     		// Notify event listeners
 			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+			
+	        // Remove session from the list
+	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
 	    }
     }
 
@@ -221,6 +224,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     		// Notify event listeners
 			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+			
+	        // Remove session from the list
+	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
 	    }
     }
 
@@ -236,6 +242,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     		// Notify event listeners
 			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+			
+	        // Remove session from the list
+	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
 	    }
     }
 }
