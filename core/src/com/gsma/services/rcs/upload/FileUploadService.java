@@ -42,7 +42,8 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
 
 /**
  * This class offers the main entry point to upload a file to the RCS content
- * server. Several applications may connect/disconnect to the API.
+ * server. Several applications may connect/disconnect to the API. There is no
+ * pause and resume supported here.
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -141,6 +142,24 @@ public class FileUploadService extends JoynService {
 		}
 	}
 
+    /**
+     * Returns the configuration of the file upload service
+     * 
+     * @return Configuration
+     * @throws JoynServiceException
+     */
+    public FileUploadServiceConfiguration getConfiguration() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.getConfiguration();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+	}
+    
     /**
      * Uploads a file to the RCS content server. The parameter file contains the URI
      * of the file to be uploaded (for a local or a remote file).

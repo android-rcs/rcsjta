@@ -42,6 +42,7 @@
 <string name="label_upload_aborted">File upload has been aborted</string>
 <string name="label_file_upload">File upload at %s</string>
 <string name="label_show_upload">Show upload</string>
+<string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
 
 </resources>
 

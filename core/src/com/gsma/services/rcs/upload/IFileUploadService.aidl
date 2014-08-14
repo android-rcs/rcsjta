@@ -3,18 +3,15 @@ package com.gsma.services.rcs.upload;
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
 
 /**
  * File uploadservice API
  */
 interface IFileUploadService {
 
-	boolean isServiceRegistered();
+	FileUploadServiceConfiguration getConfiguration();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
-
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
-    
 	List<IBinder> getFileUploads();
 	
 	IFileUpload getFileUpload(in String uploadId);

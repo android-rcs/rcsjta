@@ -133,6 +133,7 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
+    	
     	// Activate the select button when connected to the API
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setEnabled(true);
@@ -155,6 +156,19 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
     private OnClickListener btnUploadListener = new OnClickListener() {
         public void onClick(View v) {
         	try {
+        		// Check max size
+            	long maxSize = 0;
+            	try {
+            		maxSize = uploadApi.getConfiguration().getMaxSize();
+            	} catch(Exception e) {
+            		e.printStackTrace();
+            	}
+                if ((maxSize > 0) && (filesize >= maxSize)) {
+    				// Display an error
+                	Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_max_size, maxSize));
+                	return;
+                }
+                
             	// Add upload listener
         		uploadApi.addEventListener(uploadListener);
 
@@ -165,17 +179,15 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
             	// Initiate upload
         		upload = uploadApi.uploadFile(file, thumbnail);
         		
-        		
+                // Hide buttons
+                Button uploadBtn = (Button)findViewById(R.id.upload_btn);
+                uploadBtn.setVisibility(View.GONE);
+                Button selectBtn = (Button)findViewById(R.id.select_btn);
+                selectBtn.setVisibility(View.GONE);
         	} catch(Exception e) {
         		e.printStackTrace();
 				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed));
         	}
-
-            // Hide buttons
-            Button uploadBtn = (Button)findViewById(R.id.upload_btn);
-            uploadBtn.setVisibility(View.GONE);
-            Button selectBtn = (Button)findViewById(R.id.select_btn);
-            selectBtn.setVisibility(View.GONE);
         }
     };
     
@@ -240,6 +252,7 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
 				filesize = -1;
 				uriEdit.setText("Unknown");
 			}
+			
 			// Enable upload button
 			uploadBtn.setEnabled(true);
 			break;

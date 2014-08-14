@@ -29,18 +29,19 @@ import java.util.List;
 import android.net.Uri;
 import android.os.IBinder;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 import com.gsma.services.rcs.upload.IFileUploadService;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.FileUploadEventBroadcaster;
-import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,10 +56,21 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	 */
 	private static Hashtable<String, IFileUpload> uploadSessions = new Hashtable<String, IFileUpload>();
 
+	/***
+	 * Event broadcaster
+	 */
 	private final FileUploadEventBroadcaster mFileUploadEventBroadcaster = new FileUploadEventBroadcaster();
 
-	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
-
+	/**
+	 * Max file upload sessions
+	 */
+	private int maxUploadSessions;
+	
+	/**
+	 * Max file upload size
+	 */
+	private int maxUploadSize;	
+	
 	/**
 	 * The logger
 	 */
@@ -76,6 +88,10 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		if (logger.isActivated()) {
 			logger.info("File upload service API is loaded");
 		}
+		
+		// Get configuration
+		maxUploadSessions = RcsSettings.getInstance().getMaxFileTransferSessions();
+		maxUploadSize = FileSharingSession.getMaxFileSharingSize();
 	}
 
 	/**
@@ -115,60 +131,18 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		
 		uploadSessions.remove(sessionId);
 	}
-    
+
     /**
-     * Returns true if the service is registered to the platform, else returns false
+     * Returns the configuration of the file upload service
      * 
-	 * @return Returns true if registered else returns false
+     * @return Configuration
      */
-    public boolean isServiceRegistered() {
-    	return ServerApiUtils.isImsConnected();
-    }
-
-	/**
-	 * Registers a listener on service registration events
-	 *
-	 * @param listener Service registration listener
-	 */
-	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Add a service listener");
-		}
-		synchronized (lock) {
-			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
-		}
-	}
-
-	/**
-	 * Unregisters a listener on service registration events
-	 *
-	 * @param listener Service registration listener
-	 */
-	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
-		if (logger.isActivated()) {
-			logger.info("Remove a service listener");
-		}
-		synchronized (lock) {
-			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
-		}
-	}
-
-	/**
-	 * Receive registration event
-	 *
-	 * @param state Registration state
-	 */
-	public void notifyRegistrationEvent(boolean state) {
-		// Notify listeners
-		synchronized (lock) {
-			if (state) {
-				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
-			} else {
-				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
-			}
-		}
-	}
-
+    public FileUploadServiceConfiguration getConfiguration() {
+    	return new FileUploadServiceConfiguration(
+    			maxUploadSize,
+    			maxUploadSessions);
+    }    	
+	
     /**
      * Uploads a file to the RCS content server. The parameter file contains the URI
      * of the file to be uploaded (for a local or a remote file).
@@ -184,18 +158,28 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		}
 
 		// Test IMS connection
-		ServerApiUtils.testIms();
+		ServerApiUtils.testCore();
 
 		try {
-	        // Test max size
-			// TODO
-
-	        // Test max upload in progress
-			// TODO
+			// Test number of sessions
+			if ((maxUploadSessions != 0) && (uploadSessions.size() >= maxUploadSessions)) {
+				if (logger.isActivated()) {
+					logger.debug("The max number of file upload sessions is achieved: cancel the initiation");
+				}
+				throw new ServerApiException("Max file transfer sessions achieved");
+			}
 
 			// Create a file content
 			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
+
+			// Test max size
+	        if (maxUploadSize > 0 && content.getSize() > maxUploadSize) {
+	            if (logger.isActivated()) {
+	                logger.debug("File exceeds max size: cancel the initiation");
+	            }
+	            throw new ServerApiException("File exceeds max size");
+	        }
 
 			// Initiate an upload session
 			final FileUploadSession session = new FileUploadSession(content, fileicon);
