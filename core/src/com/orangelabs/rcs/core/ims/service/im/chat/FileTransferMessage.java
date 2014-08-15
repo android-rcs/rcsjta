@@ -20,6 +20,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 import java.util.Date;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 
 /**
  * File transfer message
@@ -27,6 +28,10 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */ 
 public class FileTransferMessage extends InstantMessage {
+	/**
+	 * MIME type
+	 */
+	public static final String MIME_TYPE = FileTransferHttpInfoDocument.MIME_TYPE;
 
 	/**
 	 * File info
@@ -39,12 +44,11 @@ public class FileTransferMessage extends InstantMessage {
      * @param messageId Message Id
      * @param remote Remote user identifier
      * @param file File info
-     * @param mimeType MIME type
      * @param imdnDisplayedRequested Flag indicating that an IMDN "displayed" is requested
      * @param displayName the display name
 	 */
-	public FileTransferMessage(String messageId, ContactId remote, String file, String mimeType, boolean imdnDisplayedRequested, String displayName) {
-        this(messageId, remote, file, mimeType, imdnDisplayedRequested, null, displayName);
+	public FileTransferMessage(String messageId, ContactId remote, String file, boolean imdnDisplayedRequested, String displayName) {
+        this(messageId, remote, file, imdnDisplayedRequested, null, displayName);
 	}
 	
 	/**
@@ -53,16 +57,14 @@ public class FileTransferMessage extends InstantMessage {
      * @param messageId Message Id
      * @param remote Remote user identifier
      * @param file File info
-     * @param mimeType MIME type
      * @param imdnDisplayedRequested Flag indicating that an IMDN "displayed" is requested
 	 * @param serverReceiptAt Receipt date of the message on the server
 	 * @param displayName the display name
 	 */
-	public FileTransferMessage(String messageId, ContactId remote, String file, String mimeType, boolean imdnDisplayedRequested, Date serverReceiptAt, String displayName) {
+	public FileTransferMessage(String messageId, ContactId remote, String file, boolean imdnDisplayedRequested, Date serverReceiptAt, String displayName) {
 		super(messageId, remote, null, imdnDisplayedRequested, serverReceiptAt, displayName);
 		
 		this.file = file;
-        this.mimeType = mimeType;
 	}
 
     /**

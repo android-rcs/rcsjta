@@ -50,7 +50,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
@@ -701,12 +700,11 @@ public class ChatUtils {
 	 * @param file File info
 	 * @param imdn IMDN flag
 	 * @param msgId Message ID
-     * @param mime MIME type
 	 * @return File message
 	 */
 	public static FileTransferMessage createFileTransferMessage(ContactId remote, String file,
-			boolean imdn, String msgId, String mime) {
-		return new FileTransferMessage(msgId, remote, file, mime, imdn, null);
+			boolean imdn, String msgId) {
+		return new FileTransferMessage(msgId, remote, file, imdn, null);
 	}
 	
 	/**
@@ -778,10 +776,9 @@ public class ChatUtils {
 			return new GeolocMessage(msgId, remote, ChatUtils.parseGeolocDocument(content),
 					ChatUtils.isImdnDisplayedRequested(invite), date, null);
 		} else {
-			if (mime.contains(FileTransferHttpInfoDocument.MIME_TYPE)) {
-                FileTransferHttpInfoDocument fileTransferInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(content);
+			if (mime.contains(FileTransferMessage.MIME_TYPE)) {
 				return new FileTransferMessage(msgId, remote, StringUtils.decodeUTF8(content),
-                        fileTransferInfoDoc.getFileType(), ChatUtils.isImdnDisplayedRequested(invite), date, null);
+						ChatUtils.isImdnDisplayedRequested(invite), date, null);
 			} else {
 				return new InstantMessage(msgId, remote, StringUtils.decodeUTF8(content),
 						ChatUtils.isImdnDisplayedRequested(invite), date, null);

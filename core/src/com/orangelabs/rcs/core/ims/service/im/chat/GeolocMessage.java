@@ -65,7 +65,6 @@ public class GeolocMessage extends InstantMessage {
 		super(messageId, remote, geoloc.getLabel(), imdnDisplayedRequested, serverReceiptAt, displayName);
 		
 		this.geoloc = geoloc;
-        this.mimeType = GeolocMessage.MIME_TYPE;
 	}
 
     /**
