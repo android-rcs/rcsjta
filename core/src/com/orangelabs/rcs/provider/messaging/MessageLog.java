@@ -108,6 +108,10 @@ public class MessageLog implements IMessageLog {
 	 *            Direction
 	 */
 	private void addChatMessage(InstantMessage msg, int type, int direction) {
+        if (msg instanceof FileTransferMessage) {
+            //file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
+            return;
+        }
 		if (logger.isActivated()) {
 			logger.debug("Add chat message: contact=" + msg.getRemote() + ", msg=" + msg.getMessageId() + ", dir=" + direction);
 		}
@@ -125,9 +129,6 @@ public class MessageLog implements IMessageLog {
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
-		} else if (msg instanceof FileTransferMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, msg.getMimeType());
-			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
@@ -201,15 +202,13 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_READ_STATUS, ChatLog.Message.ReadStatus.UNREAD);
 
+        //file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
-		} else if (msg instanceof FileTransferMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, msg.getMimeType());
-			values.put(MessageData.KEY_CONTENT, ((FileTransferMessage) msg).getFileInfo());
 		} else {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
