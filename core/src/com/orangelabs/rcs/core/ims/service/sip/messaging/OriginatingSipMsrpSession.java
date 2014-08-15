@@ -94,4 +94,9 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 					e.getMessage()));
 		}
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

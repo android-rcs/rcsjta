@@ -279,4 +279,9 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 			}
     	}
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

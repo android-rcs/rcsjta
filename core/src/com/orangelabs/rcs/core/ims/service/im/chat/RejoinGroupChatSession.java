@@ -169,4 +169,9 @@ public class RejoinGroupChatSession extends GroupChatSession {
 		// Notify listener
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

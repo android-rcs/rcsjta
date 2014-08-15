@@ -15,37 +15,29 @@
  */
 
 package com.orangelabs.rcs.service.api;
-import static com.gsma.services.rcs.ft.FileTransfer.State.FAILED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.ABORTED;
+import static com.gsma.services.rcs.ft.FileTransfer.State.FAILED;
+import static com.gsma.services.rcs.ft.FileTransfer.State.INACTIVE;
+import static com.gsma.services.rcs.ft.FileTransfer.State.INITIATED;
+import static com.gsma.services.rcs.ft.FileTransfer.State.INVITED;
+import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.STARTED;
 import static com.gsma.services.rcs.ft.FileTransfer.State.TRANSFERRED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INVITED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INITIATED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INACTIVE;
 import android.net.Uri;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
-import com.gsma.services.rcs.ft.IGroupFileTransferListener;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSharingSession;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -200,10 +192,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	 * @see FileTransfer.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof IOriginatingFileSharingSession) {
-			return FileTransfer.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return FileTransfer.Direction.INCOMING;
+		} else {
+			return FileTransfer.Direction.OUTGOING;
 		}
 	}
 

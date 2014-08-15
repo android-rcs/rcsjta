@@ -184,4 +184,9 @@ public class OriginatingOne2OneChatSession extends OneOneChatSession {
     public String getDirection() {
         return SdpUtils.DIRECTION_SENDRECV;
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 }

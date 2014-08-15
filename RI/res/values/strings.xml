@@ -124,7 +124,8 @@
 <string name="menu_file_transfer_log">File transfer log</string>
 <string name="title_recv_file_transfer">File transfer from %s</string>
 <string name="title_file_transfer">File transfer</string>
-<string name="label_transfer_failed">Transfer has failed (error code %d)</string>
+<string name="label_transfer_failed">Transfer failed (%1$s)</string>
+<string name="label_transfer_aborted">Transfer aborted (%1$s)</string>
 <string name="label_transfer_too_big">Transfer is aborted because file is too big</string>
 <string name="label_transfer_cancelled">File transfer session has been cancelled</string>
 <string name="label_transfer_declined">Transfer invitation has been declined</string>
@@ -135,6 +136,8 @@
 <string name="label_transfer_failed_too_big">Transfer is aborted because file is too big</string>
 <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
 <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
+<string name="label_ft_state_changed">FT state %1$s (%2$s)</string>
+
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>
@@ -154,14 +157,14 @@
 <string name="title_chat">Chat with</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
 <string name="title_chat_rejoin">Do you want to rejoin the group chat session?</string>
-<string name="label_chat_aborted">Chat session aborted</string>
+<string name="label_chat_aborted">Chat session aborted (%1$s)</string>
 <string name="menu_insert_smiley">Smiley</string>
 <string name="menu_participants">Participants</string>
 <string name="menu_add_participant">Add participant</string>
 <string name="label_send_im_failed">Send IM has failed</string>
-<string name="label_chat_failed">Chat session has failed</string>
+<string name="label_chat_failed">Chat session failed (%1$s)</string>
 <string name="label_contacts">Contacts:</string>
-<string name="label_contact_is_composing">is typing...</string>
+<string name="label_contact_is_composing">%1$s is typing...</string>
 <string name="label_select_contacts">Select contacts</string>
 <string name="label_chat_initiation_canceled">Chat session has been canceled</string>
 <string name="label_select_quicktext">Quick text</string>
@@ -199,18 +202,21 @@
 <string name="label_ft_thumb">Thumbnail</string>
 <string name="menu_send_file">Send file</string>
 <string name="label_geoloc_msg">Geoloc</string>
-<string name="label_contact_status_changed">%1$s new status %2$s</string>
-
+<string name="label_contact_status_changed">Contact %1$s status %2$s</string>
+<string name="label_delivery_status_changed">Contact %1$s delivery status %2$s (%3$s)</string>
+<string name="label_gc_state_changed">GC state %1$s (%2$s)</string>
+<string name="label_message_status_changed">%1$s (%2$s)</string>
+    
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
 <string name="menu_image_sharing">Image sharing</string>
 <string name="menu_video_sharing">Video sharing</string>
 <string name="menu_geoloc_sharing">Geoloc sharing</string>
 <string name="label_dial">Dial</string>
-<string name="label_sharing_aborted">Sharing aborted</string>
+<string name="label_sharing_aborted">Sharing aborted (%1$s)</string>
 <string name="label_sharing_declined">Sharing invitation has been declined</string>
 <string name="label_sharing_cancelled">Sharing has been cancelled</string>
-<string name="label_sharing_failed">Sharing has failed (error code %d)</string>
+<string name="label_sharing_failed">Sharing failed (%1$s)</string>
 
 <!-- Image sharing menu -->
 <string name="menu_initiate_image_sharing">Initiate image sharing</string>
@@ -220,6 +226,7 @@
 <string name="title_recv_image_sharing">Image sharing from %s</string>
 <string name="title_image_sharing">Image sharing</string>
 <string name="label_out_of_memory">No enough memory to display the image</string>
+<string name="label_ish_state_changed">ISH state %1$s (%2$s)</string>
 
 <!-- Video sharing menu -->
 <string name="menu_initiate_video_sharing">Initiate video sharing</string>
@@ -246,12 +253,15 @@
 <string name="label_switch_camera">Switch camera</string>
 <string name="label_video_duration">Duration: %s s</string>
 <string name="label_note_sharing_codec">Note: the video codec is an H264 codec from the Google Android open source and is a contribution from PacketVideo (Apache 2 license).</string>
+<string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
+<string name="label_vsh_terminated">VSH terminated</string>
 
 <!-- Geoloc sharing menu -->
 <string name="title_recv_geoloc_sharing">New geoloc sharing invitation</string>
 <string name="label_select_location">Select location</string>
 <string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
 <string name="title_geoloc_sharing">Geoloc sharing</string>
+<string name="label_gsh_state_changed">GSH state %1$s (%2$s)</string>
 
 <!-- Geoloc sharing menu -->
 
@@ -267,9 +277,9 @@
 <string name="label_service_id">Service ID:</string>
 <string name="label_session_in_progress">Session in progress...</string>
 <string name="label_session_canceled">Session initiation has been canceled</string>
-<string name="label_session_aborted">Session aborted</string>
+<string name="label_session_aborted">Session aborted (%1$s)</string>
 <string name="label_session_declined">Session invitation has been declined</string>
-<string name="label_session_failed">Session has failed (error code %d)</string>
+<string name="label_session_failed">Session has failed (%1$s)</string>
 <string name="label_session_has_expired">Session has expired</string>
 <string name="title_recv_messaging_session">Multimedia messaging session invitation</string>
 <string name="title_recv_streaming_session">Multimedia streaming session invitation</string>
@@ -279,6 +289,7 @@
 <string name="label_session_from">from %s</string>
 <string name="label_send_data">Send data</string>
 <string name="label_recv_data">Receive data:</string>
+<string name="label_mms_state_changed">MMS state %1$s (%2$s)</string>
 
 <!-- Geolocation push -->
 <string name="label_select_geoloc">Select from a map</string>
@@ -303,9 +314,9 @@
 <string name="title_recv_ipcall">New IP call invitation</string>
 <string name="title_recv_ipcall_video">New IP video call invitation</string>
 <string name="label_ipcall_has_expired">Call has expired</string>
-<string name="label_ipcall_aborted">Call aborted</string>
+<string name="label_ipcall_aborted">Call aborted (%1$s)</string>
 <string name="label_ipcall_declined">Call invitation has been declined</string>
-<string name="label_ipcall_failed">Call has failed (error code %d)</string>
+<string name="label_ipcall_failed">Call failed (%1$s)</string>
 <string name="label_ipcall_canceled">Call initiation has been canceled</string>
 <string name="menu_ipcall_list">Current calls</string>
 <string name="menu_ipcall_log">IP call log</string>
@@ -316,6 +327,7 @@
 <string name="label_resume">Resume</string>
 <string name="label_hangup">Hang Up</string>
 <string name="label_note_ipcall_codec">Note: the media codecs are not available in the RI due to patent issue on this open source part. Nevertheless the media for audio and video should be implemented in the application side thanks to the RCS API interface. So in this sample no audio and video will be played.</string>
+<string name="label_ipcall_state_changed">IPCALL state %1$s (%2$s)</string>
 
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>
@@ -343,6 +355,245 @@
 <!--  Event log -->
 <string name="menu_eventlog">Event log</string>
 <string name="label_eventlog_empty">No log</string>
+
+<string-array name="file_transfer_states">
+    <item>UNKNOWN</item>
+    <item>INVITED</item>
+    <item>INITIATED</item>
+    <item>STARTED</item>
+    <item>TRANSFERRED</item>
+    <item>ABORTED</item>
+    <item>FAILED</item>
+    <item>DELIVERED</item>
+    <item>DISPLAYED</item>
+    <item>PAUSED</item>
+    <item>REJECTED</item>
+    <item>ACCEPTING</item>
+    <item>QUEUED</item>
+</string-array>
+
+<string-array name="file_transfer_reason_codes">
+    <item></item>
+    <item>ABORTED_BY_USER</item>
+    <item>ABORTED_BY_REMOTE</item>
+    <item>ABORTED_BY_SYSTEM</item>
+    <item>ABORTED_BY_SECONDARY_DEVICE</item>
+    <item>ABORTED_BY_TIMED_OUT</item>
+    <item>REJECTED_SPAM</item>
+    <item>REJECTED_LOW_SPACE</item>
+    <item>REJECTED_MAX_SIZE</item>
+    <item>REJECTED_MAX_FILE_TRANSFERS</item>
+    <item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>PAUSED_BY_SYSTEM</item>
+    <item>PAUSED_BY_USER</item>
+    <item>FAILED_INITIATION</item>
+    <item>FAILED_DATA_TRANSFER</item>
+    <item>FAILED_SAVING</item>
+    <item>FAILED_DELIVERY</item>
+    <item>FAILED_DISPLAY</item>
+    <item>FAILED_NOT_ALLOWED_TO_TRANSFER</item>
+</string-array>
+
+<string-array name="participant_statuses">
+    <item>UNKNOWN</item>
+    <item>CONNECTED</item>
+    <item>DISCONNECTED</item>
+    <item>DEPARTED</item>
+    <item>BOOTED</item>
+    <item>FAILED</item>
+    <item>BUSY</item>
+    <item>DECLINED</item>
+    <item>PENDING</item>
+</string-array>
+
+<string-array name="delivery_statuses">
+    <item>NOT_DELIVERED</item>
+    <item>DELIVERED</item>
+    <item>DISPLAYED</item>
+</string-array>
+
+<string-array name="delivery_reason_codes">
+    <item></item>
+    <item>FAILED_DELIVERY</item>
+    <item>FAILED_DISPLAY</item>
+</string-array>
+
+<string-array name="group_chat_states">
+    <item>UNKNOWN</item>
+    <item>INVITED</item>
+    <item>INITIATED</item>
+    <item>STARTED</item>
+    <item>TERMINATED</item>
+    <item>ABORTED</item>
+    <item>CLOSED_BY_USER</item>
+    <item>FAILED</item>
+    <item>ACCEPTING</item>
+    <item>REJECTED</item>
+</string-array>
+
+<string-array name="group_chat_reason_codes">
+    <item></item>
+    <item>ABORTED_BY_USER</item>
+    <item>ABORTED_BY_REMOTE</item>
+    <item>ABORTED_BY_SYSTEM</item>
+    <item>ABORTED_BY_SECONDARY_DEVICE</item>
+    <item>REJECTED_SPAM</item>
+    <item>REJECTED_MAX_CHATS</item>
+    <item>REJECTED_BY_USER</item>
+    <item>REJECTED_BY_REMOTE</item>
+    <item>REJECTED_TIME_OUT</item>
+    <item>FAILED_INITIATION</item>
+</string-array>
+
+<string-array name="message_statuses">
+    <item>DELIVERED</item>
+    <item>DISPLAY_REPORT_REQUESTED</item>
+    <item>RECEIVED</item>
+    <item>SENDING</item>
+    <item>SENT</item>
+    <item>FAILED</item>
+    <item>QUEUED</item>
+    <item>BLOCKED</item>
+    <item>DISPLAYED</item>
+</string-array>
+
+<string-array name="message_reason_codes">
+    <item></item>
+    <item>FAILED_SEND</item>
+    <item>FAILED_DELIVERY</item>
+    <item>FAILED_DISPLAY</item>
+    <item>REJECTED_SPAM</item>
+</string-array>
+
+<string-array name="ish_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>FAILED</item>
+	<item>TRANSFERRED</item>
+	<item>REJECTED</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="ish_reason_codes">
+	<item></item>
+	<item>ABORTED_BY_USER</item>
+	<item>ABORTED_BY_REMOTE</item>    
+	<item>ABORTED_BY_SYSTEM</item>
+	<item>ABORTED_BY_SECONDARY_DEVICE</item>
+	<item>REJECTED_TIME_OUT</item>
+	<item>REJECTED_LOW_SPACE</item>
+	<item>REJECTED_ MAX_SIZE</item>
+	<item>REJECTED_MAX_SHARING_SESSIONS</item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>FAILED_INITIATION</item>
+	<item>FAILED_SHARING</item>
+	<item>FAILED_SAVING</item>
+</string-array>
+
+<string-array name="vsh_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>FAILED</item>
+	<item>TERMINATED</item>
+	<item>REJECTED</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="vsh_reason_codes">
+	<item></item>
+	<item>ABORTED_BY_USER</item>
+	<item>ABORTED_BY_REMOTE</item>    
+	<item>ABORTED_BY_SYSTEM</item>
+	<item>ABORTED_BY_SECONDARY_DEVICE</item>
+	<item>REJECTED_MAX_SHARING_SESSIONS</item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>REJECTED_TIME_OUT</item>
+	<item>FAILED_INITIATION</item>
+	<item>FAILED_SHARING</item>
+</string-array>
+
+<string-array name="gsh_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>FAILED</item>
+	<item>TERMINATED</item>
+	<item>REJECTED</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="gsh_reason_codes">
+	<item></item>
+	<item>ABORTED_BY_USER</item>
+	<item>ABORTED_BY_REMOTE</item>    
+	<item>ABORTED_BY_SYSTEM</item>
+	<item>ABORTED_BY_SECONDARY_DEVICE</item>
+	<item>REJECTED_MAX_SHARING_SESSIONS</item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>REJECTED_TIME_OUT</item>
+	<item>FAILED_INITIATION</item>
+	<item>FAILED_SHARING</item>
+</string-array>
+
+<string-array name="mms_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>TERMINATED</item>
+	<item>FAILED</item>
+	<item>REJECTED</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="mms_reason_codes">
+	<item></item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>FAILED_SESSION</item>
+	<item>FAILED_MEDIA</item>
+</string-array>
+
+<string-array name="ipcall_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>FAILED</item>
+	<item>TERMINATED</item>
+	<item>REJECTED</item>
+	<item>HOLD</item>
+	<item>ACCEPTING</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="ipcall_reason_codes">
+	<item></item>
+	<item>ABORTED_BY_USER</item>
+	<item>ABORTED_BY_REMOTE</item>
+	<item>ABORTED_BY_SYSTEM</item>
+	<item>ABORTED_BY_SECONDARY_DEVICE</item>
+	<item>REJECTED_MAX_SHARING_SESSIONS</item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>REJECTED_TIME_OUT</item>
+	<item>FAILED_INITIATION</item>
+	<item>FAILED_IPCALL</item>
+</string-array>
 
 </resources>
 

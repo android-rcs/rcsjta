@@ -22,17 +22,14 @@
 
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.vsh.VideoSharing.State.FAILED;
 import static com.gsma.services.rcs.vsh.VideoSharing.State.ABORTED;
+import static com.gsma.services.rcs.vsh.VideoSharing.State.FAILED;
 import static com.gsma.services.rcs.vsh.VideoSharing.State.STARTED;
 import static com.gsma.services.rcs.vsh.VideoSharing.State.TERMINATED;
-
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
-import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -165,10 +162,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * @see VideoSharing.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingVideoStreamingSession) {
-			return VideoSharing.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return VideoSharing.Direction.INCOMING;
+		} else {
+			return VideoSharing.Direction.OUTGOING;
 		}
 	}	
 	

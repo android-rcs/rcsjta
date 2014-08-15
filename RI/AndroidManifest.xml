@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-    <application android:icon="@drawable/app_icon" android:label="@string/app_name">
+    <application android:icon="@drawable/app_icon" android:label="@string/app_name" android:name=".RiApplication">
 
         <uses-library android:name="com.google.android.maps"/>
         
@@ -158,11 +158,11 @@
         
 		<receiver android:name=".messaging.chat.SingleChatInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_CHAT"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_ONE2ONE_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         
-        <activity android:name=".messaging.chat.SingleChatView"/>
+        <activity android:name=".messaging.chat.SingleChatView" android:launchMode="singleTop"/>
 				
         <activity android:name=".messaging.chat.ChatList"/>
         
@@ -177,13 +177,19 @@
             </intent-filter>
 		</activity>        
 
+        <receiver android:name="com.orangelabs.rcs.ri.messaging.chat.GroupChatMessageReceiver">
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE"/>
+            </intent-filter>
+        </receiver>
+        
 		<receiver android:name=".messaging.chat.GroupChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 		
-        <activity android:name=".messaging.chat.GroupChatView"/>
+        <activity android:name=".messaging.chat.GroupChatView" android:launchMode="singleTop"/>
                 
         <activity android:name=".messaging.chat.GroupChatList"/>
         
@@ -235,7 +241,7 @@
         
         <activity android:name=".sharing.video.TestVideoSharingApi"/>
 
-        <activity android:name=".sharing.video.InitiateVideoSharing"/>
+        <activity android:name=".sharing.video.InitiateVideoSharing" android:screenOrientation="landscape"/>
         
 		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
             <intent-filter>
@@ -243,7 +249,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".sharing.video.ReceiveVideoSharing"/>
+        <activity android:name=".sharing.video.ReceiveVideoSharing" android:screenOrientation="landscape"/>
         
         <activity android:name=".sharing.video.VideoSharingList"/>
         
@@ -256,6 +262,8 @@
         <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"/>
         
         <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
+        
+        <activity android:name="com.orangelabs.rcs.ri.extension.ReceiveMultiMediaSession"/>
         
         <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
         
@@ -314,9 +322,16 @@
 	 	
 	 	<activity android:name=".ipcall.IPCallView"/>
 	 
-	 	<service android:name=".messaging.ft.FileTransferIntentService"
-            android:exported="false" />
+	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
 	 	
+	 	<service android:name=".sharing.image.ImageSharingIntentService" android:exported="false" />
+	 	
+	 	<service android:name=".sharing.video.VideoSharingIntentService" android:exported="false" />
+	 	
+	 	<service android:name=".ipcall.IPCallIntentService" android:exported="false" />
+	 	
+	 	<service android:name=".messaging.chat.ChatIntentService" android:exported="false" />
+	 		 	
 </application>
 
 </manifest>

@@ -464,5 +464,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             logger.debug("MSRP session has been closed");
         }
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
 

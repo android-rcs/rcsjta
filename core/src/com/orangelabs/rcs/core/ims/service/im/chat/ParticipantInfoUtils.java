@@ -130,7 +130,9 @@ public class ParticipantInfoUtils {
 			// Contact already in set: only update status
 			if (participant.getStatus() != item.getStatus()) {
 				// Update status
-				item.setStatus(participant.getStatus());
+				set.remove(item);
+				ParticipantInfo updatedParticipant = new ParticipantInfo(participant.getContact(), participant.getStatus());
+				set.add(updatedParticipant);
 				return true;
 			}
 		}

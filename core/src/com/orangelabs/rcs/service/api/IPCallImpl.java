@@ -21,21 +21,18 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.ipcall.IPCall.State.FAILED;
 import static com.gsma.services.rcs.ipcall.IPCall.State.ABORTED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.STARTED;
-import static com.gsma.services.rcs.ipcall.IPCall.State.TERMINATED;
+import static com.gsma.services.rcs.ipcall.IPCall.State.FAILED;
 import static com.gsma.services.rcs.ipcall.IPCall.State.HOLD;
 import static com.gsma.services.rcs.ipcall.IPCall.State.INVITED;
-
-import android.os.RemoteCallbackList;
+import static com.gsma.services.rcs.ipcall.IPCall.State.STARTED;
+import static com.gsma.services.rcs.ipcall.IPCall.State.TERMINATED;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IIPCall;
-import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IPCall;
@@ -143,10 +140,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @see IPCall.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingIPCallSession) {
-			return IPCall.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return IPCall.Direction.INCOMING;
+		} else {
+			return IPCall.Direction.OUTGOING;
 		}
 	}
 	

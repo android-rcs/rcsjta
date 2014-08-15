@@ -329,5 +329,10 @@ public class TerminatingIPCallSession extends IPCallSession {
             return null;
 		}
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
 

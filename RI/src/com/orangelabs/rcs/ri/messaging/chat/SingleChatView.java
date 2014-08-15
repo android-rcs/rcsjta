@@ -19,8 +19,6 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
@@ -34,12 +32,9 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Chat;
-import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -51,23 +46,10 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SingleChatView extends ChatView {
 	/**
-	 * View modes
-	 */
-	public final static int MODE_INCOMING = 0;
-	public final static int MODE_OUTGOING = 1;
-	public final static int MODE_OPEN = 2;
-
-	/**
 	 * Intent parameters
 	 */
-	public final static String EXTRA_MODE = "mode";
-	public final static String EXTRA_CONTACT = "contact";
+	/* package private */ final static String EXTRA_CONTACT = "contact";
 
-	/**
-	 * Activity displayed status
-	 */
-	private static boolean activityDisplayed = false;
-	
 	/**
 	 * The log tag for this class
 	 */
@@ -86,73 +68,175 @@ public class SingleChatView extends ChatView {
     /**
      * Chat listener
      */
-    private MyChatListener chatListener = new MyChatListener();	
+	private ChatListener chatListener = new ChatListener() {
+		// Callback called when an Is-composing event has been received
+		@Override
+		public void onComposingEvent(final ContactId contact, final boolean status) {
+			handler.post(new Runnable() {
+				public void run() {
+					TextView view = (TextView) findViewById(R.id.isComposingText);
+					if (status) {
+						// Display is-composing notification
+						view.setText(getString(R.string.label_contact_is_composing, contact.toString()));
+						view.setVisibility(View.VISIBLE);
+					} else {
+						// Hide is-composing notification
+						view.setVisibility(View.GONE);
+					}
+				}
+			});
+		}
+
+		@Override
+		public void onMessageStatusChanged(ContactId contact, final String msgId, int status) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status);
+			}
+			if (status > MESSAGE_STATUSES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMessageStatusChanged unhandled status=" + status);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			int reasonCode = 0;
+			String reason = (reasonCode == 0) ? "" : MESSAGE_REASON_CODES[0];
+			final String notif = getString(R.string.label_message_status_changed, MESSAGE_STATUSES[status], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					addNotifHistory(notif, msgId);
+				}
+			});
+		}
+
+	};
     
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
-		if ((mode == SingleChatView.MODE_OPEN) || (mode == SingleChatView.MODE_OUTGOING)) {
-			// Open chat
-			contact = (ContactId)getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);				
-		} else {
-			// Incoming chat from its Intent
-			contact = (ContactId)getIntent().getParcelableExtra(ChatIntent.EXTRA_CONTACT);
-		}
-		
-		// Set title
-		setTitle(getString(R.string.title_chat) + " " +	contact);	
-		
-		// Load history
-		loadHistory();
-		
+        processIntent(true);
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onCreate contact=" + contact);
 		}
     }
     
-    @Override
-	protected void onResume() {
-        super.onResume();
-        activityDisplayed = true;
-    }
-
-    @Override
-	protected void onPause() {
-        super.onStart();
-        activityDisplayed = false;
-    }
-
 	@Override
 	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);		
-		// Receiving a new intent
+		super.onNewIntent(intent);
 		// Replace the value of intent
 		setIntent(intent);
-		contact = (ContactId)getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);
+		processIntent(false);
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onNewIntent contact=" + contact);
 		}
-		// Load history
-		loadHistory();
+	}
+	
+	/**
+	 * Process intent
+	 * @param loadHistory the history must be (re)loaded
+	 */
+	private void processIntent(boolean loadHistory) {
+    	ChatMessageDAO messageDao = null;
+    	if (getIntent() == null) {
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, "processIntent invalid intent");
+			}
+    		return;
+    	}
+        int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
+		switch (mode) {
+		case ChatView.MODE_OPEN:
+		case ChatView.MODE_OUTGOING:
+			// Open chat
+			contact = (ContactId) getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);
+			loadHistory = true;
+			break;
+
+		case ChatView.MODE_INCOMING:
+			// Get Incoming chat from its Intent
+			messageDao = (ChatMessageDAO) (getIntent().getExtras()
+					.getParcelable(ChatIntentService.BUNDLE_CHATMESSAGE_DAO_ID));
+			if (messageDao == null || messageDao.getContact() == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent invalid chat message");
+				}
+				return;
+			}
+			// Are we switching to a new conversation ?
+			if (!messageDao.getContact().equals(contact)) {
+				// Force reload of history
+				loadHistory = true;
+				// Save new contactId
+				contact = messageDao.getContact();
+			}
+			break;
+
+		default:
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "processIntent invalid mode "+mode);
+			}
+			return;
+		}
+		keyChat = contact;
+		// Set title
+		setTitle(getString(R.string.title_chat) + " " +	contact);
+		if (loadHistory) {
+			// Activity is new or switch to new contact: load history
+			unreadMessageIDs = loadHistory(contact.toString());
+			if (serviceConnected) {
+				try {
+					for (String msgId : unreadMessageIDs) {
+						chatApi.markMessageAsRead(msgId);
+					}
+					unreadMessageIDs.clear();
+				} catch (JoynServiceException e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "processIntent failed to mark chat message as read");
+					}
+				}
+			}
+		} else {
+			// Activity is created: display new message
+			if (messageDao.getMimeType() == null|| messageDao.getBody() == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent invalid chat message");
+				}
+				return;
+			}
+			try {
+				TextMessageItem message = new TextMessageItem(messageDao);
+				// Add chat message to history
+				addMessageHistory(message);
+				if (serviceConnected) {
+					try {
+						chatApi.markMessageAsRead(messageDao.getMsgId());
+					} catch (JoynServiceException e) {
+						if (LogUtils.isActive) {
+							Log.e(LOGTAG, "onNewIntent failed to mark chat message as read");
+						}
+					}
+				} else {
+					// Message will be marked as read upon connection
+					unreadMessageIDs.add(message.getMessageId());
+				}
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent failed to decode chat message", e);
+				}
+				return;
+			}			
+		}
 	}
 	
     /**
-     * Return true if the activity is currently displayed or not
-     *   
-     * @return Boolean
-     */
-    public static boolean isDisplayed() {
-    	return activityDisplayed;
-    }
-    
-    /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
+    	if (LogUtils.isActive) {
+    		Log.d(LOGTAG, "onServiceConnected contact=" + contact);
+    	}
     	try {
 			// Set max label length
 			int maxMsgLength = chatApi.getConfiguration().getSingleChatMessageMaxLength();
@@ -169,18 +253,29 @@ public class SingleChatView extends ChatView {
 //				Log.d(LOGTAG, "onServiceConnected GC subject max length=" + conf.getGroupChatSubjectMaxLength());
 //				Log.d(LOGTAG, "onServiceConnected is respond to display reports=" + conf.isRespondToDisplayReportsEnabled());
 //			}
+			// Add single chat event listener
+			chatApi.addOneToOneChatEventListener(chatListener);
+			
+			serviceConnected = true;
+
+			// Mark messages for this contact as read
+			for (String msgId : unreadMessageIDs) {
+				chatApi.markMessageAsRead(msgId);
+			}
+			unreadMessageIDs.clear();
+			
 			// Open chat
-    		chat = chatApi.openSingleChat(contact, chatListener);
+    		chat = chatApi.openSingleChat(contact);
 							
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
 			
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled));
+			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -192,46 +287,11 @@ public class SingleChatView extends ChatView {
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled));
+		serviceConnected = false;
+		Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled), exitOnce);
     }    
-    
-    /**
-     * Load history
-     */
-	private void loadHistory() {
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact.toString());
-		Cursor cursor = null;
-		try {
-			// @formatter:off
-			String[] projection = new String[] { 	ChatLog.Message.DIRECTION, 
-													ChatLog.Message.CONTACT_NUMBER, 
-													ChatLog.Message.BODY,
-													ChatLog.Message.MIME_TYPE,
-													ChatLog.Message.MESSAGE_ID };
-			String where = ChatLog.Message.MESSAGE_TYPE + " != ?";
-			String[] whereArgs = { ""+ChatLog.Message.Type.SYSTEM };
-			// @formatter:on
-			cursor = getContentResolver().query(uri, projection, where, whereArgs, ChatLog.Message.TIMESTAMP + " ASC");
-			while (cursor.moveToNext()) {
-				int direction = cursor.getInt(0);
-				String contact = cursor.getString(1);
-				String content = cursor.getString(2);
-				String contentType = cursor.getString(3);
-				String messageId = cursor.getString(4);
-				addMessageHistory(direction, contact, content, contentType, messageId);
-			}
-		} catch (Exception e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, e.getMessage(), e);
-			}
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
 
-    /**
+	/**
      * Send a text message
      * 
      * @param msg Message
@@ -239,6 +299,9 @@ public class SingleChatView extends ChatView {
      */
     protected String sendTextMessage(String msg) {
     	try {
+    		if (LogUtils.isActive) {
+        		Log.d(LOGTAG, "sendTextMessage msg=" + msg+" chat="+chat);
+        	}
 			// Send the text to remote
 			String msgId = chat.sendMessage(msg);
 	        // Warn the composing manager that the message was sent
@@ -273,16 +336,7 @@ public class SingleChatView extends ChatView {
      * Quit the session
      */
     protected void quitSession() {
-		// Remove listener
-    	try {
-            if (chat != null) {
-        		chat.removeEventListener(chatListener);
-            }
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
     	chat = null;
-        
         // Exit activity
 		finish();        
     }        	
@@ -290,7 +344,7 @@ public class SingleChatView extends ChatView {
     /**
      * Update the is composing status
      * 
-     * @param isTyping Is compoing status
+     * @param isTyping Is composing status
      */
     protected void setTypingStatus(boolean isTyping) {
 		try {
@@ -333,7 +387,7 @@ public class SingleChatView extends ChatView {
 					showUsInMap(chat.getRemoteContact());
 			    } catch(JoynServiceException e) {
 			    	e.printStackTrace();
-					Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed));
+					Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed), exitOnce);
 				}
 				break;	
 
@@ -350,96 +404,16 @@ public class SingleChatView extends ChatView {
 		return true;
 	}
         
-    /**
-     * Chat event listener
-     */
-    private class MyChatListener extends ChatListener {
-    	// Callback called when a new message has been received
-		public void onNewMessage(final ChatMessage message) {
-			handler.post(new Runnable() {
-				public void run() {
-					if (chatApi != null) {
-						try {
-							chatApi.markMessageAsRead(message.getId());
-						} catch (Exception e) {
-							if (LogUtils.isActive) {
-								Log.e(LOGTAG, e.getMessage(), e);
-							}
-						}
-					}
-					// Display the received message
-					displayReceivedMessage(message);
+	@Override
+	protected void removeServiceListener() {
+		if (serviceConnected) {
+			try {
+				chatApi.removeOneToOneChatEventListener(chatListener);
+			} catch (JoynServiceException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "removeServiceListener failed",e);
 				}
-			});
-		}
-
-    	// Callback called when a new geoloc has been received
-		public void onNewGeoloc(final GeolocMessage message) {
-			handler.post(new Runnable() {
-				public void run() {
-					if (chatApi != null) {
-						try {
-							chatApi.markMessageAsRead(message.getId());
-						} catch (Exception e) {
-							if (LogUtils.isActive) {
-								Log.e(LOGTAG, e.getMessage(), e);
-							}
-						}
-					}
-					// Display the received geoloc
-					displayReceivedGeoloc(message);
-				}
-			});
-		}
-
-    	// Callback called when a message has been delivered to the remote
-    	public void onReportMessageDelivered(final String msgId) {
-			handler.post(new Runnable(){
-				public void run(){
-					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_delivered), msgId);
-				}
-			});
-    	}
-
-    	// Callback called when a message has been displayed by the remote
-    	public void onReportMessageDisplayed(final String msgId) {
-			handler.post(new Runnable(){
-				public void run(){
-					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_displayed), msgId);
-				}
-			});
-    	}
-
-    	// Callback called when a message has failed to be delivered to the remote
-    	public void onReportMessageFailed(final String msgId) {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onReportMessageFailed msgId=" + msgId);
 			}
-			handler.post(new Runnable(){
-				public void run(){
-					// Display a notification
-					addNotifHistory(getString(R.string.label_receive_delivery_status_failed), msgId);
-				}
-			});
-    	}
-
-    	// Callback called when an Is-composing event has been received
-    	public void onComposingEvent(final boolean status) {
-			handler.post(new Runnable() {
-				public void run(){
-					TextView view = (TextView)findViewById(R.id.isComposingText);
-					if (status) {
-						// Display is-composing notification
-						view.setText(contact + " " + getString(R.string.label_contact_is_composing));
-						view.setVisibility(View.VISIBLE);
-					} else {
-						// Hide is-composing notification
-						view.setVisibility(View.GONE);
-					}
-				}
-			});
-    	}
-    }
+		}
+	}
 }

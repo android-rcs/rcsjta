@@ -247,5 +247,10 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 					e.getMessage()));
 		}
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
 

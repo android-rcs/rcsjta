@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import android.app.AlertDialog;
@@ -28,6 +29,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,6 +38,7 @@ import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,8 +59,11 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactsService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -66,9 +73,21 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public abstract class ChatView extends ListActivity implements OnClickListener, OnKeyListener, JoynServiceListener {	
 	/**
+	 * View modes
+	 */
+	/* package private */ final static int MODE_INCOMING = 0;
+	/* package private */ final static int MODE_OUTGOING = 1;
+	/* package private */ final static int MODE_OPEN = 2;
+	
+	/**
+	 * Intent parameters
+	 */
+	/* package private */ final static String EXTRA_MODE = "mode";
+	
+	/**
 	 * Activity result constant
 	 */
-	public final static int SELECT_GEOLOCATION = 0;
+	private final static int SELECT_GEOLOCATION = 0;
 
 	/**
      * UI handler
@@ -78,12 +97,12 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     /**
      * Progress dialog
      */
-	protected Dialog progressDialog = null;
+	protected Dialog progressDialog;
     
     /**
 	 * Chat API
 	 */
-	protected ChatService chatApi = null;
+	protected ChatService chatApi;
     
 	/**
 	 * Message composer
@@ -108,12 +127,49 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     /**
      * Utility class to manage the is-composing status
      */
-    protected IsComposingManager composingManager = null;
-	    
+    protected IsComposingManager composingManager;
+    
+    protected boolean serviceConnected = false;
+    
+    /**
+     * Set of unread message identifiers
+     */
+    protected Set<String> unreadMessageIDs;
+	
+    /**
+	 * A locker to exit only once
+	 */
+	protected LockAccess exitOnce = new LockAccess();
+	
+	/**
+	 * Activity displayed status
+	 */
+	private static boolean activityDisplayed = false;
+	
+	/**
+	 * Key for chat : ContactId for one to one chat or ChatId for Group chat
+	 */
+	protected static Object keyChat;
+	
 	/**
 	 * Smileys
 	 */
     protected Smileys smileyResources;
+    
+	protected static final String[] MESSAGE_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.message_reason_codes);
+
+	protected static final String[] MESSAGE_STATUSES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.message_statuses);
+
+	private final static String LOAD_HISTORY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MESSAGE_TYPE).append("=?").toString();
+
+	private final static String[] LOAD_HISTORY_WHERE_ARGS_CLAUSE = new String[] { Integer.toString(ChatLog.Message.Type.CONTENT) };
+
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 		
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,10 +208,35 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     @Override
     public void onDestroy() {
     	super.onDestroy();
+    	
+    	removeServiceListener();
 
         // Disconnect API
-        chatApi.disconnect();
-        contactsApi.disconnect();
+        if (serviceConnected) { 
+        	chatApi.disconnect();
+            contactsApi.disconnect();
+        }
+    }
+    
+    @Override
+	protected void onResume() {
+        super.onResume();
+        activityDisplayed = true;
+    }
+
+    @Override
+	protected void onPause() {
+        super.onStart();
+        activityDisplayed = false;
+    }
+	
+    /**
+     * Return true if the activity is currently displayed or not
+     *   
+     * @return Boolean
+     */
+    public static boolean isDisplayed() {
+    	return activityDisplayed;
     }
     
     /**
@@ -167,8 +248,6 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         sendText();
     }
     
-    
-
     /**
      * Message composer listener
      * 
@@ -221,6 +300,14 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      */
     protected void addMessageHistory(int direction, String contact, String text, String msgId) {
 		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
+		this.addMessageHistory(item);
+    }
+    
+    /**
+     * Add a text message in the message history
+     * 
+     */
+    protected void addMessageHistory(TextMessageItem item) {
 		msgListAdapter.add(item);
     }
     
@@ -231,7 +318,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected void addGeolocHistory(int direction, String contact, Geoloc geoloc, String msgId) {
     	String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
 		TextMessageItem item = new TextMessageItem(direction, contact, text, msgId);
-		msgListAdapter.add(item);
+		this.addMessageHistory(item);
     }
 
     /**
@@ -255,9 +342,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         // Check if the service is available
     	boolean registered = false;
     	try {
-    		if ((chatApi != null) && chatApi.isServiceRegistered()) {
-    			registered = true;
-    		}
+    		registered = chatApi.isServiceRegistered();
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
@@ -286,9 +371,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         // Check if the service is available
     	boolean registered = false;
     	try {
-    		if ((chatApi != null) && chatApi.isServiceRegistered()) {
-    			registered = true;
-    		}
+    		registered = chatApi.isServiceRegistered();
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
@@ -305,25 +388,6 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
     	}
-    }
-    
-    /**
-	 * Display received message
-	 * 
-	 * @param msg Instant message
-	 */
-    protected void displayReceivedMessage(ChatMessage msg) {
-        addMessageHistory(ChatLog.Message.Direction.INCOMING, msg.getContact().toString(), msg.getMessage(), msg.getId());
-    }
-
-    /**
-	 * Display received geoloc
-	 * 
-	 * @param geoloc Geoloc message
-	 */
-    protected void displayReceivedGeoloc(GeolocMessage msg) {
-    	// Add geoloc to the message history
-		addGeolocHistory(ChatLog.Message.Direction.INCOMING, msg.getContact().toString(), msg.getGeoloc(), msg.getId());
     }
 
     /**
@@ -528,13 +592,39 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	/**
 	 * Text message item
 	 */
-	private class TextMessageItem extends MessageItem {
+	protected class TextMessageItem extends MessageItem {
 	    private String text;
 	    
 	    public TextMessageItem(int direction, String contact, String text, String messageId) {
 	    	super(direction, contact, messageId);
 	    	this.text = text;
 	    }
+	    
+		/**
+		 * Constructor
+		 * 
+		 * @param dao
+		 *            the message Data Object (either text or geolocation message)
+		 */
+		public TextMessageItem(ChatMessageDAO dao) {
+			super(dao.getDirection(), dao.getContact().toString(), dao.getMsgId());
+			if (dao.getMimeType() == null)
+				throw new IllegalArgumentException("mime-type is null");
+			if (dao.getMimeType().equals(GeolocMessage.MIME_TYPE)) {
+				Geoloc geoloc = ChatLog.getGeoloc(dao.getBody());
+				if (geoloc == null) {
+					throw new IllegalArgumentException("Cannot decode geolocation");
+				} else {
+					this.text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
+				}
+			} else {
+				if (dao.getMimeType().equals(ChatMessage.MIME_TYPE)) {
+					this.text = dao.getBody();
+				} else {
+					throw new IllegalArgumentException("Invalid mime-type "+dao.getMimeType());
+				}
+			}
+		}
 	    
 	    public String getText() {
 	    	return text;
@@ -643,9 +733,14 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     protected abstract void quitSession();
     
     /**
+     * Remove the service listener
+     */
+    protected abstract void removeServiceListener();
+    
+    /**
      * Update the is composing status
      * 
-     * @param isTyping Is compoing status
+     * @param isTyping Is composing status
      */
     protected abstract void setTypingStatus(boolean isTyping);
     
@@ -704,5 +799,57 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
     	ArrayList<String> list = new ArrayList<String>(participants);
     	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
     	startActivity(intent);
-    }    
+    }
+    
+	/**
+	 * Load history
+	 * 
+	 * @param key
+	 *            the contactId for OneToOneChat or the chatId for GroupChat
+	 * @return the set of unread chat message identifiers
+	 */
+	protected Set<String> loadHistory(String key) {
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "loadHistory key" + key);
+		}
+		msgListAdapter.clear();
+		Set<String> unReadMessageIDs = new HashSet<String>();
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, key);
+		Cursor cursor = null;
+		try {
+			// @formatter:off
+			String[] projection = new String[] {
+	    				ChatLog.Message.DIRECTION,
+	    				ChatLog.Message.CONTACT_NUMBER,
+	    				ChatLog.Message.BODY,
+	    				ChatLog.Message.MIME_TYPE,
+	    				ChatLog.Message.MESSAGE_ID,
+	    				ChatLog.Message.READ_STATUS };
+			// @formatter:on
+			cursor = getContentResolver().query(uri, projection, LOAD_HISTORY_WHERE_CLAUSE, LOAD_HISTORY_WHERE_ARGS_CLAUSE,
+					ChatLog.Message.TIMESTAMP + " ASC");
+			while (cursor.moveToNext()) {
+				int direction = cursor.getInt(0);
+				String contact = cursor.getString(1);
+				String content = cursor.getString(2);
+				String contentType = cursor.getString(3);
+				String msgId = cursor.getString(4);
+				addMessageHistory(direction, contact, content, contentType, msgId);
+				boolean unread = cursor.getString(5).equals(Integer.toString(ChatLog.Message.ReadStatus.UNREAD));
+				if (unread) {
+					unReadMessageIDs.add(msgId);
+				}
+			}
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Exception loadHistory", e);
+			}
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+		return unReadMessageIDs;
+	}
+	
 }

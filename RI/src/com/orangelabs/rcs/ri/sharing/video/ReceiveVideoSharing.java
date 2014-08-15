@@ -21,9 +21,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,19 +38,22 @@ import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharing;
-import com.gsma.services.rcs.vsh.VideoSharingIntent;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
 import com.gsma.services.rcs.vsh.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoRenderer;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Receive video sharing
  *  
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
  */
 public class ReceiveVideoSharing extends Activity implements JoynServiceListener {
 
@@ -59,16 +62,6 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 	 */
 	private final Handler handler = new Handler();
 
-	/**
-	 * Sharing ID
-	 */
-    private String sharingId;
-    
-    /**
-     * Remote Contact
-     */
-    private ContactId remoteContact;
-    
     /**
 	 * Video sharing API
 	 */
@@ -77,17 +70,17 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 	/**
 	 * Video sharing
 	 */
-	private VideoSharing videoSharing = null;
-
+	private VideoSharing videoSharing;
+	
     /**
-     * Video sharing listener
+     * The Video Sharing Data Object 
      */
-    private MyVideoSharingListener vshListener = new MyVideoSharingListener();    
-    
+    VideoSharingDAO vshDao;
+
     /**
      * Video renderer
      */
-    private MyVideoRenderer videoRenderer = null;
+    private MyVideoRenderer videoRenderer;
 
     /**
      * Video width
@@ -107,7 +100,83 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
     /**
      * Video surface holder
      */
-    private SurfaceHolder surface = null;
+    private SurfaceHolder surface;
+    
+    private boolean serviceConnected = false;
+    
+	/**
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
+    
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ReceiveVideoSharing.class.getSimpleName());
+	
+	/**
+	 * Array of Video sharing states
+	 */
+	private static final String[] VSH_STATES = RiApplication.getContext().getResources().getStringArray(R.array.vsh_states);
+	
+	/**
+	 * Array of Video sharing reason codes
+	 */
+	private static final String[] VSH_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.vsh_reason_codes);
+	
+	   /**
+     * Video sharing listener
+     */
+    private VideoSharingListener vshListener = new VideoSharingListener() {
+
+		@Override
+		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+			}
+			if (state > VSH_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = VSH_REASON_CODES[0];
+			final String notif = getString(R.string.label_vsh_state_changed, VSH_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					switch (state) {
+					case VideoSharing.State.STARTED:
+						// Session is established
+						break;
+
+					case VideoSharing.State.ABORTED:
+						// Display session status
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_aborted, reason),
+								exitOnce);
+						break;
+
+					case VideoSharing.State.FAILED:
+						// Session is failed: exit
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_failed, reason),
+								exitOnce);
+						break;
+
+					case VideoSharing.State.TERMINATED:
+						// Session is failed: exit
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_vsh_terminated), exitOnce);
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onVideoSharingStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+	};
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,16 +188,25 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.video_sharing_receive);
 
         // Set title
         setTitle(R.string.menu_video_sharing);
 
         // Get invitation info
-        sharingId = getIntent().getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
-		remoteContact = getIntent().getParcelableExtra(VideoSharingIntent.EXTRA_CONTACT);
+        vshDao = (VideoSharingDAO) (getIntent().getExtras().getParcelable(VideoSharingIntentService.BUNDLE_VSHDAO_ID));
+		if (vshDao == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "onCreate cannot read Video Sharing invitation");
+			}
+			finish();
+			return;
+		}
 
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate "+vshDao);
+		}
+		
         // Create the live video view
         videoView = (VideoSurfaceView)findViewById(R.id.video_view);
         videoView.setAspectRatio(videoWidth, videoHeight);
@@ -136,57 +214,61 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
         surface.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         surface.setKeepScreenOn(true);
 
-        // Instanciate the renderer
+        // Instantiate the renderer
         videoRenderer = new MyVideoRenderer(videoView);
 
-		// Instanciate API
+		// Instantiate API
         vshApi = new VideoSharingService(getApplicationContext(), this);
 		
 		// Connect API
-        vshApi.connect();                
+        vshApi.connect();
     }
 
     @Override
-    public void onDestroy() {
-    	super.onDestroy();
-    	
-        // Remove file transfer listener
-        if (videoSharing != null) {
-        	try {
-        		videoSharing.removeEventListener(vshListener);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        }    	
-    	
-        // Disconnect API
-        vshApi.disconnect();
-    }
+	public void onDestroy() {
+		super.onDestroy();
+		if (serviceConnected) {
+			// Remove video sharing listener
+			try {
+				if (LogUtils.isActive) {
+					Log.d(LOGTAG, "onDestroy Remove listener");
+				}
+				vshApi.removeEventListener(vshListener);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// Disconnect API
+			vshApi.disconnect();
+		}
+	}
 
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
-		try{
+		try {
+			// Add service listener
+			vshApi.addEventListener(vshListener);
+			serviceConnected = true;
+			
 			// Get the video sharing
-			videoSharing = vshApi.getVideoSharing(sharingId);
+			videoSharing = vshApi.getVideoSharing(vshDao.getSharingId());
 			if (videoSharing == null) {
 				// Session not found or expired
-				Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_session_not_found));
+				Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_session_not_found), exitOnce);
 				return;
 			}
-			videoSharing.addEventListener(vshListener);
 			
 	    	// Display sharing infos
     		TextView from = (TextView)findViewById(R.id.from);
-	        from.setText(getString(R.string.label_from) + " " + remoteContact);
+	        from.setText(getString(R.string.label_from) + " " + vshDao.getContact());
 	    	
 			// Display accept/reject dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.title_video_sharing);
-			builder.setMessage(getString(R.string.label_from) +	" " + remoteContact);
+			builder.setMessage(getString(R.string.label_from) +	" " + vshDao.getContact());
 			builder.setCancelable(false);
 			builder.setIcon(R.drawable.ri_notif_csh_icon);
 			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
@@ -194,10 +276,10 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 			builder.show();
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_disabled));
+			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -209,7 +291,8 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_api_disabled), exitOnce);
     }    
     
     /**
@@ -217,11 +300,14 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 	 */
 	private void acceptInvitation() {
     	try {
+    		if (LogUtils.isActive) {
+				Log.d(LOGTAG, "acceptInvitation");
+			}
     		// Accept the invitation
     		videoSharing.acceptInvitation(videoRenderer);
     	} catch(Exception e) {
     		e.printStackTrace();
-			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_invitation_failed));
+			Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_invitation_failed), exitOnce);
     	}
 	}
 	
@@ -231,7 +317,6 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
 	private void rejectInvitation() {
     	try {
     		// Reject the invitation
-    		videoSharing.removeEventListener(vshListener);
     		videoSharing.rejectInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -262,48 +347,12 @@ public class ReceiveVideoSharing extends Activity implements JoynServiceListener
     };     
     
     /**
-     * Video sharing event listener
-     */
-    private class MyVideoSharingListener extends VideoSharingListener {
-    	// Sharing started
-    	public void onSharingStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// TODO
-				}
-			});
-    	}
-    	
-    	// Sharing aborted
-    	public void onSharingAborted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Display session status
-					Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_aborted));
-				}
-			});
-    	}
-
-    	// Sharing error
-    	public void onSharingError(final int error) {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Display error
-                    Utils.showMessageAndExit(ReceiveVideoSharing.this,
-                            getString(R.string.label_sharing_failed, error));
-				}
-			});
-    	}
-    };
-
-    /**
      * Quit the session
      */
     private void quitSession() {
     	// Stop the sharing
     	try {
             if (videoSharing != null) {
-            	videoSharing.removeEventListener(vshListener);
             	videoSharing.abortSharing();
             }
     	} catch(Exception e) {

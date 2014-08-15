@@ -316,4 +316,9 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
     public String getDirection() {
         return SdpUtils.DIRECTION_SENDRECV;
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }

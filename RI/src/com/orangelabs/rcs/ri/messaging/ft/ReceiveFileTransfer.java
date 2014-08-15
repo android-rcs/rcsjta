@@ -24,12 +24,13 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.StatFs;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -44,10 +45,14 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
+import com.gsma.services.rcs.ft.GroupFileTransferListener;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -55,6 +60,8 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * Received file transfer
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class ReceiveFileTransfer extends Activity implements JoynServiceListener {
     /**
@@ -73,11 +80,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     private FileTransfer fileTransfer;
     
     /**
-     * File transfer listener
-     */
-    private FileTransferListener ftListener = new MyFileTransferListener();
-    
-    /**
      * File transfer is resuming
      */
     private boolean resuming = false;
@@ -85,12 +87,78 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     /**
      * The File Transfer Data Object 
      */
-    private FileTransferDAO ftdao;
+    private FileTransferDAO ftDao;
+    
+    private boolean serviceConnected = false;
+    
+    private boolean groupFileTransfer = false;
+    
+    /**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
     
     /**
 	 * The log tag for this class
 	 */
 	private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
+	
+    /**
+     * Array of file transfer states
+     */
+    private final String[] FT_STATES = RiApplication.getContext().getResources().getStringArray(R.array.file_transfer_states);
+    
+    /**
+     * Array of file transfer reason codes
+     */
+	private final String[] FT_REASON_CODES = RiApplication.getContext().getResources().getStringArray(R.array.file_transfer_reason_codes);
+	
+	/**
+	 * Group File transfer listener
+	 */
+	private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
+
+		@Override
+		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact + " transferId=" + transferId + " state="
+						+ state);
+			}
+		}
+
+		@Override
+		public void onTransferProgress(String chatId, String transferId, long currentSize, long totalSize) {
+			ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+		}
+
+		@Override
+		public void onTransferStateChanged(String chatId, String transferId, int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state);
+			}
+			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state);
+		}
+
+	};
+
+	/**
+	 * File transfer listener
+	 */
+	private FileTransferListener ftListener = new FileTransferListener() {
+
+		@Override
+		public void onTransferProgress(ContactId contact, String transferId, final long currentSize, final long totalSize) {
+			ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+		}
+
+		@Override
+		public void onTransferStateChanged(ContactId contact, String transferId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state);
+			}
+			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state);
+		}
+	};
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,8 +180,8 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		resumeBtn.setEnabled(false);
 		
 		// Get invitation info
-		ftdao = (FileTransferDAO) (getIntent().getExtras().getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
-		if (ftdao == null) {
+		ftDao = (FileTransferDAO) (getIntent().getExtras().getParcelable(FileTransferIntentService.BUNDLE_FTDAO_ID));
+		if (ftDao == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "onCreate cannot read File Transfer invitation");
 			}
@@ -125,59 +193,75 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 			resuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
 		}
 
+		groupFileTransfer = (getIntent().getBooleanExtra(FileTransferIntentService.EXTRA_GROUP_FILE, false));
+		
         // Instantiate API
         ftApi = new FileTransferService(getApplicationContext(), this);
         
         // Connect API
         ftApi.connect();
+        if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate "+ftDao);
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		
-        // Remove session listener
-        if (fileTransfer != null) {
-        	try {
-        		fileTransfer.removeEventListener(ftListener);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        }
-
-        // Disconnect API
-        ftApi.disconnect();
+		if (serviceConnected) {
+			// Remove service listener
+			try {
+				if (groupFileTransfer) {
+					ftApi.removeGroupFileTransferListener(groupFtListener);
+				} else {
+					ftApi.removeOneToOneFileTransferListener(ftListener);
+				}
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
+			}
+			// Disconnect API
+			ftApi.disconnect();
+		}
 	}
 	
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
 		try {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onServiceConnected "+ftDao);
+			}
+			serviceConnected = true;
+			
 			// Get the file transfer session
-    		fileTransfer = ftApi.getFileTransfer(ftdao.getFtId());
+    		fileTransfer = ftApi.getFileTransfer(ftDao.getTransferId());
 			if (fileTransfer == null) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onServiceConnected failed to find session "+ftdao.getFtId());
-				}
 				// Session not found or expired
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_session_not_found));
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_session_not_found), exitOnce);
 				return;
 			}
-			fileTransfer.addEventListener(ftListener);
-			
+			// Add service event listener
+			if (groupFileTransfer) {
+				ftApi.addGroupFileTransferListener(groupFtListener);
+			} else {
+				ftApi.addOneToOneFileTransferListener(ftListener);
+			}
+
 			String size;
-	    	if (ftdao.getSize() != -1) {
-	    		size = getString(R.string.label_file_size, " " + (ftdao.getSize()/1024), " Kb");
+	    	if (ftDao.getSize() != -1) {
+	    		size = getString(R.string.label_file_size, " " + (ftDao.getSize()/1024), " Kb");
 	    	} else {
 	    		size = getString(R.string.label_file_size_unknown);
 	    	}
 
 	    	// Display transfer infos
     		TextView from = (TextView)findViewById(R.id.from);
-	        from.setText(getString(R.string.label_from) + " " + ftdao.getContact());
+	        from.setText(getString(R.string.label_from) + " " + ftDao.getContact());
 	    	TextView sizeTxt = (TextView)findViewById(R.id.image_size);
 	    	sizeTxt.setText(size);
 
@@ -193,7 +277,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	// Check if not already accepted by the stack
 	    	if (ftApi.getConfiguration().isAutoAcceptEnabled()) {	    		
 	    		// File Transfer is auto accepted by the stack. Check capacity
-				isCapacityOk(ftdao.getSize());
+				isCapacityOk(ftDao.getSize());
 	    	} else {
 	    		// File Transfer must be accepted/rejected by user 
 				if (LogUtils.isActive) {
@@ -213,9 +297,24 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				// Manual accept
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_file_transfer);
-				builder.setMessage(getString(R.string.label_from) +	" " + ftdao.getContact() + "\n" + size);
+				builder.setMessage(getString(R.string.label_from) +	" " + ftDao.getContact() + "\n" + size);
 				builder.setCancelable(false);
-				builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
+				if (ftDao.getThumbnail() != null) {
+					try {
+						Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), ftDao.getThumbnail());
+						builder.setIcon(new BitmapDrawable(getResources(), bitmap));
+					} catch (Exception e) {
+						if (LogUtils.isActive) {
+							Log.e(LOGTAG, "Failed to load thumbnail", e);
+						}
+					}
+				} else {
+					if (ftDao.getMimeType().equals("text/vcard")) {
+						builder.setIcon(R.drawable.ri_contact_card_icon);
+					} else {
+						builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
+					}
+				}
 				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
 				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
 				builder.show();
@@ -224,14 +323,15 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	    	if (LogUtils.isActive) {
 				Log.e(LOGTAG, e.getMessage(), e);
 			}
-			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled));
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
 	    	if (LogUtils.isActive) {
 				Log.e(LOGTAG, e.getMessage(), e);
 			}
-			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
+    
     
     /**
      * Callback called when service has been disconnected. This method is called when
@@ -241,7 +341,8 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+    	Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_api_disabled), exitOnce);
     }    
     
 	/**
@@ -258,7 +359,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, e.getMessage(), e);
 			}
-			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_invitation_failed));
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_invitation_failed), exitOnce);
     	}
 	}
 	
@@ -271,7 +372,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				Log.d(LOGTAG, "Reject invitation");
 			}
     		// Reject the invitation
-    		fileTransfer.removeEventListener(ftListener);
 			fileTransfer.rejectInvitation();
     	} catch(Exception e) {
     		if (LogUtils.isActive) {
@@ -304,124 +404,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
     };
     
     /**
-     * File transfer event listener
-     */
-    private class MyFileTransferListener extends FileTransferListener {
-    	/**
-    	 * Callback called when the file has been transferred
-    	 * 
-    	 * @param filename Filename including the path of the transferred file
-    	 */
-    	public void onFileTransferred(final Uri file) {
-    		if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onFileTransferred file="+file.toString());
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("transferred");
-					
-					// Make sure progress bar is at the end
-			        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
-			        progressBar.setProgress(progressBar.getMax());
-			        
-			        // Disable pause button
-			        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-					pauseBtn.setEnabled(false);
-					// Disable resume button
-					Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-					resumeBtn.setEnabled(false);
-
-			        if (ftdao.getMimeType().equals("text/vcard")) {
-			        	// Show the transferred vCard
-			    		Intent intent = new Intent(Intent.ACTION_VIEW);
-			    		intent.setDataAndType(file, "text/x-vcard");   		
-			    		startActivity(intent);
-			        } else {
-				        // Show the transferred image
-				        Utils.showPictureAndExit(ReceiveFileTransfer.this, file);
-			        }
-				}
-			});
-		}
-
-		/**
-		 * Callback called when the file transfer has been aborted
-		 */
-		public void onTransferAborted() {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onTransferAborted");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_sharing_aborted));
-				}
-			});
-		}
-
-		/**
-		 * Callback called when the transfer has failed
-		 * 
-		 * @param error Error
-		 * @see FileTransfer.Error
-		 */
-		public void onTransferError(final int error) {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onTransferError error="+error);
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-                    Utils.showMessageAndExit(ReceiveFileTransfer.this,
-                            getString(R.string.label_transfer_failed, error));
-				}
-			});
-		}
-
-		/**
-		 * Callback called during the transfer progress
-		 * 
-		 * @param currentSize Current transferred size in bytes
-		 * @param totalSize Total size to transfer in bytes
-		 */
-		public void onTransferProgress(final long currentSize, final long totalSize) {
-			handler.post(new Runnable() { 
-    			public void run() {
-    				updateProgressBar(currentSize, totalSize);
-    			}
-    		});
-		}
-
-		/**
-		 * Callback called when the file transfer is started
-		 */
-		public void onTransferStarted() {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStarted");
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					statusView.setText("started");
-				}
-			});
-		}
-
-		@Override
-		public void onFileTransferPaused() throws RemoteException {
-			if (LogUtils.isActive) {
-				Log.i(LOGTAG, "onFileTransferPaused");
-			}
-		}
-
-		@Override
-		public void onFileTransferResumed() throws RemoteException {
-			if (LogUtils.isActive) {
-				Log.i(LOGTAG, "onFileTransferResumed");
-			}
-		}
-    };
-
-    /**
      * Show the transfer progress
      * 
      * @param currentSize Current size transferred
@@ -453,7 +435,6 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 		// Stop session
     	try {
             if (fileTransfer != null) {
-        		fileTransfer.removeEventListener(ftListener);
         		fileTransfer.abortTransfer();
             }
     	} catch(Exception e) {
@@ -512,7 +493,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, e.getMessage(), e);
 				}
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_pause_failed));
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_pause_failed), exitOnce);
 			}
 		}
 	};
@@ -534,7 +515,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, e.getMessage(), e);
 				}
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_resume_failed));
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_resume_failed), exitOnce);
 			}
 		}
 	};
@@ -608,17 +589,105 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 			if (LogUtils.isActive) {
 				Log.w(LOGTAG, "File is too big, reject the File Transfer");
 			}
-			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_too_big));
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_too_big), exitOnce);
 			return false;
 		case STORAGE_TOO_SMALL:
 			if (LogUtils.isActive) {
 				Log.w(LOGTAG, "Not enough storage capacity, reject the File Transfer");
 			}
-			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_capacity_too_small));
+			Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed_capacity_too_small), exitOnce);
 			return false;
 		default:
 			return true;
 		}
 	}
 
+	/**
+	 * Update UI on file transfer state change
+	 * 
+	 * @param state
+	 *            new FT state
+	 */
+	private void onTransferStateChangedUpdateUI(final int state) {
+		if (state > FT_STATES.length) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
+			}
+			return;
+		}
+		// TODO : handle reason code (CR025)
+		final String reason = FT_REASON_CODES[0];
+		final String notif = getString(R.string.label_ft_state_changed, FT_STATES[state], reason);
+		handler.post(new Runnable() {
+
+			public void run() {
+				TextView statusView = (TextView) findViewById(R.id.progress_status);
+				switch (state) {
+				case FileTransfer.State.STARTED:
+					// Session is well established display session status
+					statusView.setText("started");
+					break;
+
+				case FileTransfer.State.ABORTED:
+					// Session is aborted: display message then exit
+					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_aborted, reason), exitOnce);
+					break;
+
+				case FileTransfer.State.FAILED:
+					// Session is failed: exit
+					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed, reason), exitOnce);
+					break;
+
+				case FileTransfer.State.TRANSFERRED:
+					statusView.setText("transferred");
+
+					// Make sure progress bar is at the end
+					ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+					progressBar.setProgress(progressBar.getMax());
+
+					// Disable pause button
+					Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+					pauseBtn.setEnabled(false);
+					// Disable resume button
+					Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+					resumeBtn.setEnabled(false);
+
+					if (ftDao.getMimeType().equals("text/vcard")) {
+						// Show the transferred vCard
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setDataAndType(ftDao.getFile(), "text/x-vcard");
+						startActivity(intent);
+					} else {
+						if (ftDao.getMimeType().startsWith("image/")) {
+							// Show the transferred image
+							Utils.showPictureAndExit(ReceiveFileTransfer.this, ftDao.getFile());
+						}
+					}
+					break;
+
+				default:
+					if (LogUtils.isActive) {
+						Log.d(LOGTAG, "onTransferStateChanged " + notif);
+					}
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Update UI on FT progress
+	 * 
+	 * @param currentSize
+	 *            current size
+	 * @param totalSize
+	 *            total size
+	 */
+	private void onTransferProgressUpdateUI(final long currentSize, final long totalSize) {
+		handler.post(new Runnable() {
+			public void run() {
+				// Display transfer progress
+				updateProgressBar(currentSize, totalSize);
+			}
+		});
+	}
 }

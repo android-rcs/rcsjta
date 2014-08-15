@@ -26,6 +26,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,6 +46,9 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -95,17 +99,114 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
     /**
 	 * Session
 	 */
-	private MultimediaMessagingSession session = null;
-
-    /**
-     * Session listener
-     */
-    private MySessionListener sessionListener = new MySessionListener();    
+	private MultimediaMessagingSession session;
 	
     /**
 	 * Progress dialog
 	 */
-	private Dialog progressDialog = null;
+	private Dialog progressDialog;
+	
+	private boolean serviceConnected = false;
+	
+    /**
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
+
+	/**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(MessagingSessionView.class.getSimpleName());
+   	
+	/**
+	 * Array of Multimedia Messaging Session states
+	 */
+	private static final String[] MMS_STATES = RiApplication.getContext().getResources().getStringArray(R.array.mms_states);
+
+	/**
+	 * Array of Multimedia Messaging Session codes
+	 */
+	private static final String[] MMS_REASON_CODES = RiApplication.getContext().getResources()
+			.getStringArray(R.array.mms_reason_codes);
+	
+    /**
+     * Session listener
+     */
+	private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
+
+		@Override
+		public void onMultimediaMessagingStateChanged(ContactId contact, String sessionId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onMultimediaMessagingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
+						+ state);
+			}
+			if (state > MMS_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMultimediaMessagingStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = MMS_REASON_CODES[0];
+			final String notif = getString(R.string.label_mms_state_changed, MMS_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					switch (state) {
+					case MultimediaSession.State.STARTED:
+						// Session is established: hide progress dialog
+						hideProgressDialog();
+						// Activate button
+						Button sendBtn = (Button) findViewById(R.id.send_btn);
+						sendBtn.setEnabled(true);
+						break;
+
+					case MultimediaSession.State.ABORTED:
+						// Session is aborted: hide progress dialog then exit
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_aborted, reason), exitOnce);
+						break;
+
+					// Add states
+					// case MultimediaSession.State.REJECTED:
+					// Hide progress dialog
+					// hideProgressDialog();
+					// Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_declined));
+					// break;
+
+					case MultimediaSession.State.FAILED:
+						// Session is failed: exit
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_failed, reason), exitOnce);
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onMultimediaMessagingStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		public void onNewMessage(ContactId contact, String sessionId, byte[] content) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
+			}
+			final String data = new String(content);
+
+			handler.post(new Runnable() {
+				public void run() {
+					// Display received data
+					TextView txt = (TextView) MessagingSessionView.this.findViewById(R.id.recv_data);
+					txt.setText(data);
+				}
+			});
+		}
+	};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,7 +224,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 		sendBtn.setOnClickListener(btnSendListener);
 		sendBtn.setEnabled(false);
 
-		// Instanciate API
+		// Instantiate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
         
         // Connect API
@@ -133,17 +234,19 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-		// Remove session listener
-		if (session != null) {
+		if (serviceConnected) {
+			// Remove service listener
 			try {
-				session.removeEventListener(sessionListener);
+				sessionApi.removeMessagingEventListener(serviceListener);
 			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
 			}
-		}
 
-        // Disconnect API
-        sessionApi.disconnect();
+			// Disconnect API
+			sessionApi.disconnect();
+		}
 	}
 	
 	/**
@@ -155,7 +258,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 			session.acceptInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
-			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_invitation_failed));
+			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_invitation_failed), exitOnce);
     	}
 	}
 	
@@ -165,7 +268,6 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 	private void rejectInvitation() {
     	try {
     		// Reject the invitation
-    		session.removeEventListener(sessionListener);
 			session.rejectInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -174,26 +276,23 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
     
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
 		try {
+    		// Add service listener
+			sessionApi.addMessagingEventListener(serviceListener);
+			serviceConnected = true;
+			
 	        int mode = getIntent().getIntExtra(MessagingSessionView.EXTRA_MODE, -1);
 			if (mode == MessagingSessionView.MODE_OUTGOING) {
 				// Outgoing session
 
 	            // Check if the service is available
-	        	boolean registered = false;
-	        	try {
-	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
-	        			registered = true;
-	        		}
-	        	} catch(Exception e) {
-	        		e.printStackTrace();
-	        	}
+	        	boolean registered = sessionApi.isServiceRegistered();
 	            if (!registered) {
-	    	    	Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_service_not_available));
+	    	    	Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_service_not_available), exitOnce);
 	    	    	return;
 	            } 
 	            
@@ -202,56 +301,50 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 		        
 		        // Initiate session
     			startSession();
-			} else
-			if (mode == MessagingSessionView.MODE_OPEN) {
-				// Open an existing session
-				
-				// Incoming session
-		        sessionId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
-
-		    	// Get the session
-	    		session = sessionApi.getMessagingSession(sessionId);
-				if (session == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_has_expired));
-					return;
-				}
-				
-    			// Add session event listener
-				session.addEventListener(sessionListener);
-				
-		    	// Get remote contact
-				contact = session.getRemoteContact();
 			} else {
-				// Incoming session from its Intent
-		        sessionId = getIntent().getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+				if (mode == MessagingSessionView.MODE_OPEN) {
+					// Open an existing session
 
-		    	// Get the session
-	    		session = sessionApi.getMessagingSession(sessionId);
-				if (session == null) {
-					// Session not found or expired
-					Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_has_expired));
-					return;
+					// Incoming session
+					sessionId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
+
+					// Get the session
+					session = sessionApi.getMessagingSession(sessionId);
+					if (session == null) {
+						// Session not found or expired
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_has_expired), exitOnce);
+						return;
+					}
+
+					// Get remote contact
+					contact = session.getRemoteContact();
+				} else {
+					// Incoming session from its Intent
+					sessionId = getIntent().getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+
+					// Get the session
+					session = sessionApi.getMessagingSession(sessionId);
+					if (session == null) {
+						// Session not found or expired
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_has_expired), exitOnce);
+						return;
+					}
+
+					// Get remote contact
+					contact = session.getRemoteContact();
+
+					// Manual accept
+					AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setTitle(R.string.title_messaging_session);
+					builder.setMessage(getString(R.string.label_from) + " " + contact + "\n" + getString(R.string.label_service_id)
+							+ " " + serviceId);
+					builder.setCancelable(false);
+					builder.setIcon(R.drawable.ri_notif_mm_session_icon);
+					builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+					builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+					builder.show();
 				}
-				
-    			// Add session event listener
-				session.addEventListener(sessionListener);
-				
-		    	// Get remote contact
-				contact = session.getRemoteContact();
-		
-				// Manual accept
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(R.string.title_messaging_session);
-				builder.setMessage(getString(R.string.label_from) +	" " + contact + "\n" +
-						getString(R.string.label_service_id) + " " + serviceId);
-				builder.setCancelable(false);
-				builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-				builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-				builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-				builder.show();
 			}
-			
 			// Display session info
 	    	TextView featureTagEdit = (TextView)findViewById(R.id.feature_tag);
 	    	featureTagEdit.setText(serviceId);
@@ -266,7 +359,7 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -278,7 +371,8 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_api_disabled));
+    	serviceConnected = false;
+		Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_api_disabled), exitOnce);
     }    
 	
     /**
@@ -288,10 +382,11 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 		// Initiate the chat session in background
     	try {
 			// Initiate session
-			session = sessionApi.initiateMessagingSession(serviceId, contact, sessionListener);
+			session = sessionApi.initiateMessagingSession(serviceId, contact);
     	} catch(Exception e) {
     		e.printStackTrace();
-			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_invitation_failed));		
+			Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_invitation_failed), exitOnce);
+			return;
     	}
 
         // Display a progress dialog
@@ -337,73 +432,6 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
         }
     };
     
-    /**
-     * Session event listener
-     */
-    private class MySessionListener extends MultimediaMessagingSessionListener {
-    	// Session ringing
-    	public void onSessionRinging() {
-    		// TODO: play ringtone
-    	}
-
-    	// Session started
-    	public void onSessionStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Activate button
-					Button sendBtn = (Button)findViewById(R.id.send_btn);
-					sendBtn.setEnabled(true);
-				}
-			});
-    	}
-    	
-    	// Session aborted
-    	public void onSessionAborted() {
-			handler.post(new Runnable(){
-				public void run(){
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Show info
-					Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_aborted));
-				}
-			});
-    	}
-
-    	// Session error
-    	public void onSessionError(final int error) {
-			handler.post(new Runnable() {
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display error
-					if (error == MultimediaSession.Error.INVITATION_DECLINED) {
-						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_declined));
-					} else {
-						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_failed, error));
-					}					
-				}
-			});
-    	}
-    	
-    	// Receive new message
-    	public void onNewMessage(byte[] content) {
-    		final String data = new String(content);
-    		
-			handler.post(new Runnable() {
-				public void run() {
-					// Display received data
-					TextView txt = (TextView)MessagingSessionView.this.findViewById(R.id.recv_data);
-			        txt.setText(data);					
-				}
-			});
-    	}
-    };
-        
 	/**
      * Quit the session
      */
@@ -411,7 +439,6 @@ public class MessagingSessionView extends Activity implements JoynServiceListene
 		// Stop session
         if (session != null) {
         	try {
-        		session.removeEventListener(sessionListener);
         		session.abortSession();
         	} catch(Exception e) {
         		e.printStackTrace();

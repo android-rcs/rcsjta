@@ -162,11 +162,12 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	@Override
 	public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
+		String encodedParticipants = writeParticipantInfo(participants);
 		if (logger.isActivated()) {
-			logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants=" + participants + ")");
+			logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants=" + encodedParticipants + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
+		values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
 		cr.update(chatDatabaseUri, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 

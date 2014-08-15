@@ -40,7 +40,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class GenericSipRtpSession extends GenericSipSession implements RtpStreamListener {
+public abstract class GenericSipRtpSession extends GenericSipSession implements RtpStreamListener {
 	/**
 	 * RTP payload format
 	 */

@@ -224,28 +224,32 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     public void startMediaSession() throws Exception {
         // Open the MSRP session
         msrpMgr.openMsrpSession();
+        
+		new Thread() {
+			public void run() {
+				try {
+					// Start sending data chunks
+					byte[] data = getContent().getData();
+					InputStream stream;
+					if (data == null) {
+						// Load data from Uri
+						stream = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(getContent().getUri());
+					} else {
+						// Load data from memory
+						stream = new ByteArrayInputStream(data);
+					}
 
-        try {
-            // Start sending data chunks
-            byte[] data = getContent().getData();
-            InputStream stream; 
-            if (data == null) {
-                // Load data from Uri
-                stream = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(getContent().getUri());
-            } else {
-                // Load data from memory
-                stream = new ByteArrayInputStream(data);
-            }
-            
-            msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
-        } catch(Exception e) {
-            // Unexpected error
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-            handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
-        }
+					msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent().getSize(),
+							TypeMsrpChunk.FileSharing);
+				} catch (Exception e) {
+					// Unexpected error
+					if (logger.isActivated()) {
+						logger.error("Session initiation has failed", e);
+					}
+					handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+				}
+			}
+		}.start();
     }
 
     /**
@@ -375,5 +379,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
             }
         }
+	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
 	}
 }

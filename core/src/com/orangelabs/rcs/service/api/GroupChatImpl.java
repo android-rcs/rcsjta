@@ -21,23 +21,22 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.JOINED;
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.DISCONNECTED;
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.GONE;
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
-import static com.gsma.services.rcs.chat.ParticipantInfo.Status.CONNECTED;
-import static com.gsma.services.rcs.chat.ParticipantInfo.Status.DEPARTED;
 import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED;
 import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED;
-import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE;
 import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR;
 import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR;
-import static com.gsma.services.rcs.chat.GroupChat.State.TERMINATED;
+import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.DISCONNECTED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.GONE;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.System.JOINED;
 import static com.gsma.services.rcs.chat.GroupChat.State.ABORTED;
 import static com.gsma.services.rcs.chat.GroupChat.State.CLOSED_BY_USER;
-import static com.gsma.services.rcs.chat.GroupChat.State.STARTED;
-import static com.gsma.services.rcs.chat.GroupChat.State.INVITED;
 import static com.gsma.services.rcs.chat.GroupChat.State.INITIATED;
+import static com.gsma.services.rcs.chat.GroupChat.State.INVITED;
+import static com.gsma.services.rcs.chat.GroupChat.State.STARTED;
+import static com.gsma.services.rcs.chat.GroupChat.State.TERMINATED;
+import static com.gsma.services.rcs.chat.ParticipantInfo.Status.CONNECTED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,16 +45,13 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Intent;
-import android.os.RemoteCallbackList;
 import android.util.Pair;
 
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChat;
-import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -139,12 +135,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return Direction
 	 */
 	public int getDirection() {
-		if ((session instanceof OriginatingAdhocGroupChatSession) ||
-				(session instanceof RejoinGroupChatSession) ||
-					(session instanceof RestartGroupChatSession)) {
-			return GroupChat.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return GroupChat.Direction.INCOMING;
+		} else {
+			return GroupChat.Direction.OUTGOING;
 		}
 	}		
 	
@@ -537,29 +531,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			logger.info("New conference event " + state + " for " + contact);
 		}
     	synchronized(lock) {
-			String chatId = getChatId();
 			// Update history and notify event listeners
 			if (state.equals(User.STATE_CONNECTED)) {
 				// Update rich messaging history
 				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
 						contact, JOINED);
-				// Notify event listener
-				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
-						new ParticipantInfo(contact, CONNECTED));
 			} else if (state.equals(User.STATE_DISCONNECTED)) {
 				// Update rich messaging history
 				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
 						contact, DISCONNECTED);
-				// Notify event listener
-				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
-						new ParticipantInfo(contact, ParticipantInfo.Status.DISCONNECTED));
 			} else if (state.equals(User.STATE_DEPARTED)) {
 				// Update rich messaging history
 				MessagingLog.getInstance().addGroupChatSystemMessage(session.getContributionID(),
 						contact, GONE);
-				// Notify event listener
-				mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(chatId,
-						new ParticipantInfo(contact, DEPARTED));
 			}
 	    }
     }
@@ -620,7 +604,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)
 					&& messagingLog.isDeliveredToAllRecipients(msgId)) {
 				messagingLog.updateOutgoingChatMessageDeliveryStatus(msgId, status);
-				mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, msgId, DELIVERED);
+				mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, msgId,ChatLog.Message.Status.Content.DELIVERED);
 
 			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)
 					&& messagingLog.isDisplayedByAllRecipients(msgId)) {
@@ -690,7 +674,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
 	public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
 		if (logger.isActivated()) {
-			logger.info("handleParticipantStatusChanged " + participantInfo);
+			logger.info("handleParticipantStatusChanged ParticipantInfo [contact=" + participantInfo.getContact() + ", status="
+					+ participantInfo.getStatus() + "]");
 		}
 		synchronized (lock) {
 			mGroupChatEventBroadcaster.broadcastParticipantInfoStatusChanged(getChatId(),

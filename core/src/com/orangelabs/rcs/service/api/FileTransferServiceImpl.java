@@ -21,9 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.ft.FileTransfer.State.DELIVERED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.DISPLAYED;
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -33,8 +30,6 @@ import java.util.Set;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -52,7 +47,6 @@ import com.gsma.services.rcs.ft.IGroupFileTransferListener;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -246,29 +240,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 
-    /**
-	 * Receive a new HTTP file transfer invitation outside of an existing chat session
-	 *
-	 * @param session File transfer session
-	 */
-	public void receiveFileTransferInvitation(FileSharingSession session, ChatSession chatSession, ContactId contact) {
-		// Update rich messaging history
-		if (chatSession.isGroupChat()) {
-			MessagingLog.getInstance().updateFileTransferChatId(
-					chatSession.getFirstMessage().getMessageId(), chatSession.getContributionID());
-			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(session,
-					mGroupFileTransferBroadcaster);
-			addFileTransferSession(groupFileTransfer);
-		} else {
-			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
-			addFileTransferSession(oneToOneFileTransfer);
-		}
-
-		// Display invitation
-		receiveFileTransferInvitation(session, chatSession.isGroupChat(), contact);
-	}    
-	
     /**
      * Returns the configuration of the file transfer service
      * 
@@ -526,18 +497,18 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
 		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, DELIVERED);
+			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DELIVERED);
 
 			// Notify File transfer delivery listeners
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
-					DELIVERED);
+					FileTransfer.State.DELIVERED);
 		} else if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, DISPLAYED);
+			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FileTransfer.State.DISPLAYED);
 
 			// Notify File transfer delivery listeners
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
-					DISPLAYED);
+					FileTransfer.State.DISPLAYED);
 		}
 	}
 
@@ -549,19 +520,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact Contact who received file
      * @param state State to set
      */
-	private void handleGroupFileDeliveryStatus(String chatId, String fileTransferId,
-			ContactId contact, int state) {
+	private void handleGroupFileDeliveryStatus(String chatId, String fileTransferId, ContactId contact, int state) {
 		// Update rich messaging history
 		MessagingLog messagingLog = MessagingLog.getInstance();
-		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId, state,
-				ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE, contact);
-		mGroupFileTransferBroadcaster.broadcastSingleRecipientDeliveryStateChanged(chatId,
-				contact, fileTransferId, state);
-		if (state == DELIVERED && messagingLog.isDeliveredToAllRecipients(fileTransferId)
-				|| state == DISPLAYED && messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-			messagingLog.updateFileTransferStatus(fileTransferId, state);
+		messagingLog.updateGroupChatDeliveryInfoStatus(fileTransferId, state, ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE,
+				contact);
+		mGroupFileTransferBroadcaster.broadcastSingleRecipientDeliveryStateChanged(chatId, contact, fileTransferId, state);
+		if (state == ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED
+				&& messagingLog.isDeliveredToAllRecipients(fileTransferId)
+				|| state == ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED
+				&& messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+			int fileDeliveryState = (state == ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED) ? FileTransfer.State.DELIVERED
+					: FileTransfer.State.DISPLAYED;
+			messagingLog.updateFileTransferStatus(fileTransferId, fileDeliveryState);
 			// Notify File transfer delivery listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(chatId, fileTransferId, state);
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(chatId, fileTransferId, fileDeliveryState);
 		}
 	}
 
@@ -575,9 +548,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public void handleGroupFileDeliveryStatus(String chatId, String fileTransferId, String status,
 			ContactId contact) {
 		if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-			handleGroupFileDeliveryStatus(chatId, fileTransferId, contact, DELIVERED);
+			handleGroupFileDeliveryStatus(chatId, fileTransferId, contact, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DELIVERED);
 		} else if (status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-			handleGroupFileDeliveryStatus(chatId, fileTransferId, contact, DISPLAYED);
+			handleGroupFileDeliveryStatus(chatId, fileTransferId, contact, ChatLog.GroupChatDeliveryInfo.DeliveryStatus.DISPLAYED);
 		}
 	}
 

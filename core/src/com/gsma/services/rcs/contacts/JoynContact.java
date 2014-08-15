@@ -158,9 +158,5 @@ public class JoynContact implements Parcelable {
 	public Capabilities getCapabilities(){
 		return capabilities;
 	}
-
-	@Override
-	public String toString() {
-		return "JoynContact [capabilities=" + capabilities + ", contact=" + mContact + ", registered=" + registered + "]";
-	}	
+	
 }

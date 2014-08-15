@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="select_filetotransfer">
+		<item>Image from gallery</item>
+        <item>Text file from explorer</item>
+    </string-array>
+</resources>
+    

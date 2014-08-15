@@ -187,4 +187,10 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     public SipRequest createInvite() throws SipException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
+    
 }

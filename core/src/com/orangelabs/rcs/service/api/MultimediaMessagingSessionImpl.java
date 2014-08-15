@@ -131,10 +131,10 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	 * @see MultimediaSession.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingSipMsrpSession) {
-			return MultimediaSession.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return MultimediaSession.Direction.INCOMING;
+		} else {
+			return MultimediaSession.Direction.OUTGOING;
 		}
 	}		
 	

@@ -28,6 +28,9 @@ import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
 
+import android.net.Uri;
+
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -47,7 +50,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.IOriginatingFileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -55,16 +57,13 @@ import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
-
-import android.net.Uri;
 
 /**
  * Originating file transfer session
  * 
  * @author jexa7410
  */
-public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession implements MsrpEventListener, IOriginatingFileSharingSession {
+public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession implements MsrpEventListener {
 	/**
 	 * Boundary tag
 	 */
@@ -363,5 +362,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             logger.debug("MSRP session has been closed");
         }
     }
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return false;
+	}
 
 }

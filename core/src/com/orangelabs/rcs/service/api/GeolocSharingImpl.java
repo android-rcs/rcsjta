@@ -21,19 +21,11 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.gsh.GeolocSharing.State.TRANSFERRED;
-import static com.gsma.services.rcs.gsh.GeolocSharing.State.STARTED;
-import static com.gsma.services.rcs.gsh.GeolocSharing.State.ABORTED;
-import static com.gsma.services.rcs.gsh.GeolocSharing.State.FAILED;
-
-import android.os.RemoteCallbackList;
-
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
-import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
@@ -162,10 +154,10 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	 * @see GeolocSharing.Direction
 	 */
 	public int getDirection() {
-		if (session instanceof OriginatingGeolocTransferSession) {
-			return GeolocSharing.Direction.OUTGOING;
-		} else {
+		if (session.isInitiatedByRemote()) {
 			return GeolocSharing.Direction.INCOMING;
+		} else {
+			return GeolocSharing.Direction.OUTGOING;
 		}
 	}		
 		
@@ -237,7 +229,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     	synchronized(lock) {
 			// Notify event listeners
 			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-					getSharingId(), STARTED);
+					getSharingId(), GeolocSharing.State.STARTED);
 	    }
     }
     
@@ -253,7 +245,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     	synchronized(lock) {
 	  		// Notify event listeners
 			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-					getSharingId(), ABORTED);
+					getSharingId(), GeolocSharing.State.ABORTED);
 	
 	        // Remove session from the list
 	        GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
@@ -275,7 +267,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	  		} else {
 				// Notify event listeners
 				mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
-						getSharingId(), ABORTED);
+						getSharingId(), GeolocSharing.State.ABORTED);
 
 		        // Remove session from the list
 		        GeolocSharingServiceImpl.removeGeolocSharingSession(session.getSessionID());
@@ -301,16 +293,16 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			switch (error.getErrorCode()) {
 				case ContentSharingError.SESSION_INITIATION_DECLINED:
 					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, GeolocSharing.Error.INVITATION_DECLINED*/);
+					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.INVITATION_DECLINED*/);
 					break;
 				case ContentSharingError.MEDIA_SAVING_FAILED:
 				case ContentSharingError.MEDIA_TRANSFER_FAILED:
 					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
+					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
 					break;
 				default:
 					// TODO : Handle reason code in CR009
-					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
+					mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(), getSharingId(), GeolocSharing.State.FAILED /*, GeolocSharing.Error.SHARING_FAILED*/);
 			}
 	
 	        // Remove session from the list
@@ -340,7 +332,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			}
 
 			// Notify event listeners
-			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact, getSharingId(), TRANSFERRED);
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact, getSharingId(), GeolocSharing.State.TRANSFERRED);
 	    }
     }
 }

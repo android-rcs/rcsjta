@@ -183,4 +183,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 					e.getMessage()));
 		}
 	}
+
+	@Override
+	public boolean isInitiatedByRemote() {
+		return true;
+	}
 }
