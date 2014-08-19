@@ -66,7 +66,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i).onDeliveryInfoStatusChanged(chatId,
+				mGroupChatListeners.getBroadcastItem(i).onGroupDeliveryInfoChanged(chatId,
 						contact, msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -83,7 +83,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 			try {
 				// TODO : Handle reason code in CR009
 				mGroupChatListeners.getBroadcastItem(i)
-						.onParticipantInfoStatusChanged(chatId, info);
+						.onParticipantInfoChanged(chatId, info);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

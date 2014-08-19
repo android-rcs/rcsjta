@@ -147,7 +147,7 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onParticipantInfoStatusChanged(String chatId, final ParticipantInfo participant) {
+		public void onParticipantInfoChanged(String chatId, final ParticipantInfo participant) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onParticipantStatusChanged chatId=" + chatId + " contact=" + participant.getContact() + " status="
 						+ participant.getStatus());
@@ -167,7 +167,7 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onDeliveryInfoStatusChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
+		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onDeliveryInfoStatusChanged chatId=" + chatId + " contact=" + contact + " msgId=" + msgId
 						+ " status=" + status + " reasonCode=" + reasonCode);

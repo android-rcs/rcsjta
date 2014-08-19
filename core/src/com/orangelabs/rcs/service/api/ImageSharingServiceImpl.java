@@ -29,8 +29,6 @@ import java.util.List;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -106,7 +104,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * 
 	 * @param session Image sharing session
 	 */
-	protected static void addImageSharingSession(ImageSharingImpl session) {
+	private static void addImageSharingSession(ImageSharingImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add an image sharing session in the list (size=" + ishSessions.size() + ")");
 		}
@@ -119,7 +117,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * 
 	 * @param sessionId Session ID
 	 */
-	protected static void removeImageSharingSession(String sessionId) {
+	/* package private */ static void removeImageSharingSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove an image sharing session from the list (size=" + ishSessions.size() + ")");
 		}

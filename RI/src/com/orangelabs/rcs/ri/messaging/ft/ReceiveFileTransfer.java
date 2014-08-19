@@ -119,7 +119,7 @@ public class ReceiveFileTransfer extends Activity implements JoynServiceListener
 	private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state) {
+		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact + " transferId=" + transferId + " state="
 						+ state);

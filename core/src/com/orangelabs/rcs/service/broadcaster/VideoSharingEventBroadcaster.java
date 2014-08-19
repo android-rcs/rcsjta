@@ -15,12 +15,11 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
+import android.os.RemoteCallbackList;
+
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
-import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.os.RemoteCallbackList;
 
 /**
  * VideoSharingEventBroadcaster maintains the registering and unregistering of

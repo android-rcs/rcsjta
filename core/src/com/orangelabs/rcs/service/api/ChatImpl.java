@@ -21,22 +21,15 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
+import static com.gsma.services.rcs.chat.ChatLog.Message.Direction.INCOMING;
 import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DELIVERED;
 import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DISPLAYED;
-import static com.gsma.services.rcs.chat. ChatLog.Message.Direction.INCOMING;
-
+import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.FAILED;
 import android.content.Intent;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
-import android.util.Pair;
 
 import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.IChat;
-import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;

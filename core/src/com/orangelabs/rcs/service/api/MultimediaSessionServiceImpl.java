@@ -110,7 +110,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * 
 	 * @param session SIP session
 	 */
-	protected static void addMessagingSipSession(MultimediaMessagingSessionImpl session) {
+	private static void addMessagingSipSession(MultimediaMessagingSessionImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a messaging session in the list (size=" + messagingSessions.size() + ")");
 		}
@@ -123,7 +123,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * 
 	 * @param sessionId Session ID
 	 */
-	protected static void removeMessagingSipSession(String sessionId) {
+	/* package private */ static void removeMessagingSipSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a messaging session from the list (size=" + messagingSessions.size() + ")");
 		}
@@ -136,7 +136,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * 
 	 * @param session SIP session
 	 */
-	protected static void addStreamingSipSession(MultimediaStreamingSessionImpl session) {
+	private static void addStreamingSipSession(MultimediaStreamingSessionImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a streaming session in the list (size=" + messagingSessions.size() + ")");
 		}
@@ -149,7 +149,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 * 
 	 * @param sessionId Session ID
 	 */
-	protected static void removeStreamingSipSession(String sessionId) {
+	/* package private */ static void removeStreamingSipSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a streaming session from the list (size=" + messagingSessions.size() + ")");
 		}

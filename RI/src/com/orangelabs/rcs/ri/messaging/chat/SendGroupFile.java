@@ -149,7 +149,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state) {
+		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
 						+ transferId + " state=" + state);

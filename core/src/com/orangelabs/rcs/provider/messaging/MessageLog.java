@@ -34,7 +34,6 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
@@ -108,10 +107,6 @@ public class MessageLog implements IMessageLog {
 	 *            Direction
 	 */
 	private void addChatMessage(InstantMessage msg, int type, int direction) {
-        if (msg instanceof FileTransferMessage) {
-            //file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
-            return;
-        }
 		if (logger.isActivated()) {
 			logger.debug("Add chat message: contact=" + msg.getRemote() + ", msg=" + msg.getMessageId() + ", dir=" + direction);
 		}

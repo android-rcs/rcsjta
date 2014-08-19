@@ -29,8 +29,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -104,7 +102,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param session Video sharing session
      */
-	protected static void addVideoSharingSession(VideoSharingImpl session) {
+	private static void addVideoSharingSession(VideoSharingImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a video sharing session in the list (size=" + videoSharingSessions.size() + ")");
 		}
@@ -117,7 +115,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param sessionId Session ID
      */
-	protected static void removeVideoSharingSession(String sessionId) {
+	/* package private */ static void removeVideoSharingSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a video sharing session from the list (size=" + videoSharingSessions.size() + ")");
 		}

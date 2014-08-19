@@ -9,7 +9,7 @@ interface IGroupFileTransferListener {
 
 	void onTransferStateChanged(in String chatId, in String transferId, in int state);
 
-	void onSingleRecipientDeliveryStateChanged(in String chatId, in ContactId contact, in String transferId, in int state);
+	void onGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String transferId, in int state);
 
 	void onTransferProgress(in String chatId, in String transferId, in long currentSize, in long totalSize);
 }

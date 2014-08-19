@@ -28,8 +28,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;

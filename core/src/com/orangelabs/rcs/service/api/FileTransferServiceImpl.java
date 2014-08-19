@@ -132,7 +132,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * 
 	 * @param fileTransferId File transfer ID
 	 */
-	protected static void removeFileTransferSession(String fileTransferId) {
+	/* package private */ static void removeFileTransferSession(String fileTransferId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a file transfer session from the list (size=" + ftSessions.size() + ")");
 		}

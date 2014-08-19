@@ -28,8 +28,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
@@ -104,7 +102,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * 
 	 * @param session Geoloc sharing session
 	 */
-	protected static void addGeolocSharingSession(GeolocSharingImpl session) {
+	private static void addGeolocSharingSession(GeolocSharingImpl session) {
 		if (logger.isActivated()) {
 			logger.debug("Add a geoloc sharing session in the list (size=" + gshSessions.size() + ")");
 		}
@@ -117,7 +115,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * 
 	 * @param sessionId Session ID
 	 */
-	protected static void removeGeolocSharingSession(String sessionId) {
+	/* package private */ static void removeGeolocSharingSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a geoloc sharing session from the list (size=" + gshSessions.size() + ")");
 		}

@@ -22,9 +22,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DELIVERY_ERROR;
-import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.DISPLAY_ERROR;
-import static com.gsma.services.rcs.chat.ChatLog.GroupChatDeliveryInfo.ReasonCode.NONE;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -33,7 +30,6 @@ import android.util.Pair;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

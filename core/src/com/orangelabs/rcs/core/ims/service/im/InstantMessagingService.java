@@ -51,6 +51,7 @@ import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.DelayedDisplayNotificationManager;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
@@ -496,7 +497,7 @@ public class InstantMessagingService extends ImsService {
 		// Create a new session
 		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, contact, firstMsg);
 		// Save the message
-		if (firstMsg != null) {
+		if (firstMsg != null && !(firstMsg instanceof FileTransferMessage)) {
 			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
 		}
 		return session;

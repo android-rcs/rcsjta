@@ -15,13 +15,11 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.chat.ChatListener;
+import android.os.RemoteCallbackList;
+
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.os.RemoteCallbackList;
-import android.os.RemoteException;
 
 /**
  * OneToOneChatEventBroadcaster maintains the registering and unregistering of

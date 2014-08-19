@@ -117,7 +117,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	/**
 	 * Returns the Uri of the file to be transferred
 	 *
-	 * @return Filename
+	 * @return Uri
 	 */
 	public Uri getFile() {
 		return session.getContent().getUri();
@@ -371,19 +371,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		synchronized (lock) {
 			// Check if the file has been transferred or not
 			String fileTransferId = session.getFileTransferId();
-	  		if (session.isFileTransfered()) {
-		        // Remove session from the list
-	  			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
-	  		} else {
+			if (session.isFileTransfered()) {
+				// Remove session from the list
+				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			} else {
 				// Update rich messaging history
 				MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, ABORTED);
 
 				// Notify event listeners
-					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-							ABORTED);
+				mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, ABORTED);
 
-		        // Remove session from the list
-		        FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+				// Remove session from the list
+				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			}
 		}
 	}

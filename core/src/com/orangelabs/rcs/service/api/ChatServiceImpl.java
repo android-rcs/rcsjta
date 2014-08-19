@@ -33,16 +33,12 @@ import java.util.concurrent.Executors;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IChat;
@@ -53,9 +49,7 @@ import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -365,7 +359,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @param contact Contact ID
 	 * @param GroupChat session
 	 */
-	protected static IChat getChatSession(ContactId contact) {
+	private static IChat getChatSession(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.debug("Get a chat session for " + contact);
 		}
@@ -378,7 +372,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * 
 	 * @param contact Contact ID
 	 */
-	protected static void removeChatSession(ContactId contact) {
+	/* package private */ static void removeChatSession(ContactId contact) {
 		int sizeBefore = one2oneChatSessions.size();
 		one2oneChatSessions.remove(contact);
 		int sizeAfter = one2oneChatSessions.size();
@@ -459,7 +453,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * 
 	 * @param session Chat session
 	 */
-	protected static void addGroupChatSession(GroupChatImpl session) {
+	private static void addGroupChatSession(GroupChatImpl session) {
 		int sizeBefore = groupChatSessions.size();
 		groupChatSessions.put(session.getChatId(), session);
 		int sizeAfter = groupChatSessions.size();
@@ -473,7 +467,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * 
 	 * @param chatId Chat ID
 	 */
-	protected static void removeGroupChatSession(String chatId) {
+	/* package private */ static void removeGroupChatSession(String chatId) {
 		int sizeBefore = groupChatSessions.size();
 		groupChatSessions.remove(chatId);
 		int sizeAfter = groupChatSessions.size();

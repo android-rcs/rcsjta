@@ -82,9 +82,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i)
-						.onSingleRecipientDeliveryStateChanged(chatId, contact, transferId,
-								state);
+				mGroupFileTransferListeners.getBroadcastItem(i).onGroupDeliveryInfoChanged(chatId, contact, transferId, state);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener per contact", e);
