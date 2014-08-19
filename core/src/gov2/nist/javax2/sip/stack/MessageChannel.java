@@ -41,6 +41,7 @@ import gov2.nist.javax2.sip.message.MessageFactoryImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
 import gov2.nist.javax2.sip.message.SIPRequest;
 import gov2.nist.javax2.sip.message.SIPResponse;
+import gov2.nist.javax2.sip.parser.StringMsgParser;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -165,7 +166,7 @@ public abstract class MessageChannel {
      * @param receiverAddress Address of the receiver.
      * @param receiverPort Port of the receiver.
      */
-    protected abstract void sendMessage(byte[] message, InetAddress receiverAddress,
+    protected abstract void sendMessage(SIPMessage message, InetAddress receiverAddress,
             int receiverPort, boolean reconnectFlag) throws IOException;
 
     /**
@@ -217,9 +218,8 @@ public abstract class MessageChannel {
 
                 }
             }
-            byte[] msg = sipMessage.encodeAsBytes(this.getTransport());
 
-            this.sendMessage(msg, hopAddr, hop.getPort(), sipMessage instanceof SIPRequest);
+            this.sendMessage(sipMessage, hopAddr, hop.getPort(), sipMessage instanceof SIPRequest);
 
         } catch (IOException ioe) {
             throw ioe;
@@ -246,8 +246,7 @@ public abstract class MessageChannel {
     public void sendMessage(SIPMessage sipMessage, InetAddress receiverAddress, int receiverPort)
             throws IOException {
         long time = System.currentTimeMillis();
-        byte[] bytes = sipMessage.encodeAsBytes(this.getTransport());
-        sendMessage(bytes, receiverAddress, receiverPort, sipMessage instanceof SIPRequest);
+        sendMessage(sipMessage, receiverAddress, receiverPort, sipMessage instanceof SIPRequest);
         logMessage(sipMessage, receiverAddress, receiverPort, time);
     }
 
@@ -378,7 +377,7 @@ public abstract class MessageChannel {
      * @param badReq
      * @return message bytes, null if unable to formulate response
      */
-    protected final String createBadReqRes(String badReq, ParseException pe) {
+    protected final SIPMessage createBadReqRes(String badReq, ParseException pe) {
 
         StringBuffer buf = new StringBuffer(512);
         buf.append("SIP/2.0 400 Bad Request (" + pe.getLocalizedMessage() + ')');
@@ -425,7 +424,14 @@ public abstract class MessageChannel {
             buf.append("\r\n" + clengthHeader.toString());
         }
         
-        return buf.toString();
+		StringMsgParser msgParser = new StringMsgParser();
+		try {
+			return msgParser.parseSIPMessage(buf.toString().getBytes());
+		} catch (ParseException e) {
+			InternalErrorHandler.handleException(e);
+		}
+        
+        return null;
     }
 
     /**

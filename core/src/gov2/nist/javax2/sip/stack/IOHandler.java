@@ -30,9 +30,16 @@ package gov2.nist.javax2.sip.stack;
 
 import gov2.nist.core.StackLogger;
 import gov2.nist.javax2.sip.SipStackImpl;
+import gov2.nist.javax2.sip.header.ViaList;
+import gov2.nist.javax2.sip.message.SIPMessage;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -40,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLSocket;
+import javax2.sip.InvalidArgumentException;
 
 /*
  * TLS support Added by Daniel J.Martinez Manzano <dani@dif.um.es>
@@ -103,19 +111,6 @@ class IOHandler {
      */
     // Changed by Deutsche Telekom
     // ***###*** DTAG, AS 2012-09-10; work around Android issue 34727 (large TCP packets from or to port 5060 not send)
-    private void writeChunks(OutputStream outputStream, byte[] bytes, int length)
-            throws IOException {
-        //don't do the 34727 work around by default
-        writeChunks(outputStream, bytes, length, false);
-    }
-
-    /**
-     * A private function to write things out. This needs to be synchronized as writes can occur
-     * from multiple threads. We write in chunks to allow the other side to synchronize for large
-     * sized writes.
-     */
-    // Changed by Deutsche Telekom
-    // ***###*** DTAG, AS 2012-09-10; work around Android issue 34727 (large TCP packets from or to port 5060 not send)
     private void writeChunks(OutputStream outputStream, byte[] bytes, int length, boolean smallChunks)
             throws IOException {
         // Chunk size is 16K - this hack is for large
@@ -169,24 +164,26 @@ class IOHandler {
     /**
      * Send an array of bytes.
      * 
-     * @param receiverAddress -- inet address
+     * @param senderAddress -- inet src address
+     * @param receiverAddress -- inet dst address
      * @param contactPort -- port to connect to.
      * @param transport -- tcp or udp.
+     * @param message -- sip message to send
      * @param retry -- retry to connect if the other end closed connection
+     * @param messageChannel -- message channel
      * @throws IOException -- if there is an IO exception sending message.
      */
 
     public Socket sendBytes(InetAddress senderAddress, InetAddress receiverAddress,
-            int contactPort, String transport, byte[] bytes, boolean retry,
+            int contactPort, String transport, SIPMessage message, boolean retry,
             MessageChannel messageChannel) throws IOException {
         int retry_count = 0;
         int max_retry = retry ? 2 : 1;
         // Server uses TCP transport. TCP client sockets are cached
-        int length = bytes.length;
         if (sipStack.isLoggingEnabled()) {
             sipStack.getStackLogger().logDebug(
                     "sendBytes " + transport + " inAddr " + receiverAddress.getHostAddress()
-                            + " port = " + contactPort + " length = " + length);
+                            + " port = " + contactPort );
         }
         if (sipStack.isLoggingEnabled() && sipStack.isLogStackTraceOnMessageSend()) {
             sipStack.getStackLogger().logStackTrace(StackLogger.TRACE_INFO);
@@ -229,7 +226,13 @@ class IOHandler {
                         boolean doIssue34727workarround = false;
                         if (clientSock.getLocalPort()==5060 || contactPort==5060)
                             doIssue34727workarround = true;
-                        writeChunks(outputStream, bytes, length, doIssue34727workarround);
+                        
+                        // Update Via header to reflect local port
+                        updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        // Encode the SIP message into byte array
+                        byte[] bytes = message.encodeAsBytes(transport);
+                        
+                        writeChunks(outputStream, bytes, bytes.length, doIssue34727workarround);
                         putSocket(key, clientSock);
                         break;
                     } else {
@@ -240,7 +243,13 @@ class IOHandler {
                             boolean doIssue34727workarround = false;
                             if (clientSock.getLocalPort()==5060 || contactPort==5060)
                                 doIssue34727workarround = true;
-                            writeChunks(outputStream, bytes, length, doIssue34727workarround);
+
+                            // Update Via header to reflect local port
+                            updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            // Encode the SIP message into byte array
+                            byte[] bytes = message.encodeAsBytes(transport);
+                            
+                            writeChunks(outputStream, bytes, bytes.length, doIssue34727workarround);
                             break;
                         } catch (IOException ex) {
                             if (sipStack.isLoggingEnabled())
@@ -313,7 +322,13 @@ class IOHandler {
                         if (clientSock.getLocalPort()==5060 || contactPort==5060)
                             doIssue34727workarround = true;
                         OutputStream outputStream = clientSock.getOutputStream();
-                        writeChunks(outputStream, bytes, length, doIssue34727workarround);
+                        
+                        // Update Via header to reflect local port
+                        updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        // Encode the SIP message into byte array
+                        byte[] bytes = message.encodeAsBytes(transport);
+                        
+                        writeChunks(outputStream, bytes, bytes.length, doIssue34727workarround);
                         putSocket(key, clientSock);
                         break;
                     } else {
@@ -324,7 +339,13 @@ class IOHandler {
                             if (clientSock.getLocalPort()==5060 || contactPort==5060)
                                 doIssue34727workarround = true;
                             OutputStream outputStream = clientSock.getOutputStream();
-                            writeChunks(outputStream, bytes, length, doIssue34727workarround);
+                            
+                            // Update Via header to reflect local port
+                            updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            // Encode the SIP message into byte array
+                            byte[] bytes = message.encodeAsBytes(transport);
+                            
+                            writeChunks(outputStream, bytes, bytes.length, doIssue34727workarround);
                             break;
                         } catch (IOException ex) {
                             if (sipStack.isLoggingEnabled())
@@ -354,13 +375,40 @@ class IOHandler {
             // This is a UDP transport...
             DatagramSocket datagramSock = sipStack.getNetworkLayer().createDatagramSocket();
             datagramSock.connect(receiverAddress, contactPort);
-            DatagramPacket dgPacket = new DatagramPacket(bytes, 0, length, receiverAddress,
+            
+            // Update Via header to reflect local port
+            updateViaHeaderPort(datagramSock.getLocalPort(), message);
+            // Encode the SIP message into byte array
+            byte[] bytes = message.encodeAsBytes(transport);
+            
+            DatagramPacket dgPacket = new DatagramPacket(bytes, 0, bytes.length, receiverAddress,
                     contactPort);
             datagramSock.send(dgPacket);
             datagramSock.close();
             return null;
         }
 
+    }
+    
+	/**
+	 * Update port of Via header to reflect local port
+	 * 
+	 * @param localPort the local port
+	 * @param message the SIP message to be updated
+	 */
+    private void updateViaHeaderPort(int localPort, SIPMessage message) {
+        if (message != null && message.getViaHeaders() != null) {
+            ViaList viaList = message.getViaHeaders();
+            if (viaList != null && !viaList.isEmpty()) {
+                try {
+                    viaList.get(0).setPort(localPort);
+                } catch (InvalidArgumentException e) {
+                    if (sipStack.isLoggingEnabled()) {
+                        sipStack.getStackLogger().logError(e.getMessage(), e);
+                    }
+                }
+            }
+        }
     }
 
     /**

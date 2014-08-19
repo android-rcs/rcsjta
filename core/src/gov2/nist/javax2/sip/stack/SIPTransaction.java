@@ -75,7 +75,12 @@ import javax2.sip.message.Response;
 public abstract class SIPTransaction extends MessageChannel implements
         javax2.sip.Transaction, gov2.nist.javax2.sip.TransactionExt {
 
-    protected boolean toListener; // Flag to indicate that the listener gets
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	protected boolean toListener; // Flag to indicate that the listener gets
 
     // to see the event.
 
@@ -743,8 +748,8 @@ public abstract class SIPTransaction extends MessageChannel implements
      * and send it to the SIP peer. This is just a placeholder method -- calling
      * it will result in an IO exception.
      *
-     * @param messageBytes
-     *            Bytes of the message to send.
+     * @param message
+     *            the message to send.
      * @param receiverAddress
      *            Address of the target peer.
      * @param receiverPort
@@ -753,7 +758,7 @@ public abstract class SIPTransaction extends MessageChannel implements
      * @throws IOException
      *             If called.
      */
-    protected void sendMessage(byte[] messageBytes,
+    protected void sendMessage(SIPMessage message,
             InetAddress receiverAddress, int receiverPort, boolean retry)
             throws IOException {
         throw new IOException(
