@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.database;
+package com.gsma.service.rcs.database;
 
 import android.database.Cursor;
 import android.net.Uri;
