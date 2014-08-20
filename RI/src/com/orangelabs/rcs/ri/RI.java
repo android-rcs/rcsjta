@@ -34,6 +34,7 @@ import com.orangelabs.rcs.ri.ipcall.TestIPCallApi;
 import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
 import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
+import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
 
 /**
  * RI application
@@ -61,6 +62,7 @@ public class RI extends ListActivity {
     		getString(R.string.menu_ipcall),
     		getString(R.string.menu_intents),
     		getString(R.string.menu_service),
+    		getString(R.string.menu_upload),
     		getString(R.string.menu_about)
         };
     	setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -102,6 +104,10 @@ public class RI extends ListActivity {
         		break;
 
         	case 8:
+        		startActivity(new Intent(this, InitiateFileUpload.class));
+        		break;
+
+        	case 9:
         		startActivity(new Intent(this, AboutRI.class));
         		break;
     	}

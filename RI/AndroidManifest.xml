@@ -331,6 +331,10 @@
 	 	<service android:name=".ipcall.IPCallIntentService" android:exported="false" />
 	 	
 	 	<service android:name=".messaging.chat.ChatIntentService" android:exported="false" />
+	 	
+        <!-- File Upload API -->
+	 	
+        <activity android:name=".upload.InitiateFileUpload" />
 	 		 	
 </application>
 

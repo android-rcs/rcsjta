@@ -346,15 +346,23 @@
 <string name="label_initiate_ipcall">Start an IP call</string>
 
 <!-- Service menu -->
-<string name="menu_service">joyn service</string>
+<string name="menu_service">Service</string>
 <string name="menu_service_status">Service status</string>
 <string name="menu_registration_status">Registration status</string>
 <string name="label_service_status">Service enabled:</string>
 <string name="label_registration_status">Service registered:</string>
 
-<!--  Event log -->
-<string name="menu_eventlog">Event log</string>
-<string name="label_eventlog_empty">No log</string>
+<!-- File upload menu -->
+<string name="menu_upload">File upload</string>
+<string name="title_initiate_upload">File upload</string>
+<string name="label_initiate_upload">Initiate file upload</string>
+<string name="label_upload">Upload</string>
+<string name="label_file_thumb">Thumbnail</string>
+<string name="label_upload_failed">File upload has failed</string>
+<string name="label_upload_aborted">File upload has been aborted</string>
+<string name="label_file_upload">File upload at %s</string>
+<string name="label_show_upload">Show upload</string>
+<string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
 
 <string-array name="file_transfer_states">
     <item>UNKNOWN</item>

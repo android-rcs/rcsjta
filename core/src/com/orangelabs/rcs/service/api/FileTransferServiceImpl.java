@@ -21,12 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-<<<<<<< HEAD
-=======
-import static com.gsma.services.rcs.ft.FileTransfer.State.DELIVERED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.DISPLAYED;
-
->>>>>>> 6801d2f678a20bb135fce2d36992039f6bfd136b
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;

@@ -38,6 +38,7 @@ import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadListener;
 import com.gsma.services.rcs.upload.FileUploadService;
+import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
