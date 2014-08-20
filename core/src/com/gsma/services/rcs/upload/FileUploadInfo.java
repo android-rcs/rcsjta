@@ -49,7 +49,7 @@ public class FileUploadInfo implements Parcelable {
 	/**
 	 * File size
 	 */
-	private int size;
+	private long size;
 
 	/**
 	 * File content type
@@ -69,7 +69,7 @@ public class FileUploadInfo implements Parcelable {
 	/**
 	 * File icon size
 	 */
-	private int fileiconSize;
+	private long fileiconSize;
 
 	/**
 	 * File icon content type
@@ -81,7 +81,7 @@ public class FileUploadInfo implements Parcelable {
      * 
      * @hide
 	 */
-	public FileUploadInfo(Uri file, long validity, String filename, int size, String type, Uri fileicon, long fileiconValidity, int fileiconSize, String fileiconType) {
+	public FileUploadInfo(Uri file, long validity, String filename, long size, String type, Uri fileicon, long fileiconValidity, long fileiconSize, String fileiconType) {
 		this.file = file;
 		this.validity = validity;
 		this.filename = filename;
@@ -103,11 +103,11 @@ public class FileUploadInfo implements Parcelable {
 		this.file = Uri.parse(source.readString());
 		this.validity = source.readLong();
 		this.filename = source.readString();
-		this.size = source.readInt();
+		this.size = source.readLong();
 		this.type = source.readString();
 		this.fileicon = Uri.parse(source.readString());
 		this.fileiconValidity = source.readLong();
-		this.fileiconSize = source.readInt();
+		this.fileiconSize = source.readLong();
 		this.fileiconType = source.readString();
     }
 	
@@ -133,11 +133,11 @@ public class FileUploadInfo implements Parcelable {
     	dest.writeString(file.toString());
     	dest.writeLong(validity);
     	dest.writeString(filename);
-    	dest.writeInt(size);
+    	dest.writeLong(size);
     	dest.writeString(type);
     	dest.writeString(fileicon.toString());
     	dest.writeLong(fileiconValidity);
-    	dest.writeInt(fileiconSize);
+    	dest.writeLong(fileiconSize);
     	dest.writeString(fileiconType);
     }
 
@@ -167,7 +167,8 @@ public class FileUploadInfo implements Parcelable {
 	}
 
 	/**
-	 * Returns the validity of the file on the content server
+	 * Returns the validity of the file on the content server. This corresponds
+	 * to the date and time from when the file will be removed on the content server.
 	 * 
 	 * @return Duration
 	 */
@@ -189,7 +190,7 @@ public class FileUploadInfo implements Parcelable {
 	 *  
 	 * @return Size
 	 */
-	public int getSize() {
+	public long getSize() {
 		return size;
 	}
 
@@ -212,7 +213,8 @@ public class FileUploadInfo implements Parcelable {
 	}
 
 	/**
-	 * Returns the validity of the file icon on the content server
+	 * Returns the validity of the file icon on the content server. This corresponds
+	 * to the date and time from when the file icon will be removed on the content server.
 	 * 
 	 * @return Duration
 	 */
@@ -225,7 +227,7 @@ public class FileUploadInfo implements Parcelable {
 	 *  
 	 * @return Size
 	 */
-	public int getFileiconSize() {
+	public long getFileiconSize() {
 		return fileiconSize;
 	}
 
