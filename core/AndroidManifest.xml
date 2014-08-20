@@ -4,7 +4,7 @@
  android:versionName="3.1.1"
  package="com.orangelabs.rcs">
       
-	<uses-sdk android:minSdkVersion="12" android:targetSdkVersion="19"/>
+	<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19"/>
 
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -54,9 +54,10 @@
 	            <action android:name="com.gsma.services.rcs.vsh.IVideoSharingService"/>
 	            <action android:name="com.gsma.services.rcs.ish.IImageSharingService"/>
 	            <action android:name="com.gsma.services.rcs.gsh.IGeolocSharingService"/>
-				<action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService"/>
+   				<action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService"/>
 				<action android:name="com.gsma.services.rcs.ipcall.IIPCallService"/>
-	        </intent-filter>
+	            <action android:name="com.gsma.services.rcs.upload.IFileUploadService"/>
+			</intent-filter>
 	    </service>
 	
 		<!-- RCS settings application -->

@@ -1,0 +1,31 @@
+package com.gsma.services.rcs.upload;
+
+import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.upload.IFileUpload;
+import com.gsma.services.rcs.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
+
+/**
+ * File uploadservice API
+ */
+interface IFileUploadService {
+
+	FileUploadServiceConfiguration getConfiguration();
+
+	List<IBinder> getFileUploads();
+	
+	IFileUpload getFileUpload(in String uploadId);
+
+	IFileUpload uploadFile(in Uri file, in boolean fileicon);
+
+
+
+	void addEventListener(in IFileUploadListener listener);
+
+
+
+	void removeEventListener(in IFileUploadListener listener);
+
+
+	int getServiceVersion();
+}

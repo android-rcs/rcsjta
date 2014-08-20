@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:stretchColumns="1"
+	    android:paddingTop="10dip">
+	
+		<TableRow android:paddingTop="5dip">
+       		<CheckBox android:id="@+id/file_thumb"			 
+	         android:text="@string/label_file_thumb" />
+	    </TableRow>
+       				
+		<TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_file"
+			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<TextView android:id="@+id/uri"
+			 android:singleLine="true"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	        
+	    <TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_progress_status"
+ 			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<TextView android:id="@+id/progress_status"
+			 android:singleLine="true"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	
+	    <TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_progress_bar"
+			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<ProgressBar android:id="@+id/progress_bar"
+ 			 style="?android:attr/progressBarStyleHorizontal"
+			 android:gravity="left"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>
+	    
+	    <TableRow android:padding="5dip"></TableRow>
+	
+		<Button android:text="@string/label_select_file"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/select_btn"/>
+		
+		<Button android:text="@string/label_upload"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/upload_btn"/>
+		
+		<Button android:text="@string/label_show_upload"
+		 android:layout_marginLeft="5dip"
+		 android:layout_marginRight="5dip"
+		 android:id="@+id/show_btn"/>
+		
+	</TableLayout>
+	
+</ScrollView>	

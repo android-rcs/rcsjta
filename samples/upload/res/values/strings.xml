@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- Application -->
+<string name="app_name">Upload file</string>
+
+<!-- Commons -->
+<string name="label_service_not_available">The service is not available. Please retry later.</string>
+<string name="label_file_size">Size: %1$s%2$s</string>
+<string name="label_file_size_unknown">Size: unknown</string>
+<string name="label_ims_disconnected">Service has been disconnected from the IMS</string>
+<string name="label_api_failed">Call API method has failed</string>
+<string name="label_api_disabled">joyn service is not available</string>
+<string name="label_ok">OK</string>
+<string name="label_cancel">Cancel</string>
+<string name="title_msg">Information</string>
+<string name="title_picture">Received picture</string>
+<string name="label_select">Select</string>
+<string name="label_log_empty">No entry</string>
+<string name="label_state_unknown">unknown</string>
+<string name="label_state_inactive">inactive</string>
+<string name="label_state_aborted">aborted</string>
+<string name="label_state_failed">failed</string>
+<string name="label_state_started">started</string>
+<string name="label_state_transferred">transferred</string>
+<string name="label_state_terminated">terminated</string>
+<string name="label_session_state">State: %s</string>
+<string name="label_filename">File: %s</string>
+<string name="label_filesize">Size: %s bytes</string>
+<string name="label_progress_status">Status:</string>
+<string name="label_progress_bar">Progress:</string>
+<string name="label_file">Selected file:</string>
+<string name="label_size">Size:</string>
+<string name="label_select_file">Select file</string>
+
+<!-- File upload menu -->
+<string name="title_initiate_upload">File upload</string>
+<string name="label_initiate_upload">Initiate file upload</string>
+<string name="label_upload">Upload</string>
+<string name="label_file_thumb">Thumbnail</string>
+<string name="label_upload_failed">File upload has failed</string>
+<string name="label_upload_aborted">File upload has been aborted</string>
+<string name="label_file_upload">File upload at %s</string>
+<string name="label_show_upload">Show upload</string>
+<string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
+
+</resources>
+

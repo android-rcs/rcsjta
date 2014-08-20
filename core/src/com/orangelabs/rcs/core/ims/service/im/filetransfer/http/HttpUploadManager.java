@@ -348,7 +348,8 @@ public class HttpUploadManager extends HttpTransferManager {
 			writeFileMultipart(outputStream, file);
 			if (!isCancelled()) {
 				// if the upload is cancelled, we don't send the last boundary to get bad request
-				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens); 
+				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
+				
 				// Check response status code
 				int responseCode = connection.getResponseCode();
 				if (logger.isActivated()) {
