@@ -21,8 +21,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
-import java.io.File;
-
 import android.net.Uri;
 
 import com.gsma.services.rcs.JoynServiceException;
