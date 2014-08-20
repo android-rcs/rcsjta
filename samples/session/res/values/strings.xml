@@ -20,9 +20,10 @@
 <string name="label_close_session">Close session</string>
 <string name="label_session_in_progress">Session in progress...</string>
 <string name="label_session_canceled">Session initiation has been canceled</string>
-<string name="label_session_aborted">Session aborted</string>
+<string name="label_session_aborted">Session aborted (%1$s)</string>
+<string name="label_session_not_found">Session not found</string>
 <string name="label_session_declined">Session invitation has been declined</string>
-<string name="label_session_failed">Session has failed (error code %d)</string>
+<string name="label_session_failed">Session has failed (%1$s)</string>
 <string name="title_session">Multimedia session</string>
 <string name="label_session_has_expired">Session has expired</string>
 <string name="title_recv_invitation">New session invitation</string>
@@ -31,6 +32,27 @@
 <string name="label_data">Data:</string>
 <string name="label_data_recv">%d Kb received</string>
 <string name="label_data_sent">%d Kb sent</string>
+<string name="label_mms_state_changed">MMS state %1$s (%2$s)</string>
+
+<string-array name="mms_states">
+	<item>UNKNOWN</item>
+	<item>INVITED</item>
+	<item>INITIATED</item>    
+	<item>STARTED</item>
+	<item>ABORTED</item>
+	<item>TERMINATED</item>
+	<item>FAILED</item>
+	<item>REJECTED</item>
+	<item>RINGING</item>
+</string-array>
+
+<string-array name="mms_reason_codes">
+	<item></item>
+	<item>REJECTED_BY_USER</item>
+	<item>REJECTED_BY_REMOTE</item>
+	<item>FAILED_SESSION</item>
+	<item>FAILED_MEDIA</item>
+</string-array>
 
 </resources>
 

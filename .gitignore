@@ -1,8 +1,6 @@
-/RI/gen
-/RI/bin
-/RI/.settings
-/core/rcs_api.jar
-/RI/.classpath
-/RI/lint.xml
 *.bak
-/core/tests/*.classpath
+gen
+bin
+.settings
+rcs_api.jar
+project.properties

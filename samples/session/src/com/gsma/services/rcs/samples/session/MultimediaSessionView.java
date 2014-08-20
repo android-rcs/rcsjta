@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.gsma.services.rcs.samples.session;
 
+import java.util.Arrays;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -26,6 +28,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,12 +39,14 @@ import android.widget.Toast;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.samples.utils.LogUtils;
 
 
 /**
@@ -66,7 +71,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	/**
 	 * Exchanged data
 	 */
-	private static byte[] data = new byte[2048];
+	private byte[] data = new byte[2048];
 
 	/**
      * UI handler
@@ -91,18 +96,13 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	/**
 	 * Remote contact
 	 */
-    private String contact;
+    private ContactId contact;
 
     /**
 	 * MM session
 	 */
-	private MultimediaMessagingSession session = null;
+	private MultimediaMessagingSession session;
 
-    /**
-     * MM session listener
-     */
-    private MySessionListener sessionListener = new MySessionListener();
-    
     /**
      * Data transfer status
      */
@@ -121,8 +121,133 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     /**
 	 * Progress dialog
 	 */
-	private Dialog progressDialog = null;
+	private Dialog progressDialog;
 	
+	private boolean serviceConnected = false;
+	
+	/**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(MultimediaSessionView.class.getSimpleName());
+   	
+	/**
+	 * Array of Multimedia Messaging Session states
+	 */
+	private String[] MMS_STATES;
+
+	/**
+	 * Array of Multimedia Messaging Session codes
+	 */
+	private String[] MMS_REASON_CODES;
+	
+    /**
+     * Session event listener
+     */
+	private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
+
+		@Override
+		public void onMultimediaMessagingStateChanged(ContactId contact, String sessionId, final int state) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onMultimediaMessagingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
+						+ state);
+			}
+			if (state > MMS_STATES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMultimediaMessagingStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			// TODO : handle reason code (CR025)
+			final String reason = MMS_REASON_CODES[0];
+			final String notif = getString(R.string.label_mms_state_changed, MMS_STATES[state], reason);
+			handler.post(new Runnable() {
+				public void run() {
+					switch (state) {
+					case MultimediaSession.State.STARTED:
+						// Session is established: hide progress dialog
+						hideProgressDialog();
+						// Send data
+						if (mode == MultimediaSessionView.MODE_OUTGOING) {
+							// Originating
+							new Thread() {
+								public void run() {
+									try {
+										while (!dataTransferTerminated) {
+											// Send data
+											dataSent += data.length;
+											session.sendMessage(data);
+
+											// Update UI
+											handler.post(new Runnable() {
+												public void run() {
+													TextView txtView = (TextView) findViewById(R.id.data);
+													txtView.setText(getString(R.string.label_data_sent, dataSent / 1024));
+												}
+											});
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+										// Can't connect media: abort the session
+										try {
+											session.abortSession();
+										} catch (Exception ex) {
+										}
+									}
+								}
+							}.start();
+						}
+						break;
+
+					case MultimediaSession.State.ABORTED:
+						// Stop data transfer
+						dataTransferTerminated = true;
+						// Hide progress dialog
+						hideProgressDialog();
+						// Display session status
+						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_aborted, reason));
+						break;
+
+					// Add states
+					// case MultimediaSession.State.REJECTED:
+					// Hide progress dialog
+					// hideProgressDialog();
+					// Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_declined));
+					// break;
+
+					case MultimediaSession.State.FAILED:
+						// Session is failed: exit
+						// Stop data transfer
+						dataTransferTerminated = true;
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_failed, reason));
+						break;
+
+					default:
+						if (LogUtils.isActive) {
+							Log.d(LOGTAG, "onMultimediaMessagingStateChanged " + notif);
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		public void onNewMessage(ContactId contact, String sessionId, byte[] content) {
+			// Receive data
+			dataRecv += content.length;
+			// Update UI
+			handler.post(new Runnable() {
+				public void run() {
+					// Display received data
+					TextView txt = (TextView) findViewById(R.id.data);
+					txt.setText(getString(R.string.label_data_recv, dataRecv / 1024));
+				}
+			});
+		}
+
+	};
+   	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,13 +259,15 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         // Set title
         setTitle(R.string.title_session);
 
-        // Init data
-    	for(int i=0; i < data.length; i++) {
-        	data[i] = 0x00;
-    	}
+        // Initialize data
+        Arrays.fill( data, (byte)0 );
         
-    	// Instanciate API
+    	// Instantiate API
         sessionApi = new MultimediaSessionService(getApplicationContext(), this);
+        
+        MMS_STATES = getResources().getStringArray(R.array.mms_states);
+        
+        MMS_REASON_CODES = getResources().getStringArray(R.array.mms_reason_codes);
         
         // Connect API
         sessionApi.connect();
@@ -149,44 +276,45 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-		// Remove session listener
-		if (session != null) {
+		if (serviceConnected) {
+			// Remove session listener
 			try {
-				session.removeEventListener(sessionListener);
+				sessionApi.removeMessagingEventListener(serviceListener);
 			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
 			}
-		}
 
-        // Disconnect API
-        sessionApi.disconnect();
+			// Disconnect API
+			sessionApi.disconnect();
+		}
 	}
 		    
     /**
      * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
+     * service is well connected to the RCS service (binding procedure successful):
      * this means the methods of the API may be used.
      */
     public void onServiceConnected() {
 		try {
+			// Add service listener
+			sessionApi.addMessagingEventListener(serviceListener);
+			serviceConnected = true;
+						
 	        mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
 			if (mode == MultimediaSessionView.MODE_OUTGOING) {
 				// Outgoing session
 
 	            // Check if the service is available
-	        	boolean registered = false;
-	        	try {
-	        		if ((sessionApi != null) && sessionApi.isServiceRegistered()) {
-	        			registered = true;
-	        		}
-	        	} catch(Exception e) {}
+	        	boolean registered = sessionApi.isServiceRegistered();
 	            if (!registered) {
 	    	    	Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_service_not_available));
 	    	    	return;
 	            } 
 	            
 		    	// Get remote contact
-				contact = getIntent().getStringExtra(MultimediaSessionView.EXTRA_CONTACT);
+				contact = getIntent().getParcelableExtra(MultimediaSessionView.EXTRA_CONTACT);
 		        
 		        // Initiate session
     			startSession();
@@ -201,9 +329,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_has_expired));
 					return;
 				}
-				
-    			// Add session event listener
-				session.addEventListener(sessionListener);
 				
 		    	// Get remote contact
 				contact = session.getRemoteContact();
@@ -221,8 +346,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 			
 			// Display session info
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
-	    	contactEdit.setText(contact);
+	    	contactEdit.setText(contact.toString());
 		} catch(JoynServiceException e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to connect API", e);
+			}
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
 		}
     }
@@ -235,7 +363,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
      * @see JoynService.Error
      */
     public void onServiceDisconnected(int error) {
+    	serviceConnected = false;
 		Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_disabled));
+		if (LogUtils.isActive) {
+			Log.w(LOGTAG, "onServiceDisconnected error="+error);
+		}
     }    
 	
 	/**
@@ -246,6 +378,9 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     		// Accept the invitation
 			session.acceptInvitation();
     	} catch(Exception e) {
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to accept invitation", e);
+			}
 			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));
     	}
 	}
@@ -256,9 +391,12 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 	private void rejectInvitation() {
     	try {
     		// Reject the invitation
-    		session.removeEventListener(sessionListener);
 			session.rejectInvitation();
     	} catch(Exception e) {
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to reject invitation", e);
+			}
+    		Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_failed));
     	}
 	}	
 
@@ -269,10 +407,13 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		// Initiate the chat session in background
     	try {
 			// Initiate session
-			session = sessionApi.initiateMessagingSession(ServiceUtils.SERVICE_ID, contact, sessionListener);
+			session = sessionApi.initiateMessagingSession(ServiceUtils.SERVICE_ID, contact);
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));		
+    		if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to start session", e);
+			}
+			Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_invitation_failed));
+			return;
     	}
 
         // Display a progress dialog
@@ -318,106 +459,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         }
     };
     
-    /**
-     * Session event listener
-     */
-    private class MySessionListener extends MultimediaMessagingSessionListener {
-    	// Session ringing
-    	public void onSessionRinging() {
-    	}
-
-    	// Session started
-    	public void onSessionStarted() {
-			handler.post(new Runnable() { 
-				public void run() {
-					// Hide progress dialog
-					hideProgressDialog();
-					
-            		// Send data
-					if (mode == MultimediaSessionView.MODE_OUTGOING) {
-						// Originating
-			    		Thread t = new Thread() {
-			    			public void run() {
-			    				try  {
-				            		while(!dataTransferTerminated) {
-					            		// Send data
-				            			dataSent += data.length;
-				            			session.sendMessage(data);
-				            			
-				            			// Update UI
-				            			handler.post(new Runnable() {
-				            				public void run() {
-						            	    	TextView txtView = (TextView)findViewById(R.id.data);
-						            	    	txtView.setText(getString(R.string.label_data_sent, dataSent/1024));
-				            				}
-				            			});
-				            		}
-			    				} catch(Exception e) {
-									e.printStackTrace();
-									// Can't connect media: abort the session
-									try {
-										session.abortSession();
-									} catch(Exception ex) {}
-			    				}
-			    			}
-			    		};
-			    		t.start();
-					}
-				}
-			});
-    	}
-    	
-    	// Session aborted
-    	public void onSessionAborted() {
-			handler.post(new Runnable(){
-				public void run(){
-			    	// Stop data transfer
-					dataTransferTerminated = true;
-
-					// Hide progress dialog
-					hideProgressDialog();
-
-					// Show info
-					Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_aborted));
-				}
-			});
-    	}
-
-    	// Session error
-    	public void onSessionError(final int error) {
-			handler.post(new Runnable() {
-				public void run() {
-			    	// Stop data transfer
-					dataTransferTerminated = true;
-
-					// Hide progress dialog
-					hideProgressDialog();
-					
-					// Display error
-					if (error == MultimediaSession.Error.INVITATION_DECLINED) {
-						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_declined));
-					} else {
-						Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_session_failed, error));
-					}					
-				}
-			});
-    	}
-    	
-    	// Receive new message
-    	public void onNewMessage(byte[] content) {
-    		// Receive data
-    		dataRecv += content.length;
-    		
-			// Update UI
-			handler.post(new Runnable() {
-				public void run() {
-			    	TextView txtView = (TextView)findViewById(R.id.data);
-			    	txtView.setText(getString(R.string.label_data_recv, dataRecv/1024));
-				}
-			});
-    	}
-    };
-        
 	/**
      * Quit the session
      */
@@ -428,7 +469,6 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
 		// Stop session
         if (session != null) {
         	try {
-        		session.removeEventListener(sessionListener);
         		session.abortSession();
         	} catch(Exception e) {
         	}

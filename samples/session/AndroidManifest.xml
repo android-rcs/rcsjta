@@ -5,7 +5,7 @@
  package="com.gsma.services.rcs.samples.session">
 
 	<uses-sdk android:minSdkVersion="8"
-		android:targetSdkVersion="15"/>
+		android:targetSdkVersion="19"/>
 	
 	<uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -20,14 +20,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 		</activity>
+		
+        <activity android:name=".ReceiveMultiMediaSession"/>
         
 		<receiver android:name=".MultimediaSessionInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.session.action.NEW_SESSION"/>
+                <action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
                 <data android:mimeType="com.gsma.services.rcs/ext.texto" />
         		<category android:name="android.intent.category.LAUNCHER" />
         		<category android:name="android.intent.category.DEFAULT" />
-		    	</intent-filter>
+		    </intent-filter>
         </receiver>
 
         <activity android:name=".MultimediaSessionView"/>
