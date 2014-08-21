@@ -60,7 +60,16 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     	        PackageManager pm = context.getPackageManager();
     	        String packageName = intent.getData().getSchemeSpecificPart();
     	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+    	        if (appInfo == null) {
+    	        	// No app info
+    	        	return;
+    	        }
     	        Bundle appMeta = appInfo.metaData;
+    	        if (appMeta == null) {
+    	        	// No app meta
+    	        	return;
+    	        }
+    	        
     	        String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
     	        if (exts == null) {
     	        	// No RCS extension
