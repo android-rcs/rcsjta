@@ -33,20 +33,13 @@ public class FileUploadServiceConfiguration implements Parcelable {
 	private long maxSize;
 	
 	/**
-	 * Maximum number of simultaneous file transfers 
-	 */
-	private int maxFileTransfers;
-	
-	/**
 	 * Constructor
 	 * 
 	 * @param maxSize File transfer size limit
-	 * @param maxFileTransfers Maximum number of simultaneous file transfers
 	 * @hide
 	 */
-	public FileUploadServiceConfiguration(long maxSize, int maxFileTransfers) {
+	public FileUploadServiceConfiguration(long maxSize) {
 		this.maxSize = maxSize;
-		this.maxFileTransfers = maxFileTransfers;
 	}
 	
 	/**
@@ -57,7 +50,6 @@ public class FileUploadServiceConfiguration implements Parcelable {
 	 */
 	public FileUploadServiceConfiguration(Parcel source) {
 		this.maxSize = source.readLong();
-		this.maxFileTransfers = source.readInt();
     }
 
 	/**
@@ -80,7 +72,6 @@ public class FileUploadServiceConfiguration implements Parcelable {
 	 */
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeLong(maxSize);
-		dest.writeInt(maxFileTransfers);
 	}
 
     /**
@@ -106,14 +97,5 @@ public class FileUploadServiceConfiguration implements Parcelable {
 	 */
 	public long getMaxSize() {
 		return maxSize;
-	}
-
-	/**
-	 * Returns the max number of simultaneous file transfers
-	 * 
-	 * @return Integer
-	 */
-	public int getMaxFileTransfers() {
-		return maxFileTransfers;
 	}
 }

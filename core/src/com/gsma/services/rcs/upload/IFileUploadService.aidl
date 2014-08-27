@@ -12,11 +12,14 @@ interface IFileUploadService {
 
 	FileUploadServiceConfiguration getConfiguration();
 
+	boolean canUploadFile();
+
 	List<IBinder> getFileUploads();
 	
 	IFileUpload getFileUpload(in String uploadId);
 
 	IFileUpload uploadFile(in Uri file, in boolean fileicon);
+
 
 
 

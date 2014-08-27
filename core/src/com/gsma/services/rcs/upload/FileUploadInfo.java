@@ -52,9 +52,9 @@ public class FileUploadInfo implements Parcelable {
 	private long size;
 
 	/**
-	 * File content type
+	 * File MIME type
 	 */
-	private String type;
+	private String mimeType;
 	
 	/**
 	 * URI of the file icon on the content server
@@ -72,9 +72,9 @@ public class FileUploadInfo implements Parcelable {
 	private long fileiconSize;
 
 	/**
-	 * File icon content type
+	 * File icon MIME type
 	 */
-	private String fileiconType;
+	private String fileiconMimeType;
 
     /**
      * Constructor for outgoing message
@@ -86,11 +86,11 @@ public class FileUploadInfo implements Parcelable {
 		this.validity = validity;
 		this.filename = filename;
 		this.size = size;
-		this.type = type;
+		this.mimeType = type;
 		this.fileicon = fileicon;
 		this.fileiconValidity = fileiconValidity;
 		this.fileiconSize = fileiconSize;
-		this.fileiconType = fileiconType;
+		this.fileiconMimeType = fileiconType;
 	}
 	
 	/**
@@ -104,11 +104,11 @@ public class FileUploadInfo implements Parcelable {
 		this.validity = source.readLong();
 		this.filename = source.readString();
 		this.size = source.readLong();
-		this.type = source.readString();
+		this.mimeType = source.readString();
 		this.fileicon = Uri.parse(source.readString());
 		this.fileiconValidity = source.readLong();
 		this.fileiconSize = source.readLong();
-		this.fileiconType = source.readString();
+		this.fileiconMimeType = source.readString();
     }
 	
 	/**
@@ -134,11 +134,11 @@ public class FileUploadInfo implements Parcelable {
     	dest.writeLong(validity);
     	dest.writeString(filename);
     	dest.writeLong(size);
-    	dest.writeString(type);
+    	dest.writeString(mimeType);
     	dest.writeString(fileicon.toString());
     	dest.writeLong(fileiconValidity);
     	dest.writeLong(fileiconSize);
-    	dest.writeString(fileiconType);
+    	dest.writeString(fileiconMimeType);
     }
 
     /**
@@ -195,12 +195,12 @@ public class FileUploadInfo implements Parcelable {
 	}
 
 	/**
-	 * Returns the content type of the file
+	 * Returns the MIME type of the file
 	 * 
 	 * @return Content type
 	 */
-	public String getType() {
-		return type;
+	public String getMimeType() {
+		return mimeType;
 	}
 
 	/**
@@ -232,11 +232,11 @@ public class FileUploadInfo implements Parcelable {
 	}
 
 	/**
-	 * Returns the content type of the file icon
+	 * Returns the MIME type of the file icon
 	 * 
 	 * @return Content type
 	 */
-	public String getFileiconType() {
-		return fileiconType;
+	public String getFileiconMimeType() {
+		return fileiconMimeType;
 	}
 }

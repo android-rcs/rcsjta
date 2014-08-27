@@ -143,6 +143,24 @@ public class FileUploadService extends JoynService {
 	}
 
     /**
+     * Can a file be uploaded now
+     * 
+     * @return Returns true if a file can be uploaded, else returns false
+     * @throws JoynServiceException
+     */
+    public boolean canUploadFile() throws JoynServiceException {
+		if (api != null) {
+			try {
+				return api.canUploadFile();
+			} catch(Exception e) {
+				throw new JoynServiceException(e.getMessage());
+			}
+		} else {
+			throw new JoynServiceNotAvailableException();
+		}
+    }
+    
+    /**
      * Returns the configuration of the file upload service
      * 
      * @return Configuration

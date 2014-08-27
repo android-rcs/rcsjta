@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
@@ -139,8 +140,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public FileUploadServiceConfiguration getConfiguration() {
     	return new FileUploadServiceConfiguration(
-    			maxUploadSize,
-    			maxUploadSessions);
+    			maxUploadSize);
     }    	
 	
     /**
@@ -202,6 +202,28 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		}
 	}
 
+    /**
+     * Can a file be uploaded now
+     * 
+     * @return Returns true if a file can be uploaded, else returns false
+     * @throws JoynServiceException
+     */
+    public boolean canUploadFile() throws ServerApiException {
+		if (logger.isActivated()) {
+			logger.info("Check if a file can be uploaded");
+		}
+
+		// Test IMS connection
+		ServerApiUtils.testCore();
+
+		// Test number of ongoing sessions
+		if ((maxUploadSessions != 0) && (uploadSessions.size() >= maxUploadSessions)) {
+			return false;
+		} else {
+			return true;
+		}
+    }
+    
     /**
      * Returns the list of file uploads in progress
      * 
