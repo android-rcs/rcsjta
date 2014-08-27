@@ -81,17 +81,16 @@ public abstract class InitiateMultimediaSession extends Activity {
 			// Get remote contact
 			Spinner spinner = (Spinner) findViewById(R.id.contact);
 			MatrixCursor cursor = (MatrixCursor) spinner.getSelectedItem();
-
+			String remoteContact = cursor.getString(1);
 			try {
 				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
-				ContactId contact = contactUtils.formatContactId(cursor.getString(1));
+				ContactId contact = contactUtils.formatContactId(remoteContact);
 				// Initiate session
 				initiateSession(contact);
 			} catch (JoynContactFormatException e) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Cannot parse contact " + cursor.getString(1));
+					Log.e(LOGTAG, "Cannot parse contact " + remoteContact);
 				}
-				return;
 			} finally {
 				// Exit activity
 				finish();

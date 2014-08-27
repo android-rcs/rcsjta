@@ -18,8 +18,8 @@
 package com.gsma.services.rcs.samples.contacts;
 
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 
 import android.app.Activity;
 import android.app.ListActivity;
@@ -68,10 +68,13 @@ import android.widget.QuickContactBadge;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.contacts.ContactsService;
 import com.gsma.services.rcs.contacts.JoynContact;
 
@@ -149,7 +152,7 @@ public class ContactsListActivity extends ListActivity implements
 	/**
 	 * Used to keep track of the scroll state of the list.
 	 */
-	private Parcelable mListState = null;
+	private Parcelable mListState;
 
 	private boolean mMode;
 
@@ -173,12 +176,21 @@ public class ContactsListActivity extends ListActivity implements
 	 */
 	private final Handler handler = new Handler();
 
-	private Vector<String> items = new Vector<String>();
+	private Set<ContactId> items = new HashSet<ContactId>();
+	
+	ContactUtils contactUtils;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+
+		contactUtils = ContactUtils.getInstance(ContactsListActivity.this);
+		if (contactUtils == null) {
+			Log.e(TAG,"Country code cannot be read from provider");
+			finish();
+			return;
+		}
 
 		mIconSize = getResources().getDimensionPixelSize(
 				android.R.dimen.app_icon_size);
@@ -521,50 +533,52 @@ public class ContactsListActivity extends ListActivity implements
 		return false;
 	}
 
-	@Override
+//	@Override
 	public void afterTextChanged(Editable arg0) {
 		onSearchTextChanged();
 
 	}
+	
+	
 
-	@Override
+//	@Override
 	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 			int arg3) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+//	@Override
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+//	@Override
 	public boolean onTouch(View arg0, MotionEvent arg1) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
+//	@Override
 	public void onFocusChange(View arg0, boolean arg1) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+//	@Override
 	public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
+//	@Override
 	public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
+//	@Override
 	/** {@inheritDoc} */
 	public void onClick(View v) {
 		int id = v.getId();
@@ -645,17 +659,13 @@ public class ContactsListActivity extends ListActivity implements
 	}
 
 	private Cursor queryPhoneNumbers(long contactId) {
-		Uri baseUri = ContentUris.withAppendedId(Contacts.CONTENT_URI,
-				contactId);
-		Uri dataUri = Uri.withAppendedPath(baseUri,
-				Contacts.Data.CONTENT_DIRECTORY);
+		Uri baseUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId);
+		Uri dataUri = Uri.withAppendedPath(baseUri, Contacts.Data.CONTENT_DIRECTORY);
 
-		Cursor c = getContentResolver().query(
-				dataUri,
-				new String[] { Phone._ID, Phone.NUMBER, Phone.IS_SUPER_PRIMARY,
-						RawContacts.ACCOUNT_TYPE, Phone.TYPE, Phone.LABEL },
-				Data.MIMETYPE + "=?", new String[] { Phone.CONTENT_ITEM_TYPE },
-				null);
+		Cursor c = getContentResolver()
+				.query(dataUri,
+						new String[] { Phone._ID, Phone.NUMBER, Phone.IS_SUPER_PRIMARY, RawContacts.ACCOUNT_TYPE, Phone.TYPE,
+								Phone.LABEL }, Data.MIMETYPE + "=?", new String[] { Phone.CONTENT_ITEM_TYPE }, null);
 		if (c != null) {
 			if (c.moveToFirst()) {
 				return c;
@@ -984,30 +994,29 @@ public class ContactsListActivity extends ListActivity implements
 			//Check for joyn contacts
 
 			view.setPresence(null);
-			if(items != null){
+			
+			if (!items.isEmpty()) {
 				Cursor phonesCursor = queryPhoneNumbers(contactId);
-				if (phonesCursor != null && phonesCursor.getCount() >= 1) {					
+				if (phonesCursor != null && phonesCursor.getCount() >= 1) {
 					phonesCursor.moveToPosition(-1);
 					while (phonesCursor.moveToNext()) {
-						
-						String phone = phonesCursor.getString(phonesCursor
-							.getColumnIndex(Phone.NUMBER));
-						if(phone.startsWith("0")){
-							phone = phone.replaceFirst("0", "+33");
-						}
-						
-						if(items.contains(phone)){
-							//found joyn contact
-
-							view.setPresence(getResources().getDrawable(R.drawable.presence_icon));
-							
+						String phoneNumber = phonesCursor.getString(phonesCursor.getColumnIndex(Phone.NUMBER));
+						try {
+							ContactId phone = contactUtils.formatContactId(phoneNumber);
+							if (items.contains(phone)) {
+								// found joyn contact
+								view.setPresence(getResources().getDrawable(R.drawable.presence_icon));
+								break;
+							}
+						} catch (JoynContactFormatException e) {
+							Log.e(TAG, "Cannot parse contact " + phoneNumber);
 							break;
 						}
 					}
-					
 				}
-				phonesCursor.close();
-				phonesCursor = null;
+				if (phonesCursor != null) {
+					phonesCursor.close();
+				}
 			}
 
 			view.setSnippet(null);
@@ -1457,7 +1466,7 @@ public class ContactsListActivity extends ListActivity implements
 		 * @param capabilities
 		 *            Capabilities
 		 */
-		public void onCapabilitiesReceived(final String contact,
+		public void onCapabilitiesReceived(final ContactId contact,
 				final Capabilities capabilities) {
 			handler.post(new Runnable() {
 				public void run() {
@@ -1465,7 +1474,8 @@ public class ContactsListActivity extends ListActivity implements
 					updateDataSet(contact, capabilities);
 				}
 			});
-		};
+		}
+
 	}
 
 	/**
@@ -1509,18 +1519,9 @@ public class ContactsListActivity extends ListActivity implements
 	 * @param capabilities
 	 *            Capabilities
 	 */
-	private synchronized void updateDataSet(String contact,
+	private synchronized void updateDataSet(ContactId contact,
 			Capabilities capabilities) {
 		Log.d(TAG, "Update list of contacts");
-
-		// Update list item
-		int position = -1;
-		for (int i = 0; i < items.size(); i++) {
-			String contactItem = items.get(i);
-			if (contactItem.equals(contact)) {
-				position = i;
-			}
-		}
 
 		// Get contact info
 		JoynContact joynContact = null;
@@ -1530,30 +1531,30 @@ public class ContactsListActivity extends ListActivity implements
 		}
 
 		// Check if Popup is supported by the contact
-		if ((joynContact == null) && (position != -1)) {
+		if ((joynContact == null) && items.contains(contact)) {
 			// Contact is no more joyn compliant, remove it from the list
 			Log.d(TAG, "Remove contact " + contact);
-			items.remove(position);
+			items.remove(contact);
 		} else {
-			
-			boolean online = joynContact.isRegistered();			
+			boolean online = joynContact.isRegistered();
 
 			// Add a new contact if the contact not yet in the list and supports
 			// the feature
-			if ((position == -1)  && online) {
-				Log.d(TAG, "Add contact " + contact);
-				items.add(contact);
-			}
-
-			// Remove the contact if the contact in the list but offline or
-			// Popup no more supported
-			if ((position != -1) &&  !online) {
-				// Remove contact
-				Log.d(TAG, "Remove contact " + contact);
-				items.remove(position);
+			if (online) {
+				if (!items.contains(contact)) {
+					Log.d(TAG, "Add contact " + contact);
+					items.add(contact);
+				}
+			} else {
+				// Remove the contact if the contact in the list but offline or
+				// Popup no more supported
+				if (items.contains(contact)) {
+					// Remove contact
+					Log.d(TAG, "Remove contact " + contact);
+					items.remove(contact);
+				}
 			}
 		}
-
 		mAdapter.notifyDataSetChanged();
 	}
 

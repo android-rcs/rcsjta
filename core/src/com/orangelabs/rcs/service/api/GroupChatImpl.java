@@ -72,6 +72,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -463,10 +464,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			 * session.getRemoteDisplayName());
 			 */
 			// Broadcast intent related to the received message
-			Intent intent = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
-			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-			intent.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(intent);
+			Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newGroupChatMessage);
+			newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
 	    }
     }
     
@@ -656,16 +658,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
 					geoloc, ChatLog.Message.Direction.INCOMING);
+
 			// TODO : Update displayName of remote contact
 			/*
 			 * ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(),
 			 * session.getRemoteDisplayName());
 			 */
 			// Broadcast intent related to the received message
-			Intent intent = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
-			intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-			intent.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(intent);
+			Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newGroupChatMessage);
+			newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
 	    }
     }
 

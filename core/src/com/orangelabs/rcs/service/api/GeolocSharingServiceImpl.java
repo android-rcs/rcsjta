@@ -48,6 +48,7 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -196,10 +197,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newInvitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
     
     /**

@@ -22,12 +22,18 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.samples.utils.LogUtils;
 
 
 /**
@@ -36,6 +42,11 @@ import com.gsma.services.rcs.samples.session.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class InitiateMultimediaSession extends Activity {
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(InitiateMultimediaSession.class.getSimpleName());
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,15 +82,24 @@ public class InitiateMultimediaSession extends Activity {
 			MatrixCursor cursor = (MatrixCursor) spinner.getSelectedItem();
             String remoteContact = cursor.getString(1);
 
-			// Display session view
-			Intent intent = new Intent(InitiateMultimediaSession.this, MultimediaSessionView.class);
-        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OUTGOING);
-        	intent.putExtra(MultimediaSessionView.EXTRA_CONTACT, remoteContact);
-			startActivity(intent);
-			
-        	// Exit activity
-        	finish();     
+        	try {
+				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
+				ContactId contact = contactUtils.formatContactId(remoteContact);
+				// Initiate session
+				// Display session view
+				Intent intent = new Intent(InitiateMultimediaSession.this, MultimediaSessionView.class);
+	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        	intent.putExtra(MultimediaSessionView.EXTRA_MODE, MultimediaSessionView.MODE_OUTGOING);
+	        	intent.putExtra(MultimediaSessionView.EXTRA_CONTACT, (Parcelable)contact);
+				startActivity(intent);
+			} catch (JoynContactFormatException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot parse contact " + remoteContact);
+				}
+			} finally {
+				// Exit activity
+				finish();
+			}
 		}
 	};
 }

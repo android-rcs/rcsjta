@@ -83,6 +83,7 @@ import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
 import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
 import com.orangelabs.rcs.utils.AppUtils;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -478,10 +479,11 @@ public class RcsCoreService extends Service implements CoreListener {
 
 		// Display a notification
 		addRcsServiceNotification(false, getString(R.string.rcs_core_started));
-		
+
 		// Send service up intent
-		Intent intent = new Intent(JoynService.ACTION_SERVICE_UP);
-		getApplicationContext().sendBroadcast(intent);
+		Intent serviceUp = new Intent(JoynService.ACTION_SERVICE_UP);
+		IntentUtils.tryToSetReceiverForegroundFlag(serviceUp);
+		getApplicationContext().sendBroadcast(serviceUp);
     }
 
     /* (non-Javadoc)

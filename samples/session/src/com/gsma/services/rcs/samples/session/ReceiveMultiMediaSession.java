@@ -3,7 +3,7 @@
  * Copyright © 2011 France Telecom S.A.
  ******************************************/
 
-package com.orangelabs.rcs.ri.extension;
+package com.gsma.services.rcs.samples.session;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -22,13 +22,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
-import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.samples.utils.LogUtils;
 
 /**
  * Receive MultiMedia Session invitation<br>
@@ -45,7 +40,6 @@ public class ReceiveMultiMediaSession extends Activity implements JoynServiceLis
 	private MultimediaSessionService sessionApi;
 	private boolean serviceConnected = false;
 	private String sessionId;
-	private boolean actionMultimediaMessagingSession = false;
 
 	/**
 	 * The log tag for this class
@@ -67,16 +61,12 @@ public class ReceiveMultiMediaSession extends Activity implements JoynServiceLis
 			finish();
 			return;
 		}
-		if (getIntent().getAction().equalsIgnoreCase(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
-			actionMultimediaMessagingSession = true;
-		} else {
-			if (!getIntent().getAction().equalsIgnoreCase(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION)) {
-				if (LogUtils.isActive) {
-					Log.d(LOGTAG, "onCreate invalid action=" + getIntent().getAction());
-				}
-				finish();
-				return;
+		if (!getIntent().getAction().equalsIgnoreCase(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onCreate invalid action=" + getIntent().getAction());
 			}
+			finish();
+			return;
 		}
 		// Instantiate API
 		sessionApi = new MultimediaSessionService(getApplicationContext(), this);
@@ -112,22 +102,12 @@ public class ReceiveMultiMediaSession extends Activity implements JoynServiceLis
 		}
 		serviceConnected = true;
 		try {
-			if (actionMultimediaMessagingSession) {
-				MultimediaMessagingSession mms = sessionApi.getMessagingSession(sessionId);
-				if (mms != null) {
-					ContactId contact = mms.getRemoteContact();
-					addSessionInvitationNotification(this, sessionId, contact, true);
-				} else {
-					quitSession(R.string.label_session_not_found);
-				}
+			MultimediaMessagingSession mms = sessionApi.getMessagingSession(sessionId);
+			if (mms != null) {
+				ContactId contact = mms.getRemoteContact();
+				addSessionInvitationNotification(this, sessionId, contact);
 			} else {
-				MultimediaStreamingSession mss = sessionApi.getStreamingSession(sessionId);
-				if (mss != null) {
-					ContactId contact = mss.getRemoteContact();
-					addSessionInvitationNotification(this, sessionId, contact, false);
-				} else {
-					quitSession(R.string.label_session_not_found);
-				}
+				quitSession(R.string.label_session_not_found);
 			}
 		} catch (JoynServiceException e) {
 			e.printStackTrace();
@@ -175,7 +155,7 @@ public class ReceiveMultiMediaSession extends Activity implements JoynServiceLis
 	 * @param invitation
 	 *            Intent invitation
 	 */
-	private void addSessionInvitationNotification(Context context, String sessionId, ContactId contact, boolean mms) {
+	private void addSessionInvitationNotification(Context context, String sessionId, ContactId contact) {
 		// Get remote contact and session
 		if (contact == null) {
 			if (LogUtils.isActive) {
@@ -186,21 +166,16 @@ public class ReceiveMultiMediaSession extends Activity implements JoynServiceLis
 		// Create notification
 		Intent intent = new Intent();
 		String notifTitle;
-		if (mms) {
-			intent.setClass(context, MessagingSessionView.class);
-			notifTitle = context.getString(R.string.title_recv_messaging_session);
-		} else {
-			intent.setClass(context, StreamingSessionView.class);
-			notifTitle = context.getString(R.string.title_recv_streaming_session);
-		}
+		intent.setClass(context, MultimediaSessionView.class);
+		notifTitle = context.getString(R.string.title_recv_invitation);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(sessionId);
 		intent.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		Notification notif = new Notification(R.drawable.ri_notif_mm_session_icon, notifTitle, System.currentTimeMillis());
+		Notification notif = new Notification(R.drawable.notif_invitation_icon, notifTitle, System.currentTimeMillis());
 		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_session_from, contact.toString()),
+		notif.setLatestEventInfo(context, notifTitle, context.getString(R.string.label_recv_invitation, contact.toString()),
 				contentIntent);
 		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		notif.defaults |= Notification.DEFAULT_VIBRATE;

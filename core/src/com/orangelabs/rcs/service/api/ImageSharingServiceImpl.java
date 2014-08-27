@@ -50,6 +50,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.ImageSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -203,10 +204,11 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
 
 		// Broadcast intent related to the received invitation
-		Intent intent = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-		intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-		intent.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(intent);
+		Intent newInvitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
 
     /**
