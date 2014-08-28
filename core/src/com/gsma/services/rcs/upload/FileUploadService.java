@@ -50,14 +50,12 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
  */
 public class FileUploadService extends JoynService {
 
-	private static final int KITKAT_VERSION_CODE = 19;
-	
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
 	private static final Class[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
 			Uri.class, int.class
 	};
-	
+
 	/**
 	 * API
 	 */
@@ -120,7 +118,7 @@ public class FileUploadService extends JoynService {
         	}
         }
     };
-
+    
 	private void grantUriPermissionToStackServices(Uri file) {
 		Intent fileTransferServiceIntent = new Intent(IFileUploadService.class.getName());
 		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
@@ -138,15 +136,15 @@ public class FileUploadService extends JoynService {
 	 * @param file Uri of file to transfer
 	 * @throws JoynServiceException
 	 */
-	private void tryToTakePersistableUriPermission(Uri file) throws JoynServiceException {
-		if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-			return;
-		}
+	private void persistUriPermissionForClient(Uri file) throws JoynServiceException {
 		try {
 			ContentResolver contentResolver = ctx.getContentResolver();
-			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
-					TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
-					TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
+			Method takePersistableUriPermissionMethod = contentResolver.getClass()
+					.getDeclaredMethod(TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
+							TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
+			if (takePersistableUriPermissionMethod == null) {
+				return;
+			}
 			Object[] methodArgs = new Object[] {
 					file,
 					Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -167,10 +165,10 @@ public class FileUploadService extends JoynService {
 			// Granting temporary read Uri permission from client to
 			// stack service if it is a content URI
 			grantUriPermissionToStackServices(file);
-			// Try to persist Uri access permission for the client
+			// Persist Uri access permission for the client
 			// to be able to read the contents from this Uri even
 			// after the client is restarted after device reboot.
-			tryToTakePersistableUriPermission(file);
+			persistUriPermissionForClient(file);
 		}
 	}
 
