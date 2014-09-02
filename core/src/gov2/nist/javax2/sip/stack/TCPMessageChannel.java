@@ -319,7 +319,9 @@ public class TCPMessageChannel extends MessageChannel implements SIPMessageListe
                     @Override
                     public boolean cancel() {
                         try {
-                            mySock.close();
+                            if (mySock != null) {
+                                mySock.close();
+                            }
                             super.cancel();
                         } catch (IOException ex) {
 
@@ -330,7 +332,9 @@ public class TCPMessageChannel extends MessageChannel implements SIPMessageListe
                     @Override
                     public void run() {
                         try {
-                            mySock.close();
+                            if (mySock != null) {
+                                mySock.close();
+                            }
                         } catch (IOException ex) {
 
                         }
