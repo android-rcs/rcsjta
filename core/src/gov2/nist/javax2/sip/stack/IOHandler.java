@@ -47,7 +47,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLSocket;
+
 import javax2.sip.InvalidArgumentException;
+import javax2.sip.address.Address;
+import javax2.sip.header.ContactHeader;
 
 /*
  * TLS support Added by Daniel J.Martinez Manzano <dani@dif.um.es>
@@ -226,9 +229,10 @@ class IOHandler {
                         boolean doIssue34727workarround = false;
                         if (clientSock.getLocalPort()==5060 || contactPort==5060)
                             doIssue34727workarround = true;
-                        
                         // Update Via header to reflect local port
                         updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        // Update Contact header to reflect local port
+                        updateContactHeaderPort(clientSock.getLocalPort(), message);
                         // Encode the SIP message into byte array
                         byte[] bytes = message.encodeAsBytes(transport);
                         
@@ -243,9 +247,10 @@ class IOHandler {
                             boolean doIssue34727workarround = false;
                             if (clientSock.getLocalPort()==5060 || contactPort==5060)
                                 doIssue34727workarround = true;
-
                             // Update Via header to reflect local port
                             updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            // Update Contact header to reflect local port
+                            updateContactHeaderPort(clientSock.getLocalPort(), message);
                             // Encode the SIP message into byte array
                             byte[] bytes = message.encodeAsBytes(transport);
                             
@@ -322,9 +327,10 @@ class IOHandler {
                         if (clientSock.getLocalPort()==5060 || contactPort==5060)
                             doIssue34727workarround = true;
                         OutputStream outputStream = clientSock.getOutputStream();
-                        
                         // Update Via header to reflect local port
                         updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        // Update Contact header to reflect local port
+                        updateContactHeaderPort(clientSock.getLocalPort(), message);
                         // Encode the SIP message into byte array
                         byte[] bytes = message.encodeAsBytes(transport);
                         
@@ -339,9 +345,10 @@ class IOHandler {
                             if (clientSock.getLocalPort()==5060 || contactPort==5060)
                                 doIssue34727workarround = true;
                             OutputStream outputStream = clientSock.getOutputStream();
-                            
                             // Update Via header to reflect local port
                             updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            // Update Contact header to reflect local port
+                            updateContactHeaderPort(clientSock.getLocalPort(), message);
                             // Encode the SIP message into byte array
                             byte[] bytes = message.encodeAsBytes(transport);
                             
@@ -378,6 +385,8 @@ class IOHandler {
             
             // Update Via header to reflect local port
             updateViaHeaderPort(datagramSock.getLocalPort(), message);
+            // Update Contact header to reflect local port
+            updateContactHeaderPort(datagramSock.getLocalPort(), message);
             // Encode the SIP message into byte array
             byte[] bytes = message.encodeAsBytes(transport);
             
@@ -408,6 +417,20 @@ class IOHandler {
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Update port of Contact header to reflect local port
+     *
+     * @param localPort the local port
+     * @param message the SIP message to be updated
+     */
+    private void updateContactHeaderPort(int localPort, SIPMessage message) {
+        if (message != null && message.getContactHeader() != null) {
+            ContactHeader contactHeader = message.getContactHeader();
+            Address contactAddress = contactHeader.getAddress();
+            contactAddress.setPort(localPort);
         }
     }
 
