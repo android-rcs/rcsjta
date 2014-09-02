@@ -42,6 +42,11 @@ public class JoynContact implements Parcelable {
 	private ContactId mContact;
 	
 	/**
+	 * Display name
+	 */
+	private String displayName;
+	
+	/**
 	 * Registration state
 	 */
 	private boolean registered;
@@ -51,13 +56,15 @@ public class JoynContact implements Parcelable {
 	 * 
 	 * @param contact Contact ID
 	 * @param registered Registration state
-	 * @param capabilities Capabilities 
+	 * @param capabilities Capabilities
+	 * @param displayName display name
      * @hide
 	 */
-	public JoynContact(ContactId contact, boolean registered, Capabilities capabilities) {
+	public JoynContact(ContactId contact, boolean registered, Capabilities capabilities, String displayName) {
 		mContact = contact;
 		this.registered = registered;
 		this.capabilities = capabilities;
+		this.displayName = displayName;
 	}
 	
 	/**
@@ -80,6 +87,7 @@ public class JoynContact implements Parcelable {
 		} else {
 			this.capabilities = null;
 		}
+		displayName = source.readString();
     }
 	
 	/**
@@ -114,6 +122,7 @@ public class JoynContact implements Parcelable {
     	} else {
         	dest.writeInt(0);
     	}
+    	dest.writeString(displayName);
     }
 
     /**
@@ -157,6 +166,15 @@ public class JoynContact implements Parcelable {
 	 */
 	public Capabilities getCapabilities(){
 		return capabilities;
+	}
+
+	/**
+	 * Returns the display name associated to the contact
+	 * 
+	 * @return displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
 	}
 	
 }

@@ -44,6 +44,11 @@ public class RichAddressBookData {
 	static final String KEY_CONTACT_NUMBER = CapabilitiesLog.CONTACT_NUMBER;
 	
 	/**
+	 * Column Name
+	 */
+	static final String KEY_DISPLAY_NAME = "display_name";
+	
+	/**
 	 * Column name
 	 */
 	static final String KEY_PRESENCE_SHARING_STATUS = "presence_sharing_status";

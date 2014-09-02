@@ -22,9 +22,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,13 +33,17 @@ import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadListener;
-import com.gsma.services.rcs.upload.FileUploadService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.ft.InitiateFileTransfer;
 import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -47,12 +51,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class InitiateFileUpload extends Activity implements JoynServiceListener {
+public class InitiateFileUpload extends Activity {
 	/**
 	 * Activity result constants
 	 */
 	private final static int SELECT_IMAGE = 0;
-
+	
 	/**
 	 * UI handler
 	 */
@@ -69,19 +73,36 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
 	private long filesize = -1;	
 	
 	/**
-	 * File upload API
-	 */
-    private FileUploadService uploadApi;
-    
-	/**
      * File upload session
      */
-    private FileUpload upload = null;
+    private FileUpload upload;
+    
+	
+	/**
+     * File upload Id
+     */
+    private String uploadId;
+    
+    /**
+	 * A locker to exit only once
+	 */
+	private LockAccess exitOnce = new LockAccess();
+	
+   	/**
+	 * API connection manager
+	 */
+	private ApiConnectionManager connectionManager;
+	
     
     /**
      * File upload listener
      */
     private MyFileUploadListener uploadListener = new MyFileUploadListener();  
+    
+    /**
+   	 * The log tag for this class
+   	 */
+   	private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getSimpleName());
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,52 +125,43 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
-        // Instantiate API
-        uploadApi = new FileUploadService(getApplicationContext(), this);
-		
-		// Connect API
-        uploadApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			return;
+		}
+		connectionManager.startMonitorServices(this, exitOnce, RcsServices.FileUpload);
+		try {
+			// Add upload listener
+			connectionManager.getFileUploadApi().addEventListener(uploadListener);
+		} catch (JoynServiceNotAvailableException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+		} catch (JoynServiceException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+		}
     }
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-
+    	if (connectionManager == null) {
+			return;
+		}
+		connectionManager.stopMonitorServices(this);
         // Remove upload listener
-        if (uploadApi != null) {
+        if (connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
         	try {
-        		uploadApi.removeEventListener(uploadListener);
+        		connectionManager.getFileUploadApi().removeEventListener(uploadListener);
         	} catch(Exception e) {
-        		e.printStackTrace();
+        		if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
         	}
         }
-
-        // Disconnect API
-        uploadApi.disconnect();
     }
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-    	
-    	// Activate the select button when connected to the API
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
-        selectBtn.setEnabled(true);
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_api_disabled));
-    }    
     
     /**
      * Upload button listener
@@ -160,7 +172,7 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
         		// Check max size
             	long maxSize = 0;
             	try {
-            		maxSize = uploadApi.getConfiguration().getMaxSize();
+            		maxSize = connectionManager.getFileUploadApi().getConfiguration().getMaxSize();
             	} catch(Exception e) {
             		e.printStackTrace();
             	}
@@ -169,16 +181,15 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
                 	Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_max_size, maxSize));
                 	return;
                 }
-                
-            	// Add upload listener
-        		uploadApi.addEventListener(uploadListener);
+
 
                 // Get thumbnail option
         		CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
         		boolean thumbnail = ftThumb.isChecked();
         		
             	// Initiate upload
-        		upload = uploadApi.uploadFile(file, thumbnail);
+        		upload = connectionManager.getFileUploadApi().uploadFile(file, thumbnail);
+        		uploadId = upload.getUploadId();
         		
                 // Hide buttons
                 Button uploadBtn = (Button)findViewById(R.id.upload_btn);
@@ -186,8 +197,10 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
                 Button selectBtn = (Button)findViewById(R.id.select_btn);
                 selectBtn.setVisibility(View.GONE);
         	} catch(Exception e) {
-        		e.printStackTrace();
-				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed));
+        		if (LogUtils.isActive) {
+    				Log.e(LOGTAG, "Failed to upload file", e);
+    			}
+				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed), exitOnce);
         	}
         }
     };
@@ -196,17 +209,9 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
      * Select file button listener
      */
     private OnClickListener btnSelectListener = new OnClickListener() {
-        public void onClick(View v) {
-			Intent intent;
-			if (Build.VERSION.SDK_INT < 19) { // Build.VERSION_CODES.KITKAT
-				intent = new Intent(Intent.ACTION_GET_CONTENT, null);
-			} else {
-				intent = new Intent("android.intent.action.OPEN_DOCUMENT");
-			}
-			intent.addCategory(Intent.CATEGORY_OPENABLE);
-			intent.setType("image/*");
-			startActivityForResult(intent, SELECT_IMAGE);
-        }
+		public void onClick(View v) {
+			FileUtils.openFile(InitiateFileUpload.this, "image/*", SELECT_IMAGE);
+		}
     };
     
     /**
@@ -271,6 +276,10 @@ public class InitiateFileUpload extends Activity implements JoynServiceListener 
     	 * @param state State of upload 
     	 */
     	public void onUploadStateChanged(String uploadId, final int state) {
+			// Discard event if not for current uploadId
+			if (InitiateFileUpload.this.uploadId == null || !InitiateFileUpload.this.uploadId.equals(uploadId)) {
+				return;
+			}
 			handler.post(new Runnable() { 
 				public void run() {
 					if (state == FileUpload.State.STARTED) {

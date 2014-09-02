@@ -30,11 +30,11 @@ public class SessionInvitationReceiver extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(Context context, Intent invitation) {
-		// Start MultiMediaSessionReceive activity
+		// Start MultiMediaSessionIntentService
 		Intent intent = new Intent( invitation );
-		intent.setClass( context, ReceiveMultiMediaSession.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		context.startActivity(intent);
+		intent.setClass( context, MultiMediaSessionIntentService.class);
+		invitation.setAction(intent.getAction());
+		context.startService(intent);
     }
 
 }

@@ -97,7 +97,7 @@ public class CapabilitiesList extends Activity {
     	 * @param c Cursor
     	 */
 		public CapabilitiesListAdapter(Context context, Cursor c) {
-            super(context, c);
+            super(context, c, 0);
         }
 
         @Override

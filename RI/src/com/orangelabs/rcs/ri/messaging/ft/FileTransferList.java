@@ -112,7 +112,7 @@ public class FileTransferList extends Activity {
     	 * @param c Cursor
     	 */
 		public FtListAdapter(Context context, Cursor c) {
-            super(context, c);
+            super(context, c, 0);
         }
 
         @Override

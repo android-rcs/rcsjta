@@ -223,4 +223,13 @@ public class StringUtils {
 		return buffer.toString();
 	}
 	
+	/**
+	 * compares two strings null-safe
+	 * @param str1
+	 * @param str2
+	 * @return true if equals
+	 */
+	public static boolean equals(String str1, String str2) {
+	    return str1 == null ? str2 == null : str1.equals(str2);
+	}
 }

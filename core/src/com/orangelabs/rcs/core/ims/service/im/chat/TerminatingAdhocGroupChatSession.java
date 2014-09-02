@@ -27,6 +27,7 @@ import java.util.Vector;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -80,6 +81,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 		// Create dialog path
 		createTerminatingDialogPath(invite);
 
+		setRemoteDisplayName(SipUtils.getDisplayNameFromUri(SipUtils.getAssertedIdentityHeader(invite)));
+		
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);
@@ -91,14 +94,14 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			}
 		} else {
 			if (logger.isActivated()) {
-				logger.info("Set of invited participants: " + Arrays.toString(getParticipants().toArray()));
+				logger.info("Set of invited participants: " + getListOfParticipants(getParticipants()));
 			}
 			// Detect if it's a restart: retrieve set of initial participants
 			Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance().getGroupChatConnectedParticipants(
 					getContributionID());
 			if (initialParticipants != null && initialParticipants.size() > 0) {
 				if (logger.isActivated()) {
-					logger.info("Set of initial participants: " + Arrays.toString(initialParticipants.toArray()));
+					logger.info("Set of initial participants: " + getListOfParticipants(initialParticipants));
 				}
 				missingParticipants = new HashSet<ContactId>();
 				// Run through the set of initial participants
@@ -112,8 +115,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				}
 				if (missingParticipants.size() != 0) {
 					if (logger.isActivated()) {
-						logger.info("Invite to restart with missing participants: "
-								+ Arrays.toString(missingParticipants.toArray()));
+						StringBuilder sb = new StringBuilder("Invite to restart with missing participants: ");
+						for (ContactId missing : missingParticipants) {
+							sb.append(missing.toString()).append(" ");
+						}
+						logger.info(sb.toString());
 					}
 				}
 			} else {
@@ -364,6 +370,21 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	@Override
 	public boolean isInitiatedByRemote() {
 		return true;
+	}
+	
+	/**
+	 * Returns the list of participants separated by commas
+	 * 
+	 * @param participants
+	 *            set of participants
+	 * @return the list of participants separated by commas
+	 */
+	private String getListOfParticipants(Set<ParticipantInfo> participants) {
+		StringBuilder sb = new StringBuilder();
+		for (ParticipantInfo participantInfo : participants) {
+			sb.append(participantInfo.getContact().toString()).append(",");
+		}
+		return sb.toString();
 	}
 	
 }

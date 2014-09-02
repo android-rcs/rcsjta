@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.ipcall.media;
 
+import android.util.Log;
+
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IPCallRenderer;
 import com.gsma.services.rcs.ipcall.VideoCodec;
@@ -25,6 +27,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
 import com.orangelabs.rcs.ri.sharing.video.media.NetworkRessourceManager;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * IP call renderer 
@@ -54,6 +57,11 @@ public class MyIPCallRenderer extends IPCallRenderer {
 	 * Is video activated
 	 */
 	private boolean video = false;
+	
+	/**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(MyIPCallRenderer.class.getSimpleName());
 
     /**
      * Constructor
@@ -77,6 +85,9 @@ public class MyIPCallRenderer extends IPCallRenderer {
             H264Config.QCIF_WIDTH, 
             H264Config.QCIF_HEIGHT,
 			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
+    	if (LogUtils.isActive) {
+			Log.d(LOGTAG, "MyIPCallRenderer localAudioRtpPort=" + localAudioRtpPort + " localVideoRtpPort=" + localVideoRtpPort);
+		}
     }
 
     public void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost, int remoteAudioPort, int remoteVideoPort) {

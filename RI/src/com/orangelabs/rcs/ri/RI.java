@@ -66,6 +66,8 @@ public class RI extends ListActivity {
     		getString(R.string.menu_about)
         };
     	setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+    	// Create the API connection manager
+    	ApiConnectionManager.getInstance(this);
     }		
 
     @Override

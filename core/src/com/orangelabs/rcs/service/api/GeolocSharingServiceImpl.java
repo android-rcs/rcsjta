@@ -45,6 +45,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -184,14 +185,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     public void receiveGeolocSharingInvitation(GeolocTransferSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact());
+			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact()+" displayName="+session.getRemoteDisplayName());
 		}
 		// TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
+
 		// Add session in the list
 		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);

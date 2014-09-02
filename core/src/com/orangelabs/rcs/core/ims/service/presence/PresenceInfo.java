@@ -167,7 +167,7 @@ public class PresenceInfo {
 	 * @return Boolean
 	 */
 	public boolean isOnline() {
-		return (status.equals(ONLINE));
+		return (ONLINE.equals(status));
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class PresenceInfo {
 	 * @return Boolean
 	 */
 	public boolean isOffline() {
-		return (status.equals(OFFLINE));
+		return (OFFLINE.equals(status));
 	}	
 
 	/**

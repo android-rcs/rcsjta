@@ -36,16 +36,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -54,17 +55,22 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RequestCapabilities extends Activity implements JoynServiceListener {
+public class RequestCapabilities extends Activity {
 	/**
 	 * UI handler
 	 */
 	private final Handler handler = new Handler();
 	
     /**
-	 * Capability API
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
+   	
+  	/**
+	 * API connection manager
 	 */
-    private CapabilityService capabilityApi;
-    
+	private ApiConnectionManager connectionManager;
+	
     /**
      * Capabilities listener
      */
@@ -95,40 +101,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
         Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
         
-        // Disable button until not connected to the service
-        refreshBtn.setEnabled(false);
-        
-        // Instanciate API
-        capabilityApi = new CapabilityService(getApplicationContext(), this);
-                
-        // Connect API
-        capabilityApi.connect();
-    }
-
-    @Override
-    public void onDestroy() {
-    	super.onDestroy();
-    	
-    	// Unregister API listener
-        try {
-	        capabilityApi.removeCapabilitiesListener(capabilitiesListener);
-        } catch(JoynServiceException e) {
-        	e.printStackTrace();
-        }
-
-        // Disconnect API
-    	capabilityApi.disconnect();
-    }
-
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
         // Update refresh button
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
         if (spinner.getAdapter().getCount() == 0) {
         	 // Disable button if no contact available
             refreshBtn.setEnabled(false);
@@ -136,24 +109,42 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             refreshBtn.setEnabled(true);        	
         }
         
-        try {
-	        // Register capabilities listener
-	        capabilityApi.addCapabilitiesListener(capabilitiesListener);
-        } catch(JoynServiceException e) {
-	    	e.printStackTrace();
-        }
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
+		try {
+			// Add service listener
+			connectionManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
+		} catch (JoynServiceException e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to add listener", e);
+			}
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+		}
     }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
-    }    
+
+    @Override
+    public void onDestroy() {
+    	super.onDestroy();
+    	if (connectionManager == null) {
+    		return;
+    	}
+		connectionManager.stopMonitorServices(this);
+		if (connectionManager.isServiceConnected(RcsServices.Capability)) {
+			// Remove image sharing listener
+			try {
+				connectionManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Failed to remove listener", e);
+				}
+			}
+		}
+    }
     
     /**
      * Capabilities event listener
@@ -187,6 +178,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+			CapabilityService capabilityApi = connectionManager.getCapabilityApi();
             try {
 		        // Get selected contact
 				String contact = getContactAtPosition(position);
@@ -200,13 +192,12 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 		        // Check if the service is available
 		    	boolean registered = false;
 		    	try {
-		    		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
-		    			registered = true;
-		    		}
+		    		registered = capabilityApi.isServiceRegistered();
 		    	} catch(Exception e) {
 		    		e.printStackTrace();
 		    	}
 		    	if (!registered) {
+		    		Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
 			    	return;
 		        }      	
 		    	
@@ -214,10 +205,10 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 				updateCapabilities(contactId);
 		    } catch(JoynServiceNotAvailableException e) {
 		    	e.printStackTrace();
-				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
+				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), exitOnce);
 		    } catch(JoynServiceException e) {
 		    	e.printStackTrace();
-				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed));
+				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed), exitOnce);
 			}
 		}
 
@@ -265,9 +256,7 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
-        			registered = true;
-        		}
+        		registered = connectionManager.getCapabilityApi().isServiceRegistered();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -291,17 +280,16 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
     private void updateCapabilities(ContactId contact) {
         // Display info
         Utils.displayLongToast(RequestCapabilities.this, getString(R.string.label_request_in_background, contact));
-
         // Request capabilities
     	try {
 	        // Request new capabilities
-	        capabilityApi.requestContactCapabilities(contact);
+	        connectionManager.getCapabilityApi().requestContactCapabilities(contact);
 	    } catch(JoynServiceNotAvailableException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
 	    	e.printStackTrace();
-			Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
