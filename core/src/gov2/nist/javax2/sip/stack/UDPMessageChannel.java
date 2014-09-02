@@ -49,13 +49,10 @@ import gov2.nist.javax2.sip.parser.ParseExceptionListener;
 import gov2.nist.javax2.sip.parser.StringMsgParser;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.text.ParseException;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.TimerTask;
 
@@ -353,15 +350,15 @@ public class UDPMessageChannel extends MessageChannel implements
             String msgString = new String(msgBytes, 0, packetLength);
             if (!msgString.startsWith("SIP/") && !msgString.startsWith("ACK ")) {
 
-                String badReqRes = createBadReqRes(msgString, ex);
+                SIPMessage badReqRes = createBadReqRes(msgString, ex);
                 if (badReqRes != null) {
                     if (sipStack.isLoggingEnabled()) {
                         sipStack.getStackLogger().logDebug(
                                 "Sending automatic 400 Bad Request:");
-                        sipStack.getStackLogger().logDebug(badReqRes);
+                        sipStack.getStackLogger().logDebug(msgString);
                     }
                     try {
-                        this.sendMessage(badReqRes.getBytes(), peerAddress,
+                        this.sendMessage(badReqRes, peerAddress,
                                 packet.getPort(), "UDP", false);
                     } catch (IOException e) {
                         if (sipStack.isLoggingEnabled())
@@ -650,9 +647,7 @@ public class UDPMessageChannel extends MessageChannel implements
                 }
             }
 
-            byte[] msg = sipMessage.encodeAsBytes( this.getTransport() );
-
-            sendMessage(msg, peerAddress, peerPort, peerProtocol,
+            sendMessage(sipMessage, peerAddress, peerPort, peerProtocol,
                     sipMessage instanceof SIPRequest);
 
         } catch (IOException ex) {
@@ -673,7 +668,7 @@ public class UDPMessageChannel extends MessageChannel implements
     /**
      * Send a message to a specified receiver address.
      *
-     * @param msg
+     * @param message
      *            string to send.
      * @param peerAddress
      *            Address of the place to send it to.
@@ -682,7 +677,7 @@ public class UDPMessageChannel extends MessageChannel implements
      * @throws IOException
      *             If there is trouble sending this message.
      */
-    protected void sendMessage(byte[] msg, InetAddress peerAddress,
+    protected void sendMessage(SIPMessage message, InetAddress peerAddress,
             int peerPort, boolean reConnect) throws IOException {
         // Via is not included in the request so silently drop the reply.
         if (sipStack.isLoggingEnabled() && this.sipStack.isLogStackTraceOnMessageSend() ) {
@@ -697,11 +692,12 @@ public class UDPMessageChannel extends MessageChannel implements
         } else {
             if (sipStack.isLoggingEnabled()) {
                 this.sipStack.getStackLogger().logDebug("sendMessage " + peerAddress.getHostAddress() + "/"
-                        + peerPort + "\n" + "messageSize =  "  + msg.length + " message = " + new String(msg)) ;
+                        + peerPort + "\n" ) ;
                 this.sipStack.getStackLogger().logDebug("*******************\n");
             }
 
         }
+        byte[] msg = message.encodeAsBytes("udp");
         DatagramPacket reply = new DatagramPacket(msg, msg.length, peerAddress,
                 peerPort);
         try {
@@ -737,7 +733,7 @@ public class UDPMessageChannel extends MessageChannel implements
     /**
      * Send a message to a specified receiver address.
      *
-     * @param msg
+     * @param message
      *            message string to send.
      * @param peerAddress
      *            Address of the place to send it to.
@@ -748,7 +744,7 @@ public class UDPMessageChannel extends MessageChannel implements
      * @throws IOException
      *             If there is trouble sending this message.
      */
-    protected void sendMessage(byte[] msg, InetAddress peerAddress,
+    protected void sendMessage(SIPMessage message, InetAddress peerAddress,
             int peerPort, String peerProtocol, boolean retry)
             throws IOException {
         // Via is not included in the request so silently drop the reply.
@@ -761,10 +757,11 @@ public class UDPMessageChannel extends MessageChannel implements
         } else {
             if (sipStack.isLoggingEnabled()) {
                 this.sipStack.getStackLogger().logDebug( ":sendMessage " + peerAddress.getHostAddress() + "/"
-                        + peerPort + "\n" + " messageSize = " + msg.length);
+                        + peerPort + "\n");
             }
         }
         if (peerProtocol.compareToIgnoreCase("UDP") == 0) {
+        	byte[] msg = message.encodeAsBytes("udp");
             DatagramPacket reply = new DatagramPacket(msg, msg.length,
                     peerAddress, peerPort);
 
@@ -793,13 +790,9 @@ public class UDPMessageChannel extends MessageChannel implements
 
         } else {
             // Use TCP to talk back to the sender.
-            Socket outputSocket = sipStack.ioHandler.sendBytes(
+            sipStack.ioHandler.sendBytes(
                     this.messageProcessor.getIpAddress(), peerAddress,
-                    peerPort, "tcp", msg, retry,this);
-            OutputStream myOutputStream = outputSocket.getOutputStream();
-            myOutputStream.write(msg, 0, msg.length);
-            myOutputStream.flush();
-            // The socket is cached (dont close it!);
+                    peerPort, "tcp", message, retry,this);
         }
     }
 
