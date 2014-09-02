@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.messaging.ft;
 
+import java.util.Calendar;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,12 +27,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.GroupChatDAO;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -157,16 +163,28 @@ public class FileTransferIntentService extends IntentService {
 		intent.setClass(context, ReceiveFileTransfer.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		String notifTitle = context.getString(R.string.title_recv_file_transfer, ftDao.getContact().toString());
-		Notification notif = new Notification(R.drawable.ri_notif_file_transfer_icon, notifTitle, System.currentTimeMillis());
-		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle, ftDao.getFilename(), contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		notif.defaults |= Notification.DEFAULT_VIBRATE;
+		
+		ContactId contact = ftDao.getContact();
+		String displayName = RcsDisplayName.get(context, contact);
+		displayName = RcsDisplayName.convert(context, ChatLog.Message.Direction.INCOMING, contact, displayName);
+		
+		String title = context.getString(R.string.title_recv_file_transfer, displayName);
 
+		// Create notification
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		notif.setContentIntent(contentIntent);
+		notif.setSmallIcon(R.drawable.ri_notif_file_transfer_icon);
+		notif.setWhen(Calendar.getInstance().getTimeInMillis());
+		notif.setAutoCancel(true);
+		notif.setOnlyAlertOnce(true);
+		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		notif.setDefaults(Notification.DEFAULT_VIBRATE);
+		notif.setContentTitle(title);
+		notif.setContentText(ftDao.getFilename());
+				
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif);
+		notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif.build());
 	}
 
 }

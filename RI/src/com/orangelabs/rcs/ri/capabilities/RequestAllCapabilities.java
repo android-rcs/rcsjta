@@ -24,9 +24,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.capability.CapabilityService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -35,12 +34,13 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RequestAllCapabilities extends Activity implements JoynServiceListener {
-    /**
-	 * Capability API
-	 */
-    private CapabilityService capabilityApi;
+public class RequestAllCapabilities extends Activity {
    
+  	/**
+	 * API connection manager
+	 */
+	private ApiConnectionManager connectionManager;
+   	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,43 +55,23 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
 		// Set buttons callback
         Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnSyncListener);        
-        refreshBtn.setEnabled(false);
         
-        // Instanciate API
-        capabilityApi = new CapabilityService(getApplicationContext(), this);
-                
-        // Connect API
-        capabilityApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
     }
 
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	
-        // Disconnect API
-    	capabilityApi.disconnect();
+    	if (connectionManager != null) {
+			connectionManager.stopMonitorServices(this);
+    	}
     }
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
-        refreshBtn.setEnabled(true);
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disabled));
-	}    
 
     /**
      * Publish button listener
@@ -101,9 +81,7 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		if ((capabilityApi != null) && capabilityApi.isServiceRegistered()) {
-        			registered = true;
-        		}
+        		registered = connectionManager.getCapabilityApi().isServiceRegistered();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -114,7 +92,7 @@ public class RequestAllCapabilities extends Activity implements JoynServiceListe
         	
         	try {
     			// Refresh all contacts
-                capabilityApi.requestAllContactsCapabilities();
+                connectionManager.getCapabilityApi().requestAllContactsCapabilities();
                 
         		// Display message
     			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));

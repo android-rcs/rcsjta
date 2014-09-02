@@ -148,7 +148,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     private void sendFileTransferInfo() {
         // Send File transfer Info
         String mime = CpimMessage.MIME_TYPE;
-        String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
         String to = ChatUtils.ANOMYNOUS_URI;
         // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
         String msgId = getFileTransferId();

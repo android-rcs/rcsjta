@@ -33,18 +33,19 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -53,16 +54,11 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */
-public class ReceiveImageSharing extends Activity implements JoynServiceListener {
+public class ReceiveImageSharing extends Activity {
     /**
      * UI handler
      */
     private final Handler handler = new Handler();
-    
-    /**
-	 * Image sharing API
-	 */
-    private ImageSharingService ishApi;
     
 	/**
      * Image sharing
@@ -74,23 +70,16 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
      */
     ImageSharingDAO ishDao;
     
-    /**
-     * Array of Image sharing states
-     */
-    private static final String[] ISH_STATES = RiApplication.getContext().getResources().getStringArray(R.array.ish_states);
-    
-    /**
-     * Array of Image sharing reason codes
-     */
-	private static final String[] ISH_REASON_CODES = RiApplication.getContext().getResources().getStringArray(R.array.ish_reason_codes);
-    
-	private boolean serviceConnected = false;
-	
 	/**
 	 * A locker to exit only once
 	 */
 	private LockAccess exitOnce = new LockAccess();
-		
+	
+   	/**
+	 * API connection manager
+	 */
+	private ApiConnectionManager connectionManager;
+	
 	/**
    	 * The log tag for this class
    	 */
@@ -103,6 +92,10 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 
 		@Override
 		public void onImageSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+			// Discard event if not for current sharingId
+			if (ReceiveImageSharing.this.ishDao == null || !ReceiveImageSharing.this.ishDao.getSharingId().equals(sharingId)) {
+				return;
+			}
 			handler.post(new Runnable() {
 				public void run() {
 					// Display sharing progress
@@ -116,15 +109,19 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
 			}
-			if (state > ISH_STATES.length) {
+			if (state > RiApplication.ISH_STATES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onImageSharingStateChanged unhandled state=" + state);
 				}
 				return;
 			}
+			// Discard event if not for current sharingId
+			if (ReceiveImageSharing.this.ishDao == null || !ReceiveImageSharing.this.ishDao.getSharingId().equals(sharingId)) {
+				return;
+			}
 			// TODO : handle reason code (CR025)
-			final String reason = ISH_REASON_CODES[0];
-			final String notif = getString(R.string.label_ish_state_changed, ISH_STATES[state], reason);
+			final String reason = RiApplication.ISH_REASON_CODES[0];
+			final String notif = getString(R.string.label_ish_state_changed, RiApplication.ISH_STATES[state], reason);
 			handler.post(new Runnable() {
 				public void run() {
 					
@@ -187,91 +184,82 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
 			return;
 		}
 				
-        // Instantiate API
-		ishApi = new ImageSharingService(getApplicationContext(), this);
-		
-		// Connect API
-		ishApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.ImageSharing, RcsServices.Contacts)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		} else {
+			connectionManager.startMonitorServices(this, exitOnce, RcsServices.ImageSharing, RcsServices.Contacts);
+			initiateImageSharing();
+		}
     }
 
     @Override
     public void onDestroy() {
 		super.onDestroy();
-		if (serviceConnected) {
+		if (connectionManager == null) {
+			return;
+		}
+		connectionManager.stopMonitorServices(this);
+		if (connectionManager.isServiceConnected(RcsServices.ImageSharing)) {
 			// Remove file transfer listener
 			try {
-				ishApi.removeEventListener(ishListener);
+				connectionManager.getImageSharingApi().removeEventListener(ishListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
 				}
 			}
-			// Disconnect API
-			ishApi.disconnect();
 		}
     }
     
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successful):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
+    private void initiateImageSharing() {
+    	ImageSharingService ishApi = connectionManager.getImageSharingApi();
 		try {
 			// Add service listener
 			ishApi.addEventListener(ishListener);
-			serviceConnected = true;
 			
 			// Get the image sharing
 			imageSharing = ishApi.getImageSharing(ishDao.getSharingId());
 			if (imageSharing == null) {
 				// Session not found or expired
-				Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_session_not_found), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 				return;
 			}
 			
-			String size;
-	    	if (ishDao.getSize() != -1) {
-	    		size = getString(R.string.label_file_size, " " + (ishDao.getSize()/1024), " Kb");
-	    	} else {
-	    		size = getString(R.string.label_file_size_unknown);
-	    	}
-			
-	    	// Display sharing infos
-    		TextView from = (TextView)findViewById(R.id.from);
-	        from.setText(getString(R.string.label_from) + " " + ishDao.getContact());
-	    	TextView sizeTxt = (TextView)findViewById(R.id.image_size);
-	    	sizeTxt.setText(size);
+			ContactId remote = ishDao.getContact();
+			String displayName = RcsDisplayName.get(this, remote);
+			String from = RcsDisplayName.convert(this, ImageSharing.Direction.INCOMING, remote, displayName);
+
+			// Display sharing infos
+			TextView fromTextView = (TextView) findViewById(R.id.from);
+			fromTextView.setText(getString(R.string.label_from_args, from));
+
+			String size = getString(R.string.label_file_size, ishDao.getSize() / 1024);
+			TextView sizeTxt = (TextView) findViewById(R.id.image_size);
+			sizeTxt.setText(size);
 	    	
 			// Display accept/reject dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.title_image_sharing);
-			builder.setMessage(getString(R.string.label_from) +	" " + ishDao.getContact() + "\n" + size);
+			builder.setMessage(getString(R.string.label_ft_from_size, displayName, ishDao.getSize() / 1024));
 			builder.setCancelable(false);
 			builder.setIcon(R.drawable.ri_notif_csh_icon);
 			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
 			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
 			builder.show();
 	    } catch(JoynServiceNotAvailableException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_api_disabled), exitOnce);
+	    	if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
+	    	Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_api_failed), exitOnce);
+	    	if (LogUtils.isActive) {
+				Log.e(LOGTAG, e.getMessage(), e);
+			}
+	    	Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
-
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	serviceConnected = false;
-		Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_api_disabled), exitOnce);
-    }    
     
 	/**
 	 * Accept invitation
@@ -282,7 +270,7 @@ public class ReceiveImageSharing extends Activity implements JoynServiceListener
     		imageSharing.acceptInvitation();
     	} catch(Exception e) {
     		e.printStackTrace();
-    		Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_invitation_failed), exitOnce);
+    		Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
     	}
 	}
 	

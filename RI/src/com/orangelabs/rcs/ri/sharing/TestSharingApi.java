@@ -30,7 +30,6 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.sharing.geoloc.TestGeolocSharingApi;
 import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
 import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Sharing API

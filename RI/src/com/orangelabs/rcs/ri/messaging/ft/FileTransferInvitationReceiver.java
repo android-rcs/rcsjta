@@ -32,10 +32,10 @@ import android.content.Intent;
 public class FileTransferInvitationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent receiverIntent = new Intent(context, FileTransferIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(intent.getAction());
-		context.startService(receiverIntent);
+		Intent invitation = new Intent(context, FileTransferIntentService.class);
+		invitation.putExtras(intent);
+		invitation.setAction(intent.getAction());
+		context.startService(invitation);
     }
 
 }

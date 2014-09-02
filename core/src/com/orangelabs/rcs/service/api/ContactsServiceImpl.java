@@ -41,7 +41,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     /**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static final Logger logger = Logger.getLogger(ContactsServiceImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -93,7 +93,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
     				exts,
     				capabilities.isSipAutomata()); 
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			return new JoynContact(contact, registered, capaApi);
+			return new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName());
 		} else {
 			return null;
 		}
@@ -135,7 +135,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	    				capabilities.isSipAutomata()); 
 			}
 			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			result.add(new JoynContact(contact, registered, capaApi));
+			result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
 		}
 		
 		return result;
@@ -174,7 +174,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		    				capabilities.isSipAutomata()); 
 				}
 				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-				result.add(new JoynContact(contact, registered, capaApi));
+				result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
 			}
 		}
 		
@@ -217,7 +217,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			    				new HashSet<String>(capabilities.getSupportedExtensions()),
 			    				capabilities.isSipAutomata()); 
 						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-						result.add(new JoynContact(contact, registered, capaApi));
+						result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
 					}
 				}
 			}

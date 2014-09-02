@@ -45,6 +45,7 @@ import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.IPCallEventBroadcaster;
@@ -201,7 +202,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 				IPCall.Direction.INCOMING,
 				audiocontent, videocontent,
 				IPCall.State.INVITED);
-
+		
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
+				 
 		// Add session in the list
 		IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 		IPCallServiceImpl.addIPCallSession(sessionApi);

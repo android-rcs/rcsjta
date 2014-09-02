@@ -72,14 +72,6 @@
 		<activity android:name=".capabilities.RequestAllCapabilities"/>
 		
 		<activity android:name=".capabilities.CapabilitiesList"/>
-
-		<activity android:name=".capabilities.ExtensionsCapabilities">
-			<intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions"/>
-            </intent-filter>
-        </activity>		
 		
 		<!-- Messaging API -->
 		
@@ -263,8 +255,6 @@
         
         <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.ReceiveMultiMediaSession"/>
-        
         <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
         
         <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"/>
@@ -332,9 +322,19 @@
 	 	
 	 	<service android:name=".messaging.chat.ChatIntentService" android:exported="false" />
 	 	
+	 	<service android:name=".extension.MultiMediaSessionIntentService" android:exported="false" />
+	 	
         <!-- File Upload API -->
 	 	
         <activity android:name=".upload.InitiateFileUpload" />
+        
+        <receiver android:name=".RcsServiceReceiver">
+            <intent-filter>
+		    	<action android:name="com.gsma.services.rcs.action.SERVICE_UP"/>
+            </intent-filter>
+        </receiver>
+        
+        <service android:name=".RcsServiceIntentService" android:exported="false" />
 	 		 	
 </application>
 

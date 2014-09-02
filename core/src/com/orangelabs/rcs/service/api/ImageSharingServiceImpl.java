@@ -46,6 +46,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.ImageSharingEventBroadcaster;
@@ -186,7 +187,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     public void receiveImageSharingInvitation(ImageTransferSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive image sharing invitation from " + session.getRemoteContact());
+			logger.info("Receive image sharing invitation from " + session.getRemoteContact() + " displayName="
+					+ session.getRemoteDisplayName());
 		}
 		ContactId contact = session.getRemoteContact();
 		// Update rich call history
@@ -194,11 +196,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 				ImageSharing.Direction.INCOMING,
 				session.getContent(),
 				ImageSharing.State.INVITED);
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		// Update displayName of remote contact
+		 ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
 		// Add session in the list
 		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);

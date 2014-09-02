@@ -23,10 +23,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -34,16 +34,17 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaSessionList extends ListActivity implements JoynServiceListener {
-	/**
-	 * MM session API
-	 */
-	protected MultimediaSessionService sessionApi;
+public abstract class MultimediaSessionList extends ListActivity {
 	
-	/**
-	 * API enable flag
+   	/**
+	 * API connection manager
 	 */
-	protected boolean apiEnabled = false;
+	protected ApiConnectionManager connectionManager;
+	
+    /**
+	 * A locker to exit only once
+	 */
+	protected LockAccess exitOnce = new LockAccess();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +54,13 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.extension_session_list);
 
-        // Instanciate API
-        sessionApi = new MultimediaSessionService(getApplicationContext(), this);
-        
-        // Connect API
-        sessionApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Multimedia)) {
+			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), null);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.Multimedia);
 	}
 	
 	@Override
@@ -71,50 +74,10 @@ public abstract class MultimediaSessionList extends ListActivity implements Joyn
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-        // Disconnect API
-        sessionApi.disconnect();
+		if (connectionManager != null) {
+			connectionManager.stopMonitorServices(this);
+    	}
 	}	
-	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-    	apiEnabled = true;
-    	
-		// Display the list of sessions
-		updateList();
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	apiEnabled = false;
-
-    	Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_api_disabled));
-    }    
-    
-    /**
-     * Callback called when service is registered to the RCS/IMS platform
-     */
-    public void onServiceRegistered() {
-    	// Nothing to do here
-    }
-    
-    /**
-     * Callback called when service is unregistered from the RCS/IMS platform
-     */
-    public void onServiceUnregistered() {
-    	// Update the list of sessions
-		updateList();
-    }      
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {

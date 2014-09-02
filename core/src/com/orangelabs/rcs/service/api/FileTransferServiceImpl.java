@@ -52,6 +52,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
@@ -204,7 +205,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Receive FT invitation from " + session.getRemoteContact() + " file=" + session.getContent().getName()
-					+ " size=" + session.getContent().getSize());
+					+ " size=" + session.getContent().getSize() + " displayName=" + session.getRemoteDisplayName());
 		}
 
 		// Update rich messaging history
@@ -217,11 +218,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					FileTransfer.Direction.INCOMING, session.getContent(), session.getFileicon());
 		}
 
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
 
 		// Add session in the list
 		if (isGroup) {

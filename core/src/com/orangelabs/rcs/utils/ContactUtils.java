@@ -122,34 +122,28 @@ public class ContactUtils {
 	 * @param values Contact values
 	 * @return URI of the created contact
 	 */
-	public static Uri createContact(Context context, ContentValues values) throws Exception{
+	private static Uri createContact(Context context, ContentValues values) throws Exception {
 		ContentResolver mResolver = context.getContentResolver();
-		
+
 		// We will associate the newly created contact to the null contact account (Phone)
-		
+
 		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
-        
+
 		int backRefIndex = 0;
-		operations.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
-					.withValue(RawContacts.ACCOUNT_TYPE, null)
-					.withValue(RawContacts.ACCOUNT_NAME, null)
-					.build());   
+		operations.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI).withValue(RawContacts.ACCOUNT_TYPE, null)
+				.withValue(RawContacts.ACCOUNT_NAME, null).build());
 
 		// Set the name
-        operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-        		.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex)
-        		.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
-        		.withValue(StructuredName.DISPLAY_NAME, values.get(ContactsContract.Contacts.DISPLAY_NAME))
-        		.build());
-        
-        operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-        		.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex)
-        		.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-        		.withValue(Phone.NUMBER, values.get(Phone.NUMBER))
-        		.withValue(Phone.TYPE, values.get(Phone.TYPE))
-        		.build());
-        
-        long rawContactId = 0;
+		operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+				.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+				.withValue(StructuredName.DISPLAY_NAME, values.get(ContactsContract.Contacts.DISPLAY_NAME)).build());
+
+		operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+				.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex).withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+				.withValue(Phone.NUMBER, values.get(Phone.NUMBER)).withValue(Phone.TYPE, values.get(Phone.TYPE)).build());
+
+		long rawContactId = 0;
 		ContentProviderResult[] result = mResolver.applyBatch(ContactsContract.AUTHORITY, operations);
 		rawContactId = ContentUris.parseId(result[1].uri);
 		long contactId = 0;
@@ -168,8 +162,7 @@ public class ContactUtils {
 			}
 		}
 		// Return the resulting contact uri
-		Uri resultUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId); 
-		return resultUri;
+		return ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
 	}
 
 	/**

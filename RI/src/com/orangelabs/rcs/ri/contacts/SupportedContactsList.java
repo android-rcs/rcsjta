@@ -32,10 +32,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.contacts.ContactsService;
 import com.gsma.services.rcs.contacts.JoynContact;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -43,17 +44,22 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class SupportedContactsList extends Activity implements JoynServiceListener {
+public class SupportedContactsList extends Activity {
     
     /**
      * Refresh button
      */
     private Button refreshBtn;
     
-	/**
-	 * Contacts API
+  	/**
+	 * API connection manager
 	 */
-	private ContactsService contactsApi;
+	private ApiConnectionManager connectionManager;
+	
+    /**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,41 +80,29 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
         refreshBtn = (Button)findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
 
-        // Instanciate API
-        contactsApi = new ContactsService(getApplicationContext(), this);
-        
-        // Connect API
-        contactsApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Contacts)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			return;
+		}
+		connectionManager.startMonitorServices(this, exitOnce, RcsServices.Contacts);
     }
     
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-        // Disconnect API
-		contactsApi.disconnect();
+		if (connectionManager != null) {
+			connectionManager.stopMonitorServices(this);
+    	}
 	}	
 	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-    	// Display the list of sessions
+	@Override
+	protected void onResume() {
+		super.onResume();
+    	// Update the list of RCS contacts
 		updateList();
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	// Nothing to do here
-    }    
+	}
 
     /**
      * Update the list
@@ -120,7 +114,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 			String tag = tagEdit.getText().toString();
 			
 	    	// Get list of joyn contacts supporting a given tag
-	    	Set<JoynContact> supportedContacts = contactsApi.getJoynContactsSupporting(tag);
+	    	Set<JoynContact> supportedContacts = connectionManager.getContactsApi().getJoynContactsSupporting(tag);
 	    	List<JoynContact> contacts = new ArrayList<JoynContact>(supportedContacts);
 	        ListView listView = (ListView)findViewById(R.id.contacts);
 			if (contacts.size() > 0){
@@ -142,7 +136,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(SupportedContactsList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     

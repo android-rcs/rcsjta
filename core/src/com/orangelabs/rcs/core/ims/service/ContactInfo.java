@@ -102,6 +102,11 @@ public class ContactInfo {
 	private ContactId mContact;
 	
 	/**
+	 * Display name of RCS contact
+	 */
+	private String displayName;
+	
+	/**
 	 * Registration state
 	 */
 	private int registrationState = REGISTRATION_STATUS_UNKNOWN;
@@ -253,6 +258,22 @@ public class ContactInfo {
         return (rcsStatus != ContactInfo.NO_INFO && rcsStatus != ContactInfo.NOT_RCS);
 
     }
+
+	/**
+	 * Returns the RCS display name
+	 * @return the RCS display name
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * Sets the RCS display name
+	 * @param displayName
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 
 	/**
 	 * Returns a string representation of the object

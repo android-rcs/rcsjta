@@ -44,6 +44,7 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
@@ -209,7 +210,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     public void receiveVideoSharingInvitation(VideoStreamingSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.info("Receive video sharing invitation from " + contact);
+			logger.info("Receive video sharing invitation from " + contact + " displayName=" + session.getRemoteDisplayName());
 		}
 
 		// Update rich call history
@@ -218,11 +219,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 				VideoSharing.Direction.INCOMING,
 				content,
     			VideoSharing.State.INVITED);
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
 		// Add session in the list
 		VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
 		VideoSharingServiceImpl.addVideoSharingSession(sessionApi);

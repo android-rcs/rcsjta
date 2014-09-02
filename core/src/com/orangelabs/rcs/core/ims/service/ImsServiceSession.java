@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -179,6 +180,14 @@ public abstract class ImsServiceSession extends Thread {
     	
     	// Set the authentication agent in the dialog path 
     	dialogPath.setAuthenticationAgent(getAuthenticationAgent());
+    	
+    	if (contact != null) {
+    		try {
+        		remoteDisplayName = ContactsManager.getInstance().getContactDisplayName(contact);
+			} catch (Exception e) {
+				// RCS account does not exist
+			}
+    	}
 	}
 		
 	/**
@@ -226,6 +235,8 @@ public abstract class ImsServiceSession extends Thread {
 		
 		// Set the session timer expire
 		dialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
+		
+		remoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
 	}
 	
 	/**
@@ -353,11 +364,7 @@ public abstract class ImsServiceSession extends Thread {
 	 * @return String
 	 */
 	public String getRemoteDisplayName() {
-	    if (getDialogPath() == null) {
-	        return remoteDisplayName;
-	    } else {
-	        return SipUtils.getDisplayNameFromUri(getDialogPath().getInvite().getFrom());
-	    }
+	    return remoteDisplayName;
 	}
 
     /**

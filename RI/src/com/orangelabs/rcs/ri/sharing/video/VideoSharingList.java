@@ -110,7 +110,7 @@ public class VideoSharingList extends Activity {
     	 * @param c Cursor
     	 */
 		public VideoSharingListAdapter(Context context, Cursor c) {
-            super(context, c);
+            super(context, c, 0);
         }
 
         @Override

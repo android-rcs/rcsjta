@@ -45,6 +45,7 @@ import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
@@ -222,11 +223,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
 				mMultimediaMessagingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addMessagingSipSession(sessionApi);
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
 
 		// Broadcast intent related to the received invitation
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(msrpSessionInvite);
@@ -248,11 +247,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 		MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
 				mMultimediaStreamingSessionEventBroadcaster);
 		MultimediaSessionServiceImpl.addStreamingSipSession(sessionApi);
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
 
 		// Broadcast intent related to the received invitation
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);

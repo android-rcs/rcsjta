@@ -39,7 +39,6 @@ import static com.gsma.services.rcs.chat.GroupChat.State.TERMINATED;
 import static com.gsma.services.rcs.chat.ParticipantInfo.Status.CONNECTED;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +68,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -298,7 +298,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 */
 	public void addParticipants(final List<ContactId> participants) {
 		if (logger.isActivated()) {
-			logger.info("Add " + Arrays.toString(participants.toArray()) + " participants to the session");
+			StringBuilder listOfParticipants = new StringBuilder("Add ");
+			for (ContactId contactId : participants) {
+				listOfParticipants.append(contactId.toString()).append(" ");
+			}
+			listOfParticipants.append("participants to the session");
+			logger.info(listOfParticipants.toString());
 		}
 
 		int max = session.getMaxParticipants() - 1;
@@ -458,11 +463,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(), message,
 					ChatLog.Message.Direction.INCOMING);
-			// TODO : Update displayName of remote contact
-			/*
-			 * ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(),
-			 * session.getRemoteDisplayName());
-			 */
+			// Update displayName of remote contact
+			 ContactsManager.getInstance().setContactDisplayName(message.getRemote(), message.getDisplayName());
 			// Broadcast intent related to the received message
 			Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
 			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
@@ -659,11 +661,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			MessagingLog.getInstance().addGroupChatMessage(session.getContributionID(),
 					geoloc, ChatLog.Message.Direction.INCOMING);
 
-			// TODO : Update displayName of remote contact
-			/*
-			 * ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(),
-			 * session.getRemoteDisplayName());
-			 */
+			// Update displayName of remote contact
+			ContactsManager.getInstance().setContactDisplayName(geoloc.getRemote(), geoloc.getDisplayName());
+
 			// Broadcast intent related to the received message
 			Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
 			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
