@@ -225,13 +225,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ChatImpl sessionApi = new ChatImpl(contact, session, mOneToOneChatEventBroadcaster);
 		ChatServiceImpl.addChatSession(contact, sessionApi);
 
-		// Broadcast intent related to the received invitation
-		Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
-		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
-		newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage()
-				.getMessageId());
-		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+		if (session.getFirstMessage() != null) {
+			// Broadcast intent related to the received invitation
+			Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
+			newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage().getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+		}
     }
     
     /**

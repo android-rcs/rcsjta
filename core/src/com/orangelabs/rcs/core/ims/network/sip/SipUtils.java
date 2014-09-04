@@ -366,8 +366,7 @@ public class SipUtils {
 	 */
 	public static String getAssertedIdentity(SipRequest request) {
 		String assertedIdentityHeader = getAssertedIdentityHeader(request);
-		if (assertedIdentityHeader == null) {
-			// In case there is no tel uri, return the value of the first header
+		if (assertedIdentityHeader != null) {
 			return PhoneUtils.extractUriFromSipHeader(assertedIdentityHeader);
 		}
 		// No P-AssertedIdentity header, we take the value in the FROM uri
