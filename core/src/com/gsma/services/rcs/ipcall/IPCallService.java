@@ -52,7 +52,7 @@ public class IPCallService extends JoynService {
 	/**
 	 * API
 	 */
-	private IIPCallService api = null;
+	private IIPCallService api;
 	
     /**
      * Constructor
@@ -234,30 +234,6 @@ public class IPCallService extends JoynService {
 		}
     }    
     
-    /**
-     * Returns a current IP call from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return IP call or null if not found
-     * @throws JoynServiceException
-     */
-    public IPCall getIPCallFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String callId = intent.getStringExtra(IPCallIntent.EXTRA_CALL_ID);
-				if (callId != null) {
-					return getIPCall(callId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
-
 	/**
 	 * Adds an event listener on IP call events
 	 * 

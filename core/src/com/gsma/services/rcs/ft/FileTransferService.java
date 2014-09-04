@@ -58,14 +58,14 @@ public class FileTransferService extends JoynService {
 
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
-	private static final Class[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
+	private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
 			Uri.class, int.class
 	};
 
 	/**
 	 * API
 	 */
-	private IFileTransferService api = null;
+	private IFileTransferService api;
 	
     /**
      * Constructor
@@ -343,30 +343,6 @@ public class FileTransferService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }    
-    
-    /**
-     * Returns a current file transfer from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return File transfer or null if not found
-     * @throws JoynServiceException
-     */
-    public FileTransfer getFileTransferFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
-				if (transferId != null) {
-					return getFileTransfer(transferId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
     
     /**
 	 * Registers a file transfer event listener
