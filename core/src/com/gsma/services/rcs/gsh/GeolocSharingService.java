@@ -54,7 +54,7 @@ public class GeolocSharingService extends JoynService {
 	/**
 	 * API
 	 */
-	private IGeolocSharingService api = null;
+	private IGeolocSharingService api;
 	
     /**
      * Constructor
@@ -190,30 +190,6 @@ public class GeolocSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }    
-    
-    /**
-     * Returns a current geoloc sharing from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return Geoloc sharing or null if not found
-     * @throws JoynServiceException
-     */
-    public GeolocSharing getGeolocSharingFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sharingId = intent.getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
-				if (sharingId != null) {
-					return getGeolocSharing(sharingId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
 
 	/**
 	 * Adds an event listener on geoloc sharing events

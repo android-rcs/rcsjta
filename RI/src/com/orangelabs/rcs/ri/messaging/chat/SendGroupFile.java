@@ -41,15 +41,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.gsma.services.rcs.ft.GroupFileTransferListener;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -63,7 +62,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author jexa7410
  * @author Philippe LEMORDANT
  */
-public class SendGroupFile extends Activity implements JoynServiceListener {
+public class SendGroupFile extends Activity {
 	/**
 	 * Intent parameters
 	 */
@@ -73,7 +72,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	 * Activity result constants
 	 */
 	private final static int SELECT_IMAGE = 0;
-
+	
 	/**
 	 * UI handler
 	 */
@@ -84,11 +83,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
      */
 	private String chatId;
 
-    /**
-	 * Chat API
+	/**
+	 * Transfer Id
 	 */
-	private ChatService chatApi;
-
+	private String transferId;
+	
 	/**
 	 * Selected filename
 	 */
@@ -104,10 +103,10 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 	 */
 	private long filesize = -1;
 	
-	/**
-	 * File transfer API
+   	/**
+	 * API connection manager
 	 */
-    private FileTransferService ftApi;
+	private ApiConnectionManager connectionManager;
     
     /**
      * File transfer
@@ -119,25 +118,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
    	 */
    	private static final String LOGTAG = LogUtils.getTag(SendGroupFile.class.getSimpleName());
     
-	/**
-	 * Array of file transfer states
-	 */
-	private static final String[] FT_STATES = RiApplication.getContext().getResources()
-			.getStringArray(R.array.file_transfer_states);
-
-	/**
-	 * Array of file transfer reason codes
-	 */
-	private static final String[] FT_REASON_CODES = RiApplication.getContext().getResources()
-			.getStringArray(R.array.file_transfer_reason_codes);
- 
     /**
      * Progress dialog
      */
     private Dialog progressDialog;
-    
-    private boolean serviceConnected = false;
-    
+      
     /**
 	 * A locker to exit only once
 	 */
@@ -151,13 +136,17 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 		@Override
 		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
+				Log.d(LOGTAG, "onGroupDeliveryInfoChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
 						+ transferId + " state=" + state);
 			}
 		}
 
 		@Override
 		public void onTransferProgress(String chatId, String transferId, final long currentSize, final long totalSize) {
+			// Discard event if not for current transferId
+			if (SendGroupFile.this.transferId == null || !SendGroupFile.this.transferId.equals(transferId)) {
+				return;
+			}
 			handler.post(new Runnable() {
 				public void run() {
 					// Display transfer progress
@@ -171,15 +160,19 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state);
 			}
-			if (state > FT_STATES.length) {
+			if (state > RiApplication.FT_STATES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
 				}
 				return;
 			}
+			// Discard event if not for current transferId
+			if (SendGroupFile.this.transferId == null || !SendGroupFile.this.transferId.equals(transferId)) {
+				return;
+			}
 			// TODO : handle reason code (CR025)
-			final String reason = FT_REASON_CODES[0];
-			final String notif = getString(R.string.label_ft_state_changed, FT_STATES[state], reason);
+			final String reason = RiApplication.FT_REASON_CODES[0];
+			final String notif = getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], reason);
 			handler.post(new Runnable() {
 				public void run() {
 
@@ -249,77 +242,51 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     	inviteBtn.setEnabled(false);
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
-        selectBtn.setEnabled(false);
                
-        // Instantiate API
-        chatApi = new ChatService(getApplicationContext(), null);
-        ftApi = new FileTransferService(getApplicationContext(), this);
-        
-        // Connect API
-        chatApi.connect();
-        ftApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.FileTransfer, RcsServices.Contacts)) {
+			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_service_not_available), exitOnce);
+		} else {
+			connectionManager
+					.startMonitorServices(this, exitOnce, RcsServices.Chat, RcsServices.FileTransfer, RcsServices.Contacts);
+			FileTransferService ftApi = connectionManager.getFileTransferApi();
+			try {
+				// Enable thumbnail option if supported
+				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
+				if (ftApi.getConfiguration().isFileIconSupported()) {
+					ftThumb.setEnabled(true);
+				}
+
+				// Add group file listener
+				ftApi.addGroupFileTransferListener(ftListener);
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "API failure", e);
+				}
+				Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_api_failed), exitOnce);
+			}
+		}
     }
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-
-		if (serviceConnected) {
-			// Disconnect chat API
-			chatApi.disconnect();
+		if (connectionManager == null) {
+			return;
+		}
+		connectionManager.stopMonitorServices(this);
+		if (connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
 			// Remove Group file listener
 			try {
-				ftApi.removeGroupFileTransferListener(ftListener);
+				connectionManager.getFileTransferApi().removeGroupFileTransferListener(ftListener);
 			} catch (JoynServiceException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
 				}
 			}
-			// Disconnect File Transfer API
-			ftApi.disconnect();
 		}
     }
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successful):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-        try {
-            // Enable thumbnail option if supported
-            CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
-	        if (ftApi.getConfiguration().isFileIconSupported()) {
-	        	ftThumb.setEnabled(true);
-	        }
-
-	        Button selectBtn = (Button)findViewById(R.id.select_btn);
-	        selectBtn.setEnabled(true);
-	        
-	        // Add group file listener
-			ftApi.addGroupFileTransferListener(ftListener);
-			
-			serviceConnected = true;
-			
-        } catch(Exception e) {
-        	if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Failed to connect", e);
-			}
-			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_api_failed), exitOnce);
-        }
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	serviceConnected = false;
-		Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_api_disabled), exitOnce);
-    }   
     
     /**
      * Invite button listener
@@ -328,7 +295,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
         public void onClick(View v) {
         	long warnSize = 0;
         	try {
-        		warnSize = ftApi.getConfiguration().getWarnSize();
+        		warnSize = connectionManager.getFileTransferApi().getConfiguration().getWarnSize();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -359,7 +326,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     	// Check if the service is available
 		boolean registered = false;
 		try {
-			registered = ftApi.isServiceRegistered();
+			registered = connectionManager.getFileTransferApi().isServiceRegistered();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -373,7 +340,7 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 		// Initiate session in background
 		try {
 			// Get chat session
-			GroupChat groupChat = chatApi.getGroupChat(chatId);
+			GroupChat groupChat = connectionManager.getChatApi().getGroupChat(chatId);
 			if (groupChat == null) {
 				Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_chat_aborted), exitOnce);
 				return;
@@ -382,7 +349,8 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
 				Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize);
 			}
 			// Initiate transfer
-			fileTransfer = ftApi.transferFileToGroupChat(chatId, file, ftThumb.isChecked());
+			fileTransfer = connectionManager.getFileTransferApi().transferFileToGroupChat(chatId, file, ftThumb.isChecked());
+			transferId = fileTransfer.getTransferId();
 		} catch (Exception e) {
 			hideProgressDialog();
 			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed), exitOnce);
@@ -408,13 +376,11 @@ public class SendGroupFile extends Activity implements JoynServiceListener {
     /**
      * Select file button listener
      */
-    private OnClickListener btnSelectListener = new OnClickListener() {
-        public void onClick(View v) {
-			Intent pictureShareIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
-			pictureShareIntent.setType("image/*");
-			startActivityForResult(pictureShareIntent, SELECT_IMAGE);
-        }
-    };
+	private OnClickListener btnSelectListener = new OnClickListener() {
+		public void onClick(View v) {
+			FileUtils.openFile(SendGroupFile.this, "image/*", SELECT_IMAGE);
+		}
+	};
     
     /**
      * On activity result

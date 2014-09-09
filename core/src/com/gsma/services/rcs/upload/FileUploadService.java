@@ -54,7 +54,7 @@ public class FileUploadService extends JoynService {
 	
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
-	private static final Class[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
+	private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
 			Uri.class, int.class
 	};
 	

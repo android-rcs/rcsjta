@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import java.util.Set;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -28,16 +30,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Chat;
 import com.gsma.services.rcs.chat.ChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -64,7 +69,7 @@ public class SingleChatView extends ChatView {
      * Chat 
      */
 	private Chat chat;
-
+	
     /**
      * Chat listener
      */
@@ -72,6 +77,10 @@ public class SingleChatView extends ChatView {
 		// Callback called when an Is-composing event has been received
 		@Override
 		public void onComposingEvent(final ContactId contact, final boolean status) {
+			// Discard event if not for current contact
+			if (SingleChatView.this.contact == null || !SingleChatView.this.contact.equals(contact)) {
+				return;
+			}
 			handler.post(new Runnable() {
 				public void run() {
 					TextView view = (TextView) findViewById(R.id.isComposingText);
@@ -92,7 +101,11 @@ public class SingleChatView extends ChatView {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status);
 			}
-			if (status > MESSAGE_STATUSES.length) {
+			// Discard event if not for current contact
+			if (SingleChatView.this.contact == null || !SingleChatView.this.contact.equals(contact)) {
+				return;
+			}
+			if (status > RiApplication.MESSAGE_STATUSES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onMessageStatusChanged unhandled status=" + status);
 				}
@@ -100,8 +113,8 @@ public class SingleChatView extends ChatView {
 			}
 			// TODO : handle reason code (CR025)
 			int reasonCode = 0;
-			String reason = (reasonCode == 0) ? "" : MESSAGE_REASON_CODES[0];
-			final String notif = getString(R.string.label_message_status_changed, MESSAGE_STATUSES[status], reason);
+			String reason = (reasonCode == 0) ? "" : RiApplication.MESSAGE_REASON_CODES[0];
+			final String notif = getString(R.string.label_message_status_changed, RiApplication.MESSAGE_STATUSES[status], reason);
 			handler.post(new Runnable() {
 				public void run() {
 					addNotifHistory(notif, msgId);
@@ -110,24 +123,61 @@ public class SingleChatView extends ChatView {
 		}
 
 	};
-    
+	
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        processIntent(true);
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate contact=" + contact);
+    	if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate");
 		}
+        super.onCreate(savedInstanceState);
+        
+		if (connectionManager != null && !connectionManager.isServiceConnected(RcsServices.Chat,RcsServices.Contacts)) {
+			return;
+		}
+		try {
+			ChatService chatService = connectionManager.getChatApi();
+
+			// Add single chat event listener
+			chatService.addOneToOneChatEventListener(chatListener);
+
+			processIntent(true);
+
+			// Set max label length
+			int maxMsgLength = chatService.getConfiguration().getSingleChatMessageMaxLength();
+			if (maxMsgLength > 0) {
+				// Set the message composer max length
+				InputFilter[] filterArray = new InputFilter[1];
+				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+				composeText.setFilters(filterArray);
+			}
+			// Instantiate the composing manager
+			composingManager = new IsComposingManager(chatService.getConfiguration().getIsComposingTimeout() * 1000);
+		} catch (JoynServiceNotAvailableException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+		} catch (JoynServiceException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+		}
+    }
+
+    @Override
+    public void onDestroy() {
+    	super.onDestroy();
+    	removeServiceListener();
     }
     
 	@Override
 	protected void onNewIntent(Intent intent) {
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onNewIntent contact=" + contact);
+		}
 		super.onNewIntent(intent);
 		// Replace the value of intent
 		setIntent(intent);
-		processIntent(false);
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onNewIntent contact=" + contact);
+		
+		if (connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.Contacts)) {
+			processIntent(false);
 		}
 	}
 	
@@ -136,19 +186,27 @@ public class SingleChatView extends ChatView {
 	 * @param loadHistory the history must be (re)loaded
 	 */
 	private void processIntent(boolean loadHistory) {
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "processIntent loadHistory="+loadHistory);
+		}
+		ChatService chatService = connectionManager.getChatApi();
     	ChatMessageDAO messageDao = null;
-    	if (getIntent() == null) {
-    		if (LogUtils.isActive) {
-				Log.e(LOGTAG, "processIntent invalid intent");
-			}
-    		return;
-    	}
         int mode = getIntent().getIntExtra(SingleChatView.EXTRA_MODE, -1);
 		switch (mode) {
 		case ChatView.MODE_OPEN:
 		case ChatView.MODE_OUTGOING:
 			// Open chat
 			contact = (ContactId) getIntent().getParcelableExtra(SingleChatView.EXTRA_CONTACT);
+			try {
+				// Open chat
+				chat = chatService.openSingleChat(contact);
+			} catch (JoynServiceNotAvailableException e) {
+				e.printStackTrace();
+				Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			} catch (JoynServiceException e) {
+				e.printStackTrace();
+				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			}
 			loadHistory = true;
 			break;
 
@@ -168,6 +226,16 @@ public class SingleChatView extends ChatView {
 				loadHistory = true;
 				// Save new contactId
 				contact = messageDao.getContact();
+				try {
+					// Open chat
+					chat = chatService.openSingleChat(contact);
+				} catch (JoynServiceNotAvailableException e) {
+					e.printStackTrace();
+					Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+				} catch (JoynServiceException e) {
+					e.printStackTrace();
+					Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+				}
 			}
 			break;
 
@@ -182,17 +250,14 @@ public class SingleChatView extends ChatView {
 		setTitle(getString(R.string.title_chat) + " " +	contact);
 		if (loadHistory) {
 			// Activity is new or switch to new contact: load history
-			unreadMessageIDs = loadHistory(contact.toString());
-			if (serviceConnected) {
-				try {
-					for (String msgId : unreadMessageIDs) {
-						chatApi.markMessageAsRead(msgId);
-					}
-					unreadMessageIDs.clear();
-				} catch (JoynServiceException e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "processIntent failed to mark chat message as read");
-					}
+			Set<String> unreadMessageIDs = loadHistory(contact.toString());
+			try {
+				for (String msgId : unreadMessageIDs) {
+					chatService.markMessageAsRead(msgId);
+				}
+			} catch (JoynServiceException e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "processIntent failed to mark chat message as read");
 				}
 			}
 		} else {
@@ -203,21 +268,24 @@ public class SingleChatView extends ChatView {
 				}
 				return;
 			}
+			
 			try {
-				TextMessageItem message = new TextMessageItem(messageDao);
+				String displayName = null;
+				int direction = messageDao.getDirection();
+				String msgId = messageDao.getMsgId();
+				if (direction == ChatLog.Message.Direction.INCOMING) {
+					// Get display name for incoming messages
+					displayName = RcsDisplayName.get(this, contact);
+				}
 				// Add chat message to history
-				addMessageHistory(message);
-				if (serviceConnected) {
-					try {
-						chatApi.markMessageAsRead(messageDao.getMsgId());
-					} catch (JoynServiceException e) {
-						if (LogUtils.isActive) {
-							Log.e(LOGTAG, "onNewIntent failed to mark chat message as read");
-						}
+				addMessageHistory(direction, contact, messageDao.getBody(), messageDao.getMimeType(), msgId, displayName);
+
+				try {
+					chatService.markMessageAsRead(messageDao.getMsgId());
+				} catch (JoynServiceException e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "onNewIntent failed to mark chat message as read");
 					}
-				} else {
-					// Message will be marked as read upon connection
-					unreadMessageIDs.add(message.getMessageId());
 				}
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
@@ -228,75 +296,7 @@ public class SingleChatView extends ChatView {
 		}
 	}
 	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successful):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-    	if (LogUtils.isActive) {
-    		Log.d(LOGTAG, "onServiceConnected contact=" + contact);
-    	}
-    	try {
-			// Set max label length
-			int maxMsgLength = chatApi.getConfiguration().getSingleChatMessageMaxLength();
-			if (maxMsgLength > 0) {
-		        // Set the message composer max length
-				InputFilter[] filterArray = new InputFilter[1];
-				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
-				composeText.setFilters(filterArray);
-			}
-//			if (LogUtils.isActive) {
-//				ChatServiceConfiguration conf = chatApi.getConfiguration();
-//				Log.d(LOGTAG, "onServiceConnected GC min participants=" + conf.getGroupChatMinParticipants());
-//				Log.d(LOGTAG, "onServiceConnected GC max participants=" + conf.getGroupChatMaxParticipants());
-//				Log.d(LOGTAG, "onServiceConnected GC subject max length=" + conf.getGroupChatSubjectMaxLength());
-//				Log.d(LOGTAG, "onServiceConnected is respond to display reports=" + conf.isRespondToDisplayReportsEnabled());
-//			}
-			// Add single chat event listener
-			chatApi.addOneToOneChatEventListener(chatListener);
-			
-			serviceConnected = true;
-
-			// Mark messages for this contact as read
-			for (String msgId : unreadMessageIDs) {
-				chatApi.markMessageAsRead(msgId);
-			}
-			unreadMessageIDs.clear();
-			
-			// Open chat
-    		chat = chatApi.openSingleChat(contact);
-							
-			// Instantiate the composing manager
-			composingManager = new IsComposingManager(chatApi.getConfiguration().getIsComposingTimeout() * 1000);
-			
-	    } catch(JoynServiceNotAvailableException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled), exitOnce);
-	    } catch(JoynServiceException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed), exitOnce);
-		}
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		serviceConnected = false;
-		Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_disabled), exitOnce);
-    }    
-
-	/**
-     * Send a text message
-     * 
-     * @param msg Message
-     * @return Message ID
-     */
+	@Override
     protected String sendTextMessage(String msg) {
     	try {
     		if (LogUtils.isActive) {
@@ -313,12 +313,7 @@ public class SingleChatView extends ChatView {
 	    }
     }
     
-    /**
-     * Send geoloc message
-     * 
-     * @param geoloc Geoloc
-     * @return Message ID
-     */
+    @Override
     protected String sendGeolocMessage(Geoloc geoloc) {
         try {
 			// Send the text to remote
@@ -332,20 +327,14 @@ public class SingleChatView extends ChatView {
 	    }
     }
     
-    /**
-     * Quit the session
-     */
+    @Override
     protected void quitSession() {
     	chat = null;
         // Exit activity
 		finish();        
     }        	
         
-    /**
-     * Update the is composing status
-     * 
-     * @param isTyping Is composing status
-     */
+    @Override
     protected void setTypingStatus(boolean isTyping) {
 		try {
 			if (chat != null) {
@@ -383,12 +372,7 @@ public class SingleChatView extends ChatView {
 				break;	
 							
 			case R.id.menu_showus_map:
-				try {
-					showUsInMap(chat.getRemoteContact());
-			    } catch(JoynServiceException e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(SingleChatView.this, getString(R.string.label_api_failed), exitOnce);
-				}
+					showUsInMap(contact);
 				break;	
 
 			case R.id.menu_clear_log:
@@ -403,17 +387,17 @@ public class SingleChatView extends ChatView {
 		}
 		return true;
 	}
-        
-	@Override
-	protected void removeServiceListener() {
-		if (serviceConnected) {
+    
+	private void removeServiceListener() {
+		if (connectionManager != null && connectionManager.isServiceConnected(RcsServices.Chat)) {
 			try {
-				chatApi.removeOneToOneChatEventListener(chatListener);
+				connectionManager.getChatApi().removeOneToOneChatEventListener(chatListener);
 			} catch (JoynServiceException e) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "removeServiceListener failed",e);
+					Log.e(LOGTAG, "removeServiceListener failed", e);
 				}
 			}
 		}
 	}
+
 }

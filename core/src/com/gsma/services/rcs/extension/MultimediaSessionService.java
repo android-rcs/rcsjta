@@ -50,7 +50,7 @@ public class MultimediaSessionService extends JoynService {
 	/**
 	 * API
 	 */
-	private IMultimediaSessionService api = null;
+	private IMultimediaSessionService api;
 	
     /**
      * Constructor
@@ -206,30 +206,6 @@ public class MultimediaSessionService extends JoynService {
     }    
     
     /**
-     * Returns a current messaging session from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return Multimedia messaging session or null if not found
-     * @throws JoynServiceException
-     */
-    public MultimediaMessagingSession getMessagingSessionFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sessionId = intent.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
-				if (sessionId != null) {
-					return getMessagingSession(sessionId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
-
-    /**
      * Initiates a new session for real time streaming with a remote contact and for a given
      * service extension. The payload are exchanged in real time during the session and may be
      * from any type. The parameter contact supports the following formats: MSISDN in national or
@@ -306,30 +282,6 @@ public class MultimediaSessionService extends JoynService {
 		}
     }    
     
-    /**
-     * Returns a current streaming session from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return Multimedia streaming session or null if not found
-     * @throws JoynServiceException
-     */
-    public MultimediaStreamingSession getStreamingSessionFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sessionId = intent.getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
-				if (sessionId != null) {
-					return getStreamingSession(sessionId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
-
 	/**
 	 * Adds an event listener on messaging session events
 	 *

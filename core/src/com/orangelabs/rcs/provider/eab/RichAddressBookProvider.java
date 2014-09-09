@@ -85,7 +85,7 @@ public class RichAddressBookProvider extends ContentProvider {
      */
 	private static class DatabaseHelper extends SQLiteOpenHelper{
 		private static final String DATABASE_NAME = "eab.db";
-		private static final int DATABASE_VERSION = 21;
+		private static final int DATABASE_VERSION = 22;
 		
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -108,6 +108,7 @@ public class RichAddressBookProvider extends ContentProvider {
 			db.execSQL("CREATE TABLE IF NOT EXISTS " + EAB_TABLE + " ("
 					+ RichAddressBookData.KEY_ID + " integer primary key autoincrement, "
 					+ RichAddressBookData.KEY_CONTACT_NUMBER + " TEXT, "
+					+ RichAddressBookData.KEY_DISPLAY_NAME + " TEXT, "
 					+ RichAddressBookData.KEY_RCS_STATUS + " TEXT, "
                     + RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP + " long, "
                     + RichAddressBookData.KEY_REGISTRATION_STATE + " integer, "

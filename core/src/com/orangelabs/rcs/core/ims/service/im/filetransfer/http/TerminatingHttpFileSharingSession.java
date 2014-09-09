@@ -94,9 +94,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
 		setRemoteDisplayName(chatSession.getRemoteDisplayName());
         // Build a new dialogPath with this of chatSession and an empty CallId
-        SipDialogPath dialogPath = chatSession.getDialogPath();
-        dialogPath.setCallId("");
-        setDialogPath(dialogPath);
+		setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
+		getDialogPath().setCallId("");
+
 		ContactHeader inviteContactHeader = (ContactHeader) chatSession.getDialogPath().getInvite().getHeader(ContactHeader.NAME);
 		if (inviteContactHeader != null) {
 			this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);

@@ -13,8 +13,7 @@
 <string name="label_confirm_close">Do you want to close the session on quit?</string>
 <string name="menu_close_session">Quit</string>
 <string name="menu_clear_log">Clear log</string>
-<string name="label_file_size">Size: %1$s%2$s</string>
-<string name="label_file_size_unknown">Size: unknown</string>
+<string name="label_file_size">Size: %1$s Kb</string>
 <string name="label_command_in_progress">Command in progress...</string>
 <string name="label_session_not_found">Session not found</string>
 <string name="label_session_not_yet_started">Session not yet started</string>
@@ -31,6 +30,7 @@
 <string name="label_ignore">Ignore</string>
 <string name="label_refresh">Refresh</string>
 <string name="label_from">From:</string>
+<string name="label_from_args">From: %s</string>
 <string name="label_invitation_failed">Invitation has failed</string>
 <string name="label_yes">Yes</string>
 <string name="label_no">No</string>
@@ -137,6 +137,7 @@
 <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
 <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
 <string name="label_ft_state_changed">FT state %1$s (%2$s)</string>
+<string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
 
 
 <!-- Chat menu -->
@@ -152,7 +153,7 @@
 <string name="label_msg">Message:</string>
 <string name="label_hint_first_message">Enter first message</string>
 <string name="title_chat_view">Chat</string>
-<string name="title_recv_group_chat">Group chat with %s</string>
+<string name="title_recv_group_chat">Group chat initiated by %s</string>
 <string name="title_group_chat">Group chat</string>
 <string name="title_chat">Chat with</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
@@ -198,6 +199,7 @@
 <string name="label_chat_declined">Group chat invitation has been declined</string>
 <string name="label_no_participant_found">No participant found or available</string>
 <string name="label_no_subject">no subject</string>
+<string name="label_no_contact">&#8230;</string>
 <string name="label_geoloc_prefix">Geoloc</string>
 <string name="label_ft_thumb">Thumbnail</string>
 <string name="menu_send_file">Send file</string>
@@ -206,7 +208,8 @@
 <string name="label_delivery_status_changed">Contact %1$s delivery status %2$s (%3$s)</string>
 <string name="label_gc_state_changed">GC state %1$s (%2$s)</string>
 <string name="label_message_status_changed">%1$s (%2$s)</string>
-    
+<string name="label_gc_from_subject">From: %1$s\nSubject: %2$s</string>
+
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
 <string name="menu_image_sharing">Image sharing</string>
@@ -281,15 +284,15 @@
 <string name="label_session_declined">Session invitation has been declined</string>
 <string name="label_session_failed">Session has failed (%1$s)</string>
 <string name="label_session_has_expired">Session has expired</string>
-<string name="title_recv_messaging_session">Multimedia messaging session invitation</string>
-<string name="title_recv_streaming_session">Multimedia streaming session invitation</string>
+<string name="title_recv_messaging_session">Multimedia messaging invitation</string>
+<string name="title_recv_streaming_session">Multimedia streaming invitation</string>
 <string name="title_messaging_session">Messaging session</string>
 <string name="title_streaming_session">Streaming session</string>
 <string name="label_session">Session %s</string>
-<string name="label_session_from">from %s</string>
 <string name="label_send_data">Send data</string>
 <string name="label_recv_data">Receive data:</string>
 <string name="label_mms_state_changed">MMS state %1$s (%2$s)</string>
+<string name="label_mm_from_id">From: %1$s\nService ID: %2$s</string>
 
 <!-- Geolocation push -->
 <string name="label_select_geoloc">Select from a map</string>
@@ -311,8 +314,8 @@
 <string name="menu_ipcall_sessions">Current IP calls</string>
 <string name="title_ipcall">IP call</string> 
 <string name="title_ipcall_video">IP video call</string> 
-<string name="title_recv_ipcall">New IP call invitation</string>
-<string name="title_recv_ipcall_video">New IP video call invitation</string>
+<string name="title_recv_ipcall">IP call invitation from %s</string>
+<string name="title_recv_ipcall_video">IP video call invitation from %s</string>
 <string name="label_ipcall_has_expired">Call has expired</string>
 <string name="label_ipcall_aborted">Call aborted (%1$s)</string>
 <string name="label_ipcall_declined">Call invitation has been declined</string>

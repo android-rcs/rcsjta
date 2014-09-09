@@ -28,12 +28,125 @@ import android.content.Context;
  */
 public class RiApplication extends Application {
 
+	/**
+	 * Array of participant status
+	 */
+	public static String[] PARTICIPANT_STATUSES;
+	/**
+	 * Array of delivery states
+	 */
+	public static String[] DELIVERY_STATUSES;
+
+	/**
+	 * Array of delivery reason codes
+	 */
+	public static String[] DELIVERY_REASON_CODES;
+
+	/**
+	 * Array of Group Chat states
+	 */
+	public static String[] GC_STATES;
+
+	/**
+	 * Array of Group Chat reason codes
+	 */
+	public static String[] GC_REASON_CODES;
+
+	/**
+	 * Array of message reason codes
+	 */
+	public static String[] MESSAGE_REASON_CODES;
+
+	/**
+	 * Array of message statuses
+	 */
+	public static String[] MESSAGE_STATUSES;
+
+	/**
+	 * Array of file transfer states
+	 */
+	public static String[] FT_STATES;
+
+	/**
+	 * Array of file transfer reason codes
+	 */
+	public static String[] FT_REASON_CODES;
+	
+	/**
+	 * Array of Image sharing states
+	 */
+	public static String[] ISH_STATES;
+
+	/**
+	 * Array of Image sharing reason codes
+	 */
+	public static String[] ISH_REASON_CODES;
+	
+	/**
+	 * Array of Video sharing states
+	 */
+	public static String[] VSH_STATES;
+	
+	/**
+	 * Array of Video sharing reason codes
+	 */
+	public static String[] VSH_REASON_CODES;
+	
+	/**
+	 * Array of Geolocation sharing states
+	 */
+	public static String[] GSH_STATES;
+
+	/**
+	 * Array of Geolocation sharing reason codes
+	 */
+	public static String[] GSH_REASON_CODES;
+
+	/**
+     * Array of IPCall states
+     */
+    public static String[] IPCALL_STATES;
+    
+    /**
+     * Array of IPCall reason codes
+     */
+	public static String[] IPCALL_REASON_CODES;
+	
+	/**
+	 * Array of Multimedia Messaging Session states
+	 */
+	public static String[] MMS_STATES;
+
+	/**
+	 * Array of Multimedia Messaging Session codes
+	 */
+	public static String[] MMS_REASON_CODES;
+	
 	private static Context mContext;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mContext = this;
+		PARTICIPANT_STATUSES = getResources().getStringArray(R.array.participant_statuses);
+		DELIVERY_STATUSES = getResources().getStringArray(R.array.delivery_statuses);
+		DELIVERY_REASON_CODES = getResources().getStringArray(R.array.delivery_reason_codes);
+		GC_STATES = getResources().getStringArray(R.array.group_chat_states);
+		GC_REASON_CODES = getResources().getStringArray(R.array.group_chat_reason_codes);
+		MESSAGE_REASON_CODES = getResources().getStringArray(R.array.message_reason_codes);
+		MESSAGE_STATUSES = getResources().getStringArray(R.array.message_statuses);
+		FT_STATES = getResources().getStringArray(R.array.file_transfer_states);
+		FT_REASON_CODES = getResources().getStringArray(R.array.file_transfer_reason_codes);
+		ISH_STATES = getResources().getStringArray(R.array.ish_states);
+		ISH_REASON_CODES = getResources().getStringArray(R.array.ish_reason_codes);
+		VSH_STATES = getResources().getStringArray(R.array.vsh_states);
+		VSH_REASON_CODES = getResources().getStringArray(R.array.vsh_reason_codes);
+		GSH_STATES = getResources().getStringArray(R.array.gsh_states);
+		GSH_REASON_CODES = getResources().getStringArray(R.array.gsh_reason_codes);
+		IPCALL_STATES = getResources().getStringArray(R.array.ipcall_states);
+		IPCALL_REASON_CODES = getResources().getStringArray(R.array.ipcall_reason_codes);
+		MMS_STATES = getResources().getStringArray(R.array.mms_states);
+		MMS_REASON_CODES = getResources().getStringArray(R.array.mms_reason_codes);
 	}
 
 	public static Context getContext() {

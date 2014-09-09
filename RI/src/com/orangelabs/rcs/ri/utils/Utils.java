@@ -42,7 +42,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.SendGroupFile;
 
 /**
  * Utility functions

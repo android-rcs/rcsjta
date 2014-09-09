@@ -64,7 +64,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 			startActivity(intent);
 		} catch(JoynServiceException e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
 		}
 	}
 	
@@ -75,24 +75,23 @@ public class MessagingSessionList extends MultimediaSessionList {
 		try {
 			// Reset the list
 			sessions.clear();
-			
-			if (apiEnabled) {
-		    	// Get list of pending sessions
-		    	Set<MultimediaMessagingSession> currentSessions = sessionApi.getMessagingSessions(MessagingSessionUtils.SERVICE_ID);
-		    	sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
-				if (sessions.size() > 0){
-			        String[] items = new String[sessions.size()];    
-			        for (int i = 0; i < items.length; i++) {
-						items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
-			        }
-					setListAdapter(new ArrayAdapter<String>(MessagingSessionList.this, android.R.layout.simple_list_item_1, items));
-				} else {
-					setListAdapter(null);
+
+			// Get list of pending sessions
+			Set<MultimediaMessagingSession> currentSessions = connectionManager.getMultimediaSessionApi().getMessagingSessions(
+					MessagingSessionUtils.SERVICE_ID);
+			sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
+			if (sessions.size() > 0) {
+				String[] items = new String[sessions.size()];
+				for (int i = 0; i < items.length; i++) {
+					items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
 				}
+				setListAdapter(new ArrayAdapter<String>(MessagingSessionList.this, android.R.layout.simple_list_item_1, items));
+			} else {
+				setListAdapter(null);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed), exitOnce);
 		}
-    }
+	}
 }

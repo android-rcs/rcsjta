@@ -40,15 +40,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -56,22 +55,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
 /**
  * List chats from the content provider 
  */
-public class ChatList extends Activity implements JoynServiceListener {
+public class ChatList extends Activity {
 	/**
 	 * List view
 	 */
     private ListView listView;
 
-    /**
-	 * Chat API
-	 */
-    private ChatService chatApi;
-
-    /**
-	 * API connection state
-	 */
-	private boolean apiEnabled = false;
-	
 	/**
 	 * The log tag for this class
 	 */
@@ -93,12 +82,6 @@ public class ChatList extends Activity implements JoynServiceListener {
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
-        
-        // Instanciate API
-        chatApi = new ChatService(getApplicationContext(), this);
-        
-        // Connect API
-        chatApi.connect();        
 	}
 
 	@Override
@@ -107,14 +90,6 @@ public class ChatList extends Activity implements JoynServiceListener {
 
 		// Refresh view
 		listView.setAdapter(createListAdapter());
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		
-        // Disconnect API
-        chatApi.disconnect();
 	}
 		
 	/**
@@ -151,7 +126,7 @@ public class ChatList extends Activity implements JoynServiceListener {
     	 * @param c Cursor
     	 */
 		public ChatListAdapter(Context context, Cursor c) {
-            super(context, c);
+            super(context, c, 0);
         }
 
         @Override
@@ -210,26 +185,7 @@ public class ChatList extends Activity implements JoynServiceListener {
 		private String msg;
 		private long date;
 	}    
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		apiEnabled = true;
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		apiEnabled = false;
-    }    
+ 
     
     /**
      * Onclick list listener
@@ -237,7 +193,8 @@ public class ChatList extends Activity implements JoynServiceListener {
     private OnClickListener clickItemListener = new OnClickListener() {
 		public void onClick(View v) {
 			// TODO: if not connected offers possibility to show history
-			if (!apiEnabled) {
+			ApiConnectionManager apiConnectionManager = ApiConnectionManager.getInstance(ChatList.this);
+			if (apiConnectionManager == null || !apiConnectionManager.isServiceConnected(RcsServices.Chat)) {
 				Utils.showMessage(ChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}

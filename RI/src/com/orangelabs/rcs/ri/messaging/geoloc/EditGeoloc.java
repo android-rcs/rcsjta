@@ -31,19 +31,17 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Geoloc info editor 
  */
-public class EditGeoloc extends Activity implements JoynServiceListener {
+public class EditGeoloc extends Activity {
 	/**
 	 * Intent parameters
 	 */
@@ -68,16 +66,15 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
 	 * Accuracy editor
 	 */
 	private EditText accuracyEdit;
-
+	
+	
 	/**
 	 * Activity result constant
 	 */
 	public final static int SELECT_GEOLOCATION = 0;
 	
-    /**
-	 * Chat API
-	 */
-    private ChatService chatApi;
+	private int geolocExpirationTime = 0;
+	private int geolocLabelMaxLength = 0;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +95,6 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
         // Set button callback
         Button validateBtn = (Button)findViewById(R.id.validate_btn);
         validateBtn.setOnClickListener(btnValidateListener);
-        validateBtn.setEnabled(false);
         
         // Set button callback
         Button selectBtn = (Button)findViewById(R.id.select_geoloc_btn);
@@ -107,57 +103,27 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
         // Display my current location
         setMyLocation();
         
-        // Instanciate API
-        chatApi = new ChatService(getApplicationContext(), this);
-        
-        // Connect API
-        chatApi.connect();
+        // Register to API connection manager
+     	ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
+     	if (connectionManager != null && connectionManager.isServiceConnected(RcsServices.Chat)) {
+			try {
+				ChatServiceConfiguration configuration = connectionManager.getChatApi().getConfiguration();
+				geolocExpirationTime = configuration.getGeolocExpirationTime();
+				geolocLabelMaxLength = configuration.getGeolocLabelMaxLength();
+			} catch (JoynServiceException e) {
+				// Ignore exception
+			}
+     	}
+     	if (geolocLabelMaxLength > 0) {
+			InputFilter maxLengthFilter = new InputFilter.LengthFilter(geolocLabelMaxLength);
+			locationEdit.setFilters(new InputFilter[]{ maxLengthFilter });
+		}
 	}
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-
-        // Disconnect API
-        chatApi.disconnect();
     }
-
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		try {
-			// Set max label length
-			int maxLabelLength = chatApi.getConfiguration().getGeolocLabelMaxLength();
-			if (maxLabelLength > 0) {
-				InputFilter maxLengthFilter = new InputFilter.LengthFilter(maxLabelLength);
-				locationEdit.setFilters(new InputFilter[]{ maxLengthFilter });
-			}
-
-			// Enable button
-	        Button validateBtn = (Button)findViewById(R.id.validate_btn);
-	        validateBtn.setEnabled(true);
-	    } catch(JoynServiceNotAvailableException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(EditGeoloc.this, getString(R.string.label_api_disabled));
-	    } catch(JoynServiceException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(EditGeoloc.this, getString(R.string.label_api_failed));
-		}
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		Utils.showMessageAndExit(EditGeoloc.this, getString(R.string.label_api_disabled));
-    }    
     
 	/**
 	 * Set the location of the device
@@ -196,12 +162,7 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
     			accuracyEdit.setText("0");
     		}
 
-			long expiration = 0L;
-			try {
-				expiration = System.currentTimeMillis() + chatApi.getConfiguration().getGeolocExpirationTime();
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
+			long expiration = System.currentTimeMillis() + geolocExpirationTime;
     		Geoloc geoloc = new Geoloc(locationEdit.getText().toString(),
     				Double.parseDouble(lat), Double.parseDouble(lon),
     				expiration,
@@ -224,13 +185,7 @@ public class EditGeoloc extends Activity implements JoynServiceListener {
         }
     };
     
-    /**
-     * On activity result
-     * 
-     * @param requestCode Request code
-     * @param resultCode Result code
-     * @param data Data
-     */
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	if (resultCode != RESULT_OK) {
     		return;

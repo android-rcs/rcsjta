@@ -53,6 +53,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupChatEventBroadcaster;
@@ -215,24 +216,23 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void receiveOneOneChatInvitation(OneOneChatSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.info("Receive chat invitation from " + contact);
+			logger.info("Receive chat invitation from " + contact + " (display=" + session.getRemoteDisplayName() + ")");
 		}
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
+		 
 		// Add session in the list
 		ChatImpl sessionApi = new ChatImpl(contact, session, mOneToOneChatEventBroadcaster);
 		ChatServiceImpl.addChatSession(contact, sessionApi);
 
-		// Broadcast intent related to the received invitation
-		Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
-		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
-		newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage()
-				.getMessageId());
-		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+		if (session.getFirstMessage() != null) {
+			// Broadcast intent related to the received invitation
+			Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
+			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
+			newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, session.getFirstMessage().getMessageId());
+			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+		}
     }
     
     /**
@@ -429,17 +429,17 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 */
     public void receiveGroupChatInvitation(GroupChatSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive group chat invitation from " + session.getRemoteContact());
+			logger.info("Receive group chat invitation from " + session.getRemoteContact() + " (display="
+					+ session.getRemoteDisplayName()+")");
 		}
 
 		// Update rich messaging history
 		MessagingLog.getInstance().addGroupChat(session.getContributionID(),
 				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
-		// TODO : Update displayName of remote contact
-		/*
-		 * ContactsManager.getInstance().setContactDisplayName(contact,
-		 * session.getRemoteDisplayName());
-		 */
+		
+		// Update displayName of remote contact
+		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
+		 
 		// Add session in the list
 		GroupChatImpl sessionApi = new GroupChatImpl(session, mGroupChatEventBroadcaster);
 		ChatServiceImpl.addGroupChatSession(sessionApi);

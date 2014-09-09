@@ -51,7 +51,7 @@ public class VideoSharingService extends JoynService {
 	/**
 	 * API
 	 */
-	private IVideoSharingService api = null;
+	private IVideoSharingService api;
 
 	/**
 	 * Constructor
@@ -206,33 +206,6 @@ public class VideoSharingService extends JoynService {
 				IVideoSharing sharingIntf = api.getVideoSharing(sharingId);
 				if (sharingIntf != null) {
 					return new VideoSharing(sharingIntf);
-				} else {
-					return null;
-				}
-			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-	}
-
-	/**
-	 * Returns a current video sharing from its invitation Intent
-	 * 
-	 * @param intent
-	 *            Invitation intent
-	 * @return Video sharing or null if not found
-	 * @throws JoynServiceException
-	 */
-	public VideoSharing getVideoSharingFor(Intent intent)
-			throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sharingId = intent
-						.getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
-				if (sharingId != null) {
-					return getVideoSharing(sharingId);
 				} else {
 					return null;
 				}
