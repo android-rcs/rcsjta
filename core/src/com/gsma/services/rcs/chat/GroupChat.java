@@ -80,7 +80,7 @@ public class GroupChat {
     	public final static int FAILED = 7;
 
     	/**
-    	 * Chat is about to be accepted.
+    	 * Chat has been accepted and is in the process of becoming started.
     	 */
     	public final static int ACCEPTING = 8;
 

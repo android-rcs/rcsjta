@@ -114,6 +114,16 @@ public abstract class GroupChatSession extends ChatSession {
         setWrappedTypes(wrappedTypes);
 	}
 
+	/**
+	 * Check is  session should be auto accepted. This method should only be called
+	 * once per session
+	 * @return true if group chat session should be auto accepted
+	 */
+	protected boolean shouldBeAutoAccepted() {
+		return RcsSettings.getInstance().isGroupChatAutoAccepted()
+				|| FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#isGroupChat()
 	 */

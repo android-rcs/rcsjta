@@ -370,6 +370,20 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	        VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
 	    }
     }
+
+	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting sharing");
+		}
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setVideoSharingState(sharingId,
+					VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+					sharingId, VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+		}
+	}
     
     /**
      * Video stream has been resized

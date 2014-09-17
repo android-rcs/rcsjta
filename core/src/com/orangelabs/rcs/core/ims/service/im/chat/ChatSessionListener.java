@@ -113,9 +113,4 @@ public interface ChatSessionListener extends ImsSessionListener {
 	 *            the participant information
 	 */
     public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
-
-	/**
-	 * Session is being accepted
-	 */
-    public void handleSessionAccepting();
 }

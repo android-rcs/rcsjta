@@ -46,6 +46,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -102,6 +103,16 @@ public abstract class OneOneChatSession extends ChatSession {
         setWrappedTypes(wrappedTypes);
 	}
 	
+	/**
+	 * Check is  session should be auto accepted. This method should only be called
+	 * once per session
+	 * @return true if one-to-one chat session should be auto accepted
+	 */
+	protected boolean shouldBeAutoAccepted() {
+		return RcsSettings.getInstance().isChatAutoAccepted()
+				|| FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null;
+	}
+
 	/**
 	 * Is group chat
 	 * 

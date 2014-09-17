@@ -32,7 +32,6 @@ import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat;

@@ -42,13 +42,10 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -109,9 +106,8 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 				}
 			}
 
-			 // Check if Auto-accept (FT HTTP force auto-accept for the chat session)
-			if (RcsSettings.getInstance().isChatAutoAccepted()
-					|| FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+			/* Check if session should be auto-accepted once */
+			if (shouldBeAutoAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept store and forward chat invitation");
 				}

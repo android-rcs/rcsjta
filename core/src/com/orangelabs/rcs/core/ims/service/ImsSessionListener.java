@@ -55,4 +55,9 @@ public interface ImsSessionListener {
      * Session is being rejected by remote
      */
     public void handleSessionRejectedByRemote();
+
+    /**
+     * Accept has been called and the session is in the process of being started
+     */
+    public void handleSessionAccepting();
 }

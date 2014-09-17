@@ -81,6 +81,11 @@ public abstract class MultimediaSession {
     	 */
     	public final static int RINGING = 8;
 
+    	/**
+    	 * Session has been accepted and is in the process of becoming started
+    	 */
+    	public final static int ACCEPTING = 9;
+
         private State() {
         }    	
     }

@@ -419,6 +419,20 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
 	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting sharing");
+		}
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setImageSharingState(sharingId,
+					ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mImageSharingEventBroadcaster.broadcastImageSharingStateChanged(getRemoteContact(),
+					sharingId, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	@Override
 	public void handleSessionRejectedByUser() {
 		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
 	}

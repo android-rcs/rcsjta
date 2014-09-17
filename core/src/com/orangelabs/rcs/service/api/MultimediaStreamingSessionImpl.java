@@ -342,6 +342,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
 	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting session");
+		}
+		synchronized (lock) {
+			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+					getRemoteContact(), getSessionId(), MultimediaSession.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	@Override
 	public void handleSessionRejectedByUser() {
 		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
 	}

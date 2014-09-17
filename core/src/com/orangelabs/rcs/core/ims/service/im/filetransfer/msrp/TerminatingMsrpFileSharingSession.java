@@ -102,12 +102,12 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 */
 	public void run() {
 		try {
-	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new file transfer session as terminating");
-	    	}
+			if (logger.isActivated()) {
+				logger.info("Initiate a new file transfer session as terminating");
+			}
 
-	    	// Check is file should be auto-accepted depending on settings and roaming conditions
-            if (shouldFileTransferBeAutoAccepted()) {
+			/* Check if session should be auto-accepted once */
+			if (shouldBeAutoAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}

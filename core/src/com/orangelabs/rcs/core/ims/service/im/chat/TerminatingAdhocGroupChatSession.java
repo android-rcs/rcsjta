@@ -48,9 +48,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -137,15 +135,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				}
 			}
 		}
-
-		if (RcsSettings.getInstance().isGroupChatAutoAccepted()
-				|| FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
-			if (logger.isActivated()) {
-				logger.debug("Auto accept group chat invitation");
-			}
-			return;
-		}
-
 	}
 
 	/**
@@ -157,7 +146,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	    		logger.info("Initiate a new ad-hoc group chat session as terminating");
 	    	}
 
-            if (RcsSettings.getInstance().isGroupChatAutoAccepted() || FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+	    	/* Check if session should be auto-accepted once */
+            if (shouldBeAutoAccepted()) {
                 if (logger.isActivated()) {
                     logger.debug("Auto accept group chat invitation");
                 }

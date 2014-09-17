@@ -83,7 +83,7 @@ public class FileTransfer {
     	public final static int REJECTED = 8;
 
     	/**
-    	 * Accepting, waiting for reply
+    	 * File transfer has been accepted and is in the process of becoming started
     	 */
     	public final static int ACCEPTING = 9;
     	

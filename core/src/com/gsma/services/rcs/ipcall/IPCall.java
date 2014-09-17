@@ -81,7 +81,7 @@ public class IPCall {
     	public final static int HOLD = 8;
 
     	/**
-    	 * Call about to be accepted
+    	 * Call has been accepted and is in the process of becoming started
     	 */
     	public final static int ACCEPTING = 9;
 
