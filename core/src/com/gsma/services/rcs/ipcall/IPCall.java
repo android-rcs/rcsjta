@@ -66,29 +66,24 @@ public class IPCall {
     	public final static int FAILED = 5;
 
     	/**
-    	 * Call has been terminated
-    	 */
-    	public static final int TERMINATED = 6;
-
-    	/**
     	 * Call rejected
     	 */
-    	public final static int REJECTED = 7;
+    	public final static int REJECTED = 6;
 
     	/**
     	 * Call on hold
     	 */
-    	public final static int HOLD = 8;
+    	public final static int HOLD = 7;
 
     	/**
     	 * Call has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 9;
+    	public final static int ACCEPTING = 8;
 
     	/**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 10;
+    	public final static int RINGING = 9;
 
     	private State() {
         }    	
@@ -119,9 +114,9 @@ public class IPCall {
         public static final int ABORTED_BY_SYSTEM = 3;
 
         /**
-         * IP call is aborted because already taken by the secondary device.
+         * IP call is rejected because already taken by the secondary device.
          */
-        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
         /**
          * IP call invitation was rejected due to max number of sessions reached.

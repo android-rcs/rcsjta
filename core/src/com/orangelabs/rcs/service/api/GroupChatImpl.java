@@ -198,13 +198,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				return GroupChat.State.ABORTED;
+				return GroupChat.State.REJECTED;
 
 			} else if (dialogPath.isSessionEstablished()) {
 				return GroupChat.State.STARTED;
 
 			} else if (dialogPath.isSessionTerminated()) {
-				return GroupChat.State.TERMINATED;
+				return GroupChat.State.ABORTED;
 
 			} else {
 				if ((session instanceof OriginatingAdhocGroupChatSession)
@@ -463,20 +463,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 			} else {
 				if (session.getDialogPath().isSessionCancelled()) {
+					MessagingLog.getInstance().updateGroupChatStateAndReasonCode(
+							chatId,
+							new GroupChatStateAndReasonCode(GroupChat.State.REJECTED,
+									GroupChat.ReasonCode.REJECTED_BY_REMOTE));
+
+					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId,
+							GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_BY_REMOTE);
+				} else {
 					int reasonCode = sessionAbortedReasonToReasonCode(reason);
 					MessagingLog.getInstance().updateGroupChatStateAndReasonCode(chatId,
 							new GroupChatStateAndReasonCode(GroupChat.State.ABORTED, reasonCode));
 
 					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId,
 							GroupChat.State.ABORTED, reasonCode);
-				} else {
-					MessagingLog.getInstance().updateGroupChatStateAndReasonCode(
-							chatId,
-							new GroupChatStateAndReasonCode(GroupChat.State.TERMINATED,
-									GroupChat.ReasonCode.UNSPECIFIED));
-
-					mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId,
-							GroupChat.State.TERMINATED, GroupChat.ReasonCode.UNSPECIFIED);
 				}
 			}
 
@@ -495,11 +495,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		synchronized (lock) {
 				MessagingLog.getInstance().updateGroupChatStateAndReasonCode(
 						chatId,
-						new GroupChatStateAndReasonCode(GroupChat.State.TERMINATED,
-								GroupChat.ReasonCode.UNSPECIFIED));
+						new GroupChatStateAndReasonCode(GroupChat.State.ABORTED,
+								GroupChat.ReasonCode.ABORTED_BY_REMOTE));
 
 				mGroupChatEventBroadcaster.broadcastGroupChatStateChanged(chatId,
-						GroupChat.State.TERMINATED, GroupChat.ReasonCode.UNSPECIFIED);
+						GroupChat.State.ABORTED, GroupChat.ReasonCode.ABORTED_BY_REMOTE);
 
 			ChatServiceImpl.removeGroupChatSession(chatId);
 		}

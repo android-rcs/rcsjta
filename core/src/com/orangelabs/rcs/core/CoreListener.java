@@ -29,6 +29,7 @@ import java.util.Set;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.AudioContent;
+import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
@@ -326,6 +327,16 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+            int reasonCode);
+
+    /**
+     * Handle the case of rejected geoloc sharing
+     *
+     * @param contact Remote contact
+     * @param content Geoloc content
+     * @param reasonCode Rejected reason code
+     */
+    public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
             int reasonCode);
 
     /**

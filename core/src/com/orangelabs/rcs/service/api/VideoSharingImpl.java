@@ -184,13 +184,13 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				return VideoSharing.State.ABORTED;
+				return VideoSharing.State.REJECTED;
 
 			} else if (dialogPath.isSessionEstablished()) {
 				return VideoSharing.State.STARTED;
 
 			} else if (dialogPath.isSessionTerminated()) {
-				return VideoSharing.State.TERMINATED;
+				return VideoSharing.State.ABORTED;
 
 			} else {
 				if (session instanceof OriginatingVideoStreamingSession) {
@@ -336,12 +336,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		String sharingId = getSharingId();
 		synchronized (lock) {
 			RichCallHistory.getInstance().setVideoSharingState(sharingId,
-					VideoSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
+					VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			RichCallHistory.getInstance().setVideoSharingDuration(sharingId,
 					(System.currentTimeMillis() - startedAt) / 100);
 
 			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
-					getSharingId(), VideoSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
+					getSharingId(), VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
 			VideoSharingServiceImpl.removeVideoSharingSession(sharingId);
 		}

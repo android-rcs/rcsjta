@@ -67,9 +67,9 @@ public class GeolocSharing {
     	public final static int FAILED = 5;
 
     	/**
-    	 * Sharing has been terminated
+    	 * Sharing has been transferred
     	 */
-    	public final static int TERMINATED = 6;
+    	public final static int TRANSFERRED = 6;
 
     	/**
     	 * Sharing invitation was rejected
@@ -112,9 +112,9 @@ public class GeolocSharing {
     	public final static int ABORTED_BY_SYSTEM = 3;
 
     	/**
-    	 * Geolocation share is aborted because already taken by the secondary device.
+    	 * Geolocation share is rejected because already taken by the secondary device.
     	 */
-    	public final static int ABORTED_BY_SECONDARY_DEVICE = 4;
+    	public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
 
     	/**
     	 * Geolocation share invitation was rejected due to to many open sharing sessions.

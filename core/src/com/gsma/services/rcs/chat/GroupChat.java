@@ -57,37 +57,32 @@ public class GroupChat {
     	 * Chat is started
     	 */
     	public final static int STARTED = 3;
-    	
-    	/**
-    	 * Chat has been terminated
-    	 */
-    	public final static int TERMINATED = 4;
     	   	
     	/**
     	 * Chat has been aborted 
     	 */
-    	public final static int ABORTED = 5;
+    	public final static int ABORTED = 4;
     	
     	/**
     	 * Chat has been closed by the user. A user which has closed a
     	 * conversation voluntary can't rejoin it afterward.
     	 */
-    	public final static int CLOSED_BY_USER = 6;
+    	public final static int CLOSED_BY_USER = 5;
 
     	/**
     	 * Chat has failed 
     	 */
-    	public final static int FAILED = 7;
+    	public final static int FAILED = 6;
 
     	/**
     	 * Chat has been accepted and is in the process of becoming started.
     	 */
-    	public final static int ACCEPTING = 8;
+    	public final static int ACCEPTING = 7;
 
     	/**
     	 * Chat invitation was rejected.
     	 */
-    	public final static int REJECTED = 9;
+    	public final static int REJECTED = 8;
     	
         private State() {
         }    	
@@ -120,9 +115,9 @@ public class GroupChat {
         public final static int ABORTED_BY_SYSTEM = 3;
 
         /**
-         * Group chat is aborted because already taken by the secondary device.
+         * Group chat is rejected because already taken by the secondary device.
          */
-        public final static int ABORTED_BY_SECONDARY_DEVICE = 4;
+        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
 
         /**
          * Group chat invitation was rejected as it was detected as spam.

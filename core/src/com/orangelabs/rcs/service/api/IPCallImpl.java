@@ -158,13 +158,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				return IPCall.State.ABORTED;
+				return IPCall.State.REJECTED;
 
 			} else if (dialogPath.isSessionEstablished()) {
 				return IPCall.State.STARTED;
 
 			} else if (dialogPath.isSessionTerminated()) {
-				return IPCall.State.TERMINATED;
+				return IPCall.State.ABORTED;
 
 			} else {
 				if (session instanceof OriginatingIPCallSession) {

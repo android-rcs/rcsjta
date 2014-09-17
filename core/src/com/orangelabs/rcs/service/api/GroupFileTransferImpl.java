@@ -156,7 +156,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		int state = ((HttpFileTransferSession)session).getSessionState();
 		switch (state) {
 			case HttpTransferState.CANCELLED:
-				return FileTransfer.State.ABORTED;
+				return FileTransfer.State.REJECTED;
 
 			case HttpTransferState.ESTABLISHED:
 				return FileTransfer.State.STARTED;

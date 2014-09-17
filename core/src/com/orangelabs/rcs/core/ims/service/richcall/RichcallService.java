@@ -27,11 +27,13 @@ import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -104,6 +106,13 @@ public class RichcallService extends ImsService {
 				.getBytes());
 		getImsModule().getCore().getListener()
 				.handleVideoSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	private void handleGeolocSharingInvitationRejected(SipRequest invite, int reasonCode) {
+		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+		GeolocContent content = (GeolocContent)ContentManager.createMmContentFromSdp(invite);
+		getImsModule().getCore().getListener()
+				.handleGeolocSharingInvitationRejected(contact, content, reasonCode);
 	}
 
 	/**
@@ -435,6 +444,7 @@ public class RichcallService extends ImsService {
                 logger.debug("Max sessions reached");
             }
         	rejectInvitation = true;
+        	handleVideoSharingInvitationRejected(invite, VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         } else
         if (currentSessions.size() == 1) {
         	ContentSharingSession currentSession = currentSessions.elementAt(0);
@@ -499,17 +509,18 @@ public class RichcallService extends ImsService {
 		return session;
 	}
 
-    /**
-     * Receive a geoloc sharing invitation
-     *
-     * @param invite Initial invite
-     */
+	/**
+	 * Receive a geoloc sharing invitation
+	 * 
+	 * @param invite Initial invite
+	 */
 	public void receiveGeolocSharingInvitation(SipRequest invite) {
 		if (logger.isActivated()) {
-    		logger.info("Receive a geoloc sharing session invitation");
-    	}
+			logger.info("Receive a geoloc sharing session invitation");
+		}
 
 		ContactId contact = null;
+		boolean rejectInvitation = false;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 			// Test if call is established
@@ -524,12 +535,49 @@ public class RichcallService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
-			 sendErrorResponse(invite, 486);
-	            return;
+			rejectInvitation = true;
+			return;
 		}
-        
+
+		Vector<ContentSharingSession> currentSessions = getCShSessions();
+		if (currentSessions.size() >= 2) {
+			// Already a bidirectional session
+			if (logger.isActivated()) {
+				logger.debug("Max sessions reached");
+			}
+			handleGeolocSharingInvitationRejected(invite,
+					GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+			rejectInvitation = true;
+		} else if (currentSessions.size() == 1) {
+			ContentSharingSession currentSession = currentSessions.elementAt(0);
+			if (isSessionTerminating(currentSession)) {
+				// Terminating session already used
+				if (logger.isActivated()) {
+					logger.debug("Max terminating sessions reached");
+				}
+				handleGeolocSharingInvitationRejected(invite,
+						GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+				rejectInvitation = true;
+			} else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
+				// Not the same contact
+				if (logger.isActivated()) {
+					logger.debug("Only bidirectional session with same contact authorized");
+				}
+				handleGeolocSharingInvitationRejected(invite,
+						GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+				rejectInvitation = true;
+			}
+		}
+		if (rejectInvitation) {
+			if (logger.isActivated()) {
+				logger.debug("Reject the invitation");
+			}
+			sendErrorResponse(invite, 486);
+			return;
+		}
+
 		// Create a new session
-    	GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact);
+		GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact);
 
 		// Start the session
 		session.startSession();

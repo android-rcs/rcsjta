@@ -54,6 +54,7 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreListener;
 import com.orangelabs.rcs.core.TerminalInfo;
 import com.orangelabs.rcs.core.content.AudioContent;
+import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
@@ -847,6 +848,12 @@ public class RcsCoreService extends Service implements CoreListener {
 	public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
 			int reasonCode) {
 		vshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	@Override
+	public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+			int reasonCode) {
+		gshApi.addAndbroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
 	}
 
 	@Override

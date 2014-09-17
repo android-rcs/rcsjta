@@ -117,9 +117,9 @@ public class ImageSharing {
         public static final int ABORTED_BY_SYSTEM = 3;
 
         /**
-         * Image share is aborted because already taken by the secondary device.
+         * Image share is rejected because already taken by the secondary device.
          */
-        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
         /**
          * Incoming image was rejected due to time out.

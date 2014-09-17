@@ -114,13 +114,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				return MultimediaSession.State.ABORTED;
+				return MultimediaSession.State.REJECTED;
 
 			} else if (dialogPath.isSessionEstablished()) {
 				return MultimediaSession.State.STARTED;
 
 			} else if (dialogPath.isSessionTerminated()) {
-				return MultimediaSession.State.TERMINATED;
+				return MultimediaSession.State.ABORTED;
 
 			} else {
 				if (session instanceof OriginatingSipRtpSession) {

@@ -203,7 +203,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null) {
 			if (dialogPath.isSessionCancelled()) {
-				return ImageSharing.State.ABORTED;
+				return ImageSharing.State.REJECTED;
 
 			} else if (dialogPath.isSessionEstablished()) {
 				return ImageSharing.State.STARTED;

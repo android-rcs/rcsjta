@@ -64,26 +64,21 @@ public class VideoSharing {
     	 * Sharing has failed
     	 */
     	public final static int FAILED = 5;
-    	
-        /**
-         * Sharing has been terminated
-         */
-        public static final int TERMINATED = 6;
 
         /**
     	 * Sharing has been rejected
     	 */
-    	public final static int REJECTED = 7;
+    	public final static int REJECTED = 6;
 
         /**
     	 * Ringing
     	 */
-    	public final static int RINGING = 8;
+    	public final static int RINGING = 7;
 
     	/**
     	 * Sharing has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 9;
+    	public final static int ACCEPTING = 8;
 
     	private State() {
         }    	
@@ -115,9 +110,9 @@ public class VideoSharing {
         public static final int ABORTED_BY_SYSTEM = 3;
 
         /**
-         * Video share is aborted because already taken by the secondary device.
+         * Video share is rejected because already taken by the secondary device.
          */
-        public static final int ABORTED_BY_SECONDARY_DEVICE = 4;
+        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
         /**
          * Video share invitation was rejected due to max number of sharing sessions

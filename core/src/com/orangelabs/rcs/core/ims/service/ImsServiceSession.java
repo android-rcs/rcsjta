@@ -930,6 +930,7 @@ public abstract class ImsServiceSession extends Thread {
         SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(invite, getResponseTimeout());
 
         // Analyze the received response 
+        /* TODO: Handle provisional response such as 180 RINGING */
         if (ctx.isSipResponse()) {
             // A response has been received
             if (ctx.getStatusCode() == 200) {

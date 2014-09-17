@@ -130,7 +130,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
 			} else if (dialogPath.isSessionTerminated()) {
 				if (session.isGeolocTransfered()) {
-					return GeolocSharing.State.TERMINATED;
+					return GeolocSharing.State.TRANSFERRED;
 				}
 
 				return GeolocSharing.State.ABORTED;
@@ -383,7 +383,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			}
 
 			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact,
-					getSharingId(), GeolocSharing.State.TERMINATED, ReasonCode.UNSPECIFIED);
+					getSharingId(), GeolocSharing.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
 	    }
     }
 

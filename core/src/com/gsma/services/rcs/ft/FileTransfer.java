@@ -131,9 +131,9 @@ public class FileTransfer {
         public final static int ABORTED_BY_SYSTEM = 3;
 
         /**
-         * file transfer is aborted because already taken by the secondary device.
+         * file transfer is rejected because already taken by the secondary device.
          */
-        public final static int ABORTED_BY_SECONDARY_DEVICE = 4;
+        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
 
         /**
          * File transfer has been rejected due to time out.

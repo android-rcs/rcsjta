@@ -60,31 +60,26 @@ public abstract class MultimediaSession {
     	 * Session has been aborted or 
     	 */
     	public final static int ABORTED = 4;
-    	
-        /**
-         * Session has been terminated
-         */
-        public static final int TERMINATED = 5;
 
         /**
     	 * Session has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 5;
 
         /**
     	 * Session has been rejected.
     	 */
-    	public final static int REJECTED = 7;
+    	public final static int REJECTED = 6;
 
         /**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 8;
+    	public final static int RINGING = 7;
 
     	/**
     	 * Session has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 9;
+    	public final static int ACCEPTING = 8;
 
         private State() {
         }    	
