@@ -43,7 +43,6 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -63,8 +62,9 @@ public class FileTransferLog implements IFileTransferLog {
 	private static final String SELECTION_FILE_BY_T_ID = new StringBuilder(FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
 
 	private static final String SELECTION_BY_PAUSED_BY_SYSTEM = new StringBuilder(
-			FileTransferData.KEY_STATE).append("=? AND ").append(FileTransferData.KEY_REASON_CODE)
-			.append("=?").toString();
+			FileTransferData.KEY_STATE).append("=").append(FileTransfer.State.PAUSED)
+			.append(" AND ").append(FileTransferData.KEY_REASON_CODE).append("=")
+			.append(FileTransfer.ReasonCode.PAUSED_BY_SYSTEM).toString();
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -138,12 +138,6 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.insert(ftDatabaseUri, values);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addOutgoingGroupFileTransfer(java.lang.String, java.lang.String,
-	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
-	 */
 	@Override
 	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId, MmContent content, MmContent thumbnail) {
 		if (logger.isActivated()) {
@@ -188,14 +182,6 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * addIncomingGroupFileTransfer(java.lang.String,
-	 * com.gsma.services.rcs.contacts.ContactId, java.lang.String,
-	 * com.orangelabs.rcs.core.content.MmContent,
-	 * com.orangelabs.rcs.core.content.MmContent, int, int)
-	 */
 	@Override
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact,
 			String fileTransferId, MmContent content, MmContent fileicon, int state, int reasonCode) {
@@ -233,23 +219,15 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.insert(ftDatabaseUri, values);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * updateFileTransferStateAndReasonCode(java.lang.String,
-	 * com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode)
-	 */
 	@Override
-	public void updateFileTransferStateAndReasonCode(String fileTransferId,
-			FileTransferStateAndReasonCode stateAndReasonCode) {
-		int state = stateAndReasonCode.getState();
-		int reasonCode = stateAndReasonCode.getReasonCode();
+	public void updateFileTransferStateAndReasonCode(String fileTransferId, int state,
+			int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
 					.append(fileTransferId).append(", state=").append(state)
 					.append(", reasonCode=").append(reasonCode).toString());
 		}
-		// TODO FUSION to check
+
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_STATE, state);
 		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
@@ -263,11 +241,6 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#markFileTransferAsRead(java.lang.String)
-	 */
 	@Override
 	public void markFileTransferAsRead(String fileTransferId) {
 		if (logger.isActivated()) {
@@ -284,11 +257,6 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long, long)
-	 */
 	@Override
 	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize) {
 		ContentValues values = new ContentValues();
@@ -300,9 +268,6 @@ public class FileTransferLog implements IFileTransferLog {
 		});
 	}
 
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferred(java.lang.String, com.orangelabs.rcs.core.content.MmContent)
-	 */
 	@Override
 	public void updateFileTransferred(String fileTransferId, MmContent content) {
 		if (logger.isActivated()) {
@@ -317,11 +282,6 @@ public class FileTransferLog implements IFileTransferLog {
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#isFileTransfer(java.lang.String)
-	 */
 	@Override
 	public boolean isFileTransfer(String fileTransferId) {
 		Cursor cursor = null;
@@ -342,11 +302,6 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferChatId(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void updateFileTransferChatId(String fileTransferId, String chatId) {
 		if (logger.isActivated()) {
@@ -357,11 +312,6 @@ public class FileTransferLog implements IFileTransferLog {
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] { fileTransferId });
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#setFileUploadTId(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void setFileUploadTId(String fileTransferId, String tId) {
 		if (logger.isActivated()) {
@@ -375,11 +325,6 @@ public class FileTransferLog implements IFileTransferLog {
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#setFileDownloadAddress(java.lang.String, android.net.Uri)
-	 */
 	@Override
 	public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
 		if (logger.isActivated()) {
@@ -393,22 +338,12 @@ public class FileTransferLog implements IFileTransferLog {
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#retrieveFileTransfersPausedBySystemOnConnectionLoss()
-	 */
 	@Override
 	public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
 		Cursor cursor = null;
 		try {
-			String[] selectionArgs = new String[] {
-						String.valueOf(FileTransfer.State.PAUSED),
-						String.valueOf(FileTransfer.ReasonCode.PAUSED_BY_SYSTEM)
-			};
-
 			cursor = cr.query(ftDatabaseUri, null, SELECTION_BY_PAUSED_BY_SYSTEM,
-					selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+					null, ORDER_BY_TIMESTAMP_ASC);
 			if (!cursor.moveToFirst()) {
 				return new ArrayList<FtHttpResume>();
 			}
@@ -480,11 +415,6 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#retrieveFtHttpResumeUpload()
-	 */
 	@Override
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
 		Cursor cursor = null;

@@ -228,7 +228,7 @@ public class IPCall {
 	 * Returns the direction of the call (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see IPCall.Direction
+	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws JoynServiceException
 	 */
 	public int getDirection() throws JoynServiceException {

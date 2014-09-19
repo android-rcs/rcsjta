@@ -146,7 +146,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
                 default:
                     if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in TerminatingVideoStreamingSession.run; answer="
+                        logger.debug("Unknown invitation answer in run; answer="
                                 .concat(String.valueOf(answer)));
                     }
                     return;

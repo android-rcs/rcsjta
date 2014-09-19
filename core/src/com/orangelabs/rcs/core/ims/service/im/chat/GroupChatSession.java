@@ -322,9 +322,6 @@ public abstract class GroupChatSession extends ChatSession {
 
 		// Update rich messaging history
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
-		MessagingLog.getInstance().addGroupChatMessage(getContributionID(), geolocMsg,
-				Direction.OUTGOING, ChatLog.Message.Status.Content.RECEIVED,
-				ChatLog.Message.ReasonCode.UNSPECIFIED);
 
 		/*TODO:This will be redone with CR037*/
 		if (result) {

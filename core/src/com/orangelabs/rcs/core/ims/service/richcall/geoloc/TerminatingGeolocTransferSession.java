@@ -158,7 +158,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
 				default:
 					if (logger.isActivated()) {
-						logger.debug("Unknown invitation answer in TerminatingGeolocTransferSession.run; answer="
+						logger.debug("Unknown invitation answer in run; answer="
 									.concat(String.valueOf(answer)));
 					}
 					return;

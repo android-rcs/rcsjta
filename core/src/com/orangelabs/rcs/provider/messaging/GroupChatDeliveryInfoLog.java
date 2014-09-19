@@ -99,17 +99,19 @@ public class GroupChatDeliveryInfoLog implements IGroupChatDeliveryInfoLog {
 	 * 
 	 * @param msgID
 	 *            Message ID
-	 * @param DeliveryInfoStatusAndReasonCode
-	 *            Delivery info status and reason code
+	 * @param status
+	 *            Status
+	 * @param reasonCode
+	 *            Reason code
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId,
-			DeliveryInfoStatusAndReasonCode statusAndReasonCode, ContactId contact) {
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, int status,
+			int reasonCode, ContactId contact) {
 		ContentValues values = new ContentValues();
-		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, statusAndReasonCode.getStatus());
+		values.put(GroupChatDeliveryInfoData.KEY_DELIVERY_STATUS, status);
 		values.put(GroupChatDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, statusAndReasonCode.getReasonCode());
+		values.put(GroupChatDeliveryInfoData.KEY_REASON_CODE, reasonCode);
 		String[] selectionArgs = new String[] {
 				msgId, contact.toString()
 		};

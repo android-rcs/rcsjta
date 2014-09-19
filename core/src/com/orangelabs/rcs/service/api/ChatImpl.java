@@ -98,7 +98,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DELIVERY;
 
-		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)){
+		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DISPLAY;
 
 		}
@@ -421,7 +421,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 				case ChatError.SESSION_INITIATION_CANCELLED:
 					String msgId = session.getFirstMessage().getMessageId();
 					MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
-							new MessageStatusAndReasonCode(Message.Status.Content.FAILED, ReasonCode.FAILED_SEND));
+							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
 					mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
 							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
 					break;
@@ -472,7 +472,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 			int reasonCode = imdnToFailedReasonCode(imdn);
 			synchronized (lock) {
 				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.FAILED, reasonCode));
+						Message.Status.Content.FAILED, reasonCode);
 
 				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.FAILED, reasonCode);
@@ -480,10 +480,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 
 		} else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
 			synchronized (lock) {
-				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(
-						msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.DELIVERED,
-								ReasonCode.UNSPECIFIED));
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
 
 				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -491,10 +489,8 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
 			synchronized (lock) {
-				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(
-						msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.DISPLAYED,
-								ReasonCode.UNSPECIFIED));
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 				mChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);

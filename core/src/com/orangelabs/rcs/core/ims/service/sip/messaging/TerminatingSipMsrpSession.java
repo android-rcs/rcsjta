@@ -131,7 +131,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
                 default:
                     if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in TerminatingSipMsrpSession.run; answer="
+                        logger.debug("Unknown invitation answer in run; answer="
                                 .concat(String.valueOf(answer)));
                     }
                     return;

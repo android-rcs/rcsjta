@@ -94,9 +94,8 @@ public class FtHttpResumeManager {
 				// state before device switch off.
 				for (FtHttpResume ftHttpResume : listFile2resume) {
 					MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-							ftHttpResume.getFileTransferId(),
-							new FileTransferStateAndReasonCode(FileTransfer.State.PAUSED,
-									FileTransfer.ReasonCode.PAUSED_BY_SYSTEM));
+							ftHttpResume.getFileTransferId(), FileTransfer.State.PAUSED,
+							FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
 				}
 				listOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);
 				processNext();

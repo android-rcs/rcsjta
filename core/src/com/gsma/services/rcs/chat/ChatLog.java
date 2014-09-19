@@ -70,7 +70,7 @@ public class ChatLog {
         /**
          * The name of the column containing the reason code of the state of the group chat.
          * <P>Type: INTEGER</P>
-         * @see GroupChat.RcsCommon
+         * @see ChatLog.Message.ReasonCode
          */
         public static final String REASON_CODE = "reason_code";
 
@@ -83,7 +83,7 @@ public class ChatLog {
         /**
          * The name of the column containing the direction of the group chat.
          * <P>Type: INTEGER</P>
-    	 * @see Direction
+         * @see com.gsma.services.rcs.RcsCommon.Direction
          */
         public static final String DIRECTION = "direction";
 
@@ -177,6 +177,7 @@ public class ChatLog {
         /**
          * The name of the column containing the message status reason code.
          * <P>Type: INTEGER</P>
+         * @see ChatLog.Message.ReasonCode
          */
         public static final String REASON_CODE = "reason_code";
 
@@ -190,6 +191,7 @@ public class ChatLog {
         /**
          * The name of the column containing the message direction.
          * <P>Type: INTEGER</P>
+         * @see com.gsma.services.rcs.RcsCommon.Direction
          */
         public static final String DIRECTION = "direction";
 

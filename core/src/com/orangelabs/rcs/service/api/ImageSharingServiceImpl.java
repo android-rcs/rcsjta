@@ -336,7 +336,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			MmContent content, int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
 		RichCallHistory.getInstance().addImageSharing(contact, sessionId,
-				Direction.INCOMING, content, ImageSharing.State.FAILED, reasonCode);
+				Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
 		broadcastImageSharingInvitation(sessionId);
 	}
 

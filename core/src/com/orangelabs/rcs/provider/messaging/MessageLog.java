@@ -253,7 +253,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
 
-        //file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
+		//file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
 		if (msg instanceof GeolocMessage) {
 			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
 			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
@@ -339,16 +339,11 @@ public class MessageLog implements IMessageLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
-	 * updateChatMessageStatusAndReasonCode(java.lang.String,
-	 * com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode)
+	 * updateChatMessageStatusAndReasonCode(java.lang.String, int, int)
 	 */
 	@Override
-	public void updateChatMessageStatusAndReasonCode(String msgId,
-			MessageStatusAndReasonCode statusAndReasonCode) {
-		int status = statusAndReasonCode.getStatus();
-		int reasonCode = statusAndReasonCode.getReasonCode();
+	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
 					.append(", status=").append(status).append("reasonCode=").append(reasonCode)
@@ -382,8 +377,7 @@ public class MessageLog implements IMessageLog {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Mark incoming chat message status as received for msgID=").append(msgId).toString());
 		}
-		updateChatMessageStatusAndReasonCode(msgId, new MessageStatusAndReasonCode(
-				ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED));
+		updateChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
 	}
 
 	/*

@@ -65,11 +65,12 @@ public interface IGroupChatLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
-	 * @param stateandReasonCode
-	 *            State and reasonCode
+	 * @param state
+	 *            Group chat state
+	 * @param reasonCode
+	 *            Group chat state reason code
 	 */
-	public void updateGroupChatStateAndReasonCode(String chatId,
-			GroupChatStateAndReasonCode stateAndReasonCode);
+	public void updateGroupChatStateAndReasonCode(String chatId, int state, int reasonCode);
 
 	/**
 	 * Update group chat set of participants

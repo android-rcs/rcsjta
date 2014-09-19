@@ -514,7 +514,9 @@ public abstract class ImsServiceSession extends Thread {
 
 		getImsService().removeSession(this);
 
+		/* TODO: This will be changed anyway by the implementation of CR018 */
 		Vector<ImsSessionListener> listeners = getListeners();
+		/* Handles the case of REJECTED_BY_USER on originating session */
 		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER & !dialogPath.isSigEstablished()) {
 			for (ImsSessionListener listener : listeners) {
 				listener.handleSessionRejectedByUser();

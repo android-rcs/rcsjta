@@ -104,10 +104,12 @@ public interface IMessageLog {
 	 * 
 	 * @param msgId
 	 *            Message ID
-	 * @param statusAndReasonCode
-	 *            StatusAndReasonCode
+	 * @param status
+	 *            Message status
+	 * @param reasonCode
+	 *            Message status reason code
 	 */
-	public void updateChatMessageStatusAndReasonCode(String msgId, MessageStatusAndReasonCode statusAndReasonCode);
+	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode);
 
 	/**
 	 * Mark incoming chat message status as received

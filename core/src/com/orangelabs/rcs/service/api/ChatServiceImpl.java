@@ -118,7 +118,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DELIVERY;
 
-		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)){
+		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DISPLAY;
 
 		}
@@ -366,7 +366,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			int reasonCode = imdnToFailedReasonCode(imdn);
 			synchronized (lock) {
 				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.FAILED, reasonCode));
+						Message.Status.Content.FAILED, reasonCode);
 
 				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.FAILED, reasonCode);
@@ -374,10 +374,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 		} else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
 			synchronized (lock) {
-				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(
-						msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.DELIVERED,
-								ReasonCode.UNSPECIFIED));
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
 
 				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -385,10 +383,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
 
 			synchronized (lock) {
-				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(
-						msgId,
-						new MessageStatusAndReasonCode(Message.Status.Content.DISPLAYED,
-								ReasonCode.UNSPECIFIED));
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
 						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);

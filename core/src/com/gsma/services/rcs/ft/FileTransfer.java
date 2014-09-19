@@ -380,7 +380,7 @@ public class FileTransfer {
 	 * Returns the direction of the transfer (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see Direction
+	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws JoynServiceException
 	 */
 	public int getDirection() throws JoynServiceException {

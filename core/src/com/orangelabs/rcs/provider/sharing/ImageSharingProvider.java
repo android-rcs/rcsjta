@@ -88,7 +88,7 @@ public class ImageSharingProvider extends ContentProvider {
         	db.execSQL("CREATE TABLE " + TABLE + " ("
         			+ ImageSharingLog.ID + " integer primary key autoincrement,"
         			+ ImageSharingLog.SHARING_ID + " TEXT,"
-        			+ ImageSharingLog.CONTACT_NUMBER + " TEXT,"
+        			+ ImageSharingLog.CONTACT + " TEXT,"
         			+ ImageSharingLog.FILE + " TEXT,"
         			+ ImageSharingLog.FILENAME + " TEXT,"
         			+ ImageSharingLog.MIME_TYPE + " TEXT,"

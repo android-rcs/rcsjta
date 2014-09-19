@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -41,6 +42,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimParser;
@@ -972,8 +974,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param imdn Imdn document
 	 */
 	public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-		for (int i = 0; i < getListeners().size(); i++) {
-			((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(contact, imdn);
+		Vector<ImsSessionListener> listeners = getListeners();
+		for (ImsSessionListener listener : listeners) {
+			((ChatSessionListener)listener).handleMessageDeliveryStatus(contact, imdn);
 		}
 	}
 
@@ -1000,9 +1003,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                             imdn);
                 }
             } else {
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((ChatSessionListener)getListeners().get(i)).handleMessageDeliveryStatus(
-                            contact, imdn);
+                Vector<ImsSessionListener> listeners = getListeners();
+                for (ImsSessionListener listener : listeners) {
+                    ((ChatSessionListener)listener).handleMessageDeliveryStatus(contact, imdn);
                 }
             }
         } catch (Exception e) {

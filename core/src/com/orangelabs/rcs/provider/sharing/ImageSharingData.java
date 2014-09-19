@@ -55,7 +55,7 @@ public class ImageSharingData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTACT = ImageSharingLog.CONTACT_NUMBER;
+	static final String KEY_CONTACT = ImageSharingLog.CONTACT;
 	
 	/**
 	 * Column name

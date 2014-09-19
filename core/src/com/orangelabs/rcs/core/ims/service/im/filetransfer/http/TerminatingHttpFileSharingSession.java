@@ -227,7 +227,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
 					default:
 						if (logger.isActivated()) {
-							logger.debug("Unknown invitation answer in TerminatingHttpFileSharingSession.run; answer="
+							logger.debug("Unknown invitation answer in run; answer="
 									.concat(String.valueOf(answer)));
 						}
 						return;

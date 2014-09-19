@@ -49,7 +49,7 @@ public class VideoSharingData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTACT = VideoSharingLog.CONTACT_NUMBER;
+	static final String KEY_CONTACT = VideoSharingLog.CONTACT;
 
 	/**
 	 * Column name

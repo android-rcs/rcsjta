@@ -50,12 +50,12 @@ public class VideoSharingLog {
      * The name of the column containing the MSISDN of the remote contact.
      * <P>Type: TEXT</P>
      */
-    public static final String CONTACT_NUMBER = "contact_number";
+    public static final String CONTACT = "contact";
 
     /**
      * The name of the column containing the direction of the sharing.
      * <P>Type: INTEGER</P>
-	 * @see VideoSharing.Direction
+     * @see com.orangelabs.rcs.RcsCommon.Direction
      */
     public static final String DIRECTION = "direction";
 

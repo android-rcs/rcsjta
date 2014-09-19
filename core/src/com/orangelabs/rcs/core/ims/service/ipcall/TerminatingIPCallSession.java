@@ -135,7 +135,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 
 				default:
 					if (logger.isActivated()) {
-						logger.debug("Unknown invitation answer in TerminatingIPCallSession.run; answer="
+						logger.debug("Unknown invitation answer in run; answer="
 									.concat(String.valueOf(answer)));
 					}
 					return;

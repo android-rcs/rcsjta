@@ -102,11 +102,13 @@ public interface IFileTransferLog {
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param stateAndReasonCode
-	 *            File transfer state and reason code
+	 * @param state
+	 *            File transfer state
+	 * @param reasonCode
+	 *            File transfer state reason code
 	 */
 	public void updateFileTransferStateAndReasonCode(String fileTransferId,
-			FileTransferStateAndReasonCode stateAndReasonCode);
+			int state, int reasonCode);
 
 	/**
 	 * Update file transfer read status

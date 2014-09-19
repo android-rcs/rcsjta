@@ -79,7 +79,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the direction of the transfer.
      * <P>Type: INTEGER</P>
-	 * @see Direction
+     * @see com.gsma.services.rcs.RcsCommon.Direction
      */
     public static final String DIRECTION = "direction";
 
@@ -123,12 +123,14 @@ public class FileTransferLog {
     /**
      * The name of the column containing the reason code of the state.
      * <P>Type: INTEGER</P>
+     * com.gsma.services.rcs.RcsCommon.ReasonCode
      */
     public static final String REASON_CODE = "reason_code";
 
     /**
      * The name of the column containing the read status for the transfer.
      * <P>Type: INTEGER</P>
+     * FileTransfer.ReadStatus
      */
     public static final String READ_STATUS = "read_status";
 

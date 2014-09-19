@@ -125,7 +125,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
                 default:
                     if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in TerminatingSipRtpSession.run; answer="
+                        logger.debug("Unknown invitation answer in run; answer="
                                 .concat(String.valueOf(answer)));
                     }
                     return;

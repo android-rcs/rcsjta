@@ -398,7 +398,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED, reasonCode));
+					FileTransfer.State.REJECTED, reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.REJECTED, reasonCode);
@@ -417,7 +417,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.PAUSED, reasonCode));
+					FileTransfer.State.PAUSED, reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.PAUSED, reasonCode);
@@ -433,10 +433,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-					fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.STARTED,
-							ReasonCode.UNSPECIFIED));
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
@@ -456,7 +454,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.ABORTED, reasonCode));
+					FileTransfer.State.ABORTED, reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.ABORTED, reasonCode);
@@ -478,10 +476,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			if (session.isFileTransfered()) {
 				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			} else {
-				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-						fileTransferId,
-						new FileTransferStateAndReasonCode(FileTransfer.State.ABORTED,
-								ReasonCode.ABORTED_BY_REMOTE));
+				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+						FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
 				mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 						fileTransferId, FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
@@ -506,8 +502,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		int state = stateAndReasonCode.getState();
 		int reasonCode = stateAndReasonCode.getReasonCode();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(state, reasonCode));
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId, state,
+					reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, state, reasonCode);
@@ -541,10 +537,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	public void handleTransferNotAllowedToSend() {
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-					fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
-							ReasonCode.FAILED_NOT_ALLOWED_TO_SEND));
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.FAILED,
@@ -593,10 +587,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-					fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.STARTED,
-							ReasonCode.UNSPECIFIED));
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
@@ -610,10 +602,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(
-					fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.ACCEPTING,
-							ReasonCode.UNSPECIFIED));
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(getRemoteContact(),
 					fileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);

@@ -55,13 +55,15 @@ public interface IGroupChatDeliveryInfoLog {
 	 * 
 	 * @param msgID
 	 *            Message ID
-	 * @param DeliveryInfoStatusAndReasonCode
-	 *            Delivery info status and reason code
+	 * @param status
+	 *            Delivery info status
+	 * @param reasonCode
+	 *            Delivery info status reason code
 	 * @param contact
 	 *            The contact ID for which the entry is to be updated
 	 */
-	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId,
-			DeliveryInfoStatusAndReasonCode statusAndReasonCode, ContactId contact);
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, int status,
+			int reasonCode, ContactId contact);
 
 	/**
 	 * Check if all recipients have received message

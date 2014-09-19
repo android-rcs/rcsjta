@@ -48,9 +48,7 @@ public class ImdnParser extends DefaultHandler {
 		</display-notification>
        </imdn>
    	*/
-    private StringBuffer accumulator = null;
-
-    private ImdnDocument imdn = null;
+    private StringBuffer accumulator;
 
     private String mNotificationType;
 

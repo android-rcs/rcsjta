@@ -104,18 +104,18 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set, int,
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set,
 	 * int, int)
 	 */
 	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants,
-			int status, int reasonCode, int direction) {
+			int state, int reasonCode, int direction) {
 		if (logger.isActivated()) {
 			logger.debug("addGroupChat (chatID=" + chatId + ") (subject=" + subject + ") (status="
-					+ status + ") (reasonCode=" + reasonCode + ") (dir=" + direction					+ ")");
+					+ state + ") (reasonCode=" + reasonCode + ") (dir=" + direction					+ ")");
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_CHAT_ID, chatId);
-		values.put(ChatData.KEY_STATE, status);
+		values.put(ChatData.KEY_STATE, state);
 		values.put(ChatData.KEY_REASON_CODE, reasonCode);
 		values.put(ChatData.KEY_SUBJECT, subject);
 		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
@@ -143,19 +143,8 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
-	 * updateGroupChatStatusAndReasonCode
-	 * (java.lang.String,com.orangelabs.rcs.provider
-	 * .messaging.GroupChatStateAndReasonCode)
-	 */
 	@Override
-	public void updateGroupChatStateAndReasonCode(String chatId,
-			GroupChatStateAndReasonCode stateAndReasonCode) {
-		int state = stateAndReasonCode.getState();
-		int reasonCode = stateAndReasonCode.getReasonCode();
+	public void updateGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (state=" + state
 					+ ") (reasonCode=" + reasonCode + ")");
@@ -164,7 +153,7 @@ public class GroupChatLog implements IGroupChatLog {
 		values.put(ChatData.KEY_STATE, state);
 		values.put(ChatData.KEY_REASON_CODE, reasonCode);
 		String selectionArgs[] = new String[] {
-				chatId
+			chatId
 		};
 		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID, null);
 	}

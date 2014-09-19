@@ -213,7 +213,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
 					default:
 						if (logger.isActivated()) {
-							logger.debug("Unknown invitation answer in TerminatingAdhocGroupChatSession.run; answer="
+							logger.debug("Unknown invitation answer in run; answer="
 									.concat(String.valueOf(answer)));
 						}
 						return;

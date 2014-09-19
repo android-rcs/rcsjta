@@ -57,8 +57,6 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
-import com.orangelabs.rcs.provider.messaging.DeliveryInfoStatusAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
@@ -110,7 +108,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DELIVERY;
 
-		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)){
+		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DISPLAY;
 
 		}
@@ -333,7 +331,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addFileTransferSession(oneToOneFileTransfer);
 			return oneToOneFileTransfer;
 
-		} catch(CoreException e){
+			/* TODO: This is not correct implementation. It will be fixed properly in CR037 */
+		} catch (CoreException e) {
 			if (logger.isActivated()) {
 				logger.error("Core Exception cought, outgoing session rejected due to max size exceeded", e);
 			}
@@ -546,15 +545,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String fileTransferId = imdn.getMsgId();
 		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
 			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.DELIVERED,
-							ReasonCode.UNSPECIFIED));
+					FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
 					FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
 			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.DISPLAYED,
-							ReasonCode.UNSPECIFIED));
+					FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
 					FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
@@ -564,7 +561,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			int reasonCode = imdnToFailedReasonCode(imdn);
 
 			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-					new FileTransferStateAndReasonCode(FileTransfer.State.FAILED, reasonCode));
+					FileTransfer.State.FAILED, reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
 					FileTransfer.State.FAILED, reasonCode);
@@ -582,15 +579,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	private void handleGroupFileDeliveryStatus(String chatId, String fileTransferId,
 			ContactId contact, int state, int reasonCode) {
 		MessagingLog messagingLog = MessagingLog.getInstance();
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId,
-				new DeliveryInfoStatusAndReasonCode(state, DeliveryInfo.ReasonCode.UNSPECIFIED), contact);
+		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, state,
+				DeliveryInfo.ReasonCode.UNSPECIFIED, contact);
 		switch (state) {
 			case DeliveryInfo.Status.FAILED:
 				break;
 			case DeliveryInfo.Status.DELIVERED:
 				if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
 					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-							new FileTransferStateAndReasonCode(FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED));
+							FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 
 					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(chatId,
 							fileTransferId, FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -599,7 +596,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			case DeliveryInfo.Status.DISPLAYED:
 				if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
 					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-							new FileTransferStateAndReasonCode(FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED));
+							FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(chatId,
 							fileTransferId, FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
@@ -614,8 +611,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 								+ state + "!");
 		}
 
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId,
-				new DeliveryInfoStatusAndReasonCode(state, reasonCode), contact);
+		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId,state, reasonCode, contact);
 
 		mGroupFileTransferBroadcaster.broadcastSingleRecipientDeliveryStateChanged(chatId,
 				contact, fileTransferId, state, reasonCode);
