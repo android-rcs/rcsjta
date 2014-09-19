@@ -74,7 +74,7 @@ public class VideoSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 3;
+        private static final int DATABASE_VERSION = 4;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -86,7 +86,8 @@ public class VideoSharingProvider extends ContentProvider {
         			+ VideoSharingData.KEY_ID + " integer primary key autoincrement,"
         			+ VideoSharingData.KEY_SESSION_ID + " TEXT,"
         			+ VideoSharingData.KEY_CONTACT + " TEXT,"
-        			+ VideoSharingData.KEY_STATUS + " integer,"
+        			+ VideoSharingData.KEY_STATE + " integer,"
+        			+ VideoSharingData.KEY_REASON_CODE + " integer,"
         			+ VideoSharingData.KEY_DIRECTION + " integer,"
         			+ VideoSharingData.KEY_TIMESTAMP + " long,"
         			+ VideoSharingData.KEY_DURATION + " long,"

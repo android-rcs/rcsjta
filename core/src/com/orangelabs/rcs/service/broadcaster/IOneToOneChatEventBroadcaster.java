@@ -22,7 +22,8 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IOneToOneChatEventBroadcaster {
 
-	public void broadcastMessageStatusChanged(ContactId contact, String msgId, int status);
+	public void broadcastMessageStatusChanged(ContactId contact, String msgId, int status,
+			int reasonCode);
 
 	public void broadcastComposingEvent(ContactId contact, boolean status);
 }

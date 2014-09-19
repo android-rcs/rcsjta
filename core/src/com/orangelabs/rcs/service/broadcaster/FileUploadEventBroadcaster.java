@@ -52,7 +52,6 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mFileUploadListeners.getBroadcastItem(i).onUploadStateChanged(uploadId, state);
 			} catch (Exception e) {
 				if (logger.isActivated()) {

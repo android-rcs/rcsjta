@@ -23,7 +23,6 @@
 package com.orangelabs.rcs.core.ims.service.im;
 
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -34,10 +33,14 @@ import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
+import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -58,6 +61,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
@@ -68,6 +72,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManage
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
@@ -147,6 +152,24 @@ public class InstantMessagingService extends ImsService {
 		maxChatSessions = RcsSettings.getInstance().getMaxChatSessions();
         maxFtSessions = RcsSettings.getInstance().getMaxFileTransferSessions();
         maxFtSize = FileSharingSession.getMaxFileSharingSize();
+	}
+
+	private void handleFileTransferInvitationRejected(SipRequest invite, int reasonCode) {
+		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+		MmContent content = ContentManager.createMmContentFromSdp(invite);
+		MmContent fileicon = FileTransferUtils.extractFileIcon(invite);
+		getImsModule().getCore().getListener()
+				.handleFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
+	}
+
+	private void handleGroupChatInvitationRejected(SipRequest invite, int reasonCode) {
+		String chatId = ChatUtils.getContributionId(invite);
+		String subject = ChatUtils.getSubject(invite);
+		Set<ParticipantInfo> participants = ChatUtils.getListOfParticipants(invite);
+		getImsModule()
+				.getCore()
+				.getListener()
+				.handleGroupChatInvitationRejected(chatId, subject, participants, reasonCode);
 	}
 
 	/**
@@ -443,6 +466,8 @@ public class InstantMessagingService extends ImsService {
 					logger.debug("Contact " + remote + " is blocked: automatically reject the file transfer invitation");
 				}
 
+				handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM);
+
 				// Send a 603 Decline response
 				sendErrorResponse(invite, Response.DECLINE);
 				return;
@@ -453,6 +478,9 @@ public class InstantMessagingService extends ImsService {
 				if (logger.isActivated()) {
 					logger.debug("The max number of file transfer sessions is achieved: reject the invitation");
 				}
+
+				handleFileTransferInvitationRejected(invite,
+						FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS);
 
 				// Send a 603 Decline response
 				sendErrorResponse(invite, Response.DECLINE);
@@ -498,7 +526,8 @@ public class InstantMessagingService extends ImsService {
 		OriginatingOne2OneChatSession session = new OriginatingOne2OneChatSession(this, contact, firstMsg);
 		// Save the message
 		if (firstMsg != null && !(firstMsg instanceof FileTransferMessage)) {
-			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.OUTGOING);
+			MessagingLog.getInstance().addOutgoingOneToOneChatMessage(firstMsg,
+					ChatLog.Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
 		}
 		return session;
 	}
@@ -562,7 +591,7 @@ public class InstantMessagingService extends ImsService {
 
 			// Save the message
 			if (firstMsg != null) {
-				MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
+				MessagingLog.getInstance().addIncomingOneToOneChatMessage(firstMsg);
 			}
 
 			// Test number of sessions
@@ -615,11 +644,8 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Max chat sessions achieved");
 		}
 
-		// Convert List of contacts to Set of ParticipantInfo because AIDL does not support Set type.
-		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
-		for (ContactId participant : contacts) {
-			participants.add(new ParticipantInfo(participant));
-		}
+		Set<ParticipantInfo> participants = ParticipantInfoUtils
+				.getParticipantInfos(contacts);
 
 		// Create a new session
 		OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
@@ -648,6 +674,8 @@ public class InstantMessagingService extends ImsService {
 					logger.debug("Contact " + contact + " is blocked: automatically reject the chat invitation");
 				}
 
+				handleGroupChatInvitationRejected(invite, GroupChat.ReasonCode.REJECTED_SPAM);
+
 				// Send a 486 Busy response
 				sendErrorResponse(invite, Response.BUSY_HERE);
 				return;
@@ -666,6 +694,8 @@ public class InstantMessagingService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("The max number of chat sessions is achieved: reject the invitation");
 			}
+
+			handleGroupChatInvitationRejected(invite, GroupChat.ReasonCode.REJECTED_MAX_CHATS);
 
 			// Send a 486 Busy response
 			sendErrorResponse(invite, Response.BUSY_HERE);
@@ -845,32 +875,35 @@ public class InstantMessagingService extends ImsService {
 		try {
 			// Parse received message
 			ImdnDocument imdn = ChatUtils.parseCpimDeliveryReport(message.getContent());
-			if ((imdn != null) && (imdn.getMsgId() != null) && (imdn.getStatus() != null)) {
-				ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(message));
-				String status = imdn.getStatus();
-				String msgId = imdn.getMsgId();
-				// Note: FileTransferId is always generated to equal the
-				// associated msgId of a FileTransfer invitation message.
-				String fileTransferId = msgId;
+			if (imdn == null) {
+				return;
+			}
 
-				// Check if message delivery of a file transfer
-				boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(fileTransferId);
-				if (isFileTransfer) {
-					// Notify the file delivery outside of the chat session
-					receiveFileDeliveryStatus(fileTransferId, status, contact);
-				} else {
-					// Get session associated to the contact
-					Vector<ChatSession> sessions = Core.getInstance().getImService().getImSessionsWith(contact);
-					if (sessions.size() > 0) {
-						// Notify the message delivery from the chat session
-						for (int i = 0; i < sessions.size(); i++) {
-							ChatSession session = sessions.elementAt(i);
-							session.handleMessageDeliveryStatus(msgId, status, contact);
-						}
-					} else {
-						// Notify the message delivery outside of the chat session
-						getImsModule().getCore().getListener().handleMessageDeliveryStatus(contact, msgId, status);
+			ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(message));
+			String msgId = imdn.getMsgId();
+			// Note: FileTransferId is always generated to equal the
+			// associated msgId of a FileTransfer invitation message.
+			String fileTransferId = msgId;
+
+			// Check if message delivery of a file transfer
+			boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(fileTransferId);
+			if (isFileTransfer) {
+				// Notify the file delivery outside of the chat session
+				receiveFileDeliveryStatus(contact, imdn);
+			} else {
+				// Get session associated to the contact
+				Vector<ChatSession> sessions = Core.getInstance().getImService()
+						.getImSessionsWith(contact);
+				if (sessions.size() > 0) {
+					// Notify the message delivery from the chat session
+					for (int i = 0; i < sessions.size(); i++) {
+						ChatSession session = sessions.elementAt(i);
+						session.handleMessageDeliveryStatus(contact, imdn);
 					}
+				} else {
+					// Notify the message delivery outside of the chat session
+					getImsModule().getCore().getListener()
+							.handleMessageDeliveryStatus(contact, imdn);
 				}
 			}
 		} catch (Exception e) {
@@ -882,27 +915,24 @@ public class InstantMessagingService extends ImsService {
 
     /**
      * Receive 1-1 file delivery status
-     *
-     * @param fileTransferId
-     * @param status
      * @param contact Contact identifier
+     * @param imdn Imdn document
      */
-    public void receiveFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
+    public void receiveFileDeliveryStatus(ContactId contact, ImdnDocument imdn){
         // Notify the file delivery outside of the chat session
-        getImsModule().getCore().getListener().handleFileDeliveryStatus(fileTransferId, status, contact);
+        getImsModule().getCore().getListener().handleFileDeliveryStatus(contact, imdn);
     }
 
 	/**
 	 * Receive group file delivery status
 	 *
 	 * @param chatId Chat Id
-	 * @param fileTransferId
-	 * @param status
 	 * @param contact Contact identifier
+	 * @param ImdnDocument imdn Imdn document
 	 */
-	public void receiveGroupFileDeliveryStatus(String chatId, String fileTransferId, String status, ContactId contact) {
+	public void receiveGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
 		getImsModule().getCore().getListener()
-				.handleGroupFileDeliveryStatus(chatId, fileTransferId, status, contact);
+				.handleGroupFileDeliveryStatus(chatId, contact, imdn);
 	}
 
     /**
@@ -949,7 +979,7 @@ public class InstantMessagingService extends ImsService {
 	    
 		// Save the message
 		if (firstMsg != null) {
-			MessagingLog.getInstance().addChatMessage(firstMsg, ChatLog.Message.Direction.INCOMING);
+			MessagingLog.getInstance().addIncomingOneToOneChatMessage(firstMsg);
 		}
     	
 		// Create a new session
@@ -1008,6 +1038,7 @@ public class InstantMessagingService extends ImsService {
 					logger.debug("Contact " + remote + " is blocked, automatically reject the HTTP File transfer");
 				}
 
+				handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM);
 				// Send a 603 Decline response
 				sendErrorResponse(invite, Response.DECLINE);
 				return;
@@ -1019,6 +1050,7 @@ public class InstantMessagingService extends ImsService {
 					logger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
 				}
 
+				handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS);
 				// Send a 603 Decline response
 				sendErrorResponse(invite, 603);
 				return;
@@ -1030,6 +1062,20 @@ public class InstantMessagingService extends ImsService {
 			if (error != null) {
 				// Send a 603 Decline response
 				sendErrorResponse(invite, 603);
+				int errorCode = error.getErrorCode();
+				switch (errorCode) {
+					case FileSharingError.MEDIA_SIZE_TOO_BIG:
+						handleFileTransferInvitationRejected(invite,
+								FileTransfer.ReasonCode.REJECTED_MAX_SIZE);
+					case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+						handleFileTransferInvitationRejected(invite,
+								FileTransfer.ReasonCode.REJECTED_LOW_SPACE);
+					default:
+						if (logger.isActivated()) {
+							logger.error("Encountered unexpected error while receiving HTTP file transfer invitation"
+									+ errorCode);
+						}
+				}
 				return;
 			}
 

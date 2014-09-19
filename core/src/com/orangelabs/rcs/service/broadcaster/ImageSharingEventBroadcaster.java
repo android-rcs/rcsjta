@@ -43,13 +43,13 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		mImageSharingListeners.unregister(listener);
 	}
 
-	public void broadcastImageSharingStateChanged(ContactId contact, String sharingId, int state) {
+	public void broadcastImageSharingStateChanged(ContactId contact, String sharingId, int state,
+			int reasonCode) {
 		final int N = mImageSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mImageSharingListeners.getBroadcastItem(i).onImageSharingStateChanged(contact,
-						sharingId, state);
+						sharingId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

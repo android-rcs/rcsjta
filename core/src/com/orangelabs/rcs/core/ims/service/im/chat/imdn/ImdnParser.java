@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 
@@ -44,10 +48,14 @@ public class ImdnParser extends DefaultHandler {
 		</display-notification>
        </imdn>
    	*/
-	private StringBuffer accumulator = null;
-	
-	private ImdnDocument imdn = null;
-	
+    private StringBuffer accumulator;
+
+    private String mNotificationType;
+
+    private String mStatus;
+
+    private String mMsgId;
+
 	/**
      * The logger
      */
@@ -79,43 +87,39 @@ public class ImdnParser extends DefaultHandler {
 	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
 		accumulator.setLength(0);
 
-		if (localName.equals("imdn")) {
-			imdn = new ImdnDocument();
+		if (ImdnDocument.IMDN_TAG.equals(localName)) {
+			if (logger.isActivated()) {
+				logger.debug("IMDN document is started");
+			}
+
+		} else if (ImdnDocument.DELIVERY_NOTIFICATION.equals(localName)) {
+			mNotificationType = ImdnDocument.DELIVERY_NOTIFICATION;
+
+		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(localName)) {
+			mNotificationType = ImdnDocument.DISPLAY_NOTIFICATION;
 		}
 	}
 
 	public void endElement(String namespaceURL, String localName, String qname) {
-		if (localName.equals("message-id")) {
-			if (imdn != null) {
-				imdn.setMsgId(accumulator.toString());
-			}
-		} else
-		if (localName.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
-			if (imdn != null) {
-				imdn.setStatus(ImdnDocument.DELIVERY_STATUS_DELIVERED);
-			}
-		} else
-		if (localName.equals(ImdnDocument.DELIVERY_STATUS_FAILED)) {
-			if (imdn != null) {
-				imdn.setStatus(ImdnDocument.DELIVERY_STATUS_FAILED);
-			}
-		} else
-		if (localName.equals(ImdnDocument.DELIVERY_STATUS_ERROR)) {
-			if (imdn != null) {
-				imdn.setStatus(ImdnDocument.DELIVERY_STATUS_ERROR);
-			}
-		} else
-		if (localName.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
-			if (imdn != null) {
-				imdn.setStatus(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
-			}
-		} else
-		if (localName.equals(ImdnDocument.DELIVERY_STATUS_FORBIDDEN)) {
-			if (imdn != null) {
-				imdn.setStatus(ImdnDocument.DELIVERY_STATUS_FORBIDDEN);
-			}
-		}else
-		if (localName.equals("imdn")) {
+		 if (ImdnDocument.MESSAGE_ID_TAG.equals(localName)) {
+			mMsgId = accumulator.toString();
+
+		} else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(localName)) {
+			mStatus = ImdnDocument.DELIVERY_STATUS_DELIVERED;
+
+		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(localName)) {
+			mStatus = ImdnDocument.DELIVERY_STATUS_DISPLAYED;
+
+		} else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(localName)) {
+			mStatus = ImdnDocument.DELIVERY_STATUS_FAILED;
+
+		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(localName)) {
+			mStatus = ImdnDocument.DELIVERY_STATUS_ERROR;
+
+		} else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(localName)) {
+			mStatus = ImdnDocument.DELIVERY_STATUS_FORBIDDEN;
+
+		} else if (ImdnDocument.IMDN_TAG.equals(localName)) {
 			if (logger.isActivated()) {
 				logger.debug("IMDN document is complete");
 			}
@@ -151,6 +155,10 @@ public class ImdnParser extends DefaultHandler {
 	}
 
 	public ImdnDocument getImdnDocument() {
-		return imdn;
+		if (mMsgId == null || mNotificationType == null || mStatus == null) {
+			return null;
+		}
+
+		return new ImdnDocument(mMsgId, mNotificationType, mStatus);
 	}
 }

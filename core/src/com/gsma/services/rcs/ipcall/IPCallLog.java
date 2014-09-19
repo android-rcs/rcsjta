@@ -55,7 +55,7 @@ public class IPCallLog {
     /**
      * The name of the column containing the direction of the call.
      * <P>Type: INTEGER</P>
-	 * @see IPCall.Direction
+     * @see com.gsma.services.rcs.RcsCommon.Direction
      */
     public static final String DIRECTION = "direction";
 
@@ -78,6 +78,13 @@ public class IPCallLog {
 	 * @see IPCall.State
      */
     public static final String STATE = "state";    
+
+    /**
+     * The name of the column containing the reason code of the ip call state.
+     * <P>Type: INTEGER</P>
+     *  @see IPCall.ReasonCode
+     */
+    public static final String REASON_CODE = "reason_code";
 
     /**
      * The name of the column containing the encoding type of video

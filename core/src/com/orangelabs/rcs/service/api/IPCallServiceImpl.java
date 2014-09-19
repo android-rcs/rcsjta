@@ -31,6 +31,7 @@ import android.os.IBinder;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
@@ -38,11 +39,13 @@ import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
+import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -86,6 +89,15 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		if (logger.isActivated()) {
 			logger.info("IP call service API is loaded");
 		}
+	}
+
+	/*Broadcast intent related to the received invitation*/
+	private void broadcastIPCallInvitation(String sessionId) {
+		Intent newInvitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(IPCallIntent.EXTRA_CALL_ID, sessionId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
 	/**
@@ -197,11 +209,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		// Get video encoding
 		VideoContent videocontent = session.getVideoContent();
 
-		// Update IP call history
 		IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
-				IPCall.Direction.INCOMING,
+				Direction.INCOMING,
 				audiocontent, videocontent,
-				IPCall.State.INVITED);
+				IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
 		
 		// Update displayName of remote contact
 		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
@@ -210,12 +221,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 		IPCallServiceImpl.addIPCallSession(sessionApi);
 
-		// Broadcast intent related to the received invitation
-		Intent newInvitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(IPCallIntent.EXTRA_CALL_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+		broadcastIPCallInvitation(session.getSessionID());
 	}
 
     /**
@@ -246,11 +252,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			// Initiate a new session
 			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
 
-			// Update IP call history
-			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
-					IPCall.Direction.OUTGOING,
-					session.getAudioContent(), session.getVideoContent(),
-					IPCall.State.INITIATED);
+			String callId = session.getSessionID();
+			IPCallHistory.getInstance().addCall(contact, callId,
+					Direction.OUTGOING, session.getAudioContent(),
+					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(contact, callId,
+					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session in the list
 			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
@@ -267,6 +274,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			IPCallServiceImpl.addIPCallSession(sessionApi);
 			return sessionApi;
 		} catch (Exception e) {
+			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
+					Direction.OUTGOING, null, null, IPCall.State.FAILED,
+					ReasonCode.FAILED_INITIATION);
+			;
 			throw new ServerApiException(e.getMessage());
 		}
 	} 
@@ -299,11 +310,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			// Initiate a new session
 			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
 
-			// Update IP call history
-			IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
-					IPCall.Direction.OUTGOING,
-					session.getAudioContent(), session.getVideoContent(),
-					IPCall.State.INITIATED);
+			String callId = session.getSessionID();
+			IPCallHistory.getInstance().addCall(contact, callId,
+					Direction.OUTGOING, session.getAudioContent(),
+					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(contact, callId,
+					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session in the list
 			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
@@ -320,6 +332,9 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			IPCallServiceImpl.addIPCallSession(sessionApi);
 			return sessionApi;
 		} catch (Exception e) {
+			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
+					Direction.OUTGOING, null, null, IPCall.State.FAILED,
+					ReasonCode.FAILED_INITIATION);
 			throw new ServerApiException(e.getMessage());
 		}
 	}     
@@ -376,6 +391,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	}
 
 	/**
+	 * Add and broadcast video sharing invitation rejections
+	 *
+	 * @param contact Contact ID
+	 * @param audioContent Audio content
+	 * @param videoContent Video content
+	 * @param reasonCode Reason code
+	 */
+	public void addAndBroadcastIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+			VideoContent videoContent, int reasonCode) {
+		String sessionId = SessionIdGenerator.getNewId();
+		IPCallHistory.getInstance().addCall(contact, sessionId, Direction.INCOMING,
+				audioContent, videoContent, IPCall.State.REJECTED, reasonCode);
+		broadcastIPCallInvitation(sessionId);
+	}
+
+    /**
 	 * Adds an event listener on IP call events
 	 * 
 	 * @param listener Listener

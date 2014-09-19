@@ -45,13 +45,12 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.unregister(listener);
 	}
 
-	public void broadcastMessageStatusChanged(String chatId, String msgId, int status) {
+	public void broadcastMessageStatusChanged(String chatId, String msgId, int status, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, msgId,
-						status);
+						status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -81,7 +80,6 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mGroupChatListeners.getBroadcastItem(i)
 						.onParticipantInfoChanged(chatId, info);
 			} catch (Exception e) {
@@ -93,12 +91,11 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.finishBroadcast();
 	}
 
-	public void broadcastGroupChatStateChanged(String chatId, int state) {
+	public void broadcastGroupChatStateChanged(String chatId, int state, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
-				mGroupChatListeners.getBroadcastItem(i).onGroupChatStateChanged(chatId, state);
+				mGroupChatListeners.getBroadcastItem(i).onGroupChatStateChanged(chatId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

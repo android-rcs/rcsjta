@@ -98,12 +98,15 @@ public class IPCallHistory {
 	 * @param direction Direction 
 	 * @param audiocontent Audio content
 	 * @param videocontent Video content
-	 * @param status Call status
+	 * @param state Call state
+	 * @param  Reason code
 	 */
 	public Uri addCall(ContactId contact, String sessionId, int direction, AudioContent audiocontent,
-			VideoContent videocontent, int status) {
+			VideoContent videocontent, int state, int reasonCode) {
 		if(logger.isActivated()){
-			logger.debug("Add new call entry for contact " + contact + ": session=" + sessionId + ", status=" + status);
+			logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
+					.append(": session=").append(sessionId).append(", state=").append(state)
+					.append(", reasonCode =").append(reasonCode).toString());
 		}
 
 		ContentValues values = new ContentValues();
@@ -111,7 +114,8 @@ public class IPCallHistory {
 		values.put(IPCallData.KEY_CONTACT, contact.toString());
 		values.put(IPCallData.KEY_DIRECTION, direction);
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		values.put(IPCallData.KEY_STATUS, status);
+		values.put(IPCallData.KEY_STATE, state);
+		values.put(IPCallData.KEY_REASON_CODE, reasonCode);
 		if (videocontent != null) {
 			values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
 			values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
@@ -124,19 +128,23 @@ public class IPCallHistory {
 	}
 
 	/**
-	 * Update the call status
+	 * Update the call state
 	 * 
 	 * @param sessionId Session ID
-	 * @param status New status
+	 * @param state New state
+	 * @param reasonCode Reason code
 	 */
-	public void setCallStatus(String sessionId, int status) {
+	public void setCallState(String sessionId, int state, int reasonCode) {
 		if (logger.isActivated()) {
-			logger.debug("Update call status of session " + sessionId + " to " + status);
+			logger.debug(new StringBuilder("Update call state of session ").append(sessionId)
+					.append(" state=").append(state).append(", reasonCode=").append(reasonCode)
+					.toString());
 		}
 		
 		ContentValues values = new ContentValues();
-		values.put(IPCallData.KEY_STATUS, status);
-		cr.update(databaseUri, values, IPCallData.KEY_SESSION_ID + " = " + sessionId, null);
+		values.put(IPCallData.KEY_STATE, state);
+		values.put(IPCallData.KEY_REASON_CODE, reasonCode);
+		cr.update(databaseUri, values, IPCallData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 
 	/**

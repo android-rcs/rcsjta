@@ -33,14 +33,17 @@ import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
+import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
+import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
@@ -124,6 +127,15 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		
 		gshSessions.remove(sessionId);
 	}
+
+	// Broadcast intent related to the received invitation
+	private void broadcastGeolocSharingInvitation(String sharingId) {
+		Intent newInvitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, sharingId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+	}
     
     /**
      * Returns true if the service is registered to the platform, else returns false
@@ -195,13 +207,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		// Add session in the list
 		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
-
-		// Broadcast intent related to the received invitation
-		Intent newInvitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, session.getSessionID());
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+		
+		broadcastGeolocSharingInvitation(session.getSessionID());
     }
     
     /**
@@ -234,6 +241,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 			// Initiate a sharing session
 			final GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geolocPush);
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact,
+					session.getSessionID(), GeolocSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
 			GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
@@ -333,5 +342,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return JoynService.Build.API_VERSION;
+	}
+
+	public void addAndbroadcastGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+			int reasonCode) {
+		String sharingId = SessionIdGenerator.getNewId();
+		/* TODO: Persist in geoloc content provider */
+		broadcastGeolocSharingInvitation(sharingId);
 	}
 }

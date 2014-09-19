@@ -15,18 +15,13 @@
  */
 
 package com.orangelabs.rcs.service.api;
-import static com.gsma.services.rcs.ft.FileTransfer.State.ABORTED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.FAILED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INACTIVE;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INITIATED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.INVITED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.PAUSED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.STARTED;
-import static com.gsma.services.rcs.ft.FileTransfer.State.TRANSFERRED;
+
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -37,12 +32,12 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransfer
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * File transfer implementation
- *
  */
 public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSharingSessionListener {
 
@@ -61,11 +56,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(GroupFileTransferImpl.class.getSimpleName());
+	private final static Logger logger = Logger.getLogger(GroupFileTransferImpl.class
+			.getSimpleName());
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param session Session
 	 * @param broadcaster IGroupFileTransferBroadcaster
 	 */
@@ -79,7 +75,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the chat ID of the file transfer
-	 *
+	 * 
 	 * @return Transfer ID
 	 */
 	public String getChatId() {
@@ -88,7 +84,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the file transfer ID of the file transfer
-	 *
+	 * 
 	 * @return Transfer ID
 	 */
 	public String getTransferId() {
@@ -97,7 +93,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the remote contact
-	 *
+	 * 
 	 * @return Contact
 	 */
 	public ContactId getRemoteContact() {
@@ -107,7 +103,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	/**
 	 * Returns the complete filename including the path of the file to be
 	 * transferred
-	 *
+	 * 
 	 * @return Filename
 	 */
 	public String getFileName() {
@@ -116,7 +112,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the Uri of the file to be transferred
-	 *
+	 * 
 	 * @return Uri
 	 */
 	public Uri getFile() {
@@ -125,7 +121,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the size of the file to be transferred
-	 *
+	 * 
 	 * @return Size in bytes
 	 */
 	public long getFileSize() {
@@ -134,7 +130,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the MIME type of the file to be transferred
-	 *
+	 * 
 	 * @return Type
 	 */
 	public String getFileType() {
@@ -143,7 +139,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the Uri of the file icon
-	 *
+	 * 
 	 * @return Uri
 	 */
 	public Uri getFileIcon() {
@@ -153,49 +149,46 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the state of the file transfer
-	 *
+	 * 
 	 * @return State
 	 */
 	public int getState() {
 		int state = ((HttpFileTransferSession)session).getSessionState();
 		switch (state) {
 			case HttpTransferState.CANCELLED:
-				// Session canceled
-				return ABORTED;
+				return FileTransfer.State.REJECTED;
 
 			case HttpTransferState.ESTABLISHED:
-				// Session started
-				return STARTED;
+				return FileTransfer.State.STARTED;
 
 			case HttpTransferState.TERMINATED:
 				if (session.isFileTransfered()) {
-					return TRANSFERRED;
+					return FileTransfer.State.TRANSFERRED;
 				}
-				return ABORTED;
+				return FileTransfer.State.ABORTED;
 
 			case HttpTransferState.PENDING:
-				// Session pending
 				if (session instanceof OriginatingHttpGroupFileSharingSession) {
-					return INITIATED;
+					return FileTransfer.State.INITIATED;
 				}
-				return INVITED;
+				return FileTransfer.State.INVITED;
 
 			default:
-				return INACTIVE;
+				return FileTransfer.State.UNKNOWN;
 		}
 	}
 
 	/**
 	 * Returns the direction of the transfer (incoming or outgoing)
-	 *
+	 * 
 	 * @return Direction
-	 * @see FileTransfer.Direction
+	 * @see Direction
 	 */
 	public int getDirection() {
 		if (session.isInitiatedByRemote()) {
-			return FileTransfer.Direction.INCOMING;
+			return Direction.INCOMING;
 		} else {
-			return FileTransfer.Direction.OUTGOING;
+			return Direction.OUTGOING;
 		}
 	}
 
@@ -223,10 +216,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
-
-		// Update rich messaging history
-		MessagingLog.getInstance().updateFileTransferStatus(session.getFileTransferId(),
-				FileTransfer.State.ABORTED);
 
 		// Reject invitation
 		Thread t = new Thread() {
@@ -262,7 +251,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Is HTTP transfer
-	 *
+	 * 
 	 * @return Boolean
 	 */
 	public boolean isHttpTransfer() {
@@ -327,37 +316,110 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
+		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			String fileTransferId = session.getFileTransferId();
-			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, STARTED);
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
-			// Notify event listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-					FileTransfer.State.STARTED);
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	private int sessionAbortedToReasonCode(int sessionAbortedReason) {
+		switch (sessionAbortedReason) {
+			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+			case ImsServiceSession.TERMINATION_BY_SYSTEM:
+				return ReasonCode.ABORTED_BY_SYSTEM;
+			case ImsServiceSession.TERMINATION_BY_USER:
+				return ReasonCode.ABORTED_BY_USER;
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in GroupFileTransferImpl.sessionAbortedToReasonCode; sessionAbortedReason="
+								+ sessionAbortedReason + "!");
+		}
+	}
+
+	private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
+		switch (error.getErrorCode()) {
+			case FileSharingError.SESSION_INITIATION_DECLINED:
+			case FileSharingError.SESSION_INITIATION_CANCELLED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_BY_REMOTE);
+			case FileSharingError.MEDIA_SAVING_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_SAVING);
+			case FileSharingError.MEDIA_SIZE_TOO_BIG:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_MAX_SIZE);
+			case FileSharingError.MEDIA_TRANSFER_FAILED:
+			case FileSharingError.MEDIA_UPLOAD_FAILED:
+			case FileSharingError.MEDIA_DOWNLOAD_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_DATA_TRANSFER);
+			case FileSharingError.NO_CHAT_SESSION:
+			case FileSharingError.SESSION_INITIATION_FAILED:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+						ReasonCode.FAILED_INITIATION);
+			case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+						ReasonCode.REJECTED_LOW_SPACE);
+			default:
+				throw new IllegalArgumentException(
+						"Unknown reason in GroupFileTransferImpl.toStateAndReasonCode; error="
+								+ error + "!");
+		}
+	}
+
+	private void handleSessionRejected(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+		}
+		String fileTransferId = session.getFileTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.REJECTED, reasonCode);
+
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.REJECTED, reasonCode);
+
+			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+		}
+	}
+
+	private void handleFileTransferPaused(int reasonCode) {
+		if (logger.isActivated()) {
+			logger.info("Transfer paused, reasonCode=".concat(String.valueOf(reasonCode)));
+		}
+		String fileTransferId = session.getFileTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.PAUSED, reasonCode);
+
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.PAUSED, reasonCode);
 		}
 	}
 
 	/**
 	 * Session has been aborted
-	 *
+	 * 
 	 * @param reason Termination reason
 	 */
 	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
+		String fileTransferId = session.getFileTransferId();
+		int reasonCode = sessionAbortedToReasonCode(reason);
 		synchronized (lock) {
-			// Update rich messaging history
-			String fileTransferId = session.getFileTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, ABORTED);
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.ABORTED, reasonCode);
 
-			// Notify event listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-					ABORTED);
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.ABORTED, reasonCode);
 
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 		}
 	}
 
@@ -368,20 +430,17 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
+		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			// Check if the file has been transferred or not
-			String fileTransferId = session.getFileTransferId();
 			if (session.isFileTransfered()) {
-				// Remove session from the list
 				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			} else {
-				// Update rich messaging history
-				MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, ABORTED);
+				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+						FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-				// Notify event listeners
-				mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, ABORTED);
+				mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+						fileTransferId, FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-				// Remove session from the list
 				FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 			}
 		}
@@ -389,102 +448,93 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * File transfer error
-	 *
+	 * 
 	 * @param error Error
 	 */
 	public void handleTransferError(FileSharingError error) {
 		if (logger.isActivated()) {
 			logger.info("Sharing error " + error.getErrorCode());
 		}
+		String fileTransferId = session.getFileTransferId();
+		FileTransferStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+		int state = stateAndReasonCode.getState();
+		int reasonCode = stateAndReasonCode.getReasonCode();
 		synchronized (lock) {
-			if (error.getErrorCode() == FileSharingError.SESSION_INITIATION_CANCELLED) {
-				// Do nothing here, this is an aborted event
-				return;
-			}
-			String fileTransferId = session.getFileTransferId();
-			// Update rich messaging history
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, FAILED);
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId, state,
+					reasonCode);
 
-			// Notify event listeners
-			switch (error.getErrorCode()) {
-				case FileSharingError.SESSION_INITIATION_DECLINED:
-					// TODO : Handle reason code in CR009
-					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, FAILED /*, FileTransfer.Error.INVITATION_DECLINED*/);
-					break;
-				case FileSharingError.MEDIA_SAVING_FAILED:
-					// TODO : Handle reason code in CR009
-					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, FAILED /*, FileTransfer.Error.SAVING_FAILED*/);
-					break;
-				case FileSharingError.MEDIA_SIZE_TOO_BIG:
-				case FileSharingError.MEDIA_TRANSFER_FAILED:
-					// TODO : Handle reason code in CR009
-					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, FAILED /*, FileTransfer.Error.TRANSFER_FAILED*/);
-					break;
-				default:
-					// TODO : Handle reason code in CR009
-					mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId, FAILED /*, FileTransfer.Error.TRANSFER_FAILED*/);
-			}
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, state, reasonCode);
 
-			// Remove session from the list
 			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
 		}
 	}
 
 	/**
 	 * File transfer progress
-	 *
+	 * 
 	 * @param currentSize Data size transferred
 	 * @param totalSize Total size to be transferred
 	 */
 	public void handleTransferProgress(long currentSize, long totalSize) {
+		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			String fileTransferId = session.getFileTransferId();
-			// Update rich messaging history
 			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize,
 					totalSize);
 
-			// Notify event listeners
 			mGroupFileTransferBroadcaster.broadcastTransferprogress(getChatId(), fileTransferId,
 					currentSize, totalSize);
 		}
 	}
 
 	/**
+	 * File transfer not allowed to send
+	 */
+	@Override
+	public void handleTransferNotAllowedToSend() {
+		String fileTransferId = session.getFileTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.FAILED,
+					ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+		}
+	}
+
+	/**
 	 * File has been transfered
-	 *
+	 * 
 	 * @param content MmContent associated to the received file
 	 */
 	public void handleFileTransfered(MmContent content) {
 		if (logger.isActivated()) {
 			logger.info("Content transferred");
 		}
+		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			// Update rich messaging history
-			String fileTransferId = session.getFileTransferId();
 			MessagingLog.getInstance().updateFileTransferred(session.getFileTransferId(), content);
 
-			// Notify event listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-					TRANSFERRED);
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
-	 * File transfer has been paused
+	 * File transfer has been paused by user
 	 */
-	public void handleFileTransferPaused() {
-		if (logger.isActivated()) {
-			logger.info("Transfer paused");
-		}
-		synchronized (lock) {
-			// Update rich messaging history
-			String fileTransferId = session.getFileTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, PAUSED);
+	@Override
+	public void handleFileTransferPausedByUser() {
+		handleFileTransferPaused(ReasonCode.PAUSED_BY_USER);
+	}
 
-			// Notify event listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-					PAUSED);
-		}
+	/**
+	 * File transfer has been paused by system
+	 */
+	@Override
+	public void handleFileTransferPausedBySystem() {
+		handleFileTransferPaused(ReasonCode.PAUSED_BY_SYSTEM);
 	}
 
 	/**
@@ -494,15 +544,43 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		if (logger.isActivated()) {
 			logger.info("Transfer resumed");
 		}
+		String fileTransferId = session.getFileTransferId();
 		synchronized (lock) {
-			// Update rich messaging history
-			String fileTransferId = session.getFileTransferId();
-			MessagingLog.getInstance().updateFileTransferStatus(fileTransferId, STARTED);
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
-			// Notify event listeners
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(), fileTransferId,
-					STARTED);
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
+	@Override
+	public void handleSessionAccepting() {
+		if (logger.isActivated()) {
+			logger.info("Accepting transfer");
+		}
+		String fileTransferId = session.getFileTransferId();
+		synchronized (lock) {
+			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+					FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+
+			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+					fileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	@Override
+	public void handleSessionRejectedByUser() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	}
+
+	@Override
+	public void handleSessionRejectedByTimeout() {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	}
+
+	@Override
+	public void handleSessionRejectedByRemote() {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
 }

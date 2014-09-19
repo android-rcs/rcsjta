@@ -7,5 +7,5 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IIPCallListener {
 
-	void onIPCallStateChanged(in ContactId contact, in String callId, in int state);
+	void onIPCallStateChanged(in ContactId contact, in String callId, in int state, in int reasonCode);
 }

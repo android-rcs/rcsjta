@@ -59,7 +59,12 @@ public class IPCallData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_STATUS = IPCallLog.STATE;
+	static final String KEY_STATE = IPCallLog.STATE;
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_REASON_CODE = IPCallLog.REASON_CODE;
 
 	/**
 	 * Column name

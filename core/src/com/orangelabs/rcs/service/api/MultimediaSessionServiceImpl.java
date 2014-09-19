@@ -38,6 +38,8 @@ import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.core.Core;
@@ -302,6 +304,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			// Add session listener
 			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
 					mMultimediaMessagingSessionEventBroadcaster);
+			mMultimediaMessagingSessionEventBroadcaster.broadcastMultimediaMessagingStateChanged(
+					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
+					ReasonCode.UNSPECIFIED);
 
 			// Start the session
 	        new Thread() {
@@ -396,6 +401,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			// Add session listener
 			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
 					mMultimediaStreamingSessionEventBroadcaster);
+			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
+					ReasonCode.UNSPECIFIED);
 
 			// Start the session
 	        new Thread() {

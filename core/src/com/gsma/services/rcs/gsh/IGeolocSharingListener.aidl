@@ -8,7 +8,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IGeolocSharingListener {
 
-	void onGeolocSharingStateChanged(in ContactId contact, in String sharingId, in int state);
+	void onGeolocSharingStateChanged(in ContactId contact, in String sharingId, in int state, in int reasonCode);
 
 	void onGeolocSharingProgress(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
 }

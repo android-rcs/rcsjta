@@ -109,19 +109,23 @@ public class RichCallHistory {
 	 * @param sessionId Session ID
 	 * @param direction Call event direction
 	 * @param content Shared content
-	 * @param status Call status
+	 * @param state Call state
+	 * @param reasonCode Reason Code
 	 */
-	public Uri addVideoSharing(ContactId contact, String sessionId, int direction,
-			VideoContent content, int status) {
+	public Uri addVideoSharing(ContactId contact, String sessionId, int direction, VideoContent content,
+			int state, int reasonCode) {
 		if(logger.isActivated()){
-			logger.debug("Add new video sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
+			logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
+					.append(": session=").append(sessionId).append(", state=").append(state)
+					.append(", reasonCode=").append(reasonCode).toString());
 		}
 
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SESSION_ID, sessionId);
 		values.put(VideoSharingData.KEY_CONTACT, contact.toString());
 		values.put(VideoSharingData.KEY_DIRECTION, direction);
-		values.put(VideoSharingData.KEY_STATUS, status);
+		values.put(VideoSharingData.KEY_STATE, state);
+		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
 		values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(VideoSharingData.KEY_DURATION, 0);
 		values.put(VideoSharingData.KEY_VIDEO_ENCODING, content.getEncoding());
@@ -134,14 +138,18 @@ public class RichCallHistory {
 	 * Update the video sharing status
 	 * 
 	 * @param sessionId Session ID of the entry
-	 * @param status New status
+	 * @param state New state
+	 * @param reasonCode Reason Code
 	 */
-	public void setVideoSharingStatus(String sessionId, int status) {
+	public void setVideoSharingState(String sessionId, int state, int reasonCode) {
 		if (logger.isActivated()) {
-			logger.debug("Update video sharing status of session " + sessionId + " to " + status);
+			logger.debug(new StringBuilder("Update video sharing state of session ")
+					.append(sessionId).append(" state=").append(state).append(", reasonCode=")
+					.append(reasonCode).toString());
 		}
 		ContentValues values = new ContentValues();
-		values.put(VideoSharingData.KEY_STATUS, status);
+		values.put(VideoSharingData.KEY_STATE, state);
+		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
 		cr.update(vshDatabaseUri, values, VideoSharingData.KEY_SESSION_ID + " = '" + sessionId + "'", null);
 	}
 
@@ -170,8 +178,10 @@ public class RichCallHistory {
 	 * @param direction Call event direction
 	 * @param content Shared content
 	 * @param status Call status
+	 * @param reasonCode Reason Code
 	 */
-	public Uri addImageSharing(ContactId contact, String sessionId, int direction, MmContent content, int status) {
+	public Uri addImageSharing(ContactId contact, String sessionId, int direction, MmContent content,
+			int status, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug("Add new image sharing for contact " + contact + ": session=" + sessionId + ", status=" + status);
 		}
@@ -185,24 +195,27 @@ public class RichCallHistory {
 		values.put(ImageSharingData.KEY_MIME_TYPE, content.getEncoding());
 		values.put(ImageSharingData.KEY_SIZE, 0);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, content.getSize());
-		values.put(ImageSharingData.KEY_STATUS, status);
+		values.put(ImageSharingData.KEY_STATE, status);
+		values.put(ImageSharingData.KEY_REASON_CODE, reasonCode);
 		values.put(ImageSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		return cr.insert(ishDatabaseUri, values);
 	}
 
 	/**
-	 * Update the image sharing status
+	 * Update the image sharing state
 	 * 
 	 * @param sessionId Session ID of the entry
-	 * @param status New status
+	 * @param state New state
+	 * @param reasonCode Reason Code
 	 */
-	public void setImageSharingStatus(String sessionId, int status) {
+	public void setImageSharingState(String sessionId, int state, int reasonCode) {
 		if (logger.isActivated()) {
-			logger.debug("Update status of image session " + sessionId + " to " + status);
+			logger.debug("Update status of image session " + sessionId + " to " + state);
 		}
 		ContentValues values = new ContentValues();
-		values.put(ImageSharingData.KEY_STATUS, status);
-		if (status == ImageSharing.State.TRANSFERRED) {
+		values.put(ImageSharingData.KEY_STATE, state);
+		values.put(ImageSharingData.KEY_REASON_CODE, reasonCode);
+		if (state == ImageSharing.State.TRANSFERRED) {
 			// Update the size of bytes if fully transferred
 			long total = getImageSharingTotalSize(sessionId);
 			if (total != 0) {
@@ -248,7 +261,8 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SIZE, current);
 		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);
-		values.put(ImageSharingData.KEY_STATUS, ImageSharing.State.STARTED);
+		values.put(ImageSharingData.KEY_STATE, ImageSharing.State.STARTED);
+		values.put(ImageSharingData.KEY_REASON_CODE, ImageSharing.ReasonCode.UNSPECIFIED);
 		String[] whereArgs = new String[] { sessionId };
 		cr.update(ishDatabaseUri, values, WHERE_CLAUSE_ISH, whereArgs);
 	}

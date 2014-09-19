@@ -247,4 +247,17 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
 	    }
     }
+
+	@Override
+	public void handleUploadNotAllowedToSend() {
+		if (logger.isActivated()) {
+			logger.debug("File upload not allowed");
+		}
+		String uploadId = getUploadId();
+		synchronized (lock) {
+			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(uploadId,
+					FileUpload.State.FAILED);
+			FileTransferServiceImpl.removeFileTransferSession(uploadId);
+		}
+	}
 }

@@ -43,13 +43,12 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		mGeolocSharingListeners.unregister(listener);
 	}
 
-	public void broadcastGeolocSharingStateChanged(ContactId contact, String sharingId, int state) {
+	public void broadcastGeolocSharingStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mGeolocSharingListeners.getBroadcastItem(i).onGeolocSharingStateChanged(contact,
-						sharingId, state);
+						sharingId, state, reasonCode);
 			} catch (Exception e) {
 			}
 		}

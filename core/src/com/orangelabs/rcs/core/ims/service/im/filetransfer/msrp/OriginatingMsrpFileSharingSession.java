@@ -23,6 +23,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Vector;
 
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
@@ -43,6 +44,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
@@ -105,8 +107,17 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		setContributionID(id);
 		
 		if (fileicon) {
-			// Create the fileicon
-			setFileicon(FileTransferUtils.createFileicon(content.getUri(), getSessionID()));
+			try {
+				// Create the fileicon
+				setFileicon(FileTransferUtils.createFileicon(content.getUri(), getSessionID()));
+			} catch (SecurityException e) {
+				if (logger.isActivated()) {
+					logger.error(
+							"File icon creation has failed due to that the file is not accessible!",
+							e);
+				}
+				/*TODO: Take appropriate action in CR037.*/
+			}
 		}
 	}
 
@@ -260,6 +271,14 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         stream = new ByteArrayInputStream(data);
                     }
                     msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
+                } catch (SecurityException e){
+                    if (logger.isActivated()) {
+                        logger.error("Session initiation has failed due to that the file is not accessible!", e);
+                    }
+                    Vector<ImsSessionListener> listeners = getListeners();
+                    for(ImsSessionListener listener : listeners) {
+                        ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend();
+                    }
                 } catch(Exception e) {
                     // Unexpected error
                     if (logger.isActivated()) {
@@ -300,9 +319,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent());
         }
     	InstantMessagingService imService = ((InstantMessagingService) getImsService());
-        // Notify delivery
-    	imService.receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DELIVERED, getRemoteContact());
-    	imService.receiveFileDeliveryStatus(getFileTransferId(), ImdnDocument.DELIVERY_STATUS_DISPLAYED, getRemoteContact());
+    	ContactId contact = getRemoteContact();
+    	String fileTransferId = getFileTransferId();
+    	imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId, ImdnDocument.POSITIVE_DELIVERY,
+    			ImdnDocument.DELIVERY_STATUS_DELIVERED));
+    	imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId, ImdnDocument.DISPLAY,
+    			ImdnDocument.DELIVERY_STATUS_DISPLAYED));
 	}
 	
 	/**

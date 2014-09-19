@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.service;
 
+import java.util.Set;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,6 +38,7 @@ import com.gsma.services.rcs.Intents;
 import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.upload.IFileUploadService;
@@ -50,11 +53,16 @@ import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreListener;
 import com.orangelabs.rcs.core.TerminalInfo;
+import com.orangelabs.rcs.core.content.AudioContent;
+import com.orangelabs.rcs.core.content.GeolocContent;
+import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
@@ -701,32 +709,32 @@ public class RcsCoreService extends Service implements CoreListener {
 		chatApi.receiveOneOneChatInvitation(session);
     }
     
-    public void handleMessageDeliveryStatus(ContactId contact, String msgId, String status) {
+    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
 		if (logger.isActivated()) {
 			logger.debug("Handle message delivery status");
 		}
     	
-		// Notify listeners
-		chatApi.receiveMessageDeliveryStatus(contact, msgId, status);
+		chatApi.receiveMessageDeliveryStatus(contact, imdn);
     }
     
-    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact) {
+    public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
     	 if (logger.isActivated()) {
-        	 logger.debug("Handle file delivery status: fileTransferId=" + fileTransferId + " status=" + status + " contact="+contact);
+        	 logger.debug("Handle file delivery status: fileTransferId=" + imdn.getMsgId()
+        			 + " notification_type=" + imdn.getNotificationType() + " status="
+        			 + imdn.getStatus() + " contact=" + contact);
          }
 
-        // Notify listeners
-        ftApi.handleFileDeliveryStatus(fileTransferId, status, contact);
+        ftApi.handleFileDeliveryStatus(imdn,  contact);
     }
 
-	public void handleGroupFileDeliveryStatus(String chatId, String fileTransferId, String status, ContactId contact) {
+	public void handleGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
 		if (logger.isActivated()) {
-			logger.debug("Handle group file delivery status: fileTransferId=" + fileTransferId + " status="
-					+ status + " contact=" + contact);
+			logger.debug("Handle group file delivery status: fileTransferId=" + imdn.getMsgId()
+					+ " notification_type=" + imdn.getNotificationType() + " status="
+					+ imdn.getStatus() + " contact=" + contact);
 		}
 
-		// Notify listeners
-		ftApi.handleGroupFileDeliveryStatus(chatId, fileTransferId, status, contact);
+		ftApi.handleGroupFileDeliveryStatus(chatId, imdn, contact);
 	}
 
     /* (non-Javadoc)
@@ -816,5 +824,41 @@ public class RcsCoreService extends Service implements CoreListener {
 	@Override
 	public void tryToDispatchAllPendingDisplayNotifications() {
 		chatApi.tryToDispatchAllPendingDisplayNotifications();
+	}
+
+	@Override
+	public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
+			MmContent fileicon, int reasonCode) {
+		ftApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
+	}
+
+	@Override
+	public void handleGroupChatInvitationRejected(String chatId, String subject,
+			Set<ParticipantInfo> participants, int reasonCode) {
+		chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, subject, participants, reasonCode);
+	}
+
+	@Override
+	public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
+			int reasonCode) {
+		ishApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	@Override
+	public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+			int reasonCode) {
+		vshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	@Override
+	public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+			int reasonCode) {
+		gshApi.addAndbroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
+	}
+
+	@Override
+	public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+			VideoContent videoContent, int reasonCode) {
+		ipcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode);
 	}
 }

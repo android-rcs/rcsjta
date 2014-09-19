@@ -501,27 +501,32 @@ public abstract class ImsServiceSession extends Thread {
 	 * 
 	 * @param reason Termination reason
 	 */
-	public void abortSession(int reason) {
-    	if (logger.isActivated()) {
-    		logger.info("Abort the session " + reason);
-    	}
-    	
-    	// Interrupt the session
-    	interruptSession();
+	public void abortSession(int abortedReason) {
+		if (logger.isActivated()) {
+			logger.info("Abort the session " + abortedReason);
+		}
 
-    	// Terminate session
-		terminateSession(reason);
+		interruptSession();
 
-    	// Close media session
-    	closeMediaSession();
+		terminateSession(abortedReason);
 
-    	// Remove the current session
-    	getImsService().removeSession(this);
+		closeMediaSession();
 
-    	// Notify listeners
-    	for(int i=0; i < getListeners().size(); i++) {
-    		getListeners().get(i).handleSessionAborted(reason);
-        }
+		getImsService().removeSession(this);
+
+		/* TODO: This will be changed anyway by the implementation of CR018 */
+		Vector<ImsSessionListener> listeners = getListeners();
+		/* Handles the case of REJECTED_BY_USER on originating session */
+		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER & !dialogPath.isSigEstablished()) {
+			for (ImsSessionListener listener : listeners) {
+				listener.handleSessionRejectedByUser();
+			}
+			return;
+		}
+
+		for (ImsSessionListener listener : listeners) {
+			listener.handleSessionAborted(abortedReason);
+		}
 	}
 	
 	/**
@@ -663,11 +668,6 @@ public abstract class ImsServiceSession extends Thread {
 		// Unblock semaphore
 		synchronized (waitUserAnswer) {
 			waitUserAnswer.notifyAll();
-		}
-
-		// Notify listeners
-		for (int i = 0; i < getListeners().size(); i++) {
-			getListeners().get(i).handleSessionTerminatedByRemote();
 		}
 	}
 
@@ -932,6 +932,7 @@ public abstract class ImsServiceSession extends Thread {
         SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(invite, getResponseTimeout());
 
         // Analyze the received response 
+        /* TODO: Handle provisional response such as 180 RINGING */
         if (ctx.isSipResponse()) {
             // A response has been received
             if (ctx.getStatusCode() == 200) {

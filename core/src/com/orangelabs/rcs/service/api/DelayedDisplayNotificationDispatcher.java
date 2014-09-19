@@ -1,6 +1,17 @@
 /*
- * Copyright (C) 2014 Sony Mobile Communications AB.
- * All rights, including trade secret rights, reserved.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.orangelabs.rcs.service.api;
 
@@ -8,6 +19,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 
 import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
@@ -21,13 +33,13 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class DelayedDisplayNotificationDispatcher implements Runnable {
 
 	private final static String SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
-			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT_NUMBER)
+			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT)
 			.append(" AND ").append(ChatLog.Message.MESSAGE_TYPE).append("=")
 			.append(ChatLog.Message.Type.CONTENT).append(" AND ").append(ChatLog.Message.MIME_TYPE)
 			.append(" IN('").append(ChatMessage.MIME_TYPE).append("','")
 			.append(GeolocMessage.MIME_TYPE).append("') AND ")
 			.append(ChatLog.Message.READ_STATUS).append("=")
-			.append(ChatLog.Message.ReadStatus.READ).append(" AND ")
+			.append(ReadStatus.READ).append(" AND ")
 			.append(ChatLog.Message.MESSAGE_STATUS).append("=")
 			.append(ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED).toString();
 
@@ -49,12 +61,12 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 	public void run() {
 		Cursor cursor = null;
 		try {
-			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT_NUMBER };
+			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT };
 			cursor = mContentResolver.query(ChatLog.Message.CONTENT_URI, projection,
 					SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null, ORDER_BY_TIMESTAMP_ASC);
 			while (cursor.moveToNext()) {
 				String msgId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
-				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT_NUMBER));
+				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
 				try {
 					mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, ContactUtils.createContactId(contactNumber));
 				} catch (JoynContactFormatException e) {

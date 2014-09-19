@@ -22,7 +22,8 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IImageSharingEventBroadcaster {
 
-	public void broadcastImageSharingStateChanged(ContactId contact, String sharingId, int status);
+	public void broadcastImageSharingStateChanged(ContactId contact, String sharingId, int status,
+			int reasonCode);
 
 	public void broadcastImageSharingProgress(ContactId contact, String sharingId, long currentSize,
 			long totalSize);

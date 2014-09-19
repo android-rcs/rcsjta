@@ -257,7 +257,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	public void pauseFileTransfer() {
 		fileTransferPaused();
 		interruptSession();
-		uploadManager.pauseTransfer();
+		uploadManager.pauseTransferByUser();
 	}
 
 	/**

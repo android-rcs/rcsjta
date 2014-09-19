@@ -36,8 +36,10 @@ public abstract class ChatListener extends IChatListener.Stub {
 	 * @param contact Contact ID
 	 * @param msgId Message Id
 	 * @param status Status
+	 * @param reasonCode Reason code
 	 */
-	public abstract void onMessageStatusChanged(ContactId contact, String msgId, int status);
+	public abstract void onMessageStatusChanged(ContactId contact, String msgId, int status,
+			int reasonCode);
 
 	/**
 	 * Callback called when an Is-composing event has been received. If the

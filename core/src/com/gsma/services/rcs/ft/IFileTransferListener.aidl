@@ -7,7 +7,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IFileTransferListener {
 
-	void onTransferStateChanged(in ContactId contact, in String transferId, in int state);
+	void onTransferStateChanged(in ContactId contact, in String transferId, in int state, in int reasonCode);
 
 	void onTransferProgress(in ContactId contact, in String transferId, in long currentSize, in long totalSize);
 }

@@ -21,13 +21,11 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DELIVERED;
-import static com.gsma.services.rcs.chat.ChatLog.Message.Status.Content.DISPLAYED;
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -37,7 +35,10 @@ import android.os.RemoteException;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
@@ -47,13 +48,18 @@ import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupChatEventBroadcaster;
@@ -105,6 +111,29 @@ public class ChatServiceImpl extends IChatService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Chat service API is loaded");
 		}
+	}
+
+	private int imdnToFailedReasonCode(ImdnDocument imdn) {
+		String notificationType = imdn.getNotificationType();
+		if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
+			return ReasonCode.FAILED_DELIVERY;
+
+		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
+			return ReasonCode.FAILED_DISPLAY;
+
+		}
+		throw new IllegalArgumentException(new StringBuilder(
+				"Received invalid imdn notification type:'").append(notificationType).append("'")
+				.toString());
+	}
+
+	/*Broadcast intent related to the received invitation*/
+	private void broadcastGroupChatInvitation(String chatId) {
+		Intent newInvitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
 	/**
@@ -316,27 +345,49 @@ public class ChatServiceImpl extends IChatService.Stub {
 		}
     }    
 
-    /**
-     * Receive message delivery status
-     * 
+	/**
+	 * Receive message delivery status
+	 *
 	 * @param contact Contact ID
-	 * @param msgId Message ID
-     * @param status Delivery status
-     */
-	public void receiveMessageDeliveryStatus(ContactId contact, String msgId, String status) {
-		synchronized (lock) {
-			if (logger.isActivated()) {
-				logger.info("Receive message delivery status for message " + msgId + ", status "
-						+ status);
+	 * @param imdn Imdn document
+	 */
+	public void receiveMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+		String status = imdn.getStatus();
+		String msgId = imdn.getMsgId();
+		String notificationType = imdn.getNotificationType();
+		if (logger.isActivated()) {
+			logger.info("Receive message delivery status for message " + msgId + ", status "
+					+ status + "notificationType=" + notificationType);
+		}
+
+		if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+				|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+				|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+			int reasonCode = imdnToFailedReasonCode(imdn);
+			synchronized (lock) {
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.FAILED, reasonCode);
+
+				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
+						Message.Status.Content.FAILED, reasonCode);
 			}
-			MessagingLog.getInstance().updateOutgoingChatMessageDeliveryStatus(msgId, status);
-			// Notify message delivery listeners
-			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+
+		} else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+			synchronized (lock) {
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+
 				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
-						DELIVERED);
-			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+						Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+			}
+		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+
+			synchronized (lock) {
+				MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
+
 				mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, msgId,
-						DISPLAYED);
+						Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
 			}
 		}
 	}
@@ -433,10 +484,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 					+ session.getRemoteDisplayName()+")");
 		}
 
-		// Update rich messaging history
-		MessagingLog.getInstance().addGroupChat(session.getContributionID(),
-				session.getSubject(), session.getParticipants(), GroupChat.State.INVITED, GroupChat.Direction.INCOMING);
-		
 		// Update displayName of remote contact
 		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
 		 
@@ -444,12 +491,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		GroupChatImpl sessionApi = new GroupChatImpl(session, mGroupChatEventBroadcaster);
 		ChatServiceImpl.addGroupChatSession(sessionApi);
 
-		// Broadcast intent related to the received invitation
-		Intent newInvitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(GroupChatIntent.EXTRA_CHAT_ID, sessionApi.getChatId());
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+		broadcastGroupChatInvitation(session.getContributionID());
     }
 	
 	/**
@@ -505,10 +547,9 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Add session listener
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session, mGroupChatEventBroadcaster);
 
-			// Update rich messaging history
 			MessagingLog.getInstance().addGroupChat(session.getContributionID(),
-					session.getSubject(), session.getParticipants(),
-					GroupChat.State.INITIATED, GroupChat.Direction.OUTGOING);
+					session.getSubject(), session.getParticipants(), GroupChat.State.INITIATED,
+					GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING);
 
 			// Start the session
 	        new Thread() {
@@ -520,6 +561,20 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Add session in the list
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 			return sessionApi;
+		} catch(CoreException e) {
+			if (logger.isActivated()) {
+				logger.error("Core exception", e);
+			}
+
+			Set<ParticipantInfo> participants = ParticipantInfoUtils
+					.getParticipantInfos(contacts);
+
+			String callId = Core.getInstance().getImsModule().getSipManager().getSipStack().generateCallId();
+			MessagingLog.getInstance().addGroupChat(
+					ContributionIdGenerator.getContributionId(callId), subject, participants,
+					GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_MAX_CHATS,
+					Direction.OUTGOING);
+			throw new ServerApiException(e.getMessage());
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -761,5 +816,22 @@ public class ChatServiceImpl extends IChatService.Stub {
 	@Override
 	public void setRespondToDisplayReports(boolean enable) throws RemoteException {
 		RcsSettings.getInstance().setRespondToDisplayReports(enable);
+	}
+
+	/**
+	 * Add and broadcast group chat invitation rejections.
+	 *
+	 * @param chatId Chat Id
+	 * @param subject Subject
+	 * @param participants Participants
+	 * @param reasonCode Reason code
+	 */
+	public void addAndBroadcastGroupChatInvitationRejected(String chatId, String subject,
+			Set<ParticipantInfo> participants, int reasonCode) {
+
+		MessagingLog.getInstance().addGroupChat(chatId, subject, participants,
+				GroupChat.State.REJECTED, reasonCode, Direction.INCOMING);
+
+		broadcastGroupChatInvitation(chatId);
 	}
 }

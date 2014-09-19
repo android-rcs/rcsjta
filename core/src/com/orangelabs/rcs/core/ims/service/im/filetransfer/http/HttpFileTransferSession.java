@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import java.util.List;
+import java.util.Vector;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -31,6 +32,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
@@ -148,9 +150,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                     // Remove the current session
                     getImsService().removeSession(this);
 
-                    // Notify listeners
-                    for(int i=0; i < getListeners().size(); i++) {
-                        ((FileSharingSessionListener)getListeners().get(i)).handleFileTransferPaused();
+                    Vector<ImsSessionListener> listeners = getListeners();
+                    for (ImsSessionListener listener : listeners) {
+                        ((FileSharingSessionListener)listener)
+                                .handleFileTransferPausedBySystem();
                     }
                     return;
                 }
@@ -180,9 +183,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         getImsService().removeSession(this);
         this.sessionState = HttpTransferState.TERMINATED;
 
-        // Notify listeners
-        for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(error));
+        Vector<ImsSessionListener> listeners = getListeners();
+        for (ImsSessionListener listener : listeners) {
+            ((FileSharingSessionListener)listener).handleTransferError(new FileSharingError(error));
         }
     }
 	
@@ -225,9 +228,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         getImsService().removeSession(this);
         this.sessionState = HttpTransferState.TERMINATED;
 
-		// Notify listeners
-		for (int j = 0; j < getListeners().size(); j++) {
-			((FileSharingSessionListener) getListeners().get(j)).handleFileTransfered(getContent());
+        Vector<ImsSessionListener> listeners = getListeners();
+        for (ImsSessionListener listener : listeners) {
+			((FileSharingSessionListener)listener).handleFileTransfered(getContent());
 		}
     }
     
@@ -239,9 +242,19 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param totalSize Total size in bytes
      */
     public void httpTransferProgress(long currentSize, long totalSize) {
-        // Notify listeners
-        for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleTransferProgress(currentSize, totalSize);
+        Vector<ImsSessionListener> listeners = getListeners();
+        for (ImsSessionListener listener : listeners) {
+            ((FileSharingSessionListener)listener).handleTransferProgress(currentSize, totalSize);
+        }
+    }
+
+    /**
+     * HTTP not allowed to send
+     */
+    public void httpTransferNotAllowedToSend() {
+        Vector<ImsSessionListener> listeners = getListeners();
+        for (ImsSessionListener listener : listeners) {
+            ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend();
         }
     }
 
@@ -258,13 +271,24 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     }
     
     /**
-     * Handle file transfer paused
+     * Handle file transfer paused by user
      */
-    public void httpTransferPaused() {
-    	// Notify listeners
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j))
-                    .handleFileTransferPaused();
+    public void httpTransferPausedByUser() {
+        Vector<ImsSessionListener> listeners = getListeners();
+        for(ImsSessionListener listener: listeners) {
+            ((FileSharingSessionListener)listener)
+                    .handleFileTransferPausedByUser();
+        }
+    }
+
+    /**
+     * Handle file transfer paused by system
+     */
+    public void httpTransferPausedBySystem() {
+        Vector<ImsSessionListener> listeners = getListeners();
+        for(ImsSessionListener listener: listeners) {
+            ((FileSharingSessionListener)listener)
+                    .handleFileTransferPausedBySystem();
         }
     }
     
@@ -272,9 +296,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Handle file transfer paused
      */
     public void httpTransferResumed() {
-    	// Notify listeners
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j))
+        Vector<ImsSessionListener> listeners = getListeners();
+        for(ImsSessionListener listener: listeners) {
+            ((FileSharingSessionListener) listener)
                     .handleFileTransferResumed();
         }
     }

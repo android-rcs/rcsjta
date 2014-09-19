@@ -35,8 +35,10 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	 * @param contactId Contact ID
 	 * @param sharingId ID of image sharing
 	 * @param state State of image sharing 
+	 * @param reasonCode Reason code of the image sharing state
 	 */
-	public abstract void onImageSharingStateChanged(ContactId contact, String sharingId, int state);
+	public abstract void onImageSharingStateChanged(ContactId contact, String sharingId, int state,
+			int reasonCode);
 
 	/**
 	 * Callback called during the sharing progress

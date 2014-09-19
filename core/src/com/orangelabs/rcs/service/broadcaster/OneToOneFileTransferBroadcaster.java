@@ -46,13 +46,12 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 		mOneToOneFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastTransferStateChanged(ContactId contact, String transferId, int state) {
+	public void broadcastTransferStateChanged(ContactId contact, String transferId, int state, int reasonCode) {
 		final int N = mOneToOneFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mOneToOneFileTransferListeners.getBroadcastItem(i).onTransferStateChanged(contact,
-						transferId, state);
+						transferId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

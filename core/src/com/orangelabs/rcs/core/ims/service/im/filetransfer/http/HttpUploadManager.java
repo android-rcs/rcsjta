@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
@@ -439,20 +439,20 @@ public class HttpUploadManager extends HttpTransferManager {
 				connection.disconnect();
 				return null;
 			}
-		} catch (Exception e) {
-			
-			if (e instanceof SecurityException) {
-				if (logger.isActivated()) {
-					logger.warn("Unrecoverable SecurityException: File Transfer Upload aborted");
-				}
-				throw e;
+		} catch (SecurityException e) {
+			/*Note! This is needed since this can be called during dequeuing as will be implemented in CR018.*/
+			if (logger.isActivated()) {
+				logger.error("Upload has failed due to that the file is not accessible!", e);
 			}
+			getListener().httpTransferNotAllowedToSend();
+			return null;
+		} catch (Exception e) {
 			e.printStackTrace();
 
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
-			pauseTransfer();
+			pauseTransferBySystem();
 			return null;
 		}
 	}
@@ -562,6 +562,9 @@ public class HttpUploadManager extends HttpTransferManager {
 				buffer = new byte[bufferSize];
 				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 			}
+		} catch (SecurityException e) {
+			/*TODO: WIll be changed in CR037*/
+			throw e;
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error(e.getMessage(), e);
@@ -806,19 +809,20 @@ public class HttpUploadManager extends HttpTransferManager {
 				connection.disconnect();
 				return null;
 			}
-		} catch (Exception e) {
-			if (e instanceof SecurityException) {
-				if (logger.isActivated()) {
-					logger.warn("Unrecoverable SecurityException: File Transfer resume Upload aborted");
-				}
-				throw e;
+		} catch (SecurityException e) {
+			/*Note! This is needed since this can be called during dequeuing as will be implemented in CR018.*/
+			if (logger.isActivated()) {
+				logger.error("Upload reasume has failed due to that the file is not accessible!", e);
 			}
+			getListener().httpTransferNotAllowedToSend();
+			return null;
+		} catch (Exception e) {
 			e.printStackTrace();
 
 			if (logger.isActivated()) {
 				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
 			}
-			pauseTransfer();
+			pauseTransferBySystem();
 			return null;
 		}
 	}
@@ -959,7 +963,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			if (logger.isActivated()) {
 				logger.warn("Could not get upload info due to " + e.getLocalizedMessage());
 			}
-			getListener().httpTransferPaused();
+			getListener().httpTransferPausedBySystem();
 			return null;
 		}
 		return buffer.toByteArray();

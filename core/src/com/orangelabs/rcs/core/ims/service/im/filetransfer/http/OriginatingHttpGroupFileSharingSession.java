@@ -215,7 +215,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	public void pauseFileTransfer() {
         fileTransferPaused();
 		interruptSession();
-		uploadManager.pauseTransfer();
+		uploadManager.pauseTransferByUser();
 	}
 
 	/**

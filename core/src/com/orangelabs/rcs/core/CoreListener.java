@@ -24,12 +24,20 @@ package com.orangelabs.rcs.core;
 
 import android.content.Intent;
 
+import java.util.Set;
+
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.core.content.AudioContent;
+import com.orangelabs.rcs.core.content.GeolocContent;
+import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
@@ -192,31 +200,26 @@ public interface CoreListener {
     
     /**
      * New message delivery status
-     * 
      * @param contact Contact identifier
-	 * @param msgId Message ID
-     * @param status Delivery status
+     * @param ImdnDocument imdn Imdn document
      */
-    public void handleMessageDeliveryStatus(ContactId contact, String msgId, String status);
+    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
     /**
      * New file delivery status
-     *
-     * @param fileTransferId File transfer Id
-     * @param status Delivery status
      * @param contact who notified status
+     * @param ImdnDocument imdn Imdn document
      */
-    public void handleFileDeliveryStatus(String fileTransferId, String status, ContactId contact);
+    public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
     /**
      * New group file delivery status
      *
      * @param chatId Chat Id
-     * @param fileTransferId File transfer Id
-     * @param status Delivery status
      * @param contact who notified status
+     * @param ImdnDocument imdn Imdn document
      */
-    public void handleGroupFileDeliveryStatus(String chatId, String fileTransferId, String status, ContactId contact);
+    public void handleGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn);
 
     /**
      * New SIP MSRP session invitation
@@ -282,4 +285,68 @@ public interface CoreListener {
      * Try to send delayed displayed notification after service reconnection
      */
     public void tryToDispatchAllPendingDisplayNotifications();
+
+    /**
+     * Handle the case of rejected file transfer
+     *
+     * @param contact Remote contact
+     * @param content File content
+     * @param fileicon Fileicon content
+     * @param reasonCode Rejected reason code
+     */
+
+    public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
+            MmContent fileicon, int reasonCode);
+
+    /**
+     * Handle the case of rejected group chat
+     *
+     * @param chatId Chat Id
+     * @param subject Subject
+     * @param participants Participants
+     * @param reasonCode Rejected reason code
+     */
+    public void handleGroupChatInvitationRejected(String chatId, String subject,
+            Set<ParticipantInfo> participants, int reasonCode);
+
+    /**
+     * Handles image sharing rejection
+     *
+     * @param contact Remote contact
+     * @param content Multimedia content
+     * @param reasonCode Rejected reason code
+     */
+    public void handleImageSharingInvitationRejected(ContactId contact,
+            MmContent content, int reasonCode);
+
+    /**
+     * Handle the case of rejected video sharing
+     *
+     * @param contact Remote contact
+     * @param content Video content
+     * @param reasonCode Rejected reason code
+     */
+    public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+            int reasonCode);
+
+    /**
+     * Handle the case of rejected geoloc sharing
+     *
+     * @param contact Remote contact
+     * @param content Geoloc content
+     * @param reasonCode Rejected reason code
+     */
+    public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+            int reasonCode);
+
+    /**
+     * Handle the case of rejected ip call
+     *
+     * @param contact Remote contact
+     * @param audioContent Audio content
+     * @param videoContent Video content
+     * @param reasonCode Rejected reason code
+     */
+    public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+            VideoContent videoContent, int reasonCode);
 }
