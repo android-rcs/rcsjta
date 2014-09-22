@@ -160,13 +160,14 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 	private VideoSharingListener vshListener = new VideoSharingListener() {
 
 		@Override
-		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state) {
+		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
 			// Discard event if not for current sharingId
 			if (InitiateVideoSharing.this.sharingId == null || !InitiateVideoSharing.this.sharingId.equals(sharingId)) {
 				return;
 			}
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.VSH_STATES.length) {
 				if (LogUtils.isActive) {
@@ -174,9 +175,13 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 				}
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.VSH_REASON_CODES[0];
-			final String notif = getString(R.string.label_vsh_state_changed, RiApplication.VSH_STATES[state], reason);
+			if (reasonCode > RiApplication.VSH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
+			final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 					switch (state) {
@@ -190,27 +195,31 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 						closeCamera();
 						// Hide progress dialog
 						hideProgressDialog();
-						// Display session status
-						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted, _reasonCode),
+								exitOnce);
 						break;
 
-					// Add states
-					// case VideoSharing.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_declined), exitOnce);
-					// break;
-
-					case VideoSharing.State.FAILED:
-						// Session is failed: exit
+					case VideoSharing.State.REJECTED:
+						// Release the camera
+						closeCamera();
 						// Hide progress dialog
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateVideoSharing.this,
+								getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+						break;
+
+					case VideoSharing.State.FAILED:
+						// Release the camera
+						closeCamera();
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_failed, _reasonCode),
+								exitOnce);
 						break;
 
 					default:
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onVideoSharingStateChanged " + notif);
+							Log.d(LOGTAG, "onVideoSharingStateChanged " + getString(R.string.label_vsh_state_changed, RiApplication.VSH_STATES[state], reasonCode));
 						}
 					}
 				}

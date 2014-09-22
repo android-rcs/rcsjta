@@ -42,6 +42,7 @@ import android.widget.Toast;
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
@@ -150,18 +151,18 @@ public class GroupChatView extends ChatView {
 		@Override
 		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onDeliveryInfoStatusChanged chatId=" + chatId + " contact=" + contact + " msgId=" + msgId
-						+ " status=" + status + " reasonCode=" + reasonCode);
+				Log.d(LOGTAG, "onGroupDeliveryInfoChanged chatId=" + chatId + " contact=" + contact + " msgId=" + msgId
+						+ " status=" + status + " reason=" + reasonCode);
 			}
 			if (status > RiApplication.DELIVERY_STATUSES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onDeliveryInfoStatusChanged unhandled status=" + status);
+					Log.e(LOGTAG, "onGroupDeliveryInfoChanged unhandled status=" + status);
 				}
 				return;
 			}
 			if (reasonCode > RiApplication.DELIVERY_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onDeliveryInfoStatusChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onGroupDeliveryInfoChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -178,13 +179,20 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onGroupChatStateChanged(String chatId, final int state) {
+		public void onGroupChatStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGroupChatStateChanged chatId=" + chatId + " state=" + state);
+				Log.d(LOGTAG, "onGroupChatStateChanged chatId=" + chatId + " state=" + state+" reason="+reasonCode);
 			}
+			// TODO CR031 enumerated types
 			if (state > RiApplication.GC_STATES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onGroupChatStateChanged unhandled status=" + state);
+				}
+				return;
+			}
+			if (reasonCode > RiApplication.GC_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onGroupChatStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -192,9 +200,7 @@ public class GroupChatView extends ChatView {
 			if (GroupChatView.this.chatId == null || !GroupChatView.this.chatId.equals(chatId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final int reasonCode = 0;
-			final String notif = getString(R.string.label_gc_state_changed, RiApplication.GC_STATES[state], RiApplication.GC_REASON_CODES[reasonCode]);
+			final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 					switch (state) {
@@ -206,35 +212,33 @@ public class GroupChatView extends ChatView {
 					case GroupChat.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_aborted, RiApplication.GC_REASON_CODES[reasonCode]), exitOnce);
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_aborted, _reasonCode), exitOnce);
 						break;
 						
-					// Add states
-					// case GroupChat.State.REJECTED:
-					// Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_declined));
-					// break;
+					case GroupChat.State.REJECTED:
+						// Session is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_rejected, _reasonCode), exitOnce);
+						break;
 						
 					case GroupChat.State.FAILED:
-						// Session is failed: exit
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_failed, RiApplication.GC_REASON_CODES[reasonCode]), exitOnce);
+						// Session is failed: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_failed, _reasonCode), exitOnce);
 						break;
 					
-					case GroupChat.State.TERMINATED:
-						// Session is failed: exit
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_state_terminated), exitOnce);
-						break;
-						
 					default:
-						addNotifHistory(notif, null);
+						addNotifHistory(getString(R.string.label_gc_state_changed, RiApplication.GC_STATES[state], _reasonCode),
+								null);
 					}
 				}
 			});
 		};
 
 		@Override
-		public void onMessageStatusChanged(String chatId, final String msgId, int status) {
+		public void onMessageStatusChanged(String chatId, final String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onMessageStatusChanged chatId="+chatId+" msgId=" + msgId + " status=" + status);
+				Log.w(LOGTAG, "onMessageStatusChanged chatId="+chatId+" msgId=" + msgId + " status=" + status+ " reason="+reasonCode);
 			}
 			if (status > RiApplication.MESSAGE_STATUSES.length) {
 				if (LogUtils.isActive) {
@@ -242,12 +246,16 @@ public class GroupChatView extends ChatView {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.MESSAGE_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMessageStatusChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current chatId
 			if (GroupChatView.this.chatId == null || !GroupChatView.this.chatId.equals(chatId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			int reasonCode = 0;
 			final String notif = getString(R.string.label_message_status_changed, RiApplication.MESSAGE_STATUSES[status], RiApplication.MESSAGE_REASON_CODES[reasonCode]);
 			handler.post(new Runnable() {
 				public void run() {
@@ -466,7 +474,7 @@ public class GroupChatView extends ChatView {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.title_group_chat);
 		String displayName = RcsDisplayName.get(this, remote);
-		String from = RcsDisplayName.convert(this, ChatLog.Message.Direction.INCOMING, remote, displayName);
+		String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
 		String topic = (TextUtils.isEmpty(subject)) ? getString(R.string.label_no_subject) : subject;
 		String msg = getString(R.string.label_gc_from_subject, from, topic);
 		builder.setMessage(msg);

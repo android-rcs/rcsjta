@@ -138,7 +138,8 @@ public class ContactInfo {
 		rcsStatus = info.getRcsStatus();
 		rcsStatusTimestamp = info.getRcsStatusTimestamp();
 		capabilities = info.capabilities;
-		presenceInfo = info.getPresenceInfo();		
+		presenceInfo = info.getPresenceInfo();
+		displayName = info.getDisplayName();
 	}
 
     /**

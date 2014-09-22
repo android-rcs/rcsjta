@@ -135,9 +135,10 @@ public class InitiateGeolocSharing extends Activity {
 		}
 
 		@Override
-		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state) {
+		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			// Discard event if not for current sharingId
 			if (InitiateGeolocSharing.this.sharingId == null || !InitiateGeolocSharing.this.sharingId.equals(sharingId)) {
@@ -149,9 +150,15 @@ public class InitiateGeolocSharing extends Activity {
 				}
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.GSH_REASON_CODES[0];
-			final String notif = getString(R.string.label_gsh_state_changed, RiApplication.GSH_STATES[state], reason);
+			if (reasonCode > RiApplication.GSH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onGeolocSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
+			final String _state = RiApplication.GSH_STATES[state];
+			final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode];
+			
 			handler.post(new Runnable() {
 				public void run() {
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -160,36 +167,33 @@ public class InitiateGeolocSharing extends Activity {
 						// Session is established: hide progress dialog
 						hideProgressDialog();
 						// Display session status
-						statusView.setText("started");
+						statusView.setText(_state);
 						break;
 
 					case GeolocSharing.State.ABORTED:
-						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
+						// sharing aborted: hide progress dialog then exit
 						hideProgressDialog();
 						// Display session status
-						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), exitOnce);
 						break;
 
-					// Add states
-					// case GeolocSharing.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_declined), exitOnce);
-					// break;
+					case GeolocSharing.State.REJECTED:
+						// sharing rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+						break;
 
 					case GeolocSharing.State.FAILED:
-						// Session is failed: exit
-						// Hide progress dialog
+						// sharing failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
 						break;
 
 					case GeolocSharing.State.TRANSFERRED:
 						// Hide progress dialog
 						hideProgressDialog();
 						// Display transfer progress
-						statusView.setText("transferred");
+						statusView.setText(_state);
 						// Make sure progress bar is at the end
 						ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 						progressBar.setProgress(progressBar.getMax());
@@ -202,9 +206,7 @@ public class InitiateGeolocSharing extends Activity {
 						break;
 
 					default:
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onGeolocSharingStateChanged " + notif);
-						}
+						statusView.setText(getString(R.string.label_gsh_state_changed, _state, _reasonCode));
 					}
 				}
 			});

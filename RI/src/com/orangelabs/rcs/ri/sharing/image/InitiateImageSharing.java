@@ -138,9 +138,10 @@ public class InitiateImageSharing extends Activity {
 		}
 
 		@Override
-		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state) {
+		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.ISH_STATES.length) {
 				if (LogUtils.isActive) {
@@ -148,13 +149,18 @@ public class InitiateImageSharing extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onImageSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current sharingId
 			if (InitiateImageSharing.this.sharingId == null || !InitiateImageSharing.this.sharingId.equals(sharingId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.ISH_REASON_CODES[0];
-			final String notif = getString(R.string.label_ish_state_changed, RiApplication.ISH_STATES[state], reason);
+			final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode];
+			final String _state = RiApplication.ISH_STATES[state];
 			handler.post(new Runnable() {
 				public void run() {
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -163,41 +169,42 @@ public class InitiateImageSharing extends Activity {
 						// Session is established: hide progress dialog
 						hideProgressDialog();
 						// Display session status
-						statusView.setText("started");
+						statusView.setText(_state);
 						break;
 
 					case ImageSharing.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
 						hideProgressDialog();
-						// Display session status
-						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), exitOnce);
 						break;
 
-					// Add states
-					// case ImageSharing.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_declined));
-					// break;
+					case ImageSharing.State.REJECTED:
+						//  Session is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateImageSharing.this,
+								getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+						break;
 
 					case ImageSharing.State.FAILED:
-						// Session is failed: exit
-						// Hide progress dialog
+						//  Session failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
 						break;
 
 					case ImageSharing.State.TRANSFERRED:
 						// Hide progress dialog
 						hideProgressDialog();
 						// Display transfer progress
-						statusView.setText("transferred");
+						statusView.setText(_state);
 						break;
 
 					default:
+						// Display session status
+						statusView.setText(_state);
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onImageSharingStateChanged " + notif);
+							Log.d(LOGTAG,
+									"onImageSharingStateChanged "
+											+ getString(R.string.label_ish_state_changed, _state, _reasonCode));
 						}
 					}
 				}

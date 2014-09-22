@@ -134,10 +134,10 @@ public class SendGroupFile extends Activity {
 	private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state) {
+		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGroupDeliveryInfoChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
-						+ transferId + " state=" + state);
+				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
+						+ transferId + " state=" + state+ " reason="+reasonCode);
 			}
 		}
 
@@ -156,9 +156,10 @@ public class SendGroupFile extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(String chatId, String transferId, final int state) {
+		public void onTransferStateChanged(String chatId, String transferId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state);
+				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.FT_STATES.length) {
 				if (LogUtils.isActive) {
@@ -166,60 +167,57 @@ public class SendGroupFile extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.FT_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current transferId
 			if (SendGroupFile.this.transferId == null || !SendGroupFile.this.transferId.equals(transferId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.FT_REASON_CODES[0];
-			final String notif = getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], reason);
+			final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
-
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
 					switch (state) {
 					case FileTransfer.State.STARTED:
-						// Session is well established : hide progress dialog
-						hideProgressDialog();
-						// Display session status started
-						statusView.setText("started");
-						break;
-
 					case FileTransfer.State.TRANSFERRED:
-						// Hide progress dialog
+						// hide progress dialog
 						hideProgressDialog();
-						// Display session status transferred
-						statusView.setText("transferred");
+						// Display transfer state started
+						statusView.setText(RiApplication.FT_STATES[state]);
 						break;
 
 					case FileTransfer.State.ABORTED:
-						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
+						// Transfer is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						// Display message
-						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_aborted), exitOnce);
+						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_aborted, _reasonCode),
+								exitOnce);
 						break;
 
-					// TODO: Add states
-					// case FileTransfer.State.REJECTED:
-					// // Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_declined), exitOnce);
-					// break;
+					case FileTransfer.State.REJECTED:
+						// Transfer is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_rejected, _reasonCode),
+								exitOnce);
+						break;
 
 					case FileTransfer.State.FAILED:
-						// Session is failed: exit
-						// Hide progress dialog
+						// Transfer failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_failed, reason), exitOnce);
+						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_failed, _reasonCode),
+								exitOnce);
 						break;
 
 					default:
-						statusView.setText(notif);
+						statusView.setText(getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], _reasonCode));
 					}
 				}
 			});
 		}
+
 	};
     
     @Override

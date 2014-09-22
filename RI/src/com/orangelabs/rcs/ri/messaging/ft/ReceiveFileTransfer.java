@@ -43,7 +43,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
@@ -109,10 +109,10 @@ public class ReceiveFileTransfer extends Activity {
 	private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state) {
+		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGroupDeliveryInfoChanged contact=" + contact + " transferId=" + transferId + " state="
-						+ state);
+				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 		}
 
@@ -126,15 +126,15 @@ public class ReceiveFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(String chatId, String transferId, int state) {
+		public void onTransferStateChanged(String chatId, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state);
+				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
 			// Discard event if not for current transferId
 			if (!ftDao.getTransferId().equals(transferId)) {
 				return;
 			}
-			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state);
+			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
 		}
 
 	};
@@ -154,15 +154,15 @@ public class ReceiveFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(ContactId contact, String transferId, final int state) {
+		public void onTransferStateChanged(ContactId contact, String transferId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state);
+				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
 			// Discard event if not for current transferId
 			if (!ftDao.getTransferId().equals(transferId)) {
 				return;
 			}
-			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state);
+			ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
 		}
 	};
 	
@@ -260,7 +260,7 @@ public class ReceiveFileTransfer extends Activity {
 
 			ContactId remote = ftDao.getContact();
 			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, ChatLog.Message.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
 			
 			// Display transfer infos
 			TextView fromTextView = (TextView) findViewById(R.id.from);
@@ -618,16 +618,19 @@ public class ReceiveFileTransfer extends Activity {
 	 * @param state
 	 *            new FT state
 	 */
-	private void onTransferStateChangedUpdateUI(final int state) {
+	private void onTransferStateChangedUpdateUI(final int state, final int reasonCode) {
 		if (state > RiApplication.FT_STATES.length) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
 			}
 			return;
 		}
-		// TODO : handle reason code (CR025)
-		final String reason = RiApplication.FT_REASON_CODES[0];
-		final String notif = getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], reason);
+		if (reasonCode > RiApplication.FT_REASON_CODES.length) {
+			Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
+			return;
+		}
+		final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
+		final String _state = RiApplication.FT_STATES[state];
 		handler.post(new Runnable() {
 
 			public void run() {
@@ -635,36 +638,37 @@ public class ReceiveFileTransfer extends Activity {
 				switch (state) {
 				case FileTransfer.State.STARTED:
 					// Session is well established display session status
-					statusView.setText("started");
+					statusView.setText(_state);
 					break;
 
 				case FileTransfer.State.ABORTED:
 					// Session is aborted: display message then exit
-					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_aborted, reason), exitOnce);
+					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_aborted, _reasonCode), exitOnce);
 					break;
 
 				case FileTransfer.State.FAILED:
-					// Session is failed: exit
-					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed, reason), exitOnce);
+					// Session is failed: ReceiveFileTransfer
+					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_failed, _reasonCode), exitOnce);
+					break;
+					
+				case FileTransfer.State.REJECTED:
+					// Session is rejected: display message then exit
+					Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_transfer_rejected, _reasonCode), exitOnce);
 					break;
 
 				case FileTransfer.State.TRANSFERRED:
+					statusView.setText(_state);
 					displayTransferredFile();
 					break;
 
 				default:
-					if (LogUtils.isActive) {
-						Log.d(LOGTAG, "onTransferStateChanged " + notif);
-					}
+					statusView.setText(getString(R.string.label_ft_state_changed, _state, _reasonCode));
 				}
 			}
 		});
 	}
 	
 	private void displayTransferredFile() {
-		TextView statusView = (TextView) findViewById(R.id.progress_status);
-		statusView.setText("transferred");
-
 		// Make sure progress bar is at the end
 		ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 		progressBar.setProgress(progressBar.getMax());

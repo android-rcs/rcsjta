@@ -42,7 +42,7 @@ public class ContactListAdapter extends CursorAdapter {
 	 * @param c Cursor
 	 */
 	public ContactListAdapter(Context context, Cursor c) {
-        super(context, c, 0);
+        super(context, c);
     }
 
     @Override

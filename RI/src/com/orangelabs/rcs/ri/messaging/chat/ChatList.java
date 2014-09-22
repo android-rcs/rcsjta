@@ -100,13 +100,13 @@ public class ChatList extends Activity {
 	    String[] PROJECTION = new String[] {
 	    		ChatLog.Message.ID,
 	    		ChatLog.Message.CHAT_ID,
-	    		ChatLog.Message.CONTACT_NUMBER,
-	    		ChatLog.Message.BODY,
+	    		ChatLog.Message.CONTACT,
+	    		ChatLog.Message.CONTENT,
 	    		ChatLog.Message.MIME_TYPE,
 	    		ChatLog.Message.TIMESTAMP
 	    };
         String sortOrder = ChatLog.Message.TIMESTAMP + " DESC";
-        String selection = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT_NUMBER + ") GROUP BY (" + ChatLog.Message.CONTACT_NUMBER;        
+        String selection = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT + ") GROUP BY (" + ChatLog.Message.CONTACT;        
 		Cursor cursor = getContentResolver().query(uri, PROJECTION, selection, null, sortOrder);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
@@ -126,7 +126,7 @@ public class ChatList extends Activity {
     	 * @param c Cursor
     	 */
 		public ChatListAdapter(Context context, Cursor c) {
-            super(context, c, 0);
+            super(context, c);
         }
 
         @Override
@@ -234,7 +234,7 @@ public class ChatList extends Activity {
 		switch (item.getItemId()) {
 			case R.id.menu_clear_log:
 				// Delete all
-		        String where = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT_NUMBER;        
+		        String where = ChatLog.Message.CHAT_ID + " = " + ChatLog.Message.CONTACT;        
 				getContentResolver().delete(ChatLog.Message.CONTENT_URI, where, null);
 				
 				// Refresh view

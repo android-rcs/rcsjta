@@ -148,9 +148,9 @@ public class InitiateFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(ContactId contact, String transferId, final int state) {
+		public void onTransferStateChanged(ContactId contact, String transferId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state);
+				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
 			if (state > RiApplication.FT_STATES.length) {
 				if (LogUtils.isActive) {
@@ -158,13 +158,18 @@ public class InitiateFileTransfer extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.FT_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current transferId
 			if (InitiateFileTransfer.this.ftId == null || !InitiateFileTransfer.this.ftId.equals(transferId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.FT_REASON_CODES[0];
-			final String notif = getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], reason);
+			final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
+			final String _state = RiApplication.FT_STATES[state];
 			handler.post(new Runnable() {
 				public void run() {
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -173,32 +178,32 @@ public class InitiateFileTransfer extends Activity {
 						// Session is well established : hide progress dialog
 						hideProgressDialog();
 						// Display session status
-						statusView.setText("started");
+						statusView.setText(_state);
 						break;
 
 					case FileTransfer.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
 						hideProgressDialog();
-						// Display message
-						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_aborted, _reasonCode), exitOnce);
 						break;
 
-					// Add states
-					// case FileTransfer.State.REJECTED:
-					// Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_declined));
-					// break;
+					case FileTransfer.State.REJECTED:
+						// Session is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_rejected, _reasonCode), exitOnce);
+						break;
 
 					case FileTransfer.State.FAILED:
-						// Session is failed: exit
-						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_failed, reason), exitOnce);
+						// Session failed: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_failed, _reasonCode), exitOnce);
 						break;
 
 					case FileTransfer.State.TRANSFERRED:
 						// Hide progress dialog
 						hideProgressDialog();
 						// Display transfer progress
-						statusView.setText("transferred");
+						statusView.setText(_state);
 						// Hide buttons Pause and Resume
 						Button pauseBtn = (Button) findViewById(R.id.pause_btn);
 						pauseBtn.setVisibility(View.INVISIBLE);
@@ -207,8 +212,10 @@ public class InitiateFileTransfer extends Activity {
 						break;
 
 					default:
+						statusView.setText(_state);
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onTransferStateChanged " + notif);
+							Log.d(LOGTAG,
+									"onTransferStateChanged " + getString(R.string.label_ft_state_changed, _state, _reasonCode));
 						}
 					}
 				}

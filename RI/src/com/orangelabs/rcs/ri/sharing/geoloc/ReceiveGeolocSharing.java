@@ -37,6 +37,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
@@ -113,9 +114,10 @@ public class ReceiveGeolocSharing extends Activity {
 		}
 
 		@Override
-		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state) {
+		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.GSH_STATES.length) {
 				if (LogUtils.isActive) {
@@ -128,8 +130,7 @@ public class ReceiveGeolocSharing extends Activity {
 				return;
 			}
 			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.GSH_REASON_CODES[0];
-			final String notif = getString(R.string.label_gsh_state_changed, RiApplication.GSH_STATES[state], reason);
+			final String notif = getString(R.string.label_gsh_state_changed, RiApplication.GSH_STATES[state], reasonCode);
 			handler.post(new Runnable() {
 				public void run() {
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -141,12 +142,12 @@ public class ReceiveGeolocSharing extends Activity {
 
 					case GeolocSharing.State.ABORTED:
 						// Session is aborted: display session status
-						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_aborted, reasonCode), exitOnce);
 						break;
 
 					case GeolocSharing.State.FAILED:
 						// Session is failed: exit
-						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_failed, reasonCode), exitOnce);
 						break;
 
 					case GeolocSharing.State.TRANSFERRED:
@@ -237,7 +238,7 @@ public class ReceiveGeolocSharing extends Activity {
 	    	// Display sharing infos
     		TextView fromTextView = (TextView)findViewById(R.id.from);
     		String displayName = RcsDisplayName.get(this, remoteContact);
-			String from = RcsDisplayName.convert(this, GeolocSharing.Direction.INCOMING, remoteContact, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remoteContact, displayName);
 			fromTextView.setText(getString(R.string.label_from_args, from));
 	    	
 			// Display accept/reject dialog

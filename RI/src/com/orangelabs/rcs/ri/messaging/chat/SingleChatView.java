@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.Chat;
 import com.gsma.services.rcs.chat.ChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -97,9 +98,9 @@ public class SingleChatView extends ChatView {
 		}
 
 		@Override
-		public void onMessageStatusChanged(ContactId contact, final String msgId, int status) {
+		public void onMessageStatusChanged(ContactId contact, final String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status);
+				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status+ " reason="+reasonCode);
 			}
 			// Discard event if not for current contact
 			if (SingleChatView.this.contact == null || !SingleChatView.this.contact.equals(contact)) {
@@ -111,10 +112,14 @@ public class SingleChatView extends ChatView {
 				}
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			int reasonCode = 0;
-			String reason = (reasonCode == 0) ? "" : RiApplication.MESSAGE_REASON_CODES[0];
-			final String notif = getString(R.string.label_message_status_changed, RiApplication.MESSAGE_STATUSES[status], reason);
+			if (reasonCode > RiApplication.MESSAGE_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMessageStatusChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
+			final String notif = getString(R.string.label_message_status_changed, RiApplication.MESSAGE_STATUSES[status],
+					RiApplication.MESSAGE_REASON_CODES[reasonCode]);
 			handler.post(new Runnable() {
 				public void run() {
 					addNotifHistory(notif, msgId);
@@ -273,7 +278,7 @@ public class SingleChatView extends ChatView {
 				String displayName = null;
 				int direction = messageDao.getDirection();
 				String msgId = messageDao.getMsgId();
-				if (direction == ChatLog.Message.Direction.INCOMING) {
+				if (direction == RcsCommon.Direction.INCOMING) {
 					// Get display name for incoming messages
 					displayName = RcsDisplayName.get(this, contact);
 				}

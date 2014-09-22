@@ -41,7 +41,7 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
 	 * @param c Cursor
 	 */
 	public MultiContactListAdapter(Context context, Cursor c) {
-        super(context, c, 0);
+        super(context, c);
     }
 
     @Override

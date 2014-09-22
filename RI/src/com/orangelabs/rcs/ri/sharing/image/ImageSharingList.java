@@ -36,6 +36,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.ri.R;
@@ -84,7 +85,7 @@ public class ImageSharingList extends Activity {
 		Uri uri = ImageSharingLog.CONTENT_URI;
         String[] projection = new String[] {
     		ImageSharingLog.ID,
-    		ImageSharingLog.CONTACT_NUMBER,
+    		ImageSharingLog.CONTACT,
     		ImageSharingLog.FILENAME,
     		ImageSharingLog.FILESIZE,
     		ImageSharingLog.STATE,
@@ -111,7 +112,7 @@ public class ImageSharingList extends Activity {
     	 * @param c Cursor
     	 */
 		public ImageSharingListAdapter(Context context, Cursor c) {
-            super(context, c, 0);
+            super(context, c);
         }
 
         @Override
@@ -168,27 +169,26 @@ public class ImageSharingList extends Activity {
 	 * @return String
 	 */
 	private String decodeState(int state) {
-		if (state == ImageSharing.State.ABORTED) {
-			return getString(R.string.label_state_aborted);
-		} else
-		if (state == ImageSharing.State.FAILED) {
-			return getString(R.string.label_state_failed);
-		} else
-		if (state == ImageSharing.State.INITIATED) {
-			return getString(R.string.label_state_initiated);
-		} else
-		if (state == ImageSharing.State.INVITED) {
+		switch (state) {
+		case ImageSharing.State.INVITED:
 			return getString(R.string.label_state_invited);
-		} else
-		if (state == ImageSharing.State.STARTED) {
+		case ImageSharing.State.INITIATED:
+			return getString(R.string.label_state_initiated);
+		case ImageSharing.State.STARTED:
 			return getString(R.string.label_state_started);
-		} else
-		if (state == ImageSharing.State.TRANSFERRED) {
+		case ImageSharing.State.ABORTED:
+			return getString(R.string.label_state_aborted);
+		case ImageSharing.State.FAILED:
+			return getString(R.string.label_state_failed);
+		case ImageSharing.State.TRANSFERRED:
 			return getString(R.string.label_state_transferred);
-		} else
-		if (state == ImageSharing.State.INACTIVE) {
-			return getString(R.string.label_state_inactive);
-		} else {
+		case ImageSharing.State.REJECTED:
+			return getString(R.string.label_state_rejected);
+		case ImageSharing.State.RINGING:
+			return getString(R.string.label_state_ringing);
+		case ImageSharing.State.ACCEPTING:
+			return getString(R.string.label_state_accepting);
+		default:
 			return getString(R.string.label_state_unknown);
 		}
 	}
@@ -200,7 +200,7 @@ public class ImageSharingList extends Activity {
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
-		if (direction == ImageSharing.Direction.INCOMING) {
+		if (direction == RcsCommon.Direction.INCOMING) {
 			return getString(R.string.label_incoming);
 		} else {
 			return getString(R.string.label_outgoing);

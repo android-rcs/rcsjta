@@ -30,8 +30,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -134,7 +134,7 @@ public class VideoSharingIntentService extends IntentService {
 		
 		ContactId contact = vshDao.getContact();
 		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, VideoSharing.Direction.INCOMING, contact, displayName);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 		
 		String notifTitle = context.getString(R.string.title_recv_video_sharing, displayName);
 

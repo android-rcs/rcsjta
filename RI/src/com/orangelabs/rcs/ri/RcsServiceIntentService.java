@@ -21,6 +21,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.gsma.services.rcs.JoynService;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
@@ -57,12 +58,13 @@ public class RcsServiceIntentService extends IntentService {
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "RCS service is UP");
 		}
-		try {
-			ApiConnectionManager.getInstance(this).connectApis();
-		} catch (Exception e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, e.getMessage(), e);
-			}
+		if (intent.getAction().equals(JoynService.ACTION_SERVICE_UP)) {
+			// Disconnect all APIs (cleanup)
+			ApiConnectionManager.getInstance(getApplicationContext()).disconnectApis();
+			// Start the main activity to force reconnection
+			intent.setClass(this, RI.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
 		}
 	}
 

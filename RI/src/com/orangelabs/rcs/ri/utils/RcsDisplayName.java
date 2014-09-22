@@ -20,7 +20,7 @@ package com.orangelabs.rcs.ri.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -68,7 +68,7 @@ public class RcsDisplayName {
 	 * @return the display name which can be displayed to client
 	 */
 	public static String convert(Context ctx, int direction, ContactId contact, String rcsDisplayName) {
-		if (direction == ChatLog.Message.Direction.OUTGOING) {
+		if (direction == RcsCommon.Direction.OUTGOING) {
 			return ctx.getString(R.string.label_me);
 		} else {
 			if (rcsDisplayName == null) {

@@ -53,6 +53,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -336,7 +337,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 		String msgId = sendTextMessage(text);
 		if (msgId != null) {
 			// Add text to the message history
-			TextMessageItem item = new TextMessageItem(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
+			TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
 			addMessageHistory(item);
 			composeText.setText(null);
 		} else {
@@ -368,7 +369,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    	// Add geoloc to the message history
     		// Add text to the message history
     		String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
-    		TextMessageItem item = new TextMessageItem(ChatLog.Message.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
+    		TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
     		addMessageHistory(item);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
@@ -625,7 +626,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    private String text;
 	    
 	    public NotifMessageItem(String msgId, String text) {
-	    	super(ChatLog.Message.Direction.IRRELEVANT, null, msgId);
+	    	super(RcsCommon.Direction.IRRELEVANT, null, msgId);
 	    	this.text = text;
 	    }
 	    
@@ -662,7 +663,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	        
         	MessageItem item = (MessageItem)getItem(position);
         	String line;
-        	if (item.getDirection() == ChatLog.Message.Direction.OUTGOING) {
+        	if (item.getDirection() == RcsCommon.Direction.OUTGOING) {
         		line = "[" + getString(R.string.label_me) + "] ";
         	} else {
         		line = "[" + item.getContact() + "] ";
@@ -804,8 +805,8 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 			// @formatter:off
 			String[] projection = new String[] {
 	    				ChatLog.Message.DIRECTION,
-	    				ChatLog.Message.CONTACT_NUMBER,
-	    				ChatLog.Message.BODY,
+	    				ChatLog.Message.CONTACT,
+	    				ChatLog.Message.CONTENT,
 	    				ChatLog.Message.MIME_TYPE,
 	    				ChatLog.Message.MESSAGE_ID,
 	    				ChatLog.Message.READ_STATUS };
@@ -841,7 +842,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 						} else {
 							addMessageHistory(direction, contact, content, msgId, displayName);
 						}
-						boolean unread = cursor.getString(5).equals(Integer.toString(ChatLog.Message.ReadStatus.UNREAD));
+						boolean unread = cursor.getString(5).equals(Integer.toString(RcsCommon.ReadStatus.UNREAD));
 						if (unread) {
 							unReadMessageIDs.add(msgId);
 						}

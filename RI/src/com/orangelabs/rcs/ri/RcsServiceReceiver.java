@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri;
 
+import com.gsma.services.rcs.JoynService;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,18 +32,13 @@ import android.content.Intent;
  */
 public class RcsServiceReceiver extends BroadcastReceiver {
 
-	/**
-	 * Action Service is UP
-	 */
-	/* package private */static final String ACTION_SERVICE_UP = "ACTION_SERVICE_UP";
-
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		// Send intent to service
-		Intent receiverIntent = new Intent(context, RcsServiceIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_SERVICE_UP);
-		context.startService(receiverIntent);
+		// // Send intent to service
+		if (intent.getAction() != null && intent.getAction().equals(JoynService.ACTION_SERVICE_UP)) {
+			intent.setClass(context, RcsServiceIntentService.class);
+			context.startService(intent);
+		}
 	}
 
 }

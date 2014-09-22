@@ -27,6 +27,7 @@ import android.telephony.PhoneNumberUtils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.GeolocMessage;
@@ -41,6 +42,12 @@ public class ShowUsInMap extends MapActivity {
 	 * Intent parameters
 	 */
 	public final static String EXTRA_CONTACTS = "contacts";
+	
+	private final static String QUERY_SORT_ORDER = new StringBuilder(ChatLog.Message.TIMESTAMP).append(" DESC").toString();
+	private final static String QUERY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MIME_TYPE).append(" = '")
+			.append(GeolocMessage.MIME_TYPE).append("' AND ").append(ChatLog.Message.DIRECTION).append(" = ")
+			.append(RcsCommon.Direction.OUTGOING).toString();
+	private final static String[] QUERY_PROJECTION = new String[] { ChatLog.Message.CONTENT };
 
 	/**
 	 * Map view
@@ -119,23 +126,25 @@ public class ShowUsInMap extends MapActivity {
 	 * @return Geoloc info
 	 */
 	public Geoloc getLastGeoloc(String contact) {
-		Geoloc result = null;
-
-		String sortOrder = ChatLog.Message.TIMESTAMP + " DESC ";
-		String where = ChatLog.Message.CONTACT_NUMBER + "='" + PhoneNumberUtils.formatNumber(contact) + "' AND "
-				+ ChatLog.Message.MIME_TYPE + " = '" + GeolocMessage.MIME_TYPE + "' AND "
-				+ ChatLog.Message.DIRECTION + " = " + ChatLog.Message.Direction.INCOMING;
-		Cursor cursor = getApplicationContext().getContentResolver().query(
-				ChatLog.Message.CONTENT_URI,
-				new String[] { ChatLog.Message.BODY }, where, null,
-				sortOrder);
-
-		if (cursor.moveToFirst()) {
-    		String content = cursor.getString(0);	
-			result = ChatLog.getGeoloc(content);
+		Cursor cursor = null;
+		String where = new StringBuilder(ChatLog.Message.CONTACT).append("='").append(PhoneNumberUtils.formatNumber(contact))
+				.append("' AND ").append(ChatLog.Message.MIME_TYPE).append("='").append(GeolocMessage.MIME_TYPE).append("' AND ")
+				.append(ChatLog.Message.DIRECTION).append(" = ").append(RcsCommon.Direction.INCOMING).toString();
+		try {
+			// TODO CR025 Geoloc sharing provider
+			cursor = getApplicationContext().getContentResolver().query(ChatLog.Message.CONTENT_URI, QUERY_PROJECTION, where, null,
+					QUERY_SORT_ORDER);
+			if (cursor.moveToFirst()) {
+				String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+				return ChatLog.getGeoloc(content);
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-
-		return result;
+		return null;
 	}
 
 	/**
@@ -143,23 +152,22 @@ public class ShowUsInMap extends MapActivity {
 	 * 
 	 * @return Geoloc info
 	 */
-	public Geoloc getMyLastGeoloc() {
-		Geoloc result = null;
-
-		String sortOrder = ChatLog.Message.TIMESTAMP + " DESC ";
-		String where = ChatLog.Message.MIME_TYPE + " = '" + GeolocMessage.MIME_TYPE + "' AND "
-				+ ChatLog.Message.DIRECTION + " = " + ChatLog.Message.Direction.OUTGOING;
-		Cursor cursor = getApplicationContext().getContentResolver().query(
-				ChatLog.Message.CONTENT_URI,
-				new String[] { ChatLog.Message.BODY }, where, null,
-				sortOrder);
-
-		if (cursor.moveToFirst()) {
-    		String content = cursor.getString(0);		
-			result = ChatLog.getGeoloc(content);
+	private Geoloc getMyLastGeoloc() {
+		Cursor cursor = null;
+		try {
+			// TODO CR025 Geoloc sharing provider
+			cursor = getApplicationContext().getContentResolver().query(ChatLog.Message.CONTENT_URI, QUERY_PROJECTION,
+					QUERY_WHERE_CLAUSE, null, QUERY_SORT_ORDER);
+			if (cursor.moveToFirst()) {
+				String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+				return ChatLog.getGeoloc(content);
+			}
+		} catch (Exception e) {
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-		cursor.close();
-
-		return result;
+		return null;
 	}
 }

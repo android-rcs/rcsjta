@@ -31,16 +31,16 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -227,7 +227,7 @@ public class ChatIntentService extends IntentService {
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			ContactId contact = message.getContact();
 			String displayName = RcsDisplayName.get(context, contact);
-			displayName = RcsDisplayName.convert(context, ChatLog.Message.Direction.INCOMING, contact, displayName);
+			displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 			String title = context.getString(R.string.title_recv_chat, displayName);
 			
 			String msg;
@@ -279,7 +279,7 @@ public class ChatIntentService extends IntentService {
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			ContactId contact = message.getContact();
 			String displayName = RcsDisplayName.get(context, contact);
-			displayName = RcsDisplayName.convert(context, ChatLog.Message.Direction.INCOMING, contact, displayName);
+			displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 			String title = context.getString(R.string.title_recv_chat, displayName);
 			String msg;
 			if (message.getMimeType().equals(GeolocMessage.MIME_TYPE)) {

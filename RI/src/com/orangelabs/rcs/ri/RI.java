@@ -114,4 +114,12 @@ public class RI extends ListActivity {
         		break;
     	}
     }
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
+	}
+    
+    
 }

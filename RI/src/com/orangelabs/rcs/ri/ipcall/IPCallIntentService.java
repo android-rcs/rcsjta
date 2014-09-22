@@ -30,8 +30,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -140,7 +140,7 @@ public class IPCallIntentService extends IntentService {
 		
 		ContactId contact = ipCallDao.getContact();
 		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, IPCall.Direction.INCOMING, contact, displayName);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 		
 		String notifTitle;
 		if (ipCallDao.getVideoEncoding() != null) {

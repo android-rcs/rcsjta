@@ -30,14 +30,13 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.GroupChatDAO;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -123,7 +122,7 @@ public class FileTransferIntentService extends IntentService {
 					Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
 				}
 				Intent intentLocal = new Intent(intent);
-				if (ftDao.getDirection() == FileTransfer.Direction.INCOMING) {
+				if (ftDao.getDirection() == RcsCommon.Direction.INCOMING) {
 					intentLocal.setClass(this, ReceiveFileTransfer.class);
 				} else {
 					intentLocal.setClass(this, InitiateFileTransfer.class);
@@ -166,7 +165,7 @@ public class FileTransferIntentService extends IntentService {
 		
 		ContactId contact = ftDao.getContact();
 		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, ChatLog.Message.Direction.INCOMING, contact, displayName);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 		
 		String title = context.getString(R.string.title_recv_file_transfer, displayName);
 

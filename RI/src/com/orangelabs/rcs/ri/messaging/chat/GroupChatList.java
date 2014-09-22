@@ -113,7 +113,7 @@ public class GroupChatList extends Activity {
     	 * @param c Cursor
     	 */
 		public GroupChatListAdapter(Context context, Cursor c) {
-            super(context, c, 0);
+            super(context, c);
         }
 
         @Override

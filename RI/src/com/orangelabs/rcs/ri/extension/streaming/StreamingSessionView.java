@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
@@ -123,10 +124,10 @@ public class StreamingSessionView extends Activity {
     private MultimediaStreamingSessionListener serviceListener = new MultimediaStreamingSessionListener() {
 
 		@Override
-		public void onMultimediaStreamingStateChanged(ContactId contact, String sessionId, final int state) {
+		public void onMultimediaStreamingStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onMultimediaStreamingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
-						+ state);
+						+ state + " reason=" + reasonCode);
 			}
 			if (state > RiApplication.MMS_STATES.length) {
 				if (LogUtils.isActive) {
@@ -134,13 +135,17 @@ public class StreamingSessionView extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.MMS_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onMultimediaStreamingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current sessionId
 			if (StreamingSessionView.this.sessionId == null || !StreamingSessionView.this.sessionId.equals(sessionId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.MMS_REASON_CODES[0];
-			final String notif = getString(R.string.label_mms_state_changed, RiApplication.MMS_STATES[state], reason);
+			final String _reasonCode = RiApplication.MMS_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 
@@ -155,29 +160,28 @@ public class StreamingSessionView extends Activity {
 
 					case MultimediaSession.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
 						hideProgressDialog();
-						// Display session status
-						Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_aborted, _reasonCode), exitOnce);
 						break;
 
-					// Add states
-					// case MultimediaSession.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_declined));
-					// break;
+					case MultimediaSession.State.REJECTED:
+						// Session is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_rejected, _reasonCode), exitOnce);
+						break;
 
 					case MultimediaSession.State.FAILED:
-						// Session is failed: exit
-						// Hide progress dialog
+						// Session is failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_failed, reason), exitOnce);
+						Utils.showMessageAndExit(StreamingSessionView.this, getString(R.string.label_session_failed, _reasonCode), exitOnce);
 						break;
 
 					default:
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onMultimediaStreamingStateChanged " + notif);
+							Log.d(LOGTAG,
+									"onMultimediaStreamingStateChanged "
+											+ getString(R.string.label_mms_state_changed, RiApplication.MMS_STATES[state],
+													_reasonCode));
 						}
 					}
 				}
@@ -334,7 +338,7 @@ public class StreamingSessionView extends Activity {
 					// Get remote contact
 					contact = session.getRemoteContact();
 					String displayName = RcsDisplayName.get(this, contact);
-					String from = RcsDisplayName.convert(this, MultimediaSession.Direction.INCOMING, contact, displayName);
+					String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
 					// Manual accept
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setTitle(R.string.title_streaming_session);
@@ -352,7 +356,7 @@ public class StreamingSessionView extends Activity {
 	    	featureTagEdit.setText(serviceId);
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
 	    	String displayName = RcsDisplayName.get(this, contact);
-			String from = RcsDisplayName.convert(this, MultimediaSession.Direction.INCOMING, contact, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
 	    	contactEdit.setText(from);
 			Button sendBtn = (Button)findViewById(R.id.send_btn);
 			if (session != null) {

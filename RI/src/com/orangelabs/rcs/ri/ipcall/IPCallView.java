@@ -37,12 +37,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
 import com.gsma.services.rcs.ipcall.IPCallService;
-import com.gsma.services.rcs.ish.ImageSharing;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
@@ -137,14 +137,21 @@ public class IPCallView extends Activity {
     private IPCallListener callListener = new IPCallListener() {
 
 		@Override
-		public void onIPCallStateChanged(ContactId contact, String callId, final int state) {
+		public void onIPCallStateChanged(ContactId contact, String callId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onIPCallStateChanged contact=" + contact + " callId=" + callId + " state="
-						+ state);
+				Log.d(LOGTAG, "onIPCallStateChanged contact=" + contact + " callId=" + callId + " state=" + state + " reason="
+						+ reasonCode);
 			}
+			// TODO : remove controls (CR031 enum)
 			if (state > RiApplication.IPCALL_STATES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onIPCallStateChanged unhandled state=" + state);
+				}
+				return;
+			}
+			if (reasonCode > RiApplication.IPCALL_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onIPCallStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -152,9 +159,7 @@ public class IPCallView extends Activity {
 			if (IPCallView.this.callId == null || !IPCallView.this.callId.equals(callId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.IPCALL_REASON_CODES[0];
-			final String notif = getString(R.string.label_ipcall_state_changed, RiApplication.IPCALL_STATES[state], reason);
+			final String _reasonCode = RiApplication.IPCALL_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 					
@@ -173,29 +178,28 @@ public class IPCallView extends Activity {
 						
 					case IPCall.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
-						// Hide progress dialog
 						hideProgressDialog();
-						// Display session status
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted, _reasonCode), exitOnce);
 						break;
 
-					// Add states
-					// case IPCall.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_declined));
-					// break;
+					case IPCall.State.REJECTED:
+						// Session is rejected: hide progress dialog then exit
+						hideProgressDialog();
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_rejected, _reasonCode), exitOnce);
+						break;
 
 					case IPCall.State.FAILED:
-						// Session is failed: exit
-						// Hide progress dialog
+						// Session is failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, reason), exitOnce);
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, _reasonCode), exitOnce);
 						break;
 
 					default:
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onIPCallStateChanged " + notif);
+							Log.d(LOGTAG,
+									"onIPCallStateChanged "
+											+ getString(R.string.label_ipcall_state_changed, RiApplication.IPCALL_STATES[state],
+													_reasonCode));
 						}
 					}
 				}
@@ -336,7 +340,7 @@ public class IPCallView extends Activity {
 					// Get remote contact
 					contact = call.getRemoteContact();
 					String displayName = RcsDisplayName.get(this, contact);
-					String from = RcsDisplayName.convert(this, ImageSharing.Direction.INCOMING, contact, displayName);
+					String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
 					// Get video option
 					video = call.isVideo();
 
@@ -357,7 +361,7 @@ public class IPCallView extends Activity {
 			}
 			
 			String displayName = RcsDisplayName.get(this, contact);
-			String from = RcsDisplayName.convert(this, ImageSharing.Direction.INCOMING, contact, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
 			
 			// Display call info
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);

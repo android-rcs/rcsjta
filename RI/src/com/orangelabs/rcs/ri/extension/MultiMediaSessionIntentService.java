@@ -18,10 +18,10 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -166,7 +166,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, invitation, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		String displayName = RcsDisplayName.get(this, contact);
-		String from = RcsDisplayName.convert(this, MultimediaSession.Direction.INCOMING, contact, displayName);
+		String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
 
 		// Create notification
 		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);

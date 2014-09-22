@@ -7,12 +7,9 @@
 	<string name="rcs_settings_title_about">About joyn</string>
 	<string name="rcs_settings_title_userprofile_settings">User profile settings</string>
 	<string name="rcs_settings_title_presence_settings">Presence settings</string>
-	<string name="rcs_settings_title_presence_invitation">Presence invitation settings</string>
-    <string name="rcs_settings_title_freetexts">Predefined freetexts</string>
 	<string name="rcs_settings_title_messaging_settings">Messaging settings</string>
 	<string name="rcs_settings_title_filetransfer_invitation">File transfer invitation settings</string>
 	<string name="rcs_settings_title_chat_invitation">Chat invitation settings</string>
-    <string name="rcs_settings_title_edit_freetext">Type your free text</string>
 	<string name="rcs_settings_title_csh_settings">Content sharing settings</string>
 	<string name="rcs_settings_title_csh_invitation">Content sharing invitation settings</string>
 	<string name="rcs_settings_title_csh_available">Content sharing notification</string>
@@ -25,18 +22,13 @@
 	<string name="rcs_settings_summary_csh_vibrate">Vibrate for incoming content sharing invitation</string>
 	<string name="rcs_settings_summary_presence_settings">Manage presence settings</string>
 	<string name="rcs_settings_summary_messaging_settings">Manage messaging settings</string>
-	<string name="rcs_settings_summary_presence_vibrate">Vibrate for incoming presence sharing invitation</string>
 	<string name="rcs_settings_summary_filetransfer_vibrate">Vibrate for incoming file transfer invitation</string>
 	<string name="rcs_settings_summary_chat_vibrate">Vibrate for incoming chat invitation</string>
-	<string name="rcs_settings_summary_presence_ringtone">Ringtone for incoming presence sharing invitation</string>
 	<string name="rcs_settings_summary_filetransfer_ringtone">Ringtone for incoming file transfer invitation</string>
 	<string name="rcs_settings_summary_chat_ringtone">Ringtone for incoming chat invitation</string>
 	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the joyn service</string>
 	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the joyn service</string>
-	<string name="rcs_settings_summary_edit_freetext">Edit your predefined free text</string>
 	<string name="rcs_settings_summary_csh_available">Beep when a content sharing may be initiated during the voice call</string>
-	<string name="rcs_settings_summary_video_format">Select the video codec</string>
-	<string name="rcs_settings_summary_video_size">Select the video display resolution</string>
     <string name="rcs_settings_summary_min_battery_level">Stop the joyn service if battery low</string>
     <string name="rcs_settings_summary_min_storage">Disable File transfer and Image sharing capabilities if memory low</string>
     <string name="rcs_settings_summary_image_resize_option">Select the resize option for outgoing image transfer</string>
@@ -50,10 +42,8 @@
     <string name="rcs_settings_summary_chat_displayed_notification">Send displayed notification during a chat</string>
     <string name="rcs_settings_label_displayed_notification">Displayed notification</string>
     <string name="rcs_settings_label_rcs_service">joyn service</string>
-    <string name="rcs_settings_label_rcs_roaming">Roaming</string>
 	<string name="rcs_settings_label_confirm">Confirmation</string>
 	<string name="rcs_settings_label_rcs_service_shutdown">joyn service will be terminated</string>
-    <string name="rcs_settings_label_rcs_service_roaming_shutdown">You are currently in roaming, joyn service will be terminated</string>
 	<string name="rcs_settings_label_about">joyn application</string>
 	<string name="rcs_settings_label_copyrights">Apache License Version 2.0</string>
 	<string name="rcs_settings_label_release">Release</string>
@@ -61,7 +51,6 @@
 	<string name="rcs_settings_label_ft_auto_accept_in_roaming">Auto accept in roaming</string>
 	    
     <string name="rcs_settings_label_min_battery_level">Minimum battery level</string>
-    <string name="rcs_settings_label_default_min_battery_level">0</string>
     <string-array name="rcs_settings_list_battery_level_value">
         <item>0</item>
         <item>5</item>
@@ -76,7 +65,6 @@
     </string-array>
 
     <string name="rcs_settings_label_min_storage">Minimum storage</string>
-    <string name="rcs_settings_label_default_min_storage">10240</string>
     <string-array name="rcs_settings_list_storage_value">
         <item>0</item>
         <item>10240</item>
@@ -101,7 +89,6 @@
 	<string name="rcs_settings_summary_edit_displayname">Display name associated to my phone number in outgoing calls</string>
 	
 	<string name="rcs_settings_label_image_resize_option">Image resize option</string>
-    <string name="rcs_settings_label_default_image_resize_option">2</string>
     <string-array name="rcs_settings_list_image_resize_option_value">
         <item>0</item>
         <item>1</item>

@@ -150,7 +150,7 @@ public class ApiConnectionManager {
 	 * 
 	 * @param service
 	 *            the service to monitor
-	 * @return the listerner
+	 * @return the listener
 	 */
 	private JoynServiceListener newJoynServiceListener(final RcsServices service) {
 		return new JoynServiceListener() {
@@ -200,22 +200,45 @@ public class ApiConnectionManager {
 		apis.put(RcsServices.GeolocSharing, new GeolocSharingService(context, newJoynServiceListener(RcsServices.GeolocSharing)));
 		apis.put(RcsServices.IpCall, new IPCallService(context, newJoynServiceListener(RcsServices.IpCall)));
 		apis.put(RcsServices.Multimedia, new MultimediaSessionService(context, newJoynServiceListener(RcsServices.Multimedia)));
-		// Connect APIs
-		connectApis();
 	}
 
-	/* package private */void connectApis() {
-		// Connect all disconnected APIs
+	/**
+	 * Connect APIs
+	 */
+	public void connectApis() {
+		// Connect all APIs
 		for (RcsServices service : apis.keySet()) {
+			// Check if not already connected
 			if (!isServiceConnected(service)) {
 				if (LogUtils.isActive) {
 					Log.d(LOGTAG, "Connect API " + service);
 				}
-				apis.get(service).connect();
+				try {
+					apis.get(service).connect();
+				} catch (Exception e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "Cannot connect service " + service, e);
+					}
+				}
 			}
 		}
 	}
 
+	/**
+	 * Disconnect APIs
+	 */
+	public void disconnectApis() {
+		for (RcsServices rcsService : connectedServices) {
+			try {
+				apis.get(rcsService).disconnect();
+			} catch (Exception e) {
+				//	purposely left blank
+			}
+		}
+		// Mark all services as not connected
+		connectedServices.clear();
+	}
+	
 	/**
 	 * Notify API disconnection to client
 	 * 

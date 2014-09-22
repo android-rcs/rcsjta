@@ -30,8 +30,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -135,7 +135,7 @@ public class ImageSharingIntentService extends IntentService {
 		
 		ContactId contact = ishDao.getContact();
 		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, ImageSharing.Direction.INCOMING, contact, displayName);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
 		String title = context.getString(R.string.title_recv_image_sharing, displayName);
 
 		// Create notification

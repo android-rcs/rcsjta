@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
@@ -119,9 +120,10 @@ public class ReceiveVideoSharing extends Activity {
     private VideoSharingListener vshListener = new VideoSharingListener() {
 
 		@Override
-		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state) {
+		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.VSH_STATES.length) {
 				if (LogUtils.isActive) {
@@ -129,13 +131,17 @@ public class ReceiveVideoSharing extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.VSH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current sharingId
 			if (ReceiveVideoSharing.this.vshDao == null || !ReceiveVideoSharing.this.vshDao.getSharingId().equals(sharingId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.VSH_REASON_CODES[0];
-			final String notif = getString(R.string.label_vsh_state_changed, RiApplication.VSH_STATES[state], reason);
+			final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 					switch (state) {
@@ -145,24 +151,28 @@ public class ReceiveVideoSharing extends Activity {
 
 					case VideoSharing.State.ABORTED:
 						// Display session status
-						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_aborted, reason),
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_aborted, _reasonCode),
 								exitOnce);
 						break;
 
 					case VideoSharing.State.FAILED:
 						// Session is failed: exit
-						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_failed, reason),
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_failed, _reasonCode),
 								exitOnce);
 						break;
 
-					case VideoSharing.State.TERMINATED:
-						// Session is failed: exit
-						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_vsh_terminated), exitOnce);
+					case VideoSharing.State.REJECTED:
+						// Session is rejected: exit
+						Utils.showMessageAndExit(ReceiveVideoSharing.this, getString(R.string.label_sharing_rejected, _reasonCode),
+								exitOnce);
 						break;
-
+					
 					default:
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onVideoSharingStateChanged " + notif);
+							Log.d(LOGTAG,
+									"onVideoSharingStateChanged "
+											+ getString(R.string.label_vsh_state_changed, RiApplication.VSH_STATES[state],
+													_reasonCode));
 						}
 					}
 				}
@@ -255,7 +265,7 @@ public class ReceiveVideoSharing extends Activity {
 			
 			ContactId remote = vshDao.getContact();
 			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, VideoSharing.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
 			
 	    	// Display sharing infos
     		TextView fromTextView = (TextView)findViewById(R.id.from);

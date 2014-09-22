@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
@@ -105,9 +106,10 @@ public class ReceiveImageSharing extends Activity {
 		}
 
 		@Override
-		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state) {
+		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.ISH_STATES.length) {
 				if (LogUtils.isActive) {
@@ -115,13 +117,18 @@ public class ReceiveImageSharing extends Activity {
 				}
 				return;
 			}
+			if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onImageSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
 			// Discard event if not for current sharingId
 			if (ReceiveImageSharing.this.ishDao == null || !ReceiveImageSharing.this.ishDao.getSharingId().equals(sharingId)) {
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = RiApplication.ISH_REASON_CODES[0];
-			final String notif = getString(R.string.label_ish_state_changed, RiApplication.ISH_STATES[state], reason);
+			final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode];
+			final String _state = RiApplication.ISH_STATES[state];
 			handler.post(new Runnable() {
 				public void run() {
 					
@@ -129,22 +136,27 @@ public class ReceiveImageSharing extends Activity {
 					switch (state) {
 					case ImageSharing.State.STARTED:
 						// Display session status
-						statusView.setText("started");
+						statusView.setText(_state);
 						break;
 
 					case ImageSharing.State.ABORTED:
-						// Session is aborted: display session status then exit
-						Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						// Session is aborted: exit
+						Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), exitOnce);
 						break;
 
 					case ImageSharing.State.FAILED:
 						// Session is failed: exit
-						Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
+						break;
+						
+					case ImageSharing.State.REJECTED:
+						// Session is failed: exit
+						Utils.showMessageAndExit(ReceiveImageSharing.this, getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
 						break;
 
 					case ImageSharing.State.TRANSFERRED:
 						// Display transfer progress
-						statusView.setText("transferred");
+						statusView.setText(_state);
 						// Make sure progress bar is at the end
 						ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 						progressBar.setProgress(progressBar.getMax());
@@ -154,8 +166,10 @@ public class ReceiveImageSharing extends Activity {
 						break;
 
 					default:
+						// Display session status
+						statusView.setText(_state);
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onImageSharingStateChanged " + notif);
+							Log.d(LOGTAG, "onImageSharingStateChanged " + getString(R.string.label_ish_state_changed, _state, _reasonCode));
 						}
 					}
 				}
@@ -229,7 +243,7 @@ public class ReceiveImageSharing extends Activity {
 			
 			ContactId remote = ishDao.getContact();
 			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, ImageSharing.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
 
 			// Display sharing infos
 			TextView fromTextView = (TextView) findViewById(R.id.from);
