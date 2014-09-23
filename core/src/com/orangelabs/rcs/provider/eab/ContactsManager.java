@@ -1393,17 +1393,14 @@ public final class ContactsManager {
         boolean newHasCommonExtensions = false;
         
         // Get my extensions
-        String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-		if ((exts != null) && (exts.length() > 0)) {
-			String[] ext = exts.split(",");
-			for(int i=0; i < ext.length; i++) {
-				String capability = ext[i];
-				if (newExtensions.contains(capability)){
-					newHasCommonExtensions = true;
-				}
-				if (oldExtensions.contains(capability)){
-					oldHasCommonExtensions = true;
-				}
+        List<String> exts = RcsSettings.getInstance().getSupportedRcsExtensions();
+		for(int i=0; i < exts.size(); i++) {
+			String capability = exts.get(i);
+			if (newExtensions.contains(capability)){
+				newHasCommonExtensions = true;
+			}
+			if (oldExtensions.contains(capability)){
+				oldHasCommonExtensions = true;
 			}
 		}
         
@@ -2112,19 +2109,11 @@ public final class ContactsManager {
 		boolean hasCommonExtensions = false;
 		StringBuffer extension = new StringBuffer();
         ArrayList<String> newExtensions = info.getCapabilities().getSupportedExtensions();
-        String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-        for (int j = 0; j < newExtensions.size(); j++) {
-            extension.append(newExtensions.get(j) +";");
-	        // Check if we support at least one of the extensions this contact has
-	        // Get my extensions
-			if ((exts != null) && (exts.length() > 0)) {
-				String[] ext = exts.split(",");
-				for(int i=0; i < ext.length; i++) {
-					String capability = ext[i];
-					if (newExtensions.contains(capability)){
-						hasCommonExtensions = true;
-					}
-				}
+        List<String> exts = RcsSettings.getInstance().getSupportedRcsExtensions();
+		for(int i=0; i < exts.size(); i++) {
+			String capability = exts.get(i);
+			if (newExtensions.contains(capability)){
+				hasCommonExtensions = true;
 			}
 		}
 		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)

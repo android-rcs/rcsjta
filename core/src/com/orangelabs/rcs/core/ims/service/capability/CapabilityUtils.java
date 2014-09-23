@@ -131,12 +131,9 @@ public class CapabilityUtils {
 		}
 
 		// RCS extensions support
-		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-		if (!TextUtils.isEmpty(exts)) {
-			String[] ext = exts.split(",");
-			for(int i=0; i < ext.length; i++) {
-				iariTags.add(FeatureTags.FEATURE_RCSE_EXTENSION + "." + ext[i]);
-			}
+		List<String> exts = RcsSettings.getInstance().getSupportedRcsExtensions();
+		for(int i=0; i < exts.size(); i++) {
+			iariTags.add(FeatureTags.FEATURE_RCSE_EXTENSION + "." + exts.get(i));
 		}
 
 		// Add IARI prefix

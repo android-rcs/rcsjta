@@ -50,14 +50,7 @@ public class ServiceExtensionManager {
 	private static void saveSupportedExtensions(List<String> supportedExts) {
 		try {
 			// Update supported extensions in database
-		    StringBuffer result = new StringBuffer();
-		    for(int i =0; i < supportedExts.size(); i++) {
-		    	result.append(";" + supportedExts.get(i));
-		    }
-		    if (result.length() > 0) {
-		    	result.deleteCharAt(0);
-		    }
-			RcsSettings.getInstance().setSupportedRcsExtensions(result.toString());
+		    RcsSettings.getInstance().setSupportedRcsExtensions(supportedExts);
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
