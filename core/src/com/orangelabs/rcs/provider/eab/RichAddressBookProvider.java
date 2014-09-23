@@ -85,7 +85,7 @@ public class RichAddressBookProvider extends ContentProvider {
      */
 	private static class DatabaseHelper extends SQLiteOpenHelper{
 		private static final String DATABASE_NAME = "eab.db";
-		private static final int DATABASE_VERSION = 22;
+		private static final int DATABASE_VERSION = 23;
 		
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -103,11 +103,12 @@ public class RichAddressBookProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + AGGREGATION_TABLE);
             onCreate(db);
 		}
-
+		
+		// @formatter:off
 		private void createDb(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE IF NOT EXISTS " + EAB_TABLE + " ("
 					+ RichAddressBookData.KEY_ID + " integer primary key autoincrement, "
-					+ RichAddressBookData.KEY_CONTACT_NUMBER + " TEXT, "
+					+ RichAddressBookData.KEY_CONTACT + " TEXT, "
 					+ RichAddressBookData.KEY_DISPLAY_NAME + " TEXT, "
 					+ RichAddressBookData.KEY_RCS_STATUS + " TEXT, "
                     + RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP + " long, "
@@ -124,7 +125,7 @@ public class RichAddressBookProvider extends ContentProvider {
                     + RichAddressBookData.KEY_PRESENCE_GEOLOC_LONGITUDE + " double, "
                     + RichAddressBookData.KEY_PRESENCE_GEOLOC_ALTITUDE + " double, "
                     + RichAddressBookData.KEY_PRESENCE_TIMESTAMP + " long, "
-					+ RichAddressBookData.KEY_CAPABILITY_TIMESTAMP + " long, "
+					+ RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST + " long, "
 					+ RichAddressBookData.KEY_CAPABILITY_CS_VIDEO + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING + " integer, "
@@ -140,15 +141,19 @@ public class RichAddressBookProvider extends ContentProvider {
 					+ RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF + " integer, "					
 					+ RichAddressBookData.KEY_CAPABILITY_EXTENSIONS + " TEXT, "
-					+ RichAddressBookData.KEY_IM_BLOCKED + " TEXT, "
+					+ RichAddressBookData.KEY_IM_BLOCKED + " integer, "
+					+ RichAddressBookData.KEY_FT_BLOCKED + " integer, "
 					+ RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP + " long, "
-					+ RichAddressBookData.KEY_TIMESTAMP + " long)");
+					+ RichAddressBookData.KEY_TIMESTAMP + " long, "
+					+ RichAddressBookData.KEY_AUTOMATA + " TEXT, "
+					+ RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH + " long)");
 			db.execSQL("CREATE TABLE IF NOT EXISTS " + AGGREGATION_TABLE + " ("
 					+ AggregationData.KEY_ID + " integer primary key autoincrement, "
 					+ AggregationData.KEY_RCS_NUMBER + " TEXT, "
 					+ AggregationData.KEY_RAW_CONTACT_ID + " long, "
 					+ AggregationData.KEY_RCS_RAW_CONTACT_ID + " long)");
 		}
+		// @formatter:on
 	}
 
 	@Override 
@@ -275,14 +280,14 @@ public class RichAddressBookProvider extends ContentProvider {
         	case CONTACTS:
         		qb.setTables(EAB_TABLE);
         		if (TextUtils.isEmpty(sort)){
-        			orderBy = RichAddressBookData.KEY_CONTACT_NUMBER;
+        			orderBy = RichAddressBookData.KEY_CONTACT;
         		}
         		break;
 	        case CONTACT_ID:
 	        	qb.setTables(EAB_TABLE);
 				qb.appendWhere(RichAddressBookData.KEY_ID + "=" + uri.getPathSegments().get(1));
         		if (TextUtils.isEmpty(sort)){
-        			orderBy = RichAddressBookData.KEY_CONTACT_NUMBER;
+        			orderBy = RichAddressBookData.KEY_CONTACT;
         		}
 	            break;
         	case AGGREGATIONS:
@@ -307,7 +312,7 @@ public class RichAddressBookProvider extends ContentProvider {
 	        	qb.setTables(EAB_TABLE);
 				qb.appendWhere(RichAddressBookData.KEY_ID + "=" + uri.getPathSegments().get(1));
         		if (TextUtils.isEmpty(sort)){
-        			orderBy = RichAddressBookData.KEY_CONTACT_NUMBER;
+        			orderBy = RichAddressBookData.KEY_CONTACT;
         		}
         		break;
 	        default:

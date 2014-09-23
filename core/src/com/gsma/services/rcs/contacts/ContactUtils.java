@@ -75,6 +75,12 @@ public class ContactUtils {
 	private String msisdnWithPrefixAndCountryCode;
 
 	/**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private ContactUtils() {
+	}
+
+	/**
 	 * Get an instance of ContactUtils.
 	 * 
 	 * @param context

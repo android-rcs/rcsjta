@@ -30,6 +30,7 @@ import com.gsma.services.rcs.contacts.JoynContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -42,6 +43,11 @@ public class OnlineContactsList extends ListActivity {
 	 * API connection manager
 	 */
 	private ApiConnectionManager connectionManager;
+	
+	/**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +63,7 @@ public class OnlineContactsList extends ListActivity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Contacts)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsServices.Contacts);
@@ -103,8 +109,7 @@ public class OnlineContactsList extends ListActivity {
 				setListAdapter(null);
 			}
 		} catch(Exception e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
 }

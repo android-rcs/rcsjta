@@ -17,12 +17,13 @@
  ******************************************************************************/
 package com.orangelabs.rcs.database;
 
-import java.util.ArrayList;
 import java.util.Set;
 
-import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.eab.ContactsManagerException;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
+import android.content.Context;
+import android.test.AndroidTestCase;
+
+import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
 //import com.gsma.services.rcs.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
@@ -30,13 +31,10 @@ import com.orangelabs.rcs.core.ims.service.presence.FavoriteLink;
 import com.orangelabs.rcs.core.ims.service.presence.Geoloc;
 //import com.orangelabs.rcs.core.ims.service.presence.PhotoIcon;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-
+import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.eab.ContactsManagerException;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.content.Context;
-import android.test.AndroidTestCase;
 
 public class ContactsManagerTest extends AndroidTestCase {
 
@@ -44,9 +42,9 @@ public class ContactsManagerTest extends AndroidTestCase {
 	private ContactsManager cm = null;
 	private String contact = "+33987654321";
 	// private String contacto = "+33633139785";
-	private ContactUtils contactUtils = new ContactUtils();;
+	private ContactUtils contactUtils;
 	// info.setContact(contact);
-	private ContactId contactIdo = contactUtils.formatContactId("+33633139785");
+	private ContactId contactIdo;
 	private long timestamp = 1354874203;
 	Context ctx;
 
@@ -56,6 +54,9 @@ public class ContactsManagerTest extends AndroidTestCase {
 		RcsSettings.createInstance(getContext());
 		ctx = getContext();
 		cm = ContactsManager.getInstance();
+		contactUtils = ContactUtils.getInstance(ctx);
+		// info.setContact(contact);
+		contactIdo = contactUtils.formatContactId("+33633139785");
 	}
 
 	protected void tearDown() throws Exception {
@@ -80,8 +81,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 		info.setRcsStatusTimestamp(timestamp);
 
 		info.setRegistrationState(ContactInfo.REGISTRATION_STATUS_ONLINE);
-		ContactUtils contactUtils = new ContactUtils();
-		;
+
 		// info.setContact(contact);
 		ContactId contactId = contactUtils.formatContactId(contact);
 		info.setContact(contactId);
@@ -93,9 +93,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimestamp(timestamp);
+		capa.setTimeLastRequest(timestamp);
+		capa.setSipAutomata(true);
 		capa.addSupportedExtension("MyRcsExtensionTag1");
 		capa.addSupportedExtension("MyRcsExtensionTag2");
+		capa.setTimeLastRefresh(timestamp);
 		info.setCapabilities(capa);
 
 		PresenceInfo pres = new PresenceInfo();
@@ -140,8 +142,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 			assertEquals(true, getCapa.isPresenceDiscoverySupported());
 			assertEquals(true, getCapa.isSocialPresenceSupported());
 			assertEquals(true, getCapa.isVideoSharingSupported());
+			assertEquals(true, getCapa.isSipAutomata());
+			assertEquals(timestamp, getCapa.getTimeLastRefresh());
+			assertEquals(timestamp, getCapa.getTimeLastRequest());
 			// Timestamp not tested because it is automatically updated with the current time
-			ArrayList<String> getExtraCapa = getCapa.getSupportedExtensions();
+			Set<String> getExtraCapa = getCapa.getSupportedExtensions();
 			if (getExtraCapa == null) {
 				assertEquals(true, false);
 			} else {
@@ -194,9 +199,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimestamp(timestamp);
+		capa.setTimeLastRequest(timestamp);
 		capa.addSupportedExtension("MyRcsExtensionTag1");
 		capa.addSupportedExtension("MyRcsExtensionTag2");
+		capa.setSipAutomata(true);
+		capa.setTimeLastRefresh(timestamp);
 		info.setCapabilities(capa);
 
 		PresenceInfo pres = new PresenceInfo();
@@ -245,10 +252,12 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setSocialPresenceSupport(false);
 		capa.setVideoSharingSupport(false);
 
-		capa.setTimestamp(timestamp);
+		capa.setTimeLastRequest(timestamp);
 		newInfo.setCapabilities(capa);
 
 		newInfo.setContact(contactIdo);
+		
+		capa.setTimeLastRefresh(timestamp);
 
 		// newInfo.setPresenceInfo(null);
 		// if (new)PresenceInfo is null, error on ContactManager line 504 so
@@ -288,10 +297,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimestamp(timestamp);
+		capa.setTimeLastRequest(timestamp);
 		capa.addSupportedExtension("MyRcsExtensionTag3");
 		capa.addSupportedExtension("MyRcsExtensionTag4");
-
+		capa.setTimeLastRefresh(timestamp);
+		
 		prese.setFavoriteLink(new FavoriteLink("favo_link_name", "http://favo_link_url"));
 		prese.setFreetext("free_text");
 		prese.setGeoloc(new Geoloc(1, 2, 4));

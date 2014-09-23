@@ -31,7 +31,6 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Content sharing session
@@ -44,12 +43,6 @@ public abstract class ContentSharingSession extends ImsServiceSession {
 	 */
 	private MmContent content;
 	
-	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ContentSharingSession.class.getSimpleName());
-
-    
     /**
 	 * Constructor
 	 * 

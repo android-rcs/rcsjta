@@ -60,6 +60,12 @@ public class IPCallHistory {
 	private static final Logger logger = Logger.getLogger(IPCallHistory.class.getSimpleName());
 	
 	/**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private IPCallHistory() {
+	}
+	
+	/**
 	 * Create instance
 	 * 
 	 * @param ctx Context

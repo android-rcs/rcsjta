@@ -22,9 +22,8 @@
 
 package com.orangelabs.rcs.provider.settings;
 
-import java.util.ArrayList;
-import java.util.List;
 
+import java.util.Set;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -35,6 +34,7 @@ import android.text.TextUtils;
 
 import com.orangelabs.rcs.core.ims.protocol.sip.SipInterface;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
+import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -76,7 +76,13 @@ public class RcsSettings {
 	 * Database URI
 	 */
 	private Uri databaseUri = RcsSettingsData.CONTENT_URI;
-	   
+	
+	/**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private RcsSettings() {
+	}
+	
     /**
      * Create instance
      *
@@ -992,14 +998,10 @@ public class RcsSettings {
 		capabilities.setIPVideoCallSupport(isIPVideoCallSupported());
 		capabilities.setGroupChatStoreForwardSupport(isGroupChatStoreForwardSupported());
 		capabilities.setSipAutomata(isSipAutomata());
-		capabilities.setTimestamp(System.currentTimeMillis());
-
+		capabilities.setTimeLastRequest(-1);
+		capabilities.setTimeLastRefresh(System.currentTimeMillis());
 		// Add extensions
-		List<String> exts = getSupportedRcsExtensions();
-		for(int i=0; i < exts.size(); i++) {
-			capabilities.addSupportedExtension(exts.get(i));
-		}
-
+		capabilities.setSupportedExtensions(getSupportedRcsExtensions());
 		return capabilities;
 	}
 
@@ -1645,37 +1647,22 @@ public class RcsSettings {
 	}
 
 	/**
-     * Get supported RCS extensions
+     * Get set of supported RCS extensions
      *
-     * @return List of extensions
+     * @return the set of extensions
      */
-	public List<String> getSupportedRcsExtensions() {
-		List<String> result = new ArrayList<String>();
-		String exts = readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS);
-		if ((exts != null) && (exts.length() > 0)) {
-			String[] ext = exts.split(";");
-			for(int i=0; i < ext.length; i++) {
-				result.add(ext[i]);
-			}
-		}
-		return result;
+	public Set<String> getSupportedRcsExtensions() {
+		return ServiceExtensionManager.getInstance().getExtensions(readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS));
     }
 
 	/**
-     * Set supported RCS extensions
+     * Set the set of supported RCS extensions
      *
-     * @param extensions List of extensions
+     * @param extensions Set of extensions
      */
-	public void setSupportedRcsExtensions(List<String> extensions) {
-	    StringBuffer result = new StringBuffer();
-	    for(int i =0; i < extensions.size(); i++) {
-	    	result.append(";" + extensions.get(i));
-	    }
-	    if (result.length() > 0) {
-	    	result.deleteCharAt(0);
-	    }
-		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, result.toString());
-    }
+	public void setSupportedRcsExtensions(Set<String> extensions) {
+		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, ServiceExtensionManager.getInstance().getExtensions(extensions));
+	}
 
 	/**
      * Is IM always-on thanks to the Store & Forward functionality

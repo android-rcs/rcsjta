@@ -17,14 +17,20 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.capability;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Capabilities
  * 
  * @author jexa7410
+ * @author YPLO6403
+ *
  */
 public class Capabilities {
+	
+	private static final long INVALID_TIME = -1;
+	
 	/**
 	 * Image sharing support
 	 */
@@ -101,14 +107,19 @@ public class Capabilities {
     private boolean sipAutomata = false;
 
     /**
-	 * List of supported extensions
+	 * Set of supported extensions
 	 */
-	private ArrayList<String> extensions = new ArrayList<String>();
+	private Set<String> extensions = new HashSet<String>();
 	
 	/**
-	 * Last capabilities update
+	 * Last time capabilities was requested
 	 */
-	private long timestamp = System.currentTimeMillis();
+	private long timeLastRequest = INVALID_TIME;
+	
+	/**
+	 * Last time capabilities was refreshed
+	 */
+	private long timeLastRefresh = INVALID_TIME;
 
 	/**
 	 * Constructor
@@ -385,6 +396,15 @@ public class Capabilities {
 	}
 
 	/**
+	 * Set supported extensions
+	 * 
+	 * @param extensions set of supported extensions
+	 */
+	public void setSupportedExtensions(Set<String> extensions) {
+		this.extensions = extensions;
+	}
+	
+	/**
 	 * Add supported extension
 	 * 
 	 * @param serviceId Service ID
@@ -394,30 +414,30 @@ public class Capabilities {
 	}
 	
 	/**
-	 * Get list of supported extensions
+	 * Get set of supported extensions
 	 * 
 	 * @return List
 	 */
-	public ArrayList<String> getSupportedExtensions() {
+	public Set<String> getSupportedExtensions() {
 		return extensions;
 	}
 	
 	/**
-	 * Get the capabilities timestamp 
+	 * Get time of last request
 	 * 
-	 * @return Timestamp (in milliseconds)
+	 * @return timeLastRequest (in milliseconds)
 	 */
-	public long getTimestamp() {
-		return timestamp;
+	public long getTimeLastRequest() {
+		return timeLastRequest;
 	}
 
 	/**
-	 * Set capabilities timestamp
+	 * Set time of the last request
 	 * 
-	 * @param Timestamp
+	 * @param timeLastRequest (in milliseconds)
 	 */
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setTimeLastRequest(long timeLastRequest) {
+		this.timeLastRequest = timeLastRequest;
 	}
 	
 	/**
@@ -432,13 +452,39 @@ public class Capabilities {
 			", IP_video_call=" + ipVideoCall +			
 			", File_transfer=" + fileTransfer +
 			", Chat=" + imSession +
-			", CS_video=" + csVideo +
-			", Presence_discovery=" + presenceDiscovery +
-			", Social_presence=" + socialPresence +
             ", FT_http=" + fileTransferHttp +
             ", Geolocation_push=" + geolocationPush +
-            ", FT_thumbnail=" + fileTransferThumbnail +
             ", Automata=" + sipAutomata +
-			", Timestamp=" + timestamp;
+			", TimestampLastRequest=" + timeLastRequest+
+			", TimestampLastRefresh=" + timeLastRefresh;
 	}
+
+	/**
+	 * Check validity of capability
+	 * 
+	 * @return true if the capability is valid (no need to refresh it), otherwise False.
+	 */
+	public boolean isValid() {
+		// If no refresh of capabilities is required then capabilities are valid
+		return !PollingManager.isCapabilityRefreshRequired(this.timeLastRefresh);
+	}
+
+	/**
+	 * Get time of last refresh
+	 * 
+	 * @return timeLastRefresh (in milliseconds)
+	 */
+	public long getTimeLastRefresh() {
+		return timeLastRefresh;
+	}
+
+	/**
+	 * Set time of last refresh
+	 * 
+	 * @param timeLastRefresh (in milliseconds)
+	 */
+	public void setTimeLastRefresh(long timeLastRefresh) {
+		this.timeLastRefresh = timeLastRefresh;
+	}
+
 }

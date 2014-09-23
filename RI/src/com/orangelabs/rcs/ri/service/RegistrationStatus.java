@@ -29,6 +29,7 @@ import com.gsma.services.rcs.JoynServiceRegistrationListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -46,6 +47,11 @@ public class RegistrationStatus extends Activity {
 	 * API connection manager
 	 */
 	private ApiConnectionManager connectionManager;
+	
+	/**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
     
     /**
      * Registration listener
@@ -69,7 +75,7 @@ public class RegistrationStatus extends Activity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
@@ -77,7 +83,7 @@ public class RegistrationStatus extends Activity {
 			// Add service listener
 			connectionManager.getCapabilityApi().addServiceRegistrationListener(registrationListener);
 		} catch (JoynServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), null);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
     
@@ -105,10 +111,8 @@ public class RegistrationStatus extends Activity {
 			// Display registration status
 			displayRegistrationStatus(connectionManager.getCapabilityApi().isServiceRegistered());
 		} catch (JoynServiceNotAvailableException e) {
-			e.printStackTrace();
 			Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
 		} catch (JoynServiceException e) {
-			e.printStackTrace();
 			Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
 		}
 	}

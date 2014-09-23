@@ -47,7 +47,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/**
 	 * Current instance
 	 */
-	private static MessagingLog instance = null;
+	private static MessagingLog instance;
 
 	/**
 	 * Content resolver
@@ -61,6 +61,12 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	private FileTransferLog fileTransferLog;
 
 	private GroupChatDeliveryInfoLog groupChatDeliveryInfoLog;
+
+	/**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private MessagingLog() {
+	}
 
 	/**
 	 * Create instance

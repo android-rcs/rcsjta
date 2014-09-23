@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.Set;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -32,6 +30,7 @@ import com.gsma.services.rcs.capability.Capabilities;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -43,6 +42,11 @@ public class MyCapabilities extends Activity {
 	 * API connection manager
 	 */
 	private ApiConnectionManager connectionManager;
+	
+	/**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +62,7 @@ public class MyCapabilities extends Activity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
@@ -97,19 +101,18 @@ public class MyCapabilities extends Activity {
 	        
 	        // Set extensions
 	        TextView extensions = (TextView)findViewById(R.id.extensions);
-	        String result = "";
-	        Set<String> extensionList = capabilities.getSupportedExtensions();
-	        for(String value : extensionList) {
-	        	result += value + "\n";
-	        }
-	        extensions.setText(result);
+	        extensions.setText(RequestCapabilities.getExtensions(capabilities));
+	        
+	        // Set automata
+	        CheckBox automata = (CheckBox)findViewById(R.id.automata);
+	        automata.setChecked(capabilities.isAutomata());
 	    } catch(JoynServiceNotAvailableException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
 	    } catch(JoynServiceException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 	    }
     }
 
+    
+    
 }

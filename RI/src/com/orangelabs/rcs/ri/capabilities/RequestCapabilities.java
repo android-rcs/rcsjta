@@ -18,13 +18,12 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.Set;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -160,6 +159,10 @@ public class RequestCapabilities extends Activity {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onCapabilitiesReceived " + contact);
 			}
+			if (!contact.equals(getSelectedContact())) {
+			   // Discard capabilities if not for selected contact
+				return;
+			}
 			handler.post(new Runnable() {
 				public void run() {
 					// Check if this intent concerns the current selected contact
@@ -188,26 +191,10 @@ public class RequestCapabilities extends Activity {
 	
 				// Display default capabilities
 		        displayCapabilities(currentCapabilities);
-
-		        // Check if the service is available
-		    	boolean registered = false;
-		    	try {
-		    		registered = capabilityApi.isServiceRegistered();
-		    	} catch(Exception e) {
-		    		e.printStackTrace();
-		    	}
-		    	if (!registered) {
-		    		Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
-			    	return;
-		        }      	
-		    	
-		    	// Update capabilities
-				updateCapabilities(contactId);
 		    } catch(JoynServiceNotAvailableException e) {
 		    	e.printStackTrace();
 				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), exitOnce);
 		    } catch(JoynServiceException e) {
-		    	e.printStackTrace();
 				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed), exitOnce);
 			}
 		}
@@ -298,35 +285,50 @@ public class RequestCapabilities extends Activity {
      * 
      * @param capabilities Capabilities
      */
-    private void displayCapabilities(Capabilities capabilities) {
-    	CheckBox imageCSh = (CheckBox)findViewById(R.id.image_sharing);
-		CheckBox videoCSh = (CheckBox)findViewById(R.id.video_sharing);
-		CheckBox ft = (CheckBox)findViewById(R.id.file_transfer);
-		CheckBox im = (CheckBox)findViewById(R.id.im);
-		CheckBox geoloc = (CheckBox)findViewById(R.id.geoloc_push);
-		CheckBox ipVoiceCall = (CheckBox)findViewById(R.id.ip_voice_call);
-		CheckBox ipVideoCall = (CheckBox)findViewById(R.id.ip_video_call);
-		TextView extensions = (TextView)findViewById(R.id.extensions);
-    	if (capabilities != null) {
-    		// Set capabilities
-    		imageCSh.setChecked(capabilities.isImageSharingSupported());
-    		videoCSh.setChecked(capabilities.isVideoSharingSupported());
-    		ft.setChecked(capabilities.isFileTransferSupported());
-    		im.setChecked(capabilities.isImSessionSupported());
-    		geoloc.setChecked(capabilities.isGeolocPushSupported());
-    		ipVoiceCall.setChecked(capabilities.isIPVoiceCallSupported());
-    		ipVideoCall.setChecked(capabilities.isIPVideoCallSupported());
+	private void displayCapabilities(Capabilities capabilities) {
+		CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
+		CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
+		CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
+		CheckBox im = (CheckBox) findViewById(R.id.im);
+		CheckBox geoloc = (CheckBox) findViewById(R.id.geoloc_push);
+		CheckBox ipVoiceCall = (CheckBox) findViewById(R.id.ip_voice_call);
+		CheckBox ipVideoCall = (CheckBox) findViewById(R.id.ip_video_call);
+		TextView extensions = (TextView) findViewById(R.id.extensions);
+		TextView timestamp = (TextView) findViewById(R.id.last_refresh);
+		CheckBox automata = (CheckBox) findViewById(R.id.automata);
+		CheckBox valid = (CheckBox) findViewById(R.id.is_valid);
+		// Set capabilities
+		imageCSh.setChecked((capabilities != null) ? capabilities.isImageSharingSupported() : false);
+		videoCSh.setChecked((capabilities != null) ? capabilities.isVideoSharingSupported() : false);
+		ft.setChecked((capabilities != null) ? capabilities.isFileTransferSupported() : false);
+		im.setChecked((capabilities != null) ? capabilities.isImSessionSupported() : false);
+		geoloc.setChecked((capabilities != null) ? capabilities.isGeolocPushSupported() : false);
+		ipVoiceCall.setChecked((capabilities != null) ? capabilities.isIPVoiceCallSupported() : false);
+		ipVideoCall.setChecked((capabilities != null) ? capabilities.isIPVideoCallSupported() : false);
 
-            // Set extensions
-    		extensions.setVisibility(View.VISIBLE);
-            String result = "";
-            Set<String> extensionList = capabilities.getSupportedExtensions();
-	        for(String value : extensionList) {
-	        	if (value.length() > 0) {
-	        		result += value + "\n";
-	        	}
-            }
-            extensions.setText(result);    		
-    	}
-    }
+		// Set extensions
+		extensions.setVisibility(View.VISIBLE);
+		extensions.setText(getExtensions(capabilities));
+		automata.setChecked((capabilities != null) ? capabilities.isAutomata() : false);
+		timestamp.setText((capabilities != null) ? DateUtils.getRelativeTimeSpanString(capabilities.getTimestamp(), System.currentTimeMillis(),
+				DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE) : "");
+		valid.setChecked((capabilities != null) ? capabilities.isValid() : false);
+	}
+	
+	/* package private */static String getExtensions(Capabilities capabilities) {
+		if (capabilities == null) {
+			return "";
+		}
+		StringBuilder extensions = new StringBuilder();
+		boolean start = true;
+		for (String capability : capabilities.getSupportedExtensions()) {
+			if (!start) {
+				extensions.append("\n");
+			} else {
+				start = false;
+			}
+			extensions.append(capability);
+		}
+		return extensions.toString();
+	}
 }

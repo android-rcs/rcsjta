@@ -17,8 +17,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.extension;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -35,66 +36,80 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * verified some authorization rules.
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class ServiceExtensionManager {
+	
+	/**
+	 * Singleton of ServiceExtensionManager
+	 */
+	private static volatile ServiceExtensionManager instance;
+	
 	/**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getName());
+    private final static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getSimpleName());
     
+    /**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private ServiceExtensionManager() {
+	}
+	
+	/**
+	 * Get an instance of ServiceExtensionManager.
+	 * 
+	 * @return the singleton instance.
+	 */
+	public static ServiceExtensionManager getInstance() {
+		if (instance == null) {
+			synchronized (ServiceExtensionManager.class) {
+				if (instance == null) {
+					instance = new ServiceExtensionManager();
+				}
+			}
+		}
+		return instance;
+	}
+	
 	/**
 	 * Save supported extensions in database
 	 * 
 	 * @param supportedExts List of supported extensions
 	 */
-	private static void saveSupportedExtensions(List<String> supportedExts) {
-		try {
-			// Update supported extensions in database
-		    RcsSettings.getInstance().setSupportedRcsExtensions(supportedExts);
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-		}
+	private void saveSupportedExtensions(Set<String> supportedExts) {
+		// Update supported extensions in database
+		RcsSettings.getInstance().setSupportedRcsExtensions(supportedExts);
 	}
 	
 	/**
 	 * Check if the extensions are valid. Each valid extension is saved in the cache.  
 	 * 
 	 * @param context Context
-	 * @param supportedExts List of supported extensions
-	 * @param newExts New extensions to be checked
-	 * @return Returns true if at least one valid extension has been found
+	 * @param supportedExts Set of supported extensions
+	 * @param newExts Set of new extensions to be checked
 	 */
-	private static boolean checkExtensions(Context context, List<String> supportedExts, String newExts) {
-		boolean result = false;
-		try {
-			// Check each new extension
-    		String[] extensions = new String[0];
-    		if (!TextUtils.isEmpty(newExts)) {
-    			extensions = newExts.split(";");
-    		}
-    		for(int i=0; i < extensions.length; i++) {
-    			if (isExtensionAuthorized(context, extensions[i])) {
-    				if (supportedExts.contains(extensions[i])) {
-	    				if (logger.isActivated()) {
-	    					logger.debug("Extension " + extensions[i] + " is already in the list");
-	    				}
-    				} else {
-	    				// Add the extension in the supported list if authorized and not yet in the list
-    					supportedExts.add(extensions[i]);
-	    				if (logger.isActivated()) {
-	    					logger.debug("Extension " + extensions[i] + " is added in the list");
-	    				}
-    				}
-    			}
-    		}
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
+	private void checkExtensions(Context context, Set<String> supportedExts, Set<String> newExts) {
+		// Check each new extension
+		if (newExts.isEmpty()) {
+			return;
+		}
+		for (String extension : newExts) {
+			if (isExtensionAuthorized(context, extension)) {
+				if (supportedExts.contains(extension)) {
+					if (logger.isActivated()) {
+						logger.debug("Extension " + extension + " is already in the list");
+					}
+				} else {
+					// Add the extension in the supported list if authorized and not yet in the list
+					supportedExts.add(extension);
+					if (logger.isActivated()) {
+						logger.debug("Extension " + extension + " is added to the list");
+					}
+				}
 			}
 		}
-		return result;
 	}	
 	
 	/**
@@ -102,13 +117,19 @@ public class ServiceExtensionManager {
 	 * 
 	 * @param context Context
 	 */
-	public static void updateSupportedExtensions(Context context) {
+	public void updateSupportedExtensions(Context context) {
+		if (context == null) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot update supported extension: context is null");
+			}
+			return;
+		}
 		try {
 			if (logger.isActivated()) {
 				logger.debug("Update supported extensions");
 			}
 
-			List<String> supportedExts = new ArrayList<String>(); 
+			Set<String> supportedExts = new HashSet<String>(); 
 			
 			// Intent query on current installed activities
     		PackageManager pm = context.getPackageManager();
@@ -117,13 +138,16 @@ public class ServiceExtensionManager {
 				Bundle appMeta = appInfo.metaData;
 				if (appMeta != null) {
 		    		String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-		    		if (exts != null) {
+		    		if (!TextUtils.isEmpty(exts)) {
+						if (logger.isActivated()) {
+							logger.debug("Update supported extensions " + exts);
+						}
 			    		// Check extensions
-			    		checkExtensions(context, supportedExts, exts);    		
+			    		checkExtensions(context, supportedExts, getExtensions(exts));    		
 		    		}
 				}
 			}
-			
+
 			// Update supported extensions in database
     		saveSupportedExtensions(supportedExts);
 		} catch(Exception e) {
@@ -140,26 +164,17 @@ public class ServiceExtensionManager {
 	 * @param ext Extension ID
 	 * @return Boolean
 	 */
-	public static boolean isExtensionAuthorized(Context context, String ext) {
-		try {
-			if (!RcsSettings.getInstance().isExtensionsAllowed()) {
-				if (logger.isActivated()) {
-					logger.debug("Extensions are not allowed");
-				}
-				return false;
-			}
-
+	public boolean isExtensionAuthorized(Context context, String ext) {
+		if (!RcsSettings.getInstance().isExtensionsAllowed()) {
 			if (logger.isActivated()) {
-				logger.debug("No control on extensions");
-			}
-			return true;
-			
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Internal exception", e);
+				logger.debug("Extensions are not allowed");
 			}
 			return false;
 		}
+		if (logger.isActivated()) {
+			logger.debug("No control on extensions");
+		}
+		return true;
 	}
 	
 	/**
@@ -167,7 +182,7 @@ public class ServiceExtensionManager {
 	 * 
 	 * @param context Context
 	 */
-	public static void removeSupportedExtensions(Context context) {
+	public void removeSupportedExtensions(Context context) {
 		updateSupportedExtensions(context);
 	}
 	
@@ -176,7 +191,49 @@ public class ServiceExtensionManager {
 	 * 
 	 * @param context Context
 	 */
-	public static void addNewSupportedExtensions(Context context) {
+	public void addNewSupportedExtensions(Context context) {
 		updateSupportedExtensions(context);
 	}
+	
+	/**
+	 * Extract set of extensions from String
+	 * 
+	 * @param extensions
+	 *            String where extensions are concatenated with a ";" separator
+	 * @return the set of extensions
+	 */
+	public Set<String> getExtensions(String extensions) {
+		Set<String> result = new HashSet<String>();
+		if (!TextUtils.isEmpty(extensions)) {
+			String[] extensionList = extensions.split(";");
+			for (String extension : extensionList) {
+				if (!TextUtils.isEmpty(extension) && extension.trim().length() > 0) {
+					result.add(extension);
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Concatenate set of extensions into a string
+	 * 
+	 * @param extensions
+	 *            set of extensions
+	 * @return String where extensions are concatenated with a ";" separator
+	 */
+	public String getExtensions(Set<String> extensions) {
+		StringBuilder result = new StringBuilder();
+		if (extensions != null && !extensions.isEmpty()) {
+			String loopDelim = "";
+			for (String extension : extensions) {
+				if (!TextUtils.isEmpty(extension) && extension.trim().length() > 0) {
+					result.append(loopDelim).append(extension);
+					loopDelim = ";";
+				}
+			}
+		}
+		return result.toString();
+	}
+
 }

@@ -131,9 +131,12 @@ public class CapabilityUtils {
 		}
 
 		// RCS extensions support
-		List<String> exts = RcsSettings.getInstance().getSupportedRcsExtensions();
-		for(int i=0; i < exts.size(); i++) {
-			iariTags.add(FeatureTags.FEATURE_RCSE_EXTENSION + "." + exts.get(i));
+		Set<String> extensions = RcsSettings.getInstance().getSupportedRcsExtensions();
+		if (extensions != null && !extensions.isEmpty()) {
+			for (String extension : extensions) {
+				StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
+				iariTags.add(sb.toString());
+			}
 		}
 
 		// Add IARI prefix
@@ -235,7 +238,7 @@ public class CapabilityUtils {
         	} else
 // TODO    		if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".ext") ||
 // TODO   				tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".mnc")) {
-    		if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {    			
+    		if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {
     			// Support an RCS extension
 				capabilities.addSupportedExtension(extractServiceId(tag));
 			} else
@@ -294,7 +297,8 @@ public class CapabilityUtils {
 				capabilities.setImageSharingSupport(false);
 			}
 		}
-        
+        capabilities.setTimeLastRefresh(System.currentTimeMillis());
+        capabilities.setTimeLastRequest(System.currentTimeMillis());
     	return capabilities;
     }
        

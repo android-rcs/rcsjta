@@ -57,7 +57,7 @@ public abstract class MultimediaSessionList extends ListActivity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Multimedia)) {
-			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), null);
+			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsServices.Multimedia);

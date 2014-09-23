@@ -3,82 +3,154 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="0dip"
-    android:paddingRight="12dip">
-    
-    <View android:id="@+id/divider"
+    android:paddingRight="12dip" >
+
+    <View
+        android:id="@+id/divider"
         android:layout_width="1dip"
         android:layout_height="fill_parent"
         android:layout_marginRight="11dip" />
-    
-    <TextView android:id="@+id/number"
-		android:paddingTop="5dip"
-        android:text="+33XXXXXXX"
-	    android:textStyle="bold"
-	    android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"/>
 
-	<CheckBox android:id="@+id/im"
+    <TextView
+        android:id="@+id/number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/number"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_im" />
-    
-	<CheckBox android:id="@+id/file_transfer"
-        android:layout_width="wrap_content"
+        android:paddingTop="5dip"
+        android:singleLine="true"
+        android:text="+33XXXXXXX"
+        android:textStyle="bold" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/im"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_ft" />
-	
-	<CheckBox android:id="@+id/image_sharing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/file_transfer"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_image" />
-	
-	<CheckBox android:id="@+id/video_sharing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/image_sharing"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_video" />
-	
-	<CheckBox android:id="@+id/geoloc_push"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/video_sharing"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/label_capabilities_geolocation_push" />
-				
-	<CheckBox android:id="@+id/ip_voice_call"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/geoloc_push"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_ip_voice_call" />
-        
-	<CheckBox android:id="@+id/ip_video_call"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ip_voice_call"
-		android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/label_capabilities_ip_video_call" />
-	
-    <TextView android:id="@+id/extensions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ip_video_call"
-        android:text="Xxxxxxxx"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
+        android:layout_below="@id/number"
+        android:paddingTop="5dip"
+        android:stretchColumns="1" >
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="@string/label_capabilities" />
+
+            <CheckBox
+                android:id="@+id/image_sharing"
+                android:clickable="false"
+                android:text="@string/label_capabilities_image"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/video_sharing"
+                android:clickable="false"
+                android:text="@string/label_capabilities_video"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/file_transfer"
+                android:clickable="false"
+                android:text="@string/label_capabilities_ft"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/im"
+                android:clickable="false"
+                android:text="@string/label_capabilities_im"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/geoloc_push"
+                android:clickable="false"
+                android:text="@string/label_capabilities_geolocation_push"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/ip_voice_call"
+                android:clickable="false"
+                android:text="@string/label_capabilities_ip_voice_call"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="" />
+
+            <CheckBox
+                android:id="@+id/ip_video_call"
+                android:clickable="false"
+                android:text="@string/label_capabilities_ip_video_call"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="@string/label_capabilities_extensions" />
+
+            <TextView
+                android:id="@+id/extensions"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="@string/label_automata" />
+
+            <CheckBox
+                android:id="@+id/automata"
+                android:clickable="false"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="right"
+                android:text="@string/label_capabilities_timestamp" />
+
+            <TextView
+                android:id="@+id/last_refresh"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </TableRow>
+    </TableLayout>
+
 </RelativeLayout>

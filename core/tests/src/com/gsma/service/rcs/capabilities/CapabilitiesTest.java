@@ -37,6 +37,8 @@ public class CapabilitiesTest extends AndroidTestCase {
 	private boolean ipVideoCall;
 	private Set<String> extensions;
 	private boolean automata;
+	private long timestamp;
+	private boolean valid;
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -52,6 +54,8 @@ public class CapabilitiesTest extends AndroidTestCase {
 		extensions = new HashSet<String>();
 		extensions.add(String.valueOf(random.nextInt(96) + 32));
 		extensions.add(String.valueOf(random.nextInt(96) + 32));
+		timestamp = random.nextLong();
+		valid = random.nextBoolean();
 	}
 
 	protected void tearDown() throws Exception {
@@ -60,7 +64,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
 	public void testCapabilitiesNullSet() {
 		Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer, geolocPush, ipVoiceCall,
-				ipVideoCall, null, automata);
+				ipVideoCall, null, automata, timestamp, valid);
 		Parcel parcel = Parcel.obtain();
 		capabilities.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -72,7 +76,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
 	public void testCapabilities() {
 		Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer, geolocPush, ipVoiceCall,
-				ipVideoCall, extensions, automata);
+				ipVideoCall, extensions, automata, timestamp, valid);
 		Parcel parcel = Parcel.obtain();
 		capabilities.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -83,28 +87,43 @@ public class CapabilitiesTest extends AndroidTestCase {
 	}
 
 	public static boolean capabilitiesIsEqual(Capabilities cap1, Capabilities cap2) {
-		if (cap1.isImageSharingSupported() != cap2.isImageSharingSupported())
+		if (cap1.isImageSharingSupported() != cap2.isImageSharingSupported()) {
 			return false;
-		if (cap1.isVideoSharingSupported() != cap2.isVideoSharingSupported())
+		}
+		if (cap1.isVideoSharingSupported() != cap2.isVideoSharingSupported()) {
 			return false;
-		if (cap1.isImSessionSupported() != cap2.isImSessionSupported())
+		}
+		if (cap1.isImSessionSupported() != cap2.isImSessionSupported()) {
 			return false;
-		if (cap1.isFileTransferSupported() != cap2.isFileTransferSupported())
+		}
+		if (cap1.isFileTransferSupported() != cap2.isFileTransferSupported()) {
 			return false;
-		if (cap1.isGeolocPushSupported() != cap2.isGeolocPushSupported())
+		}
+		if (cap1.isGeolocPushSupported() != cap2.isGeolocPushSupported()) {
 			return false;
-		if (cap1.isIPVideoCallSupported() != cap2.isIPVideoCallSupported())
+		}
+		if (cap1.isIPVideoCallSupported() != cap2.isIPVideoCallSupported()) {
 			return false;
-		if (cap1.isIPVoiceCallSupported() != cap2.isIPVoiceCallSupported())
+		}
+		if (cap1.isIPVoiceCallSupported() != cap2.isIPVoiceCallSupported()) {
 			return false;
-		if (cap1.isAutomata() != cap2.isAutomata())
+		}
+		if (cap1.isAutomata() != cap2.isAutomata()) {
 			return false;
+		}
 		if (cap1.getSupportedExtensions() != null) {
 			if (!cap1.getSupportedExtensions().equals(cap2.getSupportedExtensions()))
 				return false;
 		} else {
-			if (cap2.getSupportedExtensions() != null)
+			if (cap2.getSupportedExtensions() != null) {
 				return false;
+			}
+		}
+		if (cap1.getTimestamp() != cap2.getTimestamp()) {
+			return false;
+		}
+		if (cap1.isValid() != cap2.isValid()) {
+			return false;
 		}
 		return true;
 	}

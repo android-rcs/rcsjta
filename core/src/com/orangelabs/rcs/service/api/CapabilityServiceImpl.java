@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.service.api;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -38,6 +37,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Capability service API implementation
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
  */
 public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
@@ -133,22 +133,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Capabilities
      */
 	public Capabilities getMyCapabilities() {
-		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = RcsSettings.getInstance().getMyCapabilities();
-		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
-		return new Capabilities(capabilities.isImageSharingSupported(),
-				capabilities.isVideoSharingSupported(),
-				capabilities.isImSessionSupported(),
-				capabilities.isFileTransferSupported() || capabilities.isFileTransferHttpSupported(),
-				capabilities.isGeolocationPushSupported(),
-				capabilities.isIPVoiceCallSupported(),
-				capabilities.isIPVideoCallSupported(),
-    			exts,
-    			capabilities.isSipAutomata());
+		return ContactsServiceImpl.getCapabilities(RcsSettings.getInstance().getMyCapabilities());
 	}
 
     /**
      * Returns the capabilities of a given contact from the local database. This
-     * method doesn�t request any network update to the remote contact. The parameter
+     * method does not request any network update to the remote contact. The parameter
      * contact supports the following formats: MSISDN in national or international
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
      * supported an exception is thrown.
@@ -160,24 +150,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get capabilities for contact " + contact);
 		}
-
 		// Read capabilities in the local database
-		com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = ContactsManager.getInstance().getContactCapabilities(contact);
-		if (capabilities != null) {
-    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
-			return new Capabilities(
-    				capabilities.isImageSharingSupported(),
-    				capabilities.isVideoSharingSupported(),
-    				capabilities.isImSessionSupported(),
-    				capabilities.isFileTransferSupported() || capabilities.isFileTransferHttpSupported(),
-    				capabilities.isGeolocationPushSupported(),
-    				capabilities.isIPVoiceCallSupported(),
-    				capabilities.isIPVideoCallSupported(),
-    				exts,
-    				capabilities.isSipAutomata()); 
-		} else {
-			return null;
-		}
+		return ContactsServiceImpl.getCapabilities( ContactsManager.getInstance().getContactCapabilities(contact));
 	}
 
     /**
@@ -231,17 +205,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     		}
 	
     		// Create capabilities instance
-    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
-    		Capabilities c = new Capabilities(
-    				capabilities.isImageSharingSupported(),
-    				capabilities.isVideoSharingSupported(),
-    				capabilities.isImSessionSupported(),
-    				capabilities.isFileTransferSupported(),
-    				capabilities.isGeolocationPushSupported(),
-    				capabilities.isIPVoiceCallSupported(),
-    				capabilities.isIPVideoCallSupported(),
-    				exts,
-    				capabilities.isSipAutomata()); 
+    		Capabilities c = ContactsServiceImpl.getCapabilities(capabilities);
 
 			// Notify capabilities listeners
 			notifyListeners(contact, c);
@@ -281,13 +245,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 		// Request all contacts capabilities
 		try {
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			Set<ContactId> contactSet = ContactsManager.getInstance().getAllContacts();
 	    			Core.getInstance().getCapabilityService().requestContactCapabilities(contactSet);
 	    		}
-	    	};
-	    	t.start();
+	    	}.start();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);

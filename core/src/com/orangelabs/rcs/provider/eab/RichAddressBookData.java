@@ -41,7 +41,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CONTACT_NUMBER = CapabilitiesLog.CONTACT_NUMBER;
+	static final String KEY_CONTACT = CapabilitiesLog.CONTACT;
 	
 	/**
 	 * Column Name
@@ -131,7 +131,7 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_TIMESTAMP = "capability_timestamp";	
+	static final String KEY_CAPABILITY_TIME_LAST_RQST = "capability_time_last_rqst";	
 	
 	/**
 	 * Column name
@@ -216,12 +216,27 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
+	static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
+	
+	/**
+	 * Column name
+	 */
 	static final String KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP = "im_blocked_timestamp";   
 
 	/**
 	 * Column name
 	 */
 	static final String KEY_IM_BLOCKED = "im_blocked";
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_FT_BLOCKED = "ft_blocked";
+	
+	/**
+	 * Column name
+	 */
+	static final String KEY_CAPABILITY_TIME_LAST_REFRESH = CapabilitiesLog.TIMESTAMP;
 	
     /** 
      * TRUE value

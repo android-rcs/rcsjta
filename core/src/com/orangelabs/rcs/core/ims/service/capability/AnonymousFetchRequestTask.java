@@ -262,8 +262,8 @@ public class AnonymousFetchRequestTask {
     		logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason=" + error.getMessage());
     	}
 
-    	// We update the database capabilities timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(mContact, System.currentTimeMillis());
+    	// We update the database capabilities time of last request
+    	ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(mContact);
 	}
 
 	/**

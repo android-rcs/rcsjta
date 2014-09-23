@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +35,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Contacts service API implementation
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class ContactsServiceImpl extends IContactsService.Stub {
     /**
@@ -72,34 +72,87 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get joyn contact " + contact);
 		}
-
 		// Read capabilities in the local database
-		ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
-		if (contactInfo !=  null) {
-			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
-    		Set<String> exts = new HashSet<String>();
-    		List<String> listExts = capabilities.getSupportedExtensions();
-    		for(int j=0; j < listExts.size(); j++) {
-    			exts.add(listExts.get(j));
-    		}
-    		Capabilities capaApi = new Capabilities(
-    				capabilities.isImageSharingSupported(),
-    				capabilities.isVideoSharingSupported(),
-    				capabilities.isImSessionSupported(),
-    				capabilities.isFileTransferSupported(),
-    				capabilities.isGeolocationPushSupported(),
-    				capabilities.isIPVoiceCallSupported(),
-    				capabilities.isIPVideoCallSupported(),
-    				exts,
-    				capabilities.isSipAutomata()); 
-			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			return new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName());
-		} else {
+		return getJoynContact(ContactsManager.getInstance().getContactInfo(contact));
+	}
+	
+	/**
+	 * Convert the com.orangelabs.rcs.core.ims.service.capability.Capabilities instance into a Capabilities instance
+	 * 
+	 * @param capabilities
+	 *            com.orangelabs.rcs.core.ims.service.capability.Capabilities instance
+	 * @return Capabilities instance
+	 */
+	/* package private */static Capabilities getCapabilities(com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
+		if (capabilities == null) {
 			return null;
 		}
-    }	
+		return new Capabilities(capabilities.isImageSharingSupported(), capabilities.isVideoSharingSupported(),
+				capabilities.isImSessionSupported(), capabilities.isFileTransferSupported()
+						|| capabilities.isFileTransferHttpSupported(), capabilities.isGeolocationPushSupported(),
+				capabilities.isIPVoiceCallSupported(), capabilities.isIPVideoCallSupported(), capabilities.getSupportedExtensions(),
+				capabilities.isSipAutomata(), capabilities.getTimeLastRefresh(), capabilities.isValid());
+	}
 	
-    /**
+	/**
+	 * Convert the ContactInfo instance into a JoynContact instance
+	 * 
+	 * @param contactInfo
+	 *            the ContactInfo instance
+	 * @return JoynContact instance
+	 */
+	private JoynContact getJoynContact(ContactInfo contactInfo) {
+		// Discard if argument is null
+		if (contactInfo == null) {
+			return null;
+		}
+		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
+		boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+		return new JoynContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName());
+	}
+	
+	
+	/**
+	 * Interface to filter ContactInfo
+	 * @author YPLO6403
+	 *
+	 */
+	private interface FilterContactInfo {
+		/**
+		 * The filtering method
+		 * 
+		 * @param contactInfo
+		 * @return true if contactInfo is in the scope
+		 */
+		boolean inScope(ContactInfo contactInfo);
+	}
+	
+	/**
+	 * Get a filtered list of JoynContact
+	 * 
+	 * @param filterContactInfo
+	 *            the filter (or null if not applicable)
+	 * @return the filtered list of JoynContact
+	 */
+	private List<JoynContact> getJoynContacts(FilterContactInfo filterContactInfo) {
+		List<JoynContact> joynContacts = new ArrayList<JoynContact>();
+		// Read capabilities in the local database
+		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
+		for (ContactId contact : contacts) {
+			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
+			if (contactInfo != null) {
+				if (filterContactInfo == null || filterContactInfo.inScope(contactInfo)) {
+					JoynContact contact2add = getJoynContact(contactInfo);
+					if (contact2add != null) {
+						joynContacts.add(getJoynContact(contactInfo));
+					}
+				}
+			}
+		}
+		return joynContacts;
+	}
+	
+	/**
      * Returns the list of joyn contacts
      * 
      * @return List of contacts
@@ -109,36 +162,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Get joyn contacts");
 		}
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
-
-		// Read capabilities in the local database
-		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contact : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
-			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
-			Capabilities capaApi = null;
-			if (capabilities != null) {
-	    		Set<String> exts = new HashSet<String>();
-	    		List<String> listExts = capabilities.getSupportedExtensions();
-	    		for(int j=0; j < listExts.size(); j++) {
-	    			exts.add(listExts.get(j));
-	    		}
-				capaApi = new Capabilities(
-	    				capabilities.isImageSharingSupported(),
-	    				capabilities.isVideoSharingSupported(),
-	    				capabilities.isImSessionSupported(),
-	    				capabilities.isFileTransferSupported(),
-	    				capabilities.isGeolocationPushSupported(),
-	    				capabilities.isIPVoiceCallSupported(),
-	    				capabilities.isIPVideoCallSupported(),
-	    				exts,
-	    				capabilities.isSipAutomata()); 
-			}
-			boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-			result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
-		}
-		
-		return result;
+		return getJoynContacts(null);
 	}
 
     /**
@@ -147,38 +171,17 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * @return List of contacts
      * @throws ServerApiException
      */
-    public List<JoynContact> getJoynContactsOnline() throws ServerApiException {
+	public List<JoynContact> getJoynContactsOnline() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get registered joyn contacts");
 		}
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
+		return getJoynContacts(new FilterContactInfo() {
 
-		// Read capabilities in the local database
-		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contact : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
-			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
-			if (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE) {			
-				Capabilities capaApi = null;
-				if (capabilities != null) {
-		    		Set<String> exts = new HashSet<String>(capabilities.getSupportedExtensions());
-					capaApi = new Capabilities(
-		    				capabilities.isImageSharingSupported(),
-		    				capabilities.isVideoSharingSupported(),
-		    				capabilities.isImSessionSupported(),
-		    				capabilities.isFileTransferSupported(),
-		    				capabilities.isGeolocationPushSupported(),
-		    				capabilities.isIPVoiceCallSupported(),
-		    				capabilities.isIPVideoCallSupported(),
-		    				exts,
-		    				capabilities.isSipAutomata()); 
-				}
-				boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-				result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
+			@Override
+			public boolean inScope(ContactInfo contactInfo) {
+				return (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
 			}
-		}
-		
-		return result;
+		});
 	}
     
     /**
@@ -188,43 +191,30 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * @return List of contacts
      * @throws ServerApiException
      */
-    public List<JoynContact> getJoynContactsSupporting(String serviceId) throws ServerApiException {
+	public List<JoynContact> getJoynContactsSupporting(final String serviceId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get joyn contacts supporting " + serviceId);
 		}
-		
-		ArrayList<JoynContact> result = new ArrayList<JoynContact>();
 
-		// Read capabilities in the local database
-		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
-		for (ContactId contact : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
-			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
-			Capabilities capaApi = null;
-			if (capabilities != null) {
-				ArrayList<String> exts = capabilities.getSupportedExtensions();
-				for (int j=0; j < exts.size(); j++) {
-					String ext = exts.get(j);
-					if (ext.equals(serviceId)) { 
-						capaApi = new Capabilities(
-			    				capabilities.isImageSharingSupported(),
-			    				capabilities.isVideoSharingSupported(),
-			    				capabilities.isImSessionSupported(),
-			    				capabilities.isFileTransferSupported(),
-			    				capabilities.isGeolocationPushSupported(),
-			    				capabilities.isIPVoiceCallSupported(),
-			    				capabilities.isIPVideoCallSupported(),
-			    				new HashSet<String>(capabilities.getSupportedExtensions()),
-			    				capabilities.isSipAutomata()); 
-						boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-						result.add(new JoynContact(contact, registered, capaApi, contactInfo.getDisplayName()));
+		return getJoynContacts(new FilterContactInfo() {
+
+			@Override
+			public boolean inScope(ContactInfo contactInfo) {
+				com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
+				if (capabilities != null) {
+					Set<String> supportedExtensions = capabilities.getSupportedExtensions();
+					if (supportedExtensions != null) {
+						for (String supportedExtension : supportedExtensions) {
+							if (supportedExtension.equals(serviceId)) {
+								return true;
+							}
+						}
 					}
 				}
+				return false;
 			}
-		}
-		
-		return result;
-    }
+		});
+	}
 
 	/**
 	 * Returns service version

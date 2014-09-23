@@ -90,7 +90,6 @@ public class StreamingSessionList extends MultimediaSessionList {
 				setListAdapter(null);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			Utils.showMessageAndExit(StreamingSessionList.this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
