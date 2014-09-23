@@ -38,9 +38,9 @@ public class FileTransfer {
      */
     public static class State {
     	/**
-    	 * Inactive state
+    	 * Unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * File transfer invitation received
@@ -68,58 +68,148 @@ public class FileTransfer {
     	public final static int ABORTED = 5;
     	
     	/**
-    	 * File transfer has failed 
+    	 * File transfer has failed
     	 */
     	public final static int FAILED = 6;
+
+    	/**
+    	 * File transfer is paused
+    	 */
+    	public final static int PAUSED = 7;
+
+    	/**
+    	 * File transfer is rejected
+    	 */
+    	public final static int REJECTED = 8;
+
+    	/**
+    	 * File transfer has been accepted and is in the process of becoming started
+    	 */
+    	public final static int ACCEPTING = 9;
     	
     	/**
-    	 * File transfer has been delivered 
+    	 * File transfer has been delivered
     	 */
-    	public final static int DELIVERED = 7;
+    	public final static int DELIVERED = 10;
 
     	/**
-    	 * File transfer has been displayed or opened 
+    	 * File transfer has been displayed or opened
     	 */
-    	public final static int DISPLAYED = 8;
+    	public final static int DISPLAYED = 11;
 
     	/**
-    	 * File transfer is paused 
+    	 * File transfer has been queued
     	 */
-    	public final static int PAUSED = 9;
+    	public final static int QUEUED = 12;
     	
     	private State() {
         }    	
     }
 
     /**
-     * File transfer read status
+     * File transfer reason code
      */
-    public static class ReadStatus {
+    public static class ReasonCode {
         /**
-         * The invitation or file corresponding to this file transfer has not yet been displayed in the UI.
+         * No specific reason code specified.
          */
-        public final static int UNREAD = 0;
+        public final static int UNSPECIFIED = 0;
 
         /**
-         * The invitation or file corresponding to the file transfer has been displayed in the UI.
+         * File transfer is aborted by local user.
          */
-        public final static int READ = 1;
+        public final static int ABORTED_BY_USER = 1;
+
+        /**
+         * File transfer is aborted by remote user..
+         */
+        public final static int ABORTED_BY_REMOTE = 2;
+
+        /**
+         * File transfer is aborted by system.
+         */
+        public final static int ABORTED_BY_SYSTEM = 3;
+
+        /**
+         * file transfer is rejected because already taken by the secondary device.
+         */
+        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+
+        /**
+         * File transfer has been rejected due to time out.
+         */
+        public final static int REJECTED_TIME_OUT = 5;
+
+        /**
+         * Incoming file transfer was rejected as it was detected as spam.
+         */
+        public final static int REJECTED_SPAM = 6;
+
+        /**
+         * Incoming file transfer was rejected as is cannot be received due to lack of local storage space.
+         */
+        public final static int REJECTED_LOW_SPACE = 7;
+
+        /**
+         * Incoming transfer was rejected as it was too big to be received.
+         */
+        public final static int REJECTED_MAX_SIZE = 8;
+
+        /**
+         * Incoming file transfer was rejected as there was too many file transfers ongoing.
+         */
+        public final static int REJECTED_MAX_FILE_TRANSFERS = 9;
+
+        /**
+         * File transfer invitation was rejected by local user.
+         */
+        public final static int REJECTED_BY_USER = 10;
+
+        /**
+         * File transfer invitation was rejected by remote.
+         */
+        public final static int REJECTED_BY_REMOTE = 11;
+
+        /**
+         * File transfer was paused by system.
+         */
+        public final static int PAUSED_BY_SYSTEM = 12;
+
+        /**
+         * File transfer was paused by user.
+         */
+        public final static int PAUSED_BY_USER = 13;
+
+        /**
+         * File transfer initiation failed.
+         */
+        public final static int FAILED_INITIATION = 14;
+
+        /**
+         * The transferring of the file contents (data) from/to remote side failed.
+         */
+        public final static int FAILED_DATA_TRANSFER = 15;
+
+        /**
+         * Saving of the incoming file transfer failed.
+         */
+        public final static int FAILED_SAVING = 16;
+
+        /**
+         * Delivering of the file transfer invitation failed.
+         */
+        public final static int FAILED_DELIVERY = 17;
+
+        /**
+         * Displaying of the file transfer invitation failed.
+         */
+        public final static int FAILED_DISPLAY = 18;
+
+        /**
+         * File transfer not allowed to be sent.
+         */
+        public final static int FAILED_NOT_ALLOWED_TO_SEND = 19;
     }
-    
-    /**
-     * Direction of the transfer
-     */
-    public static class Direction {
-        /**
-         * Incoming transfer
-         */
-        public static final int INCOMING = 0;
-        
-        /**
-         * Outgoing transfer
-         */
-        public static final int OUTGOING = 1;
-    }     
     
     /**
      * File transfer error
@@ -290,7 +380,7 @@ public class FileTransfer {
 	 * Returns the direction of the transfer (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see FileTransfer.Direction
+	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws JoynServiceException
 	 */
 	public int getDirection() throws JoynServiceException {

@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -56,15 +57,15 @@ public class ChatMessageTest extends AndroidTestCase {
 		InstantMessage msg = new InstantMessage(msgId, remote, txt, true, "display");
 		
 		// Add entry
-		MessagingLog.getInstance().addChatMessage(msg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
     	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
-    				ChatLog.Message.CONTACT_NUMBER,
-    				ChatLog.Message.BODY,
+    				ChatLog.Message.CONTACT,
+    				ChatLog.Message.CONTENT,
     				ChatLog.Message.MIME_TYPE,
     				ChatLog.Message.MESSAGE_TYPE,
     				ChatLog.Message.MESSAGE_ID
@@ -83,7 +84,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		int type = cursor.getInt(4);
     		String id = cursor.getString(5);
     		
-    		assertEquals(direction, ChatLog.Message.Direction.OUTGOING);
+    		assertEquals(direction, RcsCommon.Direction.OUTGOING);
     		assertEquals(contact, remote.toString());
     		assertEquals(readTxt, txt);
     		assertEquals(contentType, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
@@ -98,15 +99,15 @@ public class ChatMessageTest extends AndroidTestCase {
 		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true,"display");
 		
 		// Add entry
-		MessagingLog.getInstance().addChatMessage(geolocMsg, ChatLog.Message.Direction.OUTGOING);
+		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(geolocMsg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
     	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
-    				ChatLog.Message.CONTACT_NUMBER,
-    				ChatLog.Message.BODY,
+    				ChatLog.Message.CONTACT,
+    				ChatLog.Message.CONTENT,
     				ChatLog.Message.MIME_TYPE,
     				ChatLog.Message.MESSAGE_TYPE,
     				ChatLog.Message.MESSAGE_ID
@@ -127,7 +128,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		int type = cursor.getInt(4);
     		String id = cursor.getString(5);
     		
-    		assertEquals(direction, ChatLog.Message.Direction.OUTGOING);
+    		assertEquals(direction, RcsCommon.Direction.OUTGOING);
     		assertEquals(contact, remote.toString());
     		assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
     		assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());

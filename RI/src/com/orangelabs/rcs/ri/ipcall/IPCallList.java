@@ -36,6 +36,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.ri.R;
@@ -159,27 +160,26 @@ public class IPCallList extends Activity {
 	 * @return String
 	 */
 	private String decodeState(int state) {
-		if (state == IPCall.State.ABORTED) {
-			return getString(R.string.label_state_aborted);
-		} else
-		if (state == IPCall.State.TERMINATED) {
-			return getString(R.string.label_state_terminated);
-		} else
-		if (state == IPCall.State.FAILED) {
-			return getString(R.string.label_state_failed);
-		} else
-		if (state == IPCall.State.INITIATED) {
-			return getString(R.string.label_state_initiated);
-		} else
-		if (state == IPCall.State.INVITED) {
+		switch (state) {
+		case IPCall.State.INVITED:
 			return getString(R.string.label_state_invited);
-		} else
-		if (state == IPCall.State.STARTED) {
+		case IPCall.State.INITIATED:
+			return getString(R.string.label_state_initiated);
+		case IPCall.State.STARTED:
 			return getString(R.string.label_state_started);
-		} else
-		if (state == IPCall.State.INACTIVE) {
-			return getString(R.string.label_state_inactive);
-		} else {
+		case IPCall.State.ABORTED:
+			return getString(R.string.label_state_aborted);
+		case IPCall.State.FAILED:
+			return getString(R.string.label_state_failed);
+		case IPCall.State.REJECTED:
+			return getString(R.string.label_state_rejected);
+		case IPCall.State.HOLD:
+			return getString(R.string.label_state_hold);
+		case IPCall.State.ACCEPTING:
+			return getString(R.string.label_state_accepting);
+		case IPCall.State.RINGING:
+			return getString(R.string.label_state_ringing);
+		default:
 			return getString(R.string.label_state_unknown);
 		}
 	}
@@ -191,7 +191,7 @@ public class IPCallList extends Activity {
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
-		if (direction == IPCall.Direction.INCOMING) {
+		if (direction == RcsCommon.Direction.INCOMING) {
 			return getString(R.string.label_incoming);
 		} else {
 			return getString(R.string.label_outgoing);

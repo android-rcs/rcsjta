@@ -43,13 +43,13 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 		mVideoSharingListeners.unregister(listener);
 	}
 
-	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int state) {
+	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int state,
+			int reasonCode) {
 		final int N = mVideoSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mVideoSharingListeners.getBroadcastItem(i).onVideoSharingStateChanged(contact,
-						sharingId, state);
+						sharingId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

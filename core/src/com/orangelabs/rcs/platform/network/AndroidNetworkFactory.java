@@ -56,7 +56,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
         String ipAddress = null;
         try {
             // What kind of remote address (P-CSCF) are we trying to reach?
-            boolean isIpv4 = InetAddressUtils.isIPv4Address(dnsEntry.ipAddress);
+            boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.ipAddress) : true;
 
             // check all available interfaces
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null) && en.hasMoreElements();) {

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ish;
@@ -50,7 +50,7 @@ public class ImageSharingLog {
      * The name of the column containing the MSISDN of the remote contact.
      * <P>Type: TEXT</P>
      */
-    public static final String CONTACT_NUMBER = "contact_number";
+    public static final String CONTACT = "contact";
 
     /**
      * The name of the column containing the URI of the file
@@ -79,7 +79,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the direction of the sharing.
      * <P>Type: INTEGER</P>
-	 * @see ImageSharing.Direction
+     * @see com.gsma.services.rcs.RcsCommon.Direction
      */
     public static final String DIRECTION = "direction";
     
@@ -101,4 +101,11 @@ public class ImageSharingLog {
 	 * @see ImageSharing.State
      */
     public static final String STATE = "state";    
+
+    /**
+     * The name of the column containing the reason code of the state.
+     * <P>Type: INTEGER</P>
+     * @see ImageSharing.ReasonCode
+     */
+    public static final String REASON_CODE = "reason_code";
 }

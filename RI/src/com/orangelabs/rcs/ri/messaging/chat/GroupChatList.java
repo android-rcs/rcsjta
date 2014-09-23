@@ -38,35 +38,24 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * List group chats from the content provider 
  */
-public class GroupChatList extends Activity implements JoynServiceListener {
+public class GroupChatList extends Activity {
 	/**
 	 * List view
 	 */
     private ListView listView;
 
-    /**
-	 * Chat API
-	 */
-    private ChatService chatApi;
-    
-    /**
-	 * API connection state
-	 */
-	private boolean apiEnabled = false;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -82,12 +71,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
-        
-        // Instanciate API
-        chatApi = new ChatService(getApplicationContext(), this);
-        
-        // Connect API
-        chatApi.connect();        
 	}
 
 	@Override
@@ -98,14 +81,6 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 		listView.setAdapter(createListAdapter());
 	}
 	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-
-        // Disconnect API
-        chatApi.disconnect();
-	}
-		
 	/**
 	 * Create chat list adapter with unique chat ID entries
 	 */
@@ -150,7 +125,7 @@ public class GroupChatList extends Activity implements JoynServiceListener {
     		GroupChatListItemCache cache = new GroupChatListItemCache();
     		cache.chatId = cursor.getString(1);
     		cache.subject = cursor.getString(2);
-    		cache.state = cursor.getInt(3);
+    		//cache.state = cursor.getInt(3);
     		cache.date = cursor.getLong(4);
     		view.setTag(cache);
             return view;
@@ -185,36 +160,17 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 	private class GroupChatListItemCache {
 		private String chatId;
 		private String subject;
-		private int state;
+		//private int state;
 		private long date;
 	}    
-    
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		apiEnabled = true;
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		apiEnabled = false;
-    }    
-    
+       
     /**
      * Onclick list listener
      */
     private OnClickListener clickItemListener = new OnClickListener() {
 		public void onClick(View v) {
-			if (!apiEnabled) {
+			ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(GroupChatList.this);
+			if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Chat)) {
 				Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}
@@ -224,7 +180,7 @@ public class GroupChatList extends Activity implements JoynServiceListener {
 				GroupChatListItemCache cache = (GroupChatListItemCache)v.getTag();
 				
 				// Get group chat
-				GroupChat groupChat = chatApi.getGroupChat(cache.chatId);
+				GroupChat groupChat = connectionManager.getChatApi().getGroupChat(cache.chatId);
 				if (groupChat != null) {
 					// Session already active on the device: just reload it in the UI
 					Intent intent = new Intent(GroupChatList.this, GroupChatView.class);

@@ -36,6 +36,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.ri.R;
@@ -84,7 +85,7 @@ public class VideoSharingList extends Activity {
 		Uri uri = VideoSharingLog.CONTENT_URI;
         String[] projection = new String[] {
         	VideoSharingLog.ID,
-        	VideoSharingLog.CONTACT_NUMBER,
+        	VideoSharingLog.CONTACT,
         	VideoSharingLog.DURATION,
     		VideoSharingLog.STATE,
     		VideoSharingLog.DIRECTION,
@@ -163,27 +164,24 @@ public class VideoSharingList extends Activity {
 	 * @return String
 	 */
 	private String decodeState(int state) {
-		if (state == VideoSharing.State.ABORTED) {
-			return getString(R.string.label_state_aborted);
-		} else
-		if (state == VideoSharing.State.FAILED) {
-			return getString(R.string.label_state_failed);
-		} else
-		if (state == VideoSharing.State.INITIATED) {
-			return getString(R.string.label_state_initiated);
-		} else
-		if (state == VideoSharing.State.INVITED) {
+		switch (state) {
+		case VideoSharing.State.INVITED:
 			return getString(R.string.label_state_invited);
-		} else
-		if (state == VideoSharing.State.STARTED) {
+		case VideoSharing.State.INITIATED:
+			return getString(R.string.label_state_initiated);
+		case VideoSharing.State.STARTED:
 			return getString(R.string.label_state_started);
-		} else
-		if (state == VideoSharing.State.TERMINATED) {
-			return getString(R.string.label_state_terminated);
-		} else
-		if (state == VideoSharing.State.INACTIVE) {
-			return getString(R.string.label_state_inactive);
-		} else {
+		case VideoSharing.State.ABORTED:
+			return getString(R.string.label_state_aborted);
+		case VideoSharing.State.FAILED:
+			return getString(R.string.label_state_failed);
+		case VideoSharing.State.REJECTED:
+			return getString(R.string.label_state_rejected);
+		case VideoSharing.State.RINGING:
+			return getString(R.string.label_state_ringing);
+		case VideoSharing.State.ACCEPTING:
+			return getString(R.string.label_state_accepting);
+		default:
 			return getString(R.string.label_state_unknown);
 		}
 	}
@@ -195,7 +193,7 @@ public class VideoSharingList extends Activity {
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
-		if (direction == VideoSharing.Direction.INCOMING) {
+		if (direction == RcsCommon.Direction.INCOMING) {
 			return getString(R.string.label_incoming);
 		} else {
 			return getString(R.string.label_outgoing);

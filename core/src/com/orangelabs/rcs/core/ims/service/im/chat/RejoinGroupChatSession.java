@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
@@ -22,14 +26,12 @@ import javax2.sip.header.SubjectHeader;
 
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -164,9 +166,13 @@ public class RejoinGroupChatSession extends GroupChatSession {
      */
     public void handle404SessionNotFound(SipResponse resp) {
 		// Rejoin session has failed, we update the database with status terminated by remote
-        MessagingLog.getInstance().updateGroupChatStatus(getContributionID(), GroupChat.State.TERMINATED);
 
-		// Notify listener
+		// TODO Once after CR18 is implemented we will check if this callback is
+		// really required and act accordingly
+
+		//MessagingLog.getInstance().updateGroupChatStatus(getContributionID(),
+				//GroupChat.State.TERMINATED, GroupChat.ReasonCode.NONE);
+
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
     }
 

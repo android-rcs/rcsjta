@@ -106,7 +106,7 @@ public class VideoSharingDAO implements Parcelable {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
 			if (cursor.moveToFirst()) {
 				this.sharingId = sharingId;
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT_NUMBER));
+				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
 					contact = contactUtils.formatContactId(_contact);

@@ -36,6 +36,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.ri.R;
@@ -169,30 +170,32 @@ public class FileTransferList extends Activity {
 	 * @return String
 	 */
 	private String decodeState(int state) {
-		if (state == FileTransfer.State.ABORTED) {
-			return getString(R.string.label_state_aborted);
-		} else
-		if (state == FileTransfer.State.FAILED) {
-			return getString(R.string.label_state_failed);
-		} else
-		if (state == FileTransfer.State.INITIATED) {
-			return getString(R.string.label_state_initiated);
-		} else
-		if (state == FileTransfer.State.INVITED) {
+		switch (state) {
+		case FileTransfer.State.INVITED:
 			return getString(R.string.label_state_invited);
-		} else
-		if (state == FileTransfer.State.STARTED) {
+		case FileTransfer.State.INITIATED:
+			return getString(R.string.label_state_initiated);
+		case FileTransfer.State.STARTED:
 			return getString(R.string.label_state_started);
-		} else
-		if (state == FileTransfer.State.TRANSFERRED) {
+		case FileTransfer.State.TRANSFERRED:
 			return getString(R.string.label_state_transferred);
-		} else 
-		if (state == FileTransfer.State.DISPLAYED) {
+		case FileTransfer.State.ABORTED:
+			return getString(R.string.label_state_aborted);
+		case FileTransfer.State.FAILED:
+			return getString(R.string.label_state_failed);
+		case FileTransfer.State.PAUSED:
+			return getString(R.string.label_state_paused);
+		case FileTransfer.State.REJECTED:
+			return getString(R.string.label_state_rejected);
+		case FileTransfer.State.ACCEPTING:
+			return getString(R.string.label_state_accepting);
+		case FileTransfer.State.DELIVERED:
+			return getString(R.string.label_state_delivered);
+		case FileTransfer.State.DISPLAYED:
 			return getString(R.string.label_state_displayed);
-		} else
-		if (state == FileTransfer.State.INACTIVE) {
-			return getString(R.string.label_state_inactive);
-		} else {
+		case FileTransfer.State.QUEUED:
+			return getString(R.string.label_state_queued);
+		default:
 			return getString(R.string.label_state_unknown);
 		}
 	}
@@ -204,7 +207,7 @@ public class FileTransferList extends Activity {
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
-		if (direction == FileTransfer.Direction.INCOMING) {
+		if (direction == RcsCommon.Direction.INCOMING) {
 			return getString(R.string.label_incoming);
 		} else {
 			return getString(R.string.label_outgoing);

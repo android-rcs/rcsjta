@@ -30,9 +30,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.ipcall.IPCall;
-import com.gsma.services.rcs.ipcall.IPCallService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -41,22 +41,18 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IPCallSessionsList extends ListActivity implements JoynServiceListener {
-	/**
-	 * IP call API
-	 */
-	private IPCallService callApi;
+public class IPCallSessionsList extends ListActivity {
 
 	/**
 	 * List of calls
 	 */
 	private List<IPCall> calls = new ArrayList<IPCall>();
 
-    /**
-	 * API connection state
+  	/**
+	 * API connection manager
 	 */
-	private boolean apiEnabled = false;
-	
+	private ApiConnectionManager connectionManager;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,11 +64,13 @@ public class IPCallSessionsList extends ListActivity implements JoynServiceListe
         // Set title
         setTitle(R.string.menu_ipcall_list);
 
-        // Instanciate API
-        callApi = new IPCallService(getApplicationContext(), this);
-        
-        // Connect API
-        callApi.connect();
+        // Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.IpCall)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.IpCall);
 	}
 	
 	@Override
@@ -86,35 +84,10 @@ public class IPCallSessionsList extends ListActivity implements JoynServiceListe
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-        // Disconnect API
-        callApi.disconnect();
+		if (connectionManager != null) {
+			connectionManager.stopMonitorServices(this);
+    	}
 	}	
-	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-		apiEnabled = true;
-
-		// Display the list of calls
-		updateList();
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-		apiEnabled = false;
-
-		Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_disabled));
-    }    
     
     /**
      * Callback called when service is registered to the RCS/IMS platform
@@ -151,28 +124,26 @@ public class IPCallSessionsList extends ListActivity implements JoynServiceListe
     /**
      * Update the displayed list
      */
-    private void updateList() {
+	private void updateList() {
 		try {
 			// Reset the list
 			calls.clear();
 
-			if (apiEnabled) {
-		    	// Get list of pending sessions
-		    	Set<IPCall> currentCalls = callApi.getIPCalls();
-		    	calls = new ArrayList<IPCall>(currentCalls);
-				if (calls.size() > 0){
-			        String[] items = new String[calls.size()];    
-			        for (int i = 0; i < items.length; i++) {
-						items[i] = getString(R.string.label_session, calls.get(i).getCallId());
-			        }
-					setListAdapter(new ArrayAdapter<String>(IPCallSessionsList.this, android.R.layout.simple_list_item_1, items));
-				} else {
-					setListAdapter(null);
+			// Get list of pending sessions
+			Set<IPCall> currentCalls = connectionManager.getIPCallApi().getIPCalls();
+			calls = new ArrayList<IPCall>(currentCalls);
+			if (calls.size() > 0) {
+				String[] items = new String[calls.size()];
+				for (int i = 0; i < items.length; i++) {
+					items[i] = getString(R.string.label_session, calls.get(i).getCallId());
 				}
+				setListAdapter(new ArrayAdapter<String>(IPCallSessionsList.this, android.R.layout.simple_list_item_1, items));
+			} else {
+				setListAdapter(null);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed));
 		}
-    }
+	}
 }

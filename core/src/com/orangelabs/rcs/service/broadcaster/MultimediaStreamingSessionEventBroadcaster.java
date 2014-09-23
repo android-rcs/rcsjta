@@ -61,13 +61,12 @@ public class MultimediaStreamingSessionEventBroadcaster implements
 	}
 
 	public void broadcastMultimediaStreamingStateChanged(ContactId contact, String sessionId,
-			int state) {
+			int state, int reasonCode) {
 		final int N = mMultimediaStreamingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
 				mMultimediaStreamingListeners.getBroadcastItem(i)
-						.onMultimediaStreamingStateChanged(contact, sessionId, state);
+						.onMultimediaStreamingStateChanged(contact, sessionId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

@@ -46,12 +46,13 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastTransferStateChanged(String chatId, String transferId, int state) {
+	public void broadcastTransferStateChanged(String chatId, String transferId, int state,
+			int reasonCode) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				mGroupFileTransferListeners.getBroadcastItem(i).onTransferStateChanged(chatId,
-						transferId, state);
+						transferId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -78,11 +79,13 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 	}
 
 	public void broadcastSingleRecipientDeliveryStateChanged(String chatId, ContactId contact,
-			String transferId, int state) {
+			String transferId, int state, int reasonCode) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onGroupDeliveryInfoChanged(chatId, contact, transferId, state);
+				mGroupFileTransferListeners.getBroadcastItem(i)
+						.onSingleRecipientDeliveryStateChanged(chatId, contact, transferId,
+								state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener per contact", e);

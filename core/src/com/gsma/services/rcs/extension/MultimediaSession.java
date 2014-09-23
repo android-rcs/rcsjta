@@ -37,9 +37,9 @@ public abstract class MultimediaSession {
      */
     public static class State {
     	/**
-    	 * Session is inactive
+    	 * Session is in unknown state
     	 */
-    	public final static int INACTIVE = 0;
+    	public final static int UNKNOWN = 0;
 
     	/**
     	 * Session invitation received
@@ -59,41 +59,67 @@ public abstract class MultimediaSession {
     	/**
     	 * Session has been aborted or 
     	 */
-    	public final static int ABORTED = 5;
-    	
-        /**
-         * Session has been terminated
-         */
-        public static final int TERMINATED = 6;
+    	public final static int ABORTED = 4;
 
         /**
     	 * Session has failed 
     	 */
-    	public final static int FAILED = 7;
+    	public final static int FAILED = 5;
+
+        /**
+    	 * Session has been rejected.
+    	 */
+    	public final static int REJECTED = 6;
 
         /**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 8;
+    	public final static int RINGING = 7;
+
+    	/**
+    	 * Session has been accepted and is in the process of becoming started
+    	 */
+    	public final static int ACCEPTING = 8;
 
         private State() {
         }    	
     }
-    
+
     /**
-     * Direction of the session
+     * Multimedia session reason code
      */
-    public static class Direction {
+    public static class ReasonCode {
+
         /**
-         * Incoming session
+         * No specific reason code specified.
          */
-        public static final int INCOMING = 0;
-        
+        public final static int UNSPECIFIED = 0;
+
         /**
-         * Outgoing session
+         * Session invitation was rejected due to time out.
          */
-        public static final int OUTGOING = 1;
-    }     
+        public final static int REJECTED_TIME_OUT = 1;
+
+        /**
+         * Session invitation was rejected by local user.
+         */
+        public final static int REJECTED_BY_USER = 2;
+
+        /**
+         * Session invitation was rejected by remote.
+         */
+        public final static int REJECTED_BY_REMOTE = 3;
+
+        /**
+         * Session failed.
+         */
+        public final static int FAILED_SESSION = 4;
+
+        /**
+         * Media failed.
+         */
+        public final static int FAILED_MEDIA = 5;
+    }
     
     /**
      * Session error

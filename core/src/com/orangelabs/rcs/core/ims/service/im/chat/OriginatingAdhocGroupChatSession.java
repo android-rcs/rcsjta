@@ -104,7 +104,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	                    SdpUtils.DIRECTION_SENDRECV);
 
 	        // Generate the resource list for given participants
-	        String resourceList = ChatUtils.generateChatResourceList(ParticipantInfoUtils.getContactsFromParticipantInfo(getParticipants()));
+	        String resourceList = ChatUtils.generateChatResourceList(ParticipantInfoUtils.getContacts(getParticipants()));
 	    	
 	    	// Build multipart
 	    	String multipart =

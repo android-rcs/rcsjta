@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
@@ -24,9 +28,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -38,10 +46,9 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -73,6 +80,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite, ContactId contact, String remoteUri, Set<ParticipantInfo> participants) {
 		super(parent, contact, remoteUri, participants);
 
+		Set<ParticipantInfo> sessionParticipants = getParticipants();
 		// Set subject
 		String subject = ChatUtils.getSubject(invite);
 		setSubject(subject);
@@ -80,25 +88,27 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 		// Create dialog path
 		createTerminatingDialogPath(invite);
 
+		setRemoteDisplayName(SipUtils.getDisplayNameFromUri(SipUtils.getAssertedIdentityHeader(invite)));
+		
 		// Set contribution ID
-		String id = ChatUtils.getContributionId(invite);
-		setContributionID(id);
+		String chatId = ChatUtils.getContributionId(invite);
+		setContributionID(chatId);
 
 		// Detect if it's a rejoin
-		if (getParticipants().size() == 0) {
+		if (sessionParticipants.size() == 0) {
 			if (logger.isActivated()) {
 				logger.info("Invite to join a group chat");
 			}
 		} else {
 			if (logger.isActivated()) {
-				logger.info("Set of invited participants: " + Arrays.toString(getParticipants().toArray()));
+				logger.info("Set of invited participants: " + getListOfParticipants(sessionParticipants));
 			}
 			// Detect if it's a restart: retrieve set of initial participants
 			Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance().getGroupChatConnectedParticipants(
 					getContributionID());
 			if (initialParticipants != null && initialParticipants.size() > 0) {
 				if (logger.isActivated()) {
-					logger.info("Set of initial participants: " + Arrays.toString(initialParticipants.toArray()));
+					logger.info("Set of initial participants: " + getListOfParticipants(initialParticipants));
 				}
 				missingParticipants = new HashSet<ContactId>();
 				// Run through the set of initial participants
@@ -112,8 +122,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				}
 				if (missingParticipants.size() != 0) {
 					if (logger.isActivated()) {
-						logger.info("Invite to restart with missing participants: "
-								+ Arrays.toString(missingParticipants.toArray()));
+						StringBuilder sb = new StringBuilder("Invite to restart with missing participants: ");
+						for (ContactId missing : missingParticipants) {
+							sb.append(missing.toString()).append(" ");
+						}
+						logger.info(sb.toString());
 					}
 				}
 			} else {
@@ -133,57 +146,79 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	    		logger.info("Initiate a new ad-hoc group chat session as terminating");
 	    	}
 
-            if (RcsSettings.getInstance().isGroupChatAutoAccepted() || FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+	    	/* Check if session should be auto-accepted once */
+            if (shouldBeAutoAccepted()) {
                 if (logger.isActivated()) {
                     logger.debug("Auto accept group chat invitation");
                 }
+                MessagingLog.getInstance().addGroupChat(getContributionID(), getSubject(),
+                		getParticipants(), GroupChat.State.ACCEPTING, ReasonCode.UNSPECIFIED, Direction.INCOMING);
             } else {
                 if (logger.isActivated()) {
                     logger.debug("Accept manually group chat invitation");
                 }
+                MessagingLog.getInstance().addGroupChat(getContributionID(), getSubject(),
+                        getParticipants(), GroupChat.State.INVITED, ReasonCode.UNSPECIFIED, Direction.INCOMING);
+
     	    	// Send a 180 Ringing response
     			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
     			
-    			// Wait invitation answer
-    	    	int answer = waitInvitationAnswer();
-    			if (answer == ImsServiceSession.INVITATION_REJECTED) {
-    				if (logger.isActivated()) {
-    					logger.debug("Session has been rejected by user");
-    				}
-    				
-    		    	// Remove the current session
-    		    	getImsService().removeSession(this);
-    
-    		    	// Notify listeners
-    		    	for(int i=0; i < getListeners().size(); i++) {
-    		    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_USER);
-    		        }
-    				return;
-    			} else
-    			if (answer == ImsServiceSession.INVITATION_NOT_ANSWERED) {
-    				if (logger.isActivated()) {
-    					logger.debug("Session has been rejected on timeout");
-    				}
-    
-    				// Ringing period timeout
-    				send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
-    				
-    		    	// Remove the current session
-    		    	getImsService().removeSession(this);
-    
-    		    	// Notify listeners
-        	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		getListeners().get(i).handleSessionAborted(ImsServiceSession.TERMINATION_BY_TIMEOUT);
-    		        }
-    				return;
-    			} else
-                if (answer == ImsServiceSession.INVITATION_CANCELED) {
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been canceled");
-                    }
-                    return;
-                }
-            }
+				int answer = waitInvitationAnswer();
+				Vector<ImsSessionListener> listeners = getListeners();
+				switch (answer) {
+					case ImsServiceSession.INVITATION_REJECTED:
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected by user");
+						}
+
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByUser();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_NOT_ANSWERED:
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected on timeout");
+						}
+
+						// Ringing period timeout
+						send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByTimeout();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_CANCELED:
+						if (logger.isActivated()) {
+							logger.debug("Session has been rejected by remote");
+						}
+
+						getImsService().removeSession(this);
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionRejectedByRemote();
+						}
+						return;
+
+					case ImsServiceSession.INVITATION_ACCEPTED:
+						for (ImsSessionListener listener : listeners) {
+							((ChatSessionListener)listener).handleSessionAccepting();
+						}
+						break;
+
+					default:
+						if (logger.isActivated()) {
+							logger.debug("Unknown invitation answer in run; answer="
+									.concat(String.valueOf(answer)));
+						}
+						return;
+				}
+			}
 
         	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
@@ -364,6 +399,21 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	@Override
 	public boolean isInitiatedByRemote() {
 		return true;
+	}
+	
+	/**
+	 * Returns the list of participants separated by commas
+	 * 
+	 * @param participants
+	 *            set of participants
+	 * @return the list of participants separated by commas
+	 */
+	private String getListOfParticipants(Set<ParticipantInfo> participants) {
+		StringBuilder sb = new StringBuilder();
+		for (ParticipantInfo participantInfo : participants) {
+			sb.append(participantInfo.getContact().toString()).append(",");
+		}
+		return sb.toString();
 	}
 	
 }

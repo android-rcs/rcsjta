@@ -249,13 +249,13 @@ public final class TLSMessageChannel extends MessageChannel implements SIPMessag
     /**
      * Send message to whoever is connected to us. Uses the topmost via address to send to.
      *
-     * @param msg is the message to send.
+     * @param message is the message to send.
      * @param retry
      */
-    private void sendMessage(byte[] msg, boolean retry) throws IOException {
+    private void sendMessage(SIPMessage message, boolean retry) throws IOException {
         Socket sock = this.sipStack.ioHandler.sendBytes(
                 this.getMessageProcessor().getIpAddress(), this.peerAddress, this.peerPort,
-                this.peerProtocol, msg, retry,this);
+                this.peerProtocol, message, retry,this);
         // Created a new socket so close the old one and stick the new
         // one in its place but dont do this if it is a datagram socket.
         // (could have replied via udp but received via tcp!).
@@ -284,11 +284,10 @@ public final class TLSMessageChannel extends MessageChannel implements SIPMessag
      * @throws IOException If there is an error sending the message
      */
     public void sendMessage(SIPMessage sipMessage) throws IOException {
-        byte[] msg = sipMessage.encodeAsBytes(this.getTransport());
 
         long time = System.currentTimeMillis();
 
-        this.sendMessage(msg, sipMessage instanceof SIPRequest);
+        this.sendMessage(sipMessage, sipMessage instanceof SIPRequest);
 
         if (this.sipStack.getStackLogger().isLoggingEnabled(ServerLogger.TRACE_MESSAGES))
             logMessage(sipMessage, peerAddress, peerPort, time);
@@ -297,12 +296,12 @@ public final class TLSMessageChannel extends MessageChannel implements SIPMessag
     /**
      * Send a message to a specified address.
      *
-     * @param message Pre-formatted message to send.
+     * @param message message to send.
      * @param receiverAddress Address to send it to.
      * @param receiverPort Receiver port.
      * @throws IOException If there is a problem connecting or sending.
      */
-    public void sendMessage(byte message[], InetAddress receiverAddress, int receiverPort,
+    public void sendMessage(SIPMessage message, InetAddress receiverAddress, int receiverPort,
             boolean retry) throws IOException {
         if (message == null || receiverAddress == null)
             throw new IllegalArgumentException("Null argument");
@@ -355,14 +354,14 @@ public final class TLSMessageChannel extends MessageChannel implements SIPMessag
             String msgString = sipMessage.toString();
             if (!msgString.startsWith("SIP/") && !msgString.startsWith("ACK ")) {
 
-                String badReqRes = createBadReqRes(msgString, ex);
+                SIPMessage badReqRes = createBadReqRes(msgString, ex);
                 if (badReqRes != null) {
                     if (sipStack.isLoggingEnabled()) {
                         sipStack.getStackLogger().logDebug("Sending automatic 400 Bad Request:");
-                        sipStack.getStackLogger().logDebug(badReqRes);
+                        sipStack.getStackLogger().logDebug(msgString);
                     }
                     try {
-                        this.sendMessage(badReqRes.getBytes(), this.getPeerInetAddress(), this
+                        this.sendMessage(badReqRes, this.getPeerInetAddress(), this
                                 .getPeerPort(), false);
                     } catch (IOException e) {
                         if (sipStack.isLoggingEnabled())
@@ -472,8 +471,7 @@ public final class TLSMessageChannel extends MessageChannel implements SIPMessag
                                 .getMaxMessageSize()) {
                     SIPResponse sipResponse = sipRequest
                             .createResponse(SIPResponse.MESSAGE_TOO_LARGE);
-                    byte[] resp = sipResponse.encodeAsBytes(this.getTransport());
-                    this.sendMessage(resp, false);
+                    this.sendMessage(sipResponse, false);
                     throw new Exception("Message size exceeded");
                 }
 

@@ -4,24 +4,33 @@ import java.io.Serializable;
 import java.text.ParseException;
 
 public interface Address extends Cloneable, Serializable {
-    String getDisplayName();
-    void setDisplayName(String displayName) throws ParseException;
-    boolean hasDisplayName();
+	String getDisplayName();
 
-    String getHost();
-    int getPort();
-    String getUserAtHostPort();
+	void setDisplayName(String displayName) throws ParseException;
 
-    boolean isSIPAddress();
+	boolean hasDisplayName();
 
-    URI getURI();
-    void setURI(URI uri);
+	String getHost();
 
-    boolean isWildcard();
-    void setWildCardFlag();
+	int getPort();
 
-    boolean equals(Object obj);
-    int hashCode();
-    Object clone();
+	void setPort(int port);
+	
+	String getUserAtHostPort();
+
+	boolean isSIPAddress();
+
+	URI getURI();
+
+	void setURI(URI uri);
+
+	boolean isWildcard();
+
+	void setWildCardFlag();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	Object clone();
 }
-

@@ -57,4 +57,9 @@ public interface FileUploadSessionListener {
      * Upload aborted
      */
     public void handleUploadAborted();    
+
+    /**
+     * Not allowed to send
+     */
+    public void handleUploadNotAllowedToSend();
 }

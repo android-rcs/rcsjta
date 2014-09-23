@@ -23,11 +23,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.JoynServiceRegistrationListener;
-import com.gsma.services.rcs.capability.CapabilityService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -36,16 +36,16 @@ import com.orangelabs.rcs.ri.utils.Utils;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class RegistrationStatus extends Activity implements JoynServiceListener {
+public class RegistrationStatus extends Activity {
 	/**
 	 * UI handler
 	 */
 	private final Handler handler = new Handler();
 
-	/**
-	 * Service API
+  	/**
+	 * API connection manager
 	 */
-    private JoynService serviceApi;
+	private ApiConnectionManager connectionManager;
     
     /**
      * Registration listener
@@ -66,57 +66,52 @@ public class RegistrationStatus extends Activity implements JoynServiceListener 
     	// Display registration status by default
     	displayRegistrationStatus(false);        
         
-        // Instanciate API
-        serviceApi = new CapabilityService(getApplicationContext(), this);
-                
-        // Connect API
-        serviceApi.connect();
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
+		try {
+			// Add service listener
+			connectionManager.getCapabilityApi().addServiceRegistrationListener(registrationListener);
+		} catch (JoynServiceException e) {
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), null);
+		}
     }
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	
-    	// Unregister API listener
-        try {
-        	serviceApi.removeServiceRegistrationListener(registrationListener);
-        } catch(JoynServiceException e) {
-        	e.printStackTrace();
-        }
-
-        // Disconnect API
-        serviceApi.disconnect();
-    }
-
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-        try {
-        	// Display registration status
-        	displayRegistrationStatus(serviceApi.isServiceRegistered());
-        	
-	        // Register registration listener
-	        serviceApi.addServiceRegistrationListener(registrationListener);
-        } catch(JoynServiceException e) {
-        	e.printStackTrace();
-    		Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
+    	if (connectionManager == null) {
+    		return;
     	}
+		connectionManager.stopMonitorServices(this);
+    	if (connectionManager.isServiceConnected(RcsServices.Capability)) {
+			// Remove listener
+			try {
+				connectionManager.getCapabilityApi().removeServiceRegistrationListener(registrationListener);
+			} catch (Exception e) {
+			}
+		}
     }
+
     
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	// Display registration status
-    	displayRegistrationStatus(false);
-    }    
+    @Override
+	protected void onResume() {
+		super.onResume();
+		try {
+			// Display registration status
+			displayRegistrationStatus(connectionManager.getCapabilityApi().isServiceRegistered());
+		} catch (JoynServiceNotAvailableException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
+		} catch (JoynServiceException e) {
+			e.printStackTrace();
+			Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
+		}
+	}
     
     /**
      * Registration event listener

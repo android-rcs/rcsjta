@@ -82,24 +82,25 @@ public class InitiateSingleChat extends Activity {
         // Select the corresponding contact from the intent
         Intent intent = getIntent();
         Uri contactUri = intent.getData();
-    	if (contactUri != null) {
-			Cursor cursor = managedQuery(contactUri, null, null, null, null);
-	        if (cursor.moveToNext()) {
-	        	String selectedContact = cursor.getString(cursor.getColumnIndex(Data.DATA1));
-	            if (selectedContact != null) {
-	    	        for (int i=0;i<spinner.getAdapter().getCount();i++) {
-	    	        	MatrixCursor cursor2 = (MatrixCursor)spinner.getAdapter().getItem(i);
+		if (contactUri != null) {
+			String[] proj = { Data.DATA1 };
+			Cursor cursor = getContentResolver().query(contactUri, proj, null, null, null);
+			if (cursor.moveToNext()) {
+				String selectedContact = cursor.getString(cursor.getColumnIndex(Data.DATA1));
+				if (selectedContact != null) {
+					for (int i = 0; i < spinner.getAdapter().getCount(); i++) {
+						MatrixCursor cursor2 = (MatrixCursor) spinner.getAdapter().getItem(i);
 						if (PhoneNumberUtils.compare(selectedContact, cursor2.getString(1))) {
-	    	        		// Select contact
-	    	                spinner.setSelection(i);
-	    	                spinner.setEnabled(false);
-	    	                break;
-	    	        	}
-	    	        }
-	            }
-	        }
-	        cursor.close();
-        }        
+							// Select contact
+							spinner.setSelection(i);
+							spinner.setEnabled(false);
+							break;
+						}
+					}
+				}
+			}
+			cursor.close();
+		}
     }
     
     /**

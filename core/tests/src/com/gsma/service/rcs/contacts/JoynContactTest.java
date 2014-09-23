@@ -45,6 +45,7 @@ public class JoynContactTest extends AndroidTestCase {
 	private Capabilities capabilities;
 	private boolean registered;
 	private ContactId contactId;
+	private String displayName;
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -65,6 +66,7 @@ public class JoynContactTest extends AndroidTestCase {
 		registered = random.nextBoolean();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		contactId = contactUtils.formatContactId("+33123456789");
+		displayName = "displayName";
 	}
 
 	protected void tearDown() throws Exception {
@@ -72,7 +74,7 @@ public class JoynContactTest extends AndroidTestCase {
 	}
 
 	public void testJoynContactContactNull() {
-		JoynContact joynContact = new JoynContact(null, registered, capabilities);
+		JoynContact joynContact = new JoynContact(null, registered, capabilities, displayName);
 		Parcel parcel = Parcel.obtain();
 		joynContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -83,7 +85,18 @@ public class JoynContactTest extends AndroidTestCase {
 	}
 	
 	public void testJoynContactCapabilitiesNull() {
-		JoynContact joynContact = new JoynContact(contactId, registered, null);
+		JoynContact joynContact = new JoynContact(contactId, registered, null, displayName);
+		Parcel parcel = Parcel.obtain();
+		joynContact.writeToParcel(parcel, 0);
+		// done writing, now reset parcel for reading
+		parcel.setDataPosition(0);
+		// finish round trip
+		JoynContact createFromParcel = JoynContact.CREATOR.createFromParcel(parcel);
+		assertTrue(joynContactIsEqual(createFromParcel, joynContact));
+	}
+	
+	public void testJoynContactDisplayNameNull() {
+		JoynContact joynContact = new JoynContact(contactId, registered, capabilities, null);
 		Parcel parcel = Parcel.obtain();
 		joynContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -94,7 +107,7 @@ public class JoynContactTest extends AndroidTestCase {
 	}
 	
 	public void testJoynContact() {
-		JoynContact joynContact = new JoynContact(contactId, registered, capabilities);
+		JoynContact joynContact = new JoynContact(contactId, registered, capabilities, displayName);
 		Parcel parcel = Parcel.obtain();
 		joynContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -119,6 +132,13 @@ public class JoynContactTest extends AndroidTestCase {
 				return false;
 		} else {
 			if (joyn2.getCapabilities() != null)
+				return false;
+		}
+		if (joyn1.getDisplayName() != null) {
+			if (!joyn1.getDisplayName().equals(joyn2.getDisplayName()))
+				return false;
+		} else {
+			if (joyn2.getDisplayName() != null)
 				return false;
 		}
 		return true;

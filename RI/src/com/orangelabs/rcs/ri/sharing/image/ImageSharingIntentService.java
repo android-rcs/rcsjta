@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.sharing.image;
 
+import java.util.Calendar;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,11 +27,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -126,15 +132,26 @@ public class ImageSharingIntentService extends IntentService {
 		intent.setClass(context, ReceiveImageSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		String notifTitle = context.getString(R.string.title_recv_image_sharing, ishDao.getContact().toString());
-		Notification notif = new Notification(R.drawable.ri_notif_csh_icon, notifTitle, System.currentTimeMillis());
-		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle, ishDao.getFilename(), contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		notif.defaults |= Notification.DEFAULT_VIBRATE;
+		
+		ContactId contact = ishDao.getContact();
+		String displayName = RcsDisplayName.get(context, contact);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+		String title = context.getString(R.string.title_recv_image_sharing, displayName);
 
+		// Create notification
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		notif.setContentIntent(contentIntent);
+		notif.setSmallIcon(R.drawable.ri_notif_csh_icon);
+		notif.setWhen(Calendar.getInstance().getTimeInMillis());
+		notif.setAutoCancel(true);
+		notif.setOnlyAlertOnce(true);
+		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		notif.setDefaults(Notification.DEFAULT_VIBRATE);
+		notif.setContentTitle(title);
+		notif.setContentText(getString(R.string.label_from_args, ishDao.getFilename()));
+				
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif);
+		notificationManager.notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif.build());
 	}
 }

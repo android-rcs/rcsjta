@@ -25,7 +25,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -49,17 +48,16 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
-import com.gsma.services.rcs.vsh.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoPlayer;
@@ -74,22 +72,22 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */
-public class InitiateVideoSharing extends Activity implements JoynServiceListener, SurfaceHolder.Callback {
+public class InitiateVideoSharing extends Activity implements SurfaceHolder.Callback {
 
 	/**
 	 * UI handler
 	 */
 	private final Handler handler = new Handler();
-
-	/**
-	 * Video sharing API
-	 */
-	private VideoSharingService vshApi;
 	
 	/**
 	 * Video sharing
 	 */
 	private VideoSharing videoSharing;
+	
+	/**
+	 * Video sharing Id
+	 */
+	private String sharingId;
 
     /**
      * Video player
@@ -141,48 +139,49 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      */
     private Dialog progressDialog;
     
-	private boolean serviceConnected = false;
-	
 	/**
 	 * A locker to exit only once
 	 */
 	private LockAccess exitOnce = new LockAccess();
     
+   	/**
+	 * API connection manager
+	 */
+	private ApiConnectionManager connectionManager;
+	
     /**
    	 * The log tag for this class
    	 */
    	private static final String LOGTAG = LogUtils.getTag(InitiateVideoSharing.class.getSimpleName());
    	
-	/**
-	 * Array of Video sharing states
-	 */
-	private static final String[] VSH_STATES = RiApplication.getContext().getResources().getStringArray(R.array.vsh_states);
-
-	/**
-	 * Array of Video sharing reason codes
-	 */
-	private static final String[] VSH_REASON_CODES = RiApplication.getContext().getResources()
-			.getStringArray(R.array.vsh_reason_codes);
-	
    	/**
      * Video sharing listener
      */
 	private VideoSharingListener vshListener = new VideoSharingListener() {
 
 		@Override
-		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state) {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state);
+		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
+			// Discard event if not for current sharingId
+			if (InitiateVideoSharing.this.sharingId == null || !InitiateVideoSharing.this.sharingId.equals(sharingId)) {
+				return;
 			}
-			if (state > VSH_STATES.length) {
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onVideoSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+						+ " reason=" + reasonCode);
+			}
+			if (state > RiApplication.VSH_STATES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled state=" + state);
 				}
 				return;
 			}
-			// TODO : handle reason code (CR025)
-			final String reason = VSH_REASON_CODES[0];
-			final String notif = getString(R.string.label_vsh_state_changed, VSH_STATES[state], reason);
+			if (reasonCode > RiApplication.VSH_REASON_CODES.length) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "onVideoSharingStateChanged unhandled reason=" + reasonCode);
+				}
+				return;
+			}
+			final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
 				public void run() {
 					switch (state) {
@@ -196,27 +195,31 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 						closeCamera();
 						// Hide progress dialog
 						hideProgressDialog();
-						// Display session status
-						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_aborted, _reasonCode),
+								exitOnce);
 						break;
 
-					// Add states
-					// case VideoSharing.State.REJECTED:
-					// Hide progress dialog
-					// hideProgressDialog();
-					// Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_declined), exitOnce);
-					// break;
-
-					case VideoSharing.State.FAILED:
-						// Session is failed: exit
+					case VideoSharing.State.REJECTED:
+						// Release the camera
+						closeCamera();
 						// Hide progress dialog
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_failed, reason), exitOnce);
+						Utils.showMessageAndExit(InitiateVideoSharing.this,
+								getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+						break;
+
+					case VideoSharing.State.FAILED:
+						// Release the camera
+						closeCamera();
+						// Hide progress dialog
+						hideProgressDialog();
+						Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_sharing_failed, _reasonCode),
+								exitOnce);
 						break;
 
 					default:
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onVideoSharingStateChanged " + notif);
+							Log.d(LOGTAG, "onVideoSharingStateChanged " + getString(R.string.label_vsh_state_changed, RiApplication.VSH_STATES[state], reasonCode));
 						}
 					}
 				}
@@ -254,7 +257,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         	dialBtn.setEnabled(false);
         	inviteBtn.setEnabled(false);
         }
-        
+
         // Get camera info
         numberOfCameras = getNumberOfCameras();
         
@@ -267,70 +270,47 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
         surface.setKeepScreenOn(true);
         surface.addCallback(this);
         
-        // Instantiate API
-        vshApi = new VideoSharingService(getApplicationContext(), this);
-		
-		// Connect API
-        vshApi.connect();
-        
-        if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate initiate video sharing");
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.VideoSharing)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			return;
+		}
+        connectionManager.startMonitorServices(this, exitOnce, RcsServices.VideoSharing);
+
+		// Add service listener
+		try {
+			connectionManager.getVideoSharingApi().addEventListener(vshListener);
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onCreate initiate video sharing");
+			}
+		} catch (JoynServiceException e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to add listener", e);
+			}
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
     }
 
     @Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (serviceConnected) {
+		if (connectionManager == null) {
+			return;
+		}
+		connectionManager.stopMonitorServices(this);
+		if (connectionManager.isServiceConnected(RcsServices.VideoSharing)) {
 			// Remove video sharing listener
 			try {
-				vshApi.removeEventListener(vshListener);
+				connectionManager.getVideoSharingApi().removeEventListener(vshListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
 				}
 			}
-			// Disconnect API
-			vshApi.disconnect();
 		}
 	}
 
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successful):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-        // Disable button if no contact available
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        Button dialBtn = (Button)findViewById(R.id.dial_btn);
-        if (spinner.getAdapter().getCount() != 0) {
-        	dialBtn.setEnabled(true);
-        }
-		// Add service listener
-		try {
-			vshApi.addEventListener(vshListener);
-			serviceConnected = true;
-		} catch (JoynServiceException e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Failed to add listener", e);
-			}
-			Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_api_failed), exitOnce);
-		}
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	serviceConnected = false;
-		Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_api_disabled), exitOnce);
-    }    
-    
     /**
      * Dial button listener
      */
@@ -356,7 +336,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		registered = vshApi.isServiceRegistered();
+        		registered = connectionManager.getVideoSharingApi().isServiceRegistered();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -378,7 +358,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
     	    	return;
     		}
     		
-            Thread thread = new Thread() {
+            new Thread() {
             	public void run() {
 		        	try {
 		                // Create the video player
@@ -388,7 +368,8 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 		        		openCamera();
 		
 		        		// Initiate sharing
-		        		videoSharing = vshApi.shareVideo(remote, videoPlayer);
+		        		videoSharing = connectionManager.getVideoSharingApi().shareVideo(remote, videoPlayer);
+		        		sharingId = videoSharing.getSharingId();
 		        	} catch(Exception e) {
 		        		e.printStackTrace();
 	            		handler.post(new Runnable() { 
@@ -399,8 +380,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
 		    			});
 		        	}
 		    	}
-		    };
-		    thread.start();
+		    }.start();
 
             // Display a progress dialog
             progressDialog = Utils.showProgressDialog(InitiateVideoSharing.this, getString(R.string.label_command_in_progress));            
@@ -618,7 +598,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      */
     private Method getCameraOpenMethod() {
         ClassLoader classLoader = InitiateVideoSharing.class.getClassLoader();
-        Class cameraClass = null;
+        Class<?> cameraClass = null;
         try {
             cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
@@ -665,7 +645,7 @@ public class InitiateVideoSharing extends Activity implements JoynServiceListene
      */
     private Method getCameraNumberOfCamerasMethod() {
         ClassLoader classLoader = InitiateVideoSharing.class.getClassLoader();
-        Class cameraClass = null;
+        Class<?> cameraClass = null;
         try {
             cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {

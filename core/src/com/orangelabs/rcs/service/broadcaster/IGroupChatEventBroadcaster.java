@@ -23,14 +23,15 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IGroupChatEventBroadcaster {
 
-	public void broadcastMessageStatusChanged(String chatId, String msgId, int status);
+	public void broadcastMessageStatusChanged(String chatId, String msgId, int status,
+			int reasonCode);
 
 	public void broadcastDeliveryInfoStatusChanged(String chatId, ContactId contact, String msgId,
 			int status, int reasonCode);
 
 	public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
 
-	public void broadcastGroupChatStateChanged(String chatId, int state);
+	public void broadcastGroupChatStateChanged(String chatId, int state, int reasonCode);
 
 	public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
 }

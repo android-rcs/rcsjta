@@ -78,7 +78,7 @@ public class IPCallProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 2;
+        private static final int DATABASE_VERSION = 3;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -90,7 +90,8 @@ public class IPCallProvider extends ContentProvider {
         			+ IPCallData.KEY_ID + " integer primary key autoincrement,"
         			+ IPCallData.KEY_SESSION_ID + " TEXT,"
         			+ IPCallData.KEY_CONTACT + " TEXT,"
-        			+ IPCallData.KEY_STATUS + " integer,"
+        			+ IPCallData.KEY_STATE + " integer,"
+        			+ IPCallData.KEY_REASON_CODE + " integer,"
         			+ IPCallData.KEY_DIRECTION + " integer,"
         			+ IPCallData.KEY_TIMESTAMP + " long,"
         			+ IPCallData.KEY_VIDEO_ENCODING + " TEXT,"

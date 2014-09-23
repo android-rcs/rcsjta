@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
@@ -24,6 +28,7 @@ import com.gsma.services.rcs.JoynContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
+import com.gsma.services.rcs.ipcall.IPCall;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -77,6 +82,17 @@ public class IPCallService extends ImsService {
 		
 		this.maxSessions = RcsSettings.getInstance().getMaxIPCallSessions();
     }
+
+	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
+		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+		byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes();
+		AudioContent audioContent = ContentManager
+				.createLiveAudioContentFromSdp(sessionDescriptionProtocol);
+		VideoContent videoContent = ContentManager
+				.createLiveVideoContentFromSdp(sessionDescriptionProtocol);
+		getImsModule().getCore().getListener()
+				.handleIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode);
+	}
 
 	/**
 	 * Start the IMS service
@@ -166,10 +182,11 @@ public class IPCallService extends ImsService {
         // Reject if there is already a call in progress
         Vector<IPCallSession> currentSessions = getIPCallSessions();
         if (currentSessions.size() >= 1) {
-        	// Max session
-        	if (logger.isActivated()) {
+            // Max session
+            if (logger.isActivated()) {
                 logger.debug("The max number of IP call sessions is achieved: reject the invitation");
             }
+            handleIPCallInvitationRejected(invite, IPCall.ReasonCode.REJECTED_MAX_SESSIONS);
             sendErrorResponse(invite, 486);
             return;
         } 

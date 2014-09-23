@@ -40,4 +40,24 @@ public interface ImsSessionListener {
      * Session has been terminated by remote
      */
     public void handleSessionTerminatedByRemote();
+
+    /**
+     * Session is being rejected by user
+     */
+    public void handleSessionRejectedByUser();
+
+    /**
+     * Session is being rejected due to time out
+     */
+    public void handleSessionRejectedByTimeout();
+
+    /**
+     * Session is being rejected by remote
+     */
+    public void handleSessionRejectedByRemote();
+
+    /**
+     * Accept has been called and the session is in the process of being started
+     */
+    public void handleSessionAccepting();
 }

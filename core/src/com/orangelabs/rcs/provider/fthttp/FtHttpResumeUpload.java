@@ -21,8 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 
@@ -80,7 +80,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 */
 	public FtHttpResumeUpload(MmContent file, Uri fileicon, String tId, ContactId contact,
 			String chatId, String fileTransferId, boolean isGroup) {
-		super(FileTransfer.Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file
+		super(Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file
 				.getSize(), fileicon, contact, chatId, fileTransferId, isGroup);
 		if (tId == null)
 			throw new IllegalArgumentException("Null tId");

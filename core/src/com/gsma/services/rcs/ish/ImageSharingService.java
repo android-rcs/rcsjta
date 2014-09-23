@@ -58,14 +58,14 @@ public class ImageSharingService extends JoynService {
 
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
-	private static final Class[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
+	private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
 			Uri.class, int.class
 	};
 
 	/**
 	 * API
 	 */
-	private IImageSharingService api = null;
+	private IImageSharingService api;
 	
     /**
      * Constructor
@@ -264,30 +264,6 @@ public class ImageSharingService extends JoynService {
 			throw new JoynServiceNotAvailableException();
 		}
     }    
-    
-    /**
-     * Returns a current image sharing from its invitation Intent
-     * 
-     * @param intent Invitation intent
-     * @return Image sharing or null if not found
-     * @throws JoynServiceException
-     */
-    public ImageSharing getImageSharingFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String sharingId = intent.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
-				if (sharingId != null) {
-					return getImageSharing(sharingId);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }     
 
 	/**
 	 * Adds an event listener on image sharing events

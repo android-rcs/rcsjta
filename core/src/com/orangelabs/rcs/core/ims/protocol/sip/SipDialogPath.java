@@ -183,6 +183,36 @@ public class SipDialogPath {
 	}
 
 	/**
+	 * Constructor<br>
+	 * Perform a deep copy of the dialogPath
+	 * 
+	 * @param dialogPath
+	 */
+	public SipDialogPath(SipDialogPath dialogPath) {
+		stack = dialogPath.getSipStack();
+		callId = dialogPath.getCallId();
+		cseq = dialogPath.getCseq();
+		localTag = dialogPath.getLocalTag();
+		remoteTag = dialogPath.getRemoteTag();
+		target = dialogPath.getTarget();
+		localParty = dialogPath.getLocalParty();
+		remoteParty = dialogPath.getRemoteParty();
+		invite = dialogPath.getInvite();
+		localContent = dialogPath.getLocalContent();
+		remoteContent = dialogPath.getRemoteContent();
+		remoteSipInstance = dialogPath.getRemoteSipInstance();
+		route = dialogPath.getRoute();
+		authenticationAgent = dialogPath.getAuthenticationAgent();
+		sessionExpireTime = dialogPath.getSessionExpireTime();
+		sigEstablished = dialogPath.isSigEstablished();
+		sessionEstablished = dialogPath.isSessionEstablished();
+		sessionCancelled = dialogPath.isSessionCancelled();
+		sessionTerminated = dialogPath.isSessionTerminated();
+		sessionTerminationReasonCode = dialogPath.getSessionTerminationReasonCode();
+		sessionTerminationReasonPhrase = dialogPath.getSessionTerminationReasonPhrase();
+	}
+	    
+	/**
 	 * Get the current SIP stack interface
 	 * 
 	 * @return SIP stack interface

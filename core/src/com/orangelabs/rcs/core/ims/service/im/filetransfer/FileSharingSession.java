@@ -244,10 +244,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	}
 	
 	/**
-	 * Check is file transfer should be auto accepted depending on settings and roaming conditions
-	 * @return true if file transfer should be Auto Accepted
+	 * Check is session  should be auto accepted depending on settings and roaming conditions
+	 * This method should only be called once per session
+	 * @return true if file transfer should be auto accepted
 	 */
-	public boolean shouldFileTransferBeAutoAccepted() {
+	protected boolean shouldBeAutoAccepted() {
 		if (getImsService().getImsModule().isInRoaming()) {
 			return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
 		} else {

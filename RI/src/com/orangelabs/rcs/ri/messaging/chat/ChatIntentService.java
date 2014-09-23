@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import java.util.Calendar;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,14 +27,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -217,18 +225,20 @@ public class ChatIntentService extends IntentService {
 			context.startActivity(intent);
 		} else {
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			String notifTitle = context.getString(R.string.title_recv_chat, message.getContact().toString());
-			Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
-			notif.flags = Notification.FLAG_AUTO_CANCEL;
+			ContactId contact = message.getContact();
+			String displayName = RcsDisplayName.get(context, contact);
+			displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+			String title = context.getString(R.string.title_recv_chat, displayName);
+			
 			String msg;
 			if (message.getMimeType().equals(GeolocMessage.MIME_TYPE)) {
 				msg = context.getString(R.string.label_geoloc_msg);
 			} else {
 				msg = message.getBody();
 			}
-			notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
-			notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			notif.defaults |= Notification.DEFAULT_VIBRATE;
+
+			// Create notification
+			Notification notif = buildNotification(context, contentIntent, title, msg);
 
 			// Send notification
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -267,18 +277,18 @@ public class ChatIntentService extends IntentService {
 		} else {
 			// Create notification
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			String notifTitle = context.getString(R.string.title_recv_chat, message.getContact().toString());
-			Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
-			notif.flags = Notification.FLAG_AUTO_CANCEL;
+			ContactId contact = message.getContact();
+			String displayName = RcsDisplayName.get(context, contact);
+			displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+			String title = context.getString(R.string.title_recv_chat, displayName);
 			String msg;
 			if (message.getMimeType().equals(GeolocMessage.MIME_TYPE)) {
 				msg = context.getString(R.string.label_geoloc_msg);
 			} else {
 				msg = message.getBody();
 			}
-			notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
-			notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			notif.defaults |= Notification.DEFAULT_VIBRATE;
+			// Create notification
+			Notification notif = buildNotification(context, contentIntent, title, msg);
 
 			// Send notification
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -308,16 +318,66 @@ public class ChatIntentService extends IntentService {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(ChatView.EXTRA_MODE, ChatView.MODE_INCOMING);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		String notifTitle = context.getString(R.string.title_group_chat);
-		Notification notif = new Notification(R.drawable.ri_notif_chat_icon, notifTitle, System.currentTimeMillis());
-		notif.flags = Notification.FLAG_AUTO_CANCEL;
+		
+		String title = context.getString(R.string.title_group_chat);
+		// Try to retrieve display name of remote contact
+		String displayName = getGcDisplayNameOfRemoteContact(context, groupChat.getChatId());
+		if (displayName != null) {
+			title = context.getString(R.string.title_recv_group_chat, displayName);
+		}
 		String msg = context.getString(R.string.label_subject) + " " + subject;
-		notif.setLatestEventInfo(context, notifTitle, msg, contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		notif.defaults |= Notification.DEFAULT_VIBRATE;
 
+		// Create notification
+		Notification notif = buildNotification(context, contentIntent, title, msg);
+					
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(groupChat.getChatId(), Utils.NOTIF_ID_GROUP_CHAT, notif);
+	}
+	
+	/**
+	 * Get the RCS display name of remote contact in Group Chat
+	 * @param context
+	 * @param chatId
+	 * @return the RCS display name or null
+	 */
+	private String getGcDisplayNameOfRemoteContact(Context ctx, String chatId) {
+		try {
+			GroupChat gc = ApiConnectionManager.getInstance(ctx).getChatApi().getGroupChat(chatId);
+			if (gc != null) {
+				ContactId contact = gc.getRemoteContact();
+				if (contact != null) {
+					return RcsDisplayName.get(ctx, contact);
+				}
+			}
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot get displayName", e);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Generate a notification
+	 * @param context
+	 * @param invitation
+	 * @param title
+	 * @param message
+	 * @return
+	 */
+	private Notification buildNotification(Context context, PendingIntent invitation, String title, String message) {
+		// Create notification
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		notif.setContentIntent(invitation);
+		notif.setSmallIcon(R.drawable.ri_notif_chat_icon);
+		notif.setWhen(Calendar.getInstance().getTimeInMillis());
+		notif.setAutoCancel(true);
+		notif.setOnlyAlertOnce(true);
+		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		notif.setDefaults(Notification.DEFAULT_VIBRATE);
+		notif.setContentTitle(title);
+		notif.setContentText(message);
+		return notif.build();
 	}
 }

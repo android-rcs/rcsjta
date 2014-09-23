@@ -22,5 +22,6 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IVideoSharingEventBroadcaster {
 
-	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int status);
+	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int status,
+			int reasonCode);
 }

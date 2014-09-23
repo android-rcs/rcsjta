@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.upload;
 
@@ -32,6 +36,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class FileUploadSession extends Thread implements HttpUploadTransferEventListener {
+
+	private final static int UPLOAD_ERROR_UNSPECIFIED = -1;
 
 	/**
 	 * Upload ID
@@ -131,7 +137,18 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 			MmContent fileiconContent = null;
 			if (fileicon) {
 				// Create the file icon
-				fileiconContent = FileTransferUtils.createFileicon(file.getUri(), uploadId);
+				try {
+					fileiconContent = FileTransferUtils.createFileicon(file.getUri(), uploadId);
+				} catch (SecurityException e) {
+					/*TODO: This is not the proper way to handle the exception thrown. Will be taken care of in CR037*/
+					if (logger.isActivated()) {
+						logger.error(
+								"File icon creation has failed due to that the file is not accessible!",
+								e);
+					}
+					listener.handleUploadNotAllowedToSend();
+					return;
+				}
 			}
 			
 			// Instantiate the upload manager
@@ -146,7 +163,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	    	}
 	    	
         	// Unexpected error
-	    	listener.handleUploadError(-1);
+	    	listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
 		}
 	}
 
@@ -195,7 +212,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             }
             
         	// Notify listener
-	    	listener.handleUploadError(-1);
+	    	listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
 		}
 	}
 	
@@ -231,10 +248,29 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     }
     
     /**
+     * HTTP transfer paused by user
+     */
+    public void httpTransferPausedByUser() {
+		// Not used
+    }
+    
+    /**
+     * HTTP transfer paused by system
+     */
+    public void httpTransferPausedBySystem() {
+        /*
+         * Paused by system will be called for generic exceptions occurring in
+         * the lower layers and in the scope of file upload this corresponds to
+         * failure since pause/resume does not exist for file upload
+         */
+        listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+    }
+    
+    /**
      * HTTP transfer paused
      */
-    public void httpTransferPaused() {
-		// Not used
+    public void httpTransferPausedByRemote() {
+        // Not used
     }
     
     /**
@@ -253,5 +289,10 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     public void httpTransferProgress(long currentSize, long totalSize) {
     	// Notify listener
     	listener.handleUploadProgress(currentSize, totalSize);
-    }	    
+    }
+
+	@Override
+	public void httpTransferNotAllowedToSend() {
+		listener.handleUploadNotAllowedToSend();
+	}
 }

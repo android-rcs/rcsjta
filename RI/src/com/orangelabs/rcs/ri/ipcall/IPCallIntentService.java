@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri.ipcall;
 
+import java.util.Calendar;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,11 +27,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -131,21 +137,32 @@ public class IPCallIntentService extends IntentService {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(ipCallDao.getCallId());
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		ContactId contact = ipCallDao.getContact();
+		String displayName = RcsDisplayName.get(context, contact);
+		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+		
 		String notifTitle;
 		if (ipCallDao.getVideoEncoding() != null) {
-			notifTitle = context.getString(R.string.title_recv_ipcall_video);
+			notifTitle = context.getString(R.string.title_recv_ipcall_video, displayName);
 		} else {
-			notifTitle = context.getString(R.string.title_recv_ipcall);
+			notifTitle = context.getString(R.string.title_recv_ipcall, displayName);
 		}
-		Notification notif = new Notification(R.drawable.ri_notif_ipcall_icon, notifTitle, System.currentTimeMillis());
-		notif.flags = Notification.FLAG_AUTO_CANCEL;
-		notif.setLatestEventInfo(context, notifTitle,
-				context.getString(R.string.label_session_from, ipCallDao.getContact().toString()), contentIntent);
-		notif.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		notif.defaults |= Notification.DEFAULT_VIBRATE;
+		
+		// Create notification
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		notif.setContentIntent(contentIntent);
+		notif.setSmallIcon(R.drawable.ri_notif_ipcall_icon);
+		notif.setWhen(Calendar.getInstance().getTimeInMillis());
+		notif.setAutoCancel(true);
+		notif.setOnlyAlertOnce(true);
+		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		notif.setDefaults(Notification.DEFAULT_VIBRATE);
+		notif.setContentTitle(notifTitle);
+		notif.setContentText(getString(R.string.label_from_args, displayName));
 
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(ipCallDao.getCallId(), Utils.NOTIF_ID_IP_CALL, notif);
+		notificationManager.notify(ipCallDao.getCallId(), Utils.NOTIF_ID_IP_CALL, notif.build());
 	}
 }

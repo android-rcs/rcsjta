@@ -43,12 +43,13 @@ public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
 		mIpCallListeners.unregister(listener);
 	}
 
-	public void broadcastIPCallStateChanged(ContactId contact, String callId, int state) {
+	public void broadcastIPCallStateChanged(ContactId contact, String callId, int state,
+			int reasonCode) {
 		final int N = mIpCallListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				// TODO : Handle reason code in CR009
-				mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId, state);
+				mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId, state,
+						reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

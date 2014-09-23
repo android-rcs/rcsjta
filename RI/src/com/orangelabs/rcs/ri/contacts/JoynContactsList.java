@@ -26,9 +26,9 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.contacts.ContactsService;
 import com.gsma.services.rcs.contacts.JoynContact;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -37,12 +37,13 @@ import com.orangelabs.rcs.ri.utils.Utils;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class JoynContactsList extends ListActivity implements JoynServiceListener {
-	/**
-	 * Contacts API
-	 */
-	private ContactsService contactsApi;
+public class JoynContactsList extends ListActivity {
 
+  	/**
+	 * API connection manager
+	 */
+	private ApiConnectionManager connectionManager;
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,49 +55,38 @@ public class JoynContactsList extends ListActivity implements JoynServiceListene
         // Set title
         setTitle(R.string.menu_list_rcs_contacts);
 
-        // Instanciate API
-        contactsApi = new ContactsService(getApplicationContext(), this);
-        
-        // Connect API
-        contactsApi.connect();
+        // Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Contacts)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServices.Contacts);
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
-        // Disconnect API
-		contactsApi.disconnect();
+		if (connectionManager != null) {
+			connectionManager.stopMonitorServices(this);
+    	}
 	}	
 	
-    /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure successfull):
-     * this means the methods of the API may be used.
-     */
-    public void onServiceConnected() {
-    	// Display the list of sessions
-		updateList();
-    }
-    
-    /**
-     * Callback called when service has been disconnected. This method is called when
-     * the service is disconnected from the RCS service (e.g. service deactivated).
-     * 
-     * @param error Error
-     * @see JoynService.Error
-     */
-    public void onServiceDisconnected(int error) {
-    	// Nothing to do here
-    }    
+	@Override
+	protected void onResume() {
+		super.onResume();
 
+    	// Update the list of RCS contacts
+		updateList();
+	}
+    
     /**
      * Update the list
      */
     private void updateList() {
 		try {
 	    	// Get list of joyn contacts
-	    	Set<JoynContact> allContacts = contactsApi.getJoynContacts();
+	    	Set<JoynContact> allContacts = connectionManager.getContactsApi().getJoynContacts();
 	    	List<JoynContact> contacts = new ArrayList<JoynContact>(allContacts);
 			if (contacts.size() > 0){
 		        String[] items = new String[contacts.size()];    
@@ -116,7 +106,7 @@ public class JoynContactsList extends ListActivity implements JoynServiceListene
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			Utils.showMessageAndExit(JoynContactsList.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
 		}
     }
 }

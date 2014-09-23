@@ -40,7 +40,7 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * Chat service offers the main entry point to initiate chat 1-1 ang group
+ * Chat service offers the main entry point to initiate chat 1-1 and group
  * conversations with contacts. Several applications may connect/disconnect
  * to the API.
  * 
@@ -54,7 +54,7 @@ public class ChatService extends JoynService {
 	/**
 	 * API
 	 */
-	private IChatService api = null;
+	private IChatService api;
 
 	/**
      * Constructor
@@ -316,30 +316,6 @@ public class ChatService extends JoynService {
 				IGroupChat chatIntf = api.getGroupChat(chatId);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
-			}
-		} else {
-			throw new JoynServiceNotAvailableException();
-		}
-    }
-    
-    /**
-     * Returns a group chat from its invitation Intent
-     * 
-     * @param intent Intent invitation
-     * @return Group chat or null if not found
-     * @throws JoynServiceException
-     */
-    public GroupChat getGroupChatFor(Intent intent) throws JoynServiceException {
-		if (api != null) {
-			try {
-				String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
-				if (chatId != null) {
-					return getGroupChat(chatId);
 				} else {
 					return null;
 				}

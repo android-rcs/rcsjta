@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 
@@ -27,35 +31,31 @@ public class ImdnDocument {
 	 * MIME type
 	 */
 	public static final String MIME_TYPE = "message/imdn+xml";
-	
+
 	/**
-	 * Delivery status delivered
+	 * Imdn tag indicating delivery notification
 	 */
+	public static final String DELIVERY_NOTIFICATION = "delivery-notification";
+
+	/**
+	 * Imdn tag indicating display notification
+	 */
+	public static final String DISPLAY_NOTIFICATION = "display-notification";
+
 	public static final String DELIVERY_STATUS_DELIVERED = "delivered";
-	
-	/**
-	 * Delivery status displayed
-	 */
+
 	public static final String DELIVERY_STATUS_DISPLAYED = "displayed";
-	
-	/**
-	 * Delivery status failed
-	 */
+
 	public static final String DELIVERY_STATUS_FAILED = "failed";
-	
-	/**
-	 * Delivery status error
-	 */
+
 	public static final String DELIVERY_STATUS_ERROR = "error";
 
-	/**
-	 * Delivery status forbidden
-	 */
 	public static final String DELIVERY_STATUS_FORBIDDEN = "forbidden";
 
-	/**
-	 * Namespace value
-	 */
+	public static final String IMDN_TAG = "imdn";
+
+	public static final String MESSAGE_ID_TAG = "message-id";
+
 	public static final String IMDN_NAMESPACE = "imdn <urn:ietf:params:imdn>";
 	
 	/**
@@ -73,20 +73,16 @@ public class ImdnDocument {
 	 */
 	public static final String NOTIFICATION = "notification";
 
-	/**
-	 * Message ID
-	 */
-	private String msgId = null;
-	
-	/**
-	 * Status
-	 */
-	private String status = null;
-	
-	/**
-	 * Constructor
-	 */
-	public ImdnDocument() {
+	private final String mMsgId;
+
+	private final String mStatus;
+
+	private final String mNotificationType;
+
+	public ImdnDocument(String msgId, String notificationType, String status) {
+		mMsgId = msgId;
+		mNotificationType = notificationType;
+		mStatus = status;
 	}
 
 	/**
@@ -95,33 +91,24 @@ public class ImdnDocument {
 	 * @return Message ID
 	 */
 	public String getMsgId() {
-		return msgId;
+		return mMsgId;
 	}
 
 	/**
-	 * Set message ID
-	 * 
-	 * @param msgId Message ID
-	 */
-	public void setMsgId(String msgId) {
-		this.msgId = msgId;
-	}
-	
-	/**
-	 * Get delivery status
+	 * Get status
 	 * 
 	 * @return Status
 	 */
 	public String getStatus() {
-		return status;
+		return mStatus;
 	}
 
 	/**
-	 * Set delivery status
+	 * Get notification type
 	 * 
-	 * @param status Status
+	 * @return Notification type
 	 */
-	public void setStatus(String status) {
-		this.status = status;
+	public String getNotificationType() {
+		return mNotificationType;
 	}
 }

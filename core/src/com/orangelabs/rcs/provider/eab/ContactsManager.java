@@ -65,6 +65,7 @@ import com.orangelabs.rcs.core.ims.service.presence.PhotoIcon;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
+import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -292,6 +293,11 @@ public final class ContactsManager {
 	private static final String[] PROJECTION_PRESENCE_SHARING_STATUS = new String[] { RichAddressBookData.KEY_PRESENCE_SHARING_STATUS };
 	
 	private static final String SELECTION_MIMETYPE_DATA1 = new StringBuilder(Data.MIMETYPE).append("=? AND ").append(Data.DATA1).append("=?").toString();
+	
+	/**
+     * Projection to get ID and DISPLAY_NAME
+     */
+	private static final String[] PROJECTION_ID_DISPLAY_NAME = new String[] { RichAddressBookData.KEY_ID, RichAddressBookData.KEY_DISPLAY_NAME };
 	
 	/**
 	 * The logger
@@ -711,6 +717,8 @@ public final class ContactsManager {
 					null);
 			if (cur != null) {
 				if (cur.moveToFirst()) {
+					// Get RCS display name
+					infos.setDisplayName(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_DISPLAY_NAME)));
 					// Get RCS Status
 					infos.setRcsStatus(cur.getInt(cur.getColumnIndex(RichAddressBookData.KEY_RCS_STATUS)));
 					infos.setRcsStatusTimestamp(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP)));
@@ -3202,4 +3210,67 @@ public final class ContactsManager {
     		return CapabilitiesLog.NOT_SUPPORTED;
     	}
     }
+    
+	/**
+	 * Set the display name into the rich address book provider
+	 * 
+	 * @param contact Contact ID
+	 * @param RCS display name
+	 */
+	public void setContactDisplayName(ContactId contact, String displayName) {
+		if (contact == null) {
+			return;
+		}
+		// Check if record exists and if update is required
+		boolean found = false;
+		boolean updateRequired = false;
+		try {
+			String oldDisplayName = getContactDisplayName(contact);
+			updateRequired = !StringUtils.equals(oldDisplayName, displayName);
+			found = true;
+		} catch (IllegalStateException e) {
+			// RCS account does not exist
+		}
+		ContentValues values = new ContentValues();
+		values.put(RichAddressBookData.KEY_DISPLAY_NAME, displayName);
+		if (!found) {
+			values.put(RichAddressBookData.KEY_CONTACT_NUMBER, contact.toString());
+			values.put(RichAddressBookData.KEY_TIMESTAMP, System.currentTimeMillis());
+			// Contact not present in provider, insert
+			ctx.getContentResolver().insert(RichAddressBookData.CONTENT_URI, values);
+		} else {
+			if (updateRequired) {
+				String[] whereArgs = new String[] { contact.toString() };
+				// Contact already present and display name is new, update
+				ctx.getContentResolver().update(RichAddressBookData.CONTENT_URI, values, SELECT_CONTACT, whereArgs);
+			}
+		}
+	}
+	
+	/**
+	 * Get RCS display name for contact
+	 * 
+	 * @param contact
+	 * @return the display name or IllegalStateException if RCS account is not created
+	 */
+	public String getContactDisplayName(ContactId contact) {
+		String[] whereArgs = new String[] { contact.toString() };
+		Cursor cur = null;
+		try {
+			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_ID_DISPLAY_NAME, SELECT_CONTACT,
+					whereArgs, null);
+			if (cur.moveToFirst()) {
+				return cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_DISPLAY_NAME));
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Internal exception", e);
+			}
+		} finally {
+			if (cur != null) {
+				cur.close();
+			}
+		}
+		throw new IllegalStateException("No RCS account found");
+	}
 }

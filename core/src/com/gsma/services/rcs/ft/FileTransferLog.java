@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
@@ -79,7 +79,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the direction of the transfer.
      * <P>Type: INTEGER</P>
-	 * @see FileTransfer.Direction
+     * @see com.gsma.services.rcs.RcsCommon.Direction
      */
     public static final String DIRECTION = "direction";
 
@@ -121,8 +121,16 @@ public class FileTransferLog {
     public static final String STATE = "state";
     
     /**
+     * The name of the column containing the reason code of the state.
+     * <P>Type: INTEGER</P>
+     * com.gsma.services.rcs.RcsCommon.ReasonCode
+     */
+    public static final String REASON_CODE = "reason_code";
+
+    /**
      * The name of the column containing the read status for the transfer.
      * <P>Type: INTEGER</P>
+     * FileTransfer.ReadStatus
      */
     public static final String READ_STATUS = "read_status";
 
