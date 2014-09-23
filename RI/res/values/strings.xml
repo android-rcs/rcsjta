@@ -104,6 +104,9 @@
 <string name="label_capabilities_geolocation_push">Geolocation push</string>
 <string name="label_capabilities_ip_voice_call">IP voice call</string>
 <string name="label_capabilities_ip_video_call">IP video call</string>
+<string name="label_automata">Automata:</string>
+<string name="label_capabilities_timestamp">Last refresh:</string>
+<string name="label_capabilities_valid">Valid:</string>
 
 <!-- Messaging menu -->
 <string name="menu_messaging">Messaging</string>

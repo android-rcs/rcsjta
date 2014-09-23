@@ -54,7 +54,7 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath dialogPath;
     
     /**
 	 * Authentication agent
@@ -239,6 +239,9 @@ public class OptionsRequestTask implements Runnable {
         SipResponse resp = ctx.getSipResponse();
     	Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
+    	// Update capability time of last refresh
+    	ContactsManager.getInstance().updateCapabilitiesTimeLastRefresh(mContact);
+    	
     	// Update the database capabilities
     	if (capabilities.isImSessionSupported()) {
     		// The contact is RCS capable
@@ -286,17 +289,19 @@ public class OptionsRequestTask implements Runnable {
 	}		
 	
 	/**
-	 * Handle error response 
+	 * Handle error response
 	 * 
-	 * @param error Error
+	 * @param error
+	 *            Error
 	 */
 	private void handleError(CapabilityError error) {
-        // Error
-    	if (logger.isActivated()) {
-    		logger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode() + ", reason=" + error.getMessage());
-    	}
-    	
-    	// We update the database capabilities timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(mContact, System.currentTimeMillis());
-	}	
+		// Error
+		if (logger.isActivated()) {
+			logger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode() + ", reason="
+					+ error.getMessage());
+		}
+
+		// We update the database capabilities time of last request
+		ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(mContact);
+	}
 }

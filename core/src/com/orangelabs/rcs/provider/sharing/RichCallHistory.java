@@ -70,6 +70,12 @@ public class RichCallHistory {
 	private static final String WHERE_CLAUSE_ISH = new StringBuilder(ImageSharingData.KEY_SESSION_ID).append("=?").toString();
 	
 	/**
+	 * Empty constructor : prevent caller from creating multiple instances
+	 */
+	private RichCallHistory() {
+	}
+
+	/**
 	 * Create instance
 	 * 
 	 * @param ctx Context

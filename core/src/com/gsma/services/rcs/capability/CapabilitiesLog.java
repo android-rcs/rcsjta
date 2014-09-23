@@ -50,7 +50,7 @@ public class CapabilitiesLog {
      * The name of the column containing the MSISDN of the remote contact associated to the capabilities.
      * <P>Type: TEXT</P>
      */
-    public static final String CONTACT_NUMBER = "contact_number";
+    public static final String CONTACT = "contact";
 
     /**
      * The name of the column containing the image share capability.
@@ -101,4 +101,15 @@ public class CapabilitiesLog {
      * <P>Type: TEXT</P>
      */
     public static final String CAPABILITY_EXTENSIONS = "capability_extensions";
+    
+    /**
+     * The name of the column containing the automata information.
+     */
+    public static final String AUTOMATA = "automata";
+    
+    /**
+     * The name of the column containing the time of the last capability refresh.
+     * <P>Type: LONG</P>
+     */
+    public static final String TIMESTAMP = "capability_time_last_refresh";
 }

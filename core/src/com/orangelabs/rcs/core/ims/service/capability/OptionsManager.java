@@ -99,8 +99,8 @@ public class OptionsManager implements DiscoveryManager {
     		logger.debug("Request capabilities in background for " + contact);
     	}
     	
-    	// Update capability timestamp
-    	ContactsManager.getInstance().setContactCapabilitiesTimestamp(contact, System.currentTimeMillis());
+    	// Update capability time of last request
+    	ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(contact);
     	
     	// Start request in background
 		try {

@@ -27,6 +27,7 @@ import android.widget.Button;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -40,6 +41,11 @@ public class RequestAllCapabilities extends Activity {
 	 * API connection manager
 	 */
 	private ApiConnectionManager connectionManager;
+	
+	/**
+   	 * A locker to exit only once
+   	 */
+   	private LockAccess exitOnce = new LockAccess();
    	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,7 +65,7 @@ public class RequestAllCapabilities extends Activity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsService.CAPABILITY);
@@ -97,8 +103,7 @@ public class RequestAllCapabilities extends Activity {
         		// Display message
     			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));
         	} catch(Exception e) {
-    	    	e.printStackTrace();
-        		Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_refresh_failed));
+        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_refresh_failed), exitOnce);
         	}
         }
     };

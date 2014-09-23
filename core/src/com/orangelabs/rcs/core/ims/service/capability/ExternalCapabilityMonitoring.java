@@ -40,12 +40,12 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
 	/**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class.getName());
+    private final static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class.getSimpleName());
 	
     @Override
 	public void onReceive(Context context, Intent intent) {
     	try {
-	    	// Instanciate the settings manager
+	    	// Instantiate the settings manager
 	    	RcsSettings.createInstance(context);
 	    	
 	    	// Get Intent parameters
@@ -81,16 +81,17 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
             	}
 
     	        // Add the new extension in the supported RCS extensions
-		    	ServiceExtensionManager.addNewSupportedExtensions(AndroidFactory.getApplicationContext());
-            } else
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-            	if (logger.isActivated()) {
-            		logger.debug("Remove extensions for application " + uid);
-            	}
+		    	ServiceExtensionManager.getInstance().addNewSupportedExtensions(AndroidFactory.getApplicationContext());
+			} else {
+				if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+					if (logger.isActivated()) {
+						logger.debug("Remove extensions for application " + uid);
+					}
 
-            	// Remove the extensions in the supported RCS extensions
-		    	ServiceExtensionManager.removeSupportedExtensions(AndroidFactory.getApplicationContext());
-            }
+					// Remove the extensions in the supported RCS extensions
+					ServiceExtensionManager.getInstance().removeSupportedExtensions(AndroidFactory.getApplicationContext());
+				}
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

@@ -90,7 +90,6 @@ public class MessagingSessionList extends MultimediaSessionList {
 				setListAdapter(null);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed), exitOnce);
 		}
 	}

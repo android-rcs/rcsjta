@@ -62,7 +62,7 @@ public class TestGeolocSharingApi extends ListActivity {
                 
 	        case 1:
 	            String[] projection = new String[] {
-		            	CapabilitiesLog.CONTACT_NUMBER
+		            	CapabilitiesLog.CONTACT
 		            };
 		        	ArrayList<String> list = new ArrayList<String>(); 
 		    		Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, projection, null, null, null);

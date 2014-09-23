@@ -94,7 +94,7 @@ public class ServerApiUtils {
 			intent.addCategory(Intent.CATEGORY_LAUNCHER);
 			for(ResolveInfo info : pm.queryIntentActivities(intent, 0)) {
 				if (processInfo.processName.equals(info.activityInfo.packageName)) {
-					if (ServiceExtensionManager.isExtensionAuthorized(AndroidFactory.getApplicationContext(), ext)) {
+					if (ServiceExtensionManager.getInstance().isExtensionAuthorized(AndroidFactory.getApplicationContext(), ext)) {
 						authorized = true;
 						break;
 					}

@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,24 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class CapabilitiesList extends Activity {
+	
+	private static final String[] PROJECTION = new String[] {
+        	CapabilitiesLog.ID,
+        	CapabilitiesLog.CONTACT,
+        	CapabilitiesLog.CAPABILITY_IM_SESSION,
+        	CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+        	CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
+        	CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+        	CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
+        	CapabilitiesLog.CAPABILITY_IP_VOICE_CALL,
+        	CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL,
+        	CapabilitiesLog.CAPABILITY_EXTENSIONS,
+        	CapabilitiesLog.AUTOMATA,
+        	CapabilitiesLog.TIMESTAMP
+    		};
+	
+	private static final String SORT_ORDER = new StringBuilder(CapabilitiesLog.CONTACT).append(" DESC").toString();
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,20 +84,7 @@ public class CapabilitiesList extends Activity {
 	 */
 	private CapabilitiesListAdapter createListAdapter() {
 		Uri uri = CapabilitiesLog.CONTENT_URI;
-        String[] projection = new String[] {
-        	CapabilitiesLog.ID,
-        	CapabilitiesLog.CONTACT_NUMBER,
-        	CapabilitiesLog.CAPABILITY_IM_SESSION,
-        	CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
-        	CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
-        	CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
-        	CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
-        	CapabilitiesLog.CAPABILITY_IP_VOICE_CALL,
-        	CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL,
-        	CapabilitiesLog.CAPABILITY_EXTENSIONS
-    		};
-        String sortOrder = CapabilitiesLog.CONTACT_NUMBER + " DESC ";
-		Cursor cursor = getContentResolver().query(uri, projection, null, null, sortOrder);
+		Cursor cursor = getContentResolver().query(uri, PROJECTION, null, null, SORT_ORDER);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
@@ -106,20 +112,22 @@ public class CapabilitiesList extends Activity {
             View view = inflater.inflate(R.layout.capabilities_list_item, parent, false);
             
             CapabilitiesItemCache cache = new CapabilitiesItemCache();
-    		cache.number = cursor.getString(1);
-    		cache.im = cursor.getInt(2);
-    		cache.ft = cursor.getInt(3);
-    		cache.ish = cursor.getInt(4);
-    		cache.vsh = cursor.getInt(5);
-    		cache.geoloc = cursor.getInt(6);
-    		cache.ipVoiceCall = cursor.getInt(7);
-    		cache.ipVideoCall = cursor.getInt(8);
+    		cache.number = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CONTACT));
+    		cache.im = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_IM_SESSION));
+    		cache.ft = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_FILE_TRANSFER));
+    		cache.ish = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_IMAGE_SHARE));
+    		cache.vsh = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_VIDEO_SHARE));
+    		cache.geoloc = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_GEOLOC_PUSH));
+    		cache.ipVoiceCall = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_IP_VOICE_CALL));
+    		cache.ipVideoCall = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL));
 
-    		String exts = cursor.getString(9);
+    		String exts = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_EXTENSIONS));
     		if (exts != null) {
     			exts = exts.replace(';', '\n');
     		}
     		cache.exts = exts;
+    		cache.automata = cursor.getInt(cursor.getColumnIndex(CapabilitiesLog.AUTOMATA));
+    		cache.lastRefresh = cursor.getLong(cursor.getColumnIndex(CapabilitiesLog.TIMESTAMP));
             view.setTag(cache);
             
             return view;
@@ -145,7 +153,11 @@ public class CapabilitiesList extends Activity {
 	        CheckBox ipVideoCall = (CheckBox)view.findViewById(R.id.ip_video_call);
 	        ipVideoCall.setChecked(cache.ipVideoCall == CapabilitiesLog.SUPPORTED);
     		TextView extsView = (TextView)view.findViewById(R.id.extensions);
-    		extsView.setText(getString(R.string.label_extensions, cache.exts));
+    		extsView.setText(cache.exts);
+    		CheckBox automata = (CheckBox)view.findViewById(R.id.automata);
+	        automata.setChecked(cache.automata == CapabilitiesLog.SUPPORTED);
+    		TextView lastRefresh = (TextView)view.findViewById(R.id.last_refresh);
+			lastRefresh.setText( DateUtils.getRelativeTimeSpanString(cache.lastRefresh, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE));
     	}
     }
 
@@ -162,5 +174,7 @@ public class CapabilitiesList extends Activity {
 		public int ipVoiceCall;
 		public int ipVideoCall;		
 		public String exts;
+		public int automata;
+		public long lastRefresh;
 	}    
  }

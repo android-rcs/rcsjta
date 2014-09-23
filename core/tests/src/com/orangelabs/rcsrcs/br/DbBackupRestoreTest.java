@@ -94,7 +94,6 @@ public class DbBackupRestoreTest extends AndroidTestCase {
 		}
 		try {
 			list = BackupRestoreDb.listOfSavedAccounts(srcdir);
-			logger.error(" test backup" + list.toString());
 			assertTrue("listOfSavedAccounts failed", list == null || list.length == 0);
 		} catch (InvalidArgumentException e) {
 			e.printStackTrace();

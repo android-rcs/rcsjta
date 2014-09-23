@@ -31,10 +31,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class PollingManager extends PeriodicRefresher {
-	/**
-	 * Capability expiry timeout in seconds
-	 */
-	private static final int CAPABILITY_EXPIRY_PERIOD = RcsSettings.getInstance().getCapabilityExpiryTimeout();
 
 	/**
      * Capability service
@@ -120,8 +116,7 @@ public class PollingManager extends PeriodicRefresher {
 	    	if (logger.isActivated()) {
 	    		logger.debug("Capabilities exist for " + contact);
 	    	}
-			long delta = (System.currentTimeMillis()-capabilities.getTimestamp())/1000;
-			if ((delta >= CAPABILITY_EXPIRY_PERIOD) || (delta < 0)) {
+			if (isCapabilityRefreshRequired(capabilities.getTimeLastRefresh())) {
 		    	if (logger.isActivated()) {
 		    		logger.debug("Capabilities have expired for " + contact);
 		    	}
@@ -136,5 +131,17 @@ public class PollingManager extends PeriodicRefresher {
 		    	}
 			}
 		}
+	}
+
+	/**
+	 * Check if refresh of capability is required
+	 * 
+	 * @param lastCapabilityRefresh
+	 *            time of last capability refresh
+	 * @return true if capability refresh is required
+	 */
+	/* package private */ static boolean isCapabilityRefreshRequired(long timeLastRefresh) {
+		long delta = (System.currentTimeMillis() - timeLastRefresh) / 1000;
+		return ((delta >= RcsSettings.getInstance().getCapabilityExpiryTimeout()) || (delta < 0));
 	}	    
 }

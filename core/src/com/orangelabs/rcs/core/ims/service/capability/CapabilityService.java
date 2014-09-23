@@ -47,10 +47,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class CapabilityService extends ImsService implements AddressBookEventListener {
-	/**
-	 * Capability refresh timeout in seconds
-	 */
-	private static final int CAPABILITY_REFRESH_PERIOD = RcsSettings.getInstance().getCapabilityRefreshTimeout();
 
 	/**
 	 * Options manager
@@ -81,7 +77,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	/**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(CapabilityService.class.getSimpleName());
 
     /**
      * Constructor
@@ -203,10 +199,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	    	if (logger.isActivated()) {
 	    		logger.debug("Capabilities exist for " + contact);
 	    	}
-			long delta = (System.currentTimeMillis()-capabilities.getTimestamp())/1000;
-			if ((delta >= CAPABILITY_REFRESH_PERIOD) || (delta < 0)) {
+			if (isCapabilityRefreshAuthorized(capabilities.getTimeLastRequest())) {
 		    	if (logger.isActivated()) {
-		    		logger.debug("Capabilities have expired for " + contact);
+		    		logger.debug("Request capabilities for " + contact);
 		    	}
 
 		    	// Capabilities are too old: request capabilities from the network
@@ -215,6 +210,19 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 		}
 		return capabilities;
     }
+	
+	/**
+	 * Check if refresh of capability is authorized
+	 * 
+	 * @param lastCapabilityRequest
+	 *            time of last capability request
+	 * @return true if capability request is authorized
+	 */
+	private boolean isCapabilityRefreshAuthorized(long lastCapabilityRequest) {
+		long delta = (System.currentTimeMillis() - lastCapabilityRequest) / 1000;
+		// Do not request capability refresh too often
+		return ((delta >= RcsSettings.getInstance().getCapabilityRefreshTimeout()) || (delta < 0));
+	}
 
     /**
      * Request capabilities for a set of contacts

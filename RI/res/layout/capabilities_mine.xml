@@ -103,6 +103,17 @@
 			 android:layout_marginRight="5dip"/>
 	    </TableRow>
         
+		<TableRow>
+            <TextView android:text="@string/label_automata"
+             android:layout_marginLeft="5dip"
+             android:gravity="right"/>
+            <CheckBox android:id="@+id/automata"
+             android:layout_marginLeft="5dip"
+             android:layout_marginRight="5dip"
+             android:textStyle="bold"
+             android:clickable="false" />
+        </TableRow>
+        
 	</TableLayout>
 	
 </ScrollView>

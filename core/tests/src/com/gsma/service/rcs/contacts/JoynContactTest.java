@@ -46,6 +46,8 @@ public class JoynContactTest extends AndroidTestCase {
 	private boolean registered;
 	private ContactId contactId;
 	private String displayName;
+	private long timestamp;
+	private boolean valid;
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -61,8 +63,11 @@ public class JoynContactTest extends AndroidTestCase {
 		extensions = new HashSet<String>();
 		extensions.add(String.valueOf(random.nextInt(96) + 32));
 		extensions.add(String.valueOf(random.nextInt(96) + 32));
+		timestamp = random.nextLong();
+		valid = random.nextBoolean();
+
 		capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer, geolocPush, ipVoiceCall, ipVideoCall,
-				extensions, automata);
+				extensions, automata, timestamp, valid);
 		registered = random.nextBoolean();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		contactId = contactUtils.formatContactId("+33123456789");
@@ -118,28 +123,35 @@ public class JoynContactTest extends AndroidTestCase {
 	}
 
 	private boolean joynContactIsEqual(JoynContact joyn1, JoynContact joyn2) {
-		if (joyn1.isRegistered() != joyn2.isRegistered())
+		if (joyn1.isRegistered() != joyn2.isRegistered()) {
 			return false;
+		}
 		if (joyn1.getContactId() != null) {
-			if (!joyn1.getContactId().equals(joyn2.getContactId()))
+			if (!joyn1.getContactId().equals(joyn2.getContactId())) {
 				return false;
+			}
 		} else {
-			if (joyn2.getContactId() != null)
+			if (joyn2.getContactId() != null) {
 				return false;
+			}
 		}
 		if (joyn1.getCapabilities() != null) {
-			if (!CapabilitiesTest.capabilitiesIsEqual(joyn1.getCapabilities(), joyn2.getCapabilities()))
+			if (!CapabilitiesTest.capabilitiesIsEqual(joyn1.getCapabilities(), joyn2.getCapabilities())) {
 				return false;
+			}
 		} else {
-			if (joyn2.getCapabilities() != null)
+			if (joyn2.getCapabilities() != null) {
 				return false;
+			}
 		}
 		if (joyn1.getDisplayName() != null) {
-			if (!joyn1.getDisplayName().equals(joyn2.getDisplayName()))
+			if (!joyn1.getDisplayName().equals(joyn2.getDisplayName())) {
 				return false;
+			}
 		} else {
-			if (joyn2.getDisplayName() != null)
+			if (joyn2.getDisplayName() != null) {
 				return false;
+			}
 		}
 		return true;
 	}
