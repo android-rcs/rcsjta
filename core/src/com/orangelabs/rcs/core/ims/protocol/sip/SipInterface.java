@@ -328,6 +328,10 @@ public class SipInterface implements SipListener {
             if (logger.isActivated()) {
                 logger.error("SIP stack initialization has failed", e);
             }
+
+            // discard unusable stack
+            close();
+
             throw new SipException("Can't create the SIP stack");
         }
 
@@ -354,13 +358,25 @@ public class SipInterface implements SipListener {
                 sipProvider.removeListeningPoints();
                 sipStack.deleteSipProvider(sipProvider);
             }
-
-            // Stop the stack
-            sipStack.stop();
-            SipFactory.getInstance().resetFactory();
         } catch(Exception e) {
             if (logger.isActivated()) {
-                logger.error("Can't stop SIP stack correctly", e);
+                logger.error("Can't cleanup SIP stack correctly", e);
+            }
+        } finally {
+            // Stop the stack
+            try {
+                if (sipStack != null) {
+                    sipStack.stop();
+                } else {
+                    if (logger.isActivated()) {
+                        logger.debug("SIP stack is null");
+                    }
+                }
+                SipFactory.getInstance().resetFactory();
+            } catch(Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't stop SIP stack correctly", e);
+                }
             }
         }
     }
