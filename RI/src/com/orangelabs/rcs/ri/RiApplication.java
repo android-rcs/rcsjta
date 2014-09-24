@@ -43,12 +43,12 @@ public class RiApplication extends Application {
 	public static String[] DELIVERY_REASON_CODES;
 
 	/**
-	 * Array of Group Chat states
+	 * Array of Group CHAT states
 	 */
 	public static String[] GC_STATES;
 
 	/**
-	 * Array of Group Chat reason codes
+	 * Array of Group CHAT reason codes
 	 */
 	public static String[] GC_REASON_CODES;
 
@@ -113,12 +113,12 @@ public class RiApplication extends Application {
 	public static String[] IPCALL_REASON_CODES;
 	
 	/**
-	 * Array of Multimedia Messaging Session states
+	 * Array of MULTIMEDIA Messaging Session states
 	 */
 	public static String[] MMS_STATES;
 
 	/**
-	 * Array of Multimedia Messaging Session codes
+	 * Array of MULTIMEDIA Messaging Session codes
 	 */
 	public static String[] MMS_REASON_CODES;
 	
@@ -147,6 +147,8 @@ public class RiApplication extends Application {
 		IPCALL_REASON_CODES = getResources().getStringArray(R.array.ipcall_reason_codes);
 		MMS_STATES = getResources().getStringArray(R.array.mms_states);
 		MMS_REASON_CODES = getResources().getStringArray(R.array.mms_reason_codes);
+		
+		ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
 	}
 
 	public static Context getContext() {

@@ -57,7 +57,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoPlayer;
@@ -272,11 +272,11 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.VideoSharing)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.VIDEO_SHARING)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-        connectionManager.startMonitorServices(this, exitOnce, RcsServices.VideoSharing);
+        connectionManager.startMonitorServices(this, exitOnce, RcsService.VIDEO_SHARING);
 
 		// Add service listener
 		try {
@@ -299,7 +299,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.VideoSharing)) {
+		if (connectionManager.isServiceConnected(RcsService.VIDEO_SHARING)) {
 			// Remove video sharing listener
 			try {
 				connectionManager.getVideoSharingApi().removeEventListener(vshListener);

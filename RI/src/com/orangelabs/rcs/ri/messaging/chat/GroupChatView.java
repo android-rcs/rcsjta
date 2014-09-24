@@ -55,7 +55,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.contacts.JoynContact;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -81,7 +81,7 @@ public class GroupChatView extends ChatView {
 	private String subject;
 	
     /**
-     * Chat ID 
+     * CHAT ID 
      */
 	private String chatId;
 
@@ -271,7 +271,7 @@ public class GroupChatView extends ChatView {
 			Log.d(LOGTAG, "onCreate");
 		}
 		super.onCreate(savedInstanceState);
-		if (connectionManager != null && !connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.Contacts)) {
+		if (connectionManager != null && !connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
 			return;
 		}
 		try {
@@ -316,7 +316,7 @@ public class GroupChatView extends ChatView {
 		// Replace the value of intent
 		setIntent(intent);
 		
-		if (connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.Contacts)) {
+		if (connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
 			processIntent();
 		}
 	}
@@ -816,7 +816,7 @@ public class GroupChatView extends ChatView {
 	}
 
 	private void removeServiceListener() {
-		if (connectionManager != null && connectionManager.isServiceConnected(RcsServices.Chat)) {
+		if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
 			try {
 				connectionManager.getChatApi().removeGroupChatEventListener(chatListener);
 			} catch (JoynServiceException e) {

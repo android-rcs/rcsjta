@@ -38,7 +38,7 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.ft.InitiateFileTransfer;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -127,11 +127,11 @@ public class InitiateFileUpload extends Activity {
 
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServices.FileUpload);
+		connectionManager.startMonitorServices(this, exitOnce, RcsService.FILE_UPLOAD);
 		try {
 			// Add upload listener
 			connectionManager.getFileUploadApi().addEventListener(uploadListener);
@@ -152,7 +152,7 @@ public class InitiateFileUpload extends Activity {
 		}
 		connectionManager.stopMonitorServices(this);
         // Remove upload listener
-        if (connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+        if (connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
         	try {
         		connectionManager.getFileUploadApi().removeEventListener(uploadListener);
         	} catch(Exception e) {

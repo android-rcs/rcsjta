@@ -61,7 +61,7 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
@@ -73,7 +73,7 @@ import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Chat view
+ * CHAT view
  */
 public abstract class ChatView extends ListActivity implements OnClickListener, OnKeyListener {	
 	/**
@@ -180,10 +180,10 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.Contacts)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsServices.Chat, RcsServices.Contacts);
+			connectionManager.startMonitorServices(this, exitOnce, RcsService.CHAT, RcsService.CONTACTS);
 		}
     }
 

@@ -41,7 +41,7 @@ import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -200,10 +200,10 @@ public class ReceiveImageSharing extends Activity {
 				
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.ImageSharing, RcsServices.Contacts)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IMAGE_SHARING, RcsService.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsServices.ImageSharing, RcsServices.Contacts);
+			connectionManager.startMonitorServices(this, exitOnce, RcsService.IMAGE_SHARING, RcsService.CONTACTS);
 			initiateImageSharing();
 		}
     }
@@ -215,7 +215,7 @@ public class ReceiveImageSharing extends Activity {
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.ImageSharing)) {
+		if (connectionManager.isServiceConnected(RcsService.IMAGE_SHARING)) {
 			// Remove file transfer listener
 			try {
 				connectionManager.getImageSharingApi().removeEventListener(ishListener);

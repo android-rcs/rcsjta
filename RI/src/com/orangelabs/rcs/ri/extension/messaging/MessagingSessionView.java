@@ -45,7 +45,7 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -226,11 +226,11 @@ public class MessagingSessionView extends Activity {
 
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Multimedia,RcsServices.Contacts)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.MULTIMEDIA,RcsService.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServices.Multimedia, RcsServices.Contacts);
+		connectionManager.startMonitorServices(this, exitOnce, RcsService.MULTIMEDIA, RcsService.CONTACTS);
 		try {
 			// Add service listener
 			connectionManager.getMultimediaSessionApi().addMessagingEventListener(serviceListener);
@@ -250,7 +250,7 @@ public class MessagingSessionView extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.Multimedia)) {
+		if (connectionManager.isServiceConnected(RcsService.MULTIMEDIA)) {
 			// Remove listener
 			try {
 				connectionManager.getMultimediaSessionApi().removeMessagingEventListener(serviceListener);

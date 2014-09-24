@@ -34,7 +34,7 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Chat API
+ * CHAT API
  * 
  * @author Jean-Marc AUFFRET
  */

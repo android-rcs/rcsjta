@@ -30,7 +30,7 @@ import android.content.Intent;
 public class GroupChatMessageReceiver extends BroadcastReceiver {
 	
 	/**
-	 * Action New Group Chat Message
+	 * Action New Group CHAT Message
 	 */
 	/* package private */static final String ACTION_NEW_GC_MSG = "NEW_GC_MSG";
 	

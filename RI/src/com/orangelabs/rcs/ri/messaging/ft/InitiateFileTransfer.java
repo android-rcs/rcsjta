@@ -52,7 +52,7 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -260,11 +260,11 @@ public class InitiateFileTransfer extends Activity {
 		
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServices.FileTransfer);
+		connectionManager.startMonitorServices(this, exitOnce, RcsService.FILE_TRANSFER);
 		try {
 			// Add service listener
 			connectionManager.getFileTransferApi().addOneToOneFileTransferListener(ftListener);
@@ -330,7 +330,7 @@ public class InitiateFileTransfer extends Activity {
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+		if (connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
 			// Remove file transfer listener
 			try {
 				connectionManager.getFileTransferApi().removeOneToOneFileTransferListener(ftListener);

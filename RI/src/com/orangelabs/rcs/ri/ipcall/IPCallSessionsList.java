@@ -32,7 +32,7 @@ import android.widget.ListView;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -66,11 +66,11 @@ public class IPCallSessionsList extends ListActivity {
 
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.IpCall)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IP_CALL)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServices.IpCall);
+		connectionManager.startMonitorServices(this, null, RcsService.IP_CALL);
 	}
 	
 	@Override

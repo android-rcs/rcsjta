@@ -27,7 +27,7 @@ import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.JoynServiceRegistrationListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -68,11 +68,11 @@ public class RegistrationStatus extends Activity {
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), null);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
+		connectionManager.startMonitorServices(this, null, RcsService.CAPABILITY);
 		try {
 			// Add service listener
 			connectionManager.getCapabilityApi().addServiceRegistrationListener(registrationListener);
@@ -88,7 +88,7 @@ public class RegistrationStatus extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-    	if (connectionManager.isServiceConnected(RcsServices.Capability)) {
+    	if (connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
 			// Remove listener
 			try {
 				connectionManager.getCapabilityApi().removeServiceRegistrationListener(registrationListener);

@@ -327,14 +327,6 @@
         <!-- File Upload API -->
 	 	
         <activity android:name=".upload.InitiateFileUpload" />
-        
-        <receiver android:name=".RcsServiceReceiver">
-            <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.action.SERVICE_UP"/>
-            </intent-filter>
-        </receiver>
-        
-        <service android:name=".RcsServiceIntentService" android:exported="false" />
 	 		 	
 </application>
 

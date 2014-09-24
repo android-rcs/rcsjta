@@ -48,7 +48,7 @@ import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.gsma.services.rcs.ft.GroupFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -79,7 +79,7 @@ public class SendGroupFile extends Activity {
 	private final Handler handler = new Handler();
 
     /**
-     * Chat ID 
+     * CHAT ID 
      */
 	private String chatId;
 
@@ -243,11 +243,11 @@ public class SendGroupFile extends Activity {
                
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.FileTransfer, RcsServices.Contacts)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CHAT, RcsService.FILE_TRANSFER, RcsService.CONTACTS)) {
 			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
 			connectionManager
-					.startMonitorServices(this, exitOnce, RcsServices.Chat, RcsServices.FileTransfer, RcsServices.Contacts);
+					.startMonitorServices(this, exitOnce, RcsService.CHAT, RcsService.FILE_TRANSFER, RcsService.CONTACTS);
 			FileTransferService ftApi = connectionManager.getFileTransferApi();
 			try {
 				// Enable thumbnail option if supported
@@ -274,7 +274,7 @@ public class SendGroupFile extends Activity {
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.FileTransfer)) {
+		if (connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
 			// Remove Group file listener
 			try {
 				connectionManager.getFileTransferApi().removeGroupFileTransferListener(ftListener);

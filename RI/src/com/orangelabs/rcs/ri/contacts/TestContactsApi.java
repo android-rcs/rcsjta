@@ -31,7 +31,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Contacts API
+ * CONTACTS API
  * 
  * @author Jean-Marc AUFFRET
  */

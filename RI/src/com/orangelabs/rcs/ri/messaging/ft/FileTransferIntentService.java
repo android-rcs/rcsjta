@@ -99,7 +99,7 @@ public class FileTransferIntentService extends IntentService {
 			// Get File Transfer from provider
 			FileTransferDAO ftDao = new FileTransferDAO(this, transferId);
 			try {
-				// Check if a Group Chat session exists for this file transfer
+				// Check if a Group CHAT session exists for this file transfer
 				new GroupChatDAO(this, ftDao.getChatId());
 				intent.putExtra(EXTRA_GROUP_FILE, true);
 			} catch (Exception e) {

@@ -44,7 +44,7 @@ import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
 import com.gsma.services.rcs.ipcall.IPCallService;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallPlayer;
@@ -225,10 +225,10 @@ public class IPCallView extends Activity {
 
         // Register to API connection manager
      	connectionManager = ApiConnectionManager.getInstance(this);
-     	if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.IpCall, RcsServices.Contacts)) {
+     	if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IP_CALL, RcsService.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsServices.ImageSharing, RcsServices.Contacts);
+			connectionManager.startMonitorServices(this, exitOnce, RcsService.IMAGE_SHARING, RcsService.CONTACTS);
 			initiateIpCall();
 		}
     }
@@ -240,7 +240,7 @@ public class IPCallView extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.IpCall)) {
+		if (connectionManager.isServiceConnected(RcsService.IP_CALL)) {
 			// Remove service listener
 			try {
 				connectionManager.getIPCallApi().removeEventListener(callListener);

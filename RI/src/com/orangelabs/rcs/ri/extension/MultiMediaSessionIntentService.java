@@ -25,7 +25,7 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
 import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
@@ -92,7 +92,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		}
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Multimedia)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.MULTIMEDIA)) {
 			return;
 		}
 		// Get invitation info

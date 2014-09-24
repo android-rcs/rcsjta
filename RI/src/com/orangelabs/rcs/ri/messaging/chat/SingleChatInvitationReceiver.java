@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * Chat invitation receiver
+ * CHAT invitation receiver
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
@@ -32,7 +32,7 @@ import android.content.Intent;
 public class SingleChatInvitationReceiver extends BroadcastReceiver {
 
 	/**
-	 * Action New One to One Chat Message
+	 * Action New One to One CHAT Message
 	 */
 	/* package private */static final String ACTION_NEW_121_CHAT_MSG = "NEW_121_CHAT_MSG";
 

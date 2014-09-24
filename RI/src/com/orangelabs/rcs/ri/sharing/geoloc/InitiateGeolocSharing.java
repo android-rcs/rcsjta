@@ -50,7 +50,7 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
@@ -247,11 +247,11 @@ public class InitiateGeolocSharing extends Activity {
         
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.GeolocSharing)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.GEOLOC_SHARING)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServices.GeolocSharing);
+		connectionManager.startMonitorServices(this, exitOnce, RcsService.GEOLOC_SHARING);
 		try {
 			// Add service listener
 			connectionManager.getGeolocSharingApi().addEventListener(gshListener);
@@ -270,7 +270,7 @@ public class InitiateGeolocSharing extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.GeolocSharing)) {
+		if (connectionManager.isServiceConnected(RcsService.GEOLOC_SHARING)) {
 			// Remove geoloc sharing listener
 			try {
 				connectionManager.getGeolocSharingApi().removeEventListener(gshListener);

@@ -26,7 +26,7 @@ import android.os.Parcelable;
 import com.gsma.services.rcs.chat.ChatLog;
 
 /**
- * Group Chat Data Object
+ * Group CHAT Data Object
  * 
  * @author YPLO6403
  * 
@@ -92,7 +92,7 @@ public class GroupChatDAO implements Parcelable {
 	};
 
 	/**
-	 * Construct the Group Chat data object from the provider
+	 * Construct the Group CHAT data object from the provider
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 

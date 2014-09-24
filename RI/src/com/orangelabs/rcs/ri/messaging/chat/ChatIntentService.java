@@ -140,7 +140,7 @@ public class ChatIntentService extends IntentService {
 		String chatId = invitation.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
 		if (chatId != null) {
 			try {
-				// Get Chat from provider
+				// Get CHAT from provider
 				GroupChatDAO groupChatDAO = new GroupChatDAO(this, chatId);
 				// Save ChatDAO into intent
 				Bundle bundle = new Bundle();
@@ -196,7 +196,7 @@ public class ChatIntentService extends IntentService {
 	}
 
 	/**
-	 * Forward Group Chat message to view activity
+	 * Forward Group CHAT message to view activity
 	 * 
 	 * @param context
 	 * @param newMessageIntent
@@ -304,7 +304,7 @@ public class ChatIntentService extends IntentService {
 	 * @param invitation
 	 *            Intent invitation
 	 * @param groupChat
-	 *            Group Chat DAO
+	 *            Group CHAT DAO
 	 */
 	public void forwardGCInvitation2UI(Context context, Intent invitation, GroupChatDAO groupChat) {
 		// Get subject
@@ -336,7 +336,7 @@ public class ChatIntentService extends IntentService {
 	}
 	
 	/**
-	 * Get the RCS display name of remote contact in Group Chat
+	 * Get the RCS display name of remote contact in Group CHAT
 	 * @param context
 	 * @param chatId
 	 * @return the RCS display name or null

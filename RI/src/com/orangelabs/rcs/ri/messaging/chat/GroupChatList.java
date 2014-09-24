@@ -43,7 +43,7 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -170,7 +170,7 @@ public class GroupChatList extends Activity {
     private OnClickListener clickItemListener = new OnClickListener() {
 		public void onClick(View v) {
 			ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(GroupChatList.this);
-			if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Chat)) {
+			if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CHAT)) {
 				Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}

@@ -35,7 +35,7 @@ import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 
 /**
@@ -105,7 +105,7 @@ public class EditGeoloc extends Activity {
         
         // Register to API connection manager
      	ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
-     	if (connectionManager != null && connectionManager.isServiceConnected(RcsServices.Chat)) {
+     	if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
 			try {
 				ChatServiceConfiguration configuration = connectionManager.getChatApi().getConfiguration();
 				geolocExpirationTime = configuration.getGeolocExpirationTime();

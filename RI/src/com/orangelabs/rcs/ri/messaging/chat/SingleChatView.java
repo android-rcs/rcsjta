@@ -39,7 +39,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -67,12 +67,12 @@ public class SingleChatView extends ChatView {
 	private ContactId contact;
     
     /**
-     * Chat 
+     * CHAT 
      */
 	private Chat chat;
 	
     /**
-     * Chat listener
+     * CHAT listener
      */
 	private ChatListener chatListener = new ChatListener() {
 		// Callback called when an Is-composing event has been received
@@ -136,7 +136,7 @@ public class SingleChatView extends ChatView {
 		}
         super.onCreate(savedInstanceState);
         
-		if (connectionManager != null && !connectionManager.isServiceConnected(RcsServices.Chat,RcsServices.Contacts)) {
+		if (connectionManager != null && !connectionManager.isServiceConnected(RcsService.CHAT,RcsService.CONTACTS)) {
 			return;
 		}
 		try {
@@ -181,7 +181,7 @@ public class SingleChatView extends ChatView {
 		// Replace the value of intent
 		setIntent(intent);
 		
-		if (connectionManager.isServiceConnected(RcsServices.Chat, RcsServices.Contacts)) {
+		if (connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
 			processIntent(false);
 		}
 	}
@@ -394,7 +394,7 @@ public class SingleChatView extends ChatView {
 	}
     
 	private void removeServiceListener() {
-		if (connectionManager != null && connectionManager.isServiceConnected(RcsServices.Chat)) {
+		if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
 			try {
 				connectionManager.getChatApi().removeOneToOneChatEventListener(chatListener);
 			} catch (JoynServiceException e) {

@@ -44,7 +44,7 @@ import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -111,11 +111,11 @@ public class RequestCapabilities extends Activity {
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServices.Capability)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServices.Capability);
+		connectionManager.startMonitorServices(this, null, RcsService.CAPABILITY);
 		try {
 			// Add service listener
 			connectionManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
@@ -134,7 +134,7 @@ public class RequestCapabilities extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServices.Capability)) {
+		if (connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
 			// Remove image sharing listener
 			try {
 				connectionManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);

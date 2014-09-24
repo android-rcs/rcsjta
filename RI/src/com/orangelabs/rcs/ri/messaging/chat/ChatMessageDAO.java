@@ -28,7 +28,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 
 /**
- * Chat Message Data Object
+ * CHAT Message Data Object
  * 
  * @author YPLO6403
  * 
@@ -125,7 +125,7 @@ public class ChatMessageDAO implements Parcelable {
 	}
 
 	/**
-	 * Construct the Chat Message data object from the provider
+	 * Construct the CHAT Message data object from the provider
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 

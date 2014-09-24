@@ -47,7 +47,7 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServices;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -116,7 +116,7 @@ public class ChatList extends Activity {
 	}
 	
     /**
-     * Chat list adapter
+     * CHAT list adapter
      */
     private class ChatListAdapter extends CursorAdapter {
     	/**
@@ -178,7 +178,7 @@ public class ChatList extends Activity {
     }
 
     /**
-     * Chat list item in cache
+     * CHAT list item in cache
      */
 	private class ChatListItemCache {
 		private String contact;
@@ -194,7 +194,7 @@ public class ChatList extends Activity {
 		public void onClick(View v) {
 			// TODO: if not connected offers possibility to show history
 			ApiConnectionManager apiConnectionManager = ApiConnectionManager.getInstance(ChatList.this);
-			if (apiConnectionManager == null || !apiConnectionManager.isServiceConnected(RcsServices.Chat)) {
+			if (apiConnectionManager == null || !apiConnectionManager.isServiceConnected(RcsService.CHAT)) {
 				Utils.showMessage(ChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}
