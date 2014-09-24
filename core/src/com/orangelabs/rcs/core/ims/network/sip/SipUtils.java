@@ -198,7 +198,7 @@ public class SipUtils {
      * @return UA value
      */
     public static String userAgentString() {
-        String userAgent = "IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
+        String userAgent = "ExttoExt-client/Ext1.0 IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
         return userAgent;
     }
 

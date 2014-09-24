@@ -22,6 +22,9 @@
 
 package com.orangelabs.rcs.provider.settings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -992,12 +995,9 @@ public class RcsSettings {
 		capabilities.setTimestamp(System.currentTimeMillis());
 
 		// Add extensions
-		String exts = getSupportedRcsExtensions();
-		if ((exts != null) && (exts.length() > 0)) {
-			String[] ext = exts.split(",");
-			for(int i=0; i < ext.length; i++) {
-				capabilities.addSupportedExtension(ext[i]);
-			}
+		List<String> exts = getSupportedRcsExtensions();
+		for(int i=0; i < exts.size(); i++) {
+			capabilities.addSupportedExtension(exts.get(i));
 		}
 
 		return capabilities;
@@ -1647,19 +1647,34 @@ public class RcsSettings {
 	/**
      * Get supported RCS extensions
      *
-     * @return List of extensions (semicolon separated)
+     * @return List of extensions
      */
-	public String getSupportedRcsExtensions() {
-		return readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS);
+	public List<String> getSupportedRcsExtensions() {
+		List<String> result = new ArrayList<String>();
+		String exts = readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS);
+		if ((exts != null) && (exts.length() > 0)) {
+			String[] ext = exts.split(";");
+			for(int i=0; i < ext.length; i++) {
+				result.add(ext[i]);
+			}
+		}
+		return result;
     }
 
 	/**
      * Set supported RCS extensions
      *
-     * @param extensions List of extensions (semicolon separated)
+     * @param extensions List of extensions
      */
-	public void setSupportedRcsExtensions(String extensions) {
-		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, extensions);
+	public void setSupportedRcsExtensions(List<String> extensions) {
+	    StringBuffer result = new StringBuffer();
+	    for(int i =0; i < extensions.size(); i++) {
+	    	result.append(";" + extensions.get(i));
+	    }
+	    if (result.length() > 0) {
+	    	result.deleteCharAt(0);
+	    }
+		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, result.toString());
     }
 
 	/**

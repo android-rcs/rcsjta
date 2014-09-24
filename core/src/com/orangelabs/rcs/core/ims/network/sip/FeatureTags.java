@@ -132,7 +132,7 @@ public class FeatureTags {
 	/**
 	 * 3GPP RCS extension feature tag
 	 */
-	public final static String FEATURE_3GPP_EXTENSION = "urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.rcs.extension";
+	public final static String FEATURE_3GPP_EXTENSION = "urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.rcs.extension";
 
 	/**
 	 * SIP Automata feature tag
