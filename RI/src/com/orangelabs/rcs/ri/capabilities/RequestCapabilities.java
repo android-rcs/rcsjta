@@ -75,6 +75,8 @@ public class RequestCapabilities extends Activity {
      */
     private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener();
     
+    private static final String EXTENSION_SEPARATOR = "\n";
+    
     /**
 	 * The log tag for this class
 	 */
@@ -316,19 +318,13 @@ public class RequestCapabilities extends Activity {
 	}
 	
 	/* package private */static String getExtensions(Capabilities capabilities) {
-		if (capabilities == null) {
+		if (capabilities == null || capabilities.getSupportedExtensions().isEmpty()) {
 			return "";
 		}
 		StringBuilder extensions = new StringBuilder();
-		boolean start = true;
 		for (String capability : capabilities.getSupportedExtensions()) {
-			if (!start) {
-				extensions.append("\n");
-			} else {
-				start = false;
-			}
-			extensions.append(capability);
+			extensions.append(EXTENSION_SEPARATOR).append(capability);
 		}
-		return extensions.toString();
+		return extensions.substring(EXTENSION_SEPARATOR.length());
 	}
 }

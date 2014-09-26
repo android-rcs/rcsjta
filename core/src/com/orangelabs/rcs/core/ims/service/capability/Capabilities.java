@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class Capabilities {
 	
-	private static final long INVALID_TIME = -1;
+	public static final long INVALID_TIMESTAMP = -1;
 	
 	/**
 	 * Image sharing support
@@ -112,14 +112,14 @@ public class Capabilities {
 	private Set<String> extensions = new HashSet<String>();
 	
 	/**
-	 * Last time capabilities was requested
+	 * Last timestamp capabilities was requested
 	 */
-	private long timeLastRequest = INVALID_TIME;
+	private long mTimestampOfLastRequest = INVALID_TIMESTAMP;
 	
 	/**
-	 * Last time capabilities was refreshed
+	 * Last timestamp capabilities was refreshed
 	 */
-	private long timeLastRefresh = INVALID_TIME;
+	private long mTimestampOfLastRefresh = INVALID_TIMESTAMP;
 
 	/**
 	 * Constructor
@@ -423,21 +423,21 @@ public class Capabilities {
 	}
 	
 	/**
-	 * Get time of last request
+	 * Get timestamp of last request
 	 * 
-	 * @return timeLastRequest (in milliseconds)
+	 * @return timetampOfLastRequest (in milliseconds)
 	 */
-	public long getTimeLastRequest() {
-		return timeLastRequest;
+	public long getTimestampOfLastRequest() {
+		return mTimestampOfLastRequest;
 	}
 
 	/**
-	 * Set time of the last request
+	 * Set timestamp of the last request
 	 * 
-	 * @param timeLastRequest (in milliseconds)
+	 * @param timestampOfLastRequest (in milliseconds)
 	 */
-	public void setTimeLastRequest(long timeLastRequest) {
-		this.timeLastRequest = timeLastRequest;
+	public void setTimestampOfLastRequest(long timestampOfLastRequest) {
+		this.mTimestampOfLastRequest = timestampOfLastRequest;
 	}
 	
 	/**
@@ -455,8 +455,8 @@ public class Capabilities {
             ", FT_http=" + fileTransferHttp +
             ", Geolocation_push=" + geolocationPush +
             ", Automata=" + sipAutomata +
-			", TimestampLastRequest=" + timeLastRequest+
-			", TimestampLastRefresh=" + timeLastRefresh;
+			", TimestampLastRequest=" + mTimestampOfLastRequest+
+			", TimestampLastRefresh=" + mTimestampOfLastRefresh;
 	}
 
 	/**
@@ -466,25 +466,25 @@ public class Capabilities {
 	 */
 	public boolean isValid() {
 		// If no refresh of capabilities is required then capabilities are valid
-		return !PollingManager.isCapabilityRefreshRequired(this.timeLastRefresh);
+		return !PollingManager.isCapabilityRefreshRequired(this.mTimestampOfLastRefresh);
 	}
 
 	/**
-	 * Get time of last refresh
+	 * Get timestamp of last refresh
 	 * 
-	 * @return timeLastRefresh (in milliseconds)
+	 * @return timestampOfLastRefresh (in milliseconds)
 	 */
-	public long getTimeLastRefresh() {
-		return timeLastRefresh;
+	public long getTimestampOfLastRefresh() {
+		return mTimestampOfLastRefresh;
 	}
 
 	/**
-	 * Set time of last refresh
+	 * Set timestamp of last refresh
 	 * 
-	 * @param timeLastRefresh (in milliseconds)
+	 * @param timestampOfLastRefresh (in milliseconds)
 	 */
-	public void setTimeLastRefresh(long timeLastRefresh) {
-		this.timeLastRefresh = timeLastRefresh;
+	public void setTimestampOfLastRefresh(long timestampOfLastRefresh) {
+		this.mTimestampOfLastRefresh = timestampOfLastRefresh;
 	}
 
 }

@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.accounts.AccountManager;
@@ -91,6 +93,13 @@ public final class ContactsManager {
      */
 	private static final int INVALID_ID = -1;
 
+	// @formatter:off
+	private enum MimeType {
+		NUMBER, RCS_STATUS, REGISTRATION_STATE, CAPABILITY_IMAGE_SHARING, CAPABILITY_VIDEO_SHARING, CAPABILITY_IM_SESSION, 
+		CAPABILITY_FILE_TRANSFER, CAPABILITY_GEOLOCATION_PUSH, CAPABILITY_EXTENSIONS, CAPABILITY_IP_VOICE_CALL, CAPABILITY_IP_VIDEO_CALL
+	};
+	// @formatter:on
+	
     /** 
      * MIME type for contact number
      */
@@ -100,7 +109,6 @@ public final class ContactsManager {
      * MIME type for RCS status 
      */
     private static final String MIMETYPE_RCS_STATUS = "vnd.android.cursor.item/com.orangelabs.rcs.rcs-status";
-
 
     /** 
      * MIME type for RCS registration state 
@@ -147,6 +155,11 @@ public final class ContactsManager {
      */
     private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactsProvider.MIME_TYPE_IP_VIDEO_CALL;
     
+	/**
+	 * A map between mime type string and enumerated
+	 */
+	private static Map<String, MimeType> mimeType2EnumeratedMap;
+    
     /**
      * ONLINE available status
      */
@@ -161,7 +174,7 @@ public final class ContactsManager {
      * NOT SET available status
      */
     private static final int PRESENCE_STATUS_NOT_SET = 1; //StatusUpdates.INVISIBLE;
-
+    
     /**
      * Account name for SIM contacts
      */
@@ -195,10 +208,10 @@ public final class ContactsManager {
 	private static final String[] PROJECTION_RABP = new String[] { RichAddressBookData.KEY_ID };
 
 	private static final String SELECTION_RAPB_IM_BLOCKED = new StringBuilder(RichAddressBookData.KEY_CONTACT).append("=? AND ")
-			.append(RichAddressBookData.KEY_IM_BLOCKED).append("=1").toString();
+			.append(RichAddressBookData.KEY_IM_BLOCKED).append("=").append(RichAddressBookData.BLOCKED_VALUE_SET).toString();
 
 	private static final String SELECTION_RAPB_FT_BLOCKED = new StringBuilder(RichAddressBookData.KEY_CONTACT).append("=? AND ")
-			.append(RichAddressBookData.KEY_FT_BLOCKED).append("=1").toString();
+			.append(RichAddressBookData.KEY_FT_BLOCKED).append("=").append(RichAddressBookData.BLOCKED_VALUE_SET).toString();
 	
 	/**
 	 * The logger
@@ -238,6 +251,19 @@ public final class ContactsManager {
      */
     private ContactsManager(Context ctx) {
     	this.ctx = ctx;
+    	// Build the mime type map
+		mimeType2EnumeratedMap = new HashMap<String, MimeType>();
+		mimeType2EnumeratedMap.put(MIMETYPE_NUMBER, MimeType.NUMBER);
+		mimeType2EnumeratedMap.put(MIMETYPE_RCS_STATUS, MimeType.RCS_STATUS);
+		mimeType2EnumeratedMap.put(MIMETYPE_REGISTRATION_STATE, MimeType.REGISTRATION_STATE);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IMAGE_SHARING, MimeType.CAPABILITY_IMAGE_SHARING);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_VIDEO_SHARING, MimeType.CAPABILITY_VIDEO_SHARING);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IM_SESSION, MimeType.CAPABILITY_IM_SESSION);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_FILE_TRANSFER, MimeType.CAPABILITY_FILE_TRANSFER);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH, MimeType.CAPABILITY_GEOLOCATION_PUSH);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_EXTENSIONS, MimeType.CAPABILITY_EXTENSIONS);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IP_VOICE_CALL, MimeType.CAPABILITY_IP_VOICE_CALL);
+		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IP_VIDEO_CALL, MimeType.CAPABILITY_IP_VIDEO_CALL);
     }
 
 	/**
@@ -332,8 +358,8 @@ public final class ContactsManager {
 				ServiceExtensionManager.getInstance().getExtensions(newCapabilities.getSupportedExtensions()));
 
 		// Save capabilities timestamp
-		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST, newCapabilities.getTimeLastRequest());
-		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH, newCapabilities.getTimeLastRefresh());
+		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST, newCapabilities.getTimestampOfLastRequest());
+		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH, newCapabilities.getTimestampOfLastRefresh());
 
 		PhotoIcon photoIcon = null;
 		
@@ -662,9 +688,9 @@ public final class ContactsManager {
 							cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS))));
 
 					// Set time of last request
-					capabilities.setTimeLastRequest(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST)));
+					capabilities.setTimestampOfLastRequest(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST)));
 					// Set time of last refresh
-					capabilities.setTimeLastRefresh(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH)));
+					capabilities.setTimestampOfLastRefresh(cur.getLong(cur.getColumnIndex(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH)));
 				}
 			}
 		} catch (Exception e) {
@@ -1550,7 +1576,7 @@ public final class ContactsManager {
 		if (capabilities == null) {
 			return;
 		}
-		capabilities.setTimeLastRequest(System.currentTimeMillis());
+		capabilities.setTimestampOfLastRequest(System.currentTimeMillis());
 		try {
 			setContactInfo(contactInfo, contactInfo);
 		} catch (ContactsManagerException e) {
@@ -2145,69 +2171,73 @@ public final class ContactsManager {
 		Capabilities capabilities = new Capabilities();
 
 		while (cursor.moveToNext()) {
-			String mimeType = cursor.getString(cursor.getColumnIndex(Data.MIMETYPE));
-			if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IMAGE_SHARING)) {
-				// Set capability image sharing
-				capabilities.setImageSharingSupport(true);
-			} else {
-				if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_VIDEO_SHARING)) {
+			String mimeTypeStr = cursor.getString(cursor.getColumnIndex(Data.MIMETYPE));
+			// Convert mime type string to enumerated
+			MimeType mimeType = mimeType2EnumeratedMap.get(mimeTypeStr);
+			if (mimeType != null) {
+				switch (mimeType) {
+				case CAPABILITY_IMAGE_SHARING:
+					// Set capability image sharing
+					capabilities.setImageSharingSupport(true);
+					break;
+				case CAPABILITY_VIDEO_SHARING:
 					// Set capability video sharing
 					capabilities.setVideoSharingSupport(true);
-				} else {
-					if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VOICE_CALL)) {
-						// Set capability ip voice call
-						capabilities.setIPVoiceCallSupport(true);
-					} else {
-						if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IP_VIDEO_CALL)) {
-							// Set capability ip video call
-							capabilities.setIPVideoCallSupport(true);
-						} else {
-							if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_IM_SESSION)) {
-								// Set capability IM session
-								capabilities.setImSessionSupport(true);
-							} else {
-								if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_FILE_TRANSFER)) {
-									// Set capability file transfer
-									capabilities.setFileTransferSupport(true);
-								} else {
-									if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH)) {
-										// Set capability geoloc push
-										capabilities.setGeolocationPushSupport(true);
-									} else {
-										if (mimeType.equalsIgnoreCase(MIMETYPE_CAPABILITY_EXTENSIONS)) {
-											// Set RCS extensions capability
-											int columnIndex = cursor.getColumnIndex(Data.DATA2);
-											if (columnIndex != -1) {
-												capabilities.setSupportedExtensions(ServiceExtensionManager.getInstance()
-														.getExtensions(cursor.getString(columnIndex)));
-											}
-										} else {
-											if (mimeType.equalsIgnoreCase(MIMETYPE_REGISTRATION_STATE)) {
-												// Set registration state
-												int columnIndex = cursor.getColumnIndex(Data.DATA2);
-												if (columnIndex != -1) {
-													contactInfo.setRegistrationState(cursor.getInt(columnIndex));
-												}
-											} else if (mimeType.equalsIgnoreCase(MIMETYPE_NUMBER)) {
-												// Set contact
-												int columnIndex = cursor.getColumnIndex(Data.DATA1);
-												if (columnIndex != -1) {
-													String contact = cursor.getString(columnIndex);
-													try {
-														contactInfo.setContact(ContactUtils.createContactId(contact));
-													} catch (JoynContactFormatException e) {
-														if (logger.isActivated()) {
-															logger.warn("Cannot parse contact " + contact);
-														}
-													}
-												}
-											}
-										}
-									}
-								}
+					break;
+				case CAPABILITY_IP_VOICE_CALL:
+					// Set capability ip voice call
+					capabilities.setIPVoiceCallSupport(true);
+					break;
+				case CAPABILITY_IP_VIDEO_CALL:
+					// Set capability ip video call
+					capabilities.setIPVideoCallSupport(true);
+					break;
+				case CAPABILITY_IM_SESSION:
+					// Set capability IM session
+					capabilities.setImSessionSupport(true);
+					break;
+				case CAPABILITY_FILE_TRANSFER:
+					// Set capability file transfer
+					capabilities.setFileTransferSupport(true);
+					break;
+				case CAPABILITY_GEOLOCATION_PUSH:
+					// Set capability geoloc push
+					capabilities.setGeolocationPushSupport(true);
+					break;
+				case CAPABILITY_EXTENSIONS: {
+					// Set RCS extensions capability
+					int columnIndex = cursor.getColumnIndex(Data.DATA2);
+					if (columnIndex != -1) {
+						capabilities.setSupportedExtensions(ServiceExtensionManager.getInstance().getExtensions(
+								cursor.getString(columnIndex)));
+					}
+				}
+					break;
+				case REGISTRATION_STATE: {
+					// Set registration state
+					int columnIndex = cursor.getColumnIndex(Data.DATA2);
+					if (columnIndex != -1) {
+						contactInfo.setRegistrationState(cursor.getInt(columnIndex));
+					}
+				}
+					break;
+				case NUMBER: {
+					// Set contact
+					int columnIndex = cursor.getColumnIndex(Data.DATA1);
+					if (columnIndex != -1) {
+						String contact = cursor.getString(columnIndex);
+						try {
+							contactInfo.setContact(ContactUtils.createContactId(contact));
+						} catch (JoynContactFormatException e) {
+							if (logger.isActivated()) {
+								logger.warn("Cannot parse contact " + contact);
 							}
 						}
 					}
+				}
+					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -2565,7 +2595,7 @@ public final class ContactsManager {
 		if (capabilities == null) {
 			return;
 		}
-		capabilities.setTimeLastRefresh(System.currentTimeMillis());
+		capabilities.setTimestampOfLastRefresh(System.currentTimeMillis());
 		try {
 			setContactInfo(contactInfo, contactInfo);
 		} catch (ContactsManagerException e) {

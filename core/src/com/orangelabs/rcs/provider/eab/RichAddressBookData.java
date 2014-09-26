@@ -247,4 +247,15 @@ public class RichAddressBookData {
      * FALSE value
      */
     public static final String FALSE_VALUE = Boolean.toString(false);
+
+    /**
+     * BLOCKED value is not set
+     */
+    static final int BLOCKED_VALUE_NOT_SET = 0;
+    
+    /**
+     * BLOCKED value is set
+     */
+    static final int BLOCKED_VALUE_SET = 1;
+
 }

@@ -47,6 +47,11 @@ public class ServiceExtensionManager {
 	private static volatile ServiceExtensionManager instance;
 	
 	/**
+	 * Separator of extensions
+	 */
+	private static final String EXTENSION_SEPARATOR = ";";
+	
+	/**
      * The logger
      */
     private final static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getSimpleName());
@@ -92,9 +97,6 @@ public class ServiceExtensionManager {
 	 */
 	private void checkExtensions(Context context, Set<String> supportedExts, Set<String> newExts) {
 		// Check each new extension
-		if (newExts.isEmpty()) {
-			return;
-		}
 		for (String extension : newExts) {
 			if (isExtensionAuthorized(context, extension)) {
 				if (supportedExts.contains(extension)) {
@@ -223,17 +225,16 @@ public class ServiceExtensionManager {
 	 * @return String where extensions are concatenated with a ";" separator
 	 */
 	public String getExtensions(Set<String> extensions) {
-		StringBuilder result = new StringBuilder();
 		if (extensions != null && !extensions.isEmpty()) {
-			String loopDelim = "";
+			StringBuilder result = new StringBuilder();
 			for (String extension : extensions) {
-				if (!TextUtils.isEmpty(extension) && extension.trim().length() > 0) {
-					result.append(loopDelim).append(extension);
-					loopDelim = ";";
+				if (extension.trim().length() > 0) {
+					result.append(EXTENSION_SEPARATOR).append(extension);
 				}
 			}
+			return result.substring(EXTENSION_SEPARATOR.length());
 		}
-		return result.toString();
+		return "";
 	}
 
 }

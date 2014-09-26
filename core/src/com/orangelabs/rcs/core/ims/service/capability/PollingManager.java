@@ -116,7 +116,7 @@ public class PollingManager extends PeriodicRefresher {
 	    	if (logger.isActivated()) {
 	    		logger.debug("Capabilities exist for " + contact);
 	    	}
-			if (isCapabilityRefreshRequired(capabilities.getTimeLastRefresh())) {
+			if (isCapabilityRefreshRequired(capabilities.getTimestampOfLastRefresh())) {
 		    	if (logger.isActivated()) {
 		    		logger.debug("Capabilities have expired for " + contact);
 		    	}
@@ -136,12 +136,17 @@ public class PollingManager extends PeriodicRefresher {
 	/**
 	 * Check if refresh of capability is required
 	 * 
-	 * @param lastCapabilityRefresh
-	 *            time of last capability refresh
+	 * @param timestampOfLastRefresh
+	 *            time of last capability refresh in milliseconds
 	 * @return true if capability refresh is required
 	 */
-	/* package private */ static boolean isCapabilityRefreshRequired(long timeLastRefresh) {
-		long delta = (System.currentTimeMillis() - timeLastRefresh) / 1000;
-		return ((delta >= RcsSettings.getInstance().getCapabilityExpiryTimeout()) || (delta < 0));
+	/* package private */ static boolean isCapabilityRefreshRequired(long timestampOfLastRefresh) {
+		long now = System.currentTimeMillis();
+		// Is current time before last capability refresh ? (may occur if system time has been modified)
+		if (now < timestampOfLastRefresh) {
+			return true;
+		}
+		// Is current time after capability expiration time ? 
+		return (now > (timestampOfLastRefresh + RcsSettings.getInstance().getCapabilityExpiryTimeout() * 1000));
 	}	    
 }
