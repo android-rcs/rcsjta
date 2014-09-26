@@ -91,7 +91,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 				capabilities.isImSessionSupported(), capabilities.isFileTransferSupported()
 						|| capabilities.isFileTransferHttpSupported(), capabilities.isGeolocationPushSupported(),
 				capabilities.isIPVoiceCallSupported(), capabilities.isIPVideoCallSupported(), capabilities.getSupportedExtensions(),
-				capabilities.isSipAutomata(), capabilities.getTimeLastRefresh(), capabilities.isValid());
+				capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(), capabilities.isValid());
 	}
 	
 	/**

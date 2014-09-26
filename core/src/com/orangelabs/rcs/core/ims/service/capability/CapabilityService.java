@@ -199,7 +199,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	    	if (logger.isActivated()) {
 	    		logger.debug("Capabilities exist for " + contact);
 	    	}
-			if (isCapabilityRefreshAuthorized(capabilities.getTimeLastRequest())) {
+			if (isCapabilityRefreshAuthorized(capabilities.getTimestampOfLastRequest())) {
 		    	if (logger.isActivated()) {
 		    		logger.debug("Request capabilities for " + contact);
 		    	}
@@ -214,14 +214,19 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 	/**
 	 * Check if refresh of capability is authorized
 	 * 
-	 * @param lastCapabilityRequest
-	 *            time of last capability request
+	 * @param timestampOfLastRequest
+	 *            timestamp of last capability request in milliseconds
 	 * @return true if capability request is authorized
 	 */
-	private boolean isCapabilityRefreshAuthorized(long lastCapabilityRequest) {
-		long delta = (System.currentTimeMillis() - lastCapabilityRequest) / 1000;
+	private boolean isCapabilityRefreshAuthorized(long timestampOfLastRequest) {
 		// Do not request capability refresh too often
-		return ((delta >= RcsSettings.getInstance().getCapabilityRefreshTimeout()) || (delta < 0));
+		long now = System.currentTimeMillis();
+		// Is current time before last capability request ? (may occur if current time has been updated)
+		if (now < timestampOfLastRequest) {
+			return true;
+		}
+		// Is current time after capability refresh timeout ? 
+		return (now > (timestampOfLastRequest + RcsSettings.getInstance().getCapabilityRefreshTimeout() * 1000));
 	}
 
     /**

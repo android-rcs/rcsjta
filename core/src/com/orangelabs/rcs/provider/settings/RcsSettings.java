@@ -998,8 +998,8 @@ public class RcsSettings {
 		capabilities.setIPVideoCallSupport(isIPVideoCallSupported());
 		capabilities.setGroupChatStoreForwardSupport(isGroupChatStoreForwardSupported());
 		capabilities.setSipAutomata(isSipAutomata());
-		capabilities.setTimeLastRequest(-1);
-		capabilities.setTimeLastRefresh(System.currentTimeMillis());
+		capabilities.setTimestampOfLastRequest(Capabilities.INVALID_TIMESTAMP);
+		capabilities.setTimestampOfLastRefresh(System.currentTimeMillis());
 		// Add extensions
 		capabilities.setSupportedExtensions(getSupportedRcsExtensions());
 		return capabilities;

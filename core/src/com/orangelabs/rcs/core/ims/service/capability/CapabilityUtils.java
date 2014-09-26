@@ -131,12 +131,9 @@ public class CapabilityUtils {
 		}
 
 		// RCS extensions support
-		Set<String> extensions = RcsSettings.getInstance().getSupportedRcsExtensions();
-		if (extensions != null && !extensions.isEmpty()) {
-			for (String extension : extensions) {
-				StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
-				iariTags.add(sb.toString());
-			}
+		for (String extension : RcsSettings.getInstance().getSupportedRcsExtensions()) {
+			StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
+			iariTags.add(sb.toString());
 		}
 
 		// Add IARI prefix
@@ -297,8 +294,8 @@ public class CapabilityUtils {
 				capabilities.setImageSharingSupport(false);
 			}
 		}
-        capabilities.setTimeLastRefresh(System.currentTimeMillis());
-        capabilities.setTimeLastRequest(System.currentTimeMillis());
+        capabilities.setTimestampOfLastRefresh(System.currentTimeMillis());
+        capabilities.setTimestampOfLastRequest(System.currentTimeMillis());
     	return capabilities;
     }
        
