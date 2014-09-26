@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLSocket;
 
+import android.text.TextUtils;
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.address.Address;
 import javax2.sip.header.ContactHeader;
@@ -230,7 +231,8 @@ class IOHandler {
                         if (clientSock.getLocalPort()==5060 || contactPort==5060)
                             doIssue34727workarround = true;
                         // Update Via header to reflect local port
-                        updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        updateViaHeaderPort(clientSock.getLocalPort(), clientSock.getLocalAddress(),
+                            message);
                         // Update Contact header to reflect local port
                         updateContactHeaderPort(clientSock.getLocalPort(), message);
                         // Encode the SIP message into byte array
@@ -248,7 +250,8 @@ class IOHandler {
                             if (clientSock.getLocalPort()==5060 || contactPort==5060)
                                 doIssue34727workarround = true;
                             // Update Via header to reflect local port
-                            updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            updateViaHeaderPort(clientSock.getLocalPort(),
+                                clientSock.getLocalAddress(), message);
                             // Update Contact header to reflect local port
                             updateContactHeaderPort(clientSock.getLocalPort(), message);
                             // Encode the SIP message into byte array
@@ -328,7 +331,8 @@ class IOHandler {
                             doIssue34727workarround = true;
                         OutputStream outputStream = clientSock.getOutputStream();
                         // Update Via header to reflect local port
-                        updateViaHeaderPort(clientSock.getLocalPort(), message);
+                        updateViaHeaderPort(clientSock.getLocalPort(), clientSock.getLocalAddress(),
+                            message);
                         // Update Contact header to reflect local port
                         updateContactHeaderPort(clientSock.getLocalPort(), message);
                         // Encode the SIP message into byte array
@@ -346,7 +350,8 @@ class IOHandler {
                                 doIssue34727workarround = true;
                             OutputStream outputStream = clientSock.getOutputStream();
                             // Update Via header to reflect local port
-                            updateViaHeaderPort(clientSock.getLocalPort(), message);
+                            updateViaHeaderPort(clientSock.getLocalPort(),
+                                clientSock.getLocalAddress(), message);
                             // Update Contact header to reflect local port
                             updateContactHeaderPort(clientSock.getLocalPort(), message);
                             // Encode the SIP message into byte array
@@ -384,7 +389,8 @@ class IOHandler {
             datagramSock.connect(receiverAddress, contactPort);
             
             // Update Via header to reflect local port
-            updateViaHeaderPort(datagramSock.getLocalPort(), message);
+            updateViaHeaderPort(datagramSock.getLocalPort(), datagramSock.getLocalAddress(),
+                    message);
             // Update Contact header to reflect local port
             updateContactHeaderPort(datagramSock.getLocalPort(), message);
             // Encode the SIP message into byte array
@@ -403,21 +409,32 @@ class IOHandler {
 	 * Update port of Via header to reflect local port
 	 * 
 	 * @param localPort the local port
-	 * @param message the SIP message to be updated
-	 */
-    private void updateViaHeaderPort(int localPort, SIPMessage message) {
-        if (message != null && message.getViaHeaders() != null) {
-            ViaList viaList = message.getViaHeaders();
-            if (viaList != null && !viaList.isEmpty()) {
-                try {
-                    viaList.get(0).setPort(localPort);
-                } catch (InvalidArgumentException e) {
-                    if (sipStack.isLoggingEnabled()) {
-                        sipStack.getStackLogger().logError(e.getMessage(), e);
-                    }
-                }
-            }
-        }
+     * @param localAddress the local address
+     * @param message the SIP message to be updated
+     */
+    private void updateViaHeaderPort(int localPort, InetAddress localAddress, SIPMessage message) {
+		if (localAddress == null) {
+			return;
+		}
+		if (message == null || message.getViaHeaders() == null) {
+			return;
+		}
+		ViaList viaList = message.getViaHeaders();
+		if (viaList == null || viaList.isEmpty()) {
+			return;
+		}
+		try {
+			String localHostAddress = localAddress.getHostAddress();
+			String viaHostAddress = viaList.get(0).getHost();
+			// Only update port of via header if address of via header is set to the local host address
+			if (!TextUtils.isEmpty(viaHostAddress) && viaHostAddress.equals(localHostAddress)) {
+				viaList.get(0).setPort(localPort);
+			}
+		} catch (InvalidArgumentException e) {
+			if (sipStack.isLoggingEnabled()) {
+				sipStack.getStackLogger().logError(e.getMessage(), e);
+			}
+		}
     }
     
     /**
