@@ -93,11 +93,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimeLastRequest(timestamp);
+		capa.setTimestampOfLastRequest(timestamp);
 		capa.setSipAutomata(true);
 		capa.addSupportedExtension("MyRcsExtensionTag1");
 		capa.addSupportedExtension("MyRcsExtensionTag2");
-		capa.setTimeLastRefresh(timestamp);
+		capa.setTimestampOfLastRefresh(timestamp);
 		info.setCapabilities(capa);
 
 		PresenceInfo pres = new PresenceInfo();
@@ -143,8 +143,8 @@ public class ContactsManagerTest extends AndroidTestCase {
 			assertEquals(true, getCapa.isSocialPresenceSupported());
 			assertEquals(true, getCapa.isVideoSharingSupported());
 			assertEquals(true, getCapa.isSipAutomata());
-			assertEquals(timestamp, getCapa.getTimeLastRefresh());
-			assertEquals(timestamp, getCapa.getTimeLastRequest());
+			assertEquals(timestamp, getCapa.getTimestampOfLastRefresh());
+			assertEquals(timestamp, getCapa.getTimestampOfLastRequest());
 			// Timestamp not tested because it is automatically updated with the current time
 			Set<String> getExtraCapa = getCapa.getSupportedExtensions();
 			if (getExtraCapa == null) {
@@ -199,11 +199,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimeLastRequest(timestamp);
+		capa.setTimestampOfLastRequest(timestamp);
 		capa.addSupportedExtension("MyRcsExtensionTag1");
 		capa.addSupportedExtension("MyRcsExtensionTag2");
 		capa.setSipAutomata(true);
-		capa.setTimeLastRefresh(timestamp);
+		capa.setTimestampOfLastRefresh(timestamp);
 		info.setCapabilities(capa);
 
 		PresenceInfo pres = new PresenceInfo();
@@ -252,12 +252,12 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setSocialPresenceSupport(false);
 		capa.setVideoSharingSupport(false);
 
-		capa.setTimeLastRequest(timestamp);
+		capa.setTimestampOfLastRequest(timestamp);
 		newInfo.setCapabilities(capa);
 
 		newInfo.setContact(contactIdo);
 		
-		capa.setTimeLastRefresh(timestamp);
+		capa.setTimestampOfLastRefresh(timestamp);
 
 		// newInfo.setPresenceInfo(null);
 		// if (new)PresenceInfo is null, error on ContactManager line 504 so
@@ -297,10 +297,10 @@ public class ContactsManagerTest extends AndroidTestCase {
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);
 		capa.setVideoSharingSupport(true);
-		capa.setTimeLastRequest(timestamp);
+		capa.setTimestampOfLastRequest(timestamp);
 		capa.addSupportedExtension("MyRcsExtensionTag3");
 		capa.addSupportedExtension("MyRcsExtensionTag4");
-		capa.setTimeLastRefresh(timestamp);
+		capa.setTimestampOfLastRefresh(timestamp);
 		
 		prese.setFavoriteLink(new FavoriteLink("favo_link_name", "http://favo_link_url"));
 		prese.setFreetext("free_text");
@@ -333,46 +333,5 @@ public class ContactsManagerTest extends AndroidTestCase {
 	public void testRemoveRcsContact() {
 		cm.cleanRCSEntries();
 	}
-
-	/*
-	 * private List<Long> TestGetRcsRawContactIdFromPhoneNumber(String phoneNumber) { }
-	 * 
-	 * public long TestGetAssociatedRcsRawContact(final long rawContactId, final String rcsNumber) { } public boolean
-	 * TestIsOnlySimAssociated(final String phoneNumber) {} public boolean TestIsSimAssociated(final long rawContactId){} public
-	 * boolean TestIsSimAccount(final long rawContactId){} private List<Long> TestGetRcsRawContactIdsFromContact(final String
-	 * contact){} public long TestCreateRcsContact(final ContactInfo info, final long rawContactId) {} public void
-	 * testSetContactPhotoIcon(String contact, PhotoIcon photoIcon) { } public long TestCreateMyContact() {} public void
-	 * TestRemoveContactPhotoIcon(String contact) {} public ContactInfo TestGetContactInfo(String contact){} public void
-	 * TestSetContactSharingStatus(String contact, String status, String reason){} public int TestGetContactSharingStatus(String
-	 * contact){} public void TestRevokeContact(String contact){} public void TestUnrevokeContact(String contact) {} public void
-	 * TestBlockContact(String contact) {} public void TestUnblockContact(String contact) {} public void
-	 * TestFlushContactProvider(){} public void TestModifyRcsContactInProvider(String contact, int rcsStatus){} public List<String>
-	 * TestGetRcsContactsWithSocialPresence(){ } public List<String> TestGetAllContacts(){} public List<String>
-	 * TestGetRcsBlockedContacts(){} public List<String> TestGetRcsInvitedContacts(){} public List<String>
-	 * TestGetRcsWillingContacts(){} public List<String> TestGetRcsCancelledContacts(){} public void
-	 * TestRemoveCancelledPresenceInvitation(String contact){} public boolean TestIsNumberBlocked(String number){} public boolean
-	 * TestIsNumberShared(String number){} public boolean TestIsNumberInvited(String number) {} public boolean
-	 * TestIsNumberWilling(String number){} public boolean TestIsNumberCancelled(String number){} public boolean
-	 * TestIsRcsValidNumber(String phoneNumber){} private ArrayList<ContentProviderOperation> TestModifyContactTypeForContact(long
-	 * rawContactId, String rcsNumber, int newContactType, int oldContactType){} private ContentProviderOperation
-	 * TestModifyMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType, boolean newState, boolean oldState){}
-	 * private ContentProviderOperation TestInsertMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType){} private
-	 * ContentProviderOperation TestDeleteMimeTypeForContact(long rawContactId, String rcsNumber, String mimeType){} private
-	 * ArrayList<ContentProviderOperation> TestModifyContactRegistrationState(long rawContactId, String rcsNumber, int
-	 * newRegistrationState, int oldRegistrationState, String newFreeText, String oldFreeText){}
-	 * 
-	 * private List<ContentProviderOperation> TestModifyExtensionsCapabilityForContact(long rawContactId, String rcsNumber,
-	 * ArrayList<String> newExtensions, ArrayList<String> oldExtensions){}
-	 * 
-	 * private ArrayList<ContentProviderOperation> TestModifyPresenceForContact(long rawContactId, String rcsNumber, PresenceInfo
-	 * newPresenceInfo, PresenceInfo oldPresenceInfo){}
-	 * 
-	 * private String TestGetMimeTypeDescription(String mimeType){} public List<String> TestGetImSessionCapableContacts() {} public
-	 * List<String> TestGgetRichcallCapableContacts(){} public List<String> TestGetAvailableContacts() {} public boolean
-	 * TestIsContactRcsActive(String contact){} public void TestSetContactCapabilities(String contact, Capabilities capabilities,
-	 * int contactType, int registrationState) {} public void TestSetContactCapabilities(String contact, Capabilities capabilities)
-	 * {} public Capabilities TestGetContactCapabilities(String contact){} public void TestSetContactCapabilitiesTimestamp(String
-	 * contact, long timestamp){}
-	 */
 
 }
