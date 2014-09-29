@@ -223,23 +223,22 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     	t.start();
 	}
 
-    /**
-     * Sends a payload in real time
-     * 
-     * @param content Payload content
-	 * @return Returns true if sent successfully else returns false
-	 * @throws ServerApiException 
-     */
-    public boolean sendPayload(byte[] content) throws ServerApiException  {
+	/**
+	 * Sends a payload in real time
+	 * 
+	 * @param content Payload content
+	 * @throws ServerApiException
+	 */
+	public void sendPayload(byte[] content) throws ServerApiException {
 		// Test security extension
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
-		if (session != null) {
-    		return session.sendPlayload(content);
-    	} else {
-    		return false;	
-    	}
-    }	
+		/* TODO: This exception handling is not correct. Will be fixed CR037. */
+		if (!session.sendPlayload(content)) {
+			throw new ServerApiException("Unable to send payload!");
+		}
+
+	}
 	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 

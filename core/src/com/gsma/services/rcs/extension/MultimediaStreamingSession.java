@@ -157,19 +157,18 @@ public class MultimediaStreamingSession extends MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
-    
-    /**
-     * Sends a payload in real time
-     * 
-     * @param content Payload content
-	 * @return Returns true if sent successfully else returns false
-     * @throws JoynServiceException
-     */
-    public boolean sendPayload(byte[] content) throws JoynServiceException {
+
+	/**
+	 * Sends a payload in real time
+	 * 
+	 * @param content Payload content
+	 * @throws JoynServiceException
+	 */
+	public void sendPayload(byte[] content) throws JoynServiceException {
 		try {
-			return sessionIntf.sendPayload(content);
-		} catch(Exception e) {
+			sessionIntf.sendPayload(content);
+		} catch (Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
-    }    
+	}
 }

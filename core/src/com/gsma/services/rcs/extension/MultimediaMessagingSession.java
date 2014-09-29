@@ -157,19 +157,18 @@ public class MultimediaMessagingSession extends MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
-    
-    /**
-     * Sends a message in real time
-     * 
-     * @param content Message content
-	 * @return Returns true if sent successfully else returns false
-     * @throws JoynServiceException
-     */
-    public boolean sendMessage(byte[] content) throws JoynServiceException {
+
+	/**
+	 * Sends a message in real time
+	 * 
+	 * @param content Message content
+	 * @throws JoynServiceException
+	 */
+	public void sendMessage(byte[] content) throws JoynServiceException {
 		try {
-			return sessionIntf.sendMessage(content);
-		} catch(Exception e) {
+			sessionIntf.sendMessage(content);
+		} catch (Exception e) {
 			throw new JoynServiceException(e.getMessage());
 		}
-    }    
+	}
 }

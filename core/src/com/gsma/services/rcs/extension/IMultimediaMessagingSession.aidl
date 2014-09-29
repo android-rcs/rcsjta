@@ -23,6 +23,6 @@ interface IMultimediaMessagingSession {
 	
 	void abortSession();
 
-	boolean sendMessage(in byte[] content);
+	void sendMessage(in byte[] content);
 }
 

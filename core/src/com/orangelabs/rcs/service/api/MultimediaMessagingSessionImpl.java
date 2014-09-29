@@ -222,19 +222,21 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     	t.start();
 	}
 
-    /**
-     * Sends a message in real time
-     * 
-     * @param content Message content
-	 * @return Returns true if sent successfully else returns false
+	/**
+	 * Sends a message in real time
+	 * 
+	 * @param content Message content
 	 * @throws ServerApiException
-     */
-    public boolean sendMessage(byte[] content) throws ServerApiException {
+	 */
+	public void sendMessage(byte[] content) throws ServerApiException {
 		// Test API permission
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
-		return session.sendMessage(content);
-    }	
+		/* TODO: This exception handling is not correct. Will be fixed CR037. */
+		if (!session.sendMessage(content)) {
+			throw new ServerApiException("Unable to send message!");
+		}
+	}
 	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 

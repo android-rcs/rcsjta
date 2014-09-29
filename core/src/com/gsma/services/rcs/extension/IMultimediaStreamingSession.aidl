@@ -23,6 +23,6 @@ interface IMultimediaStreamingSession {
 	
 	void abortSession();
 
-	boolean sendPayload(in byte[] content);
+	void sendPayload(in byte[] content);
 }
 
