@@ -79,14 +79,14 @@ public class TerminatingIPCallSession extends IPCallSession {
 				logger.info("Initiate a new IP call session as terminating");
 			}
 
-			// Send a 180 Ringing response
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-			// Notify listener
-			getImsService().getImsModule().getCore().getListener().handleIPCallInvitation(this);
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				listener.handleSessionInvited();
+			}
 
 			int answer = waitInvitationAnswer();
-			Vector<ImsSessionListener> listeners = getListeners();
 			switch (answer) {
 				case ImsServiceSession.INVITATION_REJECTED:
 					if (logger.isActivated()) {
@@ -128,8 +128,10 @@ public class TerminatingIPCallSession extends IPCallSession {
 					return;
 
 				case ImsServiceSession.INVITATION_ACCEPTED:
+					setSessionAccepted();
+
 					for (ImsSessionListener listener : listeners) {
-						((IPCallStreamingSessionListener)listener).handleSessionAccepting();
+						listener.handleSessionAccepted();
 					}
 					break;
 

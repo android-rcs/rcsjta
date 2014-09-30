@@ -32,7 +32,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
-import com.orangelabs.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
+import com.orangelabs.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSession;
 import com.orangelabs.rcs.service.broadcaster.IMultimediaMessagingSessionEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -111,26 +111,27 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	 */
 	public int getState() {
 		SipDialogPath dialogPath = session.getDialogPath();
-		if (dialogPath != null) {
-			if (dialogPath.isSessionCancelled()) {
-				return MultimediaSession.State.REJECTED;
+		if (dialogPath != null && dialogPath.isSessionEstablished()) {
+			return MultimediaSession.State.STARTED;
 
-			} else if (dialogPath.isSessionEstablished()) {
-				return MultimediaSession.State.STARTED;
-
-			} else if (dialogPath.isSessionTerminated()) {
-				return MultimediaSession.State.ABORTED;
-
-			} else {
-				if (session instanceof OriginatingSipMsrpSession) {
-					return MultimediaSession.State.INITIATED;
-				}
-
-				return MultimediaSession.State.INVITED;
+		} else if (session.isInitiatedByRemote()) {
+			if (session.isSessionAccepted()) {
+				return MultimediaSession.State.ACCEPTING;
 			}
+
+			return MultimediaSession.State.INVITED;
 		}
 
-		return MultimediaSession.State.UNKNOWN;
+		return MultimediaSession.State.INITIATED;
+	}
+
+	/**
+	 * Returns the reason code of the state of the multimedia messaging session
+	 *
+	 * @return ReasonCode
+	 */
+	public int getReasonCode() {
+		return ReasonCode.UNSPECIFIED;
 	}
 
 	/**
@@ -263,11 +264,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		}
 		String sessionId = getSessionId();
 		synchronized (lock) {
+			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
+
 			mMultimediaMessagingSessionEventBroadcaster.broadcastMultimediaMessagingStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
-
-			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
 		}
 	}
 
@@ -280,11 +281,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		}
 		String sessionId = getSessionId();
 		synchronized (lock) {
+			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
+
 			mMultimediaMessagingSessionEventBroadcaster.broadcastMultimediaMessagingStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
-
-			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
 		}
 	}
 
@@ -299,6 +300,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		}
 		String sessionId = getSessionId();
 		synchronized (lock) {
+			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
+
 			switch (error.getErrorCode()) {
 				case SipSessionError.SESSION_INITIATION_DECLINED:
 					mMultimediaMessagingSessionEventBroadcaster
@@ -318,8 +321,6 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 									sessionId, MultimediaSession.State.FAILED,
 									ReasonCode.FAILED_SESSION);
 			}
-
-			MultimediaSessionServiceImpl.removeMessagingSipSession(sessionId);
 		}
 	}
     
@@ -337,7 +338,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     }
 
 	@Override
-	public void handleSessionAccepting() {
+	public void handleSessionAccepted() {
 		if (logger.isActivated()) {
 			logger.info("Accepting session");
 		}
@@ -361,5 +362,14 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	@Override
 	public void handleSessionRejectedByRemote() {
 		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
+
+	@Override
+	public void handleSessionInvited() {
+		if (logger.isActivated()) {
+			logger.info("Invited to multimedia messaging session");
+		}
+		mMultimediaMessagingSessionEventBroadcaster.broadcastMultimediaMessagingInvitation(
+				getSessionId(), ((TerminatingSipMsrpSession)session).getSessionInvite());
 	}
 }

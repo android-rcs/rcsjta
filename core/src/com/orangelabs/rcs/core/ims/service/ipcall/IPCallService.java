@@ -203,8 +203,9 @@ public class IPCallService extends ImsService {
 		}
 		// Create a new session    
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
-        
-		// Start the session
+
+		getImsModule().getCore().getListener().handleIPCallInvitation(session);
+
 		session.startSession();
 	}
 	

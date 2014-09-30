@@ -30,4 +30,8 @@ public interface IGroupFileTransferBroadcaster {
 
 	public void broadcastSingleRecipientDeliveryStateChanged(String chatId, ContactId contact,
 			String transferId, int state, int reasonCode);
+
+	public void broadcastFileTransferInvitation(String fileTransferId);
+
+	public void broadcastResumeFileTransfer(String filetransferId);
 }

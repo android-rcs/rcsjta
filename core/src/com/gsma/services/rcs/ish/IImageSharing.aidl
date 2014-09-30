@@ -20,6 +20,8 @@ interface IImageSharing {
 	String getFileType();
 
 	int getState();
+
+	int getReasonCode();
 	
 	int getDirection();
 		

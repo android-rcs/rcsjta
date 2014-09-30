@@ -43,6 +43,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -78,8 +80,30 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);		
+
+		if (shouldBeAutoAccepted()) {
+			setSessionAccepted();
+		}
 	}
-	
+
+	/**
+	 * Check is session should be auto accepted. This method should only be
+	 * called once per session
+	 *
+	 * @return true if one-to-one chat session should be auto accepted
+	 */
+	private boolean shouldBeAutoAccepted() {
+		/*
+		 * In case the invite contains a http file transfer info the chat session
+		 * should be auto-accepted so that the file transfer session can be started.
+		 */
+		if ( FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+			return true;
+		}
+
+		return RcsSettings.getInstance().isChatAutoAccepted();
+	}
+
 	/**
 	 * Background processing
 	 */
@@ -109,21 +133,28 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
                 }
             }
 
-            /* Check if session should be auto-accepted once */
-            if (shouldBeAutoAccepted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Auto accept chat invitation");
-                }
-            } else {
-                if (logger.isActivated()) {
-                    logger.debug("Accept manually chat invitation");
-                }
+			Vector<ImsSessionListener> listeners = getListeners();
+			/* Check if session should be auto-accepted once */
+			if (isSessionAccepted()) {
+				if (logger.isActivated()) {
+					logger.debug("Received one-to-one chat invitation marked for auto-accept");
+				}
 
-                // Send a 180 Ringing response
-                send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+				for (ImsSessionListener listener : listeners) {
+					((ChatSessionListener)listener).handleSessionAutoAccepted();
+				}
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("Received one-to-one chat invitation marked for manual accept");
+				}
+
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionInvited();
+				}
+
+				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 				int answer = waitInvitationAnswer();
-				Vector<ImsSessionListener> listeners;
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
 						if (logger.isActivated()) {
@@ -132,7 +163,6 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
 						}
@@ -148,7 +178,6 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
 						}
@@ -161,14 +190,17 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByRemote();
 						}
 						return;
 
 					case ImsServiceSession.INVITATION_ACCEPTED:
-						/*Note: Nothing to log here for one-to-one chats.*/
+						setSessionAccepted();
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionAccepted();
+						}
 						break;
 
 					default:
@@ -298,10 +330,9 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	            	sendEmptyDataChunk();
                 }
 
-                // Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		getListeners().get(i).handleSessionStarted();
-    	        }
+                for(ImsSessionListener listener : listeners) {
+                    listener.handleSessionStarted();
+            }
 
     	    	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	

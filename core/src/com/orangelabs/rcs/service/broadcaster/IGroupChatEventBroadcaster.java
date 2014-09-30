@@ -34,4 +34,8 @@ public interface IGroupChatEventBroadcaster {
 	public void broadcastGroupChatStateChanged(String chatId, int state, int reasonCode);
 
 	public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
+
+	public void broadcastGroupChatInvitation(String chatId);
+
+	public void broadcastMessageReceived(String msgId);
 }

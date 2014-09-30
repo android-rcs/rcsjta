@@ -25,6 +25,8 @@ package com.orangelabs.rcs.core.ims.service.sip.messaging;
 import java.io.IOException;
 import java.util.Vector;
 
+import android.content.Intent;
+
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -54,6 +56,8 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      */
     private final static Logger logger = Logger.getLogger(TerminatingSipMsrpSession.class.getSimpleName());
 
+    private final Intent mSessionInvite;
+
     /**
      * Constructor
      * 
@@ -61,8 +65,10 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	 * @param invite Initial INVITE request
      * @throws JoynContactFormatException 
 	 */
-	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite) throws JoynContactFormatException {
+	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws JoynContactFormatException {
 		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite.getFeatureTags().get(0));
+
+		mSessionInvite = sessionInvite;
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
@@ -77,11 +83,14 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	    		logger.info("Initiate a new MSRP session as terminating");
 	    	}
 	
-			// Send a 180 Ringing response
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
-        
+
+            Vector<ImsSessionListener> listeners = getListeners();
+            for (ImsSessionListener listener : listeners) {
+                listener.handleSessionInvited();
+            }
+
             int answer = waitInvitationAnswer();
-            Vector<ImsSessionListener> listeners;
             switch (answer) {
                 case ImsServiceSession.INVITATION_REJECTED:
                     if (logger.isActivated()) {
@@ -90,7 +99,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByUser();
                     }
@@ -106,7 +114,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout();
                     }
@@ -119,14 +126,17 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByRemote();
                     }
                     return;
 
                 case ImsServiceSession.INVITATION_ACCEPTED:
-                    /*Note: Nothing to log here for sip msrp sessions.*/
+                    setSessionAccepted();
+
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionAccepted();
+                    }
                     break;
 
                 default:
@@ -273,6 +283,10 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	@Override
 	public boolean isInitiatedByRemote() {
 		return true;
+	}
+
+	public Intent getSessionInvite() {
+		return mSessionInvite;
 	}
 }
 

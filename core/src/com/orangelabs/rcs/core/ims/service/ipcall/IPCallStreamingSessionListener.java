@@ -128,9 +128,4 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener  {
      *
      */
 	public void handleCallResumeAborted();
-
-    /**
-     * Session is being accepted
-     */
-	public void handleSessionAccepting();
 }

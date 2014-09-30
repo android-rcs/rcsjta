@@ -270,57 +270,52 @@ public class ChatLog {
             public static class Content {
 
                 /**
-                 * The message status in unknown
-                 */
-                public static final int UNKNOWN = 0;
-
-                /**
                  * The message has been rejected
                  */
-                public static final int REJECTED = 1;
+                public static final int REJECTED = 0;
 
                 /**
                  * The message is queued to be sent by joyn service when
                  * possible
                  */
-                public static final int QUEUED = 2;
+                public static final int QUEUED = 1;
 
                 /**
                  * The message is in progress of sending
                  */
-                public static final int SENDING = 3;
+                public static final int SENDING = 2;
 
                 /**
                  * The message has been sent
                  */
-                public static final int SENT = 4;
+                public static final int SENT = 3;
 
                 /**
                  * The message sending has been failed
                  */
-                public static final int FAILED = 5;
+                public static final int FAILED = 4;
 
                 /**
                  * The message has been delivered to the remote.
                  */
-                public static final int DELIVERED = 6;
+                public static final int DELIVERED = 5;
 
                 /**
                  * The message has been received and a displayed delivery report
                  * is requested
                  */
-                public static final int DISPLAY_REPORT_REQUESTED = 7;
+                public static final int DISPLAY_REPORT_REQUESTED = 6;
 
                 /**
                  * The message is delivered and no display delivery report is
                  * requested.
                  */
-                public static final int RECEIVED = 8;
+                public static final int RECEIVED = 7;
 
                 /**
                  * The message has been displayed
                  */
-                public static final int DISPLAYED = 9;
+                public static final int DISPLAYED = 8;
             }
 
             /**

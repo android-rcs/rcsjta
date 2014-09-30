@@ -15,12 +15,16 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
+import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.service.api.ServerApiException;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -117,5 +121,21 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 			}
 		}
 		mGroupChatListeners.finishBroadcast();
+	}
+
+	public void broadcastGroupChatInvitation(String chatId) {
+		Intent invitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+		invitation.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
+		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+	}
+
+	public void broadcastMessageReceived(String msgId) {
+		Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
+		IntentUtils.tryToSetReceiverForegroundFlag(newGroupChatMessage);
+		newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, msgId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
 	}
 }

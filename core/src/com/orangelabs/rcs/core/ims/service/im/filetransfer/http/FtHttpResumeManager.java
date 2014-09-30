@@ -37,7 +37,6 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
-import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -225,7 +224,7 @@ public class FtHttpResumeManager {
 			}
 
 			@Override
-			public void handleSessionAccepting() {
+			public void handleSessionAccepted() {
 			}
 
 			@Override
@@ -246,6 +245,14 @@ public class FtHttpResumeManager {
 
 			@Override
 			public void handleSessionRejectedByRemote() {
+			}
+
+			@Override
+			public void handleSessionInvited() {
+			}
+
+			@Override
+			public void handleSessionAutoAccepted() {
 			}
 		};
 	}

@@ -38,54 +38,49 @@ public class ImageSharing {
      */
     public static class State {
     	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
     	 * Sharing invitation received
     	 */
-    	public final static int INVITED = 1;
+    	public final static int INVITED = 0;
     	
     	/**
     	 * Sharing invitation sent
     	 */
-    	public final static int INITIATED = 2;
+    	public final static int INITIATED = 1;
     	
     	/**
     	 * Sharing is started
     	 */
-    	public final static int STARTED = 3;
+    	public final static int STARTED = 2;
     	
     	/**
     	 * Sharing has been aborted
     	 */
-    	public final static int ABORTED = 4;
+    	public final static int ABORTED = 3;
     	
     	/**
     	 * Sharing has failed
     	 */
-    	public final static int FAILED = 5;
+    	public final static int FAILED = 4;
     	
     	/**
     	 * Image has been transferred with success
     	 */
-    	public final static int TRANSFERRED = 6;
+    	public final static int TRANSFERRED = 5;
 
     	/**
     	 * Sharing has been rejected
     	 */
-    	public final static int REJECTED = 7;
+    	public final static int REJECTED = 6;
 
     	/**
     	 * Ringing
     	 */
-    	public final static int RINGING = 8;
+    	public final static int RINGING = 7;
 
     	/**
     	 * Sharing has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 9;
+    	public final static int ACCEPTING = 8;
 
         private State() {
         }    	
@@ -302,6 +297,21 @@ public class ImageSharing {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}		
+
+	/**
+	 * Returns the reason code of the state of the sharing
+	 *
+	 * @return ReasonCode
+	 * @see ImageSharing.ReasonCode
+	 * @throws JoynServiceException
+	 */
+	public int getReasonCode() throws JoynServiceException {
+		try {
+			return sharingInf.getReasonCode();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 		
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)

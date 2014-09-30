@@ -38,7 +38,6 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener;
-import com.orangelabs.rcs.core.ims.service.ipcall.OriginatingIPCallSession;
 import com.orangelabs.rcs.provider.ipcall.IPCallStateAndReasonCode;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.service.broadcaster.IIPCallEventBroadcaster;
@@ -110,12 +109,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
 		String callId = getCallId();
 		synchronized (lock) {
+			IPCallServiceImpl.removeIPCallSession(callId);
+
 			IPCallHistory.getInstance().setCallState(callId,
 					IPCall.State.REJECTED, reasonCode);
 
 			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
 					IPCall.State.REJECTED, reasonCode);
-			IPCallServiceImpl.removeIPCallSession(callId);
 		}
 	}
 
@@ -156,26 +156,27 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 */
 	public int getState() {
 		SipDialogPath dialogPath = session.getDialogPath();
-		if (dialogPath != null) {
-			if (dialogPath.isSessionCancelled()) {
-				return IPCall.State.REJECTED;
+		if (dialogPath != null && dialogPath.isSessionEstablished()) {
+			return IPCall.State.STARTED;
 
-			} else if (dialogPath.isSessionEstablished()) {
-				return IPCall.State.STARTED;
-
-			} else if (dialogPath.isSessionTerminated()) {
-				return IPCall.State.ABORTED;
-
-			} else {
-				if (session instanceof OriginatingIPCallSession) {
-					return IPCall.State.INITIATED;
-				}
-
-				return IPCall.State.INVITED;
+		} else if (session.isInitiatedByRemote()) {
+			if (session.isSessionAccepted()) {
+				return IPCall.State.ACCEPTING;
 			}
+
+			return IPCall.State.INVITED;
 		}
 
-		return IPCall.State.UNKNOWN;
+		return IPCall.State.INITIATED;
+	}
+
+	/**
+	 * Returns the reason code of the state of the IP call
+	 *
+	 * @return ReasonCode
+	 */
+	public int getReasonCode() {
+		return ReasonCode.UNSPECIFIED;
 	}
 	
 	/**
@@ -460,13 +461,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		String callId = getCallId();
 		synchronized (lock) {
+			IPCallServiceImpl.removeIPCallSession(callId);
+
 			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ABORTED,
 					ReasonCode.ABORTED_BY_REMOTE);
 
 			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
 					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
-
-			IPCallServiceImpl.removeIPCallSession(callId);
 		}
 	}
     
@@ -482,15 +483,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		IPCallStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
 		int state = stateAndReasonCode.getState();
 		int reasonCode = stateAndReasonCode.getReasonCode();
-		String callId = getCallId(); 
+		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(callId,
-					state, reasonCode);
-
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
-					state, reasonCode);
-
 			IPCallServiceImpl.removeIPCallSession(callId);
+
+			IPCallHistory.getInstance().setCallState(callId, state, reasonCode);
+
+			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId, state,
+					reasonCode);
 		}
 	}
 	
@@ -733,7 +733,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	}
 
 	@Override
-	public void handleSessionAccepting() {
+	public void handleSessionAccepted() {
 		if (logger.isActivated()) {
 			logger.info("Accepting call");
 		}
@@ -761,5 +761,20 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	@Override
 	public void handleSessionRejectedByRemote() {
 		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
+
+	@Override
+	public void handleSessionInvited() {
+		if (logger.isActivated()) {
+			logger.info("Invited to ipcall session");
+		}
+		String callId = getCallId();
+		synchronized (lock) {
+			IPCallHistory.getInstance().addCall(getRemoteContact(), callId, Direction.INCOMING,
+					session.getAudioContent(), session.getVideoContent(), IPCall.State.INVITED,
+					ReasonCode.UNSPECIFIED);
+		}
+
+		mIPCallEventBroadcaster.broadcastIPCallInvitation(callId);
 	}
 }

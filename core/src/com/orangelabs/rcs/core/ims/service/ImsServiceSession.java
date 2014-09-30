@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -137,6 +137,11 @@ public abstract class ImsServiceSession extends Thread {
      * Session terminated by remote flag
      */
     private boolean sessionTerminatedByRemote = false;
+
+    /**
+     * Session accepting flag
+     */
+    private boolean mSessionAccepted = false;
 
     /**
      * The logger
@@ -690,6 +695,13 @@ public abstract class ImsServiceSession extends Thread {
 		sessionTimer.receiveUpdate(update);
 	}
 
+	/**
+	 * Set session accepted
+	 */
+	public void setSessionAccepted() {
+		mSessionAccepted = true;
+	}
+
     /**
      * Prepare media session
      * 
@@ -911,6 +923,15 @@ public abstract class ImsServiceSession extends Thread {
      */
     public boolean isSessionTerminatedByRemote() {
         return sessionTerminatedByRemote;
+    }
+
+    /**
+     * Is session accepted
+     *
+     * @return Boolean
+     */
+    public boolean isSessionAccepted() {
+        return mSessionAccepted;
     }
 
     /**

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
@@ -242,19 +242,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 		}
 		return null;
 	}
-	
-	/**
-	 * Check is session  should be auto accepted depending on settings and roaming conditions
-	 * This method should only be called once per session
-	 * @return true if file transfer should be auto accepted
-	 */
-	protected boolean shouldBeAutoAccepted() {
-		if (getImsService().getImsModule().isInRoaming()) {
-			return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
-		} else {
-			return RcsSettings.getInstance().isFileTransferAutoAccepted();
-		}
-	}
+
 	
 	@Override
 	public void receiveBye(SipRequest bye) {

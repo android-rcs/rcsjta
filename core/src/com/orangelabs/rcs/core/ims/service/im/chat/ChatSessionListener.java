@@ -67,6 +67,12 @@ public interface ChatSessionListener extends ImsSessionListener {
     /**
      * Notifying sending of a message
      *
+     * @param msg Instant message
+     */
+    public void handleMessageSending(InstantMessage msg);
+    /**
+     * Notifying that a message has been sent
+     *
      * @param msgId Message ID
      */
     public void handleMessageSent(String msgId);
@@ -113,4 +119,9 @@ public interface ChatSessionListener extends ImsSessionListener {
 	 *            the participant information
 	 */
     public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
+
+    /**
+     * Chat will be auto-accepted and the session is in the process of being started
+     */
+    public void handleSessionAutoAccepted();
 }

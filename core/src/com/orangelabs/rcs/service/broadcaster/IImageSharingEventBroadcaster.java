@@ -27,4 +27,6 @@ public interface IImageSharingEventBroadcaster {
 
 	public void broadcastImageSharingProgress(ContactId contact, String sharingId, long currentSize,
 			long totalSize);
+
+	public void broadcastImageSharingInvitation(String sharingId);
 }

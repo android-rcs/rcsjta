@@ -15,6 +15,8 @@ interface IMultimediaMessagingSession {
 	
 	int getState();
 	
+	int getReasonCode();
+	
 	int getDirection();
 	
 	void acceptInvitation();

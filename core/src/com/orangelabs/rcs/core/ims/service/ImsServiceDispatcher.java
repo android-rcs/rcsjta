@@ -300,12 +300,12 @@ public class ImsServiceDispatcher extends Thread {
                             if (logger.isActivated()) {
                                 logger.debug("Single S&F file transfer over HTTP invitation");
                             }
-                            imsModule.getInstantMessagingService().receiveStoredAndForwardHttpFileTranferInvitation(request, ftHttpInfo);
+                            imsModule.getInstantMessagingService().receiveStoredAndForwardOneToOneHttpFileTranferInvitation(request, ftHttpInfo);
                         } else {
 		                    if (logger.isActivated()) {
 		                        logger.debug("Single file transfer over HTTP invitation");
 		                    }
-                            imsModule.getInstantMessagingService().receiveHttpFileTranferInvitation(request, ftHttpInfo);
+                            imsModule.getInstantMessagingService().receiveOneToOneHttpFileTranferInvitation(request, ftHttpInfo);
                         }
                     } else {
                         // TODO : else return error to Originating side

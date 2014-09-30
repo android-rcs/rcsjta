@@ -28,10 +28,7 @@ import android.net.Uri;
 
 import java.util.Vector;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -49,6 +46,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionLis
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -121,6 +119,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			setFileicon(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
 
+		if (shouldBeAutoAccepted()) {
+			setSessionAccepted();
+		}
 	}
 
 	/**
@@ -142,6 +143,24 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		this.resumeFT = resume;
 		// Instantiate the download manager
 		downloadManager = new HttpDownloadManager(getContent(), this, resume.getDownloadServerAddress());
+
+		if (shouldBeAutoAccepted()) {
+			setSessionAccepted();
+		}
+	}
+
+	/**
+	 * Check is session should be auto accepted depending on settings and
+	 * roaming conditions This method should only be called once per session
+	 *
+	 * @return true if file transfer should be auto accepted
+	 */
+	private boolean shouldBeAutoAccepted() {
+		if (getImsService().getImsModule().isInRoaming()) {
+			return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
+		}
+
+		return RcsSettings.getInstance().isFileTransferAutoAccepted();
 	}
 
 	/**
@@ -164,24 +183,26 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				logger.info("Initiate a new HTTP file transfer session as terminating");
 			}
 
+			Vector<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
-			if (shouldBeAutoAccepted()) {
+			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
-					logger.debug("Auto accept file transfer invitation");
+					logger.debug("Received http file transfer invitation marked for auto-accept");
 				}
-				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
-						Direction.INCOMING, getContent(), getFileicon(),
-						FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+
+				for (ImsSessionListener listener : listeners) {
+					((FileSharingSessionListener)listener).handleSessionAutoAccepted();
+				}
 			} else {
 				if (logger.isActivated()) {
-					logger.debug("Accept manually file transfer invitation");
+					logger.debug("Received http file transfer invitation marked for manual accept");
 				}
-				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
-						Direction.INCOMING, getContent(), getFileicon(),
-						FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
+
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionInvited();
+				}
 
 				int answer = waitInvitationAnswer();
-				Vector<ImsSessionListener> listeners = getListeners();
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
 						if (logger.isActivated()) {
@@ -220,8 +241,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 						return;
 
 					case ImsServiceSession.INVITATION_ACCEPTED:
+						setSessionAccepted();
+
 						for (ImsSessionListener listener : listeners) {
-							((FileSharingSessionListener)listener).handleSessionAccepting();
+							((FileSharingSessionListener)listener).handleSessionAccepted();
 						}
 						break;
 

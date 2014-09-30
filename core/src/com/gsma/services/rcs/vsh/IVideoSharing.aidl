@@ -17,6 +17,8 @@ interface IVideoSharing {
 
 	int getState();
 
+	int getReasonCode();
+
 	int getDirection();
 	
 	void acceptInvitation(IVideoRenderer renderer);

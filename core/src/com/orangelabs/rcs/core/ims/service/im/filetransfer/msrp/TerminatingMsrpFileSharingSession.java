@@ -26,9 +26,6 @@ import java.io.IOException;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.RcsCommon.Direction;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -54,9 +51,9 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -94,6 +91,23 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);
 
+		if (shouldBeAutoAccepted()) {
+			setSessionAccepted();
+		}
+	}
+
+	/**
+	 * Check is session should be auto accepted depending on settings and
+	 * roaming conditions This method should only be called once per session
+	 *
+	 * @return true if file transfer should be auto accepted
+	 */
+	private boolean shouldBeAutoAccepted() {
+		if (getImsService().getImsModule().isInRoaming()) {
+			return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
+		}
+
+		return RcsSettings.getInstance().isFileTransferAutoAccepted();
 	}
 
 	
@@ -106,28 +120,29 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 				logger.info("Initiate a new file transfer session as terminating");
 			}
 
+			Vector<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
-			if (shouldBeAutoAccepted()) {
+			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept file transfer invitation");
 				}
-				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
-						Direction.INCOMING, getContent(), getFileicon(),
-						FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+
+				for (ImsSessionListener listener : listeners) {
+					((FileSharingSessionListener)listener).handleSessionAutoAccepted();
+				}
 
 			} else {
 				if (logger.isActivated()) {
 					logger.debug("Accept manually file transfer invitation");
 				}
-				MessagingLog.getInstance().addFileTransfer(getRemoteContact(), getFileTransferId(),
-						Direction.INCOMING, getContent(), getFileicon(),
-						FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
 
-				// Send a 180 Ringing response
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionInvited();
+				}
+
 				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 				int answer = waitInvitationAnswer();
-				Vector<ImsSessionListener> listeners = getListeners();
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
 
@@ -169,8 +184,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						return;
 
 					case ImsServiceSession.INVITATION_ACCEPTED:
+						setSessionAccepted();
+
 						for (ImsSessionListener listener : listeners) {
-							((FileSharingSessionListener)listener).handleSessionAccepting();
+							((FileSharingSessionListener)listener).handleSessionAccepted();
 						}
 						break;
 
@@ -308,11 +325,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     				logger.info("ACK request received");
     			}
 
-                // Notify listeners
-                for(int j=0; j < getListeners().size(); j++) {
-                    getListeners().get(j).handleSessionStarted();
-                }
-
         		// Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	// Active mode: client should connect
@@ -341,6 +353,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                 // The session is established
     	        getDialogPath().sessionEstablished();
+
+                for(ImsSessionListener listener : listeners) {
+                    listener.handleSessionStarted();
+                }
 
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	

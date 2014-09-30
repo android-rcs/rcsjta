@@ -77,7 +77,7 @@ public interface FileSharingSessionListener extends ImsSessionListener  {
     public void handleFileTransferResumed();
 
     /**
-     * Session is being accepted
+     * Session will be auto-accepted and the session is in the process of being started
      */
-    public void handleSessionAccepting();
+    public void handleSessionAutoAccepted();
 }

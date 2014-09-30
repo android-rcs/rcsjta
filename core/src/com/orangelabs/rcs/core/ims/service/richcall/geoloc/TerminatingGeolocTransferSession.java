@@ -91,7 +91,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 	    		logger.info("Initiate a new sharing session as terminating");
 	    	}
 
-	    	// Send a 180 Ringing response
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 	    	// Check if the MIME type is supported
@@ -108,8 +107,12 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         		return;
         	}
 
+			Vector<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				listener.handleSessionInvited();
+			}
+
 			int answer = waitInvitationAnswer();
-			Vector<ImsSessionListener> listeners;
 			switch (answer) {
 				case ImsServiceSession.INVITATION_REJECTED:
 					if (logger.isActivated()) {
@@ -118,7 +121,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByUser();
 					}
@@ -134,7 +136,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByTimeout();
 					}
@@ -147,13 +148,16 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByRemote();
 					}
 					return;
 				case ImsServiceSession.INVITATION_ACCEPTED:
-					/*Note: Nothing to log here for geoloc transfer sessions.*/
+					setSessionAccepted();
+
+					for (ImsSessionListener listener : listeners) {
+						listener.handleSessionAccepted();
+					}
 					break;
 
 				default:
@@ -278,11 +282,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     				logger.info("ACK request received");
     			}
 
-                // Notify listeners
-                for(int i=0; i < getListeners().size(); i++) {
-                    getListeners().get(i).handleSessionStarted();
-                }
-
     	        // Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
@@ -298,6 +297,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
                 // The session is established
                 getDialogPath().sessionEstablished();
+
+                for(ImsSessionListener listener : listeners) {
+                    listener.handleSessionStarted();
+            }
 
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	

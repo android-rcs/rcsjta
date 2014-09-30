@@ -333,11 +333,9 @@ public class RichcallService extends ImsService {
 		// Create a new session
     	ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact);
 
-		// Start the session
-		session.startSession();
-
-		// Notify listener
 		getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
+
+		session.startSession();
 	}
 
     /**
@@ -476,7 +474,8 @@ public class RichcallService extends ImsService {
 		// Create a new session
 		VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact);
 
-		// Start the session
+		getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(session);
+
 		session.startSession();
 	}
 
@@ -579,11 +578,9 @@ public class RichcallService extends ImsService {
 		// Create a new session
 		GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact);
 
-		// Start the session
-		session.startSession();
-
-		// Notify listener
 		getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
+
+		session.startSession();
 	}
 
 	/**

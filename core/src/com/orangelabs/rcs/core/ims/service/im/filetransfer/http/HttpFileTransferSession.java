@@ -181,7 +181,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
         // Remove the current session
         getImsService().removeSession(this);
-        this.sessionState = HttpTransferState.TERMINATED;
 
         Vector<ImsSessionListener> listeners = getListeners();
         for (ImsSessionListener listener : listeners) {
@@ -226,7 +225,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
         // Remove the current session
         getImsService().removeSession(this);
-        this.sessionState = HttpTransferState.TERMINATED;
 
         Vector<ImsSessionListener> listeners = getListeners();
         for (ImsSessionListener listener : listeners) {

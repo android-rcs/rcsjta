@@ -36,7 +36,6 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
-import com.orangelabs.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,8 +54,12 @@ public class GroupChatLog implements IGroupChatLog {
 	
 	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
 
-	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(ChatData.KEY_CHAT_ID).append("=? AND ")
-			.append(ChatData.KEY_STATE).append("=? AND ").append(ChatData.KEY_REJECT_GC).append("=1").toString();
+	/* TODO: This constant should not use a magic number. */
+	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
+			ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
+			.append(GroupChat.State.ABORTED).append(" AND ").append(ChatData.KEY_REASON_CODE)
+			.append("=").append(GroupChat.ReasonCode.ABORTED_BY_USER).append(" AND ")
+			.append(ChatData.KEY_REJECT_GC).append("=1").toString();
 
 	/**
 	 * The logger
@@ -136,7 +139,7 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJECT_GC, "0");
-		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId };
 		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
@@ -276,7 +279,7 @@ public class GroupChatLog implements IGroupChatLog {
 	@Override
 	public boolean isGroupChatNextInviteRejected(String chatId) {
 		String[] projection = { ChatData.KEY_CHAT_ID };
-		String[] selectionArgs = { chatId, "" + GroupChat.State.CLOSED_BY_USER };
+		String[] selectionArgs = { chatId };
 		Cursor cursor = null;
 		try {
 			cursor = cr.query(chatDatabaseUri, projection, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs, ChatData.KEY_TIMESTAMP + " DESC");

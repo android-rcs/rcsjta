@@ -24,4 +24,6 @@ public interface IVideoSharingEventBroadcaster {
 
 	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int status,
 			int reasonCode);
+
+	public void broadcastVideoSharingInvitation(String sharingId);
 }

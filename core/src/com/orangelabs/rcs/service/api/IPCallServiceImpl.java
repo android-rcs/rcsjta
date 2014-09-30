@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import android.content.Intent;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -40,20 +39,17 @@ import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
-import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.IPCallEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
-import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -91,16 +87,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		}
 	}
 
-	/*Broadcast intent related to the received invitation*/
-	private void broadcastIPCallInvitation(String sessionId) {
-		Intent newInvitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(IPCallIntent.EXTRA_CALL_ID, sessionId);
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
-	}
-
-	/**
+		/**
 	 * Close API
 	 */
 	public void close() {
@@ -202,17 +189,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Receive IP call invitation from " + contact);
 		}
-
-		// Get audio encoding
-		AudioContent audiocontent = session.getAudioContent();
-		
-		// Get video encoding
-		VideoContent videocontent = session.getVideoContent();
-
-		IPCallHistory.getInstance().addCall(contact, session.getSessionID(),
-				Direction.INCOMING,
-				audiocontent, videocontent,
-				IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
 		
 		// Update displayName of remote contact
 		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
@@ -220,8 +196,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		// Add session in the list
 		IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 		IPCallServiceImpl.addIPCallSession(sessionApi);
-
-		broadcastIPCallInvitation(session.getSessionID());
 	}
 
     /**
@@ -262,6 +236,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			// Add session in the list
 			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 
+			IPCallServiceImpl.addIPCallSession(sessionApi);
+
 			// Start the session
 	        Thread t = new Thread() {
 	    		public void run() {
@@ -269,9 +245,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	    		}
 	    	};
 	    	t.start();
-			
-			// Add session in the list
-			IPCallServiceImpl.addIPCallSession(sessionApi);
 			return sessionApi;
 		} catch (Exception e) {
 			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
@@ -320,6 +293,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			// Add session in the list
 			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
 
+			IPCallServiceImpl.addIPCallSession(sessionApi);
+
 			// Start the session
 	        Thread t = new Thread() {
 	    		public void run() {
@@ -327,9 +302,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	    		}
 	    	};
 	    	t.start();
-	    	
-			// Add session in the list
-			IPCallServiceImpl.addIPCallSession(sessionApi);
 			return sessionApi;
 		} catch (Exception e) {
 			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
@@ -403,7 +375,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		String sessionId = SessionIdGenerator.getNewId();
 		IPCallHistory.getInstance().addCall(contact, sessionId, Direction.INCOMING,
 				audioContent, videoContent, IPCall.State.REJECTED, reasonCode);
-		broadcastIPCallInvitation(sessionId);
+		mIPCallEventBroadcaster.broadcastIPCallInvitation(sessionId);
 	}
 
     /**

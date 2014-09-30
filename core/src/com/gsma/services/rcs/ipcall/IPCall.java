@@ -36,54 +36,49 @@ public class IPCall {
      */
     public static class State {
     	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
     	 * Call invitation received
     	 */
-    	public final static int INVITED = 1;
+    	public final static int INVITED = 0;
     	
     	/**
     	 * Call invitation sent
     	 */
-    	public final static int INITIATED = 2;
+    	public final static int INITIATED = 1;
     	
     	/**
     	 * Call is started
     	 */
-    	public final static int STARTED = 3;
+    	public final static int STARTED = 2;
     	
     	/**
     	 * call has been aborted
     	 */
-    	public final static int ABORTED = 4;
+    	public final static int ABORTED = 3;
 
     	/**
     	 * Call has failed
     	 */
-    	public final static int FAILED = 5;
+    	public final static int FAILED = 4;
 
     	/**
     	 * Call rejected
     	 */
-    	public final static int REJECTED = 6;
+    	public final static int REJECTED = 5;
 
     	/**
     	 * Call on hold
     	 */
-    	public final static int HOLD = 7;
+    	public final static int HOLD = 6;
 
     	/**
     	 * Call has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 8;
+    	public final static int ACCEPTING = 7;
 
     	/**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 9;
+    	public final static int RINGING = 8;
 
     	private State() {
         }    	
@@ -223,6 +218,21 @@ public class IPCall {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}		
+
+	/**
+	 * Returns the reason code of the state of the call
+	 *
+	 * @return ReasonCode
+	 * @see IPCall.ReasonCode
+	 * @throws JoynServiceException
+	 */
+	public int getReasonCode() throws JoynServiceException {
+		try {
+			return callInf.getReasonCode();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 		
 	/**
 	 * Returns the direction of the call (incoming or outgoing)

@@ -15,10 +15,14 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -71,5 +75,13 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 			}
 		}
 		mOneToOneChatListeners.finishBroadcast();
+	}
+
+	public void broadcastMessageReceived(String msgId) {
+		Intent newOneToOneMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneMessage);
+		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneMessage);
+		newOneToOneMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, msgId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
 	}
 }

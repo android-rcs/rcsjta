@@ -490,11 +490,10 @@ public class InstantMessagingService extends ImsService {
 			// Create a new session
 			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite);
 
-			// Start the session
+			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote);
+
 			session.startSession();
 
-			// Notify listener
-			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote);
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact from FT invitation");
@@ -608,11 +607,9 @@ public class InstantMessagingService extends ImsService {
 			// Create a new session
 			TerminatingOne2OneChatSession session = new TerminatingOne2OneChatSession(this, invite, remote);
 
-			// Start the session
-			session.startSession();
-
-			// Notify listener
 			getImsModule().getCore().getListener().handleOneOneChatSessionInvitation(session);
+
+			session.startSession();
 			
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
@@ -724,11 +721,9 @@ public class InstantMessagingService extends ImsService {
 			return;
 		}
 
-		// Start the session
-		session.startSession();
-
-		// Notify listener
 		getImsModule().getCore().getListener().handleAdhocGroupChatSessionInvitation(session);
+
+		session.startSession();
     }
 
     /**
@@ -1025,7 +1020,7 @@ public class InstantMessagingService extends ImsService {
      * @param invite Received invite
      * @param ftinfo File transfer info document
      */
-	public void receiveHttpFileTranferInvitation(SipRequest invite, FileTransferHttpInfoDocument ftinfo) {
+	public void receiveOneToOneHttpFileTranferInvitation(SipRequest invite, FileTransferHttpInfoDocument ftinfo) {
 		if (logger.isActivated()){
 			logger.info("Receive a single HTTP file transfer invitation");
 		}
@@ -1080,16 +1075,17 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create and start a chat session
-			TerminatingOne2OneChatSession one2oneChatSession = new TerminatingOne2OneChatSession(this, invite, remote);
-			one2oneChatSession.startSession();
+			TerminatingOne2OneChatSession oneToOneChatSession = new TerminatingOne2OneChatSession(this, invite, remote);
+			oneToOneChatSession.startSession();
 
 			// Create and start a new HTTP file transfer session
 			TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this,
-					one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact());
+					oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite), oneToOneChatSession.getRemoteContact());
+
+			getImsModule().getCore().getListener().handleOneToOneFileTransferInvitation(httpFiletransferSession, oneToOneChatSession);
+
 			httpFiletransferSession.startSession();
 
-			// Notify listener
-			getImsModule().getCore().getListener().handle1to1FileTransferInvitation(httpFiletransferSession, one2oneChatSession);
 		} catch (JoynContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error( "receiveHttpFileTranferInvitation: cannot parse remote contact");
@@ -1103,7 +1099,7 @@ public class InstantMessagingService extends ImsService {
      * @param invite Received invite
      * @param ftinfo File transfer info document
      */
-    public void receiveStoredAndForwardHttpFileTranferInvitation(SipRequest invite, FileTransferHttpInfoDocument ftinfo) {
+    public void receiveStoredAndForwardOneToOneHttpFileTranferInvitation(SipRequest invite, FileTransferHttpInfoDocument ftinfo) {
         if (logger.isActivated()) {
             logger.info("Receive a single S&F HTTP file transfer invitation");
         }
@@ -1139,10 +1135,10 @@ public class InstantMessagingService extends ImsService {
         // Create and start a new HTTP file transfer session
 		TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this, one2oneChatSession,
 				ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact());
+
+		getImsModule().getCore().getListener().handleOneToOneFileTransferInvitation(httpFiletransferSession, one2oneChatSession);
+
         httpFiletransferSession.startSession();
-        
-        // Notify listener
-        getImsModule().getCore().getListener().handle1to1FileTransferInvitation(httpFiletransferSession, one2oneChatSession);
     }
 	
     /**

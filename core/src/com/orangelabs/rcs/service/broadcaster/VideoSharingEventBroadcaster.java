@@ -15,10 +15,14 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
+import com.gsma.services.rcs.vsh.VideoSharingIntent;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -57,5 +61,13 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 			}
 		}
 		mVideoSharingListeners.finishBroadcast();
+	}
+
+	public void broadcastVideoSharingInvitation(String sharingId) {
+		Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+		newInvitation.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, sharingId);
+		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 }
