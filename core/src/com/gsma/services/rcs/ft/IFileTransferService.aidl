@@ -1,5 +1,7 @@
 package com.gsma.services.rcs.ft;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;

@@ -1,5 +1,7 @@
 package com.gsma.services.rcs.upload;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.upload.FileUploadInfo;
 
 /**
