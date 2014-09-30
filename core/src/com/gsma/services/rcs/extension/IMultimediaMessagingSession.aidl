@@ -13,6 +13,8 @@ interface IMultimediaMessagingSession {
 	
 	String getServiceId();
 	
+	String getFeatureTag();
+	
 	int getState();
 	
 	int getDirection();
@@ -25,4 +27,3 @@ interface IMultimediaMessagingSession {
 
 	void sendMessage(in byte[] content);
 }
-

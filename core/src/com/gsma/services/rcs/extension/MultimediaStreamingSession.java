@@ -60,6 +60,20 @@ public class MultimediaStreamingSession extends MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns the feature tag of the multimedia session
+	 * 
+	 * @return Feature tag
+	 * @throws JoynServiceException
+	 */
+	public String getFeatureTag() throws JoynServiceException {
+		try {
+			return sessionIntf.getFeatureTag();
+		} catch(Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 	
 	/**
 	 * Returns the remote contact identifier

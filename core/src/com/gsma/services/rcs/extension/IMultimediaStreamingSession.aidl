@@ -13,6 +13,8 @@ interface IMultimediaStreamingSession {
 	
 	String getServiceId();
 	
+	String getFeatureTag();
+	
 	int getState();
 	
 	int getDirection();
