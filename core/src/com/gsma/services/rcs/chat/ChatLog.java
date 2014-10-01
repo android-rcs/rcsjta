@@ -275,7 +275,7 @@ public class ChatLog {
                 public static final int REJECTED = 0;
 
                 /**
-                 * The message is queued to be sent by joyn service when
+                 * The message is queued to be sent by rcs service when
                  * possible
                  */
                 public static final int QUEUED = 1;

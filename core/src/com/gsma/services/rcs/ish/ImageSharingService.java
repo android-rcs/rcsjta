@@ -36,10 +36,10 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -52,7 +52,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ImageSharingService extends JoynService {
+public class ImageSharingService extends RcsService {
 
 	private static final int KITKAT_VERSION_CODE = 19;
 
@@ -73,7 +73,7 @@ public class ImageSharingService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public ImageSharingService(Context ctx, JoynServiceListener listener) {
+    public ImageSharingService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -120,7 +120,7 @@ public class ImageSharingService extends JoynService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(JoynService.Error.CONNECTION_LOST);
+        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -129,17 +129,17 @@ public class ImageSharingService extends JoynService {
      * Returns the configuration of image sharing service
      * 
      * @return Configuration
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public ImageSharingServiceConfiguration getConfiguration() throws JoynServiceException {
+    public ImageSharingServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
 				return api.getConfiguration();
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -158,9 +158,9 @@ public class ImageSharingService extends JoynService {
 	 * compatibility since this API is available only from Kitkat onwards.
 	 *
 	 * @param file Uri of file to share
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	private void tryToTakePersistableUriPermission(Uri file) throws JoynServiceException {
+	private void tryToTakePersistableUriPermission(Uri file) throws RcsServiceException {
 		if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
 			return;
 		}
@@ -175,7 +175,7 @@ public class ImageSharingService extends JoynService {
 			};
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -189,9 +189,9 @@ public class ImageSharingService extends JoynService {
      * @param contact Contact identifier
      * @param file Uri of file to share
      * @return Image sharing
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public ImageSharing shareImage(ContactId contact, Uri file) throws JoynServiceException {
+    public ImageSharing shareImage(ContactId contact, Uri file) throws RcsServiceException {
 		if (api != null) {
 			try {
 				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
@@ -210,10 +210,10 @@ public class ImageSharingService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
     
@@ -221,9 +221,9 @@ public class ImageSharingService extends JoynService {
      * Returns the list of image sharings in progress
      * 
      * @return List of image sharings
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<ImageSharing> getImageSharings() throws JoynServiceException {
+    public Set<ImageSharing> getImageSharings() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<ImageSharing> result = new HashSet<ImageSharing>();
@@ -234,10 +234,10 @@ public class ImageSharingService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -246,9 +246,9 @@ public class ImageSharingService extends JoynService {
      * 
      * @param sharingId Sharing ID
      * @return Image sharing or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public ImageSharing getImageSharing(String sharingId) throws JoynServiceException {
+    public ImageSharing getImageSharing(String sharingId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IImageSharing sharingIntf = api.getImageSharing(sharingId);
@@ -258,10 +258,10 @@ public class ImageSharingService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -269,17 +269,17 @@ public class ImageSharingService extends JoynService {
 	 * Adds an event listener on image sharing events
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addEventListener(ImageSharingListener listener) throws JoynServiceException {
+	public void addEventListener(ImageSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -287,17 +287,17 @@ public class ImageSharingService extends JoynService {
 	 * Removes an event listener from image sharing
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(ImageSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(ImageSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

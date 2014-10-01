@@ -23,7 +23,7 @@ import java.util.Vector;
 
 import org.xml.sax.InputSource;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -157,7 +157,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
 
 				// Notify listener
 				imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (logger.isActivated()) {
 					logger.error("Cannot get contact from notify");
 				}

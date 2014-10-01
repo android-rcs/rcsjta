@@ -31,7 +31,7 @@ import java.util.Vector;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat;
@@ -494,7 +494,7 @@ public class InstantMessagingService extends ImsService {
 
 			session.startSession();
 
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact from FT invitation");
 			}
@@ -611,7 +611,7 @@ public class InstantMessagingService extends ImsService {
 
 			session.startSession();
 			
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error( "Cannot parse remote contact");
 			}
@@ -677,7 +677,7 @@ public class InstantMessagingService extends ImsService {
 				sendErrorResponse(invite, Response.BUSY_HERE);
 				return;
 			}
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			// GC invitation is out of the blue (i.e. Store & Forward)
 			remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
 			if (logger.isActivated()) {
@@ -942,7 +942,7 @@ public class InstantMessagingService extends ImsService {
 		ContactId remote;
 		try {
 			remote = ChatUtils.getReferredIdentityAsContactId(invite);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("Cannot parse remote contact");
 			}
@@ -993,7 +993,7 @@ public class InstantMessagingService extends ImsService {
     	ContactId remote;
 		try {
 			remote = ChatUtils.getReferredIdentityAsContactId(invite);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("Cannot parse remote contact");
 			}
@@ -1086,7 +1086,7 @@ public class InstantMessagingService extends ImsService {
 
 			httpFiletransferSession.startSession();
 
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error( "receiveHttpFileTranferInvitation: cannot parse remote contact");
 			}
@@ -1106,7 +1106,7 @@ public class InstantMessagingService extends ImsService {
         ContactId remote;
 		try {
 			remote = ChatUtils.getReferredIdentityAsContactId(invite);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("receiveStoredAndForwardHttpFileTranferInvitation: cannot parse remote contact");
 			}

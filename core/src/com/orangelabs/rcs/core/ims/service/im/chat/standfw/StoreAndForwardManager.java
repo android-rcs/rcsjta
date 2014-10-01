@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -60,7 +60,7 @@ public class StoreAndForwardManager {
      * 
      * @param invite Received invite
      * @param contact Contact identifier
-     * @throws JoynContactFormatException 
+     * @throws RcsContactFormatException
      */
     public void receiveStoredMessages(SipRequest invite, ContactId contact) {
     	if (logger.isActivated()) {
@@ -80,7 +80,7 @@ public class StoreAndForwardManager {
      * 
      * @param invite Received invite
      * @param contact Contact identifier
-     * @throws JoynContactFormatException 
+     * @throws RcsContactFormatException
      */
     public void receiveStoredNotifications(SipRequest invite, ContactId contact) {
     	if (logger.isActivated()) {

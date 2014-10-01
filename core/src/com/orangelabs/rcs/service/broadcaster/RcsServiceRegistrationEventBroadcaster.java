@@ -15,30 +15,30 @@
  */
 package com.orangelabs.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.os.RemoteCallbackList;
 
 /**
- * JoynServiceRegistrationEventBroadcaster maintains the registering and
- * unregistering of IJoynServiceRegistrationListener and also performs broadcast
+ * RcsServiceRegistrationEventBroadcaster maintains the registering and
+ * unregistering of IRcsServiceRegistrationListener and also performs broadcast
  * events on these listeners upon the trigger of corresponding callbacks.
  */
-public class JoynServiceRegistrationEventBroadcaster implements IJoynServiceRegistrationEventBroadcaster{
+public class RcsServiceRegistrationEventBroadcaster implements IRcsServiceRegistrationEventBroadcaster{
 
-	private final RemoteCallbackList<IJoynServiceRegistrationListener> mServiceRegistrationListeners = new RemoteCallbackList<IJoynServiceRegistrationListener>();
+	private final RemoteCallbackList<IRcsServiceRegistrationListener> mServiceRegistrationListeners = new RemoteCallbackList<IRcsServiceRegistrationListener>();
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public JoynServiceRegistrationEventBroadcaster() {
+	public RcsServiceRegistrationEventBroadcaster() {
 	}
 
-	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
 		mServiceRegistrationListeners.register(listener);
 	}
 
-	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
 		mServiceRegistrationListeners.unregister(listener);
 	}
 

@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -29,7 +29,7 @@ import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
@@ -364,7 +364,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
 	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
 			}

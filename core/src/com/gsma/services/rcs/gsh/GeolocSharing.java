@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.gsh;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -178,13 +178,13 @@ public class GeolocSharing {
 	 * Returns the sharing ID of the geoloc sharing
 	 * 
 	 * @return Sharing ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getSharingId() throws JoynServiceException {
+	public String getSharingId() throws RcsServiceException {
 		try {
 			return sharingInf.getSharingId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -192,28 +192,28 @@ public class GeolocSharing {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return sharingInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
-     * Returns the geolocation info
-     *
-     * @return Geoloc object
-	 * @throws JoynServiceException
+	 * Returns the geolocation info
+	 * 
+	 * @return Geoloc object
+	 * @throws RcsServiceException
 	 * @see Geoloc
-     */
-	public Geoloc getGeoloc() throws JoynServiceException {
+	 */
+	public Geoloc getGeoloc() throws RcsServiceException {
 		try {
 			return sharingInf.getGeoloc();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -222,13 +222,13 @@ public class GeolocSharing {
 	 * 
 	 * @return State
 	 * @see GeolocSharing.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return sharingInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
@@ -237,67 +237,67 @@ public class GeolocSharing {
 	 *
 	 * @return ReasonCode
 	 * @see GeolocSharing.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return sharingInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see GeolocSharing.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return sharingInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
 	/**
 	 * Accepts geoloc sharing invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation() throws JoynServiceException {
+	public void acceptInvitation() throws RcsServiceException {
 		try {
 			sharingInf.acceptInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects geoloc sharing invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			sharingInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Aborts the sharing
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortSharing() throws JoynServiceException {
+	public void abortSharing() throws RcsServiceException {
 		try {
 			sharingInf.abortSharing();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

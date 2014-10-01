@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service;
 
 import javax2.sip.Dialog;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -282,7 +282,7 @@ public class SessionTimerManager extends PeriodicRefresher {
         			// Request capabilities
         			session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
 
-        		} catch (JoynContactFormatException e) {
+                } catch (RcsContactFormatException e) {
         			if (logger.isActivated()) {
         				logger.warn("Cannot request capabilities for contact "+session.getDialogPath().getRemoteParty() );
         			}
@@ -317,7 +317,7 @@ public class SessionTimerManager extends PeriodicRefresher {
 					ContactId remote = ContactUtils.createContactId(session.getDialogPath().getRemoteParty());
 					// Request capabilities to the remote
 			        session.getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse contact "+session.getDialogPath().getRemoteParty());
 					}

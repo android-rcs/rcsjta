@@ -20,12 +20,10 @@ package com.gsma.services.rcs.vsh;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynServiceException;
-
 
 /**
  * Video player offers an interface to manage the video player instance
- * independently of the joyn service. The video player is implemented in
+ * independently of the rcs service. The video player is implemented in
  * the application side. The video player captures the video from the device
  * camera, encodes the video into the selected format and streams the encoded
  * video frames over the network in RTP.
@@ -73,8 +71,6 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	
 	/**
 	 * Closes the player and deallocates resources
-	 * 
-	 * @throws JoynServiceException
 	 */
 	public abstract void close();
 	

@@ -21,7 +21,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -42,7 +42,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		try {
 			remote = contactUtils.formatContactId("+339000000");
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			fail( "Cannot create contactID");
 		}
 	}

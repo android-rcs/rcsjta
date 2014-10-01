@@ -18,7 +18,7 @@ package com.orangelabs.rcs.service.api;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
@@ -69,7 +69,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
 				try {
 					mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, ContactUtils.createContactId(contactNumber));
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated())  {
 						logger.error( "Cannot parse contact "+contactNumber);
 					}

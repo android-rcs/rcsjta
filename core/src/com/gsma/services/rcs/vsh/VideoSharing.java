@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.vsh;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -187,13 +187,13 @@ public class VideoSharing {
 	 * Returns the sharing ID of the video sharing
 	 * 
 	 * @return Sharing ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getSharingId() throws JoynServiceException {
+	public String getSharingId() throws RcsServiceException {
 		try {
 			return sharingInf.getSharingId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -201,13 +201,13 @@ public class VideoSharing {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return sharingInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -216,13 +216,13 @@ public class VideoSharing {
 	 * 
 	 * @return Video codec
 	 * @see VideoCodec
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public VideoCodec getVideoCodec() throws JoynServiceException {
+	public VideoCodec getVideoCodec() throws RcsServiceException {
 		try {
 			return sharingInf.getVideoCodec();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -231,13 +231,13 @@ public class VideoSharing {
 	 *
 	 * @return State
 	 * @see VideoSharing.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return sharingInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -246,28 +246,28 @@ public class VideoSharing {
 	 *
 	 * @return ReasonCode
 	 * @see VideoSharing.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return sharingInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see VideoSharing.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return sharingInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
@@ -275,39 +275,39 @@ public class VideoSharing {
 	 * Accepts video sharing invitation
 	 * 
 	 * @param renderer Video renderer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation(VideoRenderer renderer) throws JoynServiceException {
+	public void acceptInvitation(VideoRenderer renderer) throws RcsServiceException {
 		try {
 			sharingInf.acceptInvitation(renderer);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects video sharing invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			sharingInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Aborts the sharing
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortSharing() throws JoynServiceException {
+	public void abortSharing() throws RcsServiceException {
 		try {
 			sharingInf.abortSharing();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

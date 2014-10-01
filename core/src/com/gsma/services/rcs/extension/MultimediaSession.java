@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -149,62 +149,62 @@ public abstract class MultimediaSession {
 	 * Returns the session ID of the multimedia session
 	 * 
 	 * @return Session ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract String getSessionId() throws JoynServiceException;
+	public abstract String getSessionId() throws RcsServiceException;
 	
 	/**
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract ContactId getRemoteContact() throws JoynServiceException;
+	public abstract ContactId getRemoteContact() throws RcsServiceException;
 	
 	/**
 	 * Returns the service ID
 	 * 
 	 * @return Service ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract String getServiceId() throws JoynServiceException;
+	public abstract String getServiceId() throws RcsServiceException;
 	
 	/**
 	 * Returns the state of the session
 	 * 
 	 * @return State
 	 * @see MultimediaSession.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract int getState() throws JoynServiceException;
+	public abstract int getState() throws RcsServiceException;
 	
 	/**
 	 * Returns the direction of the session (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see MultimediaSession.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract int getDirection() throws JoynServiceException;	
+	public abstract int getDirection() throws RcsServiceException;
 	
 	/**
 	 * Accepts session invitation.
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract void acceptInvitation() throws JoynServiceException;
+	public abstract void acceptInvitation() throws RcsServiceException;
 	
 	/**
 	 * Rejects session invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract void rejectInvitation() throws JoynServiceException;
+	public abstract void rejectInvitation() throws RcsServiceException;
 	
 	/**
 	 * Aborts the session
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public abstract void abortSession() throws JoynServiceException;    
+	public abstract void abortSession() throws RcsServiceException;
 }

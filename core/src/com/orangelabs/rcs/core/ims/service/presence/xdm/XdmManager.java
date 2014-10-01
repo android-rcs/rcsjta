@@ -33,7 +33,7 @@ import org.xml.sax.InputSource;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.TerminalInfo;
@@ -856,7 +856,7 @@ public class XdmManager {
 			for (String uri : uris) {
 				try {
 					result.add(ContactUtils.createContactId(uri));
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse uri "+uri);
 					}

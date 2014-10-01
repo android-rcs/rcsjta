@@ -27,7 +27,7 @@ import android.database.Cursor;
 import android.os.Build;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.addressbook.AddressBookEventListener;
 import com.orangelabs.rcs.core.CoreException;
@@ -302,7 +302,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 			ContactId phoneNumber;
 			try {
 				phoneNumber = ContactUtils.createContactId(phonesCursor.getString(1));
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (logger.isActivated()) {
 					logger.warn("Cannot parse phone number " + phonesCursor.getString(1));
 				}

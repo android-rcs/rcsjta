@@ -29,8 +29,8 @@ import java.util.List;
 import android.net.Uri;
 import android.os.IBinder;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
-import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
@@ -50,7 +50,7 @@ import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.ImageSharingEventBroadcaster;
-import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -67,7 +67,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
 	private final ImageSharingEventBroadcaster mImageSharingEventBroadcaster = new ImageSharingEventBroadcaster();
 
-	private final JoynServiceRegistrationEventBroadcaster mJoynServiceRegistrationEventBroadcaster = new JoynServiceRegistrationEventBroadcaster();
+	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
 
 	/**
 	 * The logger
@@ -140,12 +140,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mJoynServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
 		}
 	}
 
@@ -154,12 +154,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener) {
+	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mJoynServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
 		}
 	}
 
@@ -172,9 +172,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		// Notify listeners
 		synchronized (lock) {
 			if (state) {
-				mJoynServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+				mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
 			} else {
-				mJoynServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
+				mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
 			}
 		}
 	}
@@ -353,10 +353,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.VERSION_CODES
+	 * @see RcsService.Build.VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.API_VERSION;
+		return RcsService.Build.API_VERSION;
 	}
 }

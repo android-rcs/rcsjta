@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * IP call renderer offers an interface to manage the IP call renderer instance
- * independently of the joyn service. The IP call renderer is implemented in
+ * independently of the rcs service. The IP call renderer is implemented in
  * the application side. The IP call renderer receives the audio/video streaming
  * over the network in RTP, decodes the audio samples and video frames, plays
  * decoded audio samples and displays the decoded picture on the device screen.

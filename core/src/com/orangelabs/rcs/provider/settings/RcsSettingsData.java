@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -25,7 +25,7 @@ package com.orangelabs.rcs.provider.settings;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 
-import com.gsma.services.rcs.JoynServiceConfiguration;
+import com.gsma.services.rcs.RcsServiceConfiguration;
 
 /**
  * RCS settings data constants
@@ -41,17 +41,17 @@ public class RcsSettingsData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_ID = JoynServiceConfiguration.Settings.ID;
+	static final String KEY_ID = RcsServiceConfiguration.Settings.ID;
 
 	/**
 	 * Column name
 	 */
-	static final String KEY_KEY = JoynServiceConfiguration.Settings.KEY;
+	static final String KEY_KEY = RcsServiceConfiguration.Settings.KEY;
 
 	/**
 	 * Column name
 	 */
-	static final String KEY_VALUE = JoynServiceConfiguration.Settings.VALUE;
+	static final String KEY_VALUE = RcsServiceConfiguration.Settings.VALUE;
 
 	// ---------------------------------------------------------------------------
 	// Constants
@@ -333,27 +333,27 @@ public class RcsSettingsData {
     /**
      * Convergent messaging UX option
      */
-    public static final String KEY_MESSAGING_MODE = JoynServiceConfiguration.Settings.MESSAGING_MODE;
+    public static final String KEY_MESSAGING_MODE = RcsServiceConfiguration.Settings.MESSAGING_MODE;
 
     /**
      * Possible values for client messaging mode 
      */
-	public static final int VALUE_MESSAGING_MODE_CONVERGED = JoynServiceConfiguration.Settings.MessagingModes.CONVERGED;
-	public static final int VALUE_MESSAGING_MODE_INTEGRATED = JoynServiceConfiguration.Settings.MessagingModes.INTEGRATED;
-	public static final int VALUE_MESSAGING_MODE_SEAMLESS = JoynServiceConfiguration.Settings.MessagingModes.SEAMLESS;
-	public static final int VALUE_MESSAGING_MODE_NONE = JoynServiceConfiguration.Settings.MessagingModes.NONE;
+	public static final int VALUE_MESSAGING_MODE_CONVERGED = RcsServiceConfiguration.Settings.MessagingModes.CONVERGED;
+	public static final int VALUE_MESSAGING_MODE_INTEGRATED = RcsServiceConfiguration.Settings.MessagingModes.INTEGRATED;
+	public static final int VALUE_MESSAGING_MODE_SEAMLESS = RcsServiceConfiguration.Settings.MessagingModes.SEAMLESS;
+	public static final int VALUE_MESSAGING_MODE_NONE = RcsServiceConfiguration.Settings.MessagingModes.NONE;
     
 	/**
 	 * Default messaging method
 	 */
-	public static final String KEY_DEFAULT_MESSAGING_METHOD = JoynServiceConfiguration.Settings.DEFAULT_MESSAGING_METHOD;
+	public static final String KEY_DEFAULT_MESSAGING_METHOD = RcsServiceConfiguration.Settings.DEFAULT_MESSAGING_METHOD;
 	
 	/**
      * Possible values for default messaging method 
      */
-	public static final int VALUE_DEF_MSG_METHOD_AUTOMATIC = JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC;
-	public static final int VALUE_DEF_MSG_METHOD_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN;
-	public static final int VALUE_DEF_MSG_METHOD_NON_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_JOYN;
+	public static final int VALUE_DEF_MSG_METHOD_AUTOMATIC = RcsServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC;
+	public static final int VALUE_DEF_MSG_METHOD_RCS = RcsServiceConfiguration.Settings.DefaultMessagingMethods.RCS;
+	public static final int VALUE_DEF_MSG_METHOD_NON_RCS = RcsServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS;
 	
     // ---------------------------------------------------------------------------
 	// User profile settings
@@ -362,12 +362,12 @@ public class RcsSettingsData {
 	/**
 	 * IMS username or username part of the IMPU (for HTTP Digest only)
 	 */
-	public static final String USERPROFILE_IMS_USERNAME = JoynServiceConfiguration.Settings.MY_CONTACT_ID;
+	public static final String USERPROFILE_IMS_USERNAME = RcsServiceConfiguration.Settings.MY_CONTACT_ID;
 
     /**
      * IMS display name
      */
-	public static final String USERPROFILE_IMS_DISPLAY_NAME = JoynServiceConfiguration.Settings.MY_DISPLAY_NAME;
+	public static final String USERPROFILE_IMS_DISPLAY_NAME = RcsServiceConfiguration.Settings.MY_DISPLAY_NAME;
 
 	/**
 	 * IMS home domain
@@ -457,12 +457,12 @@ public class RcsSettingsData {
     /**
      * Country code
      */
-	public static final String COUNTRY_CODE = JoynServiceConfiguration.Settings.MY_COUNTRY_CODE;
+	public static final String COUNTRY_CODE = RcsServiceConfiguration.Settings.MY_COUNTRY_CODE;
 
     /**
      * Country area code
      */
-	public static final String COUNTRY_AREA_CODE = JoynServiceConfiguration.Settings.MY_COUNTRY_AREA_CODE;
+	public static final String COUNTRY_AREA_CODE = RcsServiceConfiguration.Settings.MY_COUNTRY_AREA_CODE;
 	
     /**
      * Msisdn
@@ -906,7 +906,7 @@ public class RcsSettingsData {
     /**
      * Validity of the RCS configuration.
      */
-    public static final String CONFIGURATION_VALID = JoynServiceConfiguration.Settings.CONFIGURATION_VALIDITY;
+    public static final String CONFIGURATION_VALID = RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY;
 
     /**
 	 * Auto accept file transfer invitation in roaming

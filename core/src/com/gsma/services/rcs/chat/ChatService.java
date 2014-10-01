@@ -33,10 +33,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -50,7 +50,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ChatService extends JoynService {
+public class ChatService extends RcsService {
 	/**
 	 * API
 	 */
@@ -62,7 +62,7 @@ public class ChatService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public ChatService(Context ctx, JoynServiceListener listener) {
+    public ChatService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -118,17 +118,17 @@ public class ChatService extends JoynService {
      * Returns the configuration of the chat service
      * 
      * @return Configuration
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public ChatServiceConfiguration getConfiguration() throws JoynServiceException {
+    public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
 				return api.getConfiguration();
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}    
     
@@ -139,9 +139,9 @@ public class ChatService extends JoynService {
      * 
      * @param contact the ContactId
      * @return Chat or null 
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Chat openSingleChat(ContactId contact) throws JoynServiceException {
+    public Chat openSingleChat(ContactId contact) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IChat chatIntf = api.openSingleChat(contact);
@@ -151,10 +151,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -164,9 +164,9 @@ public class ChatService extends JoynService {
      * 
      * @param contacts Set of contact identifiers
      * @param subject Subject
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws JoynServiceException {
+    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws RcsServiceException {
     	if (api != null) {
 			try {
 				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contacts), subject);
@@ -176,10 +176,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -188,9 +188,9 @@ public class ChatService extends JoynService {
      * 
      * @param chatId Chat ID
      * @return Group chat
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public GroupChat rejoinGroupChat(String chatId) throws JoynServiceException {
+    public GroupChat rejoinGroupChat(String chatId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IGroupChat chatIntf = api.rejoinGroupChat(chatId);
@@ -200,10 +200,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -212,9 +212,9 @@ public class ChatService extends JoynService {
      * 
      * @param chatId Chat ID
      * @return Group chat
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public GroupChat restartGroupChat(String chatId) throws JoynServiceException {
+    public GroupChat restartGroupChat(String chatId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IGroupChat chatIntf = api.restartGroupChat(chatId);
@@ -224,10 +224,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -235,9 +235,9 @@ public class ChatService extends JoynService {
      * Returns the list of single chats in progress
      * 
      * @return List of chats
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<Chat> getChats() throws JoynServiceException {
+    public Set<Chat> getChats() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<Chat> result = new HashSet<Chat>();
@@ -248,10 +248,10 @@ public class ChatService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -260,9 +260,9 @@ public class ChatService extends JoynService {
      * 
      * @param contact ContactId
      * @return Chat or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Chat getChat(ContactId contact) throws JoynServiceException {
+    public Chat getChat(ContactId contact) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IChat chatIntf = api.getChat(contact);
@@ -272,10 +272,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -283,9 +283,9 @@ public class ChatService extends JoynService {
      * Returns the list of group chats in progress
      * 
      * @return List of group chat
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<GroupChat> getGroupChats() throws JoynServiceException {
+    public Set<GroupChat> getGroupChats() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<GroupChat> result = new HashSet<GroupChat>();
@@ -296,10 +296,10 @@ public class ChatService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -308,9 +308,9 @@ public class ChatService extends JoynService {
      * 
      * @param chatId Chat ID
      * @return Group chat or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public GroupChat getGroupChat(String chatId) throws JoynServiceException {
+    public GroupChat getGroupChat(String chatId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IGroupChat chatIntf = api.getGroupChat(chatId);
@@ -320,10 +320,10 @@ public class ChatService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -331,17 +331,17 @@ public class ChatService extends JoynService {
      * Mark a received message as read (ie. displayed in the UI)
      *
      * @param msgId Message id
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public void markMessageAsRead(String msgId) throws JoynServiceException {
+    public void markMessageAsRead(String msgId) throws RcsServiceException {
         if (api != null) {
             try {
                 api.markMessageAsRead(msgId);
             } catch(Exception e) {
-                throw new JoynServiceException(e.getMessage());
+                throw new RcsServiceException(e.getMessage());
             }
         } else {
-            throw new JoynServiceNotAvailableException();
+            throw new RcsServiceNotAvailableException();
         }
     }
 
@@ -352,17 +352,17 @@ public class ChatService extends JoynService {
 	 * 
 	 * @param enable
 	 *            true if respond to display reports
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void setRespondToDisplayReports(boolean enable) throws JoynServiceException {
+	public void setRespondToDisplayReports(boolean enable) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.setRespondToDisplayReports(enable);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -370,17 +370,17 @@ public class ChatService extends JoynService {
 	 * Adds an event listener for group chat events
 	 *
 	 * @param listener Group chat event listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addGroupChatEventListener(GroupChatListener listener) throws JoynServiceException {
+	public void addGroupChatEventListener(GroupChatListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addGroupChatEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -388,18 +388,18 @@ public class ChatService extends JoynService {
 	 * Removes an event listener for group chat events
 	 *
 	 * @param listener Group chat event listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
 	public void removeGroupChatEventListener(GroupChatListener listener)
-			throws JoynServiceException {
+			throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeGroupChatEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -407,17 +407,17 @@ public class ChatService extends JoynService {
 	 * Adds a listener for OneToOne chat events
 	 *
 	 * @param listener OneToOne Chat event listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addOneToOneChatEventListener(ChatListener listener) throws JoynServiceException {
+	public void addOneToOneChatEventListener(ChatListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addOneToOneChatEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -425,17 +425,17 @@ public class ChatService extends JoynService {
 	 * Removes a listener for OneToOne chat events
 	 *
 	 * @param listener OneToOne Chat event listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeOneToOneChatEventListener(ChatListener listener) throws JoynServiceException {
+	public void removeOneToOneChatEventListener(ChatListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeOneToOneChatEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

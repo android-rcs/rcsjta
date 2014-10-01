@@ -18,11 +18,11 @@
 package com.gsma.services.rcs;
 
 /**
- * Joyn service event listener
+ * Rcs service event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public interface JoynServiceListener {
+public interface RcsServiceListener {
     /**
      * Callback called when service is connected. This method is called when the
      * service is well connected to the RCS service (binding procedure successfull):
@@ -35,7 +35,7 @@ public interface JoynServiceListener {
      * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
      * @param error Error
-     * @see JoynService.Error
+     * @see RcsService.Error
      */
     public void onServiceDisconnected(int error);
 }

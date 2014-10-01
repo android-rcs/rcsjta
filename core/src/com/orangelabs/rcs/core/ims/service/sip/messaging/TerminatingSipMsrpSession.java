@@ -28,7 +28,7 @@ import java.util.Vector;
 
 import android.content.Intent;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -64,9 +64,9 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-     * @throws JoynContactFormatException 
+	 * @throws RcsContactFormatException
 	 */
-	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws JoynContactFormatException {
+	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws RcsContactFormatException {
 		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite.getFeatureTags().get(0));
 
 		mSessionInvite = sessionInvite;

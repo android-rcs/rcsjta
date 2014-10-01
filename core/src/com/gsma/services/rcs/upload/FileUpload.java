@@ -23,7 +23,7 @@ package com.gsma.services.rcs.upload;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.upload.IFileUpload;
 
 /**
@@ -84,13 +84,13 @@ public class FileUpload {
 	 * Returns the upload ID of the upload
 	 * 
 	 * @return Upload ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getUploadId() throws JoynServiceException {
+	public String getUploadId() throws RcsServiceException {
 		try {
 			return uploadInf.getUploadId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -98,13 +98,13 @@ public class FileUpload {
 	 * Returns the URI of the file to be uploaded
 	 *
 	 * @return Uri
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public Uri getFile() throws JoynServiceException {
+	public Uri getFile() throws RcsServiceException {
 		try {
 			return uploadInf.getFile();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -113,13 +113,13 @@ public class FileUpload {
 	 *
 	 * @return Upload info or null if not yet upload or in case of error
 	 * @see FileUploadInfo
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public FileUploadInfo getUploadInfo() throws JoynServiceException {
+	public FileUploadInfo getUploadInfo() throws RcsServiceException {
 		try {
 			return uploadInf.getUploadInfo();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -128,26 +128,26 @@ public class FileUpload {
 	 * 
 	 * @return State
 	 * @see FileUpload.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return uploadInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
 	/**
 	 * Aborts the upload
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortUpload() throws JoynServiceException {
+	public void abortUpload() throws RcsServiceException {
 		try {
 			uploadInf.abortUpload();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

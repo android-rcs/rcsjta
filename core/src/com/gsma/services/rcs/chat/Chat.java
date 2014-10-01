@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -48,13 +48,13 @@ public class Chat {
      * Returns the remote contact
      * 
      * @return ContactId
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public ContactId getRemoteContact() throws JoynServiceException {
+    public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return chatInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
     }
     
@@ -63,13 +63,13 @@ public class Chat {
      * 
      * @param message Message
 	 * @return Unique message ID or null in case of error
-   	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public String sendMessage(String message) throws JoynServiceException {
+    public String sendMessage(String message) throws RcsServiceException {
 		try {
 			return chatInf.sendMessage(message);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}    	
     }
     
@@ -78,13 +78,13 @@ public class Chat {
      * 
      * @param geoloc Geoloc info
 	 * @return Unique message ID or null in case of error
-   	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
+    public String sendGeoloc(Geoloc geoloc) throws RcsServiceException {
 		try {
 			return chatInf.sendGeoloc(geoloc);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}    	
     }
 	
@@ -93,13 +93,13 @@ public class Chat {
      * typing a message, else it is set to false.
      * 
      * @param status Is-composing status
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public void sendIsComposingEvent(boolean status) throws JoynServiceException {
+    public void sendIsComposingEvent(boolean status) throws RcsServiceException {
 		try {
 			chatInf.sendIsComposingEvent(status);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}    	
     }
 }

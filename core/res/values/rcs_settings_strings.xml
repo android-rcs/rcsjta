@@ -4,7 +4,7 @@
 	<string name="rcs_settings_label_cancel">Cancel</string>
 
     <string name="rcs_settings_title_settings">Settings</string>
-	<string name="rcs_settings_title_about">About joyn</string>
+	<string name="rcs_settings_title_about">About rcs</string>
 	<string name="rcs_settings_title_userprofile_settings">User profile settings</string>
 	<string name="rcs_settings_title_presence_settings">Presence settings</string>
 	<string name="rcs_settings_title_messaging_settings">Messaging settings</string>
@@ -26,10 +26,10 @@
 	<string name="rcs_settings_summary_chat_vibrate">Vibrate for incoming chat invitation</string>
 	<string name="rcs_settings_summary_filetransfer_ringtone">Ringtone for incoming file transfer invitation</string>
 	<string name="rcs_settings_summary_chat_ringtone">Ringtone for incoming chat invitation</string>
-	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the joyn service</string>
-	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the joyn service</string>
+	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the rcs service</string>
+	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the rcs service</string>
 	<string name="rcs_settings_summary_csh_available">Beep when a content sharing may be initiated during the voice call</string>
-    <string name="rcs_settings_summary_min_battery_level">Stop the joyn service if battery low</string>
+    <string name="rcs_settings_summary_min_battery_level">Stop the rcs service if battery low</string>
     <string name="rcs_settings_summary_min_storage">Disable File transfer and Image sharing capabilities if memory low</string>
     <string name="rcs_settings_summary_image_resize_option">Select the resize option for outgoing image transfer</string>
     <string name="rcs_settings_summary_ft_auto_accept">Auto accept file transfer</string>
@@ -41,10 +41,10 @@
     <string name="rcs_settings_label_ringtone">Phone ringtone</string>
     <string name="rcs_settings_summary_chat_displayed_notification">Send displayed notification during a chat</string>
     <string name="rcs_settings_label_displayed_notification">Displayed notification</string>
-    <string name="rcs_settings_label_rcs_service">joyn service</string>
+    <string name="rcs_settings_label_rcs_service">rcs service</string>
 	<string name="rcs_settings_label_confirm">Confirmation</string>
-	<string name="rcs_settings_label_rcs_service_shutdown">joyn service will be terminated</string>
-	<string name="rcs_settings_label_about">joyn application</string>
+	<string name="rcs_settings_label_rcs_service_shutdown">rcs service will be terminated</string>
+	<string name="rcs_settings_label_about">rcs application</string>
 	<string name="rcs_settings_label_copyrights">Apache License Version 2.0</string>
 	<string name="rcs_settings_label_release">Release</string>
 	<string name="rcs_settings_label_ft_auto_accept">Auto accept</string>

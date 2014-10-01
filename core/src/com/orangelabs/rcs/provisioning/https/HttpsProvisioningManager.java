@@ -69,7 +69,7 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provisioning.ProvisioningFailureReasons;
@@ -801,7 +801,7 @@ public class HttpsProvisioningManager {
 					}
 
 					// Send service provisioning intent
-					Intent serviceProvisioned = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
+					Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONED);
 					IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
 					context.sendBroadcast(serviceProvisioned);
 				} else {

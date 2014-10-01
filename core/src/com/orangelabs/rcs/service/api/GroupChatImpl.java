@@ -325,7 +325,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 		int max = session.getMaxParticipants() - 1;
 		// PDD 6.3.5.9 Adding participants to a Group Chat (Clarification)
-		// For the maximum user count, the joyn client shall take into account both the active and inactive users,
+		// For the maximum user count, the rcs client shall take into account both the active and inactive users,
 		// but not those that have explicitly left or declined the Chat.
 		int connected = getNumberOfParticipants(session.getConnectedParticipants());
 		if (connected < max) {

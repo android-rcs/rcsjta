@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.chat.IChatListener;
 import com.gsma.services.rcs.chat.IChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
@@ -15,9 +15,9 @@ interface IChatService {
 
 	boolean isServiceRegistered();
     
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	ChatServiceConfiguration getConfiguration();
     

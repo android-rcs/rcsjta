@@ -25,7 +25,7 @@ package com.orangelabs.rcs.core.ims.service.richcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.ish.ImageSharing;
@@ -279,7 +279,7 @@ public class RichcallService extends ImsService {
         ContactId contact = null;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
@@ -418,7 +418,7 @@ public class RichcallService extends ImsService {
         ContactId contact = null;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
@@ -530,7 +530,7 @@ public class RichcallService extends ImsService {
 				sendErrorResponse(invite, 606);
 				return;
 			}
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}

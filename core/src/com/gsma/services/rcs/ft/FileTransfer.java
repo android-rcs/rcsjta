@@ -23,7 +23,7 @@ package com.gsma.services.rcs.ft;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -248,13 +248,13 @@ public class FileTransfer {
 	 * Returns the chat ID if this file transfer is a group file transfer
 	 *
 	 * @return Chat ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getChatId() throws JoynServiceException {
+	public String getChatId() throws RcsServiceException {
 		try {
 			return transferInf.getChatId();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
     	
@@ -262,13 +262,13 @@ public class FileTransfer {
 	 * Returns the file transfer ID of the file transfer
 	 * 
 	 * @return Transfer ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getTransferId() throws JoynServiceException {
+	public String getTransferId() throws RcsServiceException {
 		try {
 			return transferInf.getTransferId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -276,13 +276,13 @@ public class FileTransfer {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return transferInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -290,13 +290,13 @@ public class FileTransfer {
      * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-	public String getFileName() throws JoynServiceException {
+	public String getFileName() throws RcsServiceException {
 		try {
 			return transferInf.getFileName();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -304,13 +304,13 @@ public class FileTransfer {
      * Returns the size of the file to be transferred
      *
      * @return Size in bytes
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-	public long getFileSize() throws JoynServiceException {
+	public long getFileSize() throws RcsServiceException {
 		try {
 			return transferInf.getFileSize();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 
@@ -318,13 +318,13 @@ public class FileTransfer {
      * Returns the MIME type of the file to be transferred
      * 
      * @return Type
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public String getFileType() throws JoynServiceException {
+    public String getFileType() throws RcsServiceException {
 		try {
 			return transferInf.getFileType();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
     }
     
@@ -332,13 +332,13 @@ public class FileTransfer {
 	 * Returns the Uri of the file icon
 	 * 
 	 * @return the Uri of the file icon or thumbnail
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public Uri getFileIcon() throws JoynServiceException {
+	public Uri getFileIcon() throws RcsServiceException {
 		try {
 			return transferInf.getFileIcon();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -346,13 +346,13 @@ public class FileTransfer {
 	 * Returns the Uri of the file
 	 *
 	 * @return Uri of file
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public Uri getFile() throws JoynServiceException {
+	public Uri getFile() throws RcsServiceException {
 		try {
 			return transferInf.getFile();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -361,13 +361,13 @@ public class FileTransfer {
 	 * 
 	 * @return State
 	 * @see FileTransfer.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return transferInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
@@ -376,93 +376,93 @@ public class FileTransfer {
 	 *
 	 * @return ReasonCode
 	 * @see GeolocSharing.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return transferInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Returns the direction of the transfer (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return transferInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Accepts file transfer invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation() throws JoynServiceException {
+	public void acceptInvitation() throws RcsServiceException {
 		try {
 			transferInf.acceptInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects file transfer invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			transferInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Aborts the file transfer
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortTransfer() throws JoynServiceException {
+	public void abortTransfer() throws RcsServiceException {
 		try {
 			transferInf.abortTransfer();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Pauses the file transfer
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void pauseTransfer() throws JoynServiceException {
+	public void pauseTransfer() throws RcsServiceException {
 		try {
 			transferInf.pauseTransfer();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Resumes the file transfer
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void resumeTransfer() throws JoynServiceException {
+	public void resumeTransfer() throws RcsServiceException {
 		try {
 			transferInf.resumeTransfer();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

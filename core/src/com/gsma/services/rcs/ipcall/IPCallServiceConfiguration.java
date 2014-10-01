@@ -91,7 +91,7 @@ public class IPCallServiceConfiguration implements Parcelable {
 
     /**
 	 * Is voice call breakout activated. It returns True if the service can reach
-	 * any user, else returns False if only joyn users supporting the IP call
+	 * any user, else returns False if only rcs users supporting the IP call
 	 * capability may be called.
 	 * 
 	 * @return Boolean 

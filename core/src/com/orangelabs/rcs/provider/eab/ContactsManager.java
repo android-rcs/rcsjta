@@ -51,7 +51,7 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.StatusUpdates;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactsProvider;
@@ -793,7 +793,7 @@ public final class ContactsManager {
 			while (c.moveToNext()) {
 				try {
 					rcsNumbers.add(ContactUtils.createContactId(c.getString(c.getColumnIndex(RichAddressBookData.KEY_CONTACT))));
-				} catch (JoynContactFormatException e1) {
+				} catch (RcsContactFormatException e1) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse number "+c.getString(c.getColumnIndex(RichAddressBookData.KEY_CONTACT)));
 					}
@@ -825,7 +825,7 @@ public final class ContactsManager {
 			while (cur.moveToNext()) {
 				try {
 					rcsNumbers.add(ContactUtils.createContactId(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CONTACT))));
-				} catch (JoynContactFormatException e1) {
+				} catch (RcsContactFormatException e1) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse number " + cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CONTACT)));
 					}
@@ -854,7 +854,7 @@ public final class ContactsManager {
 			while (cur.moveToNext()) {
 				try {
 					numbers.add(ContactUtils.createContactId(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CONTACT))));
-				} catch (JoynContactFormatException e1) {
+				} catch (RcsContactFormatException e1) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse contact " + cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_CONTACT)));
 					}
@@ -2208,7 +2208,7 @@ public final class ContactsManager {
 						String contact = cursor.getString(columnIndex);
 						try {
 							contactInfo.setContact(ContactUtils.createContactId(contact));
-						} catch (JoynContactFormatException e) {
+						} catch (RcsContactFormatException e) {
 							if (logger.isActivated()) {
 								logger.warn("Cannot parse contact " + contact);
 							}
@@ -2403,7 +2403,7 @@ public final class ContactsManager {
 						ctx.getContentResolver().delete(AggregationData.CONTENT_URI, AggregationData.KEY_RCS_RAW_CONTACT_ID + "=?",
 								new String[] { Long.toString(rawContactId) });
 					}
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse contact "+phoneNumber);
 					}
@@ -2451,7 +2451,7 @@ public final class ContactsManager {
 						String[] selectionArg = { phoneNumber };
 						ctx.getContentResolver().delete(RichAddressBookData.CONTENT_URI, SELECT_RABP_CONTACT, selectionArg);
 					}
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse contact "+phoneNumber);
 					}

@@ -24,7 +24,7 @@ import android.content.Context;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -153,7 +153,7 @@ public class CallManager {
 					mContact = ContactUtils.createContactId(incomingNumber);
 					// Phone is ringing: this state is only used for incoming call
 					callState = CallManager.RINGING;
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 					if (logger.isActivated()) {
 						logger.warn("Cannot parse ringning contact");
 					}
@@ -230,7 +230,7 @@ public class CallManager {
 	public static void setRemoteParty(String number) {
 		try {
 			CallManager.mContact = ContactUtils.createContactId(number);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("Cannot parse remote party "+number);
 			}

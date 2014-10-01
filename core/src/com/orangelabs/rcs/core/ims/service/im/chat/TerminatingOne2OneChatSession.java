@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -126,7 +126,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
                         getImdnManager().sendMessageDeliveryStatusImmediately(remote,
                                 msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
                                 SipUtils.getRemoteInstanceID(getDialogPath().getInvite()));
-            		} catch (JoynContactFormatException e) {
+                    } catch (RcsContactFormatException e) {
             			if (logger.isActivated()) {
             				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
             			}

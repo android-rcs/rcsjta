@@ -18,7 +18,7 @@
 package com.gsma.services.rcs.contacts;
 
 /**
- * Contacts provider for joyn info integrated in the native address book
+ * Contacts provider for rcs info integrated in the native address book
  * 
  * @author Jean-Marc AUFFRET
  */

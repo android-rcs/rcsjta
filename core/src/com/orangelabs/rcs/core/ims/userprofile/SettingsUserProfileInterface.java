@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.userprofile;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
@@ -62,7 +62,7 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
 			String imConfUri = RcsSettings.getInstance().getImConferenceUri();
 
 			return new UserProfile(contact, homeDomain, privateID, password, realm, xdmServer, xdmLogin, xdmPassword, imConfUri);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("cannot parse UserProfileImsUserName " +RcsSettings.getInstance().getUserProfileImsUserName());
 			}

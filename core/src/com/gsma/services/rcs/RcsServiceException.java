@@ -18,17 +18,19 @@
 package com.gsma.services.rcs;
 
 /**
- * Joyn service not registered exception
+ * Rcs service exception
  *  
  * @author Jean-Marc AUFFRET
  */
-public class JoynServiceNotRegisteredException extends JoynServiceException {
+public class RcsServiceException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;
 	
 	/**
 	 * Constructor
+	 *
+	 * @param error Error message
 	 */
-	public JoynServiceNotRegisteredException() {
-		super("joyn service not registered");
+	public RcsServiceException(String error) {
+		super(error);
 	}
 }

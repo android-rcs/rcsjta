@@ -698,7 +698,7 @@ public class ProvisioningParser {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
                             if (typenode.getNodeValue().equalsIgnoreCase("joyn")) {
-                                parseJoyn(childnode);
+                                parseRcs(childnode);
                             }
                         }
                     }
@@ -708,11 +708,11 @@ public class ProvisioningParser {
     }
     
     /**
-     * Parse joyn
+     * Parse rcs
      * 
      * @param node Node
      */
-    private void parseJoyn(Node node) {
+    private void parseRcs(Node node) {
         Node typenode = null;
         if (node == null) {
             return;
@@ -735,7 +735,7 @@ public class ProvisioningParser {
     }
     
     /**
-     * Parse joyn
+     * Parse rcs
      * 
      * @param node Node
      */
@@ -813,7 +813,7 @@ public class ProvisioningParser {
 						// set default IM messaging method if first provisioning
 						if (first) {
 							if (_imCapAlwaysOn) {
-								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_JOYN);
+								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_RCS);
 							} else {
 								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC);
 							}

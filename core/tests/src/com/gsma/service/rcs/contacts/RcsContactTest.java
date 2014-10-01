@@ -29,9 +29,9 @@ import com.gsma.service.rcs.capabilities.CapabilitiesTest;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.RcsContact;
 
-public class JoynContactTest extends AndroidTestCase {
+public class RcsContactTest extends AndroidTestCase {
 
 	private boolean imageSharing;
 	private boolean videoSharing;
@@ -78,78 +78,78 @@ public class JoynContactTest extends AndroidTestCase {
 		super.tearDown();
 	}
 
-	public void testJoynContactContactNull() {
-		JoynContact joynContact = new JoynContact(null, registered, capabilities, displayName);
+	public void testRcsContactContactNull() {
+		RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName);
 		Parcel parcel = Parcel.obtain();
-		joynContact.writeToParcel(parcel, 0);
+		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
 		parcel.setDataPosition(0);
 		// finish round trip
-		JoynContact createFromParcel = JoynContact.CREATOR.createFromParcel(parcel);
-		assertTrue(joynContactIsEqual(createFromParcel, joynContact));
+		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
 	}
 	
-	public void testJoynContactCapabilitiesNull() {
-		JoynContact joynContact = new JoynContact(contactId, registered, null, displayName);
+	public void testRcsContactCapabilitiesNull() {
+		RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName);
 		Parcel parcel = Parcel.obtain();
-		joynContact.writeToParcel(parcel, 0);
+		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
 		parcel.setDataPosition(0);
 		// finish round trip
-		JoynContact createFromParcel = JoynContact.CREATOR.createFromParcel(parcel);
-		assertTrue(joynContactIsEqual(createFromParcel, joynContact));
+		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
 	}
 	
-	public void testJoynContactDisplayNameNull() {
-		JoynContact joynContact = new JoynContact(contactId, registered, capabilities, null);
+	public void testRcsContactDisplayNameNull() {
+		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null);
 		Parcel parcel = Parcel.obtain();
-		joynContact.writeToParcel(parcel, 0);
+		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
 		parcel.setDataPosition(0);
 		// finish round trip
-		JoynContact createFromParcel = JoynContact.CREATOR.createFromParcel(parcel);
-		assertTrue(joynContactIsEqual(createFromParcel, joynContact));
+		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
 	}
 	
-	public void testJoynContact() {
-		JoynContact joynContact = new JoynContact(contactId, registered, capabilities, displayName);
+	public void testRcsContact() {
+		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName);
 		Parcel parcel = Parcel.obtain();
-		joynContact.writeToParcel(parcel, 0);
+		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
 		parcel.setDataPosition(0);
 		// finish round trip
-		JoynContact createFromParcel = JoynContact.CREATOR.createFromParcel(parcel);
-		assertTrue(joynContactIsEqual(createFromParcel, joynContact));
+		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
 	}
 
-	private boolean joynContactIsEqual(JoynContact joyn1, JoynContact joyn2) {
-		if (joyn1.isRegistered() != joyn2.isRegistered()) {
+	private boolean rcsContactIsEqual(RcsContact rcs1, RcsContact rcs2) {
+		if (rcs1.isRegistered() != rcs2.isRegistered()) {
 			return false;
 		}
-		if (joyn1.getContactId() != null) {
-			if (!joyn1.getContactId().equals(joyn2.getContactId())) {
+		if (rcs1.getContactId() != null) {
+			if (!rcs1.getContactId().equals(rcs2.getContactId())) {
 				return false;
 			}
 		} else {
-			if (joyn2.getContactId() != null) {
+			if (rcs2.getContactId() != null) {
 				return false;
 			}
 		}
-		if (joyn1.getCapabilities() != null) {
-			if (!CapabilitiesTest.capabilitiesIsEqual(joyn1.getCapabilities(), joyn2.getCapabilities())) {
+		if (rcs1.getCapabilities() != null) {
+			if (!CapabilitiesTest.capabilitiesIsEqual(rcs1.getCapabilities(), rcs2.getCapabilities())) {
 				return false;
 			}
 		} else {
-			if (joyn2.getCapabilities() != null) {
+			if (rcs2.getCapabilities() != null) {
 				return false;
 			}
 		}
-		if (joyn1.getDisplayName() != null) {
-			if (!joyn1.getDisplayName().equals(joyn2.getDisplayName())) {
+		if (rcs1.getDisplayName() != null) {
+			if (!rcs1.getDisplayName().equals(rcs2.getDisplayName())) {
 				return false;
 			}
 		} else {
-			if (joyn2.getDisplayName() != null) {
+			if (rcs2.getDisplayName() != null) {
 				return false;
 			}
 		}

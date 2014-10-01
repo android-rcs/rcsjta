@@ -27,7 +27,7 @@ import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipManager;
@@ -620,7 +620,7 @@ public abstract class ImsServiceSession extends Thread {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
 			getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Cannot parse contact " + getDialogPath().getRemoteParty());
 			}

@@ -24,7 +24,7 @@ package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import android.content.Intent;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -57,9 +57,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-     * @throws JoynContactFormatException 
+	 * @throws RcsContactFormatException
 	 */
-	public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws JoynContactFormatException {
+	public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws RcsContactFormatException {
 		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite.getFeatureTags().get(0));
 
 		mSessionInvite = sessionInvite;

@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
-import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -62,18 +62,18 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	}
     
     /**
-     * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
+     * Returns the rcs contact infos from its contact ID (i.e. MSISDN)
      * 
      * @param contact Contact ID
      * @return Contact
      * @throws ServerApiException
      */
-	public JoynContact getJoynContact(ContactId contact) throws ServerApiException {
+	public RcsContact getRcsContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get joyn contact " + contact);
+			logger.info("Get rcs contact " + contact);
 		}
 		// Read capabilities in the local database
-		return getJoynContact(ContactsManager.getInstance().getContactInfo(contact));
+		return getRcsContact(ContactsManager.getInstance().getContactInfo(contact));
 	}
 	
 	/**
@@ -95,20 +95,20 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	}
 	
 	/**
-	 * Convert the ContactInfo instance into a JoynContact instance
+	 * Convert the ContactInfo instance into a RcsContact instance
 	 * 
 	 * @param contactInfo
 	 *            the ContactInfo instance
-	 * @return JoynContact instance
+	 * @return RcsContact instance
 	 */
-	private JoynContact getJoynContact(ContactInfo contactInfo) {
+	private RcsContact getRcsContact(ContactInfo contactInfo) {
 		// Discard if argument is null
 		if (contactInfo == null) {
 			return null;
 		}
 		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
 		boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
-		return new JoynContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName());
+		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName());
 	}
 	
 	
@@ -128,41 +128,41 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	}
 	
 	/**
-	 * Get a filtered list of JoynContact
+	 * Get a filtered list of RcsContact
 	 * 
 	 * @param filterContactInfo
 	 *            the filter (or null if not applicable)
-	 * @return the filtered list of JoynContact
+	 * @return the filtered list of RcsContact
 	 */
-	private List<JoynContact> getJoynContacts(FilterContactInfo filterContactInfo) {
-		List<JoynContact> joynContacts = new ArrayList<JoynContact>();
+	private List<RcsContact> getRcsContacts(FilterContactInfo filterContactInfo) {
+		List<RcsContact> rcsContacts = new ArrayList<RcsContact>();
 		// Read capabilities in the local database
 		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
 		for (ContactId contact : contacts) {
 			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
 			if (contactInfo != null) {
 				if (filterContactInfo == null || filterContactInfo.inScope(contactInfo)) {
-					JoynContact contact2add = getJoynContact(contactInfo);
+					RcsContact contact2add = getRcsContact(contactInfo);
 					if (contact2add != null) {
-						joynContacts.add(getJoynContact(contactInfo));
+						rcsContacts.add(getRcsContact(contactInfo));
 					}
 				}
 			}
 		}
-		return joynContacts;
+		return rcsContacts;
 	}
 	
 	/**
-     * Returns the list of joyn contacts
+     * Returns the list of rcs contacts
      * 
      * @return List of contacts
      * @throws ServerApiException
      */
-    public List<JoynContact> getJoynContacts() throws ServerApiException {
+    public List<RcsContact> getRcsContacts() throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get joyn contacts");
+			logger.info("Get rcs contacts");
 		}
-		return getJoynContacts(null);
+		return getRcsContacts(null);
 	}
 
     /**
@@ -171,11 +171,11 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * @return List of contacts
      * @throws ServerApiException
      */
-	public List<JoynContact> getJoynContactsOnline() throws ServerApiException {
+	public List<RcsContact> getRcsContactsOnline() throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get registered joyn contacts");
+			logger.info("Get registered rcs contacts");
 		}
-		return getJoynContacts(new FilterContactInfo() {
+		return getRcsContacts(new FilterContactInfo() {
 
 			@Override
 			public boolean inScope(ContactInfo contactInfo) {
@@ -191,12 +191,12 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * @return List of contacts
      * @throws ServerApiException
      */
-	public List<JoynContact> getJoynContactsSupporting(final String serviceId) throws ServerApiException {
+	public List<RcsContact> getRcsContactsSupporting(final String serviceId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get joyn contacts supporting " + serviceId);
+			logger.info("Get rcs contacts supporting " + serviceId);
 		}
 
-		return getJoynContacts(new FilterContactInfo() {
+		return getRcsContacts(new FilterContactInfo() {
 
 			@Override
 			public boolean inScope(ContactInfo contactInfo) {
@@ -220,10 +220,10 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see JoynService.Build.VERSION_CODES
+	 * @see RcsService.Build.VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
-		return JoynService.Build.API_VERSION;
+		return RcsService.Build.API_VERSION;
 	}
 }

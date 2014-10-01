@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat;
@@ -35,7 +35,7 @@ import org.xml.sax.InputSource;
 
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -191,9 +191,9 @@ public class ChatUtils {
 	 * 
 	 * @param request SIP request
 	 * @return ContactId
-	 * @throws JoynContactFormatException 
+	 * @throws RcsContactFormatException
 	 */
-	public static ContactId getReferredIdentityAsContactId(SipRequest request) throws JoynContactFormatException {
+	public static ContactId getReferredIdentityAsContactId(SipRequest request) throws RcsContactFormatException {
 		try {
 			// Use the Referred-By header
 			return ContactUtils.createContactId(SipUtils.getReferredByHeader(request));
@@ -759,7 +759,7 @@ public class ChatUtils {
 		ContactId remote = null;
 		try {
 			remote = ChatUtils.getReferredIdentityAsContactId(invite);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("getFirstMessageFromCpim: cannot parse contact");
 			}
@@ -800,7 +800,7 @@ public class ChatUtils {
 		ContactId remote = null;
 		try {
 			remote = ChatUtils.getReferredIdentityAsContactId(invite);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("getFirstMessageFromSubject: cannot parse contact");
 			}
@@ -859,7 +859,7 @@ public class ChatUtils {
 					ContactId remote = getReferredIdentityAsContactId(request);
 					// Include remote contact if format if correct
 					ParticipantInfoUtils.addParticipant(participants, remote);
-				} catch (JoynContactFormatException e) {
+				} catch (RcsContactFormatException e) {
 				}
 			}
 		}

@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoPlayerListener;
@@ -272,7 +272,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 				ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 				// Request capabilities to the remote
 		        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (logger.isActivated()) {
 					logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
 				}

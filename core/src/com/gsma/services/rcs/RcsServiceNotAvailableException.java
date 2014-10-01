@@ -18,28 +18,17 @@
 package com.gsma.services.rcs;
 
 /**
- * Joyn contact format exception. This exception is thrown when the
- * contact format is not supported or not well formatted. The supported
- * formats are:<br>
- * - Phone number in national or international format (e.g. +33xxx).<br>
- * - SIP address (eg. "John" <sip:+33xxx@domain.com>).<br>
- * - SIP-URI (e.g. sip:+33xxx@domain.com).<br>
- * - Tel-URI (eg. tel:+33xxx).
+ * Rcs service not available exception
  *  
  * @author Jean-Marc AUFFRET
  */
-public class JoynContactFormatException extends RuntimeException {
+public class RcsServiceNotAvailableException extends RcsServiceException {
 	static final long serialVersionUID = 1L;
 	
 	/**
 	 * Constructor
 	 */
-	public JoynContactFormatException() {
-		super("joyn contact format not supported");
+	public RcsServiceNotAvailableException() {
+		super("rcs service not available");
 	}
-	
-	public JoynContactFormatException(String message) {
-		super(message);
-	}
-	
 }
