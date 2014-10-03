@@ -23,7 +23,6 @@ package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode;
 
 /**
  * Interface for the message table

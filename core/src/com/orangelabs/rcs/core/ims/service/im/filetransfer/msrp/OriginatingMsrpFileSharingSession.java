@@ -23,7 +23,7 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Vector;
+import java.util.Collection;
 
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
@@ -275,8 +275,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     if (logger.isActivated()) {
                         logger.error("Session initiation has failed due to that the file is not accessible!", e);
                     }
-                    Vector<ImsSessionListener> listeners = getListeners();
-                    for(ImsSessionListener listener : listeners) {
+                    Collection<ImsSessionListener> listeners = getListeners();
+                    for (ImsSessionListener listener : listeners) {
                         ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend();
                     }
                 } catch(Exception e) {

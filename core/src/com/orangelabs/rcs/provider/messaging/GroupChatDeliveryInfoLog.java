@@ -29,7 +29,6 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.DeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.provider.messaging.DeliveryInfoStatusAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

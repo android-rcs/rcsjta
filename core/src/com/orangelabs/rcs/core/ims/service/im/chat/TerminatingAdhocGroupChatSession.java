@@ -24,6 +24,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -167,7 +168,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	    		logger.info("Initiate a new ad-hoc group chat session as terminating");
 	    	}
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -363,9 +364,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                 	sendEmptyDataChunk();
                 }
 
-                for(ImsSessionListener listener : listeners) {
+                for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted();
-            }
+                }
 
     	    	// Check if some participants are missing
     	    	if (missingParticipants != null && missingParticipants.size() > 0) {

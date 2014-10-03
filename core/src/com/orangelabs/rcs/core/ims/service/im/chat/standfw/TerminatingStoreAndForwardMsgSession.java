@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -131,7 +132,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 				}
 			}
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -326,7 +327,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	            	sendEmptyDataChunk();
                 }
 
-                for(ImsSessionListener listener : listeners) {
+                for (ImsSessionListener listener : listeners) {
                         listener.handleSessionStarted();
                 }
     	    	

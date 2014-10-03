@@ -24,11 +24,11 @@ package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -972,7 +972,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param imdn Imdn document
 	 */
 	public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-		Vector<ImsSessionListener> listeners = getListeners();
+		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
 			((ChatSessionListener)listener).handleMessageDeliveryStatus(contact, imdn);
 		}
@@ -1001,7 +1001,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                             imdn);
                 }
             } else {
-                Vector<ImsSessionListener> listeners = getListeners();
+                Collection<ImsSessionListener> listeners = getListeners();
                 for (ImsSessionListener listener : listeners) {
                     ((ChatSessionListener)listener).handleMessageDeliveryStatus(contact, imdn);
                 }

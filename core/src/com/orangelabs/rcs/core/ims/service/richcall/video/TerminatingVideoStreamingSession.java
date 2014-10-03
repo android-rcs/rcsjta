@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -91,7 +92,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
             Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
-            Vector<ImsSessionListener> listeners = getListeners();
+            Collection<ImsSessionListener> listeners = getListeners();
             for (ImsSessionListener listener : listeners) {
                 listener.handleSessionInvited();
             }

@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import android.os.RemoteException;
@@ -81,7 +82,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			for (ImsSessionListener listener : listeners) {
 				listener.handleSessionInvited();
 			}

@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.sip.messaging;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import android.content.Intent;
@@ -85,7 +86,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-            Vector<ImsSessionListener> listeners = getListeners();
+            Collection<ImsSessionListener> listeners = getListeners();
             for (ImsSessionListener listener : listeners) {
                 listener.handleSessionInvited();
             }

@@ -22,10 +22,10 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import javax2.sip.header.SubjectHeader;
 
@@ -147,45 +147,38 @@ public abstract class OneOneChatSession extends ChatSession {
 	 * @param id Message-ID
 	 * @param txt Text message
 	 */
-	public void sendTextMessage(String chunkMsgId, String txt) {
+	public void sendTextMessage(String msgId, String txt) {
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
-
 		String networkContent;
-		InstantMessage msg;
 		if (useImdn) {
-			// Send message in CPIM + IMDN
-			String imdnMsgId = IdGenerator.generateMessageID();
-			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, imdnMsgId,
+			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
 					StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
-			msg = new InstantMessage(imdnMsgId, getRemoteContact(), txt, useImdn, null);
 
 		} else {
-			// Send message in CPIM
 			networkContent = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt),
 					InstantMessage.MIME_TYPE);
-			msg = new InstantMessage(chunkMsgId, getRemoteContact(), txt, useImdn, null);
 		}
+		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
 
-		Vector<ImsSessionListener> listeners = getListeners();
+		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
 			((ChatSessionListener)listener).handleMessageSending(msg);
 		}
 
-		// Send data
-		boolean result = sendDataChunks(chunkMsgId, networkContent, CpimMessage.MIME_TYPE,
+		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
 				MsrpSession.TypeMsrpChunk.TextMessage);
 
 		/* TODO:This will be redone with CR037 */
 		if (result) {
 			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(msg.getMessageId());
+				((ChatSessionListener)listener).handleMessageSent(msgId);
 			}
 
 		} else {
 			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msg.getMessageId());
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
 			}
 		}
 	}
@@ -194,55 +187,44 @@ public abstract class OneOneChatSession extends ChatSession {
 	/**
 	 * Send a geoloc message
 	 *
-	 * @param chunkMsgId Message ID
+	 * @param msgId Message ID
 	 * @param geoloc Geoloc info
 	 */
-	public void sendGeolocMessage(String chunkMsgId, GeolocPush geoloc) {
+	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
 		String geoDoc = ChatUtils.buildGeolocDocument(geoloc,
-				ImsModule.IMS_USER_PROFILE.getPublicUri(), chunkMsgId);
-
+				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
 		String networkContent;
-		GeolocMessage geolocMsg;
-		// Use IMDN MessageID as reference if existing
 		if (useImdn) {
-			// Send message in CPIM + IMDN
-			String imdnMsgId = IdGenerator.generateMessageID();
-			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, imdnMsgId, geoDoc,
+			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, geoDoc,
 					GeolocInfoDocument.MIME_TYPE);
-			geolocMsg = new GeolocMessage(imdnMsgId, getRemoteContact(), geoloc, useImdn,
-					null);
 
 		} else {
-			// Send message in CPIM
 			networkContent = ChatUtils.buildCpimMessage(from, to, geoDoc,
 					GeolocInfoDocument.MIME_TYPE);
-			geolocMsg = new GeolocMessage(chunkMsgId, getRemoteContact(), geoloc, useImdn,
-					null);
 		}
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
 
-		Vector<ImsSessionListener> listeners = getListeners();
+		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
 			((ChatSessionListener)listener).handleMessageSending(geolocMsg);
 		}
 
-		// Send data
-		boolean result = sendDataChunks(chunkMsgId, networkContent, CpimMessage.MIME_TYPE,
+		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
 				MsrpSession.TypeMsrpChunk.GeoLocation);
 
 		/* TODO:This will be redone with CR037 */
 		if (result) {
 			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(geolocMsg.getMessageId());
+				((ChatSessionListener)listener).handleMessageSent(msgId);
 			}
 
 		} else {
 			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(geolocMsg.getMessageId());
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
 			}
-
 		}
 	}
 	

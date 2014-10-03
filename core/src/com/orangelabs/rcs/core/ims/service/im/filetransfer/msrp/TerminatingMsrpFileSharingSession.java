@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -120,7 +121,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 				logger.info("Initiate a new file transfer session as terminating");
 			}
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -354,7 +355,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 // The session is established
     	        getDialogPath().sessionEstablished();
 
-                for(ImsSessionListener listener : listeners) {
+                for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted();
                 }
 

@@ -37,7 +37,7 @@ import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
-import java.util.Vector;
+import java.util.Collection;
 
 /**
  * Terminating SIP RTP session
@@ -78,7 +78,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-            Vector<ImsSessionListener> listeners = getListeners();
+            Collection<ImsSessionListener> listeners = getListeners();
             for (ImsSessionListener listener : listeners) {
                 listener.handleSessionInvited();
             }

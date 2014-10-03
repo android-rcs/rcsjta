@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.richcall.image;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -107,7 +108,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         		return;
         	}
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			for (ImsSessionListener listener : listeners) {
 				listener.handleSessionInvited();
 			}
@@ -329,7 +330,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 // The session is established
                 getDialogPath().sessionEstablished();
 
-                for(ImsSessionListener listener : listeners) {
+                for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted();
             }
 

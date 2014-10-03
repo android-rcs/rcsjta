@@ -26,7 +26,6 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 
 import android.net.Uri;
 

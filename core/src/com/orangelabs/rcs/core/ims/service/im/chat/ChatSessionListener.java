@@ -121,7 +121,7 @@ public interface ChatSessionListener extends ImsSessionListener {
     public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
 
     /**
-     * Chat will be auto-accepted and the session is in the process of being started
+     * Chat is auto-accepted and the session is in the process of being started
      */
     public void handleSessionAutoAccepted();
 }

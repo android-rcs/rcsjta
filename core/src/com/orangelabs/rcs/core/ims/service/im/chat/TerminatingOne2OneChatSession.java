@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -133,7 +134,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
                 }
             }
 
-			Vector<ImsSessionListener> listeners = getListeners();
+			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -330,7 +331,7 @@ public class TerminatingOne2OneChatSession extends OneOneChatSession implements 
 	            	sendEmptyDataChunk();
                 }
 
-                for(ImsSessionListener listener : listeners) {
+                for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted();
             }
 
