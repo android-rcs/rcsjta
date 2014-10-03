@@ -22,7 +22,6 @@
 package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.provider.messaging.DeliveryInfoStatusAndReasonCode;
 
 import android.net.Uri;
 

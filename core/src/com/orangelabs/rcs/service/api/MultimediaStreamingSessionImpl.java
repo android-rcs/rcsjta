@@ -32,7 +32,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
-import com.orangelabs.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
+import com.orangelabs.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
 import com.orangelabs.rcs.service.broadcaster.IMultimediaStreamingSessionEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -79,11 +79,10 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 		String sessionId = getSessionId();
 		synchronized (lock) {
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
-					getRemoteContact(), sessionId, MultimediaSession.State.REJECTED,
-					reasonCode);
-
 			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
+
+			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+					getRemoteContact(), sessionId, MultimediaSession.State.REJECTED, reasonCode);
 		}
 	}
 
@@ -121,26 +120,27 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 */
 	public int getState() {
 		SipDialogPath dialogPath = session.getDialogPath();
-		if (dialogPath != null) {
-			if (dialogPath.isSessionCancelled()) {
-				return MultimediaSession.State.REJECTED;
+		if (dialogPath != null && dialogPath.isSessionEstablished()) {
+			return MultimediaSession.State.STARTED;
 
-			} else if (dialogPath.isSessionEstablished()) {
-				return MultimediaSession.State.STARTED;
-
-			} else if (dialogPath.isSessionTerminated()) {
-				return MultimediaSession.State.ABORTED;
-
-			} else {
-				if (session instanceof OriginatingSipRtpSession) {
-					return MultimediaSession.State.INITIATED;
-				}
-
-				return MultimediaSession.State.INVITED;
+		} else if (session.isInitiatedByRemote()) {
+			if (session.isSessionAccepted()) {
+				return MultimediaSession.State.ACCEPTING;
 			}
+
+			return MultimediaSession.State.INVITED;
 		}
 
-		return MultimediaSession.State.UNKNOWN;
+		return MultimediaSession.State.INITIATED;
+	}
+
+	/**
+	 * Returns the reason code of the state of the multimedia streaming session
+	 *
+	 * @return ReasonCode
+	 */
+	public int getReasonCode() {
+		return ReasonCode.UNSPECIFIED;
 	}
 
 	/**
@@ -276,11 +276,11 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 		String sessionId = getSessionId();
 		synchronized (lock) {
+			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
+
 			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
-
-			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
 		}
 	}
 
@@ -291,13 +291,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
+		String sessionId = getSessionId();
 		synchronized (lock) {
-			String sessionId = getSessionId();
+			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
+
 			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
-
-			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
 		}
 	}
     
@@ -310,8 +310,10 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		if (logger.isActivated()) {
 			logger.info("Session error " + error.getErrorCode());
 		}
-    	synchronized(lock) {
-			String sessionId = getSessionId();
+		String sessionId = getSessionId();
+		synchronized (lock) {
+			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
+
 			switch (error.getErrorCode()) {
 				case SipSessionError.SESSION_INITIATION_DECLINED:
 					mMultimediaStreamingSessionEventBroadcaster
@@ -331,10 +333,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 									sessionId, MultimediaSession.State.FAILED,
 									ReasonCode.FAILED_SESSION);
 			}
-
-	        MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
-	    }
-    }
+		}
+	}
     
     /**
      * Receive data
@@ -350,7 +350,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
 	@Override
-	public void handleSessionAccepting() {
+	public void handleSessionAccepted() {
 		if (logger.isActivated()) {
 			logger.info("Accepting session");
 		}
@@ -374,5 +374,14 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	@Override
 	public void handleSessionRejectedByRemote() {
 		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	}
+
+	@Override
+	public void handleSessionInvited() {
+		if (logger.isActivated()) {
+			logger.info("Invited to multimedia streaming session");
+		}
+		mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingInvitation(
+				getSessionId(), ((TerminatingSipRtpSession)session).getSessionInvite());
 	}
 }

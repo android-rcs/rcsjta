@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 
@@ -39,14 +38,12 @@ import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.IImageSharingService;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
-import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
-import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -54,7 +51,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.ImageSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
-import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -90,15 +86,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Image sharing service API is loaded");
 		}
-	}
-
-	/*Broadcast intent related to the received invitation*/
-	private void broadcastImageSharingInvitation(String sessionId) {
-		Intent newInvitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sessionId);
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
 	/**
@@ -204,17 +191,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		}
 		ContactId contact = session.getRemoteContact();
 
-		RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
-				Direction.INCOMING,
-				session.getContent(),
-				ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		// Update displayName of remote contact
 		 ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
 		// Add session in the list
 		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
 
-		broadcastImageSharingInvitation(session.getSessionID());
     }
 
     /**
@@ -265,15 +247,14 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			// Add session listener
 			ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
 
+			addImageSharingSession(sessionApi);
+
 			// Start the session
 	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
 	    	}.start();	
-			
-			// Add session in the list
-			addImageSharingSession(sessionApi);
 			return sessionApi;
 		} catch(Exception e) {
 			// TODO:Handle Security exception in CR026
@@ -337,7 +318,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		String sessionId = SessionIdGenerator.getNewId();
 		RichCallHistory.getInstance().addImageSharing(contact, sessionId,
 				Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
-		broadcastImageSharingInvitation(sessionId);
+		mImageSharingEventBroadcaster.broadcastImageSharingInvitation(sessionId);
 	}
 
     /**

@@ -17,6 +17,8 @@ package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 
+import android.content.Intent;
+
 /**
  * Interface to perform broadcast events on MultimediaStreamingSessionListeners
  */
@@ -26,4 +28,6 @@ public interface IMultimediaStreamingSessionEventBroadcaster {
 
 	public void broadcastMultimediaStreamingStateChanged(ContactId contact, String sessionId,
 			int state, int reasonCode);
+
+	public void broadcastMultimediaStreamingInvitation(String sessionId, Intent rtpSessionInvite);
 }

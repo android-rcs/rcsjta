@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
@@ -23,28 +27,14 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
  * @author jexa7410
  */
 public interface HttpTransferState {
-	/**
-	 * Session state is unknown (i.e. session dialog path does not exist)
-	 */
-	public final static int UNKNOWN = -1;
 	
 	/**
-	 * Session has been cancelled (i.e. SIP CANCEL exchanged)
+	 * Session is pending (not yet accepted by a final response by the remote)
 	 */
-	public final static int CANCELLED = 0;
+	public final static int PENDING = 0;
 	
 	/**
 	 * Session has been established (i.e. 200 OK/ACK exchanged)
 	 */
 	public final static int ESTABLISHED = 1;
-	
-	/**
-	 * Session has been terminated (i.e. SIP BYE exchanged)
-	 */
-	public final static int TERMINATED = 2;
-	
-	/**
-	 * Session is pending (not yet accepted by a final response by the remote)
-	 */
-	public final static int PENDING = 3;
 }

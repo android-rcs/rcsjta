@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -42,10 +43,13 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -83,6 +87,28 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 		// Set contribution ID
 		String id = ChatUtils.getContributionId(invite);
 		setContributionID(id);
+
+		if (shouldBeAutoAccepted()) {
+			setSessionAccepted();
+		}
+	}
+
+	/**
+	 * Check is session should be auto accepted. This method should only be
+	 * called once per session
+	 *
+	 * @return true if one-to-one chat session should be auto accepted
+	 */
+	private boolean shouldBeAutoAccepted() {
+		/*
+		 * In case the invite contains a http file transfer info the chat session
+		 * should be auto-accepted so that the file transfer session can be started.
+		 */
+		if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+			return true;
+		}
+
+		return RcsSettings.getInstance().isChatAutoAccepted();
 	}
 	
 	/**
@@ -106,21 +132,28 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 				}
 			}
 
+			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
-			if (shouldBeAutoAccepted()) {
+			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
 					logger.debug("Auto accept store and forward chat invitation");
 				}
-			} else {
-            	if (logger.isActivated()) {
-                    logger.debug("Accept manually store and forward chat invitation");
-                }
 
-    	    	// Send a 180 Ringing response
-    			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+				for (ImsSessionListener listener : listeners) {
+					((ChatSessionListener)listener).handleSessionAutoAccepted();
+				}
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("Accept manually store and forward chat invitation");
+				}
+
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionInvited();
+				}
+
+				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 				int answer = waitInvitationAnswer();
-				Vector<ImsSessionListener> listeners;
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
 						if (logger.isActivated()) {
@@ -129,7 +162,6 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
 						}
@@ -145,7 +177,6 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
 						}
@@ -158,14 +189,17 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 
 						getImsService().removeSession(this);
 
-						listeners = getListeners();
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByRemote();
 						}
 						return;
 
 					case ImsServiceSession.INVITATION_ACCEPTED:
-						/*Note: Nothing to log here for one-to-one chats.*/
+						setSessionAccepted();
+
+						for (ImsSessionListener listener : listeners) {
+							listener.handleSessionAccepted();
+						}
 						break;
 
 					default:
@@ -293,10 +327,9 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	            	sendEmptyDataChunk();
                 }
 
-                // Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		getListeners().get(i).handleSessionStarted();
-    	        }
+                for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionStarted();
+                }
     	    	
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	

@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.service.richcall.image;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -91,7 +92,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 	    		logger.info("Initiate a new sharing session as terminating");
 	    	}
 
-	    	// Send a 180 Ringing response
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 	    	// Check if the MIME type is supported
@@ -107,9 +107,13 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 				handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
         		return;
         	}
-	    	
+
+			Collection<ImsSessionListener> listeners = getListeners();
+			for (ImsSessionListener listener : listeners) {
+				listener.handleSessionInvited();
+			}
+
 			int answer = waitInvitationAnswer();
-			Vector<ImsSessionListener> listeners;
 			switch (answer) {
 				case ImsServiceSession.INVITATION_REJECTED:
 					if (logger.isActivated()) {
@@ -118,7 +122,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByUser();
 					}
@@ -134,7 +137,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByTimeout();
 					}
@@ -147,14 +149,17 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
 					getImsService().removeSession(this);
 
-					listeners = getListeners();
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByRemote();
 					}
 					return;
 
 				case ImsServiceSession.INVITATION_ACCEPTED:
-					/*Note: Nothing to log here for image transfer sessions.*/
+					setSessionAccepted();
+
+					for (ImsSessionListener listener : listeners) {
+						listener.handleSessionAccepted();
+					}
 					break;
 
 				default:
@@ -297,11 +302,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     				logger.info("ACK request received");
     			}
 
-                // Notify listeners
-                for(int i=0; i < getListeners().size(); i++) {
-                    getListeners().get(i).handleSessionStarted();
-                }
-
     	        // Create the MSRP client session
                 if (localSetup.equals("active")) {
                 	// Active mode: client should connect
@@ -329,6 +329,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
                 // The session is established
                 getDialogPath().sessionEstablished();
+
+                for (ImsSessionListener listener : listeners) {
+                    listener.handleSessionStarted();
+            }
 
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	

@@ -28,7 +28,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -41,7 +40,6 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
-import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
@@ -53,7 +51,6 @@ import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -63,7 +60,6 @@ import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -110,8 +106,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DISPLAY;
-
 		}
+
 		throw new IllegalArgumentException(new StringBuilder(
 				"Received invalid imdn notification type:'").append(notificationType).append("'")
 				.toString());
@@ -227,17 +223,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					+ " size=" + session.getContent().getSize() + " displayName=" + session.getRemoteDisplayName());
 		}
 
-		// Update rich messaging history
-		String fileTransferId = session.getFileTransferId();
-		if (isGroup) {
-			MessagingLog.getInstance().addIncomingGroupFileTransfer(session.getContributionID(),
-					contact, fileTransferId, session.getContent(), session.getFileicon(),
-					FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
-		} else {
-			MessagingLog.getInstance().addFileTransfer(contact, fileTransferId,
-					Direction.INCOMING, session.getContent(), session.getFileicon(),
-					FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
-		}
 
 		// Update displayName of remote contact
 		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
@@ -252,8 +237,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					mOneToOneFileTransferBroadcaster);
 			FileTransferServiceImpl.addFileTransferSession(oneToOneFileTransfer);
 		}
-
-		broadcastFileTransferInvitation(fileTransferId);
     }
 
     /**
@@ -320,6 +303,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			mOneToOneFileTransferBroadcaster.broadcastTransferStateChanged(contact, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
+			addFileTransferSession(oneToOneFileTransfer);
+
 			// Start the session
 			new Thread() {
 				public void run() {
@@ -327,8 +312,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				}
 			}.start();
 
-			// Add session in the list
-			addFileTransferSession(oneToOneFileTransfer);
 			return oneToOneFileTransfer;
 
 			/* TODO: This is not correct implementation. It will be fixed properly in CR037 */
@@ -404,6 +387,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(chatId, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
+			FileTransferServiceImpl.addFileTransferSession(groupFileTransfer);
+
 			// Start the session
 			new Thread() {
 				public void run() {
@@ -411,9 +396,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					session.startSession();
 				}
 			}.start();
-
-			// Add session in the list
-			FileTransferServiceImpl.addFileTransferSession(groupFileTransfer);
 			return groupFileTransfer;
 
 		} catch (Exception e) {
@@ -613,17 +595,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId,state, reasonCode, contact);
 
-		mGroupFileTransferBroadcaster.broadcastSingleRecipientDeliveryStateChanged(chatId,
+		mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId,
 				contact, fileTransferId, state, reasonCode);
-	}
-
-	/*Broadcast intent related to the received invitation*/
-	private void broadcastFileTransferInvitation(String fileTransferId) {
-		Intent newInvitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
 	}
 
     /**
@@ -677,19 +650,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			GroupFileTransferImpl sessionApi = new GroupFileTransferImpl(session,
 					mGroupFileTransferBroadcaster);
 			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			mGroupFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
 		} else {
 			OneToOneFileTransferImpl sessionApi = new OneToOneFileTransferImpl(session,
 					mOneToOneFileTransferBroadcaster);
 			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			mOneToOneFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
 		}
-
-		// Broadcast intent related to the received invitation
-		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
-		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
-		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID,
-				session.getFileTransferId());
-		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
 	}
 
 	
@@ -710,19 +677,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			GroupFileTransferImpl sessionApi = new GroupFileTransferImpl(session,
 					mGroupFileTransferBroadcaster);
 			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			mGroupFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
 		} else {
 			OneToOneFileTransferImpl sessionApi = new OneToOneFileTransferImpl(session,
 					mOneToOneFileTransferBroadcaster);
 			FileTransferServiceImpl.addFileTransferSession(sessionApi);
+			mOneToOneFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
 		}
-
-		// Broadcast intent, we reuse the File transfer invitation intent
-		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
-		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
-		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID,
-				session.getFileTransferId());
-		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
     }
 	
 	/**
@@ -794,6 +755,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		MessagingLog.getInstance().addFileTransfer(contact, fileTransferId, Direction.INCOMING,
 				content, fileicon, FileTransfer.State.REJECTED, reasonCode);
 
-		broadcastFileTransferInvitation(fileTransferId);
+		mOneToOneFileTransferBroadcaster.broadcastFileTransferInvitation(fileTransferId);
 	}
 }

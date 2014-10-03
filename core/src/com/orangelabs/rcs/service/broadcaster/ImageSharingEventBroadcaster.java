@@ -17,8 +17,12 @@ package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharingListener;
+import com.gsma.services.rcs.ish.ImageSharingIntent;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -73,5 +77,13 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 			}
 		}
 		mImageSharingListeners.finishBroadcast();
+	}
+
+	public void broadcastImageSharingInvitation(String sharingId) {
+		Intent invitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+		invitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sharingId);
+		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
 	}
 }

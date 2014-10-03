@@ -1,4 +1,5 @@
 /*******************************************************************************
+
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
@@ -21,6 +22,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
+import android.content.Intent;
+
 import com.gsma.services.rcs.JoynContactFormatException;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
@@ -30,12 +33,11 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
-import java.util.Vector;
+import java.util.Collection;
 
 /**
  * Terminating SIP RTP session
@@ -48,6 +50,8 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
      */
     private final static Logger logger = Logger.getLogger(TerminatingSipRtpSession.class.getSimpleName());
 
+    private final Intent mSessionInvite;
+
     /**
      * Constructor
      * 
@@ -55,9 +59,10 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 	 * @param invite Initial INVITE request
      * @throws JoynContactFormatException 
 	 */
-	public TerminatingSipRtpSession(ImsService parent, SipRequest invite) throws JoynContactFormatException {
+	public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws JoynContactFormatException {
 		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite.getFeatureTags().get(0));
 
+		mSessionInvite = sessionInvite;
 		// Create dialog path
 		createTerminatingDialogPath(invite);
 	}
@@ -70,12 +75,15 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new RTP session as terminating");
 	    	}
-	
-			// Send a 180 Ringing response
-			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+
+            Collection<ImsSessionListener> listeners = getListeners();
+            for (ImsSessionListener listener : listeners) {
+                listener.handleSessionInvited();
+            }
 
             int answer = waitInvitationAnswer();
-            Vector<ImsSessionListener> listeners;
             switch (answer) {
                 case ImsServiceSession.INVITATION_REJECTED:
                     if (logger.isActivated()) {
@@ -84,7 +92,6 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByUser();
                     }
@@ -100,7 +107,6 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout();
                     }
@@ -113,14 +119,17 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByRemote();
                     }
                     return;
 
                 case ImsServiceSession.INVITATION_ACCEPTED:
-                    /* Note: Nothing to log here for sip rtp sessions */
+                    setSessionAccepted();
+
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionAccepted();
+                    }
                     break;
 
                 default:
@@ -212,5 +221,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 	@Override
 	public boolean isInitiatedByRemote() {
 		return true;
+	}
+
+	public Intent getSessionInvite() {
+		return mSessionInvite;
 	}
 }

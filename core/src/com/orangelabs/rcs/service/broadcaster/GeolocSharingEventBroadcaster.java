@@ -16,9 +16,13 @@
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -69,5 +73,13 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 			}
 		}
 		mGeolocSharingListeners.finishBroadcast();
+	}
+
+	public void broadcastGeolocSharingInvitation(String sharingId) {
+		Intent invitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+		invitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, sharingId);
+		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
 	}
 }

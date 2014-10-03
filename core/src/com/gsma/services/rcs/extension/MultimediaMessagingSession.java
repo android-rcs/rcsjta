@@ -117,6 +117,21 @@ public class MultimediaMessagingSession extends MultimediaSession {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns the reason code state of the session
+	 *
+	 * @return ReasonCode
+	 * @see MultimediaSession.ReasonCode
+	 * @throws JoynServiceException
+	 */
+	public int getReasonCode() throws JoynServiceException {
+		try {
+			return sessionIntf.getReasonCode();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 	
 	/**
 	 * Returns the direction of the session (incoming or outgoing)

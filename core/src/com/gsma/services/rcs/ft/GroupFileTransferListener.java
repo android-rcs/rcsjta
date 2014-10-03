@@ -45,8 +45,8 @@ public abstract class GroupFileTransferListener extends IGroupFileTransferListen
      * @param state state of file transfer after change
      * @param reasonCode Reason code of state after change
      */
-    public abstract void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact,
-            String transferId, int state, int reasonCode);
+    public abstract void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+            int state, int reasonCode);
 
     /**
      * Callback called during the transfer progress of group file transfer

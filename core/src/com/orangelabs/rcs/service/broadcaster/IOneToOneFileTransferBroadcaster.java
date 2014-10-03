@@ -27,4 +27,8 @@ public interface IOneToOneFileTransferBroadcaster {
 
 	public void broadcastTransferprogress(ContactId contact, String transferId, long currentSize,
 			long totalSize);
+
+	public void broadcastFileTransferInvitation(String fileTransferId);
+
+	public void broadcastResumeFileTransfer(String filetransferId);
 }

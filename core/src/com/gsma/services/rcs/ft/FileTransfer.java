@@ -38,69 +38,64 @@ public class FileTransfer {
      */
     public static class State {
     	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
     	 * File transfer invitation received
     	 */
-    	public final static int INVITED = 1;
+    	public final static int INVITED = 0;
     	
     	/**
     	 * File transfer invitation sent
     	 */
-    	public final static int INITIATED = 2;
+    	public final static int INITIATED = 1;
     	
     	/**
     	 * File transfer is started
     	 */
-    	public final static int STARTED = 3;
+    	public final static int STARTED = 2;
     	
     	/**
     	 * File transfer has been transferred with success 
     	 */
-    	public final static int TRANSFERRED = 4;
+    	public final static int TRANSFERRED = 3;
     	
     	/**
     	 * File transfer has been aborted 
     	 */
-    	public final static int ABORTED = 5;
+    	public final static int ABORTED = 4;
     	
     	/**
     	 * File transfer has failed
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 5;
 
     	/**
     	 * File transfer is paused
     	 */
-    	public final static int PAUSED = 7;
+    	public final static int PAUSED = 6;
 
     	/**
     	 * File transfer is rejected
     	 */
-    	public final static int REJECTED = 8;
+    	public final static int REJECTED = 7;
 
     	/**
     	 * File transfer has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 9;
+    	public final static int ACCEPTING = 8;
     	
     	/**
     	 * File transfer has been delivered
     	 */
-    	public final static int DELIVERED = 10;
+    	public final static int DELIVERED = 9;
 
     	/**
     	 * File transfer has been displayed or opened
     	 */
-    	public final static int DISPLAYED = 11;
+    	public final static int DISPLAYED = 10;
 
     	/**
     	 * File transfer has been queued
     	 */
-    	public final static int QUEUED = 12;
+    	public final static int QUEUED = 11;
     	
     	private State() {
         }    	
@@ -375,6 +370,21 @@ public class FileTransfer {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}		
+
+	/**
+	 * Returns the reason code of the state of the sharing
+	 *
+	 * @return ReasonCode
+	 * @see GeolocSharing.ReasonCode
+	 * @throws JoynServiceException
+	 */
+	public int getReasonCode() throws JoynServiceException {
+		try {
+			return transferInf.getReasonCode();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 		
 	/**
 	 * Returns the direction of the transfer (incoming or outgoing)

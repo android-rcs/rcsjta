@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.sip;
@@ -118,19 +122,17 @@ public class SipService extends ImsService {
     /**
      * Receive a session invitation with MSRP media
      * 
-     * @param intent Resolved intent
+     * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @throws JoynContactFormatException 
      */
-	public void receiveMsrpSessionInvitation(Intent intent, SipRequest invite) throws JoynContactFormatException {
+	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) throws JoynContactFormatException {
 		// Create a new session
-		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite);
+		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, sessionInvite);
 
-		// Start the session
+		getImsModule().getCore().getListener().handleSipMsrpSessionInvitation(sessionInvite, session);
+
 		session.startSession();
-
-		// Notify listener
-		getImsModule().getCore().getListener().handleSipMsrpSessionInvitation(intent, session);
 	}
 
     /**
@@ -154,19 +156,17 @@ public class SipService extends ImsService {
 	/**
      * Receive a session invitation with RTP media
      * 
-     * @param intent Resolved intent
+     * @param sessionInvite Resolved intent
      * @param invite Initial invite
 	 * @throws JoynContactFormatException 
      */
-	public void receiveRtpSessionInvitation(Intent intent, SipRequest invite) throws JoynContactFormatException {
+	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite) throws JoynContactFormatException {
 		// Create a new session
-		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite);
+		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, sessionInvite);
 
-		// Start the session
+		getImsModule().getCore().getListener().handleSipRtpSessionInvitation(sessionInvite, session);
+
 		session.startSession();
-		
-		// Notify listener
-		getImsModule().getCore().getListener().handleSipRtpSessionInvitation(intent, session);
 	}
 	
 	/**

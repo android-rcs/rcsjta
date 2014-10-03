@@ -18,6 +18,8 @@ interface IGroupChat {
 	
 	int getState();	
 
+	int getReasonCode();
+
 	ContactId getRemoteContact();
 
 	String getSubject();	

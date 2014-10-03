@@ -17,6 +17,8 @@ interface IMultimediaStreamingSession {
 	
 	int getState();
 	
+	int getReasonCode();
+	
 	int getDirection();
 	
 	void acceptInvitation();

@@ -21,9 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
-import android.content.Intent;
-
-import com.gsma.services.rcs.chat.ChatIntent;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -40,12 +37,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -100,23 +94,11 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 
 		} else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DISPLAY;
-
 		}
+
 		throw new IllegalArgumentException(new StringBuilder(
 				"Received invalid imdn notification type:'").append(notificationType).append("'")
 				.toString());
-	}
-
-	private void broadcastMessageStatus(String msgId, int status, int reasonCode) {
-		if (logger.isActivated()) {
-			logger.info(new StringBuilder("Insertion message status for message ").append(msgId)
-					.append(";status=").append(status).append(";reasonCode=").append(reasonCode).toString());
-		}
-		synchronized (lock) {
-
-			mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
-					status, reasonCode);
-		}
 	}
 
 	/**
@@ -378,12 +360,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		synchronized (lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addIncomingOneToOneChatMessage(message);
-			// Broadcast intent related to the received message
-			Intent newOneToOneChatMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneChatMessage);
-			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneChatMessage);
-			newOneToOneChatMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, message.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneChatMessage);
+			mChatEventBroadcaster.broadcastMessageReceived(message.getMessageId());
 		}
     }
     
@@ -398,12 +375,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		synchronized (lock) {
 			// Update rich messaging history
 			MessagingLog.getInstance().addIncomingOneToOneChatMessage(geoloc);
-			// Broadcast intent related to the received message
-			Intent newOneToOneGeolocMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
-			IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneGeolocMessage);
-			IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneGeolocMessage);
-			newOneToOneGeolocMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, geoloc.getMessageId());
-			AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneGeolocMessage);
+			mChatEventBroadcaster.broadcastMessageReceived(geoloc.getMessageId());
 		}
     }
     
@@ -415,20 +387,22 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		if (logger.isActivated()) {
 			logger.info("IM error " + error.getErrorCode());
 		}
+		ContactId remoteContact = getRemoteContact();
 		synchronized (lock) {
+			ChatServiceImpl.removeChatSession(remoteContact);
+
 			switch (error.getErrorCode()) {
 				case ChatError.SESSION_INITIATION_FAILED:
 				case ChatError.SESSION_INITIATION_CANCELLED:
 					String msgId = session.getFirstMessage().getMessageId();
 					MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
 							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
-					mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
+					mChatEventBroadcaster.broadcastMessageStatusChanged(remoteContact, msgId,
 							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
 					break;
 				default:
 					break;
 			}
-			ChatServiceImpl.removeChatSession(session.getRemoteContact());
 		}
 	}
     
@@ -443,20 +417,64 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		}
 	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageSent(java.lang.String)
-     */
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
+	 * handleMessageSending(
+	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
+	 */
 	@Override
-	public void handleMessageSent(String msgId) {
-		broadcastMessageStatus(msgId, ChatLog.Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
+	public void handleMessageSending(InstantMessage msg) {
+		String msgId = msg.getMessageId();
+		if (logger.isActivated()) {
+			logger.info(new StringBuilder("Inserting message with status sending; id=").append(
+					msgId).toString());
+		}
+		synchronized (lock) {
+			MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg,
+					ChatLog.Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
+			mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
+					ChatLog.Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
+		}
 	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleMessageFailedSend(java.lang.String)
-     */
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
+	 * handleMessageSent(java.lang.String)
+	 */
+	@Override
+	public void handleMessageSent(String msgId) {
+		if (logger.isActivated()) {
+			logger.info("New message sent " + msgId);
+		}
+		synchronized (lock) {
+			MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+					Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
+
+			mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
+					Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
+	 * handleMessageFailedSend(java.lang.String)
+	 */
+
 	@Override
 	public void handleMessageFailedSend(String msgId) {
-		broadcastMessageStatus(msgId, ChatLog.Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+		if (logger.isActivated()) {
+			logger.info("New message failure status for message " + msgId);
+		}
+		synchronized (lock) {
+			MessagingLog.getInstance().updateChatMessageStatusAndReasonCode(msgId,
+					Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+
+			mChatEventBroadcaster.broadcastMessageStatusChanged(getRemoteContact(), msgId,
+					Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+		}
 	}
 
 	@Override
@@ -528,7 +546,7 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 	}
 
 	@Override
-	public void handleSessionAccepting() {
+	public void handleSessionAccepted() {
 		// Not used in one-to-one chat
 	}
 
@@ -560,5 +578,15 @@ public class ChatImpl extends IChat.Stub implements ChatSessionListener {
 		synchronized (lock) {
 			ChatServiceImpl.removeChatSession(session.getRemoteContact());
 		}
+	}
+
+	@Override
+	public void handleSessionInvited() {
+		/* Not used by one-to-one chat */
+	}
+
+	@Override
+	public void handleSessionAutoAccepted() {
+		/* Not used by one-to-one chat */
 	}
 }

@@ -39,50 +39,39 @@ public class GroupChat {
      */
     public static class State {
     	/**
-    	 * Unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
     	 * Chat invitation received
     	 */
-    	public final static int INVITED = 1;
+    	public final static int INVITED = 0;
     	
     	/**
     	 * Chat invitation sent
     	 */
-    	public final static int INITIATED = 2;
+    	public final static int INITIATED = 1;
     	
     	/**
     	 * Chat is started
     	 */
-    	public final static int STARTED = 3;
+    	public final static int STARTED = 2;
     	   	
     	/**
     	 * Chat has been aborted 
     	 */
-    	public final static int ABORTED = 4;
-    	
-    	/**
-    	 * Chat has been closed by the user. A user which has closed a
-    	 * conversation voluntary can't rejoin it afterward.
-    	 */
-    	public final static int CLOSED_BY_USER = 5;
+    	public final static int ABORTED = 3;
 
     	/**
     	 * Chat has failed 
     	 */
-    	public final static int FAILED = 6;
+    	public final static int FAILED = 4;
 
     	/**
     	 * Chat has been accepted and is in the process of becoming started.
     	 */
-    	public final static int ACCEPTING = 7;
+    	public final static int ACCEPTING = 5;
 
     	/**
     	 * Chat invitation was rejected.
     	 */
-    	public final static int REJECTED = 8;
+    	public final static int REJECTED = 6;
     	
         private State() {
         }    	
@@ -230,6 +219,21 @@ public class GroupChat {
 			throw new JoynServiceException(e.getMessage());
 		}
 	}		
+
+	/**
+	 * Returns the reason code of the state of the group chat
+	 *
+	 * @return ReasonCode
+	 * @see GroupChat.ReasonCode
+	 * @throws JoynServiceException
+	 */
+	public int getReasonCode() throws JoynServiceException {
+		try {
+			return chatInf.getReasonCode();
+		} catch (Exception e) {
+			throw new JoynServiceException(e.getMessage());
+		}
+	}
 	
 	/**
 	 * Returns the remote contact

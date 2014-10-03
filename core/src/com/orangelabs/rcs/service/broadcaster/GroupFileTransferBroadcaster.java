@@ -16,10 +16,14 @@
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
+import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.service.api.ServerApiException;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -78,13 +82,13 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.finishBroadcast();
 	}
 
-	public void broadcastSingleRecipientDeliveryStateChanged(String chatId, ContactId contact,
+	public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
 			String transferId, int state, int reasonCode) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				mGroupFileTransferListeners.getBroadcastItem(i)
-						.onSingleRecipientDeliveryStateChanged(chatId, contact, transferId,
+						.onGroupDeliveryInfoChanged(chatId, contact, transferId,
 								state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -93,5 +97,21 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 			}
 		}
 		mGroupFileTransferListeners.finishBroadcast();
+	}
+
+	public void broadcastFileTransferInvitation(String fileTransferId) {
+		Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+		invitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
+		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+	}
+
+	public void broadcastResumeFileTransfer(String filetransferId) {
+		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
+		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
+		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
+		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
 	}
 }

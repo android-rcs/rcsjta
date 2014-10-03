@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.JoynContactFormatException;
@@ -79,7 +80,6 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 logger.info("Initiate a new live video sharing session as terminating");
             }
 
-            // Send a 180 Ringing response
             send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
             // Parse the remote SDP part
@@ -92,11 +92,12 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
             Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
-            // Notify listener
-            getImsService().getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(this);
+            Collection<ImsSessionListener> listeners = getListeners();
+            for (ImsSessionListener listener : listeners) {
+                listener.handleSessionInvited();
+            }
 
             int answer = waitInvitationAnswer();
-            Vector<ImsSessionListener> listeners;
             switch (answer) {
                 case ImsServiceSession.INVITATION_REJECTED:
                     if (logger.isActivated()) {
@@ -105,7 +106,6 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByUser();
                     }
@@ -121,7 +121,6 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout();
                     }
@@ -134,14 +133,17 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
                     getImsService().removeSession(this);
 
-                    listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByRemote();
                     }
                     return;
 
                 case ImsServiceSession.INVITATION_ACCEPTED:
-                    /*Note: Nothing to log here for terminating video streaming sessions.*/
+                    setSessionAccepted();
+
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionAccepted();
+                    }
                     break;
 
                 default:

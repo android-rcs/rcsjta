@@ -26,4 +26,6 @@ public interface IOneToOneChatEventBroadcaster {
 			int reasonCode);
 
 	public void broadcastComposingEvent(ContactId contact, boolean status);
+
+	public void broadcastMessageReceived(String msgId);
 }

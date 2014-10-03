@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
@@ -137,6 +138,11 @@ public abstract class ImsServiceSession extends Thread {
      * Session terminated by remote flag
      */
     private boolean sessionTerminatedByRemote = false;
+
+    /**
+     * Session accepting flag
+     */
+    private boolean mSessionAccepted = false;
 
     /**
      * The logger
@@ -515,7 +521,7 @@ public abstract class ImsServiceSession extends Thread {
 		getImsService().removeSession(this);
 
 		/* TODO: This will be changed anyway by the implementation of CR018 */
-		Vector<ImsSessionListener> listeners = getListeners();
+		Collection<ImsSessionListener> listeners = getListeners();
 		/* Handles the case of REJECTED_BY_USER on originating session */
 		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER & !dialogPath.isSigEstablished()) {
 			for (ImsSessionListener listener : listeners) {
@@ -688,6 +694,13 @@ public abstract class ImsServiceSession extends Thread {
 	 */
 	public void receiveUpdate(SipRequest update) {
 		sessionTimer.receiveUpdate(update);
+	}
+
+	/**
+	 * Set session accepted
+	 */
+	public void setSessionAccepted() {
+		mSessionAccepted = true;
 	}
 
     /**
@@ -911,6 +924,15 @@ public abstract class ImsServiceSession extends Thread {
      */
     public boolean isSessionTerminatedByRemote() {
         return sessionTerminatedByRemote;
+    }
+
+    /**
+     * Is session accepted
+     *
+     * @return Boolean
+     */
+    public boolean isSessionAccepted() {
+        return mSessionAccepted;
     }
 
     /**

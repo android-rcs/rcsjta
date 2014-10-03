@@ -28,6 +28,10 @@ public interface IGroupFileTransferBroadcaster {
 	public void broadcastTransferprogress(String chatId, String transferId, long currentSize,
 			long totalSize);
 
-	public void broadcastSingleRecipientDeliveryStateChanged(String chatId, ContactId contact,
+	public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
 			String transferId, int state, int reasonCode);
+
+	public void broadcastFileTransferInvitation(String fileTransferId);
+
+	public void broadcastResumeFileTransfer(String filetransferId);
 }

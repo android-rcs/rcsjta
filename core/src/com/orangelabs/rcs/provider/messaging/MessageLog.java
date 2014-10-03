@@ -39,7 +39,6 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.provider.messaging.MessageStatusAndReasonCode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

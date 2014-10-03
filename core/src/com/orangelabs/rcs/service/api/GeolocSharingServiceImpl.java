@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import android.content.Intent;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
@@ -34,7 +33,6 @@ import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
-import com.gsma.services.rcs.gsh.GeolocSharingIntent;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
@@ -47,12 +45,10 @@ import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
-import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.JoynServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -127,15 +123,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		
 		gshSessions.remove(sessionId);
 	}
-
-	// Broadcast intent related to the received invitation
-	private void broadcastGeolocSharingInvitation(String sharingId) {
-		Intent newInvitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, sharingId);
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
-	}
     
     /**
      * Returns true if the service is registered to the platform, else returns false
@@ -207,8 +194,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		// Add session in the list
 		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
 		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
-		
-		broadcastGeolocSharingInvitation(session.getSessionID());
     }
     
     /**
@@ -348,6 +333,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			int reasonCode) {
 		String sharingId = SessionIdGenerator.getNewId();
 		/* TODO: Persist in geoloc content provider */
-		broadcastGeolocSharingInvitation(sharingId);
+		mGeolocSharingEventBroadcaster.broadcastGeolocSharingInvitation(sharingId);
 	}
 }

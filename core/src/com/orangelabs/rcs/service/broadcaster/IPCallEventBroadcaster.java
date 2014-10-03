@@ -17,8 +17,12 @@ package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
+import com.gsma.services.rcs.ipcall.IPCallIntent;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -57,5 +61,13 @@ public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
 			}
 		}
 		mIpCallListeners.finishBroadcast();
+	}
+
+	public void broadcastIPCallInvitation(String callId) {
+		Intent invitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+		invitation.putExtra(IPCallIntent.EXTRA_CALL_ID, callId);
+		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
 	}
 }

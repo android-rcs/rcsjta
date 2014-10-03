@@ -17,8 +17,12 @@ package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
@@ -74,5 +78,13 @@ public class MultimediaStreamingSessionEventBroadcaster implements
 			}
 		}
 		mMultimediaStreamingListeners.finishBroadcast();
+	}
+
+	public void broadcastMultimediaStreamingInvitation(String sessionId, Intent rtpSessionInvite) {
+		IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
+		IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
+		rtpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
+
+		AndroidFactory.getApplicationContext().sendBroadcast(rtpSessionInvite);
 	}
 }

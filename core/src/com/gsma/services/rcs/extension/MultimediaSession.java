@@ -37,49 +37,44 @@ public abstract class MultimediaSession {
      */
     public static class State {
     	/**
-    	 * Session is in unknown state
-    	 */
-    	public final static int UNKNOWN = 0;
-
-    	/**
     	 * Session invitation received
     	 */
-    	public final static int INVITED = 1;
+    	public final static int INVITED = 0;
     	
     	/**
     	 * Session invitation sent
     	 */
-    	public final static int INITIATED = 2;
+    	public final static int INITIATED = 1;
     	
     	/**
     	 * Session is started
     	 */
-    	public final static int STARTED = 3;
+    	public final static int STARTED = 2;
     	
     	/**
     	 * Session has been aborted or 
     	 */
-    	public final static int ABORTED = 4;
+    	public final static int ABORTED = 3;
 
         /**
     	 * Session has failed 
     	 */
-    	public final static int FAILED = 5;
+    	public final static int FAILED = 4;
 
         /**
     	 * Session has been rejected.
     	 */
-    	public final static int REJECTED = 6;
+    	public final static int REJECTED = 5;
 
         /**
     	 * Call ringing
     	 */
-    	public final static int RINGING = 7;
+    	public final static int RINGING = 6;
 
     	/**
     	 * Session has been accepted and is in the process of becoming started
     	 */
-    	public final static int ACCEPTING = 8;
+    	public final static int ACCEPTING = 7;
 
         private State() {
         }    	

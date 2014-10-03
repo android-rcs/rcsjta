@@ -24,6 +24,8 @@ interface IFileTransfer {
 	Uri getFile();
 
 	int getState();
+
+	int getReasonCode();
 	
 	int getDirection();
 		

@@ -15,6 +15,8 @@ interface IGeolocSharing {
 	Geoloc getGeoloc();
 
 	int getState();
+
+	int getReasonCode();
 	
 	int getDirection();
 		
