@@ -134,7 +134,7 @@ public class SendGroupFile extends Activity {
 	private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
+		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
 						+ transferId + " state=" + state+ " reason="+reasonCode);

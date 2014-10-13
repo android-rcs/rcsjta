@@ -109,7 +109,7 @@ public class ReceiveFileTransfer extends Activity {
 	private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onSingleRecipientDeliveryStateChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
+		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state
 						+ " reason=" + reasonCode);

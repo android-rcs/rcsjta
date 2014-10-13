@@ -311,7 +311,6 @@
 <string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
 
 <string-array name="file_transfer_states">
-    <item>UNKNOWN</item>
     <item>INVITED</item>
     <item>INITIATED</item>
     <item>STARTED</item>
@@ -375,12 +374,10 @@
 </string-array>
 
 <string-array name="group_chat_states">
-    <item>UNKNOWN</item>
     <item>INVITED</item>
     <item>INITIATED</item>
     <item>STARTED</item>
     <item>ABORTED</item>
-    <item>CLOSED_BY_USER</item>
     <item>FAILED</item>
     <item>ACCEPTING</item>
     <item>REJECTED</item>
@@ -401,7 +398,6 @@
 </string-array>
 
 <string-array name="message_statuses">
-    <item>UNKNOWN</item>
     <item>REJECTED</item>
     <item>QUEUED</item>
     <item>SENDING</item>
@@ -422,7 +418,6 @@
 </string-array>
 
 <string-array name="ish_states">
-	<item>UNKNOWN</item>
 	<item>INVITED</item>
 	<item>INITIATED</item>    
 	<item>STARTED</item>
@@ -452,7 +447,6 @@
 </string-array>
 
 <string-array name="vsh_states">
-	<item>UNKNOWN</item>
 	<item>INVITED</item>
 	<item>INITIATED</item>    
 	<item>STARTED</item>
@@ -478,7 +472,6 @@
 </string-array>
 
 <string-array name="gsh_states">
-	<item>UNKNOWN</item>
 	<item>INVITED</item>
 	<item>INITIATED</item>    
 	<item>STARTED</item>
@@ -505,7 +498,6 @@
 </string-array>
 
 <string-array name="mms_states">
-	<item>UNKNOWN</item>
 	<item>INVITED</item>
 	<item>INITIATED</item>    
 	<item>STARTED</item>
@@ -526,7 +518,6 @@
 </string-array>
 
 <string-array name="ipcall_states">
-	<item>UNKNOWN</item>
 	<item>INVITED</item>
 	<item>INITIATED</item>    
 	<item>STARTED</item>
