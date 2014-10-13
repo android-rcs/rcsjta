@@ -68,7 +68,7 @@ public class SupportedContactsList extends Activity implements JoynServiceListen
 
 		// Set a default tag
 		EditText tagEdit = (EditText)findViewById(R.id.tag);			
-		tagEdit.setText("game");
+		tagEdit.setText("ext.game");
 
         // Set button callback
         refreshBtn = (Button)findViewById(R.id.refresh_btn);

@@ -134,9 +134,12 @@ public class CapabilityUtils {
 		// RCS extensions support
 		String exts = RcsSettings.getInstance().getSupportedRcsExtensions();
 		if (!TextUtils.isEmpty(exts)) {
-			supportedTagList.add(exts);
+			for (String extension : exts.split(",")) {
+				StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
+				supportedTagList.add(sb.toString());
+			}		
 		}
-
+		
 		// Add RCS-e prefix
 		if (!supportedTagList.isEmpty()) {
 			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", supportedTagList) + "\"");
@@ -231,8 +234,7 @@ public class CapabilityUtils {
         	} else
     		if (tag.startsWith(FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_RCSE_EXTENSION)) {
     			// Support a RCS extension
-    			String[] value = tag.split("=");
-				capabilities.addSupportedExtension(StringUtils.removeQuotes(value[1]));
+				capabilities.addSupportedExtension(extractServiceId(tag));				
 			} else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
 				capabilities.setSipAutomata(true);
 			}

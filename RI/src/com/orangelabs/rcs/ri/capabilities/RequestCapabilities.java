@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import java.util.Set;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
@@ -35,6 +33,7 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceException;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.JoynServiceNotAvailableException;
@@ -309,14 +308,18 @@ public class RequestCapabilities extends Activity implements JoynServiceListener
 
             // Set extensions
     		extensions.setVisibility(View.VISIBLE);
-            String result = "";
-            Set<String> extensionList = capabilities.getSupportedExtensions();
-	        for(String value : extensionList) {
-	        	if (value.length() > 0) {
-	        		result += value + "\n";
-	        	}
-            }
-            extensions.setText(result);    		
+    		extensions.setText(getExtensions(capabilities));
     	}
     }
+    
+    private String getExtensions(Capabilities capabilities) {
+		if (capabilities == null || capabilities.getSupportedExtensions().isEmpty()) {
+			return "";
+		}
+		StringBuilder extensions = new StringBuilder();
+		for (String capability : capabilities.getSupportedExtensions()) {
+			extensions.append(",").append(capability);
+		}
+		return extensions.substring(1);
+	}    
 }
