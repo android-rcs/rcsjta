@@ -26,6 +26,17 @@
 			 android:layout_marginRight="5dip"/>
 	    </TableRow>
 	    
+		<TableRow android:paddingTop="5dip">
+	        <TextView android:text="@string/label_size"
+			 android:layout_marginLeft="5dip"
+			 android:gravity="right"/>
+			<TextView android:id="@+id/size"
+			 android:singleLine="true"
+	         android:textStyle="bold"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	    </TableRow>	    
+	    
 	    <TableRow android:paddingTop="5dip">
 	        <TextView android:text="@string/label_progress_status"
  			 android:layout_marginLeft="5dip"

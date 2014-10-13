@@ -26,12 +26,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,11 +43,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.JoynService;
 import com.gsma.services.rcs.JoynServiceListener;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingService;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.MediaUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -251,11 +252,15 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
      */
     private OnClickListener btnSelectListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Select a picture from the gallery
-        	Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            Intent wrapperIntent = Intent.createChooser(intent, null);
-            startActivityForResult(wrapperIntent, SELECT_IMAGE);
+        	Intent pictureShareIntent;
+        	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        		pictureShareIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
+        	} else {
+        		pictureShareIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        	}
+			pictureShareIntent.addCategory(Intent.CATEGORY_OPENABLE);
+			pictureShareIntent.setType("image/*");
+			startActivityForResult(pictureShareIntent, SELECT_IMAGE);
         }
     };
 
@@ -274,30 +279,31 @@ public class InitiateImageSharing extends Activity implements JoynServiceListene
         switch(requestCode) {
             case SELECT_IMAGE: {
             	if ((data != null) && (data.getData() != null)) {
-            		// Get selected photo URI
-            		Uri uri = data.getData();
-            		
-                    // Get image filename
-                    Cursor cursor = getContentResolver().query(uri, new String[] {MediaStore.Images.ImageColumns.DATA}, null, null, null); 
-                    cursor.moveToFirst();
-                    filename = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-                    cursor.close();     
-                    
-                    // Display the selected filename attribute
-                    TextView uriEdit = (TextView)findViewById(R.id.uri);
-					try {
-						File file = new File(filename);
-						filesize = file.length()/1024;
-						uriEdit.setText(filesize + " KB");
-					} catch(Exception e) {
-						filesize = -1;
-					    uriEdit.setText(filename);
-					}
-					
+	    			// Get selected photo URI
+	    			Uri uri = data.getData();
+	    			
+	    			// Get image filename
+	    			filename = MediaUtils.getFilePath(this, uri);
+
+	    			// Display file info
+	    			TextView uriEdit = (TextView)findViewById(R.id.uri);
+					uriEdit.setText(filename);
+	    			TextView sizeEdit = (TextView) findViewById(R.id.size);
+	    			// Display the selected filename attribute
+	    			try {
+	    				File file = new File(filename);
+	    				filesize = file.length() / 1024;
+	    				sizeEdit.setText(filesize + " KB");
+	    				uriEdit.setText( file.getName());
+	    			} catch (Exception e) {
+	    				filesize = -1;
+	    				sizeEdit.setText("Unknown");
+	    				uriEdit.setText(filename);
+	    			}
 					// Enable invite button
 					Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-					inviteBtn.setEnabled(true);            
-            	}
+	    			inviteBtn.setEnabled(true);
+	    		}            	
 	    	}             
             break;
         }
