@@ -19,9 +19,12 @@
 package com.orangelabs.rcs.provisioning;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax2.sip.ListeningPoint;
 
 import org.w3c.dom.Document;
@@ -63,6 +66,42 @@ public class ProvisioningParser {
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+    
+	/**
+	 * Enumerated type for the root node
+	 *
+	 */
+	private enum RootNodeType {
+		VERS, TOKEN, MSG, APPLICATION, IMS, PRESENCE, XDMS, IM, CAPDISCOVERY, APN, OTHER, SERVICES, SUPL, SERVICEPROVIDEREXT, UX
+	};
+
+	/**
+	 * A map to associate Root node of String type to enumerated type 
+	 */
+	static final Map<String, RootNodeType> String2RootNodeTypeMap = new HashMap<String, RootNodeType>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+			put("VERS", RootNodeType.VERS);
+			put("TOKEN", RootNodeType.TOKEN);
+			put("MSG", RootNodeType.MSG);
+			put("APPLICATION", RootNodeType.APPLICATION);
+			put("IMS", RootNodeType.IMS);
+			put("PRESENCE", RootNodeType.PRESENCE);
+			put("XDMS", RootNodeType.XDMS);
+			put("IM", RootNodeType.IM);
+			put("CAPDISCOVERY", RootNodeType.CAPDISCOVERY);
+			put("APN", RootNodeType.APN);
+			put("OTHER", RootNodeType.OTHER);
+			put("SERVICES", RootNodeType.SERVICES);
+			put("SUPL", RootNodeType.SUPL);
+			put("SERVICEPROVIDEREXT", RootNodeType.SERVICEPROVIDEREXT);
+			put("UX", RootNodeType.UX);
+		}
+	};
 
     /**
      * Constructor
@@ -139,48 +178,57 @@ public class ProvisioningParser {
                                         + typenode.getNodeValue());
                             }
                             nodeNumber++;
-                            if (typenode.getNodeValue().equalsIgnoreCase("VERS")) {
-                                parseVersion(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("TOKEN")) {
-                                parseToken(childnode);
-                            } else
-                        	if (typenode.getNodeValue().equalsIgnoreCase("MSG")) {
-                                parseTermsMessage(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("APPLICATION")) {
-                                parseApplication(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("IMS")) {
-                                parseIMS(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("PRESENCE")) {
-                                parsePresence(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("XDMS")) {
-                                parseXDMS(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("IM")) {
-                                parseIM(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("CAPDISCOVERY")) {
-                                parseCapabilityDiscovery(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("APN")) {
-                                parseAPN(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("OTHER")) {
-                                parseOther(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("SERVICES")) {
-                                parseServices(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("SUPL")) {
-                                parseSupl(childnode);
-                            } else
-                            if (typenode.getNodeValue().equalsIgnoreCase("SERVICEPROVIDEREXT")) {
-                                parseServiceProviderExt(childnode);
-                            }
+							RootNodeType nodeType = String2RootNodeTypeMap.get(typenode.getNodeValue().toUpperCase());
+							if (nodeType != null) {
+								switch (nodeType) {
+								case VERS:
+									parseVersion(childnode);
+									break;
+								case TOKEN:
+									parseToken(childnode);
+									break;
+								case MSG:
+									parseTermsMessage(childnode);
+									break;
+								case APPLICATION:
+									parseApplication(childnode);
+									break;
+								case IMS:
+									parseIMS(childnode);
+									break;
+								case PRESENCE:
+									parsePresence(childnode);
+									break;
+								case XDMS:
+									parseXDMS(childnode);
+									break;
+								case IM:
+									parseIM(childnode);
+									break;
+								case APN:
+									parseAPN(childnode);
+									break;
+								case OTHER:
+									parseOther(childnode);
+									break;
+								case SERVICES:
+									parseServices(childnode);
+									break;
+								case SUPL:
+									parseSupl(childnode);
+									break;
+								case SERVICEPROVIDEREXT:
+									parseServiceProviderExt(childnode);
+									break;
+								case UX:
+									parseUx(childnode, false);
+									break;
+								default:
+									if (logger.isActivated()) {
+										logger.warn("unhandled node type: " + nodeType);
+									}
+								}
+							}
                         }
                     }
                 }
@@ -200,7 +248,7 @@ public class ProvisioningParser {
         }
     }
 
-    /**
+	/**
      * Parse the provisioning version
      *
      * @param node Node
@@ -208,9 +256,6 @@ public class ProvisioningParser {
     private void parseVersion(Node node) {
         String version = null;
         String validity = null;
-        if (node == null) {
-            return;
-        }
         Node versionchild = node.getFirstChild();
 
         if (versionchild != null) {
@@ -239,9 +284,6 @@ public class ProvisioningParser {
     private void parseToken(Node node) {
         String token = null;
         String tokenValidity = null;
-        if (node == null) {
-            return;
-        }
         Node tokenChild = node.getFirstChild();
 
         if (tokenChild != null) {
@@ -272,9 +314,6 @@ public class ProvisioningParser {
         String message = null;
         String acceptBtn = null;
         String rejectBtn = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -324,9 +363,6 @@ public class ProvisioningParser {
         String appId = null;
         String name = null;
         String appRef = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -398,9 +434,6 @@ public class ProvisioningParser {
         String noteMaxSize = null;
         String publishTimer = null;
         Node typenode = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -489,9 +522,6 @@ public class ProvisioningParser {
         String rcsIPVoiceCallAuth = null;
         String rcsIPVideoCallAuth = null;
         String allowExtensions = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -594,9 +624,6 @@ public class ProvisioningParser {
         String xcapRootURI = null;
         String xcapAuthenticationUsername = null;
         String xcapAuthenticationSecret = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -650,9 +677,6 @@ public class ProvisioningParser {
     private void parseSupl(Node node) {
         String textMaxLength = null;
         String locInfoMaxValidTime = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -687,9 +711,6 @@ public class ProvisioningParser {
      */
     private void parseServiceProviderExt(Node node) {
         Node typenode = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
         if (childnode != null) {
             do {
@@ -725,7 +746,7 @@ public class ProvisioningParser {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
                             if (typenode.getNodeValue().equalsIgnoreCase("UX")) {
-                                parseUx(childnode);
+                                parseUx(childnode, true);
                             }
                         }
                     }
@@ -735,38 +756,40 @@ public class ProvisioningParser {
     }
     
     /**
-     * Parse joyn
+     * Parse Ux
      * 
      * @param node Node
+     * @param isJoynType 
      */
-    private void parseUx(Node node) {
-        String messagingUX = null;
-        
-        if (node == null) {
-            return;
-        }
-        Node childnode = node.getFirstChild();
+	private void parseUx(Node node, boolean isJoynType) {
+		String messagingUX = null;
 
-        if (childnode != null) {
-            do {
+		Node childnode = node.getFirstChild();
 
-                if (messagingUX == null) {
-                    if ((messagingUX = getValueByParamName("messagingUX", childnode, TYPE_INT)) != null) {
+		if (childnode != null) {
+			do {
+
+				if (messagingUX == null) {
+					if ((messagingUX = getValueByParamName("messagingUX", childnode, TYPE_INT)) != null) {
 						if (messagingUX.equals("1")) {
 							RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_INTEGRATED);
 						} else {
-							RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_CONVERGED);
+							if (isJoynType) {
+								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_CONVERGED);
+							} else {
+								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_SEAMLESS);
+							}
 						}
-                        continue;
-                    }
-                }
+						continue;
+					}
+				}
 
-            } while((childnode = childnode.getNextSibling()) != null);
-        }
+			} while ((childnode = childnode.getNextSibling()) != null);
+		}
 
-        // Not used: oneButtonVoiceCall
-        // Not used: oneButtonVideoCall
-    }
+		// Not used: oneButtonVoiceCall
+		// Not used: oneButtonVideoCall
+	}
     
     /**
      * Parse IM
@@ -774,9 +797,6 @@ public class ProvisioningParser {
      * @param node Node
      */
     private void parseIM(Node node) {
-        if (node == null) {
-            return;
-        }
         String imCapAlwaysOn = null;
         String ftCapAlwaysOn = null;
         String imWarnSF = null;
@@ -1176,9 +1196,6 @@ public class ProvisioningParser {
         String maxMsrpLengthExtensions = null;
         
         Node typenode = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -1648,9 +1665,6 @@ public class ProvisioningParser {
         String regRetryBasetime = null;
         String regRetryMaxtime = null;
         Node typenode = null;
-        if (node == null) {
-            return;
-        }
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
