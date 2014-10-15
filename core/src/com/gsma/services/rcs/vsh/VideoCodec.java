@@ -74,7 +74,7 @@ public class VideoCodec implements Parcelable {
      * @param encoding Video encoding
      * @param payload Payload
      * @param clockRate Clock rate
-     * @param framerate Frame rate
+     * @param frameRate Frame rate
      * @param bitRate Bit rate
      * @param width Video width
      * @param height Video height

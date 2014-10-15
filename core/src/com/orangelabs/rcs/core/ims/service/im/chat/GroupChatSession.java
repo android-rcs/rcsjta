@@ -111,16 +111,12 @@ public abstract class GroupChatSession extends ChatSession {
         setWrappedTypes(wrappedTypes);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#isGroupChat()
-	 */
+    @Override
 	public boolean isGroupChat() {
 		return true;
 	}
 	
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#getConnectedParticipants()
-     */
+    @Override
     public Set<ParticipantInfo> getConnectedParticipants() {
 		return conferenceSubscriber.getParticipants();
 	}
@@ -225,12 +221,6 @@ public abstract class GroupChatSession extends ChatSession {
         requestContactCapabilities(getDialogPath().getRemoteParty());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#sendTextMessage
-	 * (java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void sendTextMessage(String msgId, String txt) {
 		boolean useImdn = getImdnManager().isImdnActivated();
@@ -245,8 +235,7 @@ public abstract class GroupChatSession extends ChatSession {
 			networkContent = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt),
 					InstantMessage.MIME_TYPE);
 		}
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), networkContent, useImdn,
-				null);
+		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
@@ -269,12 +258,6 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#sendGeolocMessage
-	 * (java.lang.String, com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush)
-	 */
 	@Override
 	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
 		boolean useImdn = getImdnManager().isImdnActivated();
@@ -314,9 +297,6 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#sendIsComposingStatus(boolean)
-	 */
     @Override
 	public void sendIsComposingStatus(boolean status) {
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
@@ -333,9 +313,6 @@ public abstract class GroupChatSession extends ChatSession {
 		sendMsrpMessageDeliveryStatus(null, to, msgId, status);
     }
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#sendMsrpMessageDeliveryStatus(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId, String status) {
 		// Do not perform Message Delivery Status in Albatros for group chat
