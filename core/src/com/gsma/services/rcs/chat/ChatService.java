@@ -156,55 +156,7 @@ public class ChatService extends RcsService {
 			throw new RcsServiceNotAvailableException();
 		}
     }
-    
-    /**
-     * Rejoins an existing group chat from its unique chat ID
-     * 
-     * @param chatId Chat ID
-     * @return Group chat
-     * @throws RcsServiceException
-     */
-    public GroupChat rejoinGroupChat(String chatId) throws RcsServiceException {
-		if (api != null) {
-			try {
-				IGroupChat chatIntf = api.rejoinGroupChat(chatId);
-				if (chatIntf != null) {
-					return new GroupChat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
-			throw new RcsServiceNotAvailableException();
-		}
-    }
-    
-    /**
-     * Restarts a previous group chat from its unique chat ID
-     * 
-     * @param chatId Chat ID
-     * @return Group chat
-     * @throws RcsServiceException
-     */
-    public GroupChat restartGroupChat(String chatId) throws RcsServiceException {
-		if (api != null) {
-			try {
-				IGroupChat chatIntf = api.restartGroupChat(chatId);
-				if (chatIntf != null) {
-					return new GroupChat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
-			throw new RcsServiceNotAvailableException();
-		}
-    }
-   
+
     /**
      * Returns a chat with a given contact
      * 

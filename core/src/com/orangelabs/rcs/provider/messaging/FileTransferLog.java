@@ -139,7 +139,8 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId, MmContent content, MmContent thumbnail) {
+	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
+			MmContent content, MmContent thumbnail, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug("addOutgoingGroupFileTransfer: fileTransferId=" + fileTransferId + ", chatId=" + chatId + " filename="
 					+ content.getName() + ", size=" + content.getSize() + ", MIME=" + content.getEncoding());
@@ -160,8 +161,8 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
 		values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-		values.put(FileTransferData.KEY_STATE, FileTransfer.State.INITIATED);
-		values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED);
+		values.put(FileTransferData.KEY_STATE, state);
+		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
 		if (thumbnail != null) {
 			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}

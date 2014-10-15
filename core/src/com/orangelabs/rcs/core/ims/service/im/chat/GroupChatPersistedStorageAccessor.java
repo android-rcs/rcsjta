@@ -130,4 +130,9 @@ public class GroupChatPersistedStorageAccessor {
 	public void setRejectNextGroupChatNextInvitation() {
 		mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
 	}
+
+	public void setFileTransferStateAndReasonCode(String fileTransferId, int state,
+			int reasonCode) {
+		mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+	}
 }

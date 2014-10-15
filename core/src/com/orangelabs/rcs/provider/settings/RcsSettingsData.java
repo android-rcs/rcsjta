@@ -464,6 +464,12 @@ public class RcsSettingsData {
 	/* package private */static final Integer DEFAULT_MAX_FT_SESSIONS = 10;
 
 	/**
+	 * Max number of simultaneous outgoing file transfer sessions allowed
+	 */
+	public static final String MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS = "MaxConcurrentOutgoingFileTransferSessions";
+	/* package private */static final Integer DEFAULT_MAX_CONCURRENT_OUTGOING_FT_SESSIONS = 1;
+
+	/**
 	 * Max number of simultaneous IP call sessions
 	 */
 	public static final String MAX_IP_CALL_SESSIONS = "MaxIpCallSessions";

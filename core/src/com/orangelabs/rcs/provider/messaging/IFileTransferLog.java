@@ -61,18 +61,21 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
-	 * 
-	 * @param chatSessionId
-	 *            the identity of the group chat
 	 * @param fileTransferId
 	 *            the identity of the file transfer
+	 * @param chatId
+	 *            the identity of the group chat
 	 * @param content
 	 *            the File content
 	 * @param Fileicon
 	 *            the fileIcon content
+	 * @param state
+	 *            File transfer state
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId,
-			MmContent content, MmContent fileIcon);
+	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
+			MmContent content, MmContent fileIcon, int state, int reasonCode);
 
 	/**
 	 * Add incoming group file transfer

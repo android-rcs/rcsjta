@@ -221,7 +221,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			}
 			return FileTransfer.State.INVITED;
 		}
-		return FileTransfer.State.INITIATED;
+		return FileTransfer.State.INITIATING;
 	}
 
 	/**

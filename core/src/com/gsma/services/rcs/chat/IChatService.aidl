@@ -23,11 +23,7 @@ interface IChatService {
 	ChatServiceConfiguration getConfiguration();
     
 	IGroupChat initiateGroupChat(in List<ContactId> contacts, in String subject);
-    
-	IGroupChat rejoinGroupChat(in String chatId);
-    
-	IGroupChat restartGroupChat(in String chatId);
-    
+
 	IOneToOneChat getOneToOneChat(in ContactId contact);
 
 	IGroupChat getGroupChat(in String chatId);

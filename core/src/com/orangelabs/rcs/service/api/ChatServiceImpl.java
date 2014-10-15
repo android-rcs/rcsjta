@@ -96,7 +96,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 	private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
 
-	private final Map<String, IGroupChat> mGroupChatCache = new HashMap<String, IGroupChat>();
+	private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
 
 	/**
 	 * The logger
@@ -382,7 +382,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * 
 	 * @param groupChat Group chat
 	 */
-	private void addGroupChat(GroupChatImpl groupChat) {
+	/* package private */void addGroupChat(GroupChatImpl groupChat) {
 		String chatId = groupChat.getChatId();
 		mGroupChatCache.put(chatId, groupChat);
 		if (logger.isActivated()) {
@@ -465,85 +465,17 @@ public class ChatServiceImpl extends IChatService.Stub {
 			throw new ServerApiException(e.getMessage());
 		}
     }
-    
-    /**
-     * Rejoins an existing group chat from its unique chat ID
-     * 
-     * @param chatId Chat ID
-     * @return Group chat
-     * @throws ServerApiException
-     */
-    public IGroupChat rejoinGroupChat(String chatId) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Rejoin group chat session related to the conversation " + chatId);
-		}
 
-		// Test IMS connection
-		ServerApiUtils.testIms();
-
-		try {
-			final ChatSession session = mImService.rejoinGroupChatSession(chatId);
-
-			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-					chatId, mMessagingLog);
-			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
-			addGroupChat(groupChat);
-
-	        Thread t = new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	};
-	    	t.start();
+	private GroupChatImpl getOrCreateGroupChat(String chatId) {
+		GroupChatImpl groupChat = mGroupChatCache.get(chatId);
+		if (groupChat != null) {
 			return groupChat;
-
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
 		}
-    }
-    
-    /**
-     * Restarts a previous group chat from its unique chat ID
-     * 
-     * @param chatId Chat ID
-     * @return Group chat
-     * @throws ServerApiException
-     */
-    public IGroupChat restartGroupChat(String chatId) throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Restart group chat session related to the conversation " + chatId);
-		}
-
-		// Test IMS connection
-		ServerApiUtils.testIms();
-
-		try {
-			final ChatSession session = mImService.restartGroupChatSession(chatId);
-			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-					chatId, mMessagingLog);
-			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
-			session.addListener(groupChat);
-			addGroupChat(groupChat);
-
-	       new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	}.start();
-			return groupChat;
-
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-    }
+		GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
+				chatId, mMessagingLog);
+		return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
+				mRcsSettings, mContactsManager, this, mMessagingLog);
+	}
 
 	/**
 	 * Returns a group chat from its unique ID. An exception is thrown if the
@@ -554,14 +486,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * @throws ServerApiException
 	 */
 	public IGroupChat getGroupChat(String chatId) throws ServerApiException {
-		IGroupChat groupChat = mGroupChatCache.get(chatId);
-		if (groupChat != null) {
-			return groupChat;
-		}
-		GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-				chatId, mMessagingLog);
-		return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
-				mRcsSettings, mContactsManager, this, mMessagingLog);
+		return getOrCreateGroupChat(chatId);
 	}
 
 	/**
@@ -725,5 +650,17 @@ public class ChatServiceImpl extends IChatService.Stub {
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
 				mMessagingLog, msgId);
 		return new ChatMessageImpl(persistentStorage);
+	}
+
+	/**
+	 * Handle rejoin group chat as part of send operation
+	 * 
+	 * @param chatId
+	 * @throws ServerApiException
+	 */
+	public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
+		GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
+		groupChat.rejoinGroupChat();
+		addGroupChat(groupChat);
 	}
 }

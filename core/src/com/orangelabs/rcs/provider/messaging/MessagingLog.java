@@ -291,11 +291,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#addOutgoingGroupFileTransfer(java.lang.String, java.lang.String,
-	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
+	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId, MmContent content, MmContent thumbnail) {
-		fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail);
+	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
+			MmContent content, MmContent thumbnail, int state, int reasonCode) {
+		fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
+				state, reasonCode);
 	}
 
 	/*

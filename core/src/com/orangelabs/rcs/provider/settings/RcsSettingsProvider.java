@@ -111,7 +111,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 105;
+        private static final int DATABASE_VERSION = 106;
 
         private Context mContext;
 
@@ -181,6 +181,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, RcsSettingsData.DEFAULT_MAX_VSH_DURATION);
 			addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS, RcsSettingsData.DEFAULT_MAX_CHAT_SESSIONS);
 			addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, RcsSettingsData.DEFAULT_MAX_FT_SESSIONS);
+			addParameter(db, RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, RcsSettingsData.DEFAULT_MAX_CONCURRENT_OUTGOING_FT_SESSIONS);
 			addParameter(db, RcsSettingsData.MAX_IP_CALL_SESSIONS, RcsSettingsData.DEFAULT_MAX_IP_CALL_SESSIONS);
 			addParameter(db, RcsSettingsData.SMS_FALLBACK_SERVICE, RcsSettingsData.DEFAULT_SMS_FALLBACK_SERVICE);
 			addParameter(db, RcsSettingsData.WARN_SF_SERVICE, RcsSettingsData.DEFAULT_WARN_SF_SERVICE);

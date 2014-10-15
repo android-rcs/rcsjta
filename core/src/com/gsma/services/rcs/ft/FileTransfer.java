@@ -43,9 +43,9 @@ public class FileTransfer {
     	public final static int INVITED = 0;
     	
     	/**
-    	 * File transfer invitation sent
+    	 * File transfer initiating
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * File transfer is started

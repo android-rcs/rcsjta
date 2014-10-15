@@ -1237,6 +1237,16 @@ public class RcsSettings {
 	}
 
 	/**
+	 * Get max number of simultaneous outgoing file transfer sessions
+	 *
+	 * @return Number of sessions
+	 */
+	public int getMaxConcurrentOutgoingFileTransferSessions() {
+		return readInteger(RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS,
+				RcsSettingsData.DEFAULT_MAX_CONCURRENT_OUTGOING_FT_SESSIONS);
+	}
+
+	/**
 	 * Get max number of simultaneous IP call sessions
 	 *
 	 * @return Number of sessions

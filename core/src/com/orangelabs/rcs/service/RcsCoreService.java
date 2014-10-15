@@ -259,7 +259,7 @@ public class RcsCoreService extends Service implements CoreListener {
             RcsSettings rcsSettings = RcsSettings.getInstance();
             ContactsManager contactsManager = ContactsManager.getInstance();
             chatApi = new ChatServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
-            ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings, contactsManager);
+            ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
             vshApi = new VideoSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager, core);
             ishApi = new ImageSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager);
             gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager);
@@ -873,5 +873,10 @@ public class RcsCoreService extends Service implements CoreListener {
 
 	public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {
 		chatApi.handleOneToOneChatSessionInitiation(session);
+	}
+
+	@Override
+	public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
+		chatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
 	}
 }

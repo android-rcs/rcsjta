@@ -568,6 +568,31 @@ public class InstantMessagingService extends ImsService {
 	}
 
 	/**
+	 * Checks if max number of concurrent outgoing file transfer sessions
+	 * reached
+	 * 
+	 * @return boolean
+	 */
+	public boolean isMaxConcurrentOutgoingFileTransfersReached() {
+		int nrOfConcurrentOutgoingFileTransferSessions = 0;
+		synchronized (getImsServiceSessionOperationLock()) {
+			for (FileSharingSession session : mFileTransferSessionCache.values()) {
+				if (!session.isInitiatedByRemote()) {
+					nrOfConcurrentOutgoingFileTransferSessions++;
+				}
+			}
+			int maxConcurrentOutgoingFilrTransferSessions = mRcsSettings
+					.getMaxConcurrentOutgoingFileTransferSessions();
+			if (nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFilrTransferSessions) {
+				return true;
+			}
+			nrOfConcurrentOutgoingFileTransferSessions = nrOfConcurrentOutgoingFileTransferSessions
+					+ mFileUploadSessionCache.size();
+			return nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFilrTransferSessions;
+		}
+	}
+
+	/**
 	 * Initiate a file transfer session
 	 * @param fileTransferId
 	 *            File transfer Id
@@ -616,20 +641,22 @@ public class InstantMessagingService extends ImsService {
 	 * Initiate a group file transfer session
 	 * @param fileTransferId
 	 *            File transfer Id
+	 * @param contacts
+	 *            Set of remote contacts
 	 * @param content
 	 *            The file content to be sent
 	 * @param fileIcon
 	 *            Content of fileicon
-	 * @param chatContributionId
+	 * @param groupChatId
 	 *            Chat contribution ID
-	 * @param contacts
-	 *            Set of remote contacts
+	 * @param groupChatSessionId
+	 *            GroupChatSession Id
 	 * 
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
 	public FileSharingSession initiateGroupFileTransferSession(String fileTransferId, Set<ParticipantInfo> participants, MmContent content,
-			MmContent fileIcon, String chatContributionId) throws CoreException {
+			MmContent fileIcon, String groupChatId, String groupChatSessionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + participants.size() + " contacts");
 		}
@@ -639,20 +666,10 @@ public class InstantMessagingService extends ImsService {
 			throw new CoreException("Group file transfer not supported.");
 		}
 
-		assertAvailableFileTransferSession("Max file transfer sessions achieved");
-
-		assertFileSizeNotExceedingMaxLimit(content.getSize(), "File exceeds max size.");
-
-		GroupChatSession groupChatSession = getGroupChatSession(chatContributionId);
-		if (groupChatSession == null) {
-			throw new CoreException("Cannot transfer file: Group Chat not established");
-		}
-		// TODO Cannot transfer file to group if Group Chat is not established: to implement with CR018
-		// Create a new session
-		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId, this,
-				content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-				participants, groupChatSession.getSessionID(), chatContributionId, UUID.randomUUID()
-				.toString(), Core.getInstance(), mMessagingLog);
+		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
+				this, content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
+				participants, groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore,
+				mMessagingLog);
 
 		return session;
 	}

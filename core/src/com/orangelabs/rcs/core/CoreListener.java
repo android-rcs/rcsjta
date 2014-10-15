@@ -47,6 +47,7 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
+import com.orangelabs.rcs.service.api.ServerApiException;
 
 /**
  * Observer of core events
@@ -359,4 +360,12 @@ public interface CoreListener {
      * @param session Chat session
      */
     public void handleOneOneChatSessionInitiation(OneToOneChatSession session);
+
+	/**
+     * Handle rejoin group chat as part of send operation
+     * 
+     * @param chatId
+     * @throws ServerApiException
+     */
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException;
 }

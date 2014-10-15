@@ -227,7 +227,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			}
 			return FileTransfer.State.INVITED;
 		}
-		return FileTransfer.State.INITIATED;
+		return FileTransfer.State.INITIATING;
 	}
 
 	/**
