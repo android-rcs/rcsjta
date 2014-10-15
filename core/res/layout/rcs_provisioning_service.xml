@@ -16,7 +16,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent">
     
-       	<TextView android:text="Max photo-icon size (kB):"
+       	<TextView android:text="@string/Max_photo_icon_size_kB"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -29,7 +29,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max length of the freetext:"
+       	<TextView android:text="@string/Max_length_of_the_freetext"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -42,7 +42,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max number of participants in a group chat:"
+       	<TextView android:text="@string/Max_number_of_participants_in_a_group_chat"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -55,7 +55,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max length of a chat message:"
+       	<TextView android:text="@string/Max_length_of_a_chat_message"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -68,7 +68,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 	
-       	<TextView android:text="Max length of a group chat message:"
+       	<TextView android:text="@string/Max_length_of_a_group_chat_message"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -81,7 +81,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 		
-		<TextView android:text="Idle duration of a chat session (seconds):"
+		<TextView android:text="@string/Idle_duration_of_a_chat_session_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -94,7 +94,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max size of a file transfer (kB):"
+       	<TextView android:text="@string/Max_size_of_a_file_transfer_kB"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -107,7 +107,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Threshold warning on file transfer size (kB):"
+       	<TextView android:text="@string/Threshold_warning_on_file_transfer_size_kB"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -120,7 +120,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max size of an image share (kB):"
+       	<TextView android:text="@string/Max_size_of_an_image_share_kB"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -133,7 +133,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max duration of a video share (seconds):"
+       	<TextView android:text="@string/Max_duration_of_a_video_share_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -146,7 +146,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max number of simultaneous chat sessions:"
+       	<TextView android:text="@string/Max_number_of_simultaneous_chat_sessions"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -159,7 +159,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 	 	
-       	<TextView android:text="Max number of simultaneous file transfer sessions:"
+       	<TextView android:text="@string/Max_number_of_simultaneous_file_transfer_sessions"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -172,7 +172,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Max number of simultaneous IP call sessions:"
+       	<TextView android:text="@string/Max_number_of_simultaneous_IP_call_sessions"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -185,7 +185,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 		
-			<TextView android:text="IM session start mode:"
+			<TextView android:text="@string/IM_session_start_mode"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -196,7 +196,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-       	<TextView android:text="Max entries per contact for chat history:"
+       	<TextView android:text="@string/Max_entries_per_contact_for_chat_history"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -209,7 +209,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
-       	<TextView android:text="Max entries per contact for richcall history:"
+       	<TextView android:text="@string/Max_entries_per_contact_for_richcall_history"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -222,7 +222,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 	 	
-	    <TextView android:text="Max entries per contact for IP call history:"
+	    <TextView android:text="@string/Max_entries_per_contact_for_IP_call_history"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -235,7 +235,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
-		<TextView android:text="Max length of a geolocation label:"
+		<TextView android:text="@string/Max_length_of_a_geolocation_label"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -248,7 +248,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 	
-       	<TextView android:text="Expiration time of a geolocation (seconds):"
+       	<TextView android:text="@string/Expiration_time_of_a_geolocation_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -259,7 +259,7 @@
 	 	android:layout_marginRight="5dip"
 	 	android:maxLength="10" android:inputType="number" android:lines="1"/>
 		
-       	<TextView android:text="Directory path to store photos:"
+       	<TextView android:text="@string/Directory_path_to_store_photos"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -270,7 +270,7 @@
 	 	android:layout_marginRight="5dip"
 	 	android:inputType="textUri"/>
 
-       	<TextView android:text="Directory path to store videos:"
+       	<TextView android:text="@string/Directory_path_to_store_videos"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -281,7 +281,7 @@
 	 	android:layout_marginRight="5dip"
 	 	android:inputType="textUri"/>
 
-       	<TextView android:text="Directory path to store files:"
+       	<TextView android:text="@string/Directory_path_to_store_files"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -297,35 +297,35 @@
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="SMS fallback service"/>
+        android:text="@string/SMS_fallback_service"/>
 
         <CheckBox android:id="@+id/StoreForwardServiceWarning"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Store and Forward service warning"/>
+        android:text="@string/Store_and_Forward_service_warning"/>
         
         <CheckBox android:id="@+id/AutoAcceptFileTransfer"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Auto-accept file transfer invitation"/>
+        android:text="@string/Auto_accept_file_transfer_invitation"/>
 
         <CheckBox android:id="@+id/AutoAcceptChat"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Auto-accept chat invitation"/>
+        android:text="@string/Auto_accept_chat_invitation"/>
 
         <CheckBox android:id="@+id/AutoAcceptGroupChat"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:layout_marginLeft="5dip"
         android:layout_marginRight="5dip"
-        android:text="Auto-accept group chat invitation"/>
+        android:text="@string/Auto_accept_group_chat_invitation"/>
 	</LinearLayout>
 	</ScrollView>
 </LinearLayout>
