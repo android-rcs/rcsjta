@@ -32,7 +32,7 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
 	 * Callback called when the sharing state changes
 	 *
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param sharingId ID of image sharing
 	 * @param state State of image sharing 
 	 * @param reasonCode Reason code of the image sharing state
@@ -43,7 +43,7 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
 	 * Callback called during the sharing progress
 	 *
-	 * @param contactId Contact ID
+	 * @param contact Contact ID
 	 * @param sharingId ID of image sharing
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes

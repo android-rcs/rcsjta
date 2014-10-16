@@ -1,5 +1,7 @@
 package com.gsma.services.rcs.ish;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.IJoynServiceRegistrationListener;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;

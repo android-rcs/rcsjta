@@ -65,7 +65,7 @@ public class ChatMessage implements Parcelable {
      * Constructor for outgoing message
      * 
      * @param messageId Message Id
-     * @param contact Contact
+     * @param remote Contact
      * @param message Message content
      * @param receiptAt Receipt date
      * @hide

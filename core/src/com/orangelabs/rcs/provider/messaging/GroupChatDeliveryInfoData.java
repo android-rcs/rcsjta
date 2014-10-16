@@ -15,9 +15,9 @@
  */
 package com.orangelabs.rcs.provider.messaging;
 
-import com.gsma.services.rcs.DeliveryInfo;
-
 import android.net.Uri;
+
+import com.gsma.services.rcs.DeliveryInfo;
 
 /**
  * Delivery info data constants
@@ -25,11 +25,9 @@ import android.net.Uri;
  */
 public class GroupChatDeliveryInfoData {
 
-    public static final Uri CONTENT_URI = Uri
-            .parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo");
+    public static final Uri CONTENT_URI = DeliveryInfo.CONTENT_URI;
 
-    public static final Uri CONTENT_MSG_URI = Uri
-            .parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/messageid");
+    public static final Uri CONTENT_MSG_URI =  DeliveryInfo.CONTENT_MSG_URI;
 
     public static final Uri CONTENT_ROW_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/rowid");

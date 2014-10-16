@@ -40,7 +40,7 @@ public abstract class FileUploadListener extends IFileUploadListener.Stub {
 	/**
 	 * Callback called during the upload progress
 	 *
-	 * @param sharingId ID of upload
+	 * @param uploadId ID of upload
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
