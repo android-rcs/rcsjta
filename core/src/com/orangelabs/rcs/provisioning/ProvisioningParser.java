@@ -833,7 +833,7 @@ public class ProvisioningParser {
 						// set default IM messaging method if first provisioning
 						if (first) {
 							if (_imCapAlwaysOn) {
-								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_JOYN);
+								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_RCS);
 							} else {
 								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC);
 							}

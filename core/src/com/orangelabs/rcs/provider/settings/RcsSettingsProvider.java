@@ -48,14 +48,14 @@ public class RcsSettingsProvider extends ContentProvider {
 	/**
 	 * Database table
 	 */
-    private static final String TABLE = "settings";
+	private static final String TABLE = "settings";
 
 	// Create the constants used to differentiate between the different URI requests
 	private static final int SETTINGS = 1;
-    private static final int SETTINGS_ID = 2;
-    private static final int RCSAPI_SETTINGS = 3;
-    private static final int RCSAPI_SETTINGS_ID = 4;
-    
+	private static final int SETTINGS_ID = 2;
+	private static final int RCSAPI_SETTINGS = 3;
+	private static final int RCSAPI_SETTINGS_ID = 4;
+
 	/**
 	 * Boolean value "true"
 	 */
@@ -64,29 +64,29 @@ public class RcsSettingsProvider extends ContentProvider {
 	/**
 	 * Boolean value "false"
 	 */
-    private static final String FALSE = Boolean.toString(false);
+	private static final String FALSE = Boolean.toString(false);
 
 	// Allocate the UriMatcher object, where a URI ending in 'settings'
 	// will correspond to a request for all settings, and 'settings'
 	// with a trailing '/[rowID]' will represent a single settings row.
-    private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-    static {
-        uriMatcher.addURI("com.orangelabs.rcs.settings", "settings", SETTINGS);
+	private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+	static {
+		uriMatcher.addURI("com.orangelabs.rcs.settings", "settings", SETTINGS);
 		uriMatcher.addURI("com.gsma.services.rcs.provider.settings", "settings", RCSAPI_SETTINGS);
-        uriMatcher.addURI("com.orangelabs.rcs.settings", "settings/#", SETTINGS_ID);
-        uriMatcher.addURI("com.gsma.services.rcs.provider.settings", "settings/#", RCSAPI_SETTINGS_ID);
-    }
+		uriMatcher.addURI("com.orangelabs.rcs.settings", "settings/#", SETTINGS_ID);
+		uriMatcher.addURI("com.gsma.services.rcs.provider.settings", "settings/*", RCSAPI_SETTINGS_ID);
+	}
 
-    /**
-     * Database helper class
-     */
-    private SQLiteOpenHelper openHelper;
-    
-    /**
-     * Database name
-     */
-    public static final String DATABASE_NAME = "rcs_settings.db";
-    
+	/**
+	 * Database helper class
+	 */
+	private SQLiteOpenHelper openHelper;
+
+	/**
+	 * Database name
+	 */
+	public static final String DATABASE_NAME = "rcs_settings.db";
+
 	/**
 	 * String to restrict query from client API to a set of columns
 	 */
@@ -98,6 +98,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			.append(RcsSettingsData.CONFIGURATION_VALID).append("','")
 			.append(RcsSettingsData.COUNTRY_CODE).append("','")
 			.append(RcsSettingsData.COUNTRY_AREA_CODE).append("','")
+			.append(RcsSettingsData.SERVICE_ACTIVATED).append("','")
 			.append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
 	//@formatter:on
 
@@ -109,266 +110,266 @@ public class RcsSettingsProvider extends ContentProvider {
 			.append(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME).append("','")
 			.append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
 	//@formatter:on
-	
-    /**
-     * Helper class for opening, creating and managing database version control
-     */
-    private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 102;
 
+	/**
+	 * Helper class for opening, creating and managing database version control
+	 */
+	private static class DatabaseHelper extends SQLiteOpenHelper {
+		private static final int DATABASE_VERSION = 102;
 
-        private Context ctx;
+		private Context ctx;
 
-        public DatabaseHelper(Context ctx) {
-            super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+		public DatabaseHelper(Context ctx) {
+			super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
 
-            this.ctx = ctx;
-        }
+			this.ctx = ctx;
+		}
 
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-        	db.execSQL("CREATE TABLE " + TABLE + " ("
-        			+ RcsSettingsData.KEY_ID + " integer primary key autoincrement,"
-                    + RcsSettingsData.KEY_KEY + " TEXT,"
-                    + RcsSettingsData.KEY_VALUE + " TEXT);");
+		@Override
+		public void onCreate(SQLiteDatabase db) {
+			db.execSQL("CREATE TABLE " + TABLE + " (" + RcsSettingsData.KEY_ID + " integer primary key autoincrement,"
+					+ RcsSettingsData.KEY_KEY + " TEXT," + RcsSettingsData.KEY_VALUE + " TEXT);");
 
-            // Insert default values for parameters
+			// Insert default values for parameters
 
-            addParameter(db, RcsSettingsData.SERVICE_ACTIVATED, 				FALSE);
-            addParameter(db, RcsSettingsData.PRESENCE_INVITATION_RINGTONE, 		"");
-            addParameter(db, RcsSettingsData.PRESENCE_INVITATION_VIBRATE, 		TRUE);
-            addParameter(db, RcsSettingsData.CSH_INVITATION_RINGTONE, 			"");
-            addParameter(db, RcsSettingsData.CSH_INVITATION_VIBRATE, 			TRUE);
-            addParameter(db, RcsSettingsData.CSH_AVAILABLE_BEEP, 				TRUE);
-            addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE, 	"");
-            addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE, 	TRUE);
-            addParameter(db, RcsSettingsData.CHAT_INVITATION_RINGTONE, 			"");
-            addParameter(db, RcsSettingsData.CHAT_INVITATION_VIBRATE, 			TRUE);
-            addParameter(db, RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS,   TRUE);
-            addParameter(db, RcsSettingsData.FREETEXT1, 						ctx.getString(R.string.rcs_settings_label_default_freetext_1));
-            addParameter(db, RcsSettingsData.FREETEXT2, 						ctx.getString(R.string.rcs_settings_label_default_freetext_2));
-            addParameter(db, RcsSettingsData.FREETEXT3,							ctx.getString(R.string.rcs_settings_label_default_freetext_3));
-            addParameter(db, RcsSettingsData.FREETEXT4,							ctx.getString(R.string.rcs_settings_label_default_freetext_4));
-            addParameter(db, RcsSettingsData.MIN_BATTERY_LEVEL,                 "0");
-            addParameter(db, RcsSettingsData.MAX_PHOTO_ICON_SIZE, 				"256");
-            addParameter(db, RcsSettingsData.MAX_FREETXT_LENGTH, 				"100");
-            addParameter(db, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,			"100");
-            addParameter(db, RcsSettingsData.GEOLOC_EXPIRATION_TIME,			"3600");
-            addParameter(db, RcsSettingsData.MIN_STORAGE_CAPACITY,				"10240");
-            addParameter(db, RcsSettingsData.MAX_CHAT_PARTICIPANTS, 			"10");
-            addParameter(db, RcsSettingsData.MAX_CHAT_MSG_LENGTH, 				"100");
-            addParameter(db, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,			"100");
-            addParameter(db, RcsSettingsData.CHAT_IDLE_DURATION, 				"300");
-            addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, 			"3072");
-            addParameter(db, RcsSettingsData.WARN_FILE_TRANSFER_SIZE, 			"2048");
-            addParameter(db, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, 				"3072");
-            addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, 			"54000");
-            addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS, 				"20");
-            addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, 		"10");
-            addParameter(db, RcsSettingsData.MAX_IP_CALL_SESSIONS,				"5");
-            addParameter(db, RcsSettingsData.SMS_FALLBACK_SERVICE, 				TRUE);
-            addParameter(db, RcsSettingsData.WARN_SF_SERVICE,	 				FALSE);
-            addParameter(db, RcsSettingsData.AUTO_ACCEPT_CHAT,			 		FALSE);
-            addParameter(db, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT,            FALSE);
-            addParameter(db, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,			FALSE);
-            addParameter(db, RcsSettingsData.IM_SESSION_START,	 				"1");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_USERNAME, 			"");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, 		"");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, 		"");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, 		"");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_PASSWORD, 			"");
-            addParameter(db, RcsSettingsData.USERPROFILE_IMS_REALM,		 		"");
-		    addParameter(db, RcsSettingsData.IMS_PROXY_ADDR_MOBILE,				"");
-		    addParameter(db, RcsSettingsData.IMS_PROXY_PORT_MOBILE,				"5060");
-		    addParameter(db, RcsSettingsData.IMS_PROXY_ADDR_WIFI,				"");
-		    addParameter(db, RcsSettingsData.IMS_PROXY_PORT_WIFI,				"5060");
-		    addParameter(db, RcsSettingsData.XDM_SERVER, 						"");
-		    addParameter(db, RcsSettingsData.XDM_LOGIN,							"");
-		    addParameter(db, RcsSettingsData.XDM_PASSWORD, 						"");
-		    addParameter(db, RcsSettingsData.FT_HTTP_SERVER, 					"");
-		    addParameter(db, RcsSettingsData.FT_HTTP_LOGIN,						"");
-		    addParameter(db, RcsSettingsData.FT_HTTP_PASSWORD, 					"");
-            addParameter(db, RcsSettingsData.FT_PROTOCOL,                   	RcsSettingsData.FT_PROTOCOL_MSRP);
-            addParameter(db, RcsSettingsData.IM_CONF_URI, 						RcsSettingsData.DEFAULT_GROUP_CHAT_URI);
-            addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI,			"");
-            addParameter(db, RcsSettingsData.COUNTRY_CODE,						"+33");
-            addParameter(db, RcsSettingsData.COUNTRY_AREA_CODE,					"0");
-            addParameter(db, RcsSettingsData.MSISDN,							"");
-            addParameter(db, RcsSettingsData.CAPABILITY_CS_VIDEO, 				FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_IMAGE_SHARING,			TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_VIDEO_SHARING,			TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_IP_VOICE_CALL,			TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,			TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_IM_SESSION,				TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION,		TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER,			TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,		TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,		FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,		FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,		TRUE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,			FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,		FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,			"");
-            addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, 		"300");
-            addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT, 					"5062");
-            addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,   ListeningPoint.UDP);
-            addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,     ListeningPoint.TCP);
-            addParameter(db, RcsSettingsData.TLS_CERTIFICATE_ROOT,              "");
-            addParameter(db, RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE,      "");
-            addParameter(db, RcsSettingsData.SIP_TRANSACTION_TIMEOUT, 			"120");
-            addParameter(db, RcsSettingsData.MSRP_DEFAULT_PORT, 				"20000");
-            addParameter(db, RcsSettingsData.RTP_DEFAULT_PORT, 					"10000");
-            addParameter(db, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, 			"5");
-            addParameter(db, RcsSettingsData.REGISTER_EXPIRE_PERIOD, 			"600000");
-            addParameter(db, RcsSettingsData.REGISTER_RETRY_BASE_TIME, 			"30");
-            addParameter(db, RcsSettingsData.REGISTER_RETRY_MAX_TIME, 			"1800");
-            addParameter(db, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, 			"3600");
-            addParameter(db, RcsSettingsData.REVOKE_TIMEOUT, 					"300");
-            addParameter(db, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, 		RcsSettingsData.DIGEST_AUTHENT);
-            addParameter(db, RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI, 		RcsSettingsData.DIGEST_AUTHENT);
-            addParameter(db, RcsSettingsData.TEL_URI_FORMAT, 					TRUE);
-            addParameter(db, RcsSettingsData.RINGING_SESSION_PERIOD, 			"60");
-            addParameter(db, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, 			"3600");
-            addParameter(db, RcsSettingsData.IS_COMPOSING_TIMEOUT, 				"5");
-            addParameter(db, RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, 	"0");
-            addParameter(db, RcsSettingsData.PERMANENT_STATE_MODE,	 			TRUE);
-            addParameter(db, RcsSettingsData.TRACE_ACTIVATED,			 		TRUE);
-            addParameter(db, RcsSettingsData.TRACE_LEVEL,	 					Integer.toString(Logger.DEBUG_LEVEL));
-            addParameter(db, RcsSettingsData.SIP_TRACE_ACTIVATED, 				FALSE);
-            addParameter(db, RcsSettingsData.SIP_TRACE_FILE,                    Environment.getExternalStorageDirectory() + "/sip.txt");
-            addParameter(db, RcsSettingsData.MEDIA_TRACE_ACTIVATED,				FALSE);
-            addParameter(db, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, 		"1");
-            addParameter(db, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, 		"86400");
-            addParameter(db, RcsSettingsData.CAPABILITY_POLLING_PERIOD,			"3600");
-            addParameter(db, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,			TRUE);
-            addParameter(db, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,			FALSE);
-            addParameter(db, RcsSettingsData.IM_USE_REPORTS,					TRUE);
-            addParameter(db, RcsSettingsData.NETWORK_ACCESS,					Integer.toString(RcsSettingsData.ANY_ACCESS));
-            addParameter(db, RcsSettingsData.SIP_TIMER_T1,						"2000");
-            addParameter(db, RcsSettingsData.SIP_TIMER_T2,						"16000");
-            addParameter(db, RcsSettingsData.SIP_TIMER_T4,						"17000");
-            addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE,					TRUE);
-            addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,				"60");
-            addParameter(db, RcsSettingsData.RCS_APN,							"");
-            addParameter(db, RcsSettingsData.RCS_OPERATOR,						"");
-            addParameter(db, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,				"500");
-            addParameter(db, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,			"200");
-            addParameter(db, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,			"200"); 
-            addParameter(db, RcsSettingsData.GRUU,								TRUE);
-            addParameter(db, RcsSettingsData.USE_IMEI_AS_DEVICE_ID,             TRUE);
-            addParameter(db, RcsSettingsData.CPU_ALWAYS_ON,                     FALSE);
-            addParameter(db, RcsSettingsData.AUTO_CONFIG_MODE,					Integer.toString(RcsSettingsData.HTTPS_AUTO_CONFIG));
-            addParameter(db, RcsSettingsData.PROVISIONING_TERMS_ACCEPTED,       FALSE);
-            addParameter(db, RcsSettingsData.PROVISIONING_VERSION,				"0");
-            addParameter(db, RcsSettingsData.PROVISIONING_TOKEN,				"");
-            addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS,    "");
-            addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,FALSE);
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_PHOTOS,				Environment.getExternalStorageDirectory() + "/joyn/photos/");
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS,				Environment.getExternalStorageDirectory() + "/joyn/videos/");
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,				Environment.getExternalStorageDirectory() + "/joyn/files/");
-            addParameter(db, RcsSettingsData.SECURE_MSRP_OVER_WIFI,	     		FALSE);
-            addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,				FALSE);
-            addParameter(db, RcsSettingsData.KEY_MESSAGING_MODE,				Integer.toString(RcsSettingsData.VALUE_MESSAGING_MODE_NONE));
-            addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, 			FALSE);
-            addParameter(db, RcsSettingsData.KEY_GSMA_RELEASE, 					Integer.toString(RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD));
-            addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_AA,			FALSE);
-            addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_CS,			FALSE);
-            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS,		FALSE);
-            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR,	FALSE);
-            addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY,	FALSE);
-            addParameter(db, RcsSettingsData.TCP_FALLBACK,						FALSE);   
-            addParameter(db, RcsSettingsData.VENDOR_NAME,                       "OrangeLabs");
-            addParameter(db, RcsSettingsData.CONTROL_EXTENSIONS,				FALSE);   
-            addParameter(db, RcsSettingsData.ALLOW_EXTENSIONS,					TRUE);   
-            addParameter(db, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,			"0");   
-            addParameter(db, RcsSettingsData.CONFIGURATION_VALID, 				FALSE);
-            addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING,			FALSE);
-            addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,			Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ASK));
-            addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,		Integer.toString(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC));
-            addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,			Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ONLY_ABOVE_MAX_SIZE));
-        }
+			addParameter(db, RcsSettingsData.SERVICE_ACTIVATED, FALSE);
+			addParameter(db, RcsSettingsData.PRESENCE_INVITATION_RINGTONE, "");
+			addParameter(db, RcsSettingsData.PRESENCE_INVITATION_VIBRATE, TRUE);
+			addParameter(db, RcsSettingsData.CSH_INVITATION_RINGTONE, "");
+			addParameter(db, RcsSettingsData.CSH_INVITATION_VIBRATE, TRUE);
+			addParameter(db, RcsSettingsData.CSH_AVAILABLE_BEEP, TRUE);
+			addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE, "");
+			addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE, TRUE);
+			addParameter(db, RcsSettingsData.CHAT_INVITATION_RINGTONE, "");
+			addParameter(db, RcsSettingsData.CHAT_INVITATION_VIBRATE, TRUE);
+			addParameter(db, RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS, TRUE);
+			addParameter(db, RcsSettingsData.FREETEXT1, ctx.getString(R.string.rcs_settings_label_default_freetext_1));
+			addParameter(db, RcsSettingsData.FREETEXT2, ctx.getString(R.string.rcs_settings_label_default_freetext_2));
+			addParameter(db, RcsSettingsData.FREETEXT3, ctx.getString(R.string.rcs_settings_label_default_freetext_3));
+			addParameter(db, RcsSettingsData.FREETEXT4, ctx.getString(R.string.rcs_settings_label_default_freetext_4));
+			addParameter(db, RcsSettingsData.MIN_BATTERY_LEVEL, "0");
+			addParameter(db, RcsSettingsData.MAX_PHOTO_ICON_SIZE, "256");
+			addParameter(db, RcsSettingsData.MAX_FREETXT_LENGTH, "100");
+			addParameter(db, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, "100");
+			addParameter(db, RcsSettingsData.GEOLOC_EXPIRATION_TIME, "3600");
+			addParameter(db, RcsSettingsData.MIN_STORAGE_CAPACITY, "10240");
+			addParameter(db, RcsSettingsData.MAX_CHAT_PARTICIPANTS, "10");
+			addParameter(db, RcsSettingsData.MAX_CHAT_MSG_LENGTH, "100");
+			addParameter(db, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH, "100");
+			addParameter(db, RcsSettingsData.CHAT_IDLE_DURATION, "300");
+			addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, "3072");
+			addParameter(db, RcsSettingsData.WARN_FILE_TRANSFER_SIZE, "2048");
+			addParameter(db, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, "3072");
+			addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, "54000");
+			addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS, "20");
+			addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, "10");
+			addParameter(db, RcsSettingsData.MAX_IP_CALL_SESSIONS, "5");
+			addParameter(db, RcsSettingsData.SMS_FALLBACK_SERVICE, TRUE);
+			addParameter(db, RcsSettingsData.WARN_SF_SERVICE, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_ACCEPT_CHAT, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER, FALSE);
+			addParameter(db, RcsSettingsData.IM_SESSION_START, "1");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_USERNAME, "");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, "");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, "");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, "");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_PASSWORD, "");
+			addParameter(db, RcsSettingsData.USERPROFILE_IMS_REALM, "");
+			addParameter(db, RcsSettingsData.IMS_PROXY_ADDR_MOBILE, "");
+			addParameter(db, RcsSettingsData.IMS_PROXY_PORT_MOBILE, "5060");
+			addParameter(db, RcsSettingsData.IMS_PROXY_ADDR_WIFI, "");
+			addParameter(db, RcsSettingsData.IMS_PROXY_PORT_WIFI, "5060");
+			addParameter(db, RcsSettingsData.XDM_SERVER, "");
+			addParameter(db, RcsSettingsData.XDM_LOGIN, "");
+			addParameter(db, RcsSettingsData.XDM_PASSWORD, "");
+			addParameter(db, RcsSettingsData.FT_HTTP_SERVER, "");
+			addParameter(db, RcsSettingsData.FT_HTTP_LOGIN, "");
+			addParameter(db, RcsSettingsData.FT_HTTP_PASSWORD, "");
+			addParameter(db, RcsSettingsData.FT_PROTOCOL, RcsSettingsData.FT_PROTOCOL_MSRP);
+			addParameter(db, RcsSettingsData.IM_CONF_URI, RcsSettingsData.DEFAULT_GROUP_CHAT_URI);
+			addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI, "");
+			addParameter(db, RcsSettingsData.COUNTRY_CODE, "+33");
+			addParameter(db, RcsSettingsData.COUNTRY_AREA_CODE, "0");
+			addParameter(db, RcsSettingsData.MSISDN, "");
+			addParameter(db, RcsSettingsData.CAPABILITY_CS_VIDEO, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_IMAGE_SHARING, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_VIDEO_SHARING, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_IM_SESSION, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH, TRUE);
+			addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, "");
+			addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, "300");
+			addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT, "5062");
+			addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE, ListeningPoint.UDP);
+			addParameter(db, RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI, ListeningPoint.TCP);
+			addParameter(db, RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+			addParameter(db, RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+			addParameter(db, RcsSettingsData.SIP_TRANSACTION_TIMEOUT, "120");
+			addParameter(db, RcsSettingsData.MSRP_DEFAULT_PORT, "20000");
+			addParameter(db, RcsSettingsData.RTP_DEFAULT_PORT, "10000");
+			addParameter(db, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, "5");
+			addParameter(db, RcsSettingsData.REGISTER_EXPIRE_PERIOD, "600000");
+			addParameter(db, RcsSettingsData.REGISTER_RETRY_BASE_TIME, "30");
+			addParameter(db, RcsSettingsData.REGISTER_RETRY_MAX_TIME, "1800");
+			addParameter(db, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, "3600");
+			addParameter(db, RcsSettingsData.REVOKE_TIMEOUT, "300");
+			addParameter(db, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, RcsSettingsData.DIGEST_AUTHENT);
+			addParameter(db, RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI, RcsSettingsData.DIGEST_AUTHENT);
+			addParameter(db, RcsSettingsData.TEL_URI_FORMAT, TRUE);
+			addParameter(db, RcsSettingsData.RINGING_SESSION_PERIOD, "60");
+			addParameter(db, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, "3600");
+			addParameter(db, RcsSettingsData.IS_COMPOSING_TIMEOUT, "5");
+			addParameter(db, RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, "0");
+			addParameter(db, RcsSettingsData.PERMANENT_STATE_MODE, TRUE);
+			addParameter(db, RcsSettingsData.TRACE_ACTIVATED, TRUE);
+			addParameter(db, RcsSettingsData.TRACE_LEVEL, Integer.toString(Logger.DEBUG_LEVEL));
+			addParameter(db, RcsSettingsData.SIP_TRACE_ACTIVATED, FALSE);
+			addParameter(db, RcsSettingsData.SIP_TRACE_FILE, Environment.getExternalStorageDirectory() + "/sip.txt");
+			addParameter(db, RcsSettingsData.MEDIA_TRACE_ACTIVATED, FALSE);
+			addParameter(db, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, "1");
+			addParameter(db, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, "86400");
+			addParameter(db, RcsSettingsData.CAPABILITY_POLLING_PERIOD, "3600");
+			addParameter(db, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, TRUE);
+			addParameter(db, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, FALSE);
+			addParameter(db, RcsSettingsData.IM_USE_REPORTS, TRUE);
+			addParameter(db, RcsSettingsData.NETWORK_ACCESS, Integer.toString(RcsSettingsData.ANY_ACCESS));
+			addParameter(db, RcsSettingsData.SIP_TIMER_T1, "2000");
+			addParameter(db, RcsSettingsData.SIP_TIMER_T2, "16000");
+			addParameter(db, RcsSettingsData.SIP_TIMER_T4, "17000");
+			addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE, TRUE);
+			addParameter(db, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, "60");
+			addParameter(db, RcsSettingsData.RCS_APN, "");
+			addParameter(db, RcsSettingsData.RCS_OPERATOR, "");
+			addParameter(db, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, "500");
+			addParameter(db, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, "200");
+			addParameter(db, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, "200");
+			addParameter(db, RcsSettingsData.GRUU, TRUE);
+			addParameter(db, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, TRUE);
+			addParameter(db, RcsSettingsData.CPU_ALWAYS_ON, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_CONFIG_MODE, Integer.toString(RcsSettingsData.HTTPS_AUTO_CONFIG));
+			addParameter(db, RcsSettingsData.PROVISIONING_TERMS_ACCEPTED, FALSE);
+			addParameter(db, RcsSettingsData.PROVISIONING_VERSION, "0");
+			addParameter(db, RcsSettingsData.PROVISIONING_TOKEN, "");
+			addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, "");
+			addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, FALSE);
+			addParameter(db, RcsSettingsData.DIRECTORY_PATH_PHOTOS, Environment.getExternalStorageDirectory() + "/joyn/photos/");
+			addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS, Environment.getExternalStorageDirectory() + "/joyn/videos/");
+			addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES, Environment.getExternalStorageDirectory() + "/joyn/files/");
+			addParameter(db, RcsSettingsData.SECURE_MSRP_OVER_WIFI, FALSE);
+			addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI, FALSE);
+			addParameter(db, RcsSettingsData.KEY_MESSAGING_MODE, Integer.toString(RcsSettingsData.VALUE_MESSAGING_MODE_NONE));
+			addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, FALSE);
+			addParameter(db, RcsSettingsData.KEY_GSMA_RELEASE, Integer.toString(RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD));
+			addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_AA, FALSE);
+			addParameter(db, RcsSettingsData.IPVOICECALL_BREAKOUT_CS, FALSE);
+			addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS, FALSE);
+			addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR, FALSE);
+			addParameter(db, RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY, FALSE);
+			addParameter(db, RcsSettingsData.TCP_FALLBACK, FALSE);
+			addParameter(db, RcsSettingsData.VENDOR_NAME, "OrangeLabs");
+			addParameter(db, RcsSettingsData.CONTROL_EXTENSIONS, FALSE);
+			addParameter(db, RcsSettingsData.ALLOW_EXTENSIONS, TRUE);
+			addParameter(db, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, "0");
+			addParameter(db, RcsSettingsData.CONFIGURATION_VALID, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING, FALSE);
+			addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ASK));
+			addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,
+					Integer.toString(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC));
+			addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,
+					Integer.toString(RcsSettingsData.VALUE_IMAGE_RESIZE_ONLY_ABOVE_MAX_SIZE));
+		}
 
-        /**
-         * Add a parameter in the database
-         *
-         * @param db Database
-         * @param key Key
-         * @param value Value
-         */
-        private void addParameter(SQLiteDatabase db, String key, String value) {
-            String sql = "INSERT INTO " + TABLE + " (" +
-            	RcsSettingsData.KEY_KEY + "," +
-            	RcsSettingsData.KEY_VALUE + ") VALUES ('" +
-            	key + "','" + value + "');";
-            db.execSQL(sql);
-        }
+		/**
+		 * Add a parameter in the database
+		 *
+		 * @param db
+		 *            Database
+		 * @param key
+		 *            Key
+		 * @param value
+		 *            Value
+		 */
+		private void addParameter(SQLiteDatabase db, String key, String value) {
+			String sql = "INSERT INTO " + TABLE + " (" + RcsSettingsData.KEY_KEY + "," + RcsSettingsData.KEY_VALUE + ") VALUES ('"
+					+ key + "','" + value + "');";
+			db.execSQL(sql);
+		}
 
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-        	// Get old data before deleting the table
-        	Cursor oldDataCursor = db.query(TABLE, null, null, null, null, null, null);
+		@Override
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
+			// Get old data before deleting the table
+			Cursor oldDataCursor = db.query(TABLE, null, null, null, null, null, null);
 
-            // Get all the pairs key/value of the old table to insert them back
-            // after update
-        	ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
-        	while(oldDataCursor.moveToNext()){
-        		String key = null;
-        		String value = null;
-        		int index = oldDataCursor.getColumnIndex(RcsSettingsData.KEY_KEY);
-        		if (index!=-1) {
-        			key = oldDataCursor.getString(index);
-        		}
-        		index = oldDataCursor.getColumnIndex(RcsSettingsData.KEY_VALUE);
-        		if (index!=-1) {
-        			value = oldDataCursor.getString(index);
-        		}
-        		if (key!=null && value!=null) {
-	        		ContentValues values = new ContentValues();
-	        		values.put(RcsSettingsData.KEY_KEY, key);
-	        		values.put(RcsSettingsData.KEY_VALUE, value);
-	        		valuesList.add(values);
-        		}
-        	}
-            oldDataCursor.close();
+			// Get all the pairs key/value of the old table to insert them back
+			// after update
+			ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
+			while (oldDataCursor.moveToNext()) {
+				String key = null;
+				String value = null;
+				int index = oldDataCursor.getColumnIndex(RcsSettingsData.KEY_KEY);
+				if (index != -1) {
+					key = oldDataCursor.getString(index);
+				}
+				index = oldDataCursor.getColumnIndex(RcsSettingsData.KEY_VALUE);
+				if (index != -1) {
+					value = oldDataCursor.getString(index);
+				}
+				if (key != null && value != null) {
+					ContentValues values = new ContentValues();
+					values.put(RcsSettingsData.KEY_KEY, key);
+					values.put(RcsSettingsData.KEY_VALUE, value);
+					valuesList.add(values);
+				}
+			}
+			oldDataCursor.close();
 
-        	// Delete old table
-        	db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+			// Delete old table
+			db.execSQL("DROP TABLE IF EXISTS " + TABLE);
 
-            // Recreate table
-        	onCreate(db);
+			// Recreate table
+			onCreate(db);
 
-        	// Put the old values back when possible
-        	for (int i=0; i<valuesList.size();i++) {
-        		ContentValues values = valuesList.get(i);
-        		String whereClause = RcsSettingsData.KEY_KEY + "=" + "\""+ values.getAsString(RcsSettingsData.KEY_KEY) + "\"";
-        		// Update the value with this key in the newly created database
-	    		// If key is not present in the new version, this won't do anything
-	   			db.update(TABLE, values, whereClause, null);
-        	}
-        }
-    }
+			// Put the old values back when possible
+			for (int i = 0; i < valuesList.size(); i++) {
+				ContentValues values = valuesList.get(i);
+				String whereClause = RcsSettingsData.KEY_KEY + "=" + "\"" + values.getAsString(RcsSettingsData.KEY_KEY) + "\"";
+				// Update the value with this key in the newly created database
+				// If key is not present in the new version, this won't do anything
+				db.update(TABLE, values, whereClause, null);
+			}
+		}
+	}
 
-    @Override
-    public boolean onCreate() {
-        openHelper = new DatabaseHelper(getContext());
-        return true;
-    }
+	@Override
+	public boolean onCreate() {
+		openHelper = new DatabaseHelper(getContext());
+		return true;
+	}
 
-    @Override
-    public String getType(Uri uri) {
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case SETTINGS:
-            case RCSAPI_SETTINGS:
-                return "vnd.android.cursor.dir/com.orangelabs.rcs.settings";
-            case SETTINGS_ID:
-            case RCSAPI_SETTINGS_ID:
-                return "vnd.android.cursor.item/com.orangelabs.rcs.settings";
-            default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-    }
+	@Override
+	public String getType(Uri uri) {
+		int match = uriMatcher.match(uri);
+		switch (match) {
+		case SETTINGS:
+		case RCSAPI_SETTINGS:
+			return "vnd.android.cursor.dir/com.orangelabs.rcs.settings";
+		case SETTINGS_ID:
+		case RCSAPI_SETTINGS_ID:
+			return "vnd.android.cursor.item/com.orangelabs.rcs.settings";
+		default:
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+	}
 
 	private StringBuilder buildKeyedSelection(String selectionKey, String selectionValue, String selection) {
 		StringBuilder selectionKeyBuilder = new StringBuilder("(").append(selectionKey).append("=").append(selectionValue)
@@ -379,7 +380,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			return selectionKeyBuilder.append(" AND (").append(selection).append(")");
 		}
 	}
-    
+
 	private StringBuilder restrictSelectionToColumns(String selection) {
 		if (selection == null) {
 			return new StringBuilder(RCSAPI_UPDATE_WHERE_COLUMNS);
@@ -387,14 +388,14 @@ public class RcsSettingsProvider extends ContentProvider {
 			return new StringBuilder("(").append(selection).append(") AND (").append(RCSAPI_QUERY_WHERE_COLUMNS).append(")");
 		}
 	}
-	
-    @Override
-    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(TABLE);
 
-        // Generate the body of the query
-        int match = uriMatcher.match(uri);
+	@Override
+	public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+		qb.setTables(TABLE);
+
+		// Generate the body of the query
+		int match = uriMatcher.match(uri);
 		switch (match) {
 		case SETTINGS:
 			break;
@@ -404,11 +405,12 @@ public class RcsSettingsProvider extends ContentProvider {
 			break;
 		case SETTINGS_ID:
 			// Restrict access to id
-			qb.appendWhere(buildKeyedSelection(RcsSettingsData.KEY_ID,uri.getLastPathSegment(),null));
+			qb.appendWhere(buildKeyedSelection(RcsSettingsData.KEY_ID, uri.getLastPathSegment(), null));
 			break;
 		case RCSAPI_SETTINGS_ID:
-			// Restrict access to id and authorized columns
-			qb.appendWhere(restrictSelectionToColumns(buildKeyedSelection(RcsSettingsData.KEY_ID,uri.getLastPathSegment(),null).toString()));
+			String stringKey = new StringBuilder("'").append(uri.getLastPathSegment()).append("'").toString();
+			// Restrict access to string key
+			qb.appendWhere(restrictSelectionToColumns(buildKeyedSelection(RcsSettingsData.KEY_KEY, stringKey, null).toString()));
 			break;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -427,8 +429,8 @@ public class RcsSettingsProvider extends ContentProvider {
 			}
 			throw e;
 		}
-    }
-    
+	}
+
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
 		int count = 0;
@@ -444,11 +446,11 @@ public class RcsSettingsProvider extends ContentProvider {
 			count = db.update(TABLE, values, where, whereArgs);
 			break;
 		case SETTINGS_ID:
-			where = buildKeyedSelection(RcsSettingsData.KEY_ID,uri.getLastPathSegment(),where).toString();
+			where = buildKeyedSelection(RcsSettingsData.KEY_ID, uri.getLastPathSegment(), where).toString();
 			count = db.update(TABLE, values, where, whereArgs);
 			break;
 		case RCSAPI_SETTINGS_ID:
-			where = buildKeyedSelection(RcsSettingsData.KEY_ID,uri.getLastPathSegment(),where).toString();
+			where = buildKeyedSelection(RcsSettingsData.KEY_ID, uri.getLastPathSegment(), where).toString();
 			where = restrictSelectionToColumns(where).toString();
 			count = db.update(TABLE, values, where, whereArgs);
 			break;
@@ -461,13 +463,13 @@ public class RcsSettingsProvider extends ContentProvider {
 		return count;
 	}
 
-    @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
-        throw new UnsupportedOperationException("Cannot insert URI " + uri);
-    }
+	@Override
+	public Uri insert(Uri uri, ContentValues initialValues) {
+		throw new UnsupportedOperationException("Cannot insert URI " + uri);
+	}
 
-    @Override
-    public int delete(Uri uri, String where, String[] whereArgs) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public int delete(Uri uri, String where, String[] whereArgs) {
+		throw new UnsupportedOperationException();
+	}
 }

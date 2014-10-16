@@ -2273,7 +2273,7 @@ public class RcsSettings {
 	 * @return the default messaging method (0: AUTOMATIC, 1: JOYN, 2: NON_JOYN)
 	 */
 	public int getDefaultMessagingMethod() {
-		return readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.VALUE_DEF_MSG_METHOD_JOYN) % 3;
+		return readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.VALUE_DEF_MSG_METHOD_RCS) % 3;
 	}
 	
 	/**

@@ -37,12 +37,30 @@ public class JoynServiceConfiguration {
 	private static final String[] PROJECTION = new String[] { Settings.VALUE };
 	private static final String WHERE_CLAUSE = new StringBuilder(Settings.KEY).append("=?").toString();
 	
+	// TODO make public with API 1.5.1
+	private static final String SERVICE_ACTIVATED = "ServiceActivated";
+	
+	/**
+	 * Checks the RCS service is activated.
+	 * 
+	 * @param ctx
+	 *            Context
+	 * @return Boolean True if the RCS service is activated.
+	 */
+	public static boolean isServiceActivated(Context ctx) {
+		try {
+			return Boolean.parseBoolean(getStringValueSetting(ctx, SERVICE_ACTIVATED));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	/**
 	 * Checks the RCS configuration validity.
 	 * 
 	 * @param ctx
 	 *            Context
-	 * @return Boolean True if the joyn configuration is valid.
+	 * @return Boolean True if the RCS configuration is valid.
 	 */
 	public static boolean isConfigValid(Context ctx) {
 		try {
@@ -53,19 +71,19 @@ public class JoynServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the display name associated to the joyn user account.<br>
-	 * The display name may be updated by the end user via the joyn settings application.
+	 * Returns the display name associated to the RCS user account.<br>
+	 * The display name may be updated by the end user via the RCS settings application.
 	 * 
 	 * @param ctx
 	 *            Context
-	 * @return Display name
+	 * @return the display name
 	 */
 	public static String getMyDisplayName(Context ctx) {
 		return getStringValueSetting(ctx, Settings.MY_DISPLAY_NAME);
 	}
 	
 	/**
-	 * Update the display name associated to the joyn user account.
+	 * Update the display name associated to the RCS user account.
 	 * @param ctx Context
 	 * @param name the new display name
 	 */
@@ -75,7 +93,7 @@ public class JoynServiceConfiguration {
 		}
 		ContentValues values = new ContentValues();
 		values.put(Settings.VALUE, name);
-		updateSettings( ctx, values, Settings.MY_DISPLAY_NAME );
+		updateSettings(ctx, values, Settings.MY_DISPLAY_NAME);
 	}
 	
 	/**
@@ -132,7 +150,7 @@ public class JoynServiceConfiguration {
 	}
 	
 	/**
-	 * Returns the default messaging method which can be AUTOMATIC, JOYN or NON_JOYN.
+	 * Returns the default messaging method which can be AUTOMATIC, RCS or NON_RCS.
 	 * 
 	 * @param ctx
 	 *            the context
@@ -153,15 +171,15 @@ public class JoynServiceConfiguration {
 	 * @param ctx
 	 *            Context
 	 * @param method
-	 *            the default messaging method which can be AUTOMATIC, JOYN or NON_JOYN.
+	 *            the default messaging method which can be AUTOMATIC, RCS or NON_RCS.
 	 */
 	public static void setDefaultMessagingMethod(Context ctx, int method) {
-		if (method < DefaultMessagingMethods.AUTOMATIC || method > DefaultMessagingMethods.NON_JOYN) {
+		if (method < DefaultMessagingMethods.AUTOMATIC || method > DefaultMessagingMethods.NON_RCS) {
 			throw new IllegalArgumentException("Invalid default messaging method");
 		}
 		ContentValues values = new ContentValues();
 		values.put(Settings.VALUE, method);
-		updateSettings( ctx, values, Settings.DEFAULT_MESSAGING_METHOD);
+		updateSettings(ctx, values, Settings.DEFAULT_MESSAGING_METHOD);
 	}
 	
 	/**
@@ -207,7 +225,7 @@ public class JoynServiceConfiguration {
 	}
 	
 	/**
-     * Joyn Service Configuration Settings class
+     * RCS Service Configuration Settings class
      *
      */
 	public static class Settings {
@@ -217,11 +235,6 @@ public class JoynServiceConfiguration {
 		 */
 		public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.settings/settings");
 
-		/**
-		 * The name of the column containing the unique ID for a row.
-		 */
-		public static final String ID = "_id";
-		
 		/**
 		 * The name of the column containing the key setting for a row.
 		 */
@@ -307,14 +320,14 @@ public class JoynServiceConfiguration {
 			public static final int AUTOMATIC = 0;
 
 			/**
-			 * Joyn
+			 * RCS
 			 */
-			public static final int JOYN = 1;
+			public static final int RCS = 1;
 
 			/**
 			 * other methods
 			 */
-			public static final int NON_JOYN = 2;
+			public static final int NON_RCS = 2;
 
 		}
 	}

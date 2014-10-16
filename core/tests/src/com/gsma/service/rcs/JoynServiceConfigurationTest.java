@@ -77,8 +77,8 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 		JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC);
 		assertEquals(JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC,
 				JoynServiceConfiguration.getDefaultMessagingMethod(getContext()));
-		JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN);
-		assertEquals(JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN,
+		JoynServiceConfiguration.setDefaultMessagingMethod(getContext(), JoynServiceConfiguration.Settings.DefaultMessagingMethods.RCS);
+		assertEquals(JoynServiceConfiguration.Settings.DefaultMessagingMethods.RCS,
 				JoynServiceConfiguration.getDefaultMessagingMethod(getContext()));
 		rcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
 	}
@@ -93,6 +93,11 @@ public class JoynServiceConfigurationTest extends AndroidTestCase {
 		}
 	}
 
+	public void testIsServiceActivated() {
+		boolean serviceActivated = rcsSettings.isServiceActivated();
+		assertEquals(serviceActivated, JoynServiceConfiguration.isServiceActivated(getContext()));
+	}
+	
 	public void testGetMyCountryCode() {
 		String countryCode = rcsSettings.getCountryCode();
 		assertEquals(countryCode, JoynServiceConfiguration.getMyCountryCode(getContext()));

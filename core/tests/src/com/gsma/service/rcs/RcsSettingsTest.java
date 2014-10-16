@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,8 +36,7 @@ public class RcsSettingsTest extends AndroidTestCase {
 
 	private RcsSettings rcsSettings;
 
-	final String[] SETTINGS_PROJECTION = { JoynServiceConfiguration.Settings.ID, JoynServiceConfiguration.Settings.KEY,
-			JoynServiceConfiguration.Settings.VALUE };
+	final String[] SETTINGS_PROJECTION = { JoynServiceConfiguration.Settings.KEY, JoynServiceConfiguration.Settings.VALUE };
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -69,8 +67,7 @@ public class RcsSettingsTest extends AndroidTestCase {
 	public void testRcsSettingsDelete() {
 		Throwable exception = null;
 		try {
-			String mSelectionClause = JoynServiceConfiguration.Settings.ID + " = -1";
-			int count = cr.delete(JoynServiceConfiguration.Settings.CONTENT_URI, mSelectionClause, null);
+			int count = cr.delete(JoynServiceConfiguration.Settings.CONTENT_URI, null, null);
 			assertTrue(count == 0);
 		} catch (Exception ex) {
 			exception = ex;
@@ -85,11 +82,10 @@ public class RcsSettingsTest extends AndroidTestCase {
 			String[] whereArgs = new String[] { JoynServiceConfiguration.Settings.MY_COUNTRY_CODE };
 			c = cr.query(JoynServiceConfiguration.Settings.CONTENT_URI, null, where, whereArgs, null);
 			// Check projection
-			assertTrue(c.getColumnCount() == SETTINGS_PROJECTION.length);
 			String[] columnNames = c.getColumnNames();
 			Set<String> columnNamesSet = new HashSet<String>(Arrays.asList(columnNames));
 			Set<String> projectionSet = new HashSet<String>(Arrays.asList(SETTINGS_PROJECTION));
-			assertTrue(projectionSet.containsAll(columnNamesSet));
+			assertTrue(columnNamesSet.containsAll(projectionSet));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		} finally {
@@ -142,42 +138,21 @@ public class RcsSettingsTest extends AndroidTestCase {
 			}
 		}
 	}
-
-	private int getIdForCC() {
-		Cursor c = null;
-		int id = -1;
-		// Get ID for MY_COUNTRY_CODE
-		try {
-			String where = new StringBuilder(JoynServiceConfiguration.Settings.KEY).append("=?").toString();
-			String[] whereArgs = new String[] { JoynServiceConfiguration.Settings.MY_COUNTRY_CODE };
-			c = cr.query(JoynServiceConfiguration.Settings.CONTENT_URI, null, where, whereArgs, null);
-			if (c.moveToFirst()) {
-				id = c.getInt(c.getColumnIndexOrThrow(JoynServiceConfiguration.Settings.ID));
-			}
-		} catch (Exception e) {
-		} finally {
-			if (c != null) {
-				c.close();
-			}
-		}
-		return id;
-	}
-
-	public void testRcsSettingsQueryByID() {
-		int ccID = getIdForCC();
-		Uri contenUtiWithId = ContentUris.withAppendedId(JoynServiceConfiguration.Settings.CONTENT_URI, ccID);
+	
+	public void testRcsSettingsQueryByKeyTer() {
 		Cursor c = null;
 		try {
-			c = cr.query(contenUtiWithId, null, null, null, null);
+			Uri uri = Uri.withAppendedPath(JoynServiceConfiguration.Settings.CONTENT_URI, JoynServiceConfiguration.Settings.MY_COUNTRY_CODE);
+			System.out.println("Uri = "+uri);
+			c = cr.query(uri, null, null, null, null);
 			assertTrue(c.getCount() == 1);
 			if (c.moveToFirst()) {
 				String key = c.getString(c.getColumnIndexOrThrow(JoynServiceConfiguration.Settings.KEY));
 				assertTrue(key.equals(JoynServiceConfiguration.Settings.MY_COUNTRY_CODE));
 			} else {
-				fail("Cannot find by ID " + ccID);
+				fail("Cannot find ID");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			fail(e.getMessage());
 		} finally {
 			if (c != null) {
@@ -189,24 +164,13 @@ public class RcsSettingsTest extends AndroidTestCase {
 	public void testRcsSessionsUpdateByKey() {
 		int defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
 		ContentValues values = new ContentValues();
-		values.put(Settings.VALUE, JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_JOYN);
+		values.put(Settings.VALUE, JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS);
 		String where = new StringBuilder(Settings.KEY).append("=?").toString();
 		String[] whereArg = new String[] { Settings.DEFAULT_MESSAGING_METHOD };
 		int row = cr.update(Settings.CONTENT_URI, values, where, whereArg);
 		assertTrue(row == 1);
-		assertTrue(rcsSettings.getDefaultMessagingMethod() == JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_JOYN);
+		assertTrue(rcsSettings.getDefaultMessagingMethod() == JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS);
 		rcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
 	}
 
-	public void testRcsSessionsUpdateById() {
-		String ccSav = rcsSettings.getCountryCode();
-		int ccID = getIdForCC();
-		Uri contenUtiWithId = ContentUris.withAppendedId(JoynServiceConfiguration.Settings.CONTENT_URI, ccID);
-		ContentValues values = new ContentValues();
-		values.put(Settings.VALUE, "+44");
-		int row = cr.update(contenUtiWithId, values, null, null);
-		assertTrue(row == 1);
-		assertTrue(rcsSettings.getCountryCode().equals("+44"));
-		rcsSettings.setCountryCode(ccSav);
-	}
 }

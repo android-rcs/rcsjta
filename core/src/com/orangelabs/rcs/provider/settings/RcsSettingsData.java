@@ -41,7 +41,7 @@ public class RcsSettingsData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_ID = JoynServiceConfiguration.Settings.ID;
+	static final String KEY_ID = "_id";
 
 	/**
 	 * Column name
@@ -352,8 +352,8 @@ public class RcsSettingsData {
      * Possible values for default messaging method 
      */
 	public static final int VALUE_DEF_MSG_METHOD_AUTOMATIC = JoynServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC;
-	public static final int VALUE_DEF_MSG_METHOD_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.JOYN;
-	public static final int VALUE_DEF_MSG_METHOD_NON_JOYN = JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_JOYN;
+	public static final int VALUE_DEF_MSG_METHOD_RCS = JoynServiceConfiguration.Settings.DefaultMessagingMethods.RCS;
+	public static final int VALUE_DEF_MSG_METHOD_NON_RCS = JoynServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS;
 	
     // ---------------------------------------------------------------------------
 	// User profile settings
