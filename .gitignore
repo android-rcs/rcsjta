@@ -4,3 +4,5 @@ bin
 .settings
 rcs_api.jar
 project.properties
+*.classpath
+*.project

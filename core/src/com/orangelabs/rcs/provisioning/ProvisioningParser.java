@@ -19,12 +19,9 @@
 package com.orangelabs.rcs.provisioning;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax2.sip.ListeningPoint;
 
 import org.w3c.dom.Document;
@@ -76,33 +73,13 @@ public class ProvisioningParser {
 	};
 
 	/**
-	 * A map to associate Root node of String type to enumerated type 
+	 * Enumerated type for the IMS server version
+	 *
 	 */
-	static final Map<String, RootNodeType> String2RootNodeTypeMap = new HashMap<String, RootNodeType>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		{
-			put("VERS", RootNodeType.VERS);
-			put("TOKEN", RootNodeType.TOKEN);
-			put("MSG", RootNodeType.MSG);
-			put("APPLICATION", RootNodeType.APPLICATION);
-			put("IMS", RootNodeType.IMS);
-			put("PRESENCE", RootNodeType.PRESENCE);
-			put("XDMS", RootNodeType.XDMS);
-			put("IM", RootNodeType.IM);
-			put("CAPDISCOVERY", RootNodeType.CAPDISCOVERY);
-			put("APN", RootNodeType.APN);
-			put("OTHER", RootNodeType.OTHER);
-			put("SERVICES", RootNodeType.SERVICES);
-			put("SUPL", RootNodeType.SUPL);
-			put("SERVICEPROVIDEREXT", RootNodeType.SERVICEPROVIDEREXT);
-			put("UX", RootNodeType.UX);
-		}
+	enum ImsServerVersion {
+		JOYN, NON_JOYN
 	};
-
+	
     /**
      * Constructor
      *
@@ -172,15 +149,16 @@ public class ProvisioningParser {
                 if (childnode.getNodeName().equals("characteristic")) {
                     if (childnode.getAttributes().getLength() > 0) {
                         Node typenode = childnode.getAttributes().getNamedItem("type");
-                        if (typenode != null) {
+                        if (typenode != null && typenode.getNodeValue() != null) {
                             if (logger.isActivated()) {
                                 logger.debug("Node " + childnode.getNodeName() + " with type "
                                         + typenode.getNodeValue());
                             }
                             nodeNumber++;
-							RootNodeType nodeType = String2RootNodeTypeMap.get(typenode.getNodeValue().toUpperCase());
-							if (nodeType != null) {
-								switch (nodeType) {
+							String nodeType = typenode.getNodeValue().toUpperCase();
+							try {
+								RootNodeType rootNodeType = RootNodeType.valueOf(nodeType);
+								switch (rootNodeType) {
 								case VERS:
 									parseVersion(childnode);
 									break;
@@ -221,12 +199,16 @@ public class ProvisioningParser {
 									parseServiceProviderExt(childnode);
 									break;
 								case UX:
-									parseUx(childnode, false);
+									parseUx(childnode, ImsServerVersion.NON_JOYN);
 									break;
 								default:
 									if (logger.isActivated()) {
 										logger.warn("unhandled node type: " + nodeType);
 									}
+								}
+							} catch (IllegalArgumentException e) {
+								if (logger.isActivated()) {
+									logger.warn("invalid node type: " + nodeType);
 								}
 							}
                         }
@@ -746,7 +728,7 @@ public class ProvisioningParser {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
                             if (typenode.getNodeValue().equalsIgnoreCase("UX")) {
-                                parseUx(childnode, true);
+                                parseUx(childnode, ImsServerVersion.JOYN);
                             }
                         }
                     }
@@ -759,9 +741,9 @@ public class ProvisioningParser {
      * Parse Ux
      * 
      * @param node Node
-     * @param isJoynType 
+     * @param isJoyn 
      */
-	private void parseUx(Node node, boolean isJoynType) {
+	private void parseUx(Node node, ImsServerVersion isJoyn) {
 		String messagingUX = null;
 
 		Node childnode = node.getFirstChild();
@@ -774,7 +756,7 @@ public class ProvisioningParser {
 						if (messagingUX.equals("1")) {
 							RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_INTEGRATED);
 						} else {
-							if (isJoynType) {
+							if (ImsServerVersion.JOYN.equals(isJoyn)) {
 								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_CONVERGED);
 							} else {
 								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_SEAMLESS);
