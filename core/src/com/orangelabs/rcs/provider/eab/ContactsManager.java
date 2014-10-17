@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import android.accounts.AccountManager;
@@ -155,11 +153,6 @@ public final class ContactsManager {
      */
     private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactsProvider.MIME_TYPE_IP_VIDEO_CALL;
     
-	/**
-	 * A map between mime type string and enumerated
-	 */
-	private static Map<String, MimeType> mimeType2EnumeratedMap;
-    
     /**
      * ONLINE available status
      */
@@ -251,19 +244,6 @@ public final class ContactsManager {
      */
     private ContactsManager(Context ctx) {
     	this.ctx = ctx;
-    	// Build the mime type map
-		mimeType2EnumeratedMap = new HashMap<String, MimeType>();
-		mimeType2EnumeratedMap.put(MIMETYPE_NUMBER, MimeType.NUMBER);
-		mimeType2EnumeratedMap.put(MIMETYPE_RCS_STATUS, MimeType.RCS_STATUS);
-		mimeType2EnumeratedMap.put(MIMETYPE_REGISTRATION_STATE, MimeType.REGISTRATION_STATE);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IMAGE_SHARING, MimeType.CAPABILITY_IMAGE_SHARING);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_VIDEO_SHARING, MimeType.CAPABILITY_VIDEO_SHARING);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IM_SESSION, MimeType.CAPABILITY_IM_SESSION);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_FILE_TRANSFER, MimeType.CAPABILITY_FILE_TRANSFER);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH, MimeType.CAPABILITY_GEOLOCATION_PUSH);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_EXTENSIONS, MimeType.CAPABILITY_EXTENSIONS);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IP_VOICE_CALL, MimeType.CAPABILITY_IP_VOICE_CALL);
-		mimeType2EnumeratedMap.put(MIMETYPE_CAPABILITY_IP_VIDEO_CALL, MimeType.CAPABILITY_IP_VIDEO_CALL);
     }
 
 	/**
@@ -2172,9 +2152,9 @@ public final class ContactsManager {
 
 		while (cursor.moveToNext()) {
 			String mimeTypeStr = cursor.getString(cursor.getColumnIndex(Data.MIMETYPE));
-			// Convert mime type string to enumerated
-			MimeType mimeType = mimeType2EnumeratedMap.get(mimeTypeStr);
-			if (mimeType != null) {
+			try {
+				// Convert mime type string to enumerated
+				MimeType mimeType = MimeType.valueOf(mimeTypeStr);
 				switch (mimeType) {
 				case CAPABILITY_IMAGE_SHARING:
 					// Set capability image sharing
@@ -2237,7 +2217,14 @@ public final class ContactsManager {
 				}
 					break;
 				default:
+					if (logger.isActivated()) {
+						logger.warn("Unhandled mimetype " + mimeTypeStr);
+					}
 					break;
+				}
+			} catch (Exception e) {
+				if (logger.isActivated()) {
+					logger.warn("Invalid mimetype " + mimeTypeStr);
 				}
 			}
 		}
