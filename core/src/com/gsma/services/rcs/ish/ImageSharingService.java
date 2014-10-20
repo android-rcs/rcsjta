@@ -160,10 +160,7 @@ public class ImageSharingService extends RcsService {
 	 * @param file Uri of file to share
 	 * @throws RcsServiceException
 	 */
-	private void tryToTakePersistableUriPermission(Uri file) throws RcsServiceException {
-		if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-			return;
-		}
+	private void takePersistableUriPermission(Uri file) throws RcsServiceException {
 		try {
 			ContentResolver contentResolver = ctx.getContentResolver();
 			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
@@ -180,6 +177,26 @@ public class ImageSharingService extends RcsService {
 	}
 
     /**
+     * Grant permission to the stack and persist access permission
+     * 
+     * @param file the file URI
+     * @throws RcsServiceException
+     */
+    private void tryToGrantAndPersistUriPermission(Uri file) throws RcsServiceException {
+        if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+            // Granting temporary read Uri permission from client to
+            // stack service if it is a content URI
+            grantUriPermissionToStackServices(file);
+            // Persist Uri access permission for the client
+            // to be able to read the contents from this Uri even
+            // after the client is restarted after device reboot.
+            if (android.os.Build.VERSION.SDK_INT >= KITKAT_VERSION_CODE) {
+                takePersistableUriPermission(file);
+            }
+        }
+    }
+
+    /**
      * Shares an image with a contact. The parameter file contains the URI
      * of the image to be shared (for a local or a remote image). An exception if thrown if there is
      * no ongoing CS call. The parameter contact supports the following formats: MSISDN
@@ -194,15 +211,7 @@ public class ImageSharingService extends RcsService {
     public ImageSharing shareImage(ContactId contact, Uri file) throws RcsServiceException {
 		if (api != null) {
 			try {
-				if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-					// Granting temporary read Uri permission from client to
-					// stack service if it is a content URI
-					grantUriPermissionToStackServices(file);
-					// Try to persist Uri access permission for the client
-					// to be able to read the contents from this Uri even
-					// after the client is restarted after device reboot.
-					tryToTakePersistableUriPermission(file);
-				}
+				tryToGrantAndPersistUriPermission(file);
 				IImageSharing sharingIntf = api.shareImage(contact, file);
 				if (sharingIntf != null) {
 					return new ImageSharing(sharingIntf);
