@@ -27,7 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
@@ -87,7 +87,7 @@ public abstract class InitiateMultimediaSession extends Activity {
 				ContactId contact = contactUtils.formatContactId(remoteContact);
 				// Initiate session
 				initiateSession(contact);
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Cannot parse contact " + remoteContact);
 				}

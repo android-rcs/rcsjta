@@ -30,8 +30,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.Chat;
 import com.gsma.services.rcs.chat.ChatListener;
@@ -39,7 +39,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -136,7 +136,7 @@ public class SingleChatView extends ChatView {
 		}
         super.onCreate(savedInstanceState);
         
-		if (connectionManager != null && !connectionManager.isServiceConnected(RcsService.CHAT,RcsService.CONTACTS)) {
+		if (connectionManager != null && !connectionManager.isServiceConnected(RcsServiceName.CHAT,RcsServiceName.CONTACTS)) {
 			return;
 		}
 		try {
@@ -157,10 +157,10 @@ public class SingleChatView extends ChatView {
 			}
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(chatService.getConfiguration().getIsComposingTimeout() * 1000);
-		} catch (JoynServiceNotAvailableException e) {
+		} catch (RcsServiceNotAvailableException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
@@ -181,7 +181,7 @@ public class SingleChatView extends ChatView {
 		// Replace the value of intent
 		setIntent(intent);
 		
-		if (connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			processIntent(false);
 		}
 	}
@@ -205,10 +205,10 @@ public class SingleChatView extends ChatView {
 			try {
 				// Open chat
 				chat = chatService.openSingleChat(contact);
-			} catch (JoynServiceNotAvailableException e) {
+			} catch (RcsServiceNotAvailableException e) {
 				e.printStackTrace();
 				Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				e.printStackTrace();
 				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 			}
@@ -234,10 +234,10 @@ public class SingleChatView extends ChatView {
 				try {
 					// Open chat
 					chat = chatService.openSingleChat(contact);
-				} catch (JoynServiceNotAvailableException e) {
+				} catch (RcsServiceNotAvailableException e) {
 					e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-				} catch (JoynServiceException e) {
+				} catch (RcsServiceException e) {
 					e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 				}
@@ -260,7 +260,7 @@ public class SingleChatView extends ChatView {
 				for (String msgId : unreadMessageIDs) {
 					chatService.markMessageAsRead(msgId);
 				}
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "processIntent failed to mark chat message as read");
 				}
@@ -287,7 +287,7 @@ public class SingleChatView extends ChatView {
 
 				try {
 					chatService.markMessageAsRead(messageDao.getMsgId());
-				} catch (JoynServiceException e) {
+				} catch (RcsServiceException e) {
 					if (LogUtils.isActive) {
 						Log.e(LOGTAG, "onNewIntent failed to mark chat message as read");
 					}
@@ -394,10 +394,10 @@ public class SingleChatView extends ChatView {
 	}
     
 	private void removeServiceListener() {
-		if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
+		if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 			try {
 				connectionManager.getChatApi().removeOneToOneChatEventListener(chatListener);
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "removeServiceListener failed", e);
 				}

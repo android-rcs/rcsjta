@@ -42,15 +42,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
@@ -247,15 +247,15 @@ public class InitiateGeolocSharing extends Activity {
         
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.GEOLOC_SHARING)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsService.GEOLOC_SHARING);
+		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.GEOLOC_SHARING);
 		try {
 			// Add service listener
 			connectionManager.getGeolocSharingApi().addEventListener(gshListener);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
@@ -270,7 +270,7 @@ public class InitiateGeolocSharing extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.GEOLOC_SHARING)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
 			// Remove geoloc sharing listener
 			try {
 				connectionManager.getGeolocSharingApi().removeEventListener(gshListener);
@@ -323,7 +323,7 @@ public class InitiateGeolocSharing extends Activity {
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateGeolocSharing.this);
     		try {
     			contact = contactUtils.formatContactId(cursor.getString(1));
-    		} catch (JoynContactFormatException e1) {
+    		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;
     		}

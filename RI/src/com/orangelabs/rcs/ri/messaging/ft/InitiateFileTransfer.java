@@ -44,15 +44,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -260,11 +260,11 @@ public class InitiateFileTransfer extends Activity {
 		
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsService.FILE_TRANSFER);
+		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.FILE_TRANSFER);
 		try {
 			// Add service listener
 			connectionManager.getFileTransferApi().addOneToOneFileTransferListener(ftListener);
@@ -311,10 +311,10 @@ public class InitiateFileTransfer extends Activity {
 					Log.d(LOGTAG, "onCreate");
 				}
 			}
-		} catch (JoynServiceNotAvailableException e) {
+		} catch (RcsServiceNotAvailableException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
@@ -330,7 +330,7 @@ public class InitiateFileTransfer extends Activity {
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.FILE_TRANSFER)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
 			// Remove file transfer listener
 			try {
 				connectionManager.getFileTransferApi().removeOneToOneFileTransferListener(ftListener);
@@ -396,7 +396,7 @@ public class InitiateFileTransfer extends Activity {
         ContactId remote;
 		try {
 			remote = contactUtils.formatContactId(cursor.getString(1));
-		} catch (JoynContactFormatException e1) {
+		} catch (RcsContactFormatException e1) {
 			Utils.showMessage(this, getString(R.string.label_invalid_contact,cursor.getString(1)));
 	    	return;
 		}
@@ -618,7 +618,7 @@ public class InitiateFileTransfer extends Activity {
 			pauseBtn.setEnabled(false);
 			try {
 				fileTransfer.pauseTransfer();
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				e.printStackTrace();
 				hideProgressDialog();
 				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_pause_failed), exitOnce);
@@ -637,7 +637,7 @@ public class InitiateFileTransfer extends Activity {
 			pauseBtn.setEnabled(true);
 			try {
 				fileTransfer.resumeTransfer();
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				e.printStackTrace();
 				hideProgressDialog();
 				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_resume_failed), exitOnce);

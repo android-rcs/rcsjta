@@ -36,7 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall;
@@ -44,7 +44,7 @@ import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
 import com.gsma.services.rcs.ipcall.IPCallService;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ipcall.media.MyIPCallPlayer;
@@ -225,10 +225,10 @@ public class IPCallView extends Activity {
 
         // Register to API connection manager
      	connectionManager = ApiConnectionManager.getInstance(this);
-     	if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IP_CALL, RcsService.CONTACTS)) {
+     	if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.IP_CALL, RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsService.IMAGE_SHARING, RcsService.CONTACTS);
+			connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.IMAGE_SHARING, RcsServiceName.CONTACTS);
 			initiateIpCall();
 		}
     }
@@ -240,7 +240,7 @@ public class IPCallView extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.IP_CALL)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.IP_CALL)) {
 			// Remove service listener
 			try {
 				connectionManager.getIPCallApi().removeEventListener(callListener);
@@ -372,7 +372,7 @@ public class IPCallView extends Activity {
 	        ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
 	        holdBtn.setChecked(false);
 	        holdBtn.setOnCheckedChangeListener(btnHoldListener);        
-		} catch(JoynServiceException e) {
+		} catch(RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}

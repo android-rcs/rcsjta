@@ -23,7 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService.Build;
+import com.gsma.services.rcs.RcsService.Build;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**

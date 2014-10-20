@@ -32,8 +32,8 @@ import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharing;
@@ -41,7 +41,7 @@ import com.gsma.services.rcs.vsh.VideoSharingListener;
 import com.gsma.services.rcs.vsh.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoRenderer;
@@ -221,10 +221,10 @@ public class ReceiveVideoSharing extends Activity {
 
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.VIDEO_SHARING, RcsService.CONTACTS)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.VIDEO_SHARING, RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsService.VIDEO_SHARING, RcsService.CONTACTS);
+			connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.VIDEO_SHARING, RcsServiceName.CONTACTS);
 			initiateVideoSharing();
 		}
     }
@@ -236,7 +236,7 @@ public class ReceiveVideoSharing extends Activity {
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.VIDEO_SHARING)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
 			// Remove video sharing listener
 			try {
 				if (LogUtils.isActive) {
@@ -280,10 +280,10 @@ public class ReceiveVideoSharing extends Activity {
 			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
 			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
 			builder.show();
-	    } catch(JoynServiceNotAvailableException e) {
+	    } catch(RcsServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-	    } catch(JoynServiceException e) {
+	    } catch(RcsServiceException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}

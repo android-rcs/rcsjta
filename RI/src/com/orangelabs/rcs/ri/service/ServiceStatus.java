@@ -26,8 +26,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.orangelabs.rcs.ri.R;
 
@@ -36,11 +36,11 @@ import com.orangelabs.rcs.ri.R;
  *  
  * @author Jean-Marc AUFFRET
  */
-public class ServiceStatus extends Activity implements JoynServiceListener {
+public class ServiceStatus extends Activity implements RcsServiceListener {
 	/**
 	 * Service API
 	 */
-    private JoynService serviceApi;
+    private RcsService serviceApi;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
 
         // Register service up event listener
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(JoynService.ACTION_SERVICE_UP);
+        intentFilter.addAction(RcsService.ACTION_SERVICE_UP);
         registerReceiver(serviceUpListener, intentFilter);
     	
     	// Instanciate API
@@ -98,7 +98,7 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
      * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
      * @param error Error
-     * @see JoynService.Error
+     * @see RcsService.Error
      */
     public void onServiceDisconnected(int error) {
     	// Display service status
@@ -116,7 +116,7 @@ public class ServiceStatus extends Activity implements JoynServiceListener {
     }
     
     /**
-     * Joyn service up event listener
+     * RCS service up event listener
      */
     private BroadcastReceiver serviceUpListener = new BroadcastReceiver() {
         @Override

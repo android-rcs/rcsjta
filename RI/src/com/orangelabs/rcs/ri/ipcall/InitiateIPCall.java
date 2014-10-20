@@ -29,7 +29,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
@@ -83,7 +83,7 @@ public class InitiateIPCall extends Activity {
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateIPCall.this);
     		try {
     			contact = contactUtils.formatContactId(cursor.getString(1));
-    		} catch (JoynContactFormatException e1) {
+    		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateIPCall.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;
     		}

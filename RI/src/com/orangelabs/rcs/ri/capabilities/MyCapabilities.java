@@ -24,11 +24,11 @@ import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -61,11 +61,11 @@ public class MyCapabilities extends Activity {
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsService.CAPABILITY);
+		connectionManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
     }
     
     @Override
@@ -106,9 +106,9 @@ public class MyCapabilities extends Activity {
 	        // Set automata
 	        CheckBox automata = (CheckBox)findViewById(R.id.automata);
 	        automata.setChecked(capabilities.isAutomata());
-	    } catch(JoynServiceNotAvailableException e) {
+	    } catch(RcsServiceNotAvailableException e) {
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-	    } catch(JoynServiceException e) {
+	    } catch(RcsServiceException e) {
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 	    }
     }

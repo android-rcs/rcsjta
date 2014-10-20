@@ -29,8 +29,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceListener;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contacts.ContactsService;
@@ -59,10 +59,10 @@ public class ApiConnectionManager {
 	private static volatile ApiConnectionManager instance;
 
 	/**
-	 * RCS services
+	 * Enumerated type for RCS service name
 	 *
 	 */
-	public enum RcsService {
+	public enum RcsServiceName {
 		CAPABILITY, CONTACTS, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, IP_CALL, MULTIMEDIA;
 	};
 
@@ -74,7 +74,7 @@ public class ApiConnectionManager {
 		/**
 		 * The set of monitored services
 		 */
-		private Set<RcsService> monitoredServices;
+		private Set<RcsServiceName> monitoredServices;
 		/**
 		 * The activity to notify
 		 */
@@ -94,11 +94,11 @@ public class ApiConnectionManager {
 		 * @param services
 		 *            the list of services to monitor
 		 */
-		public ClientConnectionNotifier(Activity activity, LockAccess triggerOnlyOnce, RcsService... services) {
+		public ClientConnectionNotifier(Activity activity, LockAccess triggerOnlyOnce, RcsServiceName... services) {
 			this.activity = activity;
 			this.triggerOnlyOnce = triggerOnlyOnce;
-			this.monitoredServices = new HashSet<RcsService>();
-			for (RcsService service : services) {
+			this.monitoredServices = new HashSet<RcsServiceName>();
+			for (RcsServiceName service : services) {
 				this.monitoredServices.add(service);
 			}
 		}
@@ -107,7 +107,7 @@ public class ApiConnectionManager {
 			Utils.showMessageAndExit(activity, activity.getString(R.string.label_api_disabled), triggerOnlyOnce);
 		}
 
-		public Set<RcsService> getMonitoredServices() {
+		public Set<RcsServiceName> getMonitoredServices() {
 			return monitoredServices;
 		}
 
@@ -116,7 +116,7 @@ public class ApiConnectionManager {
 	/**
 	 * Set of connected services
 	 */
-	final private Set<RcsService> connectedServices;
+	final private Set<RcsServiceName> connectedServices;
 
 	/**
 	 * Map of Activity / Client Connection notifier
@@ -126,7 +126,7 @@ public class ApiConnectionManager {
 	/**
 	 * Map of RCS services and listeners
 	 */
-	final private Map<RcsService, JoynService> apis;
+	final private Map<RcsServiceName, RcsService> apis;
 
 	/**
 	 * The log tag for this class
@@ -143,7 +143,7 @@ public class ApiConnectionManager {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction() != null && intent.getAction().equals(JoynService.ACTION_SERVICE_UP)) {
+			if (intent.getAction() != null && intent.getAction().equals(RcsService.ACTION_SERVICE_UP)) {
 				if (LogUtils.isActive) {
 					Log.d(LOGTAG, "RCS service is UP");
 				}
@@ -175,14 +175,14 @@ public class ApiConnectionManager {
 	}
 
 	/**
-	 * Create a Joyn service listener to monitor connection
+	 * Create a RCS service listener to monitor connection
 	 * 
 	 * @param service
 	 *            the service to monitor
 	 * @return the listener
 	 */
-	private JoynServiceListener newJoynServiceListener(final RcsService service) {
-		return new JoynServiceListener() {
+	private RcsServiceListener newRcsServiceListener(final RcsServiceName service) {
+		return new RcsServiceListener() {
 			@Override
 			public void onServiceDisconnected(int error) {
 				if (LogUtils.isActive) {
@@ -213,25 +213,25 @@ public class ApiConnectionManager {
 			Log.d(LOGTAG, "ApiConnectionManager");
 		}
 		// Construct list of connected services
-		connectedServices = new HashSet<RcsService>();
+		connectedServices = new HashSet<RcsServiceName>();
 		// Construct list of clients to notify
 		clientsToNotify = new HashMap<Activity, ClientConnectionNotifier>();
 		// Construct list of APIs
-		apis = new HashMap<RcsService, JoynService>();
+		apis = new HashMap<RcsServiceName, RcsService>();
 		// Instantiate APIs
-		apis.put(RcsService.CAPABILITY, new CapabilityService(context, newJoynServiceListener(RcsService.CAPABILITY)));
-		apis.put(RcsService.CHAT, new ChatService(context, newJoynServiceListener(RcsService.CHAT)));
-		apis.put(RcsService.CONTACTS, new ContactsService(context, newJoynServiceListener(RcsService.CONTACTS)));
-		apis.put(RcsService.FILE_TRANSFER, new FileTransferService(context, newJoynServiceListener(RcsService.FILE_TRANSFER)));
-		apis.put(RcsService.IMAGE_SHARING, new ImageSharingService(context, newJoynServiceListener(RcsService.IMAGE_SHARING)));
-		apis.put(RcsService.VIDEO_SHARING, new VideoSharingService(context, newJoynServiceListener(RcsService.VIDEO_SHARING)));
-		apis.put(RcsService.FILE_UPLOAD, new FileUploadService(context, newJoynServiceListener(RcsService.FILE_UPLOAD)));
-		apis.put(RcsService.GEOLOC_SHARING, new GeolocSharingService(context, newJoynServiceListener(RcsService.GEOLOC_SHARING)));
-		apis.put(RcsService.IP_CALL, new IPCallService(context, newJoynServiceListener(RcsService.IP_CALL)));
-		apis.put(RcsService.MULTIMEDIA, new MultimediaSessionService(context, newJoynServiceListener(RcsService.MULTIMEDIA)));
+		apis.put(RcsServiceName.CAPABILITY, new CapabilityService(context, newRcsServiceListener(RcsServiceName.CAPABILITY)));
+		apis.put(RcsServiceName.CHAT, new ChatService(context, newRcsServiceListener(RcsServiceName.CHAT)));
+		apis.put(RcsServiceName.CONTACTS, new ContactsService(context, newRcsServiceListener(RcsServiceName.CONTACTS)));
+		apis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context, newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
+		apis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context, newRcsServiceListener(RcsServiceName.IMAGE_SHARING)));
+		apis.put(RcsServiceName.VIDEO_SHARING, new VideoSharingService(context, newRcsServiceListener(RcsServiceName.VIDEO_SHARING)));
+		apis.put(RcsServiceName.FILE_UPLOAD, new FileUploadService(context, newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
+		apis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context, newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
+		apis.put(RcsServiceName.IP_CALL, new IPCallService(context, newRcsServiceListener(RcsServiceName.IP_CALL)));
+		apis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context, newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
 		// Register the broadcast receiver to catch ACTION_SERVICE_UP
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(JoynService.ACTION_SERVICE_UP);
+		filter.addAction(RcsService.ACTION_SERVICE_UP);
 		context.registerReceiver(new RcsServiceReceiver(), filter);
 	}
 
@@ -240,7 +240,7 @@ public class ApiConnectionManager {
 	 */
 	public void connectApis() {
 		// Connect all APIs
-		for (RcsService service : apis.keySet()) {
+		for (RcsServiceName service : apis.keySet()) {
 			// Check if not already connected
 			if (!isServiceConnected(service)) {
 				if (LogUtils.isActive) {
@@ -265,7 +265,7 @@ public class ApiConnectionManager {
 	 * @param error
 	 *            the error
 	 */
-	private void notifyDisconnection(RcsService service, int error) {
+	private void notifyDisconnection(RcsServiceName service, int error) {
 		for (ClientConnectionNotifier clienttoNotify : clientsToNotify.values()) {
 			if (clienttoNotify.getMonitoredServices().contains(service)) {
 				clienttoNotify.notifyDisconnection();
@@ -280,8 +280,8 @@ public class ApiConnectionManager {
 	 *            list of services
 	 * @return true if all services of the list are connected
 	 */
-	public boolean isServiceConnected(RcsService... services) {
-		for (RcsService service : services) {
+	public boolean isServiceConnected(RcsServiceName... services) {
+		for (RcsServiceName service : services) {
 			if (!connectedServices.contains(service)) {
 				return false;
 			}
@@ -299,7 +299,7 @@ public class ApiConnectionManager {
 	 * @param services
 	 *            the list of services to monitor
 	 */
-	public void startMonitorServices(Activity activity, LockAccess exitOnce, RcsService... services) {
+	public void startMonitorServices(Activity activity, LockAccess exitOnce, RcsServiceName... services) {
 		clientsToNotify.put(activity, new ClientConnectionNotifier(activity, exitOnce, services));
 	}
 
@@ -318,7 +318,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public CapabilityService getCapabilityApi() {
-		return (CapabilityService) apis.get(RcsService.CAPABILITY);
+		return (CapabilityService) apis.get(RcsServiceName.CAPABILITY);
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public ChatService getChatApi() {
-		return (ChatService) apis.get(RcsService.CHAT);
+		return (ChatService) apis.get(RcsServiceName.CHAT);
 	}
 
 	/**
@@ -334,7 +334,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public ContactsService getContactsApi() {
-		return (ContactsService) apis.get(RcsService.CONTACTS);
+		return (ContactsService) apis.get(RcsServiceName.CONTACTS);
 	}
 
 	/**
@@ -342,7 +342,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public FileTransferService getFileTransferApi() {
-		return (FileTransferService) apis.get(RcsService.FILE_TRANSFER);
+		return (FileTransferService) apis.get(RcsServiceName.FILE_TRANSFER);
 	}
 
 	/**
@@ -350,7 +350,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public VideoSharingService getVideoSharingApi() {
-		return (VideoSharingService) apis.get(RcsService.VIDEO_SHARING);
+		return (VideoSharingService) apis.get(RcsServiceName.VIDEO_SHARING);
 	}
 
 	/**
@@ -358,7 +358,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public ImageSharingService getImageSharingApi() {
-		return (ImageSharingService) apis.get(RcsService.IMAGE_SHARING);
+		return (ImageSharingService) apis.get(RcsServiceName.IMAGE_SHARING);
 	}
 
 	/**
@@ -366,7 +366,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public GeolocSharingService getGeolocSharingApi() {
-		return (GeolocSharingService) apis.get(RcsService.GEOLOC_SHARING);
+		return (GeolocSharingService) apis.get(RcsServiceName.GEOLOC_SHARING);
 	}
 
 	/**
@@ -374,7 +374,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public FileUploadService getFileUploadApi() {
-		return (FileUploadService) apis.get(RcsService.FILE_UPLOAD);
+		return (FileUploadService) apis.get(RcsServiceName.FILE_UPLOAD);
 	}
 
 	/**
@@ -382,7 +382,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public IPCallService getIPCallApi() {
-		return (IPCallService) apis.get(RcsService.IP_CALL);
+		return (IPCallService) apis.get(RcsServiceName.IP_CALL);
 	}
 	
 	/**
@@ -390,7 +390,7 @@ public class ApiConnectionManager {
 	 * @return the instance
 	 */
 	public MultimediaSessionService getMultimediaSessionApi() {
-		return (MultimediaSessionService) apis.get(RcsService.MULTIMEDIA);
+		return (MultimediaSessionService) apis.get(RcsServiceName.MULTIMEDIA);
 	}
 
 }

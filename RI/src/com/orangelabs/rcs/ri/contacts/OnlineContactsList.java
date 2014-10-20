@@ -26,15 +26,15 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List of joyn contacts who are online (i.e. registered)
+ * List of RCS contacts who are online (i.e. registered)
  *  
  * @author Jean-Marc AUFFRET
  */
@@ -62,11 +62,11 @@ public class OnlineContactsList extends ListActivity {
 
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CONTACTS)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsService.CONTACTS);
+		connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
 	}
 	
 	@Override
@@ -89,13 +89,13 @@ public class OnlineContactsList extends ListActivity {
      */
     private void updateList() {
 		try {
-	    	// Get list of joyn contacts who are online
-	    	Set<JoynContact> onlineContacts = connectionManager.getContactsApi().getJoynContactsOnline();
-	    	List<JoynContact> contacts = new ArrayList<JoynContact>(onlineContacts);
+	    	// Get list of RCS contacts who are online
+	    	Set<RcsContact> onlineContacts = connectionManager.getContactsApi().getRcsContactsOnline();
+	    	List<RcsContact> contacts = new ArrayList<RcsContact>(onlineContacts);
 			if (contacts.size() > 0){
 		        String[] items = new String[contacts.size()];    
 		        for (int i = 0; i < contacts.size(); i++) {
-		        	JoynContact contact = contacts.get(i);
+		        	RcsContact contact = contacts.get(i);
 		        	String status;
 		        	if (contact.isRegistered()) {
 						status = "online";

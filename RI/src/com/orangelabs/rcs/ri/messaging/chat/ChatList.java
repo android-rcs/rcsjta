@@ -39,7 +39,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -47,7 +47,7 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -194,7 +194,7 @@ public class ChatList extends Activity {
 		public void onClick(View v) {
 			// TODO: if not connected offers possibility to show history
 			ApiConnectionManager apiConnectionManager = ApiConnectionManager.getInstance(ChatList.this);
-			if (apiConnectionManager == null || !apiConnectionManager.isServiceConnected(RcsService.CHAT)) {
+			if (apiConnectionManager == null || !apiConnectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 				Utils.showMessage(ChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}
@@ -210,7 +210,7 @@ public class ChatList extends Activity {
         	ContactId contact;
 			try {
 				contact = contactUtils.formatContactId(cache.contact);
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (LogUtils.isActive) {
 	    			Log.e(LOGTAG, "Cannot parse contact "+cache.contact);
 	    		}

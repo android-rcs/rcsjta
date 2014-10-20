@@ -38,12 +38,12 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -170,7 +170,7 @@ public class GroupChatList extends Activity {
     private OnClickListener clickItemListener = new OnClickListener() {
 		public void onClick(View v) {
 			ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(GroupChatList.this);
-			if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CHAT)) {
+			if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 				Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
 				return;
 			}
@@ -192,10 +192,10 @@ public class GroupChatList extends Activity {
 					// Rejoin or restart the session
 					// TODO CR018
 				}
-		    } catch(JoynServiceNotAvailableException e) {
+		    } catch(RcsServiceNotAvailableException e) {
 		    	e.printStackTrace();
 				Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_disabled));
-		    } catch(JoynServiceException e) {
+		    } catch(RcsServiceException e) {
 		    	e.printStackTrace();
 				Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_failed));
 			}

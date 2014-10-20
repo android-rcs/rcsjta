@@ -39,9 +39,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
@@ -54,8 +54,8 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.JoynContact;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.gsma.services.rcs.contacts.RcsContact;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -271,7 +271,7 @@ public class GroupChatView extends ChatView {
 			Log.d(LOGTAG, "onCreate");
 		}
 		super.onCreate(savedInstanceState);
-		if (connectionManager != null && !connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
+		if (connectionManager != null && !connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			return;
 		}
 		try {
@@ -292,10 +292,10 @@ public class GroupChatView extends ChatView {
 
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000);
-		} catch (JoynServiceNotAvailableException e) {
+		} catch (RcsServiceNotAvailableException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
@@ -316,7 +316,7 @@ public class GroupChatView extends ChatView {
 		// Replace the value of intent
 		setIntent(intent);
 		
-		if (connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			processIntent();
 		}
 	}
@@ -345,7 +345,7 @@ public class GroupChatView extends ChatView {
 					for (String contact : contacts) {
 						try {
 							participants.add(contactUtils.formatContactId(contact));
-						} catch (JoynContactFormatException e) {
+						} catch (RcsContactFormatException e) {
 							if (LogUtils.isActive) {
 								Log.e(LOGTAG, "processIntent invalid participant " + contact);
 							}
@@ -454,10 +454,10 @@ public class GroupChatView extends ChatView {
 				connectionManager.getChatApi().markMessageAsRead(msgId);
 			}
 
-		} catch (JoynServiceNotAvailableException e) {
+		} catch (RcsServiceNotAvailableException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}
@@ -627,8 +627,8 @@ public class GroupChatView extends ChatView {
 		Set<ContactId> availableParticipants = new HashSet<ContactId>();
 		try {
 			Set<ParticipantInfo> currentContacts = groupChat.getParticipants();
-			Set<JoynContact> contacts = connectionManager.getContactsApi().getJoynContacts();
-			for (JoynContact c1 : contacts) {
+			Set<RcsContact> contacts = connectionManager.getContactsApi().getRcsContacts();
+			for (RcsContact c1 : contacts) {
 				ContactId contact = c1.getContactId();
 				boolean found = false;
 				for (ParticipantInfo c2 : currentContacts) {
@@ -736,10 +736,10 @@ public class GroupChatView extends ChatView {
 			case R.id.menu_participants:
 				try {
 					Utils.showList(this, getString(R.string.menu_participants), getSetOfParticipants(groupChat.getParticipants()));			
-			    } catch(JoynServiceNotAvailableException e) {
+			    } catch(RcsServiceNotAvailableException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-			    } catch(JoynServiceException e) {
+			    } catch(RcsServiceException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 				}
@@ -758,7 +758,7 @@ public class GroupChatView extends ChatView {
 					Intent intent = new Intent(this, SendGroupFile.class);
 					intent.putExtra(SendGroupFile.EXTRA_CHAT_ID, groupChat.getChatId());
 					startActivity(intent);
-			    } catch(JoynServiceException e) {
+			    } catch(RcsServiceException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 				}
@@ -767,7 +767,7 @@ public class GroupChatView extends ChatView {
 			case R.id.menu_showus_map:
 				try {
 					showUsInMap(getSetOfParticipants(groupChat.getParticipants()));
-			    } catch(JoynServiceException e) {
+			    } catch(RcsServiceException e) {
 			    	e.printStackTrace();
 					Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 				}
@@ -816,10 +816,10 @@ public class GroupChatView extends ChatView {
 	}
 
 	private void removeServiceListener() {
-		if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
+		if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 			try {
 				connectionManager.getChatApi().removeGroupChatEventListener(chatListener);
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "removeServiceListener failed", e);
 				}
