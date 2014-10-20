@@ -1,0 +1,442 @@
+/*generic page style*/ 
+
+.background-sdk{
+ background-color: rgb(249, 249, 249);
+ margin:auto;
+ position:relative;
+ width:100%;
+ padding-bottom:20px;
+ width:1402px;
+}
+
+.content-block{
+width:1000px;
+margin:auto;
+margin-left:200px;
+margin-right:200px;
+padding-top:10px;
+border: 1px solid #d1d1d1;
+background-color:white;
+}
+
+
+.center{
+width: 80%;
+margin: auto;
+}
+
+.intro{
+margin-top:10px;
+}
+
+.intro span{
+	font-size:17px;
+	line-height: 20px;
+}
+
+.intro h1{
+border-bottom : 1px solid #505050;
+color:#505050;
+}
+
+
+.content-body{
+margin-top: 40px;
+}
+
+.content-body p{
+ font-size:15px;
+ line-height:18px
+}
+.content-body  a, a:link, a:visited, a:active, a:hover{
+
+}
+
+
+.demo-title{
+margin: 55px 0 15px 130px
+}
+
+.video-frame-carousel{
+display: block;
+margin: auto;
+width: 480px;
+height: 270px;
+}
+
+.video-frame{
+display: block;
+margin: auto;
+width: 320px;
+height: 180px;
+}
+
+.video-carousel{
+display: inline-block;
+position: absolute;
+left: 15px;
+top: 95px;
+}
+
+
+
+/*box layout*/
+
+.demo_box{
+ width:22%;
+ padding:0 1% 0 2%
+}
+
+.demo_box_2{
+ width:39%;
+}
+
+.demo_box span{
+font-size:15px;
+line-height:18px;
+}
+
+.demo_box a{
+font-size:20px;
+line-height:20px;
+color:#ff6600;
+}
+
+
+.seperator{
+border-left: 1px solid grey;
+border-right: 1px solid grey;
+}
+
+.seperator_2{
+border-left: 1px solid grey;
+}
+
+
+/*tutorials*/
+
+.step_header{
+clear: both;
+font-family: tahoma,verdana,arial,sans-serif;
+padding: 10px 0 5px 10%;
+margin: 15px 0 0 0;
+width: 90%;
+}
+
+.step_content{
+margin-top:15px;
+margin-right:10%;
+}
+
+.step_header a{
+text-decoration:underline;
+cursor: pointer
+}
+.getStarted{
+border-top: 1px solid #ddd;
+border-right: 1px solid #999;
+border-left: 1px solid #ddd;
+position: relative;
+border-bottom: 1px solid #ff6600;
+background: #fff;
+}
+
+
+.getStarted  h2{
+color: #505050;
+}
+
+
+.guide{
+	border-top: 1px solid #FF6600;
+}
+
+.guide span{
+color: #FF6600;
+}
+
+.step_header p, h2{
+margin:0 0 0 0;
+}
+
+.step_content p{
+margin:10px 0;
+}
+
+
+.h_num{
+color: #ff6600;
+display: block;
+float: left;
+font-family: tahoma,verdana,arial,sans-serif;
+font-size: 30px;
+margin-left: -40px;
+margin-top: -8px;
+width: 40px;
+position: absolute;
+top: 25px;
+left: 85px;
+}
+
+
+
+
+/*lists*/
+
+.list{
+list-style-type: none;
+padding: 0;
+}
+
+.list p {
+ font-size:15px;
+ line-height:18px
+}
+
+.list li{
+	margin-bottom: 20px;
+}
+.list div{
+background-color: #fff;
+padding: 10px;
+position: relative;
+border-right: 2px solid #dadada;
+border-left: 1px solid #eaeaea;
+border-bottom: 1px solid #ff6600;
+border-top: 1px solid #eaeaea;
+}
+
+.clickable div:hover{
+background-color: #f1f1f1;
+}
+
+.list a{
+text-decoration:none;
+}
+
+
+
+.list h2{
+color: rgb(100, 99, 96);
+}
+
+.api-list-ver{
+position: absolute;
+right: 20px;
+font-size: 12px;
+color: #666;
+}
+
+.api-list-new{
+position: absolute;
+right: 20px;
+bottom:10px;
+font-size: 12px;
+color: #f54;
+}
+
+.item-link{ 
+  position:absolute; 
+  width:100%;
+  height:100%;
+  top:0;
+  left: 0;
+
+  z-index: 1;
+
+} 
+
+
+.question,.answer{
+	background-color: #ffffff;
+	padding: 10px;
+	position:relative
+}
+
+.img-ssh{
+	width:20%;
+	margin:10px 10% 10px 5%;
+}
+
+#guide-nav{
+
+}
+
+#tutorial-nav{
+
+
+}
+
+.nav-block{
+padding:0;
+border:0;
+
+}
+
+
+.nav{
+width: 180px;
+padding: 5px 1% 5px 1%;
+border: 1px solid gainsboro;
+float: right;
+position: absolute;
+left: 60px;
+z-index: 100;
+margin-top: 120px;
+background-color: white;
+display:inline-block;
+}
+
+
+.nav li{
+	list-style-type: none;
+}
+
+.nav a{
+	text-decoration:none;
+}
+
+.selected a{
+	color:grey;
+} 
+
+.code-block{
+	margin: 0 2% 0 2%;
+	padding: 5px 1% 5px 1%;
+	border: 1px solid #ccc;
+	background-color: #fafafa;
+	overflow: auto;
+	line-height: inherit;
+}
+
+.guide-block{
+	margin: 0 5% 0 5%;
+	border-top: 1px solid #ff6600;
+	padding-top: 10px;
+}
+
+
+.button-download{
+	
+	font-size: 15px;
+	
+	height: 30px;
+	margin-bottom: 1%;
+}
+
+
+.dl-btn{
+display: inline-block;
+background: url(./images/dl-btn.png) no-repeat 0 0;
+padding: 10px;
+border-radius: 7px;
+float: right;
+font-weight: bold;
+color: #FFF;
+text-shadow: -1px -1px #000;
+text-decoration:none;
+margin-top:23px;
+position: absolute;
+right: 310px;
+}
+
+.button-download p{
+	margin:2px;
+	font-size: 12px;
+}
+
+.dl-btn:hover{
+	background-position-y:-143px;
+	text-shadow: none;
+	color: #b3b3b3;
+}
+.dl-btn:visited{
+	color: #fff;
+}
+
+.footer{
+	
+	width: 1402px;
+	margin:auto;
+	margin-bottom:10px;
+}
+
+.list-concepts-1 li{
+line-height: 50px;
+}
+
+.list-concepts-2 li{
+line-height: 35px;
+}
+
+.content-left {
+float: left;
+text-align: center;
+vertical-align: center;
+margin: 0 0 0 35px;
+width:300px;
+}
+
+.content-right {
+margin: 80px 40px 0 0;
+width:300px;
+float:right;
+}
+
+.slide-btn div{
+float:left;
+height:12px;
+width:12px;
+border-radius:6px;
+background-color:#ccc;
+float: left;
+margin: 0 5px 20px;
+}
+
+.slide-btn  div:hover{
+background-color:rgba(255, 102, 0, 0.42);
+}
+
+.left div{
+margin-left:308px;
+}
+.right div{
+margin-right:200px;
+}
+
+.demo-text{
+margin: auto;
+width: 480px;
+height: 270px;
+margin-top: 20px;
+font-size: 15px;
+}
+
+.home-img{
+float:left;
+margin: 20px 40px 0 30px;
+}
+/*Java code (generated)*/
+
+
+td.java, td.java-ln {vertical-align:top;}
+tt.java, tt.java-ln, pre.java, pre.java-ln {line-height:1em; margin-bottom:0em;}
+td.java-ln { text-align:right; }
+tt.java-ln, pre.java-ln { color:#888888 }
+/* Background       */ span.java0  { font-size: 10pt; color:#ffffff; }
+/* Line numbers       */ span.java1  { font-size: 10pt; color:#808080; }
+/* Multi-line comments       */ span.java2 ,span.com { font-size: 10pt; color:#3f7f5f; }
+/* Single-line comments       */ span.java3  { font-size: 10pt; color:#3f7f5f; }
+/* Keywords       */ span.java4 ,span.kwd { font-size: 10pt; color:#7f0055; font-weight:bold; }
+/* Strings       */ span.java5 ,span.str { font-size: 10pt; color:#2a00ff; }
+/* Character constants       */ span.java6  { font-size: 10pt; color:#990000; }
+/* Numeric constants       */ span.java7  { font-size: 10pt; color:#990000; }
+/* Parenthesis       */ span.java8  { font-size: 10pt; color:#000000; }
+/* Primitive Types       */ span.java9  { font-size: 10pt; color:#7f0055; font-weight:bold; }
+/* Others       */ span.java10,span.pln,span.pun,span.typ,span.lit  { font-size: 10pt; color:#000000; }
+/* Javadoc keywords       */ span.java11  { font-size: 10pt; color:#7f9fbf; }
+/* Javadoc HTML tags       */ span.java12  { font-size: 10pt; color:#7f7f9f; }
+/* Javadoc links       */ span.java13  { font-size: 10pt; color:#3f3fbf; }
+/* Javadoc others       */ span.java14  { font-size: 10pt; color:#3f5fbf; }
+/* Undefined       */ span.java15  { font-size: 10pt; color:#ff6100; }
+/* Annotation       */ span.java16  { font-size: 10pt; color:#646464; }
