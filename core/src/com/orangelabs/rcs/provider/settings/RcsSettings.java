@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -2270,7 +2270,7 @@ public class RcsSettings {
 	/**
 	 * Get the default messaging method
 	 * 
-	 * @return the default messaging method (0: AUTOMATIC, 1: JOYN, 2: NON_JOYN)
+	 * @return the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
 	 */
 	public int getDefaultMessagingMethod() {
 		return readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.VALUE_DEF_MSG_METHOD_RCS) % 3;
@@ -2280,7 +2280,7 @@ public class RcsSettings {
 	 * Set default messaging method
 	 * 
 	 * @param method
-	 *            the default messaging method (0: AUTOMATIC, 1: JOYN, 2: NON_JOYN)
+	 *            the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
 	 */
 	public void setDefaultMessagingMethod(int method) {
 		writeInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, method % 3);

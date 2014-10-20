@@ -24,7 +24,7 @@ package com.orangelabs.rcs.core.ims.service.ipcall;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
@@ -193,7 +193,7 @@ public class IPCallService extends ImsService {
         ContactId contact = null;
         try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-        } catch (JoynContactFormatException e) {
+        } catch (RcsContactFormatException e) {
         	// Max session
         	if (logger.isActivated()) {
                 logger.debug("Cannot parse contact: reject the invitation");

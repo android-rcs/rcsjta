@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -51,13 +51,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * Returns the session ID of the multimedia session
 	 * 
 	 * @return Session ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getSessionId() throws JoynServiceException {
+	public String getSessionId() throws RcsServiceException {
 		try {
 			return sessionIntf.getSessionId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -65,13 +65,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * Returns the feature tag of the multimedia session
 	 * 
 	 * @return Feature tag
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getFeatureTag() throws JoynServiceException {
+	public String getFeatureTag() throws RcsServiceException {
 		try {
 			return sessionIntf.getFeatureTag();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -79,13 +79,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return sessionIntf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -93,13 +93,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * Returns the service ID
 	 * 
 	 * @return Service ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getServiceId() throws JoynServiceException {
+	public String getServiceId() throws RcsServiceException {
 		try {
 			return sessionIntf.getServiceId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -108,13 +108,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * 
 	 * @return State
 	 * @see MultimediaSession.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return sessionIntf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -123,67 +123,68 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 *
 	 * @return ReasonCode
 	 * @see MultimediaSession.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return sessionIntf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
 	
 	/**
 	 * Returns the direction of the session (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see MultimediaSession.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return sessionIntf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
 	/**
 	 * Accepts session invitation.
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation() throws JoynServiceException {
+	public void acceptInvitation() throws RcsServiceException {
 		try {
 			sessionIntf.acceptInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects session invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			sessionIntf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Aborts the session
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortSession() throws JoynServiceException {
+	public void abortSession() throws RcsServiceException {
 		try {
 			sessionIntf.abortSession();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -191,13 +192,13 @@ public class MultimediaMessagingSession extends MultimediaSession {
 	 * Sends a message in real time
 	 * 
 	 * @param content Message content
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void sendMessage(byte[] content) throws JoynServiceException {
+	public void sendMessage(byte[] content) throws RcsServiceException {
 		try {
 			sessionIntf.sendMessage(content);
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

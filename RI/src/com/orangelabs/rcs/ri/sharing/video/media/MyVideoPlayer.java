@@ -25,7 +25,7 @@ import android.hardware.Camera;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.vsh.IVideoPlayerListener;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.gsma.services.rcs.vsh.VideoPlayer;
@@ -282,7 +282,7 @@ public class MyVideoPlayer extends VideoPlayer implements Camera.PreviewCallback
 	/**
 	 * Closes the player and deallocates resources
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
 	public synchronized void close() {
         if (!opened) {

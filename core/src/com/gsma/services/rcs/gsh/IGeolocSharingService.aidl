@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.gsh;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -13,9 +13,9 @@ interface IGeolocSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	List<IBinder> getGeolocSharings();
 	

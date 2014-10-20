@@ -265,9 +265,9 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.PROVISIONING_TOKEN,				"");
             addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS,    "");
             addParameter(db, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,FALSE);
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_PHOTOS,				Environment.getExternalStorageDirectory() + "/joyn/photos/");
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS,				Environment.getExternalStorageDirectory() + "/joyn/videos/");
-            addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,				Environment.getExternalStorageDirectory() + "/joyn/files/");
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_PHOTOS,				Environment.getExternalStorageDirectory() + "/rcs/photos/");
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS,				Environment.getExternalStorageDirectory() + "/rcs/videos/");
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,				Environment.getExternalStorageDirectory() + "/rcs/files/");
             addParameter(db, RcsSettingsData.SECURE_MSRP_OVER_WIFI,	     		FALSE);
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,				FALSE);
             addParameter(db, RcsSettingsData.KEY_MESSAGING_MODE,				Integer.toString(RcsSettingsData.VALUE_MESSAGING_MODE_NONE));

@@ -37,10 +37,10 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.provider.ContactsContract;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 /**
  * Contacts service offers additional methods to manage RCS info in the
@@ -52,7 +52,7 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
  * 
  * @author Jean-Marc AUFFRET 
  */
-public class ContactsService extends JoynService {
+public class ContactsService extends RcsService {
 	/**
 	 * API
 	 */
@@ -64,7 +64,7 @@ public class ContactsService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public ContactsService(Context ctx, JoynServiceListener listener) {
+    public ContactsService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -117,47 +117,47 @@ public class ContactsService extends JoynService {
     };
     
     /**
-     * Returns the joyn contact infos from its contact ID (i.e. MSISDN)
+     * Returns the rcs contact infos from its contact ID (i.e. MSISDN)
      * 
      * @param contact Contact ID
-     * @return JoynContact
-     * @throws JoynServiceException
-     * @see JoynContact
+     * @return RcsContact
+     * @throws RcsServiceException
+     * @see RcsContact
      */
-	public JoynContact getJoynContact(ContactId contact) throws JoynServiceException {
+	public RcsContact getRcsContact(ContactId contact) throws RcsServiceException {
 		if (api != null) {
 			try {
-				return api.getJoynContact(contact);
+				return api.getRcsContact(contact);
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
     /**
-     * Returns the list of joyn contacts
+     * Returns the list of rcs contacts
      * 
      * @return List of contacts
-     * @throws JoynServiceException
-     * @see JoynContact
+     * @throws RcsServiceException
+     * @see RcsContact
      */
-    public Set<JoynContact> getJoynContacts() throws JoynServiceException {
+    public Set<RcsContact> getRcsContacts() throws RcsServiceException {
 		if (api != null) {
 			try {
-	    		Set<JoynContact> result = new HashSet<JoynContact>();
-	    		List<JoynContact> contacts = api.getJoynContacts();
+	    		Set<RcsContact> result = new HashSet<RcsContact>();
+	    		List<RcsContact> contacts = api.getRcsContacts();
 	    		for(int i=0; i < contacts.size(); i++) {
-	    			JoynContact contact = contacts.get(i);
+	    			RcsContact contact = contacts.get(i);
 	    			result.add(contact);
 	    		}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
 
@@ -165,20 +165,20 @@ public class ContactsService extends JoynService {
      * Returns the list of online contacts (i.e. registered)
      * 
      * @return List of contacts
-     * @throws JoynServiceException
-     * @see JoynContact
+     * @throws RcsServiceException
+     * @see RcsContact
      */
-    public Set<JoynContact> getJoynContactsOnline() throws JoynServiceException {
+    public Set<RcsContact> getRcsContactsOnline() throws RcsServiceException {
 		if (api != null) {
 			try {
-	    		Set<JoynContact> result = new HashSet<JoynContact>();
-	    		result.addAll(api.getJoynContactsOnline());
+	    		Set<RcsContact> result = new HashSet<RcsContact>();
+	    		result.addAll(api.getRcsContactsOnline());
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
 
@@ -187,35 +187,35 @@ public class ContactsService extends JoynService {
      * 
      * @param serviceId Service ID
      * @return List of contacts
-     * @throws JoynServiceException
-     * @see JoynContact
+     * @throws RcsServiceException
+     * @see RcsContact
      */
-    public Set<JoynContact> getJoynContactsSupporting(String serviceId) throws JoynServiceException {
+    public Set<RcsContact> getRcsContactsSupporting(String serviceId) throws RcsServiceException {
 		if (api != null) {
 			try {
-	    		Set<JoynContact> result = new HashSet<JoynContact>();
-	    		result.addAll(api.getJoynContactsSupporting(serviceId));
+	    		Set<RcsContact> result = new HashSet<RcsContact>();
+	    		result.addAll(api.getRcsContactsSupporting(serviceId));
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
     /**
      * Returns the vCard of a contact. The method returns the complete filename including the path of the visit
-     * card. The filename has the file extension “.vcf” and is generated from the native address book
+     * card. The filename has the file extension ".vcf" and is generated from the native address book
      * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which returns
      * the referenced contact formatted as a vCard when opened through openAssetFileDescriptor(Uri, String)).
      * 
      * @param ctx Application context
      * @param contactUri Contact URI of the contact in the native address book
      * @return Filename of vCard
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public static String getVCard(Context ctx, Uri contactUri) throws JoynServiceException {
+    public static String getVCard(Context ctx, Uri contactUri) throws RcsServiceException {
     	String fileName = null;
 		Cursor cursor = ctx.getContentResolver().query(contactUri, null, null, null, null);   			
     	while(cursor.moveToNext()) {
@@ -241,7 +241,7 @@ public class ContactsService extends JoynService {
     			mFileOutputStream.write(Vcard.toString().getBytes());
     			mFileOutputStream.close();
     		} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
     		}
     	}
     	cursor.close();

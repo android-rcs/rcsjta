@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -180,7 +180,7 @@ public class OptionsManager implements DiscoveryManager {
 
 			// Notify listener
 			imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
-		} catch (JoynContactFormatException e1) {
+		} catch (RcsContactFormatException e1) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact from capability request");
 			}

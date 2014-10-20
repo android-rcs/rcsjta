@@ -32,15 +32,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List of joyn contacts supporting a given feature tag or extension
+ * List of RCS contacts supporting a given feature tag or extension
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -82,11 +82,11 @@ public class SupportedContactsList extends Activity {
 
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CONTACTS)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsService.CONTACTS);
+		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACTS);
     }
     
 	@Override
@@ -113,14 +113,14 @@ public class SupportedContactsList extends Activity {
 			EditText tagEdit = (EditText)findViewById(R.id.tag);			
 			String tag = tagEdit.getText().toString();
 			
-	    	// Get list of joyn contacts supporting a given tag
-	    	Set<JoynContact> supportedContacts = connectionManager.getContactsApi().getJoynContactsSupporting(tag);
-	    	List<JoynContact> contacts = new ArrayList<JoynContact>(supportedContacts);
+	    	// Get list of RCS contacts supporting a given tag
+	    	Set<RcsContact> supportedContacts = connectionManager.getContactsApi().getRcsContactsSupporting(tag);
+	    	List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
 	        ListView listView = (ListView)findViewById(R.id.contacts);
 			if (contacts.size() > 0){
 				ArrayList<String> items = new ArrayList<String>();
 		        for (int i = 0; i < contacts.size(); i++) {
-		        	JoynContact contact = contacts.get(i);
+		        	RcsContact contact = contacts.get(i);
 		        	String status;
 		        	if (contact.isRegistered()) {
 						status = "online";

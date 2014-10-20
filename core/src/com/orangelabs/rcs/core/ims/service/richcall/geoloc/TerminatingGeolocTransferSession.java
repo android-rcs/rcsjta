@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -444,7 +444,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
 	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
 			}

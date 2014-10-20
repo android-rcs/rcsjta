@@ -29,7 +29,7 @@ import java.util.Set;
 
 import javax2.sip.header.SubjectHeader;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -339,7 +339,7 @@ public abstract class OneOneChatSession extends ChatSession {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
 	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
 			}

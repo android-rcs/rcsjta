@@ -28,7 +28,7 @@ import java.util.Set;
 
 import javax2.sip.header.ExtensionHeader;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -183,7 +183,7 @@ public abstract class GroupChatSession extends ChatSession {
 			ContactId remote = ContactUtils.createContactId(contact);
 			// Request capabilities to the remote
 			getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Failed to request capabilities: cannot parse contact " + contact);
 			}
@@ -718,7 +718,7 @@ public abstract class GroupChatSession extends ChatSession {
 									logger.debug("Discard delivery report send to " + localId);
 								}
 							}
-						} catch (JoynContactFormatException e) {
+						} catch (RcsContactFormatException e) {
 							// Purposely left blank
 						}
 					} else {

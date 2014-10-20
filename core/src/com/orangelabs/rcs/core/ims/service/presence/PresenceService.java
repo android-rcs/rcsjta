@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.presence;
 
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.addressbook.AddressBookEventListener;
 import com.orangelabs.rcs.core.CoreException;
@@ -211,7 +211,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		ContactId me = null;
 		try {
 			me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
         		logger.error("Cannot parse user contact "+ImsModule.IMS_USER_PROFILE.getPublicUri());
         	}

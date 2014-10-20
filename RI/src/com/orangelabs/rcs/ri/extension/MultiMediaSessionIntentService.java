@@ -17,7 +17,7 @@ import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
@@ -25,7 +25,7 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
 import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
@@ -92,7 +92,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		}
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.MULTIMEDIA)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
 			return;
 		}
 		// Get invitation info
@@ -126,7 +126,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 					}
 				}
 			}
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot get MM API", e);
 			}

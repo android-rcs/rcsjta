@@ -23,7 +23,7 @@ package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteException;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
@@ -380,7 +380,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Returns the video codec used during sharing
 	 *
 	 * @return VideoCodec
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
 	public VideoCodec getVideoCodec() {
 		try {
@@ -397,7 +397,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Returns the audio codec used during sharing
 	 *
 	 * @return AudioCodec
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
 	public AudioCodec getAudioCodec() {
 		try {

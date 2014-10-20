@@ -27,7 +27,7 @@ import java.util.Vector;
 
 import android.content.Intent;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -124,9 +124,10 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
-     * @throws JoynContactFormatException 
+     * @throws RcsContactFormatException
      */
-	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) throws JoynContactFormatException {
+	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) throws RcsContactFormatException {
+
 		// Create a new session
 		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, sessionInvite);
 
@@ -158,9 +159,9 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
-	 * @throws JoynContactFormatException 
+     * @throws RcsContactFormatException
      */
-	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite) throws JoynContactFormatException {
+	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite) throws RcsContactFormatException {
 		// Create a new session
 		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, sessionInvite);
 

@@ -28,7 +28,7 @@ import javax2.sip.header.SubscriptionStateHeader;
 
 import org.xml.sax.InputSource;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -185,7 +185,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 						ContactId contact;
 						try {
 							contact = ContactUtils.createContactId(user.getEntity());
-						} catch (JoynContactFormatException e) {
+						} catch (RcsContactFormatException e) {
 							// Invalid entity
 							continue;
 						}

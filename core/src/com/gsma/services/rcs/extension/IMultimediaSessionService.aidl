@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.extension;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
@@ -15,9 +15,9 @@ interface IMultimediaSessionService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	MultimediaSessionServiceConfiguration getConfiguration();
 

@@ -25,7 +25,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.MultimediaSessionList;
@@ -62,7 +62,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 			intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OPEN);
 			intent.putExtra(MessagingSessionView.EXTRA_SESSION_ID, sessionId);
 			startActivity(intent);
-		} catch(JoynServiceException e) {
+		} catch(RcsServiceException e) {
 			e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
 		}

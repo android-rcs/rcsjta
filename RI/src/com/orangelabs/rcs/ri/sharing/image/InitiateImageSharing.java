@@ -41,14 +41,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
@@ -245,15 +245,15 @@ public class InitiateImageSharing extends Activity {
         
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IMAGE_SHARING)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsService.IMAGE_SHARING);
+		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.IMAGE_SHARING);
 		try {
 			// Add service listener
 			connectionManager.getImageSharingApi().addEventListener(ishListener);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
@@ -268,7 +268,7 @@ public class InitiateImageSharing extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.IMAGE_SHARING)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
 			// Remove image sharing listener
 			try {
 				connectionManager.getImageSharingApi().removeEventListener(ishListener);
@@ -322,7 +322,7 @@ public class InitiateImageSharing extends Activity {
             final ContactId remote;
     		try {
     			remote = contactUtils.formatContactId(cursor.getString(1));
-    		} catch (JoynContactFormatException e1) {
+    		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;
     		}

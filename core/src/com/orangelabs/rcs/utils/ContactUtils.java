@@ -34,7 +34,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.platform.AndroidFactory;
 
@@ -217,14 +217,14 @@ public class ContactUtils {
 	 * @param phoneNumber
 	 *            the phone number
 	 * @return the Contact Identifier
-	 * @throws JoynContactFormatException 
+	 * @throws RcsContactFormatException
 	 */
-	public static ContactId createContactId(String phoneNumber) throws JoynContactFormatException {
+	public static ContactId createContactId(String phoneNumber) throws RcsContactFormatException {
 		com.gsma.services.rcs.contacts.ContactUtils contactUtils = com.gsma.services.rcs.contacts.ContactUtils
 				.getInstance(AndroidFactory.getApplicationContext());
 		if (contactUtils != null) {
 			return contactUtils.formatContactId(PhoneUtils.extractNumberFromUriWithoutFormatting(phoneNumber));
 		}
-		throw new JoynContactFormatException();
+		throw new RcsContactFormatException();
 	}
 }

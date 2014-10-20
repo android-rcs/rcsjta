@@ -29,10 +29,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -72,11 +72,11 @@ public class IPCallSessionsList extends ListActivity {
 
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.IP_CALL)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.IP_CALL)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsService.IP_CALL);
+		connectionManager.startMonitorServices(this, null, RcsServiceName.IP_CALL);
 	}
 	
 	@Override
@@ -121,7 +121,7 @@ public class IPCallSessionsList extends ListActivity {
 			intent.putExtra(IPCallView.EXTRA_MODE, IPCallView.MODE_OPEN);
 			intent.putExtra(IPCallView.EXTRA_CALL_ID, callId);
 			startActivity(intent);
-		} catch(JoynServiceException e) {
+		} catch(RcsServiceException e) {
 			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed), exitOnce);
 		}
 	}

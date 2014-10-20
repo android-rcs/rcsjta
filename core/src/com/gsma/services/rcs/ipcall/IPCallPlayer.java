@@ -20,11 +20,11 @@ package com.gsma.services.rcs.ipcall;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * IP call player offers an interface to manage the IP call player instance
- * independently of the joyn service. The IP call player is implemented in
+ * independently of the rcs service. The IP call player is implemented in
  * the application side. The IP call player captures the audio/video from the
  * device micro/camera, encodes the audio/video into the selected formats,
  * streams the encoded audio samples and video frames over the network in RTP.
@@ -74,8 +74,6 @@ public abstract class IPCallPlayer extends IIPCallPlayer.Stub {
 	
 	/**
 	 * Closes the player and deallocates resources
-	 * 
-	 * @throws JoynServiceException
 	 */
 	public abstract void close();
 	

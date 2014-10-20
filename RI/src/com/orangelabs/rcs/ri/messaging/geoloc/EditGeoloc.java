@@ -31,11 +31,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 
 /**
@@ -105,12 +105,12 @@ public class EditGeoloc extends Activity {
         
         // Register to API connection manager
      	ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
-     	if (connectionManager != null && connectionManager.isServiceConnected(RcsService.CHAT)) {
+     	if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 			try {
 				ChatServiceConfiguration configuration = connectionManager.getChatApi().getConfiguration();
 				geolocExpirationTime = configuration.getGeolocExpirationTime();
 				geolocLabelMaxLength = configuration.getGeolocLabelMaxLength();
-			} catch (JoynServiceException e) {
+			} catch (RcsServiceException e) {
 				// Ignore exception
 			}
      	}

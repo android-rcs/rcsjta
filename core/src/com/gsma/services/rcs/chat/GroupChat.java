@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -180,13 +180,13 @@ public class GroupChat {
      * Returns the chat ID
      * 
      * @return Chat ID
-	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-	public String getChatId() throws JoynServiceException {
+	public String getChatId() throws RcsServiceException {
 		try {
 			return chatInf.getChatId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -195,13 +195,13 @@ public class GroupChat {
 	 * 
 	 * @return Direction
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return chatInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
@@ -210,13 +210,13 @@ public class GroupChat {
 	 * 
 	 * @return State
 	 * @see GroupChat.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return chatInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
@@ -225,27 +225,28 @@ public class GroupChat {
 	 *
 	 * @return ReasonCode
 	 * @see GroupChat.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return chatInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
 	
 	/**
 	 * Returns the remote contact
 	 * 
 	 * @return Contact
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return chatInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -253,13 +254,13 @@ public class GroupChat {
 	 * Returns the subject of the group chat
 	 * 
 	 * @return Subject
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getSubject() throws JoynServiceException {
+	public String getSubject() throws RcsServiceException {
 		try {
 			return chatInf.getSubject();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -268,39 +269,39 @@ public class GroupChat {
 	 * by its MSISDN in national or international format, SIP address, SIP-URI or Tel-URI.
 	 * 
 	 * @return List of participants
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public Set<ParticipantInfo> getParticipants() throws JoynServiceException {
+	public Set<ParticipantInfo> getParticipants() throws RcsServiceException {
 		try {
 			return new HashSet<ParticipantInfo>(chatInf.getParticipants());
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}		
 	}
 	
 	/**
 	 * Accepts chat invitation
 	 *  
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation() throws JoynServiceException {
+	public void acceptInvitation() throws RcsServiceException {
 		try {
 			chatInf.acceptInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects chat invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			chatInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -309,13 +310,13 @@ public class GroupChat {
 	 * 
 	 * @param text Message
 	 * @return Unique message ID or null in case of error
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String sendMessage(String text) throws JoynServiceException {
+	public String sendMessage(String text) throws RcsServiceException {
 		try {
 			return chatInf.sendMessage(text);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}		
 	}
 	
@@ -324,13 +325,13 @@ public class GroupChat {
      * 
      * @param geoloc Geoloc info
 	 * @return Unique message ID or null in case of error
-   	 * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public String sendGeoloc(Geoloc geoloc) throws JoynServiceException {
+    public String sendGeoloc(Geoloc geoloc) throws RcsServiceException {
 		try {
 			return chatInf.sendGeoloc(geoloc);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}    	
     }	
 
@@ -339,13 +340,13 @@ public class GroupChat {
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void sendIsComposingEvent(boolean status) throws JoynServiceException {
+	public void sendIsComposingEvent(boolean status) throws RcsServiceException {
 		try {
 			chatInf.sendIsComposingEvent(status);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}		
 	}
 	
@@ -353,13 +354,13 @@ public class GroupChat {
 	 * Adds participants to a group chat
 	 * 
 	 * @param participants List of participants
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addParticipants(Set<ContactId> participants) throws JoynServiceException {
+	public void addParticipants(Set<ContactId> participants) throws RcsServiceException {
 		try {
 			chatInf.addParticipants(new ArrayList<ContactId>(participants));
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}		
 	}
 	
@@ -369,13 +370,13 @@ public class GroupChat {
 	 * parameter.
 	 * 
 	 * @return Number
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getMaxParticipants() throws JoynServiceException {
+	public int getMaxParticipants() throws RcsServiceException {
 		try {
 			return chatInf.getMaxParticipants();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}		
 	}
 	
@@ -383,13 +384,13 @@ public class GroupChat {
 	 * Quits a group chat conversation. The conversation will continue between
 	 * other participants if there are enough participants.
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void quitConversation() throws JoynServiceException {
+	public void quitConversation() throws RcsServiceException {
 		try {
 			chatInf.quitConversation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

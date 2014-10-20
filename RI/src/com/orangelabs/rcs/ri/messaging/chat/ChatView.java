@@ -52,7 +52,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
@@ -61,7 +61,7 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
@@ -180,10 +180,10 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CHAT, RcsService.CONTACTS)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsService.CHAT, RcsService.CONTACTS);
+			connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.CONTACTS);
 		}
     }
 
@@ -846,7 +846,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 						if (unread) {
 							unReadMessageIDs.add(msgId);
 						}
-					} catch (JoynContactFormatException e) {
+					} catch (RcsContactFormatException e) {
 						if (LogUtils.isActive) {
 							Log.e(LOGTAG, "Bad contact in history " + _contact, e);
 						}

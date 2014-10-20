@@ -701,7 +701,7 @@ public class ProvisioningParser {
                         typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null) {
                             if (typenode.getNodeValue().equalsIgnoreCase("joyn")) {
-                                parseJoyn(childnode);
+                                parseRcs(childnode);
                             }
                         }
                     }
@@ -711,11 +711,11 @@ public class ProvisioningParser {
     }
     
     /**
-     * Parse joyn
+     * Parse rcs
      * 
      * @param node Node
      */
-    private void parseJoyn(Node node) {
+    private void parseRcs(Node node) {
         Node typenode = null;
         if (node == null) {
             return;
@@ -738,7 +738,11 @@ public class ProvisioningParser {
     }
     
     /**
+<<<<<<< HEAD
      * Parse Ux
+=======
+     * Parse rcs
+>>>>>>> 6e7a779191c3ac0da6ae898241cb411601f332a1
      * 
      * @param node Node
      * @param isJoyn 

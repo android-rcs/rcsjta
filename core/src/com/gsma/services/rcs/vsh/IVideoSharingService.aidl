@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.vsh;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
@@ -14,9 +14,9 @@ interface IVideoSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	VideoSharingServiceConfiguration getConfiguration();
 

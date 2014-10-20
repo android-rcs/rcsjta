@@ -36,10 +36,10 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -52,7 +52,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET 
  */
-public class FileTransferService extends JoynService {
+public class FileTransferService extends RcsService {
 
 	private static final int KITKAT_VERSION_CODE = 19;
 
@@ -73,7 +73,7 @@ public class FileTransferService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public FileTransferService(Context ctx, JoynServiceListener listener) {
+    public FileTransferService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -120,7 +120,7 @@ public class FileTransferService extends JoynService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(JoynService.Error.CONNECTION_LOST);
+        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -129,17 +129,17 @@ public class FileTransferService extends JoynService {
      * Returns the configuration of the file transfer service
      * 
      * @return Configuration
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public FileTransferServiceConfiguration getConfiguration() throws JoynServiceException {
+    public FileTransferServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
 				return api.getConfiguration();
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -158,9 +158,9 @@ public class FileTransferService extends JoynService {
 	 * compatibility since this API is available only from Kitkat onwards.
 	 *
 	 * @param file Uri of file to transfer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	private void tryToTakePersistableUriPermission(Uri file) throws JoynServiceException {
+	private void tryToTakePersistableUriPermission(Uri file) throws RcsServiceException {
 		if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
 			return;
 		}
@@ -175,7 +175,7 @@ public class FileTransferService extends JoynService {
 			};
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -189,18 +189,18 @@ public class FileTransferService extends JoynService {
      * @param contact the remote contact identifier
      * @param file URI of file to transfer
      * @return File transfer
-     * @throws JoynServiceException
+     * @throws RcsServiceException
 	 */
-    public FileTransfer transferFile(ContactId contact, Uri file) throws JoynServiceException {
+    public FileTransfer transferFile(ContactId contact, Uri file) throws RcsServiceException {
     	return transferFile(contact, file, false);
     }
     
 	/**
 	 * Grant permission to the stack and persist access permission
 	 * @param file the file URI
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	private void grantAndPersistUriPermission(Uri file) throws JoynServiceException {
+	private void grantAndPersistUriPermission(Uri file) throws RcsServiceException {
 		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 			// Granting temporary read Uri permission from client to
 			// stack service if it is a content URI
@@ -226,9 +226,9 @@ public class FileTransferService extends JoynService {
 	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be attached if file is not an
 	 *            image or if local or remote contact does not support fileicon.
 	 * @return File transfer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon) throws JoynServiceException {
+	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon) throws RcsServiceException {
     	if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
@@ -240,10 +240,10 @@ public class FileTransferService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -257,10 +257,10 @@ public class FileTransferService extends JoynService {
 	 *            image or if local or remote contact does not support
 	 *            fileicon.
 	 * @return File transfer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
 	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon)
-			throws JoynServiceException {
+			throws RcsServiceException {
 		if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
@@ -272,10 +272,10 @@ public class FileTransferService extends JoynService {
 					return null;
 				}
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -283,17 +283,17 @@ public class FileTransferService extends JoynService {
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in the UI).
      *
      * @param transferId
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public void markFileTransferAsRead(String transferId) throws JoynServiceException {
+    public void markFileTransferAsRead(String transferId) throws RcsServiceException {
         if (api != null) {
             try {
                 api.markFileTransferAsRead(transferId);
             } catch(Exception e) {
-                throw new JoynServiceException(e.getMessage());
+                throw new RcsServiceException(e.getMessage());
             }
         } else {
-            throw new JoynServiceNotAvailableException();
+            throw new RcsServiceNotAvailableException();
         }
     }
     
@@ -301,9 +301,9 @@ public class FileTransferService extends JoynService {
      * Returns the list of file transfers in progress
      * 
      * @return List of file transfers
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<FileTransfer> getFileTransfers() throws JoynServiceException {
+    public Set<FileTransfer> getFileTransfers() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<FileTransfer> result = new HashSet<FileTransfer>();
@@ -314,10 +314,10 @@ public class FileTransferService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -325,9 +325,9 @@ public class FileTransferService extends JoynService {
      * Returns a current file transfer from its unique ID
      * 
      * @return File transfer or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public FileTransfer getFileTransfer(String transferId) throws JoynServiceException {
+    public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IFileTransfer ftIntf = api.getFileTransfer(transferId);
@@ -337,10 +337,10 @@ public class FileTransferService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
     
@@ -348,17 +348,17 @@ public class FileTransferService extends JoynService {
 	 * Registers a file transfer event listener
 	 * 
 	 * @param listener OneToOne File transfer listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addOneToOneFileTransferListener(FileTransferListener listener) throws JoynServiceException {
+	public void addOneToOneFileTransferListener(FileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addOneToOneFileTransferListener(listener);
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -366,17 +366,17 @@ public class FileTransferService extends JoynService {
 	 * Unregisters a file transfer event listener
 	 * 
 	 * @param listener File transfer listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeOneToOneFileTransferListener(FileTransferListener listener) throws JoynServiceException {
+	public void removeOneToOneFileTransferListener(FileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeOneToOneFileTransferListener(listener);
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -384,17 +384,17 @@ public class FileTransferService extends JoynService {
 	 * Registers a group file transfer event listener
 	 *
 	 * @param listener Group file transfer listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addGroupFileTransferListener(GroupFileTransferListener listener) throws JoynServiceException {
+	public void addGroupFileTransferListener(GroupFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addGroupFileTransferListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -402,17 +402,17 @@ public class FileTransferService extends JoynService {
 	 * Unregisters a group file transfer event listener
 	 *
 	 * @param listener Group file transfer listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeGroupFileTransferListener(GroupFileTransferListener listener) throws JoynServiceException {
+	public void removeGroupFileTransferListener(GroupFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeGroupFileTransferListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -424,17 +424,17 @@ public class FileTransferService extends JoynService {
 	 * 
 	 * @param enable
 	 *            true to enable else false
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-    public void setAutoAccept(boolean enable) throws JoynServiceException {
+    public void setAutoAccept(boolean enable) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.setAutoAccept(enable);
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 	
@@ -446,17 +446,17 @@ public class FileTransferService extends JoynService {
 	 * 
 	 * @param enable
 	 *            true to enable else false
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void setAutoAcceptInRoaming(boolean enable) throws JoynServiceException {
+	public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.setAutoAcceptInRoaming(enable);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
     
@@ -466,15 +466,15 @@ public class FileTransferService extends JoynService {
 	 * @param option
 	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
 	 */
-    public void setImageResizeOption(int option) throws JoynServiceException {
+    public void setImageResizeOption(int option) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.setImageResizeOption(option);
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

@@ -32,10 +32,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -50,7 +50,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class GeolocSharingService extends JoynService {
+public class GeolocSharingService extends RcsService {
 	/**
 	 * API
 	 */
@@ -62,7 +62,7 @@ public class GeolocSharingService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public GeolocSharingService(Context ctx, JoynServiceListener listener) {
+    public GeolocSharingService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -109,7 +109,7 @@ public class GeolocSharingService extends JoynService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(JoynService.Error.CONNECTION_LOST);
+        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -123,10 +123,10 @@ public class GeolocSharingService extends JoynService {
      * @param contact Contact identifier
      * @param geoloc Geolocation info
      * @return Geoloc sharing
-     * @throws JoynServiceException
+     * @throws RcsServiceException
 	 * @see Geoloc
      */
-    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc) throws JoynServiceException {
+    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IGeolocSharing sharingIntf = api.shareGeoloc(contact, geoloc);
@@ -136,10 +136,10 @@ public class GeolocSharingService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
     
@@ -147,9 +147,9 @@ public class GeolocSharingService extends JoynService {
      * Returns the list of geoloc sharings in progress
      * 
      * @return List of geoloc sharings
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<GeolocSharing> getGeolocSharings() throws JoynServiceException {
+    public Set<GeolocSharing> getGeolocSharings() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<GeolocSharing> result = new HashSet<GeolocSharing>();
@@ -160,10 +160,10 @@ public class GeolocSharingService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -172,9 +172,9 @@ public class GeolocSharingService extends JoynService {
      * 
      * @param sharingId Sharing ID
      * @return Geoloc sharing or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public GeolocSharing getGeolocSharing(String sharingId) throws JoynServiceException {
+    public GeolocSharing getGeolocSharing(String sharingId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IGeolocSharing sharingIntf = api.getGeolocSharing(sharingId);
@@ -184,10 +184,10 @@ public class GeolocSharingService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -195,17 +195,17 @@ public class GeolocSharingService extends JoynService {
 	 * Adds an event listener on geoloc sharing events
 	 *
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addEventListener(GeolocSharingListener listener) throws JoynServiceException {
+	public void addEventListener(GeolocSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -213,17 +213,17 @@ public class GeolocSharingService extends JoynService {
 	 * Removes an event listener on geoloc sharing
 	 *
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(GeolocSharingListener listener) throws JoynServiceException {
+	public void removeEventListener(GeolocSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

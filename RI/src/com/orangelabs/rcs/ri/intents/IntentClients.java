@@ -31,11 +31,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.JoynUtils;
+import com.gsma.services.rcs.RcsUtils;
 import com.orangelabs.rcs.ri.R;
 
 /**
- * List existing joyn clients
+ * List existing RCS clients
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -57,13 +57,13 @@ public class IntentClients extends ListActivity {
         setTitle(getString(R.string.menu_clients));
         
 		// Get the list of clients
-	    clients = JoynUtils.getJoynClients(this);
+	    clients = RcsUtils.getRcsClients(this);
 
 	    // Set list adapter
         String[] items = new String[clients.size()];
         for(int i=0; i < clients.size(); i++) {
         	items[i] = clients.get(i).activityInfo.packageName;
-        	JoynUtils.isJoynClientActivated(this, clients.get(i), receiverResult);
+        	RcsUtils.isRcsClientActivated(this, clients.get(i), receiverResult);
         }
         setListAdapter(new ArrayAdapter<String>(
         	      this,
@@ -75,7 +75,7 @@ public class IntentClients extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 
-		JoynUtils.loadJoynClientSettings(this, clients.get(position));
+		RcsUtils.loadRcsClientSettings(this, clients.get(position));
 	}
 
 	/**

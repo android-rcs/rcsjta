@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -79,9 +79,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
-     * @throws JoynContactFormatException 
+	 * @throws RcsContactFormatException
 	 */
-	public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite) throws JoynContactFormatException {
+	public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite) throws RcsContactFormatException {
 		super(parent, ContentManager.createMmContentFromSdp(invite), ContactUtils.createContactId(SipUtils
 				.getAssertedIdentity(invite)), FileTransferUtils.extractFileIcon(invite), IdGenerator.generateMessageID());
 

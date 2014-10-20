@@ -2,7 +2,7 @@ package com.gsma.services.rcs.ft;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferListener;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
@@ -16,9 +16,9 @@ interface IFileTransferService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	FileTransferServiceConfiguration getConfiguration();
 

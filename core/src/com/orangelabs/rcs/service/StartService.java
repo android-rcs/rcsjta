@@ -41,7 +41,7 @@ import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 
-import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
@@ -295,7 +295,7 @@ public class StartService extends Service {
     }
 
 	private void broadcastServiceProvisioned() {
-		Intent serviceProvisioned = new Intent(JoynService.ACTION_SERVICE_PROVISIONED);
+		Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONED);
 		IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
 		getApplicationContext().sendBroadcast(serviceProvisioned);
 	}

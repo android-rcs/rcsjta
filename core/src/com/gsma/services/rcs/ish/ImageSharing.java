@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ish;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.net.Uri;
@@ -203,13 +203,13 @@ public class ImageSharing {
 	 * Returns the sharing ID of the image sharing
 	 * 
 	 * @return Sharing ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getSharingId() throws JoynServiceException {
+	public String getSharingId() throws RcsServiceException {
 		try {
 			return sharingInf.getSharingId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -217,13 +217,13 @@ public class ImageSharing {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return sharingInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -231,13 +231,13 @@ public class ImageSharing {
 	 * Returns the URI of the file to be shared
 	 *
 	 * @return Uri
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public Uri getFile() throws JoynServiceException {
+	public Uri getFile() throws RcsServiceException {
 		try {
 			return sharingInf.getFile();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -245,13 +245,13 @@ public class ImageSharing {
      * Returns the complete filename including the path of the file to be transferred
      *
      * @return Filename
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
      */
-	public String getFileName() throws JoynServiceException {
+	public String getFileName() throws RcsServiceException {
 		try {
 			return sharingInf.getFileName();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -259,13 +259,13 @@ public class ImageSharing {
      * Returns the size of the file to be transferred
      *
      * @return Size in bytes
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
      */
-	public long getFileSize() throws JoynServiceException {
+	public long getFileSize() throws RcsServiceException {
 		try {
 			return sharingInf.getFileSize();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 
@@ -273,13 +273,13 @@ public class ImageSharing {
      * Returns the MIME type of the file to be transferred
      * 
      * @return Type
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
      */
-    public String getFileType() throws JoynServiceException {
+    public String getFileType() throws RcsServiceException {
 		try {
 			return sharingInf.getFileType();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
     }
 
@@ -288,13 +288,13 @@ public class ImageSharing {
 	 * 
 	 * @return State
 	 * @see ImageSharing.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return sharingInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
@@ -303,67 +303,67 @@ public class ImageSharing {
 	 *
 	 * @return ReasonCode
 	 * @see ImageSharing.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return sharingInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see ImageSharing.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return sharingInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
 	/**
 	 * Accepts image sharing invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation() throws JoynServiceException {
+	public void acceptInvitation() throws RcsServiceException {
 		try {
 			sharingInf.acceptInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects image sharing invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			sharingInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Aborts the sharing
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortSharing() throws JoynServiceException {
+	public void abortSharing() throws RcsServiceException {
 		try {
 			sharingInf.abortSharing();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

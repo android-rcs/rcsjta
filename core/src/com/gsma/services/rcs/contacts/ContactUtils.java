@@ -21,8 +21,8 @@ package com.gsma.services.rcs.contacts;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceConfiguration;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceConfiguration;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -94,14 +94,14 @@ public class ContactUtils {
 					if (context == null) {
 						throw new IllegalArgumentException("Context is null");
 					}
-					String countryCode = JoynServiceConfiguration.getMyCountryCode(context);
+					String countryCode = RcsServiceConfiguration.getMyCountryCode(context);
 					if (countryCode != null) {
 						// Check for Country Code validity
 						Matcher matcher = PATTERN_COUNTRY_CODE.matcher(countryCode);
 						if (matcher.find()) {
 							instance = new ContactUtils();
 							instance.mCountryCode = countryCode;
-							instance.mCountryAreaCode = JoynServiceConfiguration.getMyCountryAreaCode(context);
+							instance.mCountryAreaCode = RcsServiceConfiguration.getMyCountryAreaCode(context);
 							instance.msisdnWithPrefixAndCountryCode = new StringBuilder(MSISDN_PREFIX_INTERNATIONAL).append(
 									countryCode.substring(1)).toString();
 						}
@@ -136,16 +136,16 @@ public class ContactUtils {
 	 * 
 	 * @param contact
 	 *            the contact number
-	 * @return Returns true if the given ContactId have the syntax of valid Joyn ContactId.
+	 * @return Returns true if the given ContactId have the syntax of valid Rcs ContactId.
 	 */
 	public boolean isValidContact(String contact) {
 		return (!TextUtils.isEmpty(stripSeparators(contact)));
 	}
 
 	/**
-	 * Formats the given ContactId to uniquely represent a Joyn contact.
+	 * Formats the given ContactId to uniquely represent a Rcs contact.
 	 * <p>
-	 * May throw a JoynContactFormatException exception if the string contact parameter is not enabled to produce a valid ContactId.
+	 * May throw a RcsContactFormatException exception if the string contact parameter is not enabled to produce a valid ContactId.
 	 * 
 	 * @param contact
 	 *            the contact number
@@ -158,7 +158,7 @@ public class ContactUtils {
 			if (contact.charAt(0) != '+') {
 				// CC not provided, does it exists in provider ?
 				if (mCountryCode == null) {
-					throw new JoynContactFormatException("Country code is unknown");
+					throw new RcsContactFormatException("Country code is unknown");
 				}
 				// International numbering with prefix ?
 				if (contact.startsWith(msisdnWithPrefixAndCountryCode)) {
@@ -172,7 +172,7 @@ public class ContactUtils {
 							// Remove Country Area Code and add Country Code
 							contact = new StringBuilder(mCountryCode).append(contact.substring(mCountryAreaCode.length())).toString();
 						} else {
-							throw new JoynContactFormatException("Local phone number should be prefixed with Country Area Code");
+							throw new RcsContactFormatException("Local phone number should be prefixed with Country Area Code");
 						}
 					} else {
 						// No Country Area Code, add Country code to local number
@@ -182,7 +182,7 @@ public class ContactUtils {
 			}
 			return new ContactId(contact);
 		}
-		throw new JoynContactFormatException("Input parameter is null or empty");
+		throw new RcsContactFormatException("Input parameter is null or empty");
 	}
 
 }

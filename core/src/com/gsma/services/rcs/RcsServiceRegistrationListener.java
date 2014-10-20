@@ -17,18 +17,20 @@
  ******************************************************************************/
 package com.gsma.services.rcs;
 
+
 /**
- * Joyn service not available exception 
- *  
+ * Service registration events listener
+ * 
  * @author Jean-Marc AUFFRET
  */
-public class JoynServiceNotAvailableException extends JoynServiceException {
-	static final long serialVersionUID = 1L;
+public abstract class RcsServiceRegistrationListener extends IRcsServiceRegistrationListener.Stub {
+	/**
+	 * Callback called when service is registered to the network platform
+	 */
+	public abstract void onServiceRegistered();
 	
 	/**
-	 * Constructor
+	 * Callback called when service is unregistered from the network platform
 	 */
-	public JoynServiceNotAvailableException() {
-		super("joyn service not available");
-	}
+	public abstract void onServiceUnregistered();
 }

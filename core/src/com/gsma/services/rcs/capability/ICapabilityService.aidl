@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.capability;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -11,9 +11,9 @@ import com.gsma.services.rcs.contacts.ContactId;
 interface ICapabilityService {
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	Capabilities getMyCapabilities();
 

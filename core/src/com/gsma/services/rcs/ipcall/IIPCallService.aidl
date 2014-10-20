@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.ipcall;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
@@ -15,9 +15,9 @@ interface IIPCallService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	IPCallServiceConfiguration getConfiguration();
 

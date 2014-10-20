@@ -34,7 +34,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
@@ -116,7 +116,7 @@ public class InitiateSingleChat extends Activity {
             ContactId contact;
 			try {
 				contact = contactUtils.formatContactId(phoneNumber);
-			} catch (JoynContactFormatException e) {
+			} catch (RcsContactFormatException e) {
 				if (LogUtils.isActive) {
 	    			Log.e(LOGTAG, "Cannot parse contact "+phoneNumber);
 	    		}

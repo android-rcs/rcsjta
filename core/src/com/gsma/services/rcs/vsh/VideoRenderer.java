@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * Video renderer offers an interface to manage the video renderer instance
- * independently of the joyn service. The video renderer is implemented in
+ * independently of the rcs service. The video renderer is implemented in
  * the application side. The video renderer receives the video streaming over
  * the network in RTP, decodes the video frames and displays the decoded
  * picture on the device screen.

@@ -18,13 +18,13 @@
 package com.gsma.services.rcs;
 
 /**
- * Intents related to joyn service activities 
+ * Intents related to rcs service activities
  * 
  * @author Jean-Marc AUFFRET
  */
 public class Intents {
     /**
-     * Intents for joyn client
+     * Intents for rcs client
      */
     public static class Client {
     	/**

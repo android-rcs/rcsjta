@@ -23,7 +23,7 @@ import java.util.Locale;
 
 import org.xml.sax.InputSource;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
@@ -201,7 +201,7 @@ public class TermsConditionsService extends ImsService {
 					}
 				}
 			}
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.error("Can't parse contact");
 			}

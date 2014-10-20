@@ -47,8 +47,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.vsh.VideoSharing;
@@ -57,7 +57,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.MyVideoPlayer;
@@ -272,11 +272,11 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.VIDEO_SHARING)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-        connectionManager.startMonitorServices(this, exitOnce, RcsService.VIDEO_SHARING);
+        connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.VIDEO_SHARING);
 
 		// Add service listener
 		try {
@@ -284,7 +284,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onCreate initiate video sharing");
 			}
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
@@ -299,7 +299,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 			return;
 		}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.VIDEO_SHARING)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
 			// Remove video sharing listener
 			try {
 				connectionManager.getVideoSharingApi().removeEventListener(vshListener);
@@ -353,7 +353,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
             final ContactId remote;
     		try {
     			remote = contactUtils.formatContactId(cursor.getString(1));
-    		} catch (JoynContactFormatException e1) {
+    		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;
     		}

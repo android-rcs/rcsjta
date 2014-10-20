@@ -2,7 +2,7 @@ package com.gsma.services.rcs.ish;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.IJoynServiceRegistrationListener;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
@@ -15,9 +15,9 @@ interface IImageSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IJoynServiceRegistrationListener listener);
+	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IJoynServiceRegistrationListener listener); 
+	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
 
 	ImageSharingServiceConfiguration getConfiguration();
     

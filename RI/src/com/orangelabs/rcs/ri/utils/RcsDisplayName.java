@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.JoynContact;
+import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
 
@@ -48,7 +48,7 @@ public class RcsDisplayName {
 			if (contact == null) {
 				return null;
 			}
-			JoynContact rcsContact = ApiConnectionManager.getInstance(ctx).getContactsApi().getJoynContact(contact);
+			RcsContact rcsContact = ApiConnectionManager.getInstance(ctx).getContactsApi().getRcsContact(contact);
 			return rcsContact.getDisplayName();
 		} catch (Exception e) {
 			if (LogUtils.isActive) {

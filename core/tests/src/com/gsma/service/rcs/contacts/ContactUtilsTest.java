@@ -21,7 +21,7 @@ package com.gsma.service.rcs.contacts;
 import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -99,9 +99,9 @@ public class ContactUtilsTest extends AndroidTestCase {
 	public void testFormatContactIdNull() {
 		try {
 			contactUtils.formatContactId(null);
-			fail("Expected JoynContactFormatException to be thrown");
-		} catch (JoynContactFormatException e) {
-			assertTrue(e instanceof JoynContactFormatException);
+			fail("Expected RcsContactFormatException to be thrown");
+		} catch (RcsContactFormatException e) {
+			assertTrue(e instanceof RcsContactFormatException);
 		}
 	}
 
@@ -109,8 +109,8 @@ public class ContactUtilsTest extends AndroidTestCase {
 		try {
 			ContactId cid = contactUtils.formatContactId("+33612345678");
 			assertTrue(cid.toString().equals("+33612345678"));
-		} catch (JoynContactFormatException e) {
-			fail("JoynContactFormatException thrown");
+		} catch (RcsContactFormatException e) {
+			fail("RcsContactFormatException thrown");
 		}
 	}
 	
@@ -122,8 +122,8 @@ public class ContactUtilsTest extends AndroidTestCase {
 		try {
 			ContactId cid = contactUtils.formatContactId(cac+"612345678");
 			assertTrue(cid.toString().equals(cc+"612345678"));
-		} catch (JoynContactFormatException e) {
-			fail("JoynContactFormatException thrown");
+		} catch (RcsContactFormatException e) {
+			fail("RcsContactFormatException thrown");
 		}
 	}
 	
@@ -134,9 +134,9 @@ public class ContactUtilsTest extends AndroidTestCase {
 		try {
 			int cacInteger = Integer.parseInt(cac);
 			contactUtils.formatContactId((++cacInteger)+"612345678");
-			fail("JoynContactFormatException expected");
+			fail("RcsContactFormatException expected");
 		} catch (Exception e) {
-			assertTrue(e instanceof JoynContactFormatException);
+			assertTrue(e instanceof RcsContactFormatException);
 		}
 	}
 	
@@ -145,8 +145,8 @@ public class ContactUtilsTest extends AndroidTestCase {
 		try {
 			ContactId cid = contactUtils.formatContactId("00"+cc.substring(1)+"612345678");
 			assertTrue(cid.toString().equals(cc+"612345678"));
-		} catch (JoynContactFormatException e) {
-			fail("JoynContactFormatException thrown");
+		} catch (RcsContactFormatException e) {
+			fail("RcsContactFormatException thrown");
 		}
 	}
 }

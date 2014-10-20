@@ -34,16 +34,16 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsService;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -112,15 +112,15 @@ public class RequestCapabilities extends Activity {
         
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsService.CAPABILITY);
+		connectionManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
 		try {
 			// Add service listener
 			connectionManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
-		} catch (JoynServiceException e) {
+		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
@@ -135,7 +135,7 @@ public class RequestCapabilities extends Activity {
     		return;
     	}
 		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsService.CAPABILITY)) {
+		if (connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
 			// Remove image sharing listener
 			try {
 				connectionManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);
@@ -193,10 +193,10 @@ public class RequestCapabilities extends Activity {
 	
 				// Display default capabilities
 		        displayCapabilities(currentCapabilities);
-		    } catch(JoynServiceNotAvailableException e) {
+		    } catch(RcsServiceNotAvailableException e) {
 		    	e.printStackTrace();
 				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), exitOnce);
-		    } catch(JoynServiceException e) {
+		    } catch(RcsServiceException e) {
 				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed), exitOnce);
 			}
 		}
@@ -229,7 +229,7 @@ public class RequestCapabilities extends Activity {
 	    ContactUtils contactUtils = ContactUtils.getInstance(RequestCapabilities.this);
 		try {
 			return contactUtils.formatContactId(cursor.getString(1));
-		} catch (JoynContactFormatException e) {
+		} catch (RcsContactFormatException e) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "getSelectedContact cannot parse contact " + cursor.getString(1));
 			}
@@ -273,10 +273,10 @@ public class RequestCapabilities extends Activity {
     	try {
 	        // Request new capabilities
 	        connectionManager.getCapabilityApi().requestContactCapabilities(contact);
-	    } catch(JoynServiceNotAvailableException e) {
+	    } catch(RcsServiceNotAvailableException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-	    } catch(JoynServiceException e) {
+	    } catch(RcsServiceException e) {
 	    	e.printStackTrace();
 			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 		}

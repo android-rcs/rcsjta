@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
-import com.gsma.services.rcs.JoynServiceException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -180,13 +180,13 @@ public class IPCall {
 	 * Returns the call ID of call
 	 * 
 	 * @return Call ID
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public String getCallId() throws JoynServiceException {
+	public String getCallId() throws RcsServiceException {
 		try {
 			return callInf.getCallId();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -194,13 +194,13 @@ public class IPCall {
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() throws JoynServiceException {
+	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return callInf.getRemoteContact();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
@@ -209,13 +209,13 @@ public class IPCall {
 	 * 
 	 * @return State
 	 * @see IPCall.State
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getState() throws JoynServiceException {
+	public int getState() throws RcsServiceException {
 		try {
 			return callInf.getState();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}		
 
@@ -224,28 +224,28 @@ public class IPCall {
 	 *
 	 * @return ReasonCode
 	 * @see IPCall.ReasonCode
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getReasonCode() throws JoynServiceException {
+	public int getReasonCode() throws RcsServiceException {
 		try {
 			return callInf.getReasonCode();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
-		
+
 	/**
 	 * Returns the direction of the call (incoming or outgoing)
 	 * 
 	 * @return Direction
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws JoynServiceException {
+	public int getDirection() throws RcsServiceException {
 		try {
 			return callInf.getDirection();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}	
 	
@@ -254,39 +254,39 @@ public class IPCall {
 	 * 
 	 * @param player IP call player
 	 * @param renderer IP call renderer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void acceptInvitation(IPCallPlayer player, IPCallRenderer renderer) throws JoynServiceException {
+	public void acceptInvitation(IPCallPlayer player, IPCallRenderer renderer) throws RcsServiceException {
 		try {
 			callInf.acceptInvitation(player, renderer);
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Rejects call invitation
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void rejectInvitation() throws JoynServiceException {
+	public void rejectInvitation() throws RcsServiceException {
 		try {
 			callInf.rejectInvitation();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Aborts the call
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void abortCall() throws JoynServiceException {
+	public void abortCall() throws RcsServiceException {
 		try {
 			callInf.abortCall();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -294,39 +294,39 @@ public class IPCall {
 	 * Is video activated
 	 * 
 	 * @return Boolean
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public boolean isVideo() throws JoynServiceException {
+	public boolean isVideo() throws RcsServiceException {
 		try {
 			return callInf.isVideo();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Add video stream
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addVideo() throws JoynServiceException {
+	public void addVideo() throws RcsServiceException {
 		try {
 			callInf.addVideo();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Remove video stream
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeVideo() throws JoynServiceException {
+	public void removeVideo() throws RcsServiceException {
 		try {
 			callInf.removeVideo();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -334,39 +334,39 @@ public class IPCall {
 	 * Is call on hold
 	 * 
 	 * @return Boolean
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public boolean isOnHold() throws JoynServiceException {
+	public boolean isOnHold() throws RcsServiceException {
 		try {
 			return callInf.isOnHold();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Puts the call on hold
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void holdCall() throws JoynServiceException {
+	public void holdCall() throws RcsServiceException {
 		try {
 			callInf.holdCall();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Continues the call that hold's on
 	 * 
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void continueCall() throws JoynServiceException {
+	public void continueCall() throws RcsServiceException {
 		try {
 			callInf.continueCall();
 		} catch(Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -374,13 +374,13 @@ public class IPCall {
 	 * Returns the video codec used during sharing
 	 *
 	 * @return VideoCodec
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public VideoCodec getVideoCodec() throws JoynServiceException {
+	public VideoCodec getVideoCodec() throws RcsServiceException {
 		try {
 			return callInf.getVideoCodec();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
@@ -388,13 +388,13 @@ public class IPCall {
 	 * Returns the audio codec used during sharing
 	 *
 	 * @return AudioCodec
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public AudioCodec getAudioCodec() throws JoynServiceException {
+	public AudioCodec getAudioCodec() throws RcsServiceException {
 		try {
 			return callInf.getAudioCodec();
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}
 }

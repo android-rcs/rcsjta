@@ -36,10 +36,10 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.JoynServiceNotAvailableException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 /**
  * This class offers the main entry point to upload a file to the RCS content
@@ -48,7 +48,7 @@ import com.gsma.services.rcs.JoynServiceNotAvailableException;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FileUploadService extends JoynService {
+public class FileUploadService extends RcsService {
 
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
@@ -67,7 +67,7 @@ public class FileUploadService extends JoynService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public FileUploadService(Context ctx, JoynServiceListener listener) {
+    public FileUploadService(Context ctx, RcsServiceListener listener) {
     	super(ctx, listener);
     }
 
@@ -114,7 +114,7 @@ public class FileUploadService extends JoynService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(JoynService.Error.CONNECTION_LOST);
+        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -134,9 +134,9 @@ public class FileUploadService extends JoynService {
 	 * compatibility since this API is available only from Kitkat onwards.
 	 *
 	 * @param file Uri of file to transfer
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	private void persistUriPermissionForClient(Uri file) throws JoynServiceException {
+	private void persistUriPermissionForClient(Uri file) throws RcsServiceException {
 		try {
 			ContentResolver contentResolver = ctx.getContentResolver();
 			Method takePersistableUriPermissionMethod = contentResolver.getClass()
@@ -151,16 +151,16 @@ public class FileUploadService extends JoynService {
 			};
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
-			throw new JoynServiceException(e.getMessage());
+			throw new RcsServiceException(e.getMessage());
 		}
 	}    
     
 	/**
 	 * Grant permission to the stack and persist access permission
 	 * @param file the file URI
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	private void grantAndPersistUriPermission(Uri file) throws JoynServiceException {
+	private void grantAndPersistUriPermission(Uri file) throws RcsServiceException {
 		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 			// Granting temporary read Uri permission from client to
 			// stack service if it is a content URI
@@ -176,17 +176,17 @@ public class FileUploadService extends JoynService {
      * Can a file be uploaded now
      * 
      * @return Returns true if a file can be uploaded, else returns false
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public boolean canUploadFile() throws JoynServiceException {
+    public boolean canUploadFile() throws RcsServiceException {
 		if (api != null) {
 			try {
 				return api.canUploadFile();
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }
     
@@ -194,17 +194,17 @@ public class FileUploadService extends JoynService {
      * Returns the configuration of the file upload service
      * 
      * @return Configuration
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public FileUploadServiceConfiguration getConfiguration() throws JoynServiceException {
+    public FileUploadServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
 				return api.getConfiguration();
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
     
@@ -215,9 +215,9 @@ public class FileUploadService extends JoynService {
      * @param file Uri of file to upload
 	 * @param fileicon File icon option. If true and if it's an image, a file icon is attached.
      * @return File upload
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public FileUpload uploadFile(Uri file, boolean fileicon) throws JoynServiceException {
+    public FileUpload uploadFile(Uri file, boolean fileicon) throws RcsServiceException {
 		if (api != null) {
 			try {
 				grantAndPersistUriPermission(file);
@@ -229,10 +229,10 @@ public class FileUploadService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
     
@@ -240,9 +240,9 @@ public class FileUploadService extends JoynService {
      * Returns the list of file uploads in progress
      * 
      * @return List of file uploads
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public Set<FileUpload> getFileUploads() throws JoynServiceException {
+    public Set<FileUpload> getFileUploads() throws RcsServiceException {
 		if (api != null) {
 			try {
 	    		Set<FileUpload> result = new HashSet<FileUpload>();
@@ -253,10 +253,10 @@ public class FileUploadService extends JoynService {
 				}
 				return result;
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
 
@@ -265,9 +265,9 @@ public class FileUploadService extends JoynService {
      * 
      * @param uploadId Upload ID
      * @return File upload or null if not found
-     * @throws JoynServiceException
+     * @throws RcsServiceException
      */
-    public FileUpload getFileUpload(String uploadId) throws JoynServiceException {
+    public FileUpload getFileUpload(String uploadId) throws RcsServiceException {
 		if (api != null) {
 			try {
 				IFileUpload uploadIntf = api.getFileUpload(uploadId);
@@ -277,10 +277,10 @@ public class FileUploadService extends JoynService {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
     }    
  
@@ -288,17 +288,17 @@ public class FileUploadService extends JoynService {
 	 * Adds an event listener on file upload events
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void addEventListener(IFileUploadListener listener) throws JoynServiceException {
+	public void addEventListener(IFileUploadListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 
@@ -306,17 +306,17 @@ public class FileUploadService extends JoynService {
 	 * Removes an event listener from file upload
 	 * 
 	 * @param listener Listener
-	 * @throws JoynServiceException
+	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(FileUploadListener listener) throws JoynServiceException {
+	public void removeEventListener(FileUploadListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.removeEventListener(listener);
 			} catch (Exception e) {
-				throw new JoynServiceException(e.getMessage());
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new JoynServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

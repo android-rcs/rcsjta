@@ -35,7 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.Intents;
-import com.gsma.services.rcs.JoynService;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -489,7 +489,7 @@ public class RcsCoreService extends Service implements CoreListener {
 		addRcsServiceNotification(false, getString(R.string.rcs_core_started));
 
 		// Send service up intent
-		Intent serviceUp = new Intent(JoynService.ACTION_SERVICE_UP);
+		Intent serviceUp = new Intent(RcsService.ACTION_SERVICE_UP);
 		IntentUtils.tryToSetReceiverForegroundFlag(serviceUp);
 		getApplicationContext().sendBroadcast(serviceUp);
     }

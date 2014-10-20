@@ -16,9 +16,9 @@
 package com.orangelabs.rcs.service.broadcaster;
 
 /**
- * Interface to perform broadcast events on JoynServiceRegistrationListeners
+ * Interface to perform broadcast events on RcsServiceRegistrationListeners
  */
-public interface IJoynServiceRegistrationEventBroadcaster {
+public interface IRcsServiceRegistrationEventBroadcaster {
 
 	public void broadcastServiceRegistered();
 

@@ -25,7 +25,7 @@ package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 import java.io.IOException;
 import java.util.Vector;
 
-import com.gsma.services.rcs.JoynContactFormatException;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -323,7 +323,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneOneChatSession im
 							ContactId contact = ContactUtils.createContactId(from);
 							// Receive an IMDN report
 							receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
-						} catch (JoynContactFormatException e) {
+						} catch (RcsContactFormatException e) {
 							// Receive an IMDN report
 							receiveMessageDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
 						}
