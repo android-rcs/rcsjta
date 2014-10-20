@@ -523,7 +523,8 @@ public abstract class ImsServiceSession extends Thread {
 		/* TODO: This will be changed anyway by the implementation of CR018 */
 		Collection<ImsSessionListener> listeners = getListeners();
 		/* Handles the case of REJECTED_BY_USER on originating session */
-		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER & !dialogPath.isSigEstablished()) {
+		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER && dialogPath != null
+				&& !dialogPath.isSigEstablished()) {
 			for (ImsSessionListener listener : listeners) {
 				listener.handleSessionRejectedByUser();
 			}
