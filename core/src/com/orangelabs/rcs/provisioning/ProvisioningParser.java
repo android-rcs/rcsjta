@@ -738,11 +738,7 @@ public class ProvisioningParser {
     }
     
     /**
-<<<<<<< HEAD
      * Parse Ux
-=======
-     * Parse rcs
->>>>>>> 6e7a779191c3ac0da6ae898241cb411601f332a1
      * 
      * @param node Node
      * @param isJoyn 
