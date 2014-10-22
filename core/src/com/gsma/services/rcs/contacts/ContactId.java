@@ -37,10 +37,10 @@ public class ContactId implements Parcelable, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * The ContactId formatted in the international representation of the phone number “<CC><NDCCS><SN>” <br>
+	 * The ContactId formatted in the international representation of the phone number "<CC><NDCCS><SN>" <br>
 	 * with:
 	 * <ul>
-	 * <li>- CC : the country code with a leading ‘+’ character
+	 * <li>- CC : the country code with a leading '+' character
 	 * <li>- NCSDC : the national destination code
 	 * <li>- SN: the subscriber number
 	 * </ul>
@@ -55,7 +55,7 @@ public class ContactId implements Parcelable, Serializable {
 	 * Constructor
 	 * 
 	 * @param contact
-	 *            the contact number (valid characters are digits, space, ‘-‘, leading ‘+’)
+	 *            the contact number (valid characters are digits, space, '-', leading '+')
 	 */
 	/* package private */ContactId(String contact) {
 		mContactId = contact;

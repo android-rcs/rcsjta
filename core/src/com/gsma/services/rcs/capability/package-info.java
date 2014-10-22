@@ -6,8 +6,8 @@
  * - Read the supported capabilities locally by the user on its device.<br>
  * - Retrieve all capabilities of a user.<br>
  * - Checking a specific capability of a user.<br>
- * - Registering for changes to a user/users‘s capabilities.<br>
- * - Unregistering for changes to a user/users‘s capabilities.<br>
+ * - Registering for changes to a user/users's capabilities.<br>
+ * - Unregistering for changes to a user/users's capabilities.<br>
  * - Define scheme for registering new service capabilities based on manifest defined
  *  feature tags. This API may be accessible by any application (third party, MNO, OEM).
  *  The RCS extensions are controlled internally by the RCS service.

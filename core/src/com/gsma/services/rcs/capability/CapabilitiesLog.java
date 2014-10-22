@@ -97,7 +97,7 @@ public class CapabilitiesLog {
     
     /**
      * The name of the column containing the RCS extensions. List of features tags
-     * semicolon separated (e.g. <TAG1>;<TAG2>;…;TAGn).
+     * semicolon separated (e.g. <TAG1>;<TAG2>;...;TAGn).
      * <P>Type: TEXT</P>
      */
     public static final String CAPABILITY_EXTENSIONS = "capability_extensions";

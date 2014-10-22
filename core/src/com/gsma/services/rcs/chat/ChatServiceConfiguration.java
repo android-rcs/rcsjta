@@ -281,9 +281,9 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * The maximum group chat subject’s length can have. 
+	 * The maximum group chat subject's length can have.
 	 * <p>The length is the number of bytes of the message encoded in UTF-8.
-	 * @return The maximum group chat subject’s length can have.
+	 * @return The maximum group chat subject's length can have.
 	 */
 	public int getGroupChatSubjectMaxLength() {
 		return groupChatSubjectMaxLength;
