@@ -268,7 +268,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         		logger.info("Send 200 OK");
         	}
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-            		RichcallService.FEATURE_TAGS_IMAGE_SHARE, sdp);
+            		RichcallService.FEATURE_TAGS_GEOLOC_SHARE, sdp);
 
             // The signalisation is established
             getDialogPath().sigEstablished();
