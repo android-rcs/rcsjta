@@ -57,12 +57,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * File information to send via chat
      */
-    private String fileInfo = null;
+    private String fileInfo;
 
     /**
      * Chat session used to send file info
      */
-    private ChatSession chatSession= null;
+    private ChatSession chatSession;
 
     /**
      * The logger
@@ -81,7 +81,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 * @param conferenceId
 	 *            Conference ID
 	 * @param participants
-	 *            List of participants
+	 *            Set of participants
 	 * @param chatSessionId
 	 *            Chat session ID
 	 * @param chatContributionId

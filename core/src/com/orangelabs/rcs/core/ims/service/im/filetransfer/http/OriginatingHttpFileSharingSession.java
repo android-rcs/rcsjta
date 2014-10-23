@@ -41,6 +41,7 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -53,7 +54,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
     /**
      * HTTP upload manager
      */
-    protected HttpUploadManager uploadManager = null;
+    protected HttpUploadManager uploadManager;
 
 	/**
      * The logger
@@ -83,7 +84,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact+ " remoteURI= "+remoteUri);
 		}
 		MmContent fileiconContent = null;
-		if (fileicon) {
+		if (fileicon && MimeManager.isImageType(content.getEncoding())) {
 			// Create the fileicon
 			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getFileTransferId());
 			setFileicon(fileiconContent);
