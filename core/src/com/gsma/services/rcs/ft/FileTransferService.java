@@ -160,10 +160,7 @@ public class FileTransferService extends RcsService {
 	 * @param file Uri of file to transfer
 	 * @throws RcsServiceException
 	 */
-	private void tryToTakePersistableUriPermission(Uri file) throws RcsServiceException {
-		if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-			return;
-		}
+	private void takePersistableUriPermission(Uri file) throws RcsServiceException {
 		try {
 			ContentResolver contentResolver = ctx.getContentResolver();
 			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
@@ -200,7 +197,7 @@ public class FileTransferService extends RcsService {
 	 * @param file the file URI
 	 * @throws RcsServiceException
 	 */
-	private void grantAndPersistUriPermission(Uri file) throws RcsServiceException {
+	private void tryToGrantAndPersistUriPermission(Uri file) throws RcsServiceException {
 		if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
 			// Granting temporary read Uri permission from client to
 			// stack service if it is a content URI
@@ -208,7 +205,9 @@ public class FileTransferService extends RcsService {
 			// Try to persist Uri access permission for the client
 			// to be able to read the contents from this Uri even
 			// after the client is restarted after device reboot.
-			tryToTakePersistableUriPermission(file);
+			if (android.os.Build.VERSION.SDK_INT >= KITKAT_VERSION_CODE) {
+				takePersistableUriPermission(file);
+			}
 		}
 	}
     
@@ -231,7 +230,7 @@ public class FileTransferService extends RcsService {
 	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon) throws RcsServiceException {
     	if (api != null) {
 			try {
-				grantAndPersistUriPermission(file);
+				tryToGrantAndPersistUriPermission(file);
 
 				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon);
 				if (ftIntf != null) {
@@ -263,7 +262,7 @@ public class FileTransferService extends RcsService {
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				grantAndPersistUriPermission(file);
+				tryToGrantAndPersistUriPermission(file);
 				
 				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon);
 				if (ftIntf != null) {

@@ -21,23 +21,23 @@
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Application traces"/>	
+        android:text="@string/Application_traces"/>
     
 		<CheckBox android:id="@+id/SipTraceActivated"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="SIP traces"/>			
+        android:text="@string/SIP_traces"/>
 
 		<CheckBox android:id="@+id/MediaTraceActivated"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Media traces"/>		
+        android:text="@string/Media_traces"/>
 
-       	<TextView android:text="SIP traces file:"
+       	<TextView android:text="@string/SIP_traces_file"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -48,7 +48,7 @@
 	 	android:layout_marginRight="5dip"
 	 	android:maxLength="100" android:lines="1"/>
        
-        <TextView android:text="Trace level:"
+        <TextView android:text="@string/Trace_level"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>

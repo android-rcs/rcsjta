@@ -16,7 +16,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent">
 
-       	<TextView android:text="Auto config mode:"
+       	<TextView android:text="@string/Auto_config_mode"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -26,7 +26,7 @@
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
-       <TextView android:text="Vendor:"
+       <TextView android:text="@string/Vendor"
             android:paddingTop="5dip"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
@@ -38,7 +38,7 @@
                 android:layout_marginRight="5dip"
                 android:drawSelectorOnTop="true" />
 
-        <TextView android:text="Secondary provisioning server:"
+        <TextView android:text="@string/Secondary_provisioning_server"
         android:paddingTop="5dip"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
@@ -54,9 +54,9 @@
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Use only the secondary provisioning server"/>
+        android:text="@string/Use_only_the_secondary_provisioning_server"/>
 
-       	<TextView android:text="Network access:"
+       	<TextView android:text="@string/Network_access"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -67,7 +67,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-       	<TextView android:text="IMS service polling period (seconds):"
+       	<TextView android:text="@string/IMS_service_polling_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -80,7 +80,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Default protocol for file transfer:"
+       	<TextView android:text="@string/Default_protocol_for_file_transfer"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -91,7 +91,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 		
-		<TextView android:text="Default SIP protocol for Mobile access:"
+		<TextView android:text="@string/Default_SIP_protocol_for_Mobile_access"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -102,7 +102,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-	    <TextView android:text="Default SIP protocol for Wi-Fi access:"
+	    <TextView android:text="@string/Default_SIP_protocol_for_Wi_Fi_access"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -113,7 +113,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 			 
-		<TextView android:text="TLS root or self-signed certificate from /sdcard:"
+		<TextView android:text="@string/TLS_root_or_self_signed_certificate_from_sdcard"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -124,7 +124,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-		<TextView android:text="TLS intermediate certificate from /sdcard:"
+		<TextView android:text="@string/TLS_intermediate_certificate_from_sdcard"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -135,7 +135,7 @@
 		android:layout_marginRight="5dip"
 		android:drawSelectorOnTop="true"/>
 
-       	<TextView android:text="Default SIP port:"
+       	<TextView android:text="@string/Default_SIP_port"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -148,7 +148,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="SIP timer base T1 (milliseconds):"
+       	<TextView android:text="@string/SIP_timer_base_T1_milliseconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -165,7 +165,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:paddingTop="5dip"
-            android:text="SIP timer T2 (milliseconds):" />
+            android:text="@string/SIP_timer_T2_milliseconds" />
         <EditText
             android:id="@+id/SipTimerT2"
             android:layout_width="fill_parent"
@@ -180,7 +180,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:paddingTop="5dip"
-            android:text="SIP timer T4 (milliseconds):" />
+            android:text="@string/SIP_timer_T4_milliseconds" />
         <EditText
             android:id="@+id/SipTimerT4"
             android:layout_width="fill_parent"
@@ -191,7 +191,7 @@
             android:lines="1"
             android:maxLength="5" />
 
-		<TextView android:text="SIP keep-alive period (seconds):"
+		<TextView android:text="@string/SIP_keep_alive_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -204,7 +204,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="SIP transaction timeout (seconds):"
+       	<TextView android:text="@string/SIP_transaction_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -217,7 +217,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Default TCP port for MSRP session:"
+       	<TextView android:text="@string/Default_TCP_port_for_MSRP_session"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -230,7 +230,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Default UDP port for RTP session:"
+       	<TextView android:text="@string/Default_UDP_port_for_RTP_session"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -243,7 +243,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="MSRP transaction timeout (seconds):"
+       	<TextView android:text="@string/MSRP_transaction_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -256,7 +256,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Registration expire period (seconds):"
+       	<TextView android:text="@string/Registration_expire_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -269,7 +269,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Registration retry base time (seconds):"
+       	<TextView android:text="@string/Registration_retry_base_time_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -282,7 +282,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Registration retry max time (seconds):"
+       	<TextView android:text="@string/Registration_retry_max_time_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -295,7 +295,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Publish expire period (seconds):"
+       	<TextView android:text="@string/Publish_expire_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -308,7 +308,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Revoke timeout (seconds):"
+       	<TextView android:text="@string/Revoke_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -321,7 +321,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Ringing session period (seconds):"
+       	<TextView android:text="@string/Ringing_session_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -334,7 +334,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Subscribe expiration timeout (seconds):"
+       	<TextView android:text="@string/Subscribe_expiration_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -347,7 +347,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Is-composing timeout for chat (seconds):"
+       	<TextView android:text="@string/Is_composing_timeout_for_chat_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -360,7 +360,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Session refresh expire period (seconds):"
+       	<TextView android:text="@string/Session_refresh_expire_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -373,7 +373,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="Capability refresh timeout (seconds):"
+       	<TextView android:text="@string/Capability_refresh_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -386,7 +386,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
-       	<TextView android:text="Capability expiry timeout (seconds):"
+       	<TextView android:text="@string/Capability_expiry_timeout_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -399,7 +399,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
-       	<TextView android:text="Capability polling period (seconds):"
+       	<TextView android:text="@string/Capability_polling_period_seconds"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -412,7 +412,7 @@
 	 	android:lines="1"
 	 	android:inputType="numberSigned"/>
 
-       	<TextView android:text="Max MSRP length for extensions (bytes):"
+       	<TextView android:text="@string/Max_MSRP_length_for_extensions_bytes"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -431,77 +431,77 @@
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Enable SIP TCP fallback"/>
+        android:text="@string/Enable_SIP_TCP_fallback"/>
 		
 		<CheckBox android:id="@+id/SipKeepAlive"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Enable SIP keep-alive"/>
+        android:text="@string/Enable_SIP_keep_alive"/>
 
         <CheckBox android:id="@+id/TelUriFormat"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Tel-URI format"/>
+        android:text="@string/Tel_URI_format"/>
 
 		<CheckBox android:id="@+id/ImAlwaysOn"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="IM always-on"/>
+        android:text="@string/IM_always_on"/>
 		
 		<CheckBox android:id="@+id/FtAlwaysOn"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="FT always-on"/>
+        android:text="@string/FT_always_on"/>
 
         <CheckBox android:id="@+id/ImUseReports"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="IM delivery reports"/>
+        android:text="@string/IM_delivery_reports"/>
 
         <CheckBox android:id="@+id/PermanentState"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Permanent state mode"/>
+        android:text="@string/Permanent_state_mode"/>
 
         <CheckBox android:id="@+id/Gruu"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="GRUU"/>
+        android:text="@string/GRUU"/>
 
         <CheckBox android:id="@+id/CpuAlwaysOn"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="CPU Always on"/>
+        android:text="@string/CPU_Always_on"/>
 
         <CheckBox android:id="@+id/SecureMsrpOverWifi"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Secure MSRP over Wi-Fi access"/>
+        android:text="@string/Secure_MSRP_over_Wi_Fi_access"/>
 
         <CheckBox android:id="@+id/SecureRtpOverWifi"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Secure RTP over Wi-Fi access"
+        android:text="@string/Secure_RTP_over_Wi_Fi_access"
         android:enabled="false"/>
 
         <CheckBox android:id="@+id/ImeiAsDeviceId"
@@ -509,21 +509,21 @@
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="IMEI as device ID"/>
+        android:text="@string/IMEI_as_device_ID"/>
         
         <CheckBox android:id="@+id/ControlExtensions"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Control extensions"/>
+        android:text="@string/Control_extensions"/>
         
         <CheckBox android:id="@+id/AllowExtensions"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_marginLeft="5dip"
 		android:layout_marginRight="5dip"
-        android:text="Allow extensions"/>
+        android:text="@string/Allow_extensions"/>
         
       	</LinearLayout>
 	</ScrollView>
