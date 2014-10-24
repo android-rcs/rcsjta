@@ -258,11 +258,9 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize) {
+	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_SIZE, size);
-		values.put(FileTransferData.KEY_TOTAL_SIZE, totalSize);
-		values.put(FileTransferData.KEY_STATE, FileTransfer.State.STARTED);
+		values.put(FileTransferData.KEY_SIZE, currentSize);
 		cr.update(ftDatabaseUri, values, SELECTION_FILE_BY_FT_ID, new String[] {
 			fileTransferId
 		});

@@ -122,12 +122,10 @@ public interface IFileTransferLog {
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param size
-	 *            Downloaded size
-	 * @param totalSize
-	 *            Total size to download
+	 * @param currentSize
+	 *            Current size
 	 */
-	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize);
+	public void updateFileTransferProgress(String fileTransferId, long currentSize);
 
 	/**
 	 * Update file transfer URI

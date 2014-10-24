@@ -488,8 +488,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	public void handleTransferProgress(long currentSize, long totalSize) {
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize,
-					totalSize);
+			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize);
 
 			// Notify event listeners
 			mOneToOneFileTransferBroadcaster.broadcastTransferprogress(getRemoteContact(),
