@@ -158,7 +158,7 @@ public class GroupChatLog implements IGroupChatLog {
 		String selectionArgs[] = new String[] {
 			chatId
 		};
-		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID, null);
+		cr.update(chatDatabaseUri, values, SELECT_CHAT_ID, selectionArgs);
 	}
 
 	/*
