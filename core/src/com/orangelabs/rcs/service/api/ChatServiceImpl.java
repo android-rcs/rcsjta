@@ -417,32 +417,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			logger.debug("Remove " + (sizeBefore - sizeAfter) + " chat session from list (size=" + sizeAfter + ") for " + contact);
 		}
 	}
-	
-    /**
-     * Returns the list of single chats in progress
-     * 
-     * @return List of chats
-     * @throws ServerApiException
-     */
-    public List<IBinder> getChats() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get chat sessions");
-		}
 
-		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(one2oneChatSessions.size());
-			for (Enumeration<ChatImpl> e = one2oneChatSessions.elements() ; e.hasMoreElements() ;) {
-				IChat sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
-			}
-			return result;
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-    }
     
     /**
      * Returns a chat in progress from its unique ID
@@ -639,33 +614,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			throw new ServerApiException(e.getMessage());
 		}
     }
-    
-    /**
-     * Returns the list of group chats in progress
-     * 
-     * @return List of group chat
-     * @throws ServerApiException
-     */
-    public List<IBinder> getGroupChats() throws ServerApiException {
-		if (logger.isActivated()) {
-			logger.info("Get group chat sessions");
-		}
 
-		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(groupChatSessions.size());
-			for (Enumeration<IGroupChat> e = groupChatSessions.elements() ; e.hasMoreElements() ;) {
-				IGroupChat sessionApi = (IGroupChat)e.nextElement() ;
-				result.add(sessionApi.asBinder());
-			}
-			return result;
-		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
-		}
-    }
-    
     /**
      * Returns a group chat in progress from its unique ID
      * 

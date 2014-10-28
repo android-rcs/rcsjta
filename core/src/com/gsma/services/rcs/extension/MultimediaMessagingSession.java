@@ -60,20 +60,6 @@ public class MultimediaMessagingSession extends MultimediaSession {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-
-	/**
-	 * Returns the feature tag of the multimedia session
-	 * 
-	 * @return Feature tag
-	 * @throws RcsServiceException
-	 */
-	public String getFeatureTag() throws RcsServiceException {
-		try {
-			return sessionIntf.getFeatureTag();
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
 	
 	/**
 	 * Returns the remote contact identifier

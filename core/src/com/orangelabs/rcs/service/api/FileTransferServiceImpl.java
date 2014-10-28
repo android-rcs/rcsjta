@@ -252,7 +252,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     			rs.isFtAutoAcceptedModeChangeable(),
     			rs.isFileTransferAutoAccepted(),
     			rs.isFileTransferAutoAcceptedInRoaming(),
-    			rs.isFileTransferThumbnailSupported(),
     			rs.getMaxFileTransferSessions()	,
     			rs.getImageResizeOption());
     }    

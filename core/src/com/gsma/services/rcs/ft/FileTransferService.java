@@ -176,22 +176,6 @@ public class FileTransferService extends RcsService {
 		}
 	}
 
-    /**
-     * Transfers a file to a contact. The parameter file contains the URI of the
-     * file to be transferred (for a local or a remote file). The parameter 
-     * contact supports the following formats: MSISDN in national or 
-     * international format, SIP address, SIP-URI or Tel-URI. If the format of 
-     * the contact is not supported an exception is thrown.
-     * 
-     * @param contact the remote contact identifier
-     * @param file URI of file to transfer
-     * @return File transfer
-     * @throws RcsServiceException
-	 */
-    public FileTransfer transferFile(ContactId contact, Uri file) throws RcsServiceException {
-    	return transferFile(contact, file, false);
-    }
-    
 	/**
 	 * Grant permission to the stack and persist access permission
 	 * @param file the file URI

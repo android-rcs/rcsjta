@@ -96,15 +96,6 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	}
 
 	/**
-	 * Returns the feature tag of the multimedia session
-	 * 
-	 * @return Feature tag
-	 */
-	public String getFeatureTag() {
-		return session.getFeatureTag();
-	}
-
-	/**
 	 * Returns the remote contact ID
 	 * 
 	 * @return ContactId

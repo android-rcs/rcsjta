@@ -232,30 +232,6 @@ public class ChatService extends RcsService {
     }
     
     /**
-     * Returns the list of single chats in progress
-     * 
-     * @return List of chats
-     * @throws RcsServiceException
-     */
-    public Set<Chat> getChats() throws RcsServiceException {
-		if (api != null) {
-			try {
-	    		Set<Chat> result = new HashSet<Chat>();
-				List<IBinder> chatList = api.getChats();
-				for (IBinder binder : chatList) {
-					Chat chat = new Chat(IChat.Stub.asInterface(binder));
-					result.add(chat);
-				}
-				return result;
-			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
-			throw new RcsServiceNotAvailableException();
-		}
-    }
-    
-    /**
      * Returns a chat in progress with a given contact
      * 
      * @param contact ContactId
@@ -271,30 +247,6 @@ public class ChatService extends RcsService {
 				} else {
 					return null;
 				}
-			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
-			throw new RcsServiceNotAvailableException();
-		}
-    }
-    
-    /**
-     * Returns the list of group chats in progress
-     * 
-     * @return List of group chat
-     * @throws RcsServiceException
-     */
-    public Set<GroupChat> getGroupChats() throws RcsServiceException {
-		if (api != null) {
-			try {
-	    		Set<GroupChat> result = new HashSet<GroupChat>();
-				List<IBinder> chatList = api.getGroupChats();
-				for (IBinder binder : chatList) {
-					GroupChat chat = new GroupChat(IGroupChat.Stub.asInterface(binder));
-					result.add(chat);
-				}
-				return result;
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

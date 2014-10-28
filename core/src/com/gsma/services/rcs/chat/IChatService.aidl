@@ -30,10 +30,6 @@ interface IChatService {
 	IGroupChat restartGroupChat(in String chatId);
     
 	IChat getChat(in ContactId contact);
-
-	List<IBinder> getChats();
-
-	List<IBinder> getGroupChats();
     
 	IGroupChat getGroupChat(in String chatId);
 	

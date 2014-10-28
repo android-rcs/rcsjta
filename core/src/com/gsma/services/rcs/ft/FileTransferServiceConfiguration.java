@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
@@ -36,11 +40,6 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * File transfer size limit
 	 */
 	private long maxSize;
-	
-	/**
-	 * File icon
-	 */
-	private boolean fileIcon;
 	
 	/**
 	 * File transfer auto accept mode
@@ -87,13 +86,12 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * @hide
 	 */
 	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptModeChangeable, boolean autoAcceptMode,
-			boolean autoAcceptModeInRoaming, boolean fileIcon, int maxFileTransfers, int imageResizeOption) {
+			boolean autoAcceptModeInRoaming, int maxFileTransfers, int imageResizeOption) {
 		this.warnSize = warnSize;
 		this.maxSize = maxSize;
 		this.autoAcceptModeChangeable = autoAcceptModeChangeable;
 		this.autoAcceptMode = autoAcceptMode;
 		this.autoAcceptModeInRoaming = autoAcceptModeInRoaming;
-		this.fileIcon = fileIcon;
 		this.maxFileTransfers = maxFileTransfers;
 		this.imageResizeOption = imageResizeOption;
 	}
@@ -110,7 +108,6 @@ public class FileTransferServiceConfiguration implements Parcelable {
 		this.autoAcceptMode = source.readInt() != 0;
 		this.autoAcceptModeInRoaming = source.readInt() != 0;
 		this.autoAcceptModeChangeable = source.readInt() != 0;
-		this.fileIcon = source.readInt() != 0;
 		this.maxFileTransfers = source.readInt();
 		this.imageResizeOption = source.readInt();
     }
@@ -139,7 +136,6 @@ public class FileTransferServiceConfiguration implements Parcelable {
 		dest.writeInt(autoAcceptMode ? 1 : 0);
 		dest.writeInt(autoAcceptModeInRoaming ? 1 : 0);
 		dest.writeInt(autoAcceptModeChangeable ? 1 : 0);
-		dest.writeInt(fileIcon ? 1 : 0);
 		dest.writeInt(maxFileTransfers);
 		dest.writeInt(imageResizeOption);
 	}
@@ -216,15 +212,6 @@ public class FileTransferServiceConfiguration implements Parcelable {
 		return maxFileTransfers;
 	}
 	
-	/**
-	 * Is file icon supported 
-	 * 
-	 * @return Returns true if supported else returns false
-	 */
-	public boolean isFileIconSupported() {
-		return fileIcon;
-	}
-
 	/**
 	 * @return the image resize option for file transfer in the range: ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK
 	 */

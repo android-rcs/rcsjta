@@ -13,8 +13,6 @@ interface IMultimediaMessagingSession {
 	
 	String getServiceId();
 	
-	String getFeatureTag();
-	
 	int getState();
 	
 	int getReasonCode();
