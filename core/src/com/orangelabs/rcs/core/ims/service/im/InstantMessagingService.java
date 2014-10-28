@@ -53,8 +53,8 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.DelayedDisplayNotificationManager;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.DelayedDisplayNotificationTask;
+import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
@@ -166,6 +166,8 @@ public class InstantMessagingService extends ImsService {
 	
 	private FtHttpResumeManager resumeManager;
 
+	private GroupChatAutoRejoinTask mGroupChatAutoRejoinTask;
+
 	/**
 	 * Store & Forward manager
 	 */
@@ -230,11 +232,18 @@ public class InstantMessagingService extends ImsService {
         imdnMgr = new ImdnManager(this);
 		imdnMgr.start();
 
-		// Send delayed displayed notifications for read messages if they were
-		// not sent before already
-		new DelayedDisplayNotificationManager(this);
+		/*
+		 * Send delayed displayed notifications for read messages if they were
+		 * not sent before already. This only attempts to send report and in
+		 * case of failure the report will be sent later as postponed delivery
+		 * report
+		 */
+		new DelayedDisplayNotificationTask(this);
 		// Start resuming FT HTTP
 		resumeManager = new FtHttpResumeManager(this);
+		/* Auto-rejoin group chats that are still marked as active. */
+		mGroupChatAutoRejoinTask = new GroupChatAutoRejoinTask(MessagingLog.getInstance(), mCore);
+		mGroupChatAutoRejoinTask.start();
 	}
 
     /**
@@ -252,6 +261,9 @@ public class InstantMessagingService extends ImsService {
         imdnMgr.interrupt();
         if (resumeManager != null)
         	resumeManager.terminate();
+        if (mGroupChatAutoRejoinTask.isAlive()) {
+        	mGroupChatAutoRejoinTask.interrupt();
+        }
 	}
 
 	/**
@@ -1131,7 +1143,6 @@ public class InstantMessagingService extends ImsService {
 			return;
 		}
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
-
     	// Test if the contact is blocked
 	    if (mContactsManager.isImBlockedForContact(remote)) {
 			if (logger.isActivated()) {

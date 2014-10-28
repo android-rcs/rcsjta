@@ -86,9 +86,9 @@ public class ChatData {
 	static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
 
 	/**
-	 * Column name : Departed by usert
+	 * Column name : Departed by user
 	 */
-	public static final String KEY_DEPARTED_BY_USER = "departure_status";
+	public static final String KEY_USER_ABORTION = "user_abortion";
 
 	/**
 	 * ContactId formatted number of the inviter of the group chat or null if

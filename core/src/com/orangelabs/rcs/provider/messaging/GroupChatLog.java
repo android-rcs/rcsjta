@@ -22,8 +22,10 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -47,8 +49,6 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class GroupChatLog implements IGroupChatLog {
 
-	private final static int NOT_DEPARTED_BY_USER = 0;
-
 	private final static int DEPARTED_BY_USER = 1;
 
 	private final static String ORDER_BY_TIMESTAMP_DESC = ChatData.KEY_TIMESTAMP.concat(" DESC");
@@ -63,8 +63,11 @@ public class GroupChatLog implements IGroupChatLog {
 			ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
 			.append(GroupChat.State.ABORTED).append(" AND ").append(ChatData.KEY_REASON_CODE)
 			.append("=").append(GroupChat.ReasonCode.ABORTED_BY_USER).append(" AND ")
-			.append(ChatData.KEY_DEPARTED_BY_USER).append("=").append(DEPARTED_BY_USER)
+			.append(ChatData.KEY_USER_ABORTION).append("=").append(UserAbortion.SERVER_NOT_NOTIFIED.toInt())
 			.toString();
+
+	private static final String SELECT_ACTIVE_GROUP_CHATS = new StringBuilder(ChatData.KEY_STATE)
+			.append("=").append(GroupChat.State.STARTED).toString();
 
 	/**
 	 * The logger
@@ -72,6 +75,37 @@ public class GroupChatLog implements IGroupChatLog {
 	private static final Logger logger = Logger.getLogger(GroupChatLog.class.getSimpleName());
 
 	private static final int FIRST_COLUMN_IDX = 0;
+
+	public static enum UserAbortion {
+
+		SERVER_NOTIFIED(0), SERVER_NOT_NOTIFIED(1);
+
+		private final int mValue;
+
+		private static SparseArray<UserAbortion> mValueToEnum = new SparseArray<UserAbortion>();
+		static {
+			for (UserAbortion entry : UserAbortion.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private UserAbortion(int value) {
+			mValue = value;
+		}
+
+		public final int toInt() {
+			return mValue;
+		}
+
+		public final static UserAbortion valueOf(int value) {
+			UserAbortion entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException("No enum const class "
+					+ UserAbortion.class.getName() + "." + value);
+		}
+	}
 
 	/**
 	 * Constructor
@@ -136,7 +170,7 @@ public class GroupChatLog implements IGroupChatLog {
 		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
 		values.put(ChatData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		values.put(ChatData.KEY_DEPARTED_BY_USER, NOT_DEPARTED_BY_USER);
+		values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
 		mLocalContentResolver.insert(ChatData.CONTENT_URI, values);
 	}
 
@@ -151,7 +185,7 @@ public class GroupChatLog implements IGroupChatLog {
 			logger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_DEPARTED_BY_USER, NOT_DEPARTED_BY_USER);
+		values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
 		String[] selectionArgs = { chatId };
 		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
 		if (logger.isActivated()) {
@@ -455,8 +489,35 @@ public class GroupChatLog implements IGroupChatLog {
 			logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
 		}
 		ContentValues values = new ContentValues();
-		values.put(ChatData.KEY_DEPARTED_BY_USER, DEPARTED_BY_USER);
+		values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOT_NOTIFIED.toInt());
 		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
 				+ chatId + "'", null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
+	 * retrieveChatIdsOfActiveGroupChatsForAutoRejoin
+	 */
+	public List<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
+		String[] projection = new String[] {
+			ChatData.KEY_CHAT_ID
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
+					SELECT_ACTIVE_GROUP_CHATS, null, null);
+			List<String> activeGroupChats = new ArrayList<String>();
+			while (cursor.moveToNext()) {
+				String chatId = cursor.getString(FIRST_COLUMN_IDX);
+				activeGroupChats.add(chatId);
+			}
+			return activeGroupChats;
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
 	}
 }

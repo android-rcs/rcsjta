@@ -132,7 +132,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
-	 * updateGroupChatStatusAndReasonCode (java.lang.String, int, int)
+	 * setGroupChatStateAndReasonCode (java.lang.String, int, int, GroupChatLog.ActiveStatus)
 	 */
 	@Override
 	public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
@@ -597,5 +597,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public int getMessageReasonCode(String msgId) {
 		return messageLog.getMessageReasonCode(msgId);
+	}
+
+	@Override
+	public List<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
+		return groupChatLog.getChatIdsOfActiveGroupChatsForAutoRejoin();
 	}
 }

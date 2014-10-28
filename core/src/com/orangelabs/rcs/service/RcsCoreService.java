@@ -879,4 +879,8 @@ public class RcsCoreService extends Service implements CoreListener {
 	public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
 		chatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
 	}
+
+	public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException {
+		chatApi.handleAutoRejoinGroupChat(chatId);
+	}
 }

@@ -368,4 +368,12 @@ public interface CoreListener {
      * @throws ServerApiException
      */
     public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException;
+
+    /**
+     * Handle auto rejoin group chat
+     * 
+     * @param chatId
+     * @throws ServerApiException
+     */
+    public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException;
 }

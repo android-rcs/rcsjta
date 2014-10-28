@@ -60,6 +60,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.messaging.GroupChatLog.UserAbortion;
 import com.orangelabs.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -90,6 +91,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	private final ContactsManager mContactsManager;
 
 	private final MessagingLog mMessagingLog;
+
+	private boolean mGroupChatRejoinedAsPartOfSendOperation = false;
 
 	/**
 	 * Lock used for synchronization
@@ -177,6 +180,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	private void handleSessionRejected(int reasonCode) {
+		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			mChatService.removeGroupChat(mChatId);
 
@@ -342,10 +346,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 */
 	public void leave() {
 		final GroupChatSession session = mImService.getGroupChatSession(mChatId);
-		if (session == null) {
+		if (session == null || !ServerApiUtils.isImsConnected()) {
 			/*
-			 * Quitting group chat that is inactive should reject the next group
-			 * chat invitation that is received
+			 * Quitting group chat that is inactive/ not available due to
+			 * network drop should reject the next group chat invitation that is
+			 * received
 			 */
 			mPersistentStorage.setStateAndReasonCode(GroupChat.State.ABORTED,
 					GroupChat.ReasonCode.ABORTED_BY_USER);
@@ -486,6 +491,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			 */
 			addOutgoingGroupChatMessage(msg, Message.Status.Content.QUEUED);
 			try {
+				setRejoinedAsPartOfSendOperation(true);
 				rejoinGroupChat();
 				/*
 				 * Observe that the queued message above will be dequeued on the
@@ -729,7 +735,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * Try to restart group chat session on failure of restart
 	 *
 	 */
-	private void handleGroupChatRejoinFailed() {
+	private void handleGroupChatRejoinAsPartOfSendOperationFailed() {
 		try {
 			restartGroupChat();
 
@@ -737,6 +743,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			// failed to restart group chat session. Ignoring this
 			// exception because we want to try again later.
 		}
+	}
+
+	public void setRejoinedAsPartOfSendOperation(boolean enable) {
+		mGroupChatRejoinedAsPartOfSendOperation = enable;
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -749,6 +759,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			logger.info(new StringBuilder("Session status ").append(GroupChat.State.STARTED)
 					.toString());
 		}
+		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			GroupChatSession session = mImService.getGroupChatSession(mChatId);
 			mPersistentStorage.setRejoinId(session.getImSessionIdentity());
@@ -785,14 +796,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			logger.info(new StringBuilder("Session status ").append(GroupChat.State.ABORTED)
 					.append(" reason ").append(reason).toString());
 		}
+		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			mChatService.removeGroupChat(mChatId);
 
 			int reasonCode = sessionAbortedReasonToReasonCode(reason);
-			mPersistentStorage.setStateAndReasonCode(GroupChat.State.ABORTED, reasonCode);
-
-			mBroadcaster.broadcastStateChanged(mChatId,
-					GroupChat.State.ABORTED, reasonCode);
+			if (ImsServiceSession.TERMINATION_BY_SYSTEM == reason) {
+				/*
+				 * This error is caused because of a network drop so the group
+				 * chat is not set to ABORTED state in this case as it will be
+				 * auto-rejoined when network connection is regained
+				 */
+			} else {
+				mPersistentStorage.setStateAndReasonCode(GroupChat.State.ABORTED, reasonCode);
+				mBroadcaster.broadcastStateChanged(mChatId, GroupChat.State.ABORTED, reasonCode);
+			}
 		}
 	}
     
@@ -820,6 +838,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			logger.info(new StringBuilder("Session status ").append(GroupChat.State.ABORTED)
 					.append(" reason ").append(GroupChat.ReasonCode.ABORTED_BY_REMOTE).toString());
 		}
+		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			mChatService.removeGroupChat(mChatId);
 
@@ -859,6 +878,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 */
 	public void handleImError(ChatError error) {
 		GroupChatSession session = mImService.getGroupChatSession(mChatId);
+		int chatErrorCode = error.getErrorCode();
 		if (session != null && session.isPendingForRemoval()) {
 			/*
 			 * If there is an ongoing group chat session with same chatId, this
@@ -868,29 +888,36 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			 * is of course not the intention here
 			 */
 			if (logger.isActivated()) {
-				logger.info("Session marked pending for removal - Error " + error.getErrorCode());
+				logger.info("Session marked pending for removal - Error " + chatErrorCode);
 			}
 			return;
 		}
-		int chatErrorCode = error.getErrorCode();
 		if (logger.isActivated()) {
 			logger.info("IM error " + chatErrorCode);
 		}
+		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			mChatService.removeGroupChat(mChatId);
 
 			if (ChatError.SESSION_NOT_FOUND == chatErrorCode) {
-				handleGroupChatRejoinFailed();
+				if (mGroupChatRejoinedAsPartOfSendOperation) {
+					handleGroupChatRejoinAsPartOfSendOperationFailed();
+				}
 				return;
 			}
-			if (ChatError.SESSION_RESTART_FAILED != chatErrorCode) {
-				GroupChatStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
-				int state = stateAndReasonCode.getState();
-				int reasonCode = stateAndReasonCode.getReasonCode();
-				mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
-				mBroadcaster
-						.broadcastStateChanged(mChatId, state, reasonCode);
+			GroupChatStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
+			int state = stateAndReasonCode.getState();
+			int reasonCode = stateAndReasonCode.getReasonCode();
+			if (ChatError.MEDIA_SESSION_FAILED == chatErrorCode) {
+				/*
+				 * This error is caused because of a network drop so the group
+				 * chat is not set to ABORTED state in this case as it will be
+				 * auto-rejoined when network connection is regained
+				 */
+			} else {
+				mPersistentStorage.setStateAndReasonCode(state, reasonCode);
+				mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
 			}
 		}
 	}

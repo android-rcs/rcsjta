@@ -663,4 +663,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChat.rejoinGroupChat();
 		addGroupChat(groupChat);
 	}
+
+	/**
+	 * Handle auto rejoin group chat
+	 * 
+	 * @param chatId
+	 * @throws ServerApiException
+	 */
+	public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException {
+		GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
+		groupChat.rejoinGroupChat();
+		addGroupChat(groupChat);
+	}
 }

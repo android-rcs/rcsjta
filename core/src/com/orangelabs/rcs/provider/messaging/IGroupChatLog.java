@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
+import java.util.List;
 import java.util.Set;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -179,4 +180,11 @@ public interface IGroupChatLog {
 	 * @return Set of participants
 	 */
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId);
+
+	/**
+	 * Retrieve all active group chats for auto-rejoin
+	 * 
+	 * @return List of chat IDs of those group chats that has to be auto-rejoined
+	 */
+	public List<String> getChatIdsOfActiveGroupChatsForAutoRejoin();
 }

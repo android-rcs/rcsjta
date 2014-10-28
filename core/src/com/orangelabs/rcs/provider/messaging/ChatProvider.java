@@ -127,7 +127,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 14;
+        private static final int DATABASE_VERSION = 15;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -143,7 +143,7 @@ public class ChatProvider extends ContentProvider {
                     .append(ChatData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
-                    .append(ChatData.KEY_DEPARTED_BY_USER).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_USER_ABORTION).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_CONTACT).append(" TEXT)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_GROUP_CHAT).append("_")
                     .append(ChatData.KEY_TIMESTAMP).append("_idx").append(" ON ")
