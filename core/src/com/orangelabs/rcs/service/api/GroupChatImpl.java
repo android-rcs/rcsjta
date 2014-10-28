@@ -102,6 +102,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
 			case ChatError.UNEXPECTED_EXCEPTION:
 				return new GroupChatStateAndReasonCode(GroupChat.State.FAILED, GroupChat.ReasonCode.FAILED_INITIATION);
+			case ChatError.MEDIA_SESSION_BROKEN:
+			case ChatError.MEDIA_SESSION_FAILED:
+				return new GroupChatStateAndReasonCode(GroupChat.State.ABORTED,
+						GroupChat.ReasonCode.ABORTED_BY_SYSTEM);
 			default:
 				throw new IllegalArgumentException(
 						"Unknown reason in GroupChatImpl.toStateAndReasonCode; error="
