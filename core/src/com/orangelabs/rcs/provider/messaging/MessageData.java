@@ -59,11 +59,6 @@ public class MessageData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_TYPE = ChatLog.Message.MESSAGE_TYPE;
-
-	/**
-	 * Column name
-	 */
 	static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
 	/**

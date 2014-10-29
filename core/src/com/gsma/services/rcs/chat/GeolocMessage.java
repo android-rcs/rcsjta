@@ -34,10 +34,6 @@ import android.os.Parcelable;
  * @author Jean-Marc AUFFRET
  */
 public class GeolocMessage extends ChatMessage implements Parcelable {
-	/**
-	 * MIME type
-	 */
-	public final static String MIME_TYPE = "application/geoloc"; 
 
 	/**
 	 * Geoloc info

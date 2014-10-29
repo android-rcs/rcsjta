@@ -196,13 +196,6 @@ public class ChatLog {
         public static final String DIRECTION = "direction";
 
         /**
-         * The name of the column containing the type of message.
-         * <P>Type: INTEGER</P>
-         * @see ChatLog.Message.Type
-         */
-        public static final String MESSAGE_TYPE = "msg_type";
-
-        /**
          * The name of the column containing the MSISDN of the remote contact.
          * <P>Type: TEXT</P>
          */
@@ -243,21 +236,26 @@ public class ChatLog {
          * <P>Type: TEXT</P>
          */
         public static final String MIME_TYPE = "mime_type";
-        
-        /**
-         * Type of the message
+
+        /*
+         * Message MIME-types
          */
-        public static class Type {
-	        /**
-	         * Content message
-	         */
-	        public static final int CONTENT = 0;
-	        
-	        /**
-	         * System message
-	         */
-	        public static final int SYSTEM = 1;
-	        
+        public static class MimeType {
+
+           /*
+            * MIME-type of text messages
+            */
+            public static final String TEXT_MESSAGE = "text/plain";
+
+            /*
+             * MIME-type of geoloc messages
+             */
+            public static final String GEOLOC_MESSAGE = "application/geoloc";
+
+            /*
+             * MIME-type of group chat events
+             */
+            public static final String GROUPCHAT_EVENT = "rcs/groupchat-event";
         }
 
         /**

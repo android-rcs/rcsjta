@@ -87,7 +87,7 @@ public class ChatProvider extends ContentProvider {
      * Helper class for opening, creating and managing database version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 11;
+        private static final int DATABASE_VERSION = 12;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -112,7 +112,6 @@ public class ChatProvider extends ContentProvider {
         			+ MessageData.KEY_CHAT_ID + " TEXT,"
         			+ MessageData.KEY_CONTACT + " TEXT,"
         			+ MessageData.KEY_MSG_ID + " TEXT,"
-        			+ MessageData.KEY_TYPE + " integer,"
         			+ MessageData.KEY_CONTENT + " TEXT,"
         			+ MessageData.KEY_CONTENT_TYPE + " TEXT,"
         			+ MessageData.KEY_DIRECTION + " integer,"

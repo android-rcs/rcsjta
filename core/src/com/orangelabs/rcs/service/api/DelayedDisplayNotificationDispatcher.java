@@ -21,6 +21,7 @@ import android.database.Cursor;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.utils.ContactUtils;
@@ -32,15 +33,12 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class DelayedDisplayNotificationDispatcher implements Runnable {
 
-	private final static String SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
-			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT)
-			.append(" AND ").append(ChatLog.Message.MESSAGE_TYPE).append("=")
-			.append(ChatLog.Message.Type.CONTENT).append(" AND ").append(ChatLog.Message.MIME_TYPE)
-			.append(" IN('").append(ChatMessage.MIME_TYPE).append("','")
-			.append(GeolocMessage.MIME_TYPE).append("') AND ")
-			.append(ChatLog.Message.READ_STATUS).append("=")
-			.append(ReadStatus.READ).append(" AND ")
-			.append(ChatLog.Message.MESSAGE_STATUS).append("=")
+	private final static String SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
+			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT).append(" AND ")
+			.append(ChatLog.Message.MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE)
+			.append("','").append(MimeType.GEOLOC_MESSAGE).append("') AND ")
+			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ)
+			.append(" AND ").append(ChatLog.Message.MESSAGE_STATUS).append("=")
 			.append(ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED).toString();
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = ChatLog.Message.TIMESTAMP.concat(" ASC");
@@ -63,7 +61,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 		try {
 			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT };
 			cursor = mContentResolver.query(ChatLog.Message.CONTENT_URI, projection,
-					SELECTION_READ_ONE2ONE_TEXT_AND_GEOLOC_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null, ORDER_BY_TIMESTAMP_ASC);
+					SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null, ORDER_BY_TIMESTAMP_ASC);
 			while (cursor.moveToNext()) {
 				String msgId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
 				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));

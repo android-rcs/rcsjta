@@ -33,6 +33,7 @@ import android.net.Uri;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -119,19 +120,16 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_MSG_ID, msgId);
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.INCOMING);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE,
-					com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
 					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE,
-					com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -166,19 +164,16 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_MSG_ID, msgId);
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.OUTGOING);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE,
-					com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
 					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE,
-					com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -247,20 +242,19 @@ public class MessageLog implements IMessageLog {
 			values.put(MessageData.KEY_CONTACT, msg.getRemote().toString());
 		}
 		values.put(MessageData.KEY_DIRECTION, direction);
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.CONTENT);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
 
 		//file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
+			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -306,7 +300,7 @@ public class MessageLog implements IMessageLog {
 		if (contact != null) {
 			values.put(MessageData.KEY_CONTACT, contact.toString());
 		}
-		values.put(MessageData.KEY_TYPE, ChatLog.Message.Type.SYSTEM);
+		values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GROUPCHAT_EVENT);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		values.put(MessageData.KEY_DIRECTION, Direction.IRRELEVANT);
