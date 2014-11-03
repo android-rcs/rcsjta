@@ -30,7 +30,6 @@ import com.google.android.maps.MapView;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -44,8 +43,8 @@ public class ShowUsInMap extends MapActivity {
 	public final static String EXTRA_CONTACTS = "contacts";
 	
 	private final static String QUERY_SORT_ORDER = new StringBuilder(ChatLog.Message.TIMESTAMP).append(" DESC").toString();
-	private final static String QUERY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MIME_TYPE).append(" = '")
-			.append(GeolocMessage.MIME_TYPE).append("' AND ").append(ChatLog.Message.DIRECTION).append(" = ")
+	private final static String QUERY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MIME_TYPE).append("='")
+			.append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' AND ").append(ChatLog.Message.DIRECTION).append(" = ")
 			.append(RcsCommon.Direction.OUTGOING).toString();
 	private final static String[] QUERY_PROJECTION = new String[] { ChatLog.Message.CONTENT };
 
@@ -128,7 +127,7 @@ public class ShowUsInMap extends MapActivity {
 	public Geoloc getLastGeoloc(String contact) {
 		Cursor cursor = null;
 		String where = new StringBuilder(ChatLog.Message.CONTACT).append("='").append(PhoneNumberUtils.formatNumber(contact))
-				.append("' AND ").append(ChatLog.Message.MIME_TYPE).append("='").append(GeolocMessage.MIME_TYPE).append("' AND ")
+				.append("' AND ").append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' AND ")
 				.append(ChatLog.Message.DIRECTION).append(" = ").append(RcsCommon.Direction.INCOMING).toString();
 		try {
 			// TODO CR025 Geoloc sharing provider

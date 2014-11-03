@@ -67,7 +67,6 @@ public class ChatMessageTest extends AndroidTestCase {
     				ChatLog.Message.CONTACT,
     				ChatLog.Message.CONTENT,
     				ChatLog.Message.MIME_TYPE,
-    				ChatLog.Message.MESSAGE_TYPE,
     				ChatLog.Message.MESSAGE_ID
     				},
     				"(" + ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", 
@@ -75,20 +74,18 @@ public class ChatMessageTest extends AndroidTestCase {
     			ChatLog.Message.TIMESTAMP + " ASC");
     	assertEquals(cursor.getCount(), 1);
     	while(cursor.moveToNext()) {
-    		int direction = cursor.getInt(0);
-    		String contact = cursor.getString(1);
-    		String content = cursor.getString(2);
+    		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
+    		String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
+    		String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
     		assertNotNull(content);
     		String readTxt = new String(content);
-    		String contentType = cursor.getString(3);
-    		int type = cursor.getInt(4);
-    		String id = cursor.getString(5);
+    		String mimeType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
+    		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
     		
     		assertEquals(direction, RcsCommon.Direction.OUTGOING);
     		assertEquals(contact, remote.toString());
     		assertEquals(readTxt, txt);
-    		assertEquals(contentType, com.gsma.services.rcs.chat.ChatMessage.MIME_TYPE);
-    		assertEquals(type, ChatLog.Message.Type.CONTENT);
+    		assertEquals(mimeType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.TEXT_MESSAGE);
     		assertEquals(id, msgId);
     	}
 	}
@@ -109,7 +106,6 @@ public class ChatMessageTest extends AndroidTestCase {
     				ChatLog.Message.CONTACT,
     				ChatLog.Message.CONTENT,
     				ChatLog.Message.MIME_TYPE,
-    				ChatLog.Message.MESSAGE_TYPE,
     				ChatLog.Message.MESSAGE_ID
     				},
     				"(" + ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", 
@@ -117,16 +113,15 @@ public class ChatMessageTest extends AndroidTestCase {
     			ChatLog.Message.TIMESTAMP + " ASC");
     	assertEquals(cursor.getCount(), 1);
     	while(cursor.moveToNext()) {
-    		int direction = cursor.getInt(0);
-    		String contact = cursor.getString(1);
-    		String content = cursor.getString(2);
+    		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
+    		String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
+    		String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
     		assertNotNull(content);
 			Geoloc readGeoloc = ChatLog.getGeoloc(content);
     		assertNotNull(readGeoloc);
 			
-    		String contentType = cursor.getString(3);
-    		int type = cursor.getInt(4);
-    		String id = cursor.getString(5);
+    		String contentType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
+    		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
     		
     		assertEquals(direction, RcsCommon.Direction.OUTGOING);
     		assertEquals(contact, remote.toString());
@@ -135,8 +130,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
     		assertEquals(readGeoloc.getExpiration(), geoloc.getExpiration());
     		assertEquals(readGeoloc.getAccuracy(), geoloc.getAccuracy());
-    		assertEquals(contentType, com.gsma.services.rcs.chat.GeolocMessage.MIME_TYPE);
-    		assertEquals(type, ChatLog.Message.Type.CONTENT);
+    		assertEquals(contentType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.GEOLOC_MESSAGE);
     		assertEquals(id, msgId);
     	}
 	}

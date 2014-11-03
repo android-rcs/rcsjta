@@ -52,12 +52,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -148,10 +146,10 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	 */
 	private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 	
-	private final static String LOAD_HISTORY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MESSAGE_TYPE).append("=?").toString();
+	private final static String LOAD_HISTORY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MIME_TYPE).append("='")
+			.append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("' OR ").append(ChatLog.Message.MIME_TYPE).append("='")
+			.append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("'").toString();
 
-	private final static String[] LOAD_HISTORY_WHERE_ARGS_CLAUSE = new String[] { Integer.toString(ChatLog.Message.Type.CONTENT) };
-	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -260,7 +258,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      */
 	protected void addMessageHistory(int direction, ContactId contact, String content, String contentType, String msgId,
 			String displayName) {
-		if (GeolocMessage.MIME_TYPE.equals(contentType)) {
+		if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(contentType)) {
 			Geoloc geoloc = ChatLog.getGeoloc(content);
 			if (geoloc != null) {
 				addGeolocHistory(direction, contact, geoloc, msgId, displayName);
@@ -596,9 +594,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 		 */
 		public TextMessageItem(ChatMessageDAO dao, String displayName) {
 			super(dao.getDirection(), TextUtils.isEmpty(displayName) ? dao.getContact().toString() : displayName, dao.getMsgId());
-			if (dao.getMimeType() == null)
-				throw new IllegalArgumentException("mime-type is null");
-			if (dao.getMimeType().equals(GeolocMessage.MIME_TYPE)) {
+			if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(dao.getMimeType())) {
 				Geoloc geoloc = ChatLog.getGeoloc(dao.getBody());
 				if (geoloc == null) {
 					throw new IllegalArgumentException("Cannot decode geolocation");
@@ -606,7 +602,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 					this.text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
 				}
 			} else {
-				if (dao.getMimeType().equals(ChatMessage.MIME_TYPE)) {
+				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(dao.getMimeType())) {
 					this.text = dao.getBody();
 				} else {
 					throw new IllegalArgumentException("Invalid mime-type "+dao.getMimeType());
@@ -811,7 +807,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 	    				ChatLog.Message.MESSAGE_ID,
 	    				ChatLog.Message.READ_STATUS };
 			// @formatter:on
-			cursor = getContentResolver().query(uri, projection, LOAD_HISTORY_WHERE_CLAUSE, LOAD_HISTORY_WHERE_ARGS_CLAUSE,
+			cursor = getContentResolver().query(uri, projection, LOAD_HISTORY_WHERE_CLAUSE, null,
 					ChatLog.Message.TIMESTAMP + " ASC");
 			while (cursor.moveToNext()) {
 				int direction = cursor.getInt(0);
@@ -830,7 +826,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 						
 						String displayName = participants.get(contact);
 						displayName = RcsDisplayName.convert(ChatView.this, direction, contact, displayName);
-						if (GeolocMessage.MIME_TYPE.equals(contentType)) {
+						if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(contentType)) {
 							Geoloc geoloc = ChatLog.getGeoloc(content);
 							if (geoloc != null) {
 								addGeolocHistory(direction, contact, geoloc, msgId, displayName);

@@ -41,9 +41,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -142,15 +140,16 @@ public class ChatList extends Activity {
     		String contentType = cursor.getString(4);
     		
         	String text = "";
-        	if (contentType.equals(GeolocMessage.MIME_TYPE)) {
-    			Geoloc geoloc = ChatLog.getGeoloc(content);
-    			if (geoloc != null) {
-        	    	text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
-        		}
-        	} else
-        	if (contentType.equals(ChatMessage.MIME_TYPE)) {
-        		text = content;
-        	}
+			if (contentType.equals(ChatLog.Message.MimeType.GEOLOC_MESSAGE)) {
+				Geoloc geoloc = ChatLog.getGeoloc(content);
+				if (geoloc != null) {
+					text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
+				}
+			} else {
+				if (contentType.equals(ChatLog.Message.MimeType.TEXT_MESSAGE)) {
+					text = content;
+				}
+			}
     		cache.msg = text;
     		
     		cache.date = cursor.getLong(5);
