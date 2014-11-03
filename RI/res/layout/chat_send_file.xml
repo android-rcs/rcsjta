@@ -12,7 +12,7 @@
 		<TableRow android:paddingTop="5dip">
     		<CheckBox android:id="@+id/ft_thumb"			 
 	         android:text="@string/label_ft_thumb"
-	         android:enabled="false" />
+	         android:enabled="true" />
 	    </TableRow>
     				
 		<TableRow android:paddingTop="5dip">

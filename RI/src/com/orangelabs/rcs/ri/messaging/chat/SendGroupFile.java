@@ -250,11 +250,11 @@ public class SendGroupFile extends Activity {
 					.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
 			FileTransferService ftApi = connectionManager.getFileTransferApi();
 			try {
-				// Enable thumbnail option if supported
-				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-				if (ftApi.getConfiguration().isFileIconSupported()) {
-					ftThumb.setEnabled(true);
-				}
+//				// Enable thumbnail option if supported
+//				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
+//				if (ftApi.getConfiguration().isFileIconSupported()) {
+//					ftThumb.setEnabled(true);
+//				}
 
 				// Add group file listener
 				ftApi.addGroupFileTransferListener(ftListener);

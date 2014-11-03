@@ -31,7 +31,6 @@ public class FileTransferServiceConfigurationTest extends AndroidTestCase {
 	boolean autoAcceptModeChangeable;
 	boolean autoAcceptMode;
 	boolean autoAcceptModeInRoaming;
-	boolean fileIcon;
 	int maxFileTransfers;
 	int imageResizeOption;
 
@@ -43,7 +42,6 @@ public class FileTransferServiceConfigurationTest extends AndroidTestCase {
 		autoAcceptModeChangeable = random.nextBoolean();
 		autoAcceptMode = random.nextBoolean();
 		autoAcceptModeInRoaming = random.nextBoolean();
-		fileIcon = random.nextBoolean();
 		maxFileTransfers = random.nextInt();
 		imageResizeOption = random.nextInt();
 	}
@@ -64,8 +62,6 @@ public class FileTransferServiceConfigurationTest extends AndroidTestCase {
 			return false;
 		if (conf1.isAutoAcceptInRoamingEnabled() != conf2.isAutoAcceptInRoamingEnabled())
 			return false;
-		if (conf1.isFileIconSupported() != conf2.isFileIconSupported())
-			return false;
 		if (conf1.getMaxFileTransfers() != conf2.getMaxFileTransfers())
 			return false;
 		if (conf1.getImageResizeOption() != conf2.getImageResizeOption())
@@ -76,7 +72,7 @@ public class FileTransferServiceConfigurationTest extends AndroidTestCase {
 
 	public void testChatServiceConfiguration() {
 		FileTransferServiceConfiguration config = new FileTransferServiceConfiguration(warnSize, maxSize, autoAcceptModeChangeable,
-				autoAcceptMode, autoAcceptModeInRoaming, fileIcon, maxFileTransfers, imageResizeOption);
+				autoAcceptMode, autoAcceptModeInRoaming, maxFileTransfers, imageResizeOption);
 		Parcel parcel = Parcel.obtain();
 		config.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
