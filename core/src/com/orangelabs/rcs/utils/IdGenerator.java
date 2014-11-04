@@ -131,6 +131,6 @@ public class IdGenerator {
 	 */
 	public static synchronized String generateMessageID() {
 		UUID id = UUID.randomUUID();
-		return Long.toHexString(id.getMostSignificantBits()) + Long.toHexString(id.getLeastSignificantBits());
+		return String.format("%016x%016x", id.getMostSignificantBits(), id.getLeastSignificantBits());
 	}
 }
