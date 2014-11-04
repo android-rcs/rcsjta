@@ -66,11 +66,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * @param parent IMS service
 	 * @param content Content of file to be shared
 	 * @param contact Remote contact identifier
-	 * @param fileicon Content of fileicon
+	 * @param fileIcon Content of file icon
 	 * @param filetransferId File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact, MmContent fileicon, String filetransferId) {
-		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileicon, filetransferId);
+	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact, MmContent fileIcon, String filetransferId) {
+		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, filetransferId);
 	}
 	
 	/**

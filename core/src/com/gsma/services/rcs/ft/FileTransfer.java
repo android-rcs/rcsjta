@@ -320,9 +320,9 @@ public class FileTransfer {
      * @return Type
      * @throws RcsServiceException
      */
-    public String getFileType() throws RcsServiceException {
+    public String getMimeType() throws RcsServiceException {
 		try {
-			return transferInf.getFileType();
+			return transferInf.getMimeType();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

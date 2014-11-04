@@ -15,9 +15,9 @@ interface IImageSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	ImageSharingServiceConfiguration getConfiguration();
     
@@ -27,9 +27,9 @@ interface IImageSharingService {
 
 	IImageSharing shareImage(in ContactId contact, in Uri file);
 
-	void addEventListener(in IImageSharingListener listener);
+	void addEventListener2(in IImageSharingListener listener);
 
-	void removeEventListener(in IImageSharingListener listener);
+	void removeEventListener2(in IImageSharingListener listener);
 
 	int getServiceVersion();
 }

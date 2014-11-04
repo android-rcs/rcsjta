@@ -24,10 +24,10 @@ import android.content.Intent;
  */
 public interface IMultimediaMessagingSessionEventBroadcaster {
 
-	public void broadcastNewMessage(ContactId contact, String sessionId, byte[] message);
+	public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message);
 
-	public void broadcastMultimediaMessagingStateChanged(ContactId contact, String sessionId,
+	public void broadcastStateChanged(ContactId contact, String sessionId,
 			int state, int reasonCode);
 
-	public void broadcastMultimediaMessagingInvitation(String sessionId, Intent msrpSessionInvite);
+	public void broadcastInvitation(String sessionId, Intent msrpSessionInvite);
 }

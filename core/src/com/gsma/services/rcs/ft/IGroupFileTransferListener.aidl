@@ -7,9 +7,9 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IGroupFileTransferListener {
 
-	void onTransferStateChanged(in String chatId, in String transferId, in int state, in int reasonCode);
+	void onStateChanged(in String chatId, in String transferId, in int state, in int reasonCode);
 
-	void onGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String transferId, in int state, in int reasonCode);
+	void onDeliveryInfoChanged(in String chatId, in ContactId contact, in String transferId, in int state, in int reasonCode);
 
-	void onTransferProgress(in String chatId, in String transferId, in long currentSize, in long totalSize);
+	void onProgressUpdate(in String chatId, in String transferId, in long currentSize, in long totalSize);
 }

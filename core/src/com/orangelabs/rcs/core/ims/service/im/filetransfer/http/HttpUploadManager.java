@@ -106,7 +106,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	/**
 	 * Fileicon to upload
 	 */
-	private MmContent fileicon;
+	private MmContent fileIcon;
 
 	/**
 	 * TID of the upload
@@ -147,18 +147,18 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * 
 	 * @param content
 	 *            File content to upload
-	 * @param fileicon
-	 *            content of fileicon
+	 * @param fileIcon
+	 *            content of the file icon
 	 * @param listener
 	 *            HTTP transfer event listener
 	 * @param tId
 	 *            TID of the upload
 	 */
-	public HttpUploadManager(MmContent content, MmContent fileicon,
+	public HttpUploadManager(MmContent content, MmContent fileIcon,
 			HttpUploadTransferEventListener listener, String tId) {
 		super(listener);
 		this.content = content;
-		this.fileicon = fileicon;
+		this.fileIcon = fileIcon;
 		mTId = tId;
 	}
 
@@ -337,8 +337,8 @@ public class HttpUploadManager extends HttpTransferManager {
 		outputStream = new DataOutputStream(connection.getOutputStream());
 		outputStream.writeBytes(body);
 
-		// Add fileicon
-		if (fileicon != null) {
+		// Add file icon
+		if (fileIcon != null) {
 			writeThumbnailMultipart(outputStream);
 		}
 		// From this point, resuming is possible
@@ -465,28 +465,28 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
 		if (logger.isActivated()) {
-			logger.debug("write fileicon " + fileicon.getName() + " (size=" + fileicon.getSize() + ")");
+			logger.debug("write file icon " + fileIcon.getName() + " (size=" + fileIcon.getSize() + ")");
 		}
-		if (fileicon.getSize() > 0) {
+		if (fileIcon.getSize() > 0) {
 			outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + lineEnd);
 			outputStream.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_" + content.getName() + "\""
 					+ lineEnd);
 			outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
-			outputStream.writeBytes("Content-Length: " + fileicon.getSize());
+			outputStream.writeBytes("Content-Length: " + fileIcon.getSize());
 			outputStream.writeBytes(lineEnd + lineEnd);
 			// Are thumbnail data available ?
-			if (fileicon.getData() != null) {
+			if (fileIcon.getData() != null) {
 				// Thumbnail data were loaded upon creation.
 				// Write thumbnail content
-				outputStream.write(fileicon.getData());
+				outputStream.write(fileIcon.getData());
 			} else {
 				// Thumbnail must be loaded from file.
 				FileInputStream fileInputStream = null;
 				try {
 					fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
-							.getContentResolver().openInputStream(fileicon.getUri());
-					byte[] buffer = new byte[(int)fileicon.getSize()];
-					int bytesRead = fileInputStream.read(buffer, 0, (int)fileicon.getSize());
+							.getContentResolver().openInputStream(fileIcon.getUri());
+					byte[] buffer = new byte[(int)fileIcon.getSize()];
+					int bytesRead = fileInputStream.read(buffer, 0, (int)fileIcon.getSize());
 					if (bytesRead > 0) {
 						outputStream.write(buffer);
 					}

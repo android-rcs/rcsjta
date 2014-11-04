@@ -64,12 +64,12 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.finishBroadcast();
 	}
 
-	public void broadcastDeliveryInfoStatusChanged(String chatId, ContactId contact, String msgId,
+	public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId,
 			int status, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i).onGroupDeliveryInfoChanged(chatId,
+				mGroupChatListeners.getBroadcastItem(i).onMessageGroupDeliveryInfoChanged(chatId,
 						contact, msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -95,11 +95,11 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.finishBroadcast();
 	}
 
-	public void broadcastGroupChatStateChanged(String chatId, int state, int reasonCode) {
+	public void broadcastStateChanged(String chatId, int state, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i).onGroupChatStateChanged(chatId, state, reasonCode);
+				mGroupChatListeners.getBroadcastItem(i).onStateChanged(chatId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -123,7 +123,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.finishBroadcast();
 	}
 
-	public void broadcastGroupChatInvitation(String chatId) {
+	public void broadcastInvitation(String chatId) {
 		Intent invitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(invitation);

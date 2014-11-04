@@ -210,20 +210,21 @@ public class FileUploadService extends RcsService {
 	}
     
     /**
-     * Uploads a file to the RCS content server. The parameter file contains the URI
-     * of the file to be uploaded (for a local or a remote file).
-     * 
-     * @param file Uri of file to upload
-	 * @param fileicon File icon option. If true and if it's an image, a file icon is attached.
-     * @return File upload
-     * @throws RcsServiceException
-     */
-    public FileUpload uploadFile(Uri file, boolean fileicon) throws RcsServiceException {
+	 * Uploads a file to the RCS content server. The parameter file contains the
+	 * URI of the file to be uploaded (for a local or a remote file).
+	 * 
+	 * @param file Uri of file to upload
+	 * @param attachFileIcon Attach file icon option. If true and if it's an
+	 *            image, a file icon is attached.
+	 * @return FileUpload
+	 * @throws RcsServiceException
+	 */
+    public FileUpload uploadFile(Uri file, boolean attachFileIcon) throws RcsServiceException {
 		if (api != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 				
-				IFileUpload uploadIntf = api.uploadFile(file, fileicon);
+				IFileUpload uploadIntf = api.uploadFile(file, attachFileIcon);
 				if (uploadIntf != null) {
 					return new FileUpload(uploadIntf);
 				} else {
@@ -286,12 +287,12 @@ public class FileUploadService extends RcsService {
     }    
  
 	/**
-	 * Adds an event listener on file upload events
+	 * Adds a listener on file upload events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException
 	 */
-	public void addEventListener(IFileUploadListener listener) throws RcsServiceException {
+	public void addEventListener(FileUploadListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
 				api.addEventListener(listener);
@@ -304,7 +305,7 @@ public class FileUploadService extends RcsService {
 	}
 
 	/**
-	 * Removes an event listener from file upload
+	 * Removes a listener on file upload events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException

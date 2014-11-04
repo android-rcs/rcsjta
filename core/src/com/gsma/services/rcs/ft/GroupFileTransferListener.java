@@ -33,7 +33,7 @@ public abstract class GroupFileTransferListener extends IGroupFileTransferListen
      * @param state State of file transfer after change
      * @param reasonCode Reason code of file transfer after change
      */
-    public abstract void onTransferStateChanged(String chatId, String transferId, int state, int reasonCode);
+    public abstract void onStateChanged(String chatId, String transferId, int state, int reasonCode);
 
     /**
      * Callback called when a group file transfer state/reasonCode is changed
@@ -45,7 +45,7 @@ public abstract class GroupFileTransferListener extends IGroupFileTransferListen
      * @param state state of file transfer after change
      * @param reasonCode Reason code of state after change
      */
-    public abstract void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+    public abstract void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
             int state, int reasonCode);
 
     /**
@@ -56,6 +56,6 @@ public abstract class GroupFileTransferListener extends IGroupFileTransferListen
      * @param currentSize Current transferred size in bytes
      * @param totalSize Total size to transfer in bytes
      */
-    public abstract void onTransferProgress(String chatId, String transferId, long currentSize,
+    public abstract void onProgressUpdate(String chatId, String transferId, long currentSize,
             long totalSize);
 }

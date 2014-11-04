@@ -52,14 +52,14 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 *            the {@code file} value.
 	 * @param filetransferId
 	 *            the {@code filetransferId} value.
-	 * @param fileicon
-	 *            the {@code fileicon} value.
+	 * @param fileIcon
+	 *            the {@code fileIcon} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress, Uri file, String filetransferId, Uri fileicon,
+	public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress, Uri file, String filetransferId, Uri fileIcon,
 			boolean isGroup) {
-		this(downloadServerAddress, file, fileicon, session.getContent(), session.getRemoteContact(),
+		this(downloadServerAddress, file, fileIcon, session.getContent(), session.getRemoteContact(),
 				session.getContributionID(), filetransferId, isGroup);
 	}
 
@@ -70,8 +70,8 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 *            the {@code downloadServerAddress} instance.
 	 * @param file
 	 *            the {@code file} value.
-	 * @param fileicon
-	 *            the {@code fileicon} value.
+	 * @param fileIcon
+	 *            the {@code fileIcon} value.
 	 * @param content
 	 *            the {@code content} content.
 	 * @param contact
@@ -83,9 +83,9 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileicon, MmContent content, ContactId contact,
+	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileIcon, MmContent content, ContactId contact,
 			String chatId, String filetransferId, boolean isGroup) {
-		super(Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileicon, contact, chatId, filetransferId, isGroup);
+		super(Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup);
 		this.downloadServerAddress = downloadServerAddress;
 		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");

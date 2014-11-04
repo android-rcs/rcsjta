@@ -4,7 +4,7 @@ import android.net.Uri;
 
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -16,9 +16,9 @@ interface IFileTransferService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	FileTransferServiceConfiguration getConfiguration();
 
@@ -32,13 +32,13 @@ interface IFileTransferService {
 
 	void markFileTransferAsRead(in String transferId);
 	
-	void addOneToOneFileTransferListener(in IFileTransferListener listener);
+	void addEventListener2(in IOneToOneFileTransferListener listener);
 
-	void removeOneToOneFileTransferListener(in IFileTransferListener listener);
+	void removeEventListener2(in IOneToOneFileTransferListener listener);
 
-	void addGroupFileTransferListener(in IGroupFileTransferListener listener);
+	void addEventListener3(in IGroupFileTransferListener listener);
 
-	void removeGroupFileTransferListener(in IGroupFileTransferListener listener);
+	void removeEventListener3(in IGroupFileTransferListener listener);
 	
 	int getServiceVersion();
 	

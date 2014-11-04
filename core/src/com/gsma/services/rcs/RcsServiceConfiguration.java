@@ -134,7 +134,7 @@ public class RcsServiceConfiguration {
 			throw new IllegalStateException("Cannot instantiate ContactUtils");
 		}
 		String contact = getStringValueSetting(ctx, Settings.MY_CONTACT_ID);
-		return contactUtilsInstance.formatContactId(contact);
+		return contactUtilsInstance.formatContact(contact);
 	}
 
 	/**

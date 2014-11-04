@@ -229,32 +229,28 @@ public abstract class RcsService {
 	}
 
 	/**
-	 * Registers a listener on service registration events
+	 * Adds a listener on service registration events
 	 * 
 	 * @param listener Service registration listener
 	 * @throws RcsServiceException
 	 */
-	public void addServiceRegistrationListener(RcsServiceRegistrationListener listener)
-			throws RcsServiceException {
+	public void addEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
 		if (api != null) {
-			callApiMethod("addServiceRegistrationListener", listener,
-					IRcsServiceRegistrationListener.class);
+			callApiMethod("addEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
 			throw new RcsServiceNotAvailableException();
 		}
 	}
 
 	/**
-	 * Unregisters a listener on service registration events
+	 * Removes a listener on service registration events
 	 * 
 	 * @param listener Service registration listener
-	 * @throws RcsServiceException
+     * @throws RcsServiceException
 	 */
-	public void removeServiceRegistrationListener(RcsServiceRegistrationListener listener)
-			throws RcsServiceException {
+	public void removeEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
 		if (api != null) {
-			callApiMethod("removeServiceRegistrationListener", listener,
-					IRcsServiceRegistrationListener.class);
+			callApiMethod("removeEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
 			throw new RcsServiceNotAvailableException();
 		}

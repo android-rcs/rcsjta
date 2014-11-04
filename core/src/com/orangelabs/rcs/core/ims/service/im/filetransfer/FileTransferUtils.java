@@ -81,15 +81,15 @@ public class FileTransferUtils {
 	}
 
 	/**
-	 * Create a content of fileicon from a file
+	 * Create a content of fileIcon from a file
 	 * 
 	 * @param file
 	 *            Uri of the image
-	 * @param fileiconId
-	 *            the identifier of the fileicon
-	 * @return the content of the fileicon
+	 * @param fileIconId
+	 *            the identifier of the file icon
+	 * @return the content of the file icon
 	 */
-	public static MmContent createFileicon(Uri file, String fileiconId) {
+	public static MmContent createFileicon(Uri file, String fileIconId) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream in = null;
 		try {
@@ -124,23 +124,23 @@ public class FileTransferUtils {
 				size = out.size();
 				quality -= 10;
 			}
-			// Create fileicon URL
-			String fileiconName = buildFileiconUrl(fileiconId, "image/jpeg");
-			// Get the fileicon data
+			// Create fileIcon URL
+			String fileIconName = buildFileiconUrl(fileIconId, "image/jpeg");
+			// Get the fileIcon data
 			byte[] fileIconData = out.toByteArray();
 
-			// Generate fileicon content
-			Uri fileiconUri = ContentManager.generateUriForReceivedContent(fileiconName, "image/jpeg");
-			MmContent fileicon = ContentManager.createMmContent(fileiconUri, fileIconData.length, fileiconName);
-			// Save the fileicon data
-			fileicon.setData(fileIconData);
-			// persist the fileicon content
-			fileicon.writeData2File(fileIconData);
-			fileicon.closeFile();
+			// Generate fileIcon content
+			Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName, "image/jpeg");
+			MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length, fileIconName);
+			// Save the fileIcon data
+			fileIcon.setData(fileIconData);
+			// persist the fileIcon content
+			fileIcon.writeData2File(fileIconData);
+			fileIcon.closeFile();
 			if (logger.isActivated()) {
-				logger.debug("Generate Icon " + fileiconName + " for image " + file);
+				logger.debug("Generate Icon " + fileIconName + " for image " + file);
 			}
-			return fileicon;
+			return fileIcon;
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error(e.getMessage(), e);
@@ -152,13 +152,13 @@ public class FileTransferUtils {
 	}
 
 	/**
-	 * Generate a filename for the fileicon
+	 * Generate a filename for the file icon
 	 * 
 	 * @param msgId
 	 *            the message ID of the File Transfer
 	 * @param mimeType
 	 *            the mime-type
-	 * @return the filename of the fileicon
+	 * @return the filename of the file icon
 	 */
 	public static String buildFileiconUrl(String msgId, String mimeType) {
 		StringBuilder iconName = new StringBuilder("thumbnail_");
@@ -173,11 +173,11 @@ public class FileTransferUtils {
 	}
 
 	/**
-	 * Extract fileicon from incoming INVITE request
+	 * Extract file icon from incoming INVITE request
 	 * 
 	 * @param request
 	 *            Request
-	 * @return fileicon the fileicon content persisted on disk
+	 * @return fileIcon the file icon content persisted on disk
 	 */
 	public static MmContent extractFileIcon(SipRequest request) {
 		try {
@@ -195,17 +195,17 @@ public class FileTransferUtils {
 					data = multi.getPart(mimeType);
 				}
 				if (data != null) {
-					// Build fileicon name
+					// Build fileIcon name
 					String iconName = buildFileiconUrl(ChatUtils.getContributionId(request), mimeType);
 					// Generate URL
-					Uri fileiconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType);
+					Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType);
 					// Get binary data
-					byte[] fileiconData = Base64.decodeBase64(mimeType.getBytes());
-					// Generate fileicon content
-					MmContent result = ContentManager.createMmContent(fileiconUri, fileiconData.length, iconName);
-					result.setData(fileiconData);
+					byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes());
+					// Generate fileIcon content
+					MmContent result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
+					result.setData(fileIconData);
 					// Decode the content and persist on disk
-					result.writeData2File(fileiconData);
+					result.writeData2File(fileIconData);
 					result.closeFile();
 					return result;
 				}

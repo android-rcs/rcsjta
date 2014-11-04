@@ -30,23 +30,23 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
-	 * Callback called when the sharing state changes
+	 * Callback called when the image sharing state/reasonCode has been changed.
 	 *
 	 * @param contact Contact ID
 	 * @param sharingId ID of image sharing
 	 * @param state State of image sharing 
 	 * @param reasonCode Reason code of the image sharing state
 	 */
-	public abstract void onImageSharingStateChanged(ContactId contact, String sharingId, int state,
+	public abstract void onStateChanged(ContactId contact, String sharingId, int state,
 			int reasonCode);
 
 	/**
-	 * Callback called during the sharing progress
+	 * Callback called during the sharing progress.
 	 *
 	 * @param contact Contact ID
 	 * @param sharingId ID of image sharing
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
-	public abstract void onImageSharingProgress(ContactId contact, String sharingId, long currentSize, long totalSize);
+	public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize, long totalSize);
 }

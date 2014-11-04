@@ -34,11 +34,11 @@ public class RcsServiceRegistrationEventBroadcaster implements IRcsServiceRegist
 	public RcsServiceRegistrationEventBroadcaster() {
 	}
 
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		mServiceRegistrationListeners.register(listener);
 	}
 
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		mServiceRegistrationListeners.unregister(listener);
 	}
 

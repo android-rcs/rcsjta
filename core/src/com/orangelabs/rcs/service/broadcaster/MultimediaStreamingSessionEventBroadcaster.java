@@ -49,11 +49,11 @@ public class MultimediaStreamingSessionEventBroadcaster implements
 		mMultimediaStreamingListeners.unregister(listener);
 	}
 
-	public void broadcastNewPayload(ContactId contact, String sessionId, byte[] content) {
+	public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
 		final int N = mMultimediaStreamingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mMultimediaStreamingListeners.getBroadcastItem(i).onNewPayload(contact, sessionId,
+				mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived(contact, sessionId,
 						content);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -64,13 +64,13 @@ public class MultimediaStreamingSessionEventBroadcaster implements
 		mMultimediaStreamingListeners.finishBroadcast();
 	}
 
-	public void broadcastMultimediaStreamingStateChanged(ContactId contact, String sessionId,
+	public void broadcastStateChanged(ContactId contact, String sessionId,
 			int state, int reasonCode) {
 		final int N = mMultimediaStreamingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				mMultimediaStreamingListeners.getBroadcastItem(i)
-						.onMultimediaStreamingStateChanged(contact, sessionId, state, reasonCode);
+						.onStateChanged(contact, sessionId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -80,7 +80,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
 		mMultimediaStreamingListeners.finishBroadcast();
 	}
 
-	public void broadcastMultimediaStreamingInvitation(String sessionId, Intent rtpSessionInvite) {
+	public void broadcastInvitation(String sessionId, Intent rtpSessionInvite) {
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
 		IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
 		rtpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);

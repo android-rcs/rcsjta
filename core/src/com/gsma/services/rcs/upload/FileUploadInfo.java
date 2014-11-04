@@ -59,38 +59,38 @@ public class FileUploadInfo implements Parcelable {
 	/**
 	 * URI of the file icon on the content server
 	 */
-	private Uri fileicon = null;
+	private final Uri mFileIcon;
 
 	/**
 	 * Validity of the file icon
 	 */
-	private long fileiconValidity;
+	private final long mFileIconValidity;
 
 	/**
 	 * File icon size
 	 */
-	private long fileiconSize;
+	private final long mFileIconSize;
 
 	/**
 	 * File icon MIME type
 	 */
-	private String fileiconMimeType;
+	private final String mFileIconMimeType;
 
     /**
      * Constructor for outgoing message
      * 
      * @hide
 	 */
-	public FileUploadInfo(Uri file, long validity, String filename, long size, String type, Uri fileicon, long fileiconValidity, long fileiconSize, String fileiconType) {
+	public FileUploadInfo(Uri file, long validity, String filename, long size, String type, Uri fileIcon, long fileIconValidity, long fileIconSize, String fileIconType) {
 		this.file = file;
 		this.validity = validity;
 		this.filename = filename;
 		this.size = size;
 		this.mimeType = type;
-		this.fileicon = fileicon;
-		this.fileiconValidity = fileiconValidity;
-		this.fileiconSize = fileiconSize;
-		this.fileiconMimeType = fileiconType;
+		mFileIcon = fileIcon;
+		mFileIconValidity = fileIconValidity;
+		mFileIconSize = fileIconSize;
+		mFileIconMimeType = fileIconType;
 	}
 	
 	/**
@@ -105,10 +105,10 @@ public class FileUploadInfo implements Parcelable {
 		this.filename = source.readString();
 		this.size = source.readLong();
 		this.mimeType = source.readString();
-		this.fileicon = Uri.parse(source.readString());
-		this.fileiconValidity = source.readLong();
-		this.fileiconSize = source.readLong();
-		this.fileiconMimeType = source.readString();
+		mFileIcon = Uri.parse(source.readString());
+		mFileIconValidity = source.readLong();
+		mFileIconSize = source.readLong();
+		mFileIconMimeType = source.readString();
     }
 	
 	/**
@@ -135,10 +135,10 @@ public class FileUploadInfo implements Parcelable {
     	dest.writeString(filename);
     	dest.writeLong(size);
     	dest.writeString(mimeType);
-    	dest.writeString(fileicon.toString());
-    	dest.writeLong(fileiconValidity);
-    	dest.writeLong(fileiconSize);
-    	dest.writeString(fileiconMimeType);
+    	dest.writeString(mFileIcon.toString());
+    	dest.writeLong(mFileIconValidity);
+    	dest.writeLong(mFileIconSize);
+    	dest.writeString(mFileIconMimeType);
     }
 
     /**
@@ -209,7 +209,7 @@ public class FileUploadInfo implements Parcelable {
 	 * @return Uri
 	 */	
 	public Uri getFileicon() {
-		return fileicon;
+		return mFileIcon;
 	}
 
 	/**
@@ -219,7 +219,7 @@ public class FileUploadInfo implements Parcelable {
 	 * @return Duration
 	 */
 	public long getFileiconValidity() {
-		return fileiconValidity;
+		return mFileIconValidity;
 	}
 
 	/**
@@ -228,7 +228,7 @@ public class FileUploadInfo implements Parcelable {
 	 * @return Size
 	 */
 	public long getFileiconSize() {
-		return fileiconSize;
+		return mFileIconSize;
 	}
 
 	/**
@@ -237,6 +237,6 @@ public class FileUploadInfo implements Parcelable {
 	 * @return Content type
 	 */
 	public String getFileiconMimeType() {
-		return fileiconMimeType;
+		return mFileIconMimeType;
 	}
 }

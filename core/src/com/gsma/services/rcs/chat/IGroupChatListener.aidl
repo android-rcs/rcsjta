@@ -10,13 +10,13 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IGroupChatListener {
 
-	void onGroupChatStateChanged(in String chatId, in int state, in int reasonCode);
+	void onStateChanged(in String chatId, in int state, in int reasonCode);
 
 	void onComposingEvent(String chatId, in ContactId contact, in boolean status);
 
 	void onMessageStatusChanged(in String chatId, in String msgId, in int status, in int reasonCode);
 
-	void onGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String msgId, in int status, in int reasonCode);
+	void onMessageGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String msgId, in int status, in int reasonCode);
 
 	void onParticipantInfoChanged(in String chatId, in ParticipantInfo info);
 }

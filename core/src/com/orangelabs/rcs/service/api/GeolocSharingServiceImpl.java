@@ -138,12 +138,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -152,12 +152,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -291,11 +291,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	}
 
 	/**
-	 * Adds an event listener on geoloc sharing events
+	 * Adds a listener on geoloc sharing events
 	 * 
 	 * @param listener Listener
 	 */
-	public void addEventListener(IGeolocSharingListener listener) {
+	public void addEventListener2(IGeolocSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a Geoloc sharing event listener");
 		}
@@ -305,11 +305,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	}
 
 	/**
-	 * Removes an event listener on geoloc sharing events
+	 * Removes a listener on geoloc sharing events
 	 *
 	 * @param listener Listener
 	 */
-	public void removeEventListener(IGeolocSharingListener listener) {
+	public void removeEventListener2(IGeolocSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a Geoloc sharing event listener");
 		}
@@ -333,6 +333,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			int reasonCode) {
 		String sharingId = SessionIdGenerator.getNewId();
 		/* TODO: Persist in geoloc content provider */
-		mGeolocSharingEventBroadcaster.broadcastGeolocSharingInvitation(sharingId);
+		mGeolocSharingEventBroadcaster.broadcastInvitation(sharingId);
 	}
 }

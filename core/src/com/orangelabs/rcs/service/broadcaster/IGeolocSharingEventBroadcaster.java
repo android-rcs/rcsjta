@@ -25,8 +25,8 @@ public interface IGeolocSharingEventBroadcaster {
 	public void broadcastGeolocSharingStateChanged(ContactId contact, String sharingId, int status,
 			int reasonCode);
 
-	public void broadcastGeolocSharingprogress(ContactId contact, String sharingId, long currentSize,
+	public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
 			long totalSize);
 
-	public void broadcastGeolocSharingInvitation(String sharingId);
+	public void broadcastInvitation(String sharingId);
 }

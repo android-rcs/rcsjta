@@ -19,7 +19,7 @@ interface IFileUploadService {
 	
 	IFileUpload getFileUpload(in String uploadId);
 
-	IFileUpload uploadFile(in Uri file, in boolean fileicon);
+	IFileUpload uploadFile(in Uri file, in boolean fileIcon);
 
 
 

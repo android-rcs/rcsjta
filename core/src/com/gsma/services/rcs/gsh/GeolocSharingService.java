@@ -192,7 +192,7 @@ public class GeolocSharingService extends RcsService {
     }    
 
 	/**
-	 * Adds an event listener on geoloc sharing events
+	 * Adds a listener on geoloc sharing events
 	 *
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -200,7 +200,7 @@ public class GeolocSharingService extends RcsService {
 	public void addEventListener(GeolocSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addEventListener(listener);
+				api.addEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -210,7 +210,7 @@ public class GeolocSharingService extends RcsService {
 	}
 
 	/**
-	 * Removes an event listener on geoloc sharing
+	 * Removes a listener on geoloc sharing events
 	 *
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -218,7 +218,7 @@ public class GeolocSharingService extends RcsService {
 	public void removeEventListener(GeolocSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeEventListener(listener);
+				api.removeEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

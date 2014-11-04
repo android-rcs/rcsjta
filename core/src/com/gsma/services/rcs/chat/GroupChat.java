@@ -309,10 +309,10 @@ public class GroupChat {
 	 * Sends a text message to the group
 	 * 
 	 * @param text Message
-	 * @return Unique message ID or null in case of error
+	 * @return ChatMessage
 	 * @throws RcsServiceException
 	 */
-	public String sendMessage(String text) throws RcsServiceException {
+	public ChatMessage sendMessage(String text) throws RcsServiceException {
 		try {
 			return chatInf.sendMessage(text);
 		} catch(Exception e) {
@@ -324,12 +324,12 @@ public class GroupChat {
      * Sends a geoloc message
      * 
      * @param geoloc Geoloc info
-	 * @return Unique message ID or null in case of error
+     * @return GeolocMessage
      * @throws RcsServiceException
      */
-    public String sendGeoloc(Geoloc geoloc) throws RcsServiceException {
+    public GeolocMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
 		try {
-			return chatInf.sendGeoloc(geoloc);
+			return chatInf.sendMessage2(geoloc);
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}    	
@@ -381,14 +381,14 @@ public class GroupChat {
 	}
 	
 	/**
-	 * Quits a group chat conversation. The conversation will continue between
-	 * other participants if there are enough participants.
+	 * Leaves a group chat willingly and permanently. The group chat will
+	 * continue between other participants if there are enough participants.
 	 * 
 	 * @throws RcsServiceException
 	 */
-	public void quitConversation() throws RcsServiceException {
+	public void leave() throws RcsServiceException {
 		try {
-			chatInf.quitConversation();
+			chatInf.leave();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

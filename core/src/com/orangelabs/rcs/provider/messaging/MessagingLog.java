@@ -301,9 +301,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	@Override
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent fileicon, int state, int reasonCode) {
+			MmContent fileIcon, int state, int reasonCode) {
 		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content,
-				fileicon, state, reasonCode);
+				fileIcon, state, reasonCode);
 	}
 
 	/*
