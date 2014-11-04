@@ -2,9 +2,9 @@
 if [ -d "$GITHOME/rcsjta/sdk-joyn" ]; then
 	if [ -d "$GITHOME/rcsjta.javadoc" ]; then
 		cd $GITHOME/rcsjta.javadoc
-		git reset --hard ca6cbdf16f13f05a989d271923db7237838adf9d
-		rm -Rf $GITHOME/rcsjta.javadoc/sdk-joyn 2> /dev/null
-		cp -R $GITHOME/rcsjta/sdk-joyn $GITHOME/rcsjta.javadoc
+		git reset --hard 9d755aa6730a89fa054b38028eab1c064379ed2a
+		rm -Rf $GITHOME/rcsjta.javadoc/reference 2> /dev/null
+		cp -R $GITHOME/rcsjta/doclava/reference $GITHOME/rcsjta.javadoc
 		git add --all
 		git commit -m "Generate javadoc 1.5"
 		git push -f origin javadoc1.5

@@ -21,23 +21,6 @@
 		<pathelement path="${j2se.classpath};${android.root}/platforms/android-10/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
 	</path>
 
-	<!-- Generate RCS API DOCS -->
-
-	<!--target name="docs" description="Generate RCS API javadoc">
-    <echo>Generate Javadoc</echo>
-    <delete dir="${terminal.root}/docs/javadoc"/>
-    <mkdir dir="${terminal.root}/docs/javadoc"/>
-    <javadoc doctitle="GSMA RCS Terminal API"
-        verbose="on"
-        destdir="docs/javadoc"
-        use="true"
-        access="public" 
-        classpath="${android_jar}:${project.all.jars.path}" 
-        sourcepath="${src.path}"
-        packagenames="com.gsma.services.rcs.*">
-    </javadoc>
-    </target-->
-
 	<!-- Generate RCS API SDK -->
 
 	<target name="sdk" description="Generate RCS SDK" depends="">
@@ -71,12 +54,12 @@
 		<echo>Generate Javadoc</echo>
 
 		<javadoc
-	        verbose="on"
-	        access="public" 
-	        classpath=":${terminal.classpath}" 
-	        sourcepath="${src.path}"
-	        packagenames="com.gsma.services.rcs.*"
-	        bootclasspath="${android.root}\platforms\android-10\android.jar:${terminal.root}/core/bin/classes">
+				verbose="on"
+				access="public" 
+				classpath=":${terminal.classpath}" 
+				sourcepath="${src.path}"
+				packagenames="com.gsma.services.rcs.*"
+				bootclasspath="${android.root}\platforms\android-10\android.jar:${terminal.root}/core/bin/classes">
 
 			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
 				<param name="-d" value="${terminal.root}/sdk-joyn"/>			    
@@ -115,42 +98,33 @@
 	</target>
 	<target name="generate-ri-apk" depends="generate-api">
 		<ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
-	</target>
+	</target>	
 
-	<target name="doclava">
-		<delete dir="${terminal.root}/sdk-joyn"/>
-		<mkdir dir="${terminal.root}/sdk-joyn"/>
+	<!-- Generate RCS API DOCS -->
+	<target name="docs">
+		<delete dir="${terminal.root}/doclava"/>
+		<mkdir dir="${terminal.root}/doclava"/>
 		<javadoc 
-			verbose="on"
-	        access="public"
-			classpath=":${terminal.classpath}"
-			sourcepath="${src.path}"
-			packagenames="com.gsma.services.rcs.*"
-			bootclasspath="${android.root}\platforms\android-10\android.jar:${terminal.root}/core/bin/classes"
-           >
+				verbose="on"
+				access="public"
+				sourcepath="${src.path}"
+				classpath=":${terminal.classpath}"
+				packagenames="com.gsma.services.rcs.*"
+				bootclasspath="${android.root}/platforms/android-10/android.jar:${terminal.root}/core/bin/classes"
+				>
 			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
-				<param name="-d" value="${terminal.root}/sdk-joyn"/>			    
-				<param name="-templatedir"/><param name="${terminal.root}/templates-sdk" />
-				<param name="-hdf"/> <param name="project.name"/> <param name="RCS SDK"/>
+				<param name="-d" value="${terminal.root}/doclava"/>
+				<param name="-hdf"/> <param name="project.name"/> <param name="RCS API"/>
 				<param name="-hdf"/> <param name="sdk.version"/> <param name="${sdk.version}"/>
-
-				<param name="-htmldir"/> <param name="${terminal.root}/sdk" />
-				<param name="-overview"/> <param name="${terminal.root}/sdk-joyn/overview.html" />
-				<param name="-generatesources"/>
-				<param name="-assetsdir"/> <param name="assets" />
-
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/albatros.xml"/><param name="Albatros"/>
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/blackbird.xml"/><param name="Blackbird"/>
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/current.xml"/><param name="Crane"/>
-
+				<param name="-title" value="TAPI 1.5"/>
+				<!-- versioning -->
+				<param name="-apiversion" value="v1.5"/>
+				<!-- federation -->
 				<param name="-federate" /><param name="android"/><param name="http://developer.android.com/reference/"/>
 				<param name="-federationxml" /><param name="android"/><param name="${terminal.root}/doclava-1.0.6/android-10.xml"/>
-
 			</doclet>
 		</javadoc>
-		<copy todir="${terminal.root}/sdk-joyn/javadoc">
-			<fileset dir="${terminal.root}/sdk-joyn/reference"/>
-		</copy>
 	</target>
+
 
 </project>
