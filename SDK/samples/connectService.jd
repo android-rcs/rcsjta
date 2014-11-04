@@ -1,0 +1,79 @@
+page.title=How to connect to a joyn service
+doc.type=samples
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>How to connect to a joyn service</h1></p>
+			<p><span>Learn how to instantiate a joyn service, connect to it and and listen to service events.</span></p>
+			<p><span>Here we use the Capability service API as an example, the procedure will remain the same for any other service API.</span></p>
+		</div>
+		
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>Instantiate a service API</h2>
+				<p></p>
+				<p>To instantiate an API, all you need to do is to pass an Android context and a service listener as parameter when calling the API constructor. The Android context is used by the Android API binding procedure. The listener is used to monitor the API connection events (JoynServiceListener).</p>				
+				<p></p>
+				<div class="code-block">
+					<!--Generated HTML from java using Java2Html Converter -->
+					<tt class="java"><span class="java3">// Instanciate API<br />
+						</span><span class="java10">capabilityApi = </span><span class="java4">new </span><span class="java10">CapabilityService</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">()</span><span class="java10">, </span><span class="java4">new </span><span class="java10">MyEventListener </span><span class="java8">())</span><span class="java10">;<br />
+						<br />
+						<br />
+						</span><span class="java4">public class </span><span class="java10">MyEventListener </span><span class="java4">implements </span><span class="java10">JoynServiceListener </span><span class="java8">{<br />
+						}</span>
+					</tt>
+				</div>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Connect to the service API</h2>
+				<p></p>
+				<p>After having instanciated the service Api, you should connect to it :</p>
+				<p></p>
+				<div class="code-block">				
+					<tt class="java"><span class="java3">// Connect API<br />
+						</span><span class="java10">capabilityApi.connect</span><span class="java8">()</span><span class="java10">;</span>
+					</tt>
+				</div>	
+				<p></p>				
+				<p>The API connection procedure is asynchronous and the connection result is given via callback events : The callback event onServiceConnected() means that the API binding was successful and methods may be called on the API.</p>
+				<p></p>
+			</div>	
+			</br>
+			<div class="guide-block">
+				<h2>Disconnect from the service API</h2>
+				<p></p>
+				<p>When you have no more need on the API don’t forget to disconnect from it :</p>	
+				<p></p>
+				<div class="code-block">				
+					<tt class="java"><span class="java3">// Disconnect API<br />
+						</span><span class="java10">capabilityApi.disconnect</span><span class="java8">()</span><span class="java10">;</span>
+					</tt>
+				</div>	
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Monitor API connection events</h2>
+				<p></p>
+				<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/JoynServiceListener.html">JoynServiceListener</a> contains 2 methods that allows you to monitor the API connection state :</p>	
+				<p></p>
+				<div class="code-block">				
+					<tt class="java"><span class="java4">public class </span><span class="java10">MyEventListener </span><span class="java4">implements </span><span class="java10">JoynServiceListener </span><span class="java8">{<br />
+						&#xA0;&#xA0; </span><span class="java9">void </span><span class="java10">onServiceConnected</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java9">void </span><span class="java10">onServiceDisconnected</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; }<br />
+						}</span>
+					</tt>
+				</div>
+			</div>
+			</br>
+			</br>
+		</div>
+	</div>
+</div>

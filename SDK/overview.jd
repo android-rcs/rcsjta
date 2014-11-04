@@ -1,0 +1,7 @@
+page.title=RCS Overview
+doc.type=overview
+@jd:body
+
+<p>Start coding with our API documentation.</p>
+
+<p>See also the <a href="./../concepts.html" >API concepts</a> and the <a target="_blank" href="http://www.gsma.com/rcs/specifications">joyn documentation</a> from GSMA.</p>

@@ -1,0 +1,107 @@
+page.title=Concepts
+home=true
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Concepts</h1></p>
+			<p><span>The joyn API permits to build new joyn applications on top of the native ones. The joyn API for Android terminal uses the Android concepts.</span></p>
+			<p><span>The joyn API offers the following features:</span></p>
+			<p></p>
+			<ul class="list-concepts-1">
+				<li>
+					<p><span>Core joyn features:</span></p>
+					<ul class="list-concepts-2">
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability API:</a></span> <span>this API exposes classes/methods to manage the supported capabilities of the contacts of the native address book and the capabilities locally supported by the device.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/contacts/package-summary.html">Contacts API:</a></span> <span>this API exposes classes/methods to read joyn infos (presence, capabilities) of the contacts of the native address book.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat API:</a></span> <span>this API exposes classes/methods for using the single chat and the group chat services.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/ft/package-summary.html">File transfer API :</a></span> <span>this API exposes classes/methods to transfer files in real time.</span></p>
+						</li>
+						<li>
+							<p><span><a href="{@docRoot}javadoc/com/gsma/services/rcs/ish/package-summary.html">Image sharing API :</a></span> <span>this API exposes classes/methods to share an image (pre-recorded or live) during a CS call.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/vsh/package-summary.html">Video sharing API:</a></span> <span>this API exposes all classes/methods to share a live video stream during a CS call.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/Intents.html">Intents API:</a></span> <span>this API exposes Intents which permits to link your application with native joyn applications.</span></p>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<p><span>Extended joyn features: this API permits to build new services on top of core joyn services.</span></p>
+					<ul class="list-concepts-2">
+						<li>
+							<p><span><a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">New capability API :</a></span> <span>this API exposes methods to define and to discover dynamically new capabilities.</span></p>
+						</li>
+						<li>
+							<p><span ><a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">MultiMedia session API :</a></span> <span>this API exposes classes/methods to create new multimedia application. The media is implemented in the application side and is independant from the joyn API.</span></p>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<p></p>
+			</br>
+			
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">	
+				<h2>Architecture</h2>
+				<p><span>The joyn services are implemented via an Android service which runs in background on the device and which offers a joyn API interface for third party applications. Several applications may be connected at the same time to the the single joyn service by using a local client/server model. Several services may be used at a time.</span></p>
+				<p><span>The joyn API uses the following Android concepts:</span></p>
+				<ul >
+					<li>
+						<p><span>Android <a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> </span></p>
+					</li>
+					<li>
+						<p><span>Android <a href="http://developer.android.com/guide/topics/providers/content-providers.html">Content Providers</a></span></p>
+					</li>
+					<li>
+						<p><span><a href="http://developer.android.com/guide/components/aidl.html">AIDL</a> interfaces</span></p>
+					</li>
+				</ul>
+				<p></p>
+				<div style="width:700px;margin:auto;">
+					<img src="{@docRoot}assets-sdk/images/concepts_1.png" width="100%"/>
+				</div>
+				<p></p>			
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Intents</h2>
+				<p><a href="http://developer.android.com/reference/android/content/Intent.html">Intents</a> are used to broadcast incoming invitations to applications (eg. file transfer invitation, multimedia session invitation, new chat message, .etc). Then it’s up to the application to catch the Intent and to display a popup or any UI associated to the incoming event.</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>Content providers</h2>
+				<p><a href="http://developer.android.com/guide/topics/providers/content-providers.html">Content providers</a> are used to store logs persistently (eg. chat history, rich call log).</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>AIDL interfaces</h2>
+				<p><a href="http://developer.android.com/guide/components/aidl.html">AIDL interfaces</a> are used to implement the entry point of each service API and to manage sessions dynamically (initiate, accept/reject, terminate). An AIDL interface permits also to receive session events thanks to callback methods.</p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>API connection</h2>
+				<p>Prior to requesting a service API, an application should connect to the service API : this is the binding procedure between the client side and the server side of the API.</p>
+				<p>When the binding has been done with success then the application can use API methods. Under Android, the binding procedure is asynchronous, so the API connection events are send to the application via callback method (see listener JoynServiceListener).</p>	
+				<p>See the following sequence diagram :</p>		
+				<p></p>
+				<div style="width:700px;margin:auto;">
+					<img src="{@docRoot}assets-sdk/images/concepts_2.png" width="100%"/>
+				</div>
+				<p></p>			
+			</div>
+			</br>
+		</div>
+		</br>
+	</div>
+</div>

@@ -1,0 +1,21 @@
+page.title=Detect if joyn service is started
+doc.type=samples
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="height:700px;">
+		<div class="intro center">
+			<p><h1>How to detect if the joyn service is started</h1></p>
+			<p><span>Sometimes it’s useful to know if the joyn service is running or not in order to enable/disable views in the UI part of the application (e.g. a menu).</span></p>			
+			<p><span>The joyn API offers utility methods to get the current state of the joyn service from the class JoynServiceConfiguration:</span></p><p><span></span></p>
+			<div class="code-block">
+				<tt class="java"><span class="java3">// Get joyn service activation state<br />
+					</span><span class="java9">boolean </span><span class="java10">activated = JoynServiceConfiguration.isServiceActivated</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">())</span><span class="java10">;</span>
+				</tt>
+			</div>
+			<p><span></span></p>
+		</div>
+		<div class="content-body center">
+			
+		</div>
+	</div>
+</div>

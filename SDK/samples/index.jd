@@ -1,0 +1,60 @@
+page.title=Samples
+doc.type=samples
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Source code samples</h1></p>
+			<p><span>Our different samples will show you how to perform specific tasks using joyn APIs.</span></p>
+		</div>
+		<div class="content-body center">
+			<ul class="list clickable">
+				<li>
+					<div>
+						<span class="api-list-ver">Albatros</span>
+						<a href="{@docRoot}samples/connectService.html"><span class="item-link"></span>
+							<h2>How to connect to a joyn service</h2>
+						</a>
+						<p>Lean how to instantiate a joyn service, connect to it and register listeners for receiving callback events.</p>
+					</div>
+				<li>
+					<div>
+						<span class="api-list-ver">Albatros</span>
+						<a href="{@docRoot}samples/initChat.html"><span class="item-link"></span>
+							<h2>How to initialise a chat</h2>
+						</a>
+						<p>Learn how to use the chat service.</p>
+					</div>
+				</li>
+				<li>
+					<div>
+						<span class="api-list-ver">Albatros</span>
+						<a href="{@docRoot}samples/listContacts.html"><span class="item-link"></span>
+							<h2>How to get online contacts</h2>
+						</a>
+						<p>Shows you how to get contacts who are online and reachable via joyn services.</p>
+					</div>
+				</li>
+				<li>
+					<div>
+						<span class="api-list-ver">Albatros</span>
+						<a href="{@docRoot}samples/serviceSupported.html"><span class="item-link"></span>
+							<h2>How to get joyn contacts supporting a given service</h2>
+						</a>
+						<p>Shows you how to get contacts who support a specific service.</p>
+					</div>
+				</li>
+				<li>
+					<div>
+						<span class="api-list-ver">Albatros</span>
+						<a href="{@docRoot}samples/detectServices.html"><span class="item-link"></span>
+							<h2>How to detect if the joyn service is started</h2>
+						</a>
+						<p>Shows you how to check if the joyn service is started or not on your device.</p>
+					</div>
+				</li>
+			</ul>
+		</div>
+		
+	</div>
+</div>

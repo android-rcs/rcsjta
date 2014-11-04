@@ -1,0 +1,172 @@
+page.title=New multimedia application
+doc.type=tutorials
+@jd:body
+<div class="background-sdk">
+	<div class="content-block">
+		<div class="intro center" >
+			<p><h1>New multimedia application</h1></p>
+			<p><span>This tutorial demonstrates how to build a new multimedia application based on the joyn technology.</span></p>
+			<p><span>The multimedia application implements a conversational mobile-to-mobile service which permits to exchange data in real time. A multimedia session is established between the two endpoints by using the joyn platform, then the media is exchanged via the MSRP protocol (real time messaging protocol to exchange any media data). It’s up to the application to define the media content exchanged in real time via the MSRP protocol, the joyn API just hides the complexity of the multimedia session (ie. SIP, SDP and MSRP protocols).</span></p>
+			<p><span>This tutorial shows how to exchange text in real time.</span></p>
+			<p><span>This demonstrated application uses the <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session</a> API to initiate and to manage multimedia sessions (accept, reject, terminate). This API may also be combined with the Capability API to discover the new service accross contacts and to offer a complete end-to-end solution.</span></p>
+			<p><span>The Multimedia Session API implements the following call flows:</span></p>
+			<p><span><b>Originating side :</b></span></p>
+			<p></p>
+			<div style="width:700px;margin:auto;">
+				<img src="{@docRoot}assets-sdk/images/multi_sample_1.png" width="100%"/>
+			</div>
+			<p></p>
+			<p><span><b>Terminating side :</b></span></p>
+			<p></p>
+			<div style="width:700px;margin:auto;">
+				<img src="{@docRoot}assets-sdk/images/multi_sample_2.png" width="100%"/>
+			</div>
+			<p></p>
+			</br>
+			<h1>How to implement a new multimedia service?</h1>
+		</div>
+		<div class="content-body center" style="min-height:700px;">
+			<div class="guide-block">
+				<h2>1. Define a service ID associated to your new application or service</h2>
+				<p></p>
+				<p>A unique service ID should be associated to your application, this ID is used to route the incoming request internally in the API and may be used by the joyn platform for billing and routing.</p>
+				<p>The service ID corresponds also to a capability (or extension) associated to your application (see <a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability</a> API).</p>						
+				<p>Here the chosen service ID is "ext.texto".</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Implement the sender side (see class InitiateMultimediaSession)</h2>
+				<p></p>
+				<p>The session is initiated to a remote contact with the service ID.</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// MM session<br />
+						</span><span class="java4">private </span><span class="java10">MultimediaSession session = </span><span class="java4">null</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// MM session listener<br />
+						</span><span class="java4">private </span><span class="java10">MySessionListener sessionListener = </span><span class="java4">new </span><span class="java10">MySessionListener</span><span class="java8">()</span><span class="java10">;<br />
+
+						</span><span class="java3">// Initiate session<br />
+						</span><span class="java10">session = sessionApi.initiateSession</span><span class="java8">(</span><span class="java10">serviceId, contact, sessionListener</span><span class="java8">)</span><span class="java10">;<br />
+						...<br />
+						<br />
+						</span><span class="java3">// Session event listener<br />
+						</span><span class="java4">private class </span><span class="java10">MySessionListener </span><span class="java4">extends </span><span class="java10">MultimediaSessionListener </span><span class="java8">{<br />
+						&#xA0; </span><span class="java3">// Session ringing<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionRinging</span><span class="java8">() {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session started<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionStarted</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java5">&lt; you can exchange data from now &gt;<br /><br>
+						&#xA0;&#xA0;&#xA0; </span><span class="java3">// Send data<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">byte[] data;<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">session.sendMessage</span><span class="java8">(</span><span class="java10">data</span><span class="java8">)</span><span class="java10">;<br />						
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session aborted<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionAborted</span><span class="java8">() {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session error<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionError</span><span class="java8">(</span><span class="java4">final </span><span class="java9">int </span><span class="java10">error</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Receive data<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewMessage</span><span class="java8">(</span><span class="java9">byte[] </span><span class="java10">content</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java5">&lt; you receive your data here &gt;<br />
+						&#xA0; </span><span class="java8">}<br />
+						}</span><span class="java10">;</span>
+					</tt>
+				</div>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>3. Implement the receiver side (see class MultimediaSessionInvitationReceiver)</h2>
+				<p></p>
+				<p>Defines an Intent receiver to catch the incoming multimedia session invitation. The Intent should have a MIME type having the following syntax: "com.gsma.services.rcs&#47;ext.texto",</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.session.MultimediaSessionInvitationReceiver&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.session.action.NEW_SESSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/ext.texto&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.LAUNCHER&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.DEFAULT&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt;<br />
+						&lt;/receiver&gt;</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>Then the Intent receiver gets the session instance from its session ID found in the incoming Intent :</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// MM session<br />
+						</span><span class="java4">private </span><span class="java10">MultimediaSession session = </span><span class="java4">null</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// MM session listener<br />
+						</span><span class="java4">private </span><span class="java10">MySessionListener sessionListener = </span><span class="java4">new </span><span class="java10">MySessionListener</span><span class="java8">()</span><span class="java10">;<br />
+						<br />
+						...<br />
+						<br />
+						</span><span class="java3">// Get session ID<br />
+						</span><span class="java10">String sessionId = invitation.getStringExtra</span><span class="java8">(</span><span class="java10">MultimediaSessionIntent.EXTRA_SESSION_ID</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Get the session<br />
+						</span><span class="java10">session = sessionApi.getSession</span><span class="java8">(</span><span class="java10">sessionId</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Add session event listener<br />
+						</span><span class="java10">session.addEventListener</span><span class="java8">(</span><span class="java10">sessionListener</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Accept the invitation<br />
+						</span><span class="java10">session.acceptInvitation</span><span class="java8">(</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						...<br />
+						<br />
+						</span><span class="java3">// Session event listener<br />
+						</span><span class="java4">private class </span><span class="java10">MySessionListener </span><span class="java4">extends </span><span class="java10">MultimediaSessionListener </span><span class="java8">{<br />
+						&#xA0; </span><span class="java3">// Session ringing<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionRinging</span><span class="java8">() {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session started<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionStarted</span><span class="java8">() {<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java5">&lt; you can exchange data from now &gt;<br /><br>
+						&#xA0;&#xA0;&#xA0; </span><span class="java3">// Send data<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">byte[] data;<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">session.sendMessage</span><span class="java8">(</span><span class="java10">data</span><span class="java8">)</span><span class="java10">;<br />						
+						&#xA0;&#xA0;&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session aborted<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionAborted</span><span class="java8">() {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Session error<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onSessionError</span><span class="java8">(</span><span class="java4">final </span><span class="java9">int </span><span class="java10">error</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java8">}<br />
+						<br />
+						&#xA0; </span><span class="java3">// Receive data<br />
+						&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewMessage</span><span class="java8">(</span><span class="java9">byte[] </span><span class="java10">content</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0; </span><span class="java5">&lt; you receive your data here &gt;<br />
+						&#xA0; </span><span class="java8">}<br />
+						}</span><span class="java10">;</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>See the complete source code of the application <a href="https://code.google.com/p/rcsjta/source/browse/#git%2Fsamples%2Fsession" target="_blank">here</a>.</p>
+				<p></p>
+			</div>
+			</br>
+		</div>
+	</div>
+</div>

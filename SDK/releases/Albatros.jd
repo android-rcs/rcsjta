@@ -1,0 +1,12 @@
+page.title=API version Albatros
+doc.type=apilevel
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+		<p><h1>API version Albatros</h1></p>
+		<span><p>joyn Albatros is the first release implementing the RCS-e 1.2.2 specification.</p></span>
+		<span><p>See <a href="http://www.gsma.com/rcs/v1-2-joyn-hot-fixes-user-experience-guidelines" target="_blank">Product specification</a></p></span>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,154 @@
+page.title=Text to speech application
+doc.type=tutorials
+@jd:body
+<div class="background-sdk">
+	<div class="content-block">
+		<div class="intro center">
+			<p><h1>Text to speech application</h1></p>
+			<p><span>This tutorial demonstrates how to build a Text-To-Speech (TTS) application around the joyn chat service. This service permits to play a TTS synthesis on each received chat message.</span></p>
+			<p><span>The application offers a simple UI which permits to activate/deactivate the TTS synthesis:</span></p>
+			<div style="width:280px;margin:auto;">
+				<img src="{@docRoot}assets-sdk/images/tts_sample_1.png" width="100%"/>
+			</div>
+			<p></p>
+			<p><span>This application uses the following API :</span></p>
+			<ul>
+				<li>
+					<p><span>The <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat</a> API to receive incoming chat message.</span></p>
+				</li>
+				<li>
+					<p><span>The Android <a href="http://developer.android.com/reference/android/speech/tts/TextToSpeech.html">TTS</a> API </span></p>				
+				</li>
+			</ul>
+			<p></p>
+			</br>
+			<h1>How to implement the Text-to-speech application?</h1>
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>1. Activate the speech synthesis on your Android device</h2>
+				<p></p>			
+			
+				<ul>
+					<li>
+						<p>Load device parameters application.</p>
+					</li>
+					<li>
+						<p>Select the menu « Language and inputs ».</p>			
+					</li>
+					<li>
+						<p>Go to « Text-to-speech ouput ».</p>			
+					</li>
+					<li>
+						<p>Configure the TTS engine (speed, language, .etc).</p>			
+					</li>
+				</ul>					
+				
+				<div style="width:280px;margin:auto;">
+					<img src="{@docRoot}assets-sdk/images/tts_sample_2.png" width="100%"/>
+				</div>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Catch a single chat message</h2>
+				<p></p>	
+				<p>There are different ways to catch incoming chat messages:</p>				
+				
+				<ul>
+					<li>
+						<p>From a chat listener interface <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/NewChatListener.html">NewChatListener</a>.</p>
+					</li>
+					<li>
+						<p>From the Intent <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatIntent.html#ACTION_NEW_CHAT">ChatIntent.ACTION_NEW_CHAT</a>.</p>			
+					</li>
+					<li>
+						<p>From a Chat object if a conversation is already opened.</p>		
+					</li>
+					<li>
+						<p>From the Content Provider <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatLog.Message.html">ChatLog.Message</a>.</p>	
+					</li>
+				</ul>					
+				
+				<p>Here, we have choosen to use the Intent to catch the incoming message:</p>
+				<p>Using the Intent, we do not need to manage a joyn session. The Intent is broadcasted by the joyn service, we only need to receive it.</p>
+				<p>An Intent receiver is declared in the Manisfest file with a filter on single chat message :</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;com.orangelabs.rcs.tts.ChatEvent&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt;<br />
+						&lt;/receiver&gt;</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>An Intent receiver is implemented to read the received chat message and to process a TTS in background:</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java16">@Override<br />
+						</span><span class="java4">public </span><span class="java9">void </span><span class="java10">onReceive</span><span class="java8">(</span><span class="java10">Context context, Intent intent</span><span class="java8">) {<br />
+						<br />
+						&#xA0; </span><span class="java3">// A new chat message is received<br />
+						<br />
+						&#xA0; // Check activation state before to continue<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; ...<br />
+						&#xA0; </span><span class="java3">// Get the chat message from the Intent<br />
+						&#xA0; </span><span class="java10">ChatMessage message = intent.getParcelableExtra</span><span class="java8">(</span><span class="java10">ChatIntent.EXTRA_MESSAGE</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						&#xA0; </span><span class="java3">// Play TTS on the chat message<br />
+						&#xA0; </span><span class="java10">ArrayList&lt;String&gt; messages = </span><span class="java4">new </span><span class="java10">ArrayList&lt;String&gt;</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0; messages.add</span><span class="java8">(</span><span class="java10">context.getString</span><span class="java8">(</span><span class="java10">R.string.label_new_msg</span><span class="java8">))</span><span class="java10">;<br />
+						&#xA0; messages.add</span><span class="java8">(</span><span class="java10">message.getMessage</span><span class="java8">())</span><span class="java10">;<br />
+						&#xA0; Intent serviceIntent = </span><span class="java4">new </span><span class="java10">Intent</span><span class="java8">(</span><span class="java10">context, PlayTextToSpeech.</span><span class="java4">class</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; serviceIntent.putStringArrayListExtra</span><span class="java8">(</span><span class="java5">&#34;messages&#34;</span><span class="java10">, messages</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; context.startService</span><span class="java8">(</span><span class="java10">serviceIntent</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; ...<br />
+						</span><span class="java8">}</span>
+					</tt>
+				</div>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>3. Play a TTS on the received text message</h2>
+				<p></p>	
+				<p>See also an introduction to Text-to-Speech in Android at <a target="_blank" href="http://android-developers.blogspot.fr/2009/09/introduction-to-text-to-speech-in.html">http://android-developers.blogspot.fr/2009/09/introduction-to-text-to-speech-in.html</a>.</p>				
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// Instanciate the TTS engine<br />
+						</span><span class="java4">try </span><span class="java8">{<br />
+						&#xA0;&#xA0; </span><span class="java10">tts = </span><span class="java4">new </span><span class="java10">TextToSpeech</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">()</span><span class="java10">, </span><span class="java4">this</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java8">} </span><span class="java4">catch</span><span class="java8">(</span><span class="java10">Exception e</span><span class="java8">) {<br />
+						&#xA0;&#xA0; </span><span class="java10">Log.v</span><span class="java8">(</span><span class="java10">TAG, </span><span class="java5">&#34;Can't instanciate TTS engine&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0;&#xA0; e.printStackTrace</span><span class="java8">()</span><span class="java10">;<br />
+						</span><span class="java8">}<br />
+						<br />
+						</span><span class="java3">// Speak<br />
+						</span><span class="java10">Log.v</span><span class="java8">(</span><span class="java10">TAG, </span><span class="java5">&#34;Start TTS session: play &#34; </span><span class="java10">+ messages.size</span><span class="java8">() </span><span class="java10">+ </span><span class="java5">&#34; messages&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						tts.speak</span><span class="java8">(</span><span class="java10">messages.get</span><span class="java8">(</span><span class="java7">0</span><span class="java8">)</span><span class="java10">, TextToSpeech.QUEUE_FLUSH, </span><span class="java4">null</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java4">if </span><span class="java8">(</span><span class="java10">messages.size</span><span class="java8">() </span><span class="java10">&gt; </span><span class="java7">1</span><span class="java8">) {<br />
+						&#xA0;&#xA0; </span><span class="java4">for</span><span class="java8">(</span><span class="java9">int </span><span class="java10">i=</span><span class="java7">1</span><span class="java10">; i &lt; messages.size</span><span class="java8">()</span><span class="java10">; i++</span><span class="java8">) {<br />
+						&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">tts.speak</span><span class="java8">(</span><span class="java10">messages.get</span><span class="java8">(</span><span class="java10">i</span><span class="java8">)</span><span class="java10">, TextToSpeech.QUEUE_ADD, </span><span class="java4">null</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0;&#xA0; </span><span class="java8">}<br />
+						}<br />
+						<br />
+						</span><span class="java3">// Wait end of speech<br />
+						</span><span class="java4">while</span><span class="java8">(</span><span class="java10">tts.isSpeaking</span><span class="java8">()) {<br />
+						&#xA0;&#xA0; </span><span class="java4">try </span><span class="java8">{<br />
+						&#xA0;&#xA0;&#xA0;&#xA0; </span><span class="java10">Thread.sleep</span><span class="java8">(</span><span class="java7">500</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0;&#xA0; </span><span class="java8">} </span><span class="java4">catch</span><span class="java8">(</span><span class="java10">Exception e</span><span class="java8">) {}<br />
+						}<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>See the complete source code of the application <a target="_blank" href="https://code.google.com/p/rcsjta/source/browse/#git%2Fsamples%2Ftts">here</a>.</p>
+				<p></p>
+			</div>
+			</br>
+			
+		</div>
+	</div>
+</div>

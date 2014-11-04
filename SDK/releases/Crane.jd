@@ -1,0 +1,23 @@
+page.title=API version Crane
+doc.type=apilevel
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+		<p><h1>API version Crane</h1></p>
+		<span><p>joyn Crane is based on RCS 5.2 specification.</p></span>
+		<span><p>Crane release introduces the following new features:</p></span>
+		<ul>	
+			<li>
+				<span>Automata capability which indicates if the remote is an automata or not.</span>	
+			</li>
+			<li>
+				<span>Multimedia Session API which permits to create new multimedia services.</span>		
+			</li>
+		</ul>
+
+		<span><p>Note: Crane specification not yet published by GSMA.</a></p></span>
+
+		</div>
+	</div>
+</div>

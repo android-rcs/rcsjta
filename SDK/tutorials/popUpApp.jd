@@ -1,0 +1,238 @@
+page.title=Popup application
+doc.type=tutorials
+@jd:body
+<div class="background-sdk">
+	<div class="content-block">
+		<div class="intro center">
+			<p><h1>Popup application</h1></p>
+			<p><span>This tutorial demonstrates how to build a new multimedia application based on the joyn technology.</span></p>
+			<p><span>The idea of the Popup application is to offer a service which allows one to send animated popups to remote joyn contacts who also have the same application on their devices.</span></p>
+			<p><span>A Popup is composed of a text message, an over-the-top picture and an animation used to display the picture in over-the-top.</span></p>
+			<p><span>The application offers several harcoded Popups. A Text-To-Speech synthesis may also be requested on the remote device to play the text message.</span></p>
+			<div style="width:440px;height:350px;margin:auto;">
+				<div style="height:350px;float:left">
+					<img src="{@docRoot}assets-sdk/images/popup_sample_1.png" height="100%"/>
+				</div>
+				<div style="height:350px;float:right">
+					<img src="{@docRoot}assets-sdk/images/popup_sample_2.png" height="100%"/>
+				</div>
+			</div>
+			</br>
+			<p></p>
+			<p><span>See the following video from the last Mobile World Congress (2012):</span></p>
+			</br>
+			<div style="margin-bottom: 3%;">
+				<iframe frameborder="0" width="480" height="270" src="http://www.dailymotion.com/embed/video/k6zGwVvjQxn5Ek3Sp38" class="video-frame"></iframe>
+			</div>
+			
+			<p><span>This application uses the following APIs :</span></p>
+			<ul>
+				<li>
+					<p><span>The <a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability</a> API to define a new capability (e.g. extension) corresponding to the Popup service.</span></p>
+				</li>
+				<li>
+					<p><span>The <a href="{@docRoot}javadoc/com/gsma/services/rcs/contacts/package-summary.html">Contact</a> API to extract contacts supporting the Popup service and to know which contact is online or not.</span></p>
+				</li>
+				<li>
+					<p><span>The <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session y</a> API to send and receive Popups.</span></p>
+				</li>
+				<li>
+					<p><span>The Android <a href="http://developer.android.com/reference/android/speech/tts/TextToSpeech.html">TTS</a> API </span></p>				
+				</li>
+			</ul>
+			<p></p>
+			</br>
+			<h1>How to implement the Popup application?</h1>
+		</div>
+		<div class="content-body center" style="min-height:700px;">
+			<div class="guide-block">
+				<h2>1. Define a new capability or extension</h2>
+				<p></p>
+				<p>The new capability is just declared in the Manifest file of the application and that's it. Then when the application is installed on the device, the joyn service in background will detect it and will automatically share this new capability with joyn contacts of your Address Book.</p>						
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;activity android:name=</span><span class="java5">&#34;.SendPopup&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.capability.EXTENSION&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/mnc01.mcc208.popup&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt; <br />
+						&lt;/activity&gt;<br />
+						<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Display contacts supporting the Popup service</h2>
+				<p></p>
+				<p>We want to display contacts from the device Address Book supporting the Popup service and which are online in order to interract with them immediately. By using the Contact API, there are directly methods to find joyn contacts for a given capability :</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java">
+						</span><span class="java3">// Service ID for the service<br />
+						</span><span class="java4">public static final </span><span class="java10">String SERVICE_ID = </span><span class="java5">&#34;mnc01.mcc208.popup&#34;</span><span class="java10">;<br />
+						<br />
+						Set&lt;JoynContact&gt; supportedContacts = contactsApi.getJoynContactsSupporting</span><span class="java8">(</span><span class="java10">PopupManager.SERVICE_ID</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java4">for </span><span class="java8">(</span><span class="java10">JoynContact contact : supportedContacts</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java4">if </span><span class="java8">(</span><span class="java10">contact.isRegistered</span><span class="java8">()) {<br />
+						&#xA0;&#xA0; </span><span class="java10">Log.d</span><span class="java8">(</span><span class="java10">TAG, </span><span class="java5">&#34;Add online contact &#34; </span><span class="java10">+ contact.getContactId</span><span class="java8">())</span><span class="java10">;<br />
+						&#xA0;&#xA0; items.add</span><span class="java8">(</span><span class="java4">new </span><span class="java10">ContactItem</span><span class="java8">(</span><span class="java10">contact.getContactId</span><span class="java8">()))</span><span class="java10">;<br />
+						&#xA0; </span><span class="java8">}<br />
+						}</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>In general a joyn application first displays the list of contacts from its local database and then executes a capability refresh in background in order to update capabilities and availability of contacts.</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// Refresh capability task<br />
+						</span><span class="java4">private class </span><span class="java10">RefreshCapabilitiesAsyncTask </span><span class="java4">extends </span><span class="java10">AsyncTask&lt;Void, Void, Void&gt; </span><span class="java8">{<br />
+						<br />
+						</span><span class="java16">@Override<br />
+						</span><span class="java4">protected </span><span class="java9">void </span><span class="java10">onPreExecute</span><span class="java8">() {<br />
+						&#xA0; </span><span class="java4">super</span><span class="java10">.onPreExecute</span><span class="java8">()</span><span class="java10">;<br />
+						</span><span class="java8">}<br />
+						<br />
+						</span><span class="java16">@Override<br />
+						</span><span class="java4">protected </span><span class="java10">Void doInBackground</span><span class="java8">(</span><span class="java10">Void... params</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java10">Set&lt;JoynContact&gt; rcsContacts = contactsApi.getJoynContacts</span><span class="java8">()</span><span class="java10">;<br />
+						&#xA0; </span><span class="java4">for </span><span class="java8">(</span><span class="java10">JoynContact contact : rcsContacts</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java10">capabilityApi.requestContactCapabilities</span><span class="java8">(</span><span class="java10">contact.getContactId</span><span class="java8">())</span><span class="java10">;<br />
+						&#xA0; </span><span class="java8">}<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; </span><span class="java4">return null</span><span class="java10">;<br />
+						</span><span class="java8">}<br />
+						<br />
+						</span><span class="java16">@Override<br />
+						</span><span class="java4">protected </span><span class="java9">void </span><span class="java10">onPostExecute</span><span class="java8">(</span><span class="java10">Void result</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java4">super</span><span class="java10">.onPostExecute</span><span class="java8">(</span><span class="java10">result</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java8">}<br />
+						}<br />
+						<br />
+						</span><span class="java10">...<br />
+						</span><span class="java3">// Then use the CapabilitiesListener to receive the result and to update the list of contacts</span>
+					</tt>
+				</div>
+				</br>
+				<p></p>				
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>3. Define a protocol to implement your new service</h2>
+				<p></p>
+				<p>Here we just want to send an instant message or a popup, so there is no session lasting over time. In this case the best practice is to use the method <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/MultimediaSessionService.html#sendMessage(java.lang.String, java.lang.String, java.lang.String, java.lang.String)">MultimediaSessionService.sendMessage</a> which permits to send a SIP MESSAGE to the joyn network :</p>						
+				<p></p>
+				<div style="width:600px;margin:auto">
+					<img src="{@docRoot}assets-sdk/images/popup_sample_3.png" width="100%"/>
+				</div>
+				<p></p>
+				<p>Then we should also define the format used to transfer the Popup information (text message, TTS option and animation). Here we have decided to use an XML format as the follows :</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java5">&#34;&lt;?xml version=\&#34;1.0\&#34; encoding=\&#34;UTF-8\&#34;?&gt;&#34; </span><span class="java10">+ CRLF +<br />
+						</span><span class="java5">&#34;&lt;popup&gt;&#34; </span><span class="java10">+ CRLF +&#xA0;&#xA0;&#xA0; <br />
+						</span><span class="java5">&#34;&lt;message&gt;&#34; </span><span class="java10">+ message + </span><span class="java5">&#34;&lt;/message&gt;&#34; </span><span class="java10">+ CRLF&#xA0; +<br />
+						</span><span class="java5">&#34;&lt;animation&gt;&#34; </span><span class="java10">+ animation + </span><span class="java5">&#34;&lt;/animation&gt;&#34; </span><span class="java10">+ CRLF +<br />
+						</span><span class="java5">&#34;&lt;timeout&gt;&#34; </span><span class="java10">+ DateUtils.encodeDate</span><span class="java8">(</span><span class="java10">System.currentTimeMillis</span><span class="java8">()) </span><span class="java10">+ </span><span class="java5">&#34;&lt;/timeout&gt;&#34; </span><span class="java10">+ CRLF +<br />
+						</span><span class="java5">&#34;&lt;tts&gt;&#34; </span><span class="java10">+ Boolean.toString</span><span class="java8">(</span><span class="java10">tts</span><span class="java8">) </span><span class="java10">+ </span><span class="java5">&#34;&lt;/tts&gt;&#34; </span><span class="java10">+ CRLF +<br />
+						</span><span class="java5">&#34;&lt;/popup&gt;&#34;</span><span class="java10">;</span>
+					</tt>
+				</div>
+				</br>
+				<p></p>			
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>4. Implement the sender side (see class SendPopup)</h2>
+				<p></p>
+				<p>The end user should select 1 or more contacts from the list of joyn contacts displayed in step 2. Then we use the Multimedia Session API to send the selected Popup to each contact sequentially.</p>						
+				<p></p>				
+				<div class="code-block">
+					<tt class="java"><span class="java4">for</span><span class="java8">(</span><span class="java9">int </span><span class="java10">i=</span><span class="java7">0</span><span class="java10">; i &lt; selectedContacts.size</span><span class="java8">()</span><span class="java10">; i++</span><span class="java8">) {<br />
+						&#xA0; </span><span class="java10">...<br />
+						&#xA0; ContactItem contact = selectedContacts.get</span><span class="java8">(</span><span class="java10">i</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; </span><span class="java9">boolean </span><span class="java10">result = sessionApi.sendMessage</span><span class="java8">(<span class="java10">PopupManager.SERVICE_ID,<br />
+						&#xA0;&#xA0;&#xA0; contact.number,<br />
+						&#xA0;&#xA0;&#xA0; PopupManager.generatePopup</span><span class="java8">(</span><span class="java10">message, animation, tts</span><span class="java8">)</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; ...<br />
+						</span><span class="java8">}</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>The static PopupManager.<span style="color:blue">SERVICE_ID</span> contains the capability extension defined in step 1.</p>		
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>5. Implement the receiver side (see class PopupReceiver)</h2>
+				<p></p>
+				<p>An incoming Popup is catched via the Intent MultimediaMessageIntent. See the following Intent receiver defined in the Manisfest file :</p>						
+				<p></p>				
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.PopupReceiver&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.session.action.NEW_MESSAGE&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;data android:mimeType=</span><span class="java5">&#34;com.gsma.services.rcs/orange.popup&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;category android:name=</span><span class="java5">&#34;android.intent.category.LAUNCHER&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; category android:name=</span><span class="java5">&#34;android.intent.category.DEFAULT&#34; </span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt;<br />
+						&lt;/receiver&gt;</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>Then the XML content received in the incoming Intent is parsed and the Popup is displayed in over-the-top :</p>
+				<p></p>				
+				<div class="code-block">
+					<tt class="java"><span class="java3">// Parse received popup<br />
+						</span><span class="java10">String content = getIntent</span><span class="java8">()</span><span class="java10">.getStringExtra</span><span class="java8">(</span><span class="java5">&#34;content&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						InputSource input = </span><span class="java4">new </span><span class="java10">InputSource</span><span class="java8">(</span><span class="java4">new </span><span class="java10">ByteArrayInputStream</span><span class="java8">(</span><span class="java10">content.getBytes</span><span class="java8">()))</span><span class="java10">;<br />
+						PopupParser parser = </span><span class="java4">new </span><span class="java10">PopupParser</span><span class="java8">(</span><span class="java10">input</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Display message<br />
+						</span><span class="java10">String remote = getIntent</span><span class="java8">()</span><span class="java10">.getStringExtra</span><span class="java8">(</span><span class="java5">&#34;contact&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						String txt = parser.getMessage</span><span class="java8">()</span><span class="java10">;<br />
+						String msg = getString</span><span class="java8">(</span><span class="java10">R.string.label_remote, remote</span><span class="java8">) </span><span class="java10">+ </span><span class="java5">&#34;\n&#34; </span><span class="java10">+ txt;<br />
+						TextView msgView = </span><span class="java8">(</span><span class="java10">TextView</span><span class="java8">)</span><span class="java10">findViewById</span><span class="java8">(</span><span class="java10">R.id.message</span><span class="java8">)</span><span class="java10">;<br />
+						msgView.setText</span><span class="java8">(</span><span class="java10">msg</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Play TTS<br />
+						</span><span class="java4">if </span><span class="java8">(</span><span class="java10">parser.isTTS</span><span class="java8">() </span><span class="java10">&amp;&amp; !TextUtils.isEmpty</span><span class="java8">(</span><span class="java10">txt</span><span class="java8">)) {<br />
+						&#xA0; </span><span class="java10">Intent ttsIntent = </span><span class="java4">new </span><span class="java10">Intent</span><span class="java8">(</span><span class="java10">getApplicationContext</span><span class="java8">()</span><span class="java10">, PlayTTS.</span><span class="java4">class</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; ttsIntent.putExtra</span><span class="java8">(</span><span class="java5">&#34;message&#34;</span><span class="java10">, txt</span><span class="java8">)</span><span class="java10">;<br />
+						&#xA0; startService</span><span class="java8">(</span><span class="java10">ttsIntent</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java8">}<br />
+						<br />
+						</span><span class="java3">// Make a vibration<br />
+						</span><span class="java10">Vibrator vibrator = </span><span class="java8">(</span><span class="java10">Vibrator</span><span class="java8">)</span><span class="java10">getSystemService</span><span class="java8">(</span><span class="java10">Context.VIBRATOR_SERVICE</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java9">long</span><span class="java8">[] </span><span class="java10">pattern = </span><span class="java8">{</span><span class="java7">500L</span><span class="java10">, </span><span class="java7">200L</span><span class="java10">, </span><span class="java7">500L</span><span class="java8">}</span><span class="java10">;<br />
+						vibrator.vibrate</span><span class="java8">(</span><span class="java10">pattern, -</span><span class="java7">1</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Display animation<br />
+						</span><span class="java10">ImageView imageView = </span><span class="java8">(</span><span class="java10">ImageView</span><span class="java8">)</span><span class="java10">findViewById</span><span class="java8">(</span><span class="java10">R.id.picture</span><span class="java8">)</span><span class="java10">;<br />
+						imageView.setClickable</span><span class="java8">(</span><span class="java4">true</span><span class="java8">)</span><span class="java10">;<br />
+						imageView.setFocusable</span><span class="java8">(</span><span class="java4">true</span><span class="java8">)</span><span class="java10">;<br />
+						imageView.setOnClickListener</span><span class="java8">(</span><span class="java4">this</span><span class="java8">)</span><span class="java10">;<br />
+						String animation = parser.getAnimation</span><span class="java8">()</span><span class="java10">;<br />
+						InputStream stream = getResources</span><span class="java8">()</span><span class="java10">.getAssets</span><span class="java8">()</span><span class="java10">.open</span><span class="java8">(</span><span class="java10">animation.toLowerCase</span><span class="java8">() </span><span class="java10">+ </span><span class="java5">&#34;.png&#34;</span><span class="java8">)</span><span class="java10">;<br />
+						Drawable d = Drawable.createFromStream</span><span class="java8">(</span><span class="java10">stream, </span><span class="java4">null</span><span class="java8">)</span><span class="java10">;<br />
+						imageView.setImageDrawable</span><span class="java8">(</span><span class="java10">d</span><span class="java8">)</span><span class="java10">;<br />
+						<br />
+						</span><span class="java3">// Play animation<br />
+						</span><span class="java10">Animation hyperspaceJumpAnimation = AnimationUtils.loadAnimation</span><span class="java8">(</span><span class="java10">this, R.anim.zoom</span><span class="java8">)</span><span class="java10">;<br />
+						imageView.startAnimation</span><span class="java8">(</span><span class="java10">hyperspaceJumpAnimation</span><span class="java8">)</span><span class="java10">;</span>
+					</tt>
+				</div>
+				<p></p>
+				<div style="width:59px;height:63px;">
+					<img src="{@docRoot}assets-sdk/images/popup_sample_4.png" width="100%"/>
+				</div>
+				<p></p>
+				<p>See the complete source code of the application <a target="_blank" href="https://code.google.com/p/rcsjta/source/browse/#git%2Fsamples%2Fpopup">here</a>.</p>
+				<p></p>
+			</div>
+			</br>
+		</div>
+	</div>
+</div>

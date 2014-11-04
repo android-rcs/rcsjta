@@ -1,0 +1,105 @@
+page.title=Home
+home=true
+@jd:body
+<script type="text/javascript">
+    $('.slideshow-container').dacSlideshow({
+        auto: true,
+        btnPrev: '.slideshow-prev',
+        btnNext: '.slideshow-next'
+    });
+</script>
+<div class="background-sdk">
+
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">	
+			<div style="display:inline-block">
+				<div style="display:inline-block;float:left;"><h1 style="border:0;">Applications demonstrating joyn APIs</h1></div>
+				<a  class="dl-btn" href="{@docRoot}index.html">Home</a>
+			</div>
+			<div id="mycarousel" class="jcarousel-skin-tango">	
+				<div class="jcarousel-control" >					
+					<ul >	
+
+						<li>
+							<h2 class="demo-title">Chat Application</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k2EOEbeoEPZ87k3SqZZ" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This chat application demonstrates instant messaging and file transfer using joyn APIs.</br></br>Take a look at the <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">chat API</a> documentation and see how you can further enhance your instant messaging experience.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Deezer App</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k65awxJFmFbghS3SoSq" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This application demonstrates how you can integrate share functionalities with your existing application.</br></br> Using joyn <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> you can send custom messages to any of your contacts.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Popup Application</h2>
+							<iframe frameborder="0" width="160" height="90" src="//www.dailymotion.com/embed/video/k5YBvROqkbZH0O3Sp38" class="video-frame-carousel"></iframe>
+							<div class="demo-text">This applications shows how to use real time messaging in a fun and useful way.</br></br>Popup application uses <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> custom messaging to send text and image so you never miss that coffee break you've been waiting for.</div>
+						</li>
+						<li>
+							<h2 class="demo-title">Whiteboard App</h2>
+							<iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x15d0cz" class="video-frame-carousel"></iframe>
+							<div class="demo-text">Whiteboard application demonstrates real time communications with joyn APIs.</br></br>Make cooperative drawings with contacts from your address book using <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a>.</div>
+						</li>
+
+						<li>
+							<h2 class="demo-title">LiveSharing App</h2>
+							<iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x15d0aj" class="video-frame-carousel"></iframe>
+							<div class="demo-text">Live browsing shows how you can share your browsing experience in real time with one of your contacts.</br></br>Using <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a> browser events are sent in real time to your contacts and replicated on their application.</div>
+						</li>						
+					</ul>
+					<a href="#" class="slide-btn left" id="1"><div></div></a>
+					<a href="#" class="slide-btn" id="2"><div></div></a>
+					<a href="#" class="slide-btn" id="3"><div></div></a>
+					<a href="#" class="slide-btn" id="4"><div></div></a>
+					<a href="#" class="slide-btn right" id="5"><div></div></a>
+				</div>
+			</div>
+		</div>
+		</br>
+		
+		<div class="content-body " style="display:inline-block;margin:30px 5%;width:90%">
+			<div class="demo_box" style="float:left">
+				<div>
+					<p><b><a href="{@docRoot}getStarted.html">Get Started</a></b></p>
+				</div>	
+				<div>
+					<p>Learn how to get joyn up and running on an Android device.
+					</p>
+				</div>
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="https://rcsjta.googlecode.com/git/joyn-sdk-{@sdkCurrentVersion}.zip">Get latest SDK</a></b></p>
+				</div>
+				<div>
+					<p>
+						The latest version is {@sdkCurrentVersion}	</br>				
+						<a style="color:#006699;text-decoration:underline;font-size:14px"href="{@docRoot}releases/joyn-sdk-{@sdkCurrentVersion}.txt">release note</a>.
+					</p>	
+					
+				</div>	
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="{@docRoot}javadoc/index.html">SDK Reference</a></b></p>
+				</div>
+				<div>
+					<p>
+						Full documentation for joyn terminal APIs.
+					</p>
+					
+				</div>	
+			</div>
+			<div  style="float:right" class="demo_box">
+				<div>
+					<p><b><a href="{@docRoot}concepts.html">Concepts</a></b></p>
+				</div>
+				<div>
+					<p>
+					Discover the concepts used in the joyn APIs.
+					</p>
+				</div>	
+			</div>
+		</div>
+	</div>	
+</div>	

@@ -1,0 +1,160 @@
+page.title=Home
+home=true
+@jd:body
+<script type="text/javascript">
+    $('.slideshow-container').dacSlideshow({
+        auto: true,
+        btnPrev: '.slideshow-prev',
+        btnNext: '.slideshow-next'
+    });
+</script>
+<div class="background-sdk">
+
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">	
+			<div style="display:inline-block;"">
+				<div style="display:inline-block;float:left;"><h1 style="border:0;">Welcome to the joyn SDK for Android terminals</h1></div>
+				<a  class="dl-btn" href="{@docRoot}demos.html">Demos</a>
+			</div>
+			<div id="mycarousel" class="jcarousel-skin-tango">	
+				<div class="jcarousel-control" >					
+					<ul >
+						<li >
+							<span>				
+								<img src="{@docRoot}assets-sdk/images/app_icon.png" height="30" width="33" style="float:left;margin-top: 0px;margin-right: 5px;"/>
+								<p><span style="text-decoration:underline"><a target="_blank" href="http://www.joynus.com/" style="color:#333">joyn™</a></span> is a certification trade mark of the GSMA (GSM Association) for RCS (Rich Communication Suite) which is an industry standard that is being adopted across the world by mobile operators. RCS is a set of new communication services to improve traditional communications with real times services.</p>
+								<p>This SDK offers the first implementation of the joyn API which is under standardization with <a style="text-decoration:underline" href="http://www.gsma.com/rcs">GSMA</a> and where Orange is the main contributor with several OEMs (Samsung, Qualcomm, Ericsson, Sony, HTC ...).</p>
+								<div style="margin-bottom: 3%;">
+									<iframe width="336" height="189" class="video-frame" src="//www.youtube.com/embed/fu1XFZ2rqiM" frameborder="0" allowfullscreen></iframe>
+								</div>
+								<p><b>Enhance your app with joyn rich communication APIs. </b>joyn APIs leverage the device address book to encourage social recommendation from your phone numbers ; provide <b>rich messaging</b> with chat, file transfer and group chat ; provide <b>rich call</b> experience with image and live video sharing during voice calls ; share your <b>geolocation</b> with your contacts; and offer the possibility to <b>create your new joyn services</b>.</p>
+							</span>
+						</li>		
+						<li >
+							<span>	
+								<p><h2>Capabilities discovery</h2></p>
+								<p>Discover which services are supported by your contacts before do use them.</p>
+								<img class="home-img" src="{@docRoot}assets-sdk/images/home-capa.png"/>
+								<p style="margin:75px 20px 0 0;">
+									When installing a joyn application on a device, a contact gains the capabilities associated with the application. joyn APIs provide you with the capabilities associated with each contact of your native address book. 
+									</br>
+									</br>								
+									Of course you can discover the core capabilities of joyn (chat, file transfer, .etc), but you can also declare and exchange new capabilities. 
+									</br>
+									</br>								
+									Have a look at the <a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability API</a> to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>		
+						<li >
+							<span>	
+								<p><h2>Rich messaging</h2></p>
+								<p>Add the real time instant messaging experience in your application.</p>
+								<img class="home-img" src="{@docRoot}assets-sdk/images/home-rm.png"/>
+								<p style="margin:105px 20px 0 0;">
+									May it be point-to-point or group conversations, sending messages (text or geoloc) with delivery reports and transfering files in real time to one or several contacts.
+									</br>
+									</br>								
+									Adding messaging features to games, social media or any application is simplified. 
+									</br>
+									</br>
+									Have a look at the <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat API</a> and <a href="{@docRoot}javadoc/com/gsma/services/rcs/ft/package-summary.html">File transfer API</a> to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>	
+						<li >
+							<span>	
+								<p><h2>Rich call</h2></p>
+								<p>Share in real time images, videos and locations during your phone calls.</p>
+								<img class="home-img" src="{@docRoot}assets-sdk/images/home-share.png"/>
+								<p style="margin:105px 20px 0 0;">
+									With joyn APIs it is possible to share images, live videos and geolocations during a phone call. Take a live photo or film your favourite event, share it in real time and continue to comment it by phone.
+									</br>
+									</br>
+									Have a look at the <a href="{@docRoot}javadoc/com/gsma/services/rcs/ish/package-summary.html">Image sharing API</a>, <a href="{@docRoot}javadoc/com/gsma/services/rcs/vsh/package-summary.html">Video sharing API</a> and <a href="{@docRoot}javadoc/com/gsma/services/rcs/gsh/package-summary.html">Geoloc sharing API</a> to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>
+						<li >
+							<span>	
+								<p><h2>Geolocalisation</h2></p>
+								<p>Share your geolocation with your contacts.</p>
+								<img class="home-img" src="{@docRoot}assets-sdk/images/home-geo.png"/>
+								<p style="margin:105px 20px 0 0;">
+									Share your geolocation with your contacts via a chat or during a rich call.
+									</br>
+									</br>
+									Have a look at the <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat API</a> and <a href="{@docRoot}javadoc/com/gsma/services/rcs/gsh/package-summary.html">Geoloc sharing API</a> to see how to implement these features in your application.
+								</p>
+							</span>
+						</li>		
+						<li >
+							<span>	
+								<p><h2>New multimedia services</h2></p>
+								<p>With the Multimedia Session API concept you can create new joyn services from your application. The API offers the way to initiate the new communication channel between contacts, then it's up to the application to implement the media corresponding to its service (gaming, music, video, ..., any data).
+								<img class="home-img" src="{@docRoot}assets-sdk/images/home-multi.png"/>
+								<p style="margin:105px 20px 0 0;">
+									</br>
+									</br>
+									Have a look at our dedicated <a href="{@docRoot}/tutorials/multiApp.html">tutorial</a> to better grasp the potential of the <a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">Multimedia Session API</a>.</p>
+								</p>
+							</span>
+						</li>	
+					</ul>
+					<a href="#" class="slide-btn" id="1"><div style="margin-left:285px"></div></a>
+					<a href="#" class="slide-btn" id="2"><div></div></a>
+					<a href="#" class="slide-btn" id="3"><div></div></a>
+					<a href="#" class="slide-btn" id="4"><div></div></a>
+					<a href="#" class="slide-btn" id="5"><div></div></a>
+					<a href="#" class="slide-btn right" id="6"><div></div></a>
+				</div>
+			</div>
+		</div>
+		</br>
+		
+		<div class="content-body " style="display:inline-block;margin:30px 5%;width:90%">
+			<div class="demo_box" style="float:left">
+				<div>
+					<p><b><a href="{@docRoot}getStarted.html">Get Started</a></b></p>
+				</div>	
+				<div>
+					<p>Learn how to get joyn up and running on an Android device.
+					</p>
+				</div>
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="https://rcsjta.googlecode.com/git/joyn-sdk-{@sdkCurrentVersion}.zip">Get latest SDK</a></b></p>
+				</div>
+				<div>
+					<p>
+						The latest version is {@sdkCurrentVersion}	</br>				
+						<a style="color:#006699;text-decoration:underline;font-size:14px"href="{@docRoot}releases/joyn-sdk-{@sdkCurrentVersion}.txt">release note</a>.
+					</p>	
+					
+				</div>	
+			</div>
+			<div class="demo_box" style="float:right">
+				<div>
+					<p><b><a href="{@docRoot}javadoc/index.html">SDK Reference</a></b></p>
+				</div>
+				<div>
+					<p>
+						Full documentation for joyn terminal APIs.
+					</p>
+					
+				</div>	
+			</div>
+			<div  style="float:right" class="demo_box">
+				<div>
+					<p><b><a href="{@docRoot}concepts.html">Concepts</a></b></p>
+				</div>
+				<div>
+					<p>
+					Discover the concepts used in the joyn APIs.
+					</p>
+				</div>	
+			</div>
+		</div>
+	</div>	
+</div>	

@@ -1,0 +1,28 @@
+page.title=API version Blackbird
+doc.type=apilevel
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+		<p><h1>API version Blackbird</h1></p>
+		<span><p>joyn Blackbird is based on RCS 5.0 and 5.1 specifications which include the RCS-e 1.2.2 specification, the Hot Fixes Implementation Guidelines 3.0 and the Hot Fixes UX Guidelines 2.2.</p></span>
+		<span><p>Blackbird release introduces the following new features:</p></span>
+		<ul>	
+			<li>
+				<span>Geolocation (send geoloc, show us in a map, geolocation sharing during a call).</span>	
+			</li>
+			<li>
+				<span>File transfer enhancements (vCard, thumbnail, delivery report, pause & resume, file to group).</span>		
+			</li>
+			<li>
+				<span>IP voice & video call.</span>	
+			</li>	
+			<li>
+				<span>Video sharing orientation management.</span>	
+			</li>
+		</ul>
+		<span><p>See <a href="http://www.gsma.com/rcs/joyn-blackbird-pdd" target="_blank">Product specification</a></p></span>
+
+		</div>
+	</div>
+</div>

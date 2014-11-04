@@ -1,0 +1,122 @@
+page.title=Get to know joyn services via the RI application
+doc.type=tools
+@jd:body
+<div class="background-sdk">
+<script type="text/javascript">
+    $('.slideshow-container').dacSlideshow({
+        auto: true,
+        btnPrev: '.slideshow-prev',
+        btnNext: '.slideshow-next'
+    });
+    </script>
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Get to know joyn services via the RI application</h1></p>
+			<p><span>The RI application will help you get a quick view of the different functionalities joyn APIs offer.</span></p>
+			<p><span>The RI application uses the joyn APIs and offers a basic UI to test the joyn features.</span></p>
+			<p><span>To install the RI, connect your device via USB. Make sure that USB debugging is active. Then use the following command:</span></p>
+			<p><span><code style="background-color:#e1e1e1;">adb install &lt;SDK&gt;\tools\joyn-RI.apk</code></span> </p>
+		</div>
+		
+		<div class="content-body center">
+			<div id="mycarousel" class="jcarousel-skin-tango">	
+				<div class="jcarousel-control" >
+					<a href="#" class="slide-btn left" id="1"><div></div></a>
+					<a href="#" class="slide-btn" id="2"><div></div></a>
+					<a href="#" class="slide-btn" id="3"><div></div></a>
+					<a href="#" class="slide-btn" id="4"><div></div></a>
+					<a href="#" class="slide-btn" id="5"><div></div></a>
+					<a href="#" class="slide-btn" id="6"><div></div></a>
+					<a href="#" class="slide-btn" id="7"><div></div></a>
+					<a href="#" class="slide-btn" id="8"><div></div></a>
+					<a href="#" class="slide-btn right" id="9"><div></div></a>
+					<ul >
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_home.png">
+							</div>
+							<div class="content-right">
+								<h1>Home View</h1>
+								<p>Choose among the different features to try out joyn services.</p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_contacts.png">
+							</div>
+							<div class="content-right">
+								<h1>Contacts</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/contacts/package-summary.html">Contacts API</a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_capabilities.png">
+							</div>
+							<div class="content-right">
+								<h1>Capabilities</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/capability/package-summary.html">Capability API</a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_chat.png">
+							</div>
+							<div class="content-right">
+								<h1>Chat</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/package-summary.html">Chat API</a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_ft.png">
+							</div>
+							<div class="content-right">
+								<h1>File Transfer</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/ft/package-summary.html">File transfer API</a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_ish.png">
+							</div>
+							<div class="content-right">
+								<h1>Image Sharing</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/ish/package-summary.html">Image sharing API </a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_vsh.png">
+							</div>
+							<div class="content-right">
+								<h1>Video Sharing</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/vsh/package-summary.html">Video sharing API</a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_multi.png">
+							</div>
+							<div class="content-right">
+								<h1>Multimedia Session</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/session/package-summary.html">MultiMedia session API </a></p>
+							</div>
+						</li>
+						<li >
+							<div class="content-left" >
+								<img width="100%" src="{@docRoot}assets-sdk/images/RI_intents.png">
+							</div>
+							<div class="content-right">
+								<h1>Intents</h1>
+								<p><a href="{@docRoot}javadoc/com/gsma/services/rcs/Intents.html">Intents API</a></p>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+			</br>
+			</br>
+		</div>	
+	</div>
+</div>

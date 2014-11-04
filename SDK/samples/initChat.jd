@@ -1,0 +1,103 @@
+page.title=How to initialise a chat
+doc.type=samples
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>How to initialise a chat</h1></p>
+			<p><span>The <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatService.html" >Chat service API</a> offers all the features in order to manage single chat conversations and group chat conferences between joyn contacts.</span></p>
+			<p><span>To initiate a chat conversation see the following steps :</span></p>
+		
+		</div>
+		<div class="content-body center">
+			<div class="guide-block">
+				<h2>1. Connect to the chat service API</h2>
+				<p></p>
+				<p>See <a href="{@docRoot}samples/connectService.html">How to connect to a joyn service</a>.</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>2. Check if the service is connected to the joyn platform</h2>
+				<p></p>
+				<p>Before initiating a chat you should check if the service platform is properly available : use the method <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatService.html#isServiceRegistered()">isServiceRegistered</a> from the service API in order to get the last registration state which indicates if the device is registered on the joyn platform.</p>
+				<p>If the joyn platform is not available you can redirect the end user to classic services like SMS/MMS.</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>3. Identify contacts supporting the chat service</h2>
+				<p></p>
+				<p>All joyn contacts support the chat service because this is a mandatory service. So it’s not necessary to check the capabilities.</p>
+				<p></p>
+			</div>
+			</br>
+			<div class="guide-block">
+				<h2>4. Initiate a single chat conversation</h2>
+				<p></p>
+				<p>To initiate a chat conversation you just need to use the method <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatService.html#openSingleChat(java.lang.String, com.gsma.services.rcs.chat.ChatListener)">openSingleChat</a> from the API, by passing the remote contact (ie. phone number) as parameter and also a listener on the chat events. The method will return a <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/Chat.html">Chat</a> object of the corresponding conversation.. The chat session is really established after sending a first message.</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// Open chat<br />
+						</span><span class="java10">Chat chat = chatApi.openSingleChat</span><span class="java8">(</span><span class="java10">contact, chatListener</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java10">chat.sendMessage("Bla bla bla");</span><span class="java10">;<br />
+						<br />
+						</span><span class="java14">/**<br />
+						 * Chat event listener<br />
+						 */<br />
+						</span><span class="java4">private class </span><span class="java10">MyChatListener </span><span class="java4">extends </span><span class="java10">ChatListener </span><span class="java8">{<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a new message has been received<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewMessage</span><span class="java8">(</span><span class="java4">final </span><span class="java10">ChatMessage message</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a new geoloc has been received<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onNewGeoloc</span><span class="java8">(</span><span class="java4">final </span><span class="java10">GeolocMessage message</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a message has been delivered to the remote<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onReportMessageDelivered</span><span class="java8">(</span><span class="java10">String msgId</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a message has been displayed by the remote<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onReportMessageDisplayed</span><span class="java8">(</span><span class="java10">String msgId</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when a message has failed to be delivered to the remote<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onReportMessageFailed</span><span class="java8">(</span><span class="java10">String msgId</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						<br />
+						&#xA0;&#xA0; </span><span class="java3">// Callback called when an Is-composing event has been received<br />
+						&#xA0;&#xA0; </span><span class="java4">public </span><span class="java9">void </span><span class="java10">onComposingEvent</span><span class="java8">(</span><span class="java4">final </span><span class="java9">boolean </span><span class="java10">status</span><span class="java8">) {<br />
+						&#xA0;&#xA0; }<br />
+						}<br />
+						</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>When leaving the chat conversation you should remove the listeners:</p>
+				<p></p>
+				<div class="code-block">
+					<tt class="java"><span class="java3">// Remove listener<br />
+						</span><span class="java4">if </span><span class="java8">(</span><span class="java10">chat != </span><span class="java4">null</span><span class="java8">) {<br />
+						&#xA0;&#xA0; </span><span class="java10">chat.removeEventListener</span><span class="java8">(</span><span class="java10">chatListener</span><span class="java8">)</span><span class="java10">;<br />
+						</span><span class="java8">}</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>In the terminating side, a new chat conversation is received via an Intent :</p>
+				<div class="code-block">
+					<tt class="java"><span class="java10">&lt;receiver android:name=</span><span class="java5">&#34;.messaging.chat.SingleChatInvitationReceiver&#34;</span><span class="java10">&gt;<br />
+						&#xA0; &lt;intent-filter&gt;<br />
+						&#xA0; &lt;action android:name=</span><span class="java5">&#34;com.gsma.services.rcs.chat.action.NEW_CHAT&#34;</span><span class="java10">/&gt;<br />
+						&#xA0; &lt;/intent-filter&gt;<br />
+						&lt;/receiver&gt;</span>
+					</tt>
+				</div>
+				<p></p>
+				<p>Then like on the originating side, you just have to use the method <a href="{@docRoot}javadoc/com/gsma/services/rcs/chat/ChatService.html#openSingleChat(java.lang.String, com.gsma.services.rcs.chat.ChatListener)">openSingleChat</a> from the API to get a <a href="{@docRoot}javadoc/javadoc/com/gsma/services/rcs/chat/Chat.html">Chat</a> object of the corresponding conversation.</p>
+				<p></p>
+			</div>
+			</br>
+		</div>
+	</div>
+</div>

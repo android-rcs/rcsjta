@@ -1,0 +1,14 @@
+page.title=Support
+doc.type=faq
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;">
+		<div class="intro center">
+			<p><h1>Support</h1></p>
+			<p><span><h2>Report a Bug</h2></span></p>
+			<p><span>Use the <a target="_blank" href="https://code.google.com/p/rcsjta/issues/list">online tracker</a> to report a bug or to find a bug related to the joyn API.</span></p>
+			<p><span><h2>Ask for Help</h2></span></p>
+			<p><span>If the online tracker is not sufficient and if you have any questions related to the joyn API don't hesitate to <a href="mailto:jeanmarc.auffret@orange.com">contact</a> us.</span></p>
+		</div> 
+	</div> 
+</div> 

@@ -1,0 +1,45 @@
+page.title=Downloads
+doc.type=download
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="min-height:700px;background-repeat: no-repeat;background-position: center;background-position-y: bottom;">
+		<div class="intro center" >	
+			<p><h1>Downloads</h1></p>
+			<p><span>The SDK is delivered as a ZIP file which may be deployed anywhere in a local directory on your PC.</span></p>
+			<p></p>
+			<p><span>The SDK contains:</span></p>
+			<p></p>
+			<ul>
+				<li>
+					<p><span>A complete Javadoc.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Source code samples.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Tutorials.</span></p>
+				</li>
+				
+				<li>
+					<p><span>Tools: a standalone RCS service if your device is not natively joyn compliant, a Reference Implementation (RI) which allows you to test the joyn features.</span></p>
+				</li>
+				
+				<li>
+					<p><span>The joyn API library: this is the JAR file which allows you to implement your joyn app.</span></p>
+				</li>
+			</ul>
+			<p></p>
+			<p><span>Download the latest SDK release from here:</span></p>
+			<p><span style="margin-left:30px"><a href="https://rcsjta.googlecode.com/git/joyn-sdk-{@sdkCurrentVersion}.zip">joyn SDK {@sdkCurrentVersion}</a><span style="margin-left:30px"><a href="{@docRoot}releases/joyn-sdk-{@sdkCurrentVersion}.txt">README</a></span></p>
+		</div>
+		
+				
+				
+			
+		<div class="content-body center">
+			
+		</div>
+	</div>
+</div>

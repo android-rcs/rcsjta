@@ -1,0 +1,29 @@
+page.title=Tools
+doc.type=tools
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="height:700px;">
+		<div class="intro center">
+			<p><h1>Tools</h1></p>
+			<p><span>This section regroups a number of specific tools that can help you with your application development.</span></p>
+		</div>
+		<div class="content-body center">
+			<ul class="list clickable">
+				<li>
+					<div>
+						<a href="{@docRoot}tools/installJoynServices.html"><span class="item-link"></span><h2 >Standalone joyn service</h2></a>
+						<p>If your device is not natively joyn compliant, you should deploy a standalone joyn service on your device before using the joyn APIs from applications.</p>
+						<p>You will find a step by step explanation on how to accomplish this in our dedicated <a style="text-decoration:underline;z-index:2;position:relative;" href="{@docRoot}tools/installJoynServices.html">guide</a>.</p>
+					</div>
+				</li>
+				<li>
+					<div>
+						<a href="{@docRoot}tools/getToKnow.html"><span class="item-link"></span><h2>Reference Implementation (RI)</h2></a>
+						<p>The Reference Implementation is an application with a very basic UI which allows you to test the joyn features (chat, file transfer, sharing) step by step. See also the source code of the RI <a target="_blank" style="text-decoration:underline;z-index:2;position:relative;" href="https://code.google.com/p/rcsjta/source/browse/#git%2FRI">here</a>.</p>
+					</div>
+				</li>
+			</ul>
+		</div>
+		
+	</div>
+</div>

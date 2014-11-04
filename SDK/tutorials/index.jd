@@ -1,0 +1,51 @@
+page.title=Tutorials
+doc.type=tutorials
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="height:700px;">
+		<div class="intro center">
+			<p><h1>Tutorials</h1></p>
+			<p><span>Step-by-step explanations helping you master joyn APIs with complete and runnable applications.</span></p>		
+			<p><span>Before starting our tutorials, make sure you are familiar with joyn <a href="{@docRoot}concepts.html">concepts</a> and don't be afraid to check out our <a href="{@docRoot}getStarted.html">Get Started</a> page. See also the API <a href="{@docRoot}javadoc/index.html">Javadoc</a>.</span></p>
+		</div>
+		<div class="content-body center">
+			<ul class="list clickable">
+				<li>					
+					<div class="ok">
+						<a href="{@docRoot}tutorials/ttsApp.html"><span class="item-link"></span>
+							<h2>Text to speech application</h2>
+						</a>
+						<p>This tutorial demonstrates how to build a Text-To-Speech (TTS) application around the joyn chat service. This service permits to play a TTS synthesis on each received chat message.</p>
+					</div>						
+				</li>
+				<li>					
+					<div class="easy">
+						<a href="{@docRoot}tutorials/multiCapability.html"><span class="item-link"></span>
+							<h2>New multimedia capability</h2>
+						</a>
+						<p>This tutorial shows you how to create a new capacity extension enabling you to declare a new supported service for your device.</p>
+					</div>						
+				</li>
+				<li>					
+					<div class="easy">
+						<a href="{@docRoot}tutorials/popUpApp.html"><span class="item-link"></span>
+							<h2>Popup application</h2>
+						</a>
+						<p>This tutorial demonstrates how to build a new multimedia application based on the joyn technology.</p>
+						<p>The idea of the Popup application is to offer a service which allows one to send animated popups to remote joyn contacts having the same application installed on their devices.</p>
+					</div>						
+				</li>
+				
+				<li>					
+					<div class="hard">
+						<a href="{@docRoot}tutorials/multiApp.html"><span class="item-link"></span>
+							<h2>New multimedia application</h2>
+						</a>
+						<p>This tutorial demonstrates how to create a new multimedia service based on the joyn technology. Here the proposed application exchanges text in real-time via a mobile-to-mobile TCP connection.</p>
+					</div>						
+				</li>
+			</ul>
+		</div>
+		
+	</div>
+</div>

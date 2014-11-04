@@ -1,0 +1,121 @@
+page.title=Get Started
+home=true
+@jd:body
+<div class="background-sdk">
+	<div class="content-block" style="background: rgb(249, 249, 249);padding:0;border:0;">
+		<div class="intro center" style="padding: 10px 10%;border: 1px solid #eaeaea;background: #fff;border-bottom:0;margin:0;">
+			<p><h1>Lets get started ...</h1></p>
+			<p><span>The joyn android terminal SDK regroups all the knowledge needed to develop joyn apps. But before getting down to business, let's take some time and make sure you have everything you need to get started in the best of ways.</span></p>
+		</div>
+		<div >
+			<div class="step_header getStarted" style="margin-top: 0;">
+				<p><h2><span class="h_num">1</span>Install and prerequisites</h2></p>
+				<p>Eclipse, Android SDK and ADT</p>
+				<p><a id="show1" onclick="showStep(this,'hide1','step1');">show</a></p>
+				<p><a id="hide1" style="display:none;" onClick="hideStep(this,'show1','step1');">hide</a></p>
+				<div id="step1" class="step_content" style="display:none;">
+					<p>The required version for the Android SDK is at least 2.3 (Gingerbread).</p>
+					<p>There are two ways to install Eclipse, Android SDK and ADT.</p>					
+					<p><h3>Solution 1 : </h3></p>
+					<p>Go to <a target="_blank" href="http://developer.android.com/sdk/index.html">Android Developers website</a> and download the latest version of the ADT bundle for windows. Unzip the bundle and launch Eclipse. Create a new workspace if needed. </p>
+					<p>That's it!<p> 
+					<p><h3>Solution 2 : </h3></p>
+					<p>If you wish to download each component separately or you wish to add ADT plugin to a pre-installed version of Eclipse, follow these steps</p>					
+					<ul>
+						<li>
+							<p>Download the latest version of <a target="_blank" href="http://www.eclipse.org/downloads/">Eclipse</a> </p>
+						</li>
+						<li>
+							<p>Follow the instructions on the <a target="_blank" href="http://developer.android.com/sdk/installing/index.html">Android Developers website</a> 
+						</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">2</span>Install the joyn SDK</h2></p>
+				<p>Download and install the latest joyn SDK on your PC.</p>
+				<p><a id="show2" onclick="showStep(this,'hide2','step2');">show</a></p>
+				<p><a id="hide2" style="display:none;" onClick="hideStep(this,'show2','step2');">hide</a></p>
+				<div id="step2" class="step_content" style="display:none;">
+						<p>You can donwload directly our SDK from <a  href="https://rcsjta.googlecode.com/git/joyn-sdk-{@sdkCurrentVersion}.zip">here</a></p>	
+						<p>You can also visit our <a href="{@docRoot}download/index.html">Downloads</a> page where you will find more information about the latest release and a link to the latest version.</p>
+						<p>Once you have download the ZIP file, all you need to do is Unzip the package to a directory of your choice.
+				</div>
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">3</span>Install and configure the joyn service on your Android terminal</h2></p>
+				<p>Install joyn services and configure stack if not pre-installed on device</p>
+				<p><a id="show3" onclick="showStep(this,'hide3','step3');">show</a></p>
+				<p><a id="hide3" style="display:none;" onClick="hideStep(this,'show3','step3');">hide</a></p>
+				<div id="step3" class="step_content" style="display:none;">
+						<p>If your device is not natively joyn, you must install the standalone joyn services and configure it.</p>
+						<p>You can get the standalone joyn service application from <a href="{@docRoot}tools/joyn-core.apk">here</a>.</p>
+						<p>There is also a dedicated <a href="{@docRoot}tools/installJoynServices.html">guide</a> explaining the installation and configuration of these services.</p>					
+				</div>
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">4</span>Import sample projects</h2></p>
+				<p>Import and configure sample projects</p>
+				<p><a id="show4" onclick="showStep(this,'hide4','step4');">show</a></p>
+				<p><a id="hide4" style="display:none;" onClick="hideStep(this,'show4','step4');">hide</a></p>
+				<div id="step4" class="step_content" style="display:none;">			
+						<p>First open Eclipse IDE.</p>
+						<p>Open the <b>file</b> menu and click <b>import</b>.</p>
+						<div style="width:700px;margin:auto;">
+							<img src="{@docRoot}assets-sdk/images/tuto_sample_1.png" width="100%"/>
+						</div>
+						<p></p>
+						<p>Now click on <b>Android</b>, then select <b>Existing Android Code Into Workspace</b>. Click <b>Next &gt;</b>.</p>
+						<div style="width:350px;margin:auto;">
+							<img src="{@docRoot}assets-sdk/images/tuto_sample_2.png" width="100%"/>
+						</div>
+						<p></p>
+						<p>Click on <b>Browse...</b>, navigate to the directory where you unziped the sdk and select the <b>sample_projects</b> folder.</p>
+						<p>A list of projects present in the folder should appear. You can select all the projects or just one if you wish.</p>
+						
+						<div style="width:450px;margin:auto;">
+							<img src="{@docRoot}assets-sdk/images/tuto_sample_3.png" width="100%"/>
+						</div>
+						<p></p>
+						<p>Select <b>Copy projects into workspace</b> (If the projects are already present under your workspace directory, do not select). </p>
+						<p>Finally, click on <b>Finish</b>.</p>
+						<p>You will have to add the joyn-API JAR to the project's build path (if this is not already the case). You will find the JAR file in the <b>libs</b> folder of the SDK. Copy it to a new folder in your project and add to build path.</p>
+						<p></p>
+				</div>
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">5</span>Run a sample project</h2></p>
+				<p>Try out a joyn sample application on your terminal</p>
+				<p><a id="show5" onclick="showStep(this,'hide5','step5');">show</a></p>
+				<p><a id="hide5" style="display:none;" onClick="hideStep(this,'show5','step5');">hide</a></p>
+				<div id="step5" class="step_content" style="display:none;">					
+						<p>The easiest way to install and run an application on your terminal is to use Eclipse.</p>
+						<P>Connect your device via USB and make sure <b>Android debug</b> is activated.</p>
+						<p>In Eclipse, right-click on your project, go to <b>Run As</b> then <b>Android Application</b>.</p>
+						<div style="width:400px;margin:auto;">
+							<img src="{@docRoot}assets-sdk/images/tuto_sample_4.png" width="100%"/>
+						</div>
+						<p></p>
+						<p>A popup should appear with a list of available devices. Select the device you wish to install on and click <b>Ok</b>.</p>
+						<div style="width:350px;margin:auto;">
+							<img src="{@docRoot}assets-sdk/images/tuto_sample_5.png" width="100%"/>
+						</div>
+						<p></p>
+						<p>The application should automatically launch on your device.</p>
+						<p></p>
+				</div>
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num">6</span>Nearly there</h2></p>
+				<p>Before you start coding, have a look at the different <a href="{@docRoot}concepts.html">concepts</a> behind joyn APIs.</p>
+				<p>There are also a number of <a href="{@docRoot}tutorials/index.html">tutorials</a> and <a href="{@docRoot}samples/index.html">samples</a> that can help you kick-start your application development.</p>
+			</div>
+			<div class="step_header getStarted">
+				<p><h2><span class="h_num" style="top:20px;left: 80px;"><img src="{@docRoot}assets/images/rcs_notif_icon.png" height="100%"/></span>Have fun</h2></p>
+				<p>and if you have any questions don't hesitate to <a href="mailto:jeanmarc.auffret@orange.com">contact</a> us.</p>
+			</div>
+		</div>
+		
+	</div>
+</div>
