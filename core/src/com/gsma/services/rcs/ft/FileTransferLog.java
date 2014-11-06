@@ -32,13 +32,7 @@ public class FileTransferLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.ft/ft");
-	
-    /**
-     * The name of the column containing the unique ID for a row.
-     * <P>Type: primary key</P>
-     */
-    public static final String ID = "_id";
+    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.filetransfer/filetransfer");
 
     /**
      * The name of the column containing the unique ID of the file transfer.
@@ -50,7 +44,7 @@ public class FileTransferLog {
      * The name of the column containing the identity of the remote contact.
      * <P>Type: TEXT</P>
      */
-    public static final String CONTACT_NUMBER = "contact_number";
+    public static final String CONTACT = "contact";
 
     /**
      * The name of the column containing the URI of the file.
@@ -145,4 +139,12 @@ public class FileTransferLog {
      * <P>Type: TEXT</P>
      */
     public static final String CHAT_ID = "chat_id";
+
+    /**
+     * The name of the column containing the MIME-type of the file icon.
+     * <P>
+     * Type: TEXT
+     * </P>
+     */
+    public static final String FILEICON_MIME_TYPE = "fileicon_mime_type";
 }

@@ -310,7 +310,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 			}
 			if (!alreadyInEabOrInvalidNumbers.contains(phoneNumber)) {
 				// If this number is not considered RCS valid or has already an entry with RCS, skip it
-                if (!ContactsManager.getInstance().isRcsAssociated(phoneNumber)
+                if (!ContactsManager.getInstance().isContactIdAssociatedWithContactInRichAddressBook(phoneNumber)
 						&& ( !ContactsManager.getInstance().isOnlySimAssociated(phoneNumber) || (Build.VERSION.SDK_INT > 10))) {
 					// This entry is valid and not already has a RCS raw contact, it can be treated
                     // We exclude the number that comes from SIM only contacts, as those cannot be

@@ -21,20 +21,18 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.ipcall;
 
+import com.gsma.services.rcs.ipcall.IPCallLog;
+
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-
-import com.gsma.services.rcs.ipcall.IPCallLog;
 
 /**
  * IP call history provider
@@ -42,43 +40,39 @@ import com.gsma.services.rcs.ipcall.IPCallLog;
  * @author owom5460
  */
 public class IPCallProvider extends ContentProvider {
-	// Database table
-	public static final String TABLE = "ipcall";
-		
-	// Create the constants used to differentiate between the different
-	// URI requests
-	private static final int IPCALLS = 1;
-	private static final int IPCALL_ID = 2;
-    private static final int RCSAPI = 3;
-    private static final int RCSAPI_ID = 4;
-		
-	// Allocate the UriMatcher object, where a URI ending in 'ipcall'
-	// will correspond to a request for all ipcall, and 'ipcall'
-	// with a trailing '/[rowID]' will represent a single ipcall row.
-	private static final UriMatcher uriMatcher;
-	static {
-		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI("com.orangelabs.rcs.ipcall", "ipcall", IPCALLS);
-		uriMatcher.addURI("com.orangelabs.rcs.ipcall", "ipcall/#", IPCALL_ID);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.ipcall", "ipcall", RCSAPI);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.ipcall", "ipcall/#", RCSAPI_ID);
-	}
-			
-	/**
-	 * Database helper class
-	 */
-	private SQLiteOpenHelper openHelper;	
-	 
-    /**
-     * Database name
-     */
-    public static final String DATABASE_NAME = "ipcall.db";
 
-    /**
-     * Helper class for opening, creating and managing database version control
-     */
+    private static final String TABLE = "ipcall";
+
+    private static final String SELECTION_WITH_CALLID_ONLY = IPCallData.KEY_CALL_ID
+            .concat("=?");
+
+    private static final String DATABASE_NAME = "ipcall.db";
+
+    private static final UriMatcher sUriMatcher;
+    static {
+        sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath(),
+                UriType.IPCALL);
+        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath()
+                .concat("/*"), UriType.IPCALL_WITH_CALLID);
+    }
+
+    private static final class UriType {
+
+        private static final int IPCALL = 1;
+
+        private static final int IPCALL_WITH_CALLID = 2;
+    }
+
+    private static final class CursorType {
+
+        private static final String TYPE_DIRECTORY = "vnd.android.cursor.dir/ipcall";
+
+        private static final String TYPE_ITEM = "vnd.android.cursor.item/ipcall";
+    }
+
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 3;
+        private static final int DATABASE_VERSION = 4;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -86,140 +80,162 @@ public class IPCallProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-        	db.execSQL("CREATE TABLE " + TABLE + " ("
-        			+ IPCallData.KEY_ID + " integer primary key autoincrement,"
-        			+ IPCallData.KEY_SESSION_ID + " TEXT,"
-        			+ IPCallData.KEY_CONTACT + " TEXT,"
-        			+ IPCallData.KEY_STATE + " integer,"
-        			+ IPCallData.KEY_REASON_CODE + " integer,"
-        			+ IPCallData.KEY_DIRECTION + " integer,"
-        			+ IPCallData.KEY_TIMESTAMP + " long,"
-        			+ IPCallData.KEY_VIDEO_ENCODING + " TEXT,"
-        			+ IPCallData.KEY_AUDIO_ENCODING + " TEXT,"
-        			+ IPCallData.KEY_WIDTH + " integer,"
-        			+ IPCallData.KEY_HEIGHT + " integer);");
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+                    .append(IPCallData.KEY_CALL_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(IPCallData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(IPCallData.KEY_STATE).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_VIDEO_ENCODING).append(" TEXT,")
+                    .append(IPCallData.KEY_AUDIO_ENCODING).append(" TEXT,")
+                    .append(IPCallData.KEY_WIDTH).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_HEIGHT).append(" INTEGER NOT NULL);")
+                    .append("CREATE INDEX ").append(IPCallData.KEY_CONTACT).append("_idx")
+                    .append(" ON ").append(TABLE).append("(").append(IPCallData.KEY_CONTACT)
+                    .append("); ").append("CREATE INDEX ").append(IPCallData.KEY_TIMESTAMP)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(IPCallData.KEY_TIMESTAMP).append("); ").toString());
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+            db.execSQL("DROP TABLE IF EXISTS ".concat(TABLE));
             onCreate(db);
         }
     }
 
+    private SQLiteOpenHelper mOpenHelper;
+
+    private String getSelectionWithCallId(String selection) {
+        if (TextUtils.isEmpty(selection)) {
+            return SELECTION_WITH_CALLID_ONLY;
+        }
+        return new StringBuilder("(").append(SELECTION_WITH_CALLID_ONLY)
+                .append(") AND (").append(selection).append(")").toString();
+    }
+
+    private String[] getSelectionArgsWithCallId(String[] selectionArgs, String callId) {
+        String[] callSelectionArg = new String[] {
+            callId
+        };
+        if (selectionArgs == null) {
+            return callSelectionArg;
+        }
+        return DatabaseUtils.appendSelectionArgs(callSelectionArg, selectionArgs);
+    }
+
     @Override
     public boolean onCreate() {
-        openHelper = new DatabaseHelper(getContext());
+        mOpenHelper = new DatabaseHelper(getContext());
         return true;
     }
-	
 
-	@Override
-	public String getType(Uri uri) {
-		switch(uriMatcher.match(uri)){
-			case IPCALLS:
-			case RCSAPI:
-				return "vnd.android.cursor.dir/ipcall";
-			case IPCALL_ID:
-			case RCSAPI_ID:
-				return "vnd.android.cursor.item/ipcall";
-			default:
-				throw new IllegalArgumentException("Unsupported URI " + uri);
-		}
-	}
-	
-	@Override
-    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
-		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(TABLE);
+    @Override
+    public String getType(Uri uri) {
+        switch (sUriMatcher.match(uri)) {
+            case UriType.IPCALL:
+                return CursorType.TYPE_DIRECTORY;
 
-        // Generate the body of the query
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case IPCALLS:
-        	case RCSAPI:
-                break;
-            case IPCALL_ID:
-            case RCSAPI_ID:
-                qb.appendWhere(IPCallLog.ID + "=" + uri.getPathSegments().get(1));
-                break;
+            case UriType.IPCALL_WITH_CALLID:
+                return CursorType.TYPE_ITEM;
+
             default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
+    }
 
-        SQLiteDatabase db = openHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sort) {
+        Cursor cursor = null;
+        try {
+            switch (sUriMatcher.match(uri)) {
+                case UriType.IPCALL_WITH_CALLID:
+                    String callId = uri.getLastPathSegment();
+                    selection = getSelectionWithCallId(selection);
+                    selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                    /* Intentional fall through */
+                case UriType.IPCALL:
+                    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE, projection, selection, selectionArgs, null,
+                            null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                    return cursor;
 
-    	// Register the contexts ContentResolver to be notified if the cursor result set changes.
-        if (c != null) {
-        	c.setNotificationUri(getContext().getContentResolver(), IPCallLog.CONTENT_URI);
+                default:
+                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                            .append(uri).append("!").toString());
+            }
+        } catch (RuntimeException e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
         }
-        return c;
-	}
-	
-	@Override
-    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count = 0;
-        SQLiteDatabase db = openHelper.getWritableDatabase();
+    }
 
-        int match = uriMatcher.match(uri);
-        switch (match) {
-	        case IPCALLS:
-	            count = db.update(TABLE, values, where, null);
-	            break;
-            case IPCALL_ID:
-                String segment = uri.getPathSegments().get(1);
-                int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, IPCallLog.ID + "=" + id, null);
-                break;
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        switch (sUriMatcher.match(uri)) {
+            case UriType.IPCALL_WITH_CALLID:
+                String callId = uri.getLastPathSegment();
+                selection = getSelectionWithCallId(selection);
+                selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                /* Intentional fall through */
+            case UriType.IPCALL:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.update(TABLE, values, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return count;
+
             default:
-                throw new UnsupportedOperationException("Cannot update URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-        getContext().getContentResolver().notifyChange(uri, null);
-        return count;
-	}
-	
+    }
 
-	@Override
-	public Uri insert(Uri uri, ContentValues initialValues) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        switch(uriMatcher.match(uri)){
-	        case IPCALLS:
-	        case IPCALL_ID:
-	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(IPCallLog.CONTENT_URI, rowId);
-	        	break;
-	        default:
-	    		throw new SQLException("Failed to insert row into " + uri);
-        }
-		getContext().getContentResolver().notifyChange(uri, null);
-        return uri;
-	}
+    @Override
+    public Uri insert(Uri uri, ContentValues initialValues) {
+        switch (sUriMatcher.match(uri)) {
+            case UriType.IPCALL:
+                /* Intentional fall through */
+            case UriType.IPCALL_WITH_CALLID:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                String callId = initialValues.getAsString(IPCallData.KEY_CALL_ID);
+                db.insert(TABLE, null, initialValues);
+                Uri notificationUri = Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
+                return notificationUri;
 
-	
-	@Override
-	public int delete(Uri uri, String where, String[] whereArgs) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        int count = 0;
-        switch(uriMatcher.match(uri)){
-	        case IPCALLS:
-	        case RCSAPI:
-	        	count = db.delete(TABLE, where, whereArgs);
-	        	break;
-	        case IPCALL_ID:
-	        case RCSAPI_ID:
-	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, IPCallLog.ID + "="
-						+ segment
-						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
-						whereArgs);
-				
-				break;
-	        	
-	        default:
-	    		throw new SQLException("Failed to delete row " + uri);
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-		getContext().getContentResolver().notifyChange(uri, null);
-        return count;    
-	}
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        switch (sUriMatcher.match(uri)) {
+            case UriType.IPCALL_WITH_CALLID:
+                String callId = uri.getLastPathSegment();
+                selection = getSelectionWithCallId(selection);
+                selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                /* Intentional fall through */
+            case UriType.IPCALL:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.delete(TABLE, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return count;
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
+        }
+    }
 }

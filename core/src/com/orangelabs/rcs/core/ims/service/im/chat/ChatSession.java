@@ -711,7 +711,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param displayName the display name
 	 */
 	protected void receiveText(ContactId contact, String txt, String msgId, boolean imdnDisplayedRequested, Date date, String displayName) {
-		if (!MessagingLog.getInstance().isNewMessage(getContributionID(), msgId)) {
+		if (MessagingLog.getInstance().isMessagePersisted(msgId)) {
 			// Message already received
 			return;
 		}
@@ -760,7 +760,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param pseudo the display name
 	 */
 	protected void receiveGeoloc(ContactId contact, String geolocDoc, String msgId, boolean imdnDisplayedRequested, Date date, String pseudo) {
-		if (!MessagingLog.getInstance().isNewMessage(getContributionID(), msgId)) {
+		if (MessagingLog.getInstance().isMessagePersisted(msgId)) {
 			// Message already received
 			return;
 		}

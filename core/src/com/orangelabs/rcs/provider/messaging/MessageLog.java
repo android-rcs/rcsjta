@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -49,20 +50,13 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class MessageLog implements IMessageLog {
 
 	/**
-	 * Message database URI
-	 */
-	private Uri msgDatabaseUri = MessageData.CONTENT_URI;
-
-	private static final String SELECTION_MSG_BY_MSG_ID = new StringBuilder(MessageData.KEY_MSG_ID).append("=?").toString();
-
-	/**
 	 * Content resolver
 	 */
 	private ContentResolver cr;
 
 	private GroupChatLog groupChatLog;
 
-	private GroupChatDeliveryInfoLog groupChatDeliveryInfoLog;
+	private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
 	/**
 	 * The logger
 	 */
@@ -76,7 +70,7 @@ public class MessageLog implements IMessageLog {
 	 * @param groupChatLog
 	 * @param groupChatDeliveryInfoLog
 	 */
-	/* package private */MessageLog(ContentResolver cr, GroupChatLog groupChatLog, GroupChatDeliveryInfoLog groupChatDeliveryInfoLog) {
+	/* package private */MessageLog(ContentResolver cr, GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
 		this.cr = cr;
 		this.groupChatLog = groupChatLog;
 		this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
@@ -117,19 +111,19 @@ public class MessageLog implements IMessageLog {
 
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact.toString());
-		values.put(MessageData.KEY_MSG_ID, msgId);
+		values.put(MessageData.KEY_MESSAGE_ID, msgId);
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.INCOMING);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
 					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -140,7 +134,7 @@ public class MessageLog implements IMessageLog {
 
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
-		cr.insert(msgDatabaseUri, values);
+		cr.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	/**
@@ -161,19 +155,19 @@ public class MessageLog implements IMessageLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact.toString());
-		values.put(MessageData.KEY_MSG_ID, msgId);
+		values.put(MessageData.KEY_MESSAGE_ID, msgId);
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.OUTGOING);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
 					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -184,7 +178,7 @@ public class MessageLog implements IMessageLog {
 
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
-		cr.insert(msgDatabaseUri, values);
+		cr.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	/*
@@ -237,7 +231,7 @@ public class MessageLog implements IMessageLog {
 
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
-		values.put(MessageData.KEY_MSG_ID, msgId);
+		values.put(MessageData.KEY_MESSAGE_ID, msgId);
 		if (msg.getRemote() != null) {
 			values.put(MessageData.KEY_CONTACT, msg.getRemote().toString());
 		}
@@ -248,13 +242,13 @@ public class MessageLog implements IMessageLog {
 
 		//file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
 		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GEOLOC_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
 			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
 			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
 					geoloc.getAccuracy());
 			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
 		} else {
-			values.put(MessageData.KEY_CONTENT_TYPE, MimeType.TEXT_MESSAGE);
+			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
 			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
 		}
 
@@ -271,17 +265,18 @@ public class MessageLog implements IMessageLog {
 			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 		}
-		cr.insert(msgDatabaseUri, values);
+		cr.insert(ChatLog.Message.CONTENT_URI, values);
 
 		if (direction == Direction.OUTGOING) {
 			try {
 				Set<ParticipantInfo> participants = groupChatLog.getGroupChatConnectedParticipants(chatId);
 				for (ParticipantInfo participant : participants) {
-					groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, msgId, participant.getContact());
+					groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
+							participant.getContact(), msgId);
 				}
 			} catch (Exception e) {
-				cr.delete(msgDatabaseUri, MessageData.KEY_MSG_ID + "='" + msgId + "'", null);
-				cr.delete(Uri.withAppendedPath(GroupChatDeliveryInfoData.CONTENT_MSG_URI, msgId), null, null);
+				cr.delete(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
+				cr.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
 				/* TODO: Throw exception */
 				if (logger.isActivated()) {
 					logger.warn("Group chat message with msgId '" + msgId + "' could not be added to database!");
@@ -300,12 +295,12 @@ public class MessageLog implements IMessageLog {
 		if (contact != null) {
 			values.put(MessageData.KEY_CONTACT, contact.toString());
 		}
-		values.put(MessageData.KEY_CONTENT_TYPE, MimeType.GROUPCHAT_EVENT);
+		values.put(MessageData.KEY_MIME_TYPE, MimeType.GROUPCHAT_EVENT);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		values.put(MessageData.KEY_DIRECTION, Direction.IRRELEVANT);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		cr.insert(msgDatabaseUri, values);
+		cr.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	/*
@@ -322,7 +317,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ);
 		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 
-		if (cr.update(msgDatabaseUri, values, SELECTION_MSG_BY_MSG_ID, new String[] { msgId }) < 1) {
+		if (cr.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
@@ -350,9 +345,7 @@ public class MessageLog implements IMessageLog {
 					.getTimeInMillis());
 		}
 
-		if (cr.update(msgDatabaseUri, values, SELECTION_MSG_BY_MSG_ID, new String[] {
-			msgId
-		}) < 1) {
+		if (cr.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to update status for.");
@@ -376,24 +369,21 @@ public class MessageLog implements IMessageLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#isNewMessage(java.lang.String, java.lang.String)
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#isMessagePersisted(java.lang.String)
 	 */
 	@Override
-	public boolean isNewMessage(String chatId, String msgId) {
+	public boolean isMessagePersisted(String msgId) {
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(msgDatabaseUri, new String[] { MessageData.KEY_MSG_ID }, "(" + MessageData.KEY_CHAT_ID + " = '"
-					+ chatId + "') AND (" + MessageData.KEY_MSG_ID + " = '" + msgId + "')", null, null);
-			return cursor.getCount() == 0;
-		} catch (Exception e) {
-			return false;
+			cursor = cr.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), new String[] {
+				MessageData.KEY_MESSAGE_ID
+			}, null, null, null);
+			return (cursor != null);
+
 		} finally {
-			if (cursor != null)
+			if (cursor != null) {
 				cursor.close();
+			}
 		}
-	}
-	
-	public boolean isNewMessage(ContactId contact, String msgId) {
-		return isNewMessage(contact.toString(), msgId);
 	}
 }

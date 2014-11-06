@@ -21,212 +21,327 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.ft.FileTransferLog;
+import com.orangelabs.rcs.provider.messaging.FileTransferData;
+
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * File transfer content provider
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferProvider extends ContentProvider {
-	/**
-	 * Database table
-	 */
-    private static final String TABLE = "ft";
 
-	// Create the constants used to differentiate between the different URI requests
-	private static final int FILETRANSFERS = 1;
-    private static final int FILETRANSFER_ID = 2;
-    private static final int RCSAPI = 3;
-    private static final int RCSAPI_ID = 4;
+    private static final String TABLE = "filetransfer";
 
-	// Allocate the UriMatcher object
-    private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final String SELECTION_WITH_FT_ID_ONLY = FileTransferData.KEY_FT_ID.concat("=?");
+
+    private static final String DATABASE_NAME = "filetransfer.db";
+
+    private static final class UriType {
+
+        private static final class FileTransfer {
+
+            private static final int FILE_TRANSFER = 1;
+
+            private static final int FILE_TRANSFER_WITH_ID = 2;
+        }
+
+        private static final class InternalFileTransfer {
+
+            private static final int FILE_TRANSFER = 3;
+
+            private static final int FILE_TRANSFER_WITH_ID = 4;
+        }
+    }
+
+    private static final class CursorType {
+
+        private static final String TYPE_DIRECTORY = "vnd.android.cursor.dir/filetransfer";
+
+        private static final String TYPE_ITEM = "vnd.android.cursor.item/filetransfer";
+    }
+
+    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        uriMatcher.addURI("com.orangelabs.rcs.ft", "ft", FILETRANSFERS);
-        uriMatcher.addURI("com.orangelabs.rcs.ft", "ft/#", FILETRANSFER_ID);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.ft", "ft", RCSAPI);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.ft", "ft/#", RCSAPI_ID);
+        sUriMatcher.addURI(FileTransferLog.CONTENT_URI.getAuthority(),
+                FileTransferLog.CONTENT_URI.getPath(), UriType.FileTransfer.FILE_TRANSFER);
+        sUriMatcher.addURI(FileTransferLog.CONTENT_URI.getAuthority(), FileTransferLog.CONTENT_URI
+                .getPath().concat("/*"), UriType.FileTransfer.FILE_TRANSFER_WITH_ID);
+        sUriMatcher.addURI(FileTransferData.CONTENT_URI.getAuthority(),
+                FileTransferData.CONTENT_URI.getPath(), UriType.InternalFileTransfer.FILE_TRANSFER);
+        sUriMatcher.addURI(FileTransferData.CONTENT_URI.getAuthority(),
+                FileTransferData.CONTENT_URI.getPath().concat("/*"),
+                UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID);
     }
 
     /**
-     * Database helper class
+     * String to restrict projection for exposed URI to a set of columns
      */
-    private SQLiteOpenHelper openHelper;
-    
-    /**
-     * Database name
-     */
-    public static final String DATABASE_NAME = "ft.db";
+    private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
+            FileTransferLog.FT_ID, FileTransferLog.CHAT_ID, FileTransferLog.CONTACT,
+            FileTransferLog.FILE, FileTransferLog.FILENAME, FileTransferLog.MIME_TYPE,
+            FileTransferLog.FILEICON, FileTransferLog.FILEICON_MIME_TYPE,
+            FileTransferLog.DIRECTION, FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED,
+            FileTransferLog.TIMESTAMP, FileTransferLog.TIMESTAMP_SENT,
+            FileTransferLog.TIMESTAMP_DELIVERED, FileTransferLog.TIMESTAMP_DISPLAYED,
+            FileTransferLog.STATE, FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS
+    };
 
-    /**
-     * Helper class for opening, creating and managing database version control
-     */
+    private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
+            Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
+
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 10;
+        private static final int DATABASE_VERSION = 11;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
         }
-        
-        // @formatter:off
+
         @Override
         public void onCreate(SQLiteDatabase db) {
-        	db.execSQL("CREATE TABLE " + TABLE + " ("
-        			+ FileTransferData.KEY_ID + " integer primary key autoincrement,"
-        			+ FileTransferData.KEY_FT_ID + " TEXT,"
-        			+ FileTransferData.KEY_CONTACT + " TEXT,"
-        			+ FileTransferData.KEY_FILE + " TEXT,"
-        			+ FileTransferData.KEY_NAME + " TEXT,"
-        			+ FileTransferData.KEY_CHAT_ID + " TEXT,"
-        			+ FileTransferData.KEY_MIME_TYPE + " TEXT,"
-        			+ FileTransferData.KEY_STATE + " integer,"
-        			+ FileTransferData.KEY_REASON_CODE + " integer,"
-        			+ FileTransferData.KEY_READ_STATUS + " integer,"
-        			+ FileTransferData.KEY_DIRECTION + " integer,"
-        			+ FileTransferData.KEY_TIMESTAMP + " long,"
-        			+ FileTransferData.KEY_TIMESTAMP_SENT + " long,"
-        			+ FileTransferData.KEY_TIMESTAMP_DELIVERED + " long,"
-        			+ FileTransferData.KEY_TIMESTAMP_DISPLAYED + " long,"
-        			+ FileTransferData.KEY_SIZE + " long,"
-        			+ FileTransferData.KEY_TOTAL_SIZE + " long,"
-        			+ FileTransferData.KEY_FILEICON + " TEXT,"
-        			+ FileTransferData.KEY_UPLOAD_TID + " TEXT,"
-        			+ FileTransferData.KEY_DOWNLOAD_URI + " TEXT);");
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+                    .append(FileTransferData.KEY_FT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(FileTransferData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_FILE).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_FILENAME).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_STATE).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_READ_STATUS).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_FILESIZE).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_FILEICON).append(" TEXT,")
+                    .append(FileTransferData.KEY_UPLOAD_TID).append(" TEXT,")
+                    .append(FileTransferData.KEY_DOWNLOAD_URI).append(" TEXT,")
+                    .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT);")
+                    .append("CREATE INDEX ").append(FileTransferData.KEY_CHAT_ID).append("_idx")
+                    .append(" ON ").append(TABLE).append("(").append(FileTransferData.KEY_CHAT_ID)
+                    .append("); ").append("CREATE INDEX ").append(FileTransferData.KEY_CONTACT)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(FileTransferData.KEY_CONTACT).append("); ").append("CREATE INDEX ")
+                    .append(FileTransferData.KEY_TIMESTAMP).append("_idx").append(" ON ")
+                    .append(TABLE).append("(").append(FileTransferData.KEY_TIMESTAMP).append("); ")
+                    .append("CREATE INDEX ").append(FileTransferData.KEY_TIMESTAMP_SENT)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(FileTransferData.KEY_TIMESTAMP_SENT).append("); ").toString());
         }
-        // @formatter:on
-        
+
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+            db.execSQL("DROP TABLE IF EXISTS ".concat(TABLE));
             onCreate(db);
         }
     }
 
+    private SQLiteOpenHelper mOpenHelper;
+
+    private String getSelectionWithFtId(String selection) {
+        if (TextUtils.isEmpty(selection)) {
+            return SELECTION_WITH_FT_ID_ONLY;
+        }
+        return new StringBuilder("(").append(SELECTION_WITH_FT_ID_ONLY).append(") AND (")
+                .append(selection).append(")").toString();
+    }
+
+    private String[] getSelectionArgsWithFtId(String[] selectionArgs, String ftId) {
+        String[] ftSelectionArg = new String[] {
+            ftId
+        };
+        if (selectionArgs == null) {
+            return ftSelectionArg;
+        }
+        return DatabaseUtils.appendSelectionArgs(ftSelectionArg, selectionArgs);
+    }
+
+    private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
+            throws UnsupportedOperationException {
+        if (projection == null || projection.length == 0) {
+            return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
+        }
+        for (String projectedColumn : projection) {
+            if (!RESTRICTED_PROJECTION_SET.contains(projectedColumn)) {
+                throw new UnsupportedOperationException(new StringBuilder(
+                        "No visibility to the accessed column ").append(projectedColumn)
+                        .append("!").toString());
+            }
+        }
+        return projection;
+    }
+
     @Override
     public boolean onCreate() {
-        openHelper = new DatabaseHelper(getContext());
+        mOpenHelper = new DatabaseHelper(getContext());
         return true;
     }
 
     @Override
     public String getType(Uri uri) {
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case FILETRANSFERS:
-			case RCSAPI:
-                return "vnd.android.cursor.dir/ft";
-            case FILETRANSFER_ID:
-			case RCSAPI_ID:
-                return "vnd.android.cursor.item/ft";
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalFileTransfer.FILE_TRANSFER:
+                /* Intentional fall through */
+            case UriType.FileTransfer.FILE_TRANSFER:
+                return CursorType.TYPE_DIRECTORY;
+
+            case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
+                /* Intentional fall through */
+            case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
+                return CursorType.TYPE_ITEM;
+
             default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(TABLE);
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sort) {
+        Cursor cursor = null;
+        Uri notificationUri = FileTransferLog.CONTENT_URI;
+        try {
+            switch (sUriMatcher.match(uri)) {
+                case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
+                    String ftId = uri.getLastPathSegment();
+                    selection = getSelectionWithFtId(selection);
+                    selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
+                    notificationUri = Uri.withAppendedPath(notificationUri, ftId);
+                    /* Intentional fall through */
+                case UriType.InternalFileTransfer.FILE_TRANSFER:
+                    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE, projection, selection, selectionArgs, null,
+                            null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
+                    return cursor;
 
-        // Generate the body of the query
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case FILETRANSFERS:
-        	case RCSAPI:
-                break;
-            case FILETRANSFER_ID:
-        	case RCSAPI_ID:
-                qb.appendWhere(FileTransferData.KEY_ID + "=");
-                qb.appendWhere(uri.getPathSegments().get(1));
-        		break;
-            default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
+                    ftId = uri.getLastPathSegment();
+                    selection = getSelectionWithFtId(selection);
+                    selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
+                    /* Intentional fall through */
+                case UriType.FileTransfer.FILE_TRANSFER:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE,
+                            restrictProjectionToExternallyDefinedColumns(projection), selection,
+                            selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                    return cursor;
+
+                default:
+                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                            .append(uri).append("!").toString());
+
+            }
+        } catch (RuntimeException e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
         }
-
-        SQLiteDatabase db = openHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
-
-		// Register the contexts ContentResolver to be notified if the cursor result set changes
-        if (c != null) {
-            c.setNotificationUri(getContext().getContentResolver(), uri);
-        }
-
-        return c;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count;
-        SQLiteDatabase db = openHelper.getWritableDatabase();
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri notificationUri = FileTransferLog.CONTENT_URI;
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
+                String ftId = uri.getLastPathSegment();
+                selection = getSelectionWithFtId(selection);
+                selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
+                notificationUri = Uri.withAppendedPath(notificationUri, ftId);
+                /* Intentional fall through */
+            case UriType.InternalFileTransfer.FILE_TRANSFER:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.update(TABLE, values, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                }
+                return count;
 
-        int match = uriMatcher.match(uri);
-        switch (match) {
-	        case FILETRANSFERS:
-	            count = db.update(TABLE, values, where, whereArgs);
-	            break;
-            case FILETRANSFER_ID:
-                String segment = uri.getPathSegments().get(1);
-                int id = Integer.parseInt(segment);
-                count = db.update(TABLE, values, FileTransferData.KEY_ID + "=" + id, null);
-                break;
+            case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
+                /* Intentional fall through */
+            case UriType.FileTransfer.FILE_TRANSFER:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
             default:
-                throw new UnsupportedOperationException("Cannot update URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-        getContext().getContentResolver().notifyChange(uri, null);
-        return count;
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        switch(uriMatcher.match(uri)){
-	        case FILETRANSFERS:
-	        case FILETRANSFER_ID:
-	    		long rowId = db.insert(TABLE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(FileTransferData.CONTENT_URI, rowId);
-	        	break;
-	        default:
-	    		throw new SQLException("Failed to insert row into " + uri);
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalFileTransfer.FILE_TRANSFER:
+                /* Intentional fall through */
+            case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                String ftId = initialValues.getAsString(FileTransferData.KEY_FT_ID);
+                db.insert(TABLE, null, initialValues);
+                Uri notificationUri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
+                return notificationUri;
+
+            case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
+                /* Intentional fall through */
+            case UriType.FileTransfer.FILE_TRANSFER:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-		getContext().getContentResolver().notifyChange(uri, null);
-        return uri;
     }
 
     @Override
-    public int delete(Uri uri, String where, String[] whereArgs) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        int count = 0;
-        switch(uriMatcher.match(uri)){
-	        case FILETRANSFERS:
-	        case RCSAPI:
-	        	count = db.delete(TABLE, where, whereArgs);
-	        	break;
-	        case FILETRANSFER_ID:
-	        case RCSAPI_ID:
-	        	String segment = uri.getPathSegments().get(1);
-				count = db.delete(TABLE, FileTransferData.KEY_ID + "="
-						+ segment
-						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
-						whereArgs);
-				
-				break;
-	        	
-	        default:
-	    		throw new SQLException("Failed to delete row " + uri);
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri notificationUri = FileTransferLog.CONTENT_URI;
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
+                String ftId = uri.getLastPathSegment();
+                selection = getSelectionWithFtId(selection);
+                selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
+                notificationUri = Uri.withAppendedPath(notificationUri, ftId);
+                /* Intentional fall through */
+            case UriType.InternalFileTransfer.FILE_TRANSFER:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.delete(TABLE, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                }
+                return count;
+
+            case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
+                /* Intentional fall through */
+            case UriType.FileTransfer.FILE_TRANSFER:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-		getContext().getContentResolver().notifyChange(uri, null);
-        return count;    
     }
 }
