@@ -355,4 +355,23 @@ public class ChatService extends RcsService {
 			throw new RcsServiceNotAvailableException();
 		}
 	}
+
+	/**
+	 * Returns a chat message from its unique ID
+	 * 
+	 * @param msgId
+	 * @return ChatMessage
+	 * @throws RcsServiceException
+	 */
+	public ChatMessage getChatMessage(String msgId) throws RcsServiceException {
+		if (api != null) {
+			try {
+				return new ChatMessage(api.getChatMessage(msgId));
+			} catch (Exception e) {
+				throw new RcsServiceException(e.getMessage());
+			}
+		} else {
+			throw new RcsServiceNotAvailableException();
+		}
+	}
 }

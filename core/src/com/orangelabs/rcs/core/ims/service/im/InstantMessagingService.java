@@ -569,17 +569,20 @@ public class InstantMessagingService extends ImsService {
 
 	/**
 	 * Initiate a file transfer session
-	 * 
+	 * @param fileTransferId
+	 *            File transfer Id
 	 * @param contact
 	 *            Remote contact identifier
 	 * @param content
 	 *            Content of file to sent
 	 * @param fileIcon
-	 *            true if the stack must try to attach fileIcon
+	 *            Content of fileicon
+	 * 
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateFileTransferSession(ContactId contact, MmContent content, boolean fileIcon) throws CoreException {
+	public FileSharingSession initiateFileTransferSession(String fileTransferId, ContactId contact,
+			MmContent content, MmContent fileIcon) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -589,64 +592,44 @@ public class InstantMessagingService extends ImsService {
 		assertFileSizeNotExceedingMaxLimit(content.getSize(), "File exceeds max size.");
 
 		boolean isFToHttpSupportedByRemote = false;
-		Capabilities capability = mContactsManager.getContactCapabilities(contact);
-		if (capability != null) {
-			isFToHttpSupportedByRemote = capability.isFileTransferHttpSupported();
+		Capabilities remoteCapability = mContactsManager.getContactCapabilities(contact);
+		if (remoteCapability != null) {
+			isFToHttpSupportedByRemote = remoteCapability.isFileTransferHttpSupported();
 		}
 
 		Capabilities myCapability = mRcsSettings.getMyCapabilities();
-		boolean isHttpProtocol = false;
 		if (isFToHttpSupportedByRemote && myCapability.isFileTransferHttpSupported()) {
 			if (FileTransferProtocol.HTTP.equals(mRcsSettings.getFtProtocol())) {
-				isHttpProtocol = true;
+				return new OriginatingHttpFileSharingSession(fileTransferId, this, content,
+						contact, fileIcon, UUID.randomUUID().toString(), mCore, mMessagingLog);
 			}
 		}
 
-		if (fileIcon && (MimeManager.isImageType(content.getEncoding()) == false)) {
-			fileIcon = false;
+		if (remoteCapability != null && remoteCapability.isFileTransferThumbnailSupported()) {
+			fileIcon = null;
 		}
-
-		FileSharingSession session;
-		if (isHttpProtocol) {
-			session = new OriginatingHttpFileSharingSession(this, content, contact,
-					PhoneUtils.formatContactIdToUri(contact), fileIcon, UUID.randomUUID()
-							.toString(), mCore, mMessagingLog);
-		} else {
-			if (fileIcon) {
-				if (capability != null && capability.isFileTransferThumbnailSupported() == false) {
-					fileIcon = false;
-					if (logger.isActivated()) {
-						logger.warn("Thumbnail not supported by remote");
-					}
-				}
-				if (fileIcon && myCapability.isFileTransferThumbnailSupported() == false) {
-					fileIcon = false;
-					if (logger.isActivated()) {
-						logger.warn("Thumbnail not supported !");
-					}
-				}
-			}
-			session = new OriginatingMsrpFileSharingSession(this, content, contact, fileIcon);
-		}
-		return session;
+		return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
+				fileIcon);
 	}
 	
 	/**
 	 * Initiate a group file transfer session
-	 * 
-	 * @param contacts
-	 *            Set of remote contacts
+	 * @param fileTransferId
+	 *            File transfer Id
 	 * @param content
 	 *            The file content to be sent
 	 * @param fileIcon
-	 *            true if the stack must try to attach fileIcon
+	 *            Content of fileicon
 	 * @param chatContributionId
 	 *            Chat contribution ID
+	 * @param contacts
+	 *            Set of remote contacts
+	 * 
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> participants, MmContent content, boolean fileIcon,
-			String chatContributionId) throws CoreException {
+	public FileSharingSession initiateGroupFileTransferSession(String fileTransferId, Set<ParticipantInfo> participants, MmContent content,
+			MmContent fileIcon, String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + participants.size() + " contacts");
 		}
@@ -666,10 +649,10 @@ public class InstantMessagingService extends ImsService {
 		}
 		// TODO Cannot transfer file to group if Group Chat is not established: to implement with CR018
 		// Create a new session
-		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content,
-				fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), participants,
-				groupChatSession.getSessionID(), chatContributionId, UUID.randomUUID().toString(),
-				mCore, mMessagingLog);
+		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId, this,
+				content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
+				participants, groupChatSession.getSessionID(), chatContributionId, UUID.randomUUID()
+				.toString(), Core.getInstance(), mMessagingLog);
 
 		return session;
 	}
@@ -741,13 +724,8 @@ public class InstantMessagingService extends ImsService {
 			logger.info("Initiate 1-1 chat session with " + contact);
 		}
 		assertAvailableChatSession("Max chat sessions achieved");
-		// Create a new session
+
 		OriginatingOneToOneChatSession session = new OriginatingOneToOneChatSession(this, contact, firstMsg);
-		// Save the message
-		if (firstMsg != null && !(firstMsg instanceof FileTransferMessage)) {
-			mMessagingLog.addOutgoingOneToOneChatMessage(firstMsg,
-					ChatLog.Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
-		}
 		return session;
 	}
 
@@ -996,7 +974,7 @@ public class InstantMessagingService extends ImsService {
 		assertAvailableChatSession("Max chat sessions reached");
 
 		// Get the group chat info from database
-		GroupChatInfo groupChat = MessagingLog.getInstance().getGroupChatInfo(chatId);
+		GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
 		if (groupChat == null) {
 			if (logger.isActivated()) {
 				logger.warn("Group chat " + chatId + " can't be restarted: conversation not found");
@@ -1007,7 +985,7 @@ public class InstantMessagingService extends ImsService {
 		// TODO check whether participants of GroupChatInfo cannot be used instead
 		
 		// Get the connected participants from database
-		Set<ParticipantInfo> participants = MessagingLog.getInstance().getGroupChatConnectedParticipants(chatId);
+		Set<ParticipantInfo> participants = mMessagingLog.getGroupChatConnectedParticipants(chatId);
 		
 		if (participants.size() == 0) {
 			if (logger.isActivated()) {
@@ -1138,7 +1116,7 @@ public class InstantMessagingService extends ImsService {
 		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
 
     	// Test if the contact is blocked
-	    if (ContactsManager.getInstance().isImBlockedForContact(remote)) {
+	    if (mContactsManager.isImBlockedForContact(remote)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + remote + " is blocked: automatically reject the S&F invitation");
 			}

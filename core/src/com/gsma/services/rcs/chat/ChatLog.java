@@ -29,6 +29,7 @@ import java.util.StringTokenizer;
 import android.content.Context;
 import android.net.Uri;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactUtils;
 
 /**

@@ -28,9 +28,9 @@ import java.util.Map;
 
 import android.os.IBinder;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharing;

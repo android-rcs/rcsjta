@@ -318,8 +318,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Cancel session");
 		}
-		final FileSharingSession session = mImService
-				.getFileSharingSession(mFileTransferId);
+		final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		if (session == null) {
 			/*
 			 * TODO: Throw correct exception as part of CR037 implementation
@@ -413,8 +412,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * Resume the session (only for HTTP transfer)
 	 */
 	public void resumeTransfer() {
-		FileSharingSession session = mImService
-				.getFileSharingSession(mFileTransferId);
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		if (session == null) {
 			/*
 			 * TODO: Throw correct exception as part of CR037 implementation

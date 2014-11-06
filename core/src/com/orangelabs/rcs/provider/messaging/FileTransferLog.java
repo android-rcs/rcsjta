@@ -139,7 +139,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId, MmContent content, MmContent thumbnail) {
+	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId, MmContent content, MmContent thumbnail) {
 		if (logger.isActivated()) {
 			logger.debug("addOutgoingGroupFileTransfer: fileTransferId=" + fileTransferId + ", chatId=" + chatId + " filename="
 					+ content.getName() + ", size=" + content.getSize() + ", MIME=" + content.getEncoding());
@@ -536,7 +536,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
 	 * getChatId(java.lang.String)
 	 */
-	public String getChatId(String fileTransferId) {
+	public String getFileTransferChatId(String fileTransferId) {
 		if (logger.isActivated()) {
 			logger.debug("Get file transfer chatId for " + fileTransferId);
 		}
@@ -548,7 +548,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
 	 * getContact(java.lang.String)
 	 */
-	public ContactId getRemoteContact(String fileTransferId) {
+	public ContactId getFileTransferRemoteContact(String fileTransferId) {
 		if (logger.isActivated()) {
 			logger.debug("Get file transfer contact for " + fileTransferId);
 		}
@@ -594,7 +594,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
 	 * getFileType(java.lang.String)
 	 */
-	public String getMimeType(String fileTransferId) {
+	public String getFileMimeType(String fileTransferId) {
 		if (logger.isActivated()) {
 			logger.debug("Get file type for " + fileTransferId);
 		}

@@ -3,7 +3,7 @@ package com.gsma.services.rcs.gsh;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**

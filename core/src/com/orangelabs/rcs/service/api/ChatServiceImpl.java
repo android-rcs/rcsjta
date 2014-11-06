@@ -31,12 +31,14 @@ import java.util.concurrent.Executors;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
@@ -64,7 +66,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.GroupChatEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
-import com.orangelabs.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -371,7 +372,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
 				chatId, mMessagingLog);
 		GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-				mImService, storageAccessor, mRcsSettings, mContactsManager, this);
+				mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
 		session.addListener(groupChat);
 		addGroupChat(groupChat);
     }
@@ -428,7 +429,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
 					chatId, mMessagingLog);
 			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-					mImService, storageAccessor, mRcsSettings, mContactsManager, this);
+					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
 			session.addListener(groupChat);
 
 			mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
@@ -486,7 +487,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
 					chatId, mMessagingLog);
 			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-					mImService, storageAccessor, mRcsSettings, mContactsManager, this);
+					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
 			addGroupChat(groupChat);
 
 	        Thread t = new Thread() {
@@ -525,7 +526,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
 					chatId, mMessagingLog);
 			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-					mImService, storageAccessor, mRcsSettings, mContactsManager, this);
+					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
 			session.addListener(groupChat);
 			addGroupChat(groupChat);
 
@@ -560,7 +561,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
 				chatId, mMessagingLog);
 		return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
-				mRcsSettings, mContactsManager, this);
+				mRcsSettings, mContactsManager, this, mMessagingLog);
 	}
 
 	/**
@@ -711,5 +712,18 @@ public class ChatServiceImpl extends IChatService.Stub {
 				mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this);
 		session.addListener(oneToOneChat);
 		addOneToOneChat(contact, oneToOneChat);
+	}
+
+	/**
+	 * Returns a chat message from its unique ID
+	 * 
+	 * @param msgId
+	 * @return IChatMessage
+	 * @throws RcsServiceException
+	 */
+	public IChatMessage getChatMessage(String msgId) {
+		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+				mMessagingLog, msgId);
+		return new ChatMessageImpl(persistentStorage);
 	}
 }

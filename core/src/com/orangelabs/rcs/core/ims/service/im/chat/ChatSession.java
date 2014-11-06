@@ -878,21 +878,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	
 	/**
 	 * Send a GeoLoc message
-	 * 
-	 * @param msgId Message-ID
-	 * @param geoloc GeoLocation
-	 * @return Boolean result
+	 *
+	 * @param geolocMsg GeolocMessage
 	 */
-	public abstract void sendGeolocMessage(String msgId, GeolocPush geoloc);
+	public abstract void sendGeolocMessage(GeolocMessage geolocMsg);
 	
 	/**
 	 * Send a text message
-	 * 
-	 * @param msgId Message-ID
-	 * @param txt Text message
-	 * @return Boolean result
+	 *
+	 * @param msg InstantMessage
 	 */
-	public abstract void sendTextMessage(String msgId, String txt);
+	public abstract void sendTextMessage(InstantMessage msg);
 	
 	/**
 	 * Send is composing status

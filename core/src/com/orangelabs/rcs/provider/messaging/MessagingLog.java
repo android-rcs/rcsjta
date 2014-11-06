@@ -294,8 +294,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId, MmContent content, MmContent thumbnail) {
-		fileTransferLog.addOutgoingGroupFileTransfer(chatId, fileTransferId, content, thumbnail);
+	public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId, MmContent content, MmContent thumbnail) {
+		fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail);
 	}
 
 	/*
@@ -488,13 +488,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public String getChatId(String fileTransferId) {
-		return fileTransferLog.getChatId(fileTransferId);
+	public String getFileTransferChatId(String fileTransferId) {
+		return fileTransferLog.getFileTransferChatId(fileTransferId);
 	}
 
 	@Override
-	public ContactId getRemoteContact(String fileTransferId) {
-		return fileTransferLog.getRemoteContact(fileTransferId);
+	public ContactId getFileTransferRemoteContact(String fileTransferId) {
+		return fileTransferLog.getFileTransferRemoteContact(fileTransferId);
 	}
 
 	@Override
@@ -508,8 +508,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public String getMimeType(String fileTransferId) {
-		return fileTransferLog.getMimeType(fileTransferId);
+	public String getFileMimeType(String fileTransferId) {
+		return fileTransferLog.getFileMimeType(fileTransferId);
 	}
 
 	@Override
@@ -535,5 +535,65 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public void setRejectNextGroupChatNextInvitation(String chatId) {
 		groupChatLog.setRejectNextGroupChatNextInvitation(chatId);
+	}
+
+	@Override
+	public long getMessageSentTimestamp(String msgId) {
+		return messageLog.getMessageSentTimestamp(msgId);
+	}
+
+	@Override
+	public boolean isMessageRead(String msgId) {
+		return messageLog.isMessageRead(msgId);
+	}
+
+	@Override
+	public long getMessageTimestamp(String msgId) {
+		return messageLog.getMessageTimestamp(msgId);
+	}
+
+	@Override
+	public long getMessageDeliveredTimestamp(String msgId) {
+		return messageLog.getMessageDeliveredTimestamp(msgId);
+	}
+
+	@Override
+	public long getMessageDisplayedTimestamp(String msgId) {
+		return messageLog.getMessageDisplayedTimestamp(msgId);
+	}
+
+	@Override
+	public String getMessageChatId(String msgId) {
+		return messageLog.getMessageChatId(msgId);
+	}
+
+	@Override
+	public ContactId getMessageRemoteContact(String msgId) {
+		return messageLog.getMessageRemoteContact(msgId);
+	}
+
+	@Override
+	public String getMessageMimeType(String msgId) {
+		return messageLog.getMessageMimeType(msgId);
+	}
+
+	@Override
+	public String getMessageContent(String msgId) {
+		return messageLog.getMessageContent(msgId);
+	}
+
+	@Override
+	public int getMessageDirection(String msgId) {
+		return messageLog.getMessageDirection(msgId);
+	}
+
+	@Override
+	public int getMessageStatus(String msgId) {
+		return messageLog.getMessageStatus(msgId);
+	}
+
+	@Override
+	public int getMessageReasonCode(String msgId) {
+		return messageLog.getMessageReasonCode(msgId);
 	}
 }

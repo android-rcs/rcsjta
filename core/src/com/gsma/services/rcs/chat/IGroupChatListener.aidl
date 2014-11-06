@@ -1,7 +1,5 @@
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 

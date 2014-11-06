@@ -27,13 +27,14 @@ import java.util.Set;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
@@ -41,6 +42,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -61,6 +63,8 @@ public class MessageLog implements IMessageLog {
 	private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
 	
 	private static final String[] PROJECTION_MESSAGE_ID = new String[] { MessageData.KEY_MESSAGE_ID };
+
+	private static final int FIRST_COLUMN_IDX = 0;
 
 	/**
 	 * Constructor
@@ -352,5 +356,173 @@ public class MessageLog implements IMessageLog {
 				cursor.close();
 			}
 		}
+	}
+
+	private Cursor getMessageData(String columnName, String msgId) throws SQLException {
+		String[] projection = new String[] {
+			columnName
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), projection, null,
+					null, null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+
+			throw new SQLException("No row returned while querying for message data with msgId : "
+					+ msgId);
+
+		} catch (RuntimeException e) {
+			if (logger.isActivated()) {
+				logger.error("Exception occured while retrieving message info of msgId = '" + msgId
+						+ "' ! ", e);
+			}
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
+		}
+	}
+
+	private String getDataAsString(Cursor cursor) {
+		try {
+			return cursor.getString(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private int getDataAsInt(Cursor cursor) {
+		try {
+			return cursor.getInt(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private long getDataAsLong(Cursor cursor) {
+		try {
+			return cursor.getLong(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	@Override
+	public boolean isMessageRead(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Is message read for ").append(msgId).toString());
+		}
+		return (getDataAsInt(getMessageData(MessageData.KEY_READ_STATUS, msgId)) == 1);
+	}
+
+	@Override
+	public long getMessageTimestamp(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message timestamp for ").append(msgId).toString());
+		}
+		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP, msgId));
+	}
+
+	@Override
+	public long getMessageSentTimestamp(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message sent timestamp for ").append(msgId)
+					.toString());
+		}
+		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_SENT, msgId));
+	}
+
+	@Override
+	public long getMessageDeliveredTimestamp(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message delivered timestamp for ").append(msgId)
+					.toString());
+		}
+		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_DELIVERED, msgId));
+	}
+
+	@Override
+	public long getMessageDisplayedTimestamp(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message displayed timestamp for ").append(msgId)
+					.toString());
+		}
+		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_DISPLAYED, msgId));
+	}
+
+	@Override
+	public String getMessageChatId(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message chat ID for ").append(msgId).toString());
+		}
+		return getDataAsString(getMessageData(MessageData.KEY_CHAT_ID, msgId));
+	}
+
+	@Override
+	public ContactId getMessageRemoteContact(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message remote contact for ").append(msgId)
+					.toString());
+		}
+		String number = getDataAsString(getMessageData(MessageData.KEY_CONTACT, msgId));
+		/*
+		 * null is legal value here only when this is a outgoing group message
+		 */
+		if (number == null) {
+			return null;
+		}
+		return ContactUtils.createContactId(number);
+	}
+
+	@Override
+	public String getMessageMimeType(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message mime type for ").append(msgId).toString());
+		}
+		return getDataAsString(getMessageData(MessageData.KEY_MIME_TYPE, msgId));
+	}
+
+	@Override
+	public String getMessageContent(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message content for ").append(msgId).toString());
+		}
+		return getDataAsString(getMessageData(MessageData.KEY_CONTENT, msgId));
+	}
+
+	@Override
+	public int getMessageDirection(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message direction for ").append(msgId).toString());
+		}
+		return getDataAsInt(getMessageData(MessageData.KEY_DIRECTION, msgId));
+	}
+
+	@Override
+	public int getMessageStatus(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message status for ").append(msgId).toString());
+		}
+		return getDataAsInt(getMessageData(MessageData.KEY_STATUS, msgId));
+	}
+
+	@Override
+	public int getMessageReasonCode(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message reason code for ").append(msgId).toString());
+		}
+		return getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId));
 	}
 }

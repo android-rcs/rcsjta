@@ -41,6 +41,7 @@ import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.api.ServerApiException;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.MimeManager;
+import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -67,71 +68,33 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	/**
 	 * Constructor
 	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param content
-	 *            Content of file to share
-	 * @param contact
-	 *            Remote contact identifier
-	 * @param remoteUri
-	 *            the remote URI
-	 * @param fileIcon
-	 *            true if the stack must try to attach file icon
-	 * @param tId
-	 *            TID of the upload
-	 * @param core Core
-	 * @param messagingLog MessagingLog
-	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
-			ContactId contact, String remoteUri, boolean fileIcon, String tId, Core core,
-			MessagingLog messagingLog) {
-		super(parent, content, contact, remoteUri, null, null, null, IdGenerator.generateMessageID());
-		mCore = core;
-		mMessagingLog = messagingLog;
-		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contact+ " remoteURI= "+remoteUri);
-		}
-		MmContent fileIconContent = null;
-		if (fileIcon && MimeManager.isImageType(content.getEncoding())) {
-			// Create the file icon
-			fileIconContent = FileTransferUtils.createFileicon(content.getUri(), getFileTransferId());
-			setFileicon(fileIconContent);
-		}
-		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), fileIconContent, this, tId);
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param content
-	 *            Content of file to share
-	 * @param contact
-	 *            Remote contact identifier
-	 * @param remoteUri
-	 *            Remote URI
-	 * @param fileIconContent
-	 *            Content of file icon
 	 * @param fileTransferId
 	 *            File transfer Id
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content of file to share
+	 * @param contact
+	 *            Remote contact identifier
+	 * @param fileIconContent
+	 *            Content of fileicon
 	 * @param tId
 	 *            TID of the upload
 	 * @param core Core
 	 * @param messagingLog MessagingLog
 	 */
-	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
-			ContactId contact, String remoteUri, MmContent fileIconContent, String fileTransferId,
-			String tId, Core core, MessagingLog messagingLog) {
-		super(parent, content, contact, remoteUri, fileIconContent, null, null, fileTransferId);
+	public OriginatingHttpFileSharingSession(String fileTransferId, ImsService parent,
+			MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
+			MessagingLog messagingLog) {
+		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
+				null, fileTransferId);
 		mCore = core;
 		mMessagingLog = messagingLog;
 		if (logger.isActivated()) {
-			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
+			logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
 		}
-		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), getFileicon(), this, tId);
+
+		uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId);
 	}
 
 	/**

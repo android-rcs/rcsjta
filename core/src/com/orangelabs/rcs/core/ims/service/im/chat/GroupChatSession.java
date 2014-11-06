@@ -29,12 +29,16 @@ import java.util.Set;
 import javax2.sip.header.ExtensionHeader;
 
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -229,21 +233,21 @@ public abstract class GroupChatSession extends ChatSession {
 	}
 
 	@Override
-	public void sendTextMessage(String msgId, String txt) {
+	public void sendTextMessage(InstantMessage msg) {
 		boolean useImdn = getImdnManager().isImdnActivated()
 				&& !RcsSettings.getInstance().isAlbatrosRelease();
 		String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
 		String to = ChatUtils.ANOMYNOUS_URI;
+		String msgId = msg.getMessageId();
+		String textMessage = msg.getTextMessage();
 		String networkContent;
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
-					StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
-
+					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
 		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt),
-					InstantMessage.MIME_TYPE);
+			networkContent = ChatUtils.buildCpimMessage(from, to,
+					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
 		}
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
@@ -267,22 +271,21 @@ public abstract class GroupChatSession extends ChatSession {
 	}
 
 	@Override
-	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
+	public void sendGeolocMessage(GeolocMessage geolocMsg) {
+		String msgId = geolocMsg.getMessageId();
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
 		String to = ChatUtils.ANOMYNOUS_URI;
-		String geoDoc = ChatUtils.buildGeolocDocument(geoloc,
+		String geoDoc = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
 				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
 		String networkContent;
 		if (useImdn) {
-			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
-					geoDoc, GeolocInfoDocument.MIME_TYPE);
-
+			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId, geoDoc,
+					GeolocInfoDocument.MIME_TYPE);
 		} else {
 			networkContent = ChatUtils.buildCpimMessage(from, to, geoDoc,
 					GeolocInfoDocument.MIME_TYPE);
 		}
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn, null);
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {

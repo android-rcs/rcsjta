@@ -23,9 +23,9 @@ package com.orangelabs.rcs.service.api;
 
 import javax2.sip.message.Response;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
@@ -112,7 +112,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 		GeolocPush geoloc = session.getGeoloc();
 		if (geoloc != null) {
-			com.gsma.services.rcs.chat.Geoloc geolocApi = new com.gsma.services.rcs.chat.Geoloc(
+			com.gsma.services.rcs.Geoloc geolocApi = new com.gsma.services.rcs.Geoloc(
 					geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(),
 					geoloc.getExpiration(), geoloc.getAccuracy());
 			return geolocApi;

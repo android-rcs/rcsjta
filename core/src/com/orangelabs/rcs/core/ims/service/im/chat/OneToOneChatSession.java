@@ -145,23 +145,23 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Send a text message
 	 * 
-	 * @param id Message-ID
-	 * @param txt Text message
+	 * @param msg InstantMessage
 	 */
-	public void sendTextMessage(String msgId, String txt) {
+	public void sendTextMessage(InstantMessage msg) {
+		String msgId = msg.getMessageId();
 		boolean useImdn = getImdnManager().isImdnActivated();
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
+		String textMessage = msg.getTextMessage();
 		String networkContent;
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
-					StringUtils.encodeUTF8(txt), InstantMessage.MIME_TYPE);
+					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
 
 		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to, StringUtils.encodeUTF8(txt),
-					InstantMessage.MIME_TYPE);
+			networkContent = ChatUtils.buildCpimMessage(from, to,
+					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
 		}
-		InstantMessage msg = new InstantMessage(msgId, getRemoteContact(), txt, useImdn, null);
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
@@ -187,26 +187,23 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Send a geoloc message
 	 * 
-	 * @param msgId Message ID
-	 * @param geoloc Geoloc info
+	 * @param geolocMsg GeolocMessage
 	 */
-	public void sendGeolocMessage(String msgId, GeolocPush geoloc) {
+	public void sendGeolocMessage(GeolocMessage geolocMsg) {
 		boolean useImdn = getImdnManager().isImdnActivated();
+		String msgId = geolocMsg.getMessageId();
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
-		String geoDoc = ChatUtils.buildGeolocDocument(geoloc,
+		String geoDoc = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
 				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
 		String networkContent;
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, geoDoc,
 					GeolocInfoDocument.MIME_TYPE);
-
 		} else {
 			networkContent = ChatUtils.buildCpimMessage(from, to, geoDoc,
 					GeolocInfoDocument.MIME_TYPE);
 		}
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, getRemoteContact(), geoloc, useImdn,
-				null);
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {

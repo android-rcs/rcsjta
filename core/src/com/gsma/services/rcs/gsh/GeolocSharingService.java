@@ -32,11 +32,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**

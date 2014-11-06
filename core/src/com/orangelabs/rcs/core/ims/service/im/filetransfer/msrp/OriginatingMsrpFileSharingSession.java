@@ -84,6 +84,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	/**
 	 * Constructor
 	 * 
+	 * @param fileTransferId
+	 *            File transfer Id
 	 * @param parent
 	 *            IMS service
 	 * @param content
@@ -91,13 +93,14 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 * @param contact
 	 *            Remote contact identifier
 	 * @param fileIcon
-	 *            true if the stack must try to attach file icon
+	 *            Content of fileicon
 	 */
-	public OriginatingMsrpFileSharingSession(ImsService parent, MmContent content, ContactId contact, boolean fileIcon) {
-		super(parent, content, contact, null, IdGenerator.generateMessageID());
+	public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
+			MmContent content, ContactId contact, MmContent fileIcon) {
+		super(parent, content, contact, fileIcon, fileTransferId);
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileIcon="+fileIcon);
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName());
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -105,20 +108,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		// Set contribution ID
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
 		setContributionID(id);
-		
-		if (fileIcon) {
-			try {
-				// Create the file icon
-				setFileicon(FileTransferUtils.createFileicon(content.getUri(), getSessionID()));
-			} catch (SecurityException e) {
-				if (logger.isActivated()) {
-					logger.error(
-							"File icon creation has failed due to that the file is not accessible!",
-							e);
-				}
-				/*TODO: Take appropriate action in CR037.*/
-			}
-		}
+
 	}
 
 	/**

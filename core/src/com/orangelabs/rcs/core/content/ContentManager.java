@@ -128,6 +128,15 @@ public class ContentManager{
 	public static MmContent createMmContent(Uri uri, long size, String fileName) {
 		String extension = MimeManager.getFileExtension(fileName);
 		String mime = MimeManager.getInstance().getMimeType(extension);
+		if (size < 0 || fileName == null || mime == null) {
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
+			throw new IllegalArgumentException(new StringBuilder("Invalid file, size ")
+					.append(size).append(" fileName ").append(fileName).append(" mimeType ")
+					.append(mime).append(" unable to create MmContent.").toString());
+		}
 		return createMmContentFromMime(uri, mime, size, fileName);
 	}
 

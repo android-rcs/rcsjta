@@ -32,6 +32,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -77,12 +78,14 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	/**
 	 * Constructor
 	 * 
+	 * @param fileTransferId
+	 *            File transfer Id
 	 * @param parent
 	 *            IMS service
 	 * @param content
 	 *            The file content to share
 	 * @param fileIcon
-	 *            true if the stack must try to attach file icon
+	 *            Content of fileicon
 	 * @param conferenceId
 	 *            Conference ID
 	 * @param participants
@@ -96,23 +99,17 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 * @param core Core
 	 * @param messagingLog MessagingLog
 	 */
-	public OriginatingHttpGroupFileSharingSession(ImsService parent, MmContent content,
-			boolean fileIcon, String conferenceId, Set<ParticipantInfo> participants,
-			String chatSessionID, String chatContributionId, String tId, Core core,
-			MessagingLog messagingLog) {
-		super(parent, content, null, conferenceId, null, chatSessionID, chatContributionId, IdGenerator.generateMessageID());
+	public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
+			MmContent content, MmContent fileIcon, String conferenceId,
+			Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId,
+			String tId, Core core, MessagingLog messagingLog) {
+		super(parent, content, null, conferenceId, fileIcon, chatSessionID, chatContributionId, fileTransferId);
 		mCore = core;
 		mMessagingLog = messagingLog;
 		this.participants = participants;
-		
-		MmContent fileIconContent = null;
-		if (fileIcon && MimeManager.isImageType(content.getEncoding())) {
-			// Create the file icon
-			fileIconContent = FileTransferUtils.createFileicon(content.getUri(), getSessionID());
-			setFileicon(fileIconContent);
-		}
+
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), fileIconContent, this, tId);
+		uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId);
 	}
 
 	/**

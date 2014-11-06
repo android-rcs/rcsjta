@@ -52,11 +52,10 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param resumeUpload the data object in DB
      */
 	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
-		super(parent, content, resumeUpload.getContact(), PhoneUtils
-				.formatContactIdToUri(resumeUpload.getContact()),
+		super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
 				resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
-						.getFileicon()) : null, resumeUpload.getFileTransferId(), resumeUpload
-						.getTId(), Core.getInstance(), MessagingLog.getInstance());
+						.getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
+				MessagingLog.getInstance());
 		this.resumeFT = resumeUpload;
 	}
 

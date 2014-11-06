@@ -78,7 +78,7 @@ public class GeolocMessage extends InstantMessage {
 
 	@Override
 	public String toString() {
-		return "GeolocMessage [geoloc=" + geoloc + ", " + super.toString() + "]";
+		return geoloc.toString();
 	}
 	
 	

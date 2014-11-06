@@ -65,7 +65,7 @@ public class FileTransferPersistedStorageAccessor {
 		 * times.
 		 */
 		if (mChatId == null) {
-			mChatId = mMessagingLog.getChatId(mFileTransferId);
+			mChatId = mMessagingLog.getFileTransferChatId(mFileTransferId);
 		}
 		return mChatId;
 	}
@@ -77,7 +77,7 @@ public class FileTransferPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mContact == null) {
-			mContact = mMessagingLog.getRemoteContact(mFileTransferId);
+			mContact = mMessagingLog.getFileTransferRemoteContact(mFileTransferId);
 		}
 		return mContact;
 	}
@@ -125,7 +125,7 @@ public class FileTransferPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mMimeType == null) {
-			mMimeType = mMessagingLog.getMimeType(mFileTransferId);
+			mMimeType = mMessagingLog.getFileMimeType(mFileTransferId);
 		}
 		return mMimeType;
 	}

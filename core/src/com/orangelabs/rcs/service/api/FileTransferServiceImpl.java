@@ -54,6 +54,7 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -64,6 +65,7 @@ import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
+import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -283,6 +285,47 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }    
 
 	/**
+	 * 1-1 file send operation initiated
+	 *
+	 * @param contact
+	 * @param file
+	 * @param fileIcon
+	 * @param fileTransferId
+	 * return IFileTransfer OneToOneFileTransferImpl
+	 * @throws ServerApiException
+	 */
+	private IFileTransfer sendOneToOneFile(ContactId contact, MmContent file, MmContent fileIcon,
+			String fileTransferId) throws ServerApiException {
+		try {
+			final FileSharingSession session = mImService.initiateFileTransferSession(
+					fileTransferId, contact, file, fileIcon);
+
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
+					new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
+
+			new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			}.start();
+			return oneToOneFileTransfer;
+
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not correct implementation. It will be fixed
+			 * properly in CR037
+			 */
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e);
+		}
+	}
+
+	/**
      * Transfers a file to a contact. The parameter file contains the URI of the
      * file to be transferred (for a local or a remote file). The parameter
      * contact supports the following formats: MSISDN in national or
@@ -302,75 +345,79 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Transfer file " + file + " to " + contact + " (fileicon=" + attachfileIcon + ")");
 		}
-
-		// Test IMS connection
-		ServerApiUtils.testIms();
-		MmContent content = null;
 		try {
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
-
-			content = ContentManager.createMmContent(file, fileDescription.getSize(),
+			MmContent fileIconContent = null;
+			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
 					fileDescription.getName());
-			if (content == null || content.getSize() <= 0 || content.getEncoding() == null
-					|| content.getName() == null) {
-				throw new ServerApiException("FileTransfer initiation failed: invalid file");
+
+			String fileTransferId = IdGenerator.generateMessageID();
+			if (attachfileIcon && MimeManager.isImageType(content.getEncoding())) {
+				fileIconContent = FileTransferUtils.createFileicon(file, fileTransferId);
 			}
-			final FileSharingSession session = mImService.initiateFileTransferSession(contact, content, attachfileIcon);
 
-			String fileTransferId = session.getFileTransferId();
-			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, mMessagingLog);
-			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
-					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-					this);
-			session.addListener(oneToOneFileTransfer);
-
-			
-			mMessagingLog.addFileTransfer(fileTransferId, contact,
-					Direction.OUTGOING, session.getContent(), session.getFileicon(),
-					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING,
+					content, fileIconContent, FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 			mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			addFileTransfer(oneToOneFileTransfer);
+			if (!ServerApiUtils.isImsConnected()) {
+				/*
+				 * TODO : Check if file has to be queued else throw exception
+				 */
+				return null;
+			}
+			return sendOneToOneFile(contact, content, fileIconContent, fileTransferId);
+
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not the correct way to handle this exception, and
+			 * will be fixed in CR037
+			 */
+			if (logger.isActivated()) {
+				logger.error("Unexpected exception", e);
+			}
+			throw new ServerApiException(e);
+		}
+	}
+
+	/**
+	 * Group file send operation initiated
+	 *
+	 * @param participants
+	 * @param content
+	 * @param fileIcon
+	 * @param chatId
+	 * @param fileTransferId
+	 * @throws ServerApiException
+	 */
+	private IFileTransfer sendGroupFile(Set<ParticipantInfo> participants, MmContent content,
+			MmContent fileIcon, String chatId, String fileTransferId) throws ServerApiException {
+		try {
+			final FileSharingSession session = mImService.initiateGroupFileTransferSession(
+					fileTransferId, participants, content, fileIcon, chatId);
+
+			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+					chatId, mGroupFileTransferBroadcaster, mImService,
+					new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this);
+			session.addListener(groupFileTransfer);
+			addFileTransfer(groupFileTransfer);
 
 			new Thread() {
 				public void run() {
 					session.startSession();
 				}
 			}.start();
+			return groupFileTransfer;
 
-			return oneToOneFileTransfer;
-
-			/* TODO: This is not correct implementation. It will be fixed properly in CR037 */
-		} catch (CoreException e) {
+		} catch (Exception e) {
+			/*
+			 * TODO: Handle Security exception in Exception handling CR037
+			 */
 			if (logger.isActivated()) {
-				logger.error("Core Exception cought, outgoing session rejected due to max size exceeded", e);
+				logger.error("Unexpected error", e);
 			}
-			MmContent fileiconContent = null;
-			mMessagingLog.addFileTransfer(IdGenerator.generateMessageID(), contact,
-					Direction.OUTGOING, content, fileiconContent,
-					FileTransfer.State.REJECTED, ReasonCode.REJECTED_MAX_SIZE);
-			throw new ServerApiException(e);
-
-		} catch(IOException e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected io exception", e);
-			}
-			throw new ServerApiException(e);
-
-		} catch (IllegalArgumentException e) {
-			if (logger.isActivated()) {
-				logger.error("Illegal arugment exception", e);
-			}
-			/*TODO: This is not the correct way to handle this exception, and will be fixed in CR037*/
-			throw new ServerApiException(e);
-
-		} catch(RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected runtime exception", e);
-			}
-			throw new ServerApiException(e);
+			throw new ServerApiException(e.getMessage());
 		}
 	}
 
@@ -394,42 +441,35 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
 					fileDescription.getName());
-			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
-				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
-			}
+
 			Set<ParticipantInfo> participants = mMessagingLog
 					.getGroupChatConnectedParticipants(chatId);
-			final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-					participants, content, attachfileIcon, chatId);
+			String fileTransferId = IdGenerator.generateMessageID();
+			MmContent fileIconContent = null;
+			if (attachfileIcon && MimeManager.isImageType(content.getEncoding())) {
+				fileIconContent = FileTransferUtils
+						.createFileicon(content.getUri(), fileTransferId);
+			}
 
-			String fileTransferId = session.getFileTransferId();
-			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, mMessagingLog);
-			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
-					chatId, mGroupFileTransferBroadcaster, mImService, storageAccessor, this);
-			session.addListener(groupFileTransfer);
-
-			mMessagingLog.addOutgoingGroupFileTransfer(session.getContributionID(),
-					fileTransferId, session.getContent(), session.getFileicon());
+			mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId,
+					content, fileIconContent);
 			mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			addFileTransfer(groupFileTransfer);
-
-			new Thread() {
-				public void run() {
-					session.startSession();
-				}
-			}.start();
-			return groupFileTransfer;
+			if (!ServerApiUtils.isImsConnected()) {
+				/*
+				 * TODO : Check if file has to be queued else throw exception
+				 */
+				return null;
+			}
+			return sendGroupFile(participants, content, fileIconContent, chatId, fileTransferId);
 
 		} catch (Exception e) {
-			// TODO:Handle Security exception in CR026
+			/*
+			 * TODO: Handle Security exception in CR037
+			 */
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
-			}
-			if (e instanceof RuntimeException) {
-				throw (RuntimeException)e;
 			}
 			throw new ServerApiException(e.getMessage());
 		}

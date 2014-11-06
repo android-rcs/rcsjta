@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -273,7 +274,7 @@ public class GroupChat {
 	 */
 	public ChatMessage sendMessage(String text) throws RcsServiceException {
 		try {
-			return mGroupChatInf.sendMessage(text);
+			return new ChatMessage(mGroupChatInf.sendMessage(text));
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -283,12 +284,12 @@ public class GroupChat {
      * Sends a geoloc message
      * 
      * @param geoloc Geoloc info
-     * @return GeolocMessage
+     * @return ChatMessage
      * @throws RcsServiceException
      */
-    public GeolocMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
+    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
 		try {
-			return mGroupChatInf.sendMessage2(geoloc);
+			return new ChatMessage(mGroupChatInf.sendMessage2(geoloc));
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}    	

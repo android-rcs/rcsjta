@@ -182,7 +182,7 @@ public interface IFileTransferLog {
 	 * @param fileTransferId Unique ID of file transfer
 	 * @return chatId
 	 */
-	public String getChatId(String fileTransferId);
+	public String getFileTransferChatId(String fileTransferId);
 
 	/**
 	 * Get file transfer remote contact from its unique ID
@@ -190,7 +190,7 @@ public interface IFileTransferLog {
 	 * @param fileTransferId Unique ID of file transfer
 	 * @return contact
 	 */
-	public ContactId getRemoteContact(String fileTransferId);
+	public ContactId getFileTransferRemoteContact(String fileTransferId);
 
 	/**
 	 * Get file from its unique ID
@@ -214,7 +214,7 @@ public interface IFileTransferLog {
 	 * @param fileTransferId Unique ID of file transfer
 	 * @return Direction
 	 */
-	public String getMimeType(String fileTransferId);
+	public String getFileMimeType(String fileTransferId);
 
 	/**
 	 * Get file icon from its unique ID

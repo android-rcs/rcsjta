@@ -177,10 +177,13 @@ public class GeolocPush {
      * @return String
      */
     public String toString() {
-        return "Label=" + label +
-                ", Latitude=" + latitude +
-                ", Longitude=" + longitude +
-        		", Expiration=" + expiration +
-        		", Accuracy=" + accuracy;
+        StringBuilder providerContent;
+        if (label == null) {
+            providerContent = new StringBuilder();
+        } else {
+            providerContent = new StringBuilder(label);
+        }
+        return providerContent.append(",").append(latitude).append(",").append(longitude)
+                .append(",").append(expiration).append(",").append(accuracy).toString();
     }
 }

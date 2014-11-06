@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.gsh;
 
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**

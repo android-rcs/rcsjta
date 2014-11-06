@@ -126,4 +126,100 @@ public interface IMessageLog {
 	 * @return true if the message already exists in db
 	 */
 	public boolean isMessagePersisted(String msgId);
+
+	/**
+	 * Check if the message is read by remote contact
+	 * 
+	 * @param msgId message ID
+	 * @return true is read
+	 */
+	public boolean isMessageRead(String msgId);
+
+	/**
+	 * Returns the timestamp of a message
+	 * 
+	 * @param msgId
+	 * @return timestamp
+	 */
+	public long getMessageTimestamp(String msgId);
+
+	/**
+	 * Returns the timestamp_sent of a message
+	 * 
+	 * @param msgId
+	 * @return timestamp_sent
+	 */
+	public long getMessageSentTimestamp(String msgId);
+
+	/**
+	 * Returns the timestamp_delivered of a message
+	 * 
+	 * @param msgId
+	 * @return timestamp_delivered
+	 */
+	public long getMessageDeliveredTimestamp(String msgId);
+
+	/**
+	 * Returns the timestamp_displayed of a message
+	 * 
+	 * @param msgId
+	 * @return timestamp_displayed
+	 */
+	public long getMessageDisplayedTimestamp(String msgId);
+
+	/**
+	 * Get message chatId from its unique ID
+	 * 
+	 * @param msgId
+	 * @return chatId
+	 */
+	public String getMessageChatId(String msgId);
+
+	/**
+	 * Get message remote contact from its unique ID
+	 * 
+	 * @param msgId
+	 * @return contact
+	 */
+	public ContactId getMessageRemoteContact(String msgId);
+
+	/**
+	 * Get message direction from its unique ID
+	 * 
+	 * @param msgId
+	 * @return Mime type
+	 */
+	public String getMessageMimeType(String msgId);
+
+	/**
+	 * Get message content from its unique ID
+	 * 
+	 * @param msgId
+	 * @return Content
+	 */
+	public String getMessageContent(String msgId);
+
+	/**
+	 * Get message direction from its unique ID
+	 * 
+	 * @param msgId
+	 * @return Direction
+	 */
+	public int getMessageDirection(String msgId);
+
+	/**
+	 * Get message state from its unique ID
+	 * 
+	 * @param msgId
+	 * @return State
+	 */
+	public int getMessageStatus(String msgId);
+
+	/**
+	 * Get message reason code from its unique ID
+	 * 
+	 * @param msgId
+	 * @return reason code of the state
+	 */
+	public int getMessageReasonCode(String msgId);
 }

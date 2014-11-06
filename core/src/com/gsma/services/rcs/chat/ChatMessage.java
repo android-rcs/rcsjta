@@ -19,11 +19,11 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.chat;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -31,156 +31,105 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
- *
  */
-public class ChatMessage implements Parcelable {
+public class ChatMessage {
 
-	/**
-	 * Unique message Id
-	 */
-	private final String mId;
+	private final IChatMessage mChatMessageInf;
 
-	/**
-	 * Contact who has sent the message
-	 */
-	private final ContactId mRemoteContact;
-	
-	/**
-	 * Message content
-	 */
-	private final String mContent;
-	
-	/**
-	 * Time-stamp
-	 */
-	private final long mTimestamp;
-
-	/**
-	 * Time-stamp sent
-	 */
-	private final long mTimestampSent;
-
-    /**
-     * Constructor for outgoing message
-     * 
-     * @param id Message Id
-     * @param remoteContact Contact Id
-     * @param content Message content
-     * @param timestamp Time-stamp
-     * @param timestampSent Time-stamp sent
-     * @hide
-	 */
-	public ChatMessage(String id, ContactId remoteContact, String content, long timestamp, long timestampSent) {
-		mId = id;
-		mRemoteContact = remoteContact;
-		mContent = content;
-		mTimestamp = timestamp;
-		mTimestampSent = timestampSent;
-	}
-	
 	/**
 	 * Constructor
 	 * 
-	 * @param source Parcelable source
-     * @hide
+	 * @param chatMessageInf IChatMessage
 	 */
-	public ChatMessage(Parcel source) {
-		mId = source.readString();
-		boolean containsContactId = source.readInt() != 0;
-		if (containsContactId) {
-			mRemoteContact = ContactId.CREATOR.createFromParcel(source);
-		} else {
-			mRemoteContact = null;
-		}
-		mContent = source.readString();
-		mTimestamp = source.readLong();
-		mTimestampSent = source.readLong();
-    }
-	
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-     * @hide
-	 */
-	public int describeContents() {
-        return 0;
-    }
+	public ChatMessage(IChatMessage chatMessageInf) {
+		mChatMessageInf = chatMessageInf;
+	}
 
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(mId);
-    	if (mRemoteContact != null) {
-    		dest.writeInt(1);
-    		mRemoteContact.writeToParcel(dest, flags);
-    	} else {
-    		dest.writeInt(0);
-    	}
-    	dest.writeString(mContent);
-    	dest.writeLong(mTimestamp);
-    	dest.writeLong(mTimestampSent);
-    }
-
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<ChatMessage> CREATOR
-            = new Parcelable.Creator<ChatMessage>() {
-        public ChatMessage createFromParcel(Parcel source) {
-            return new ChatMessage(source);
-        }
-
-        public ChatMessage[] newArray(int size) {
-            return new ChatMessage[size];
-        }
-    };	
-	
 	/**
 	 * Returns the message ID
 	 * 
 	 * @return ID
+	 * @throws RcsServiceException
 	 */
-    public String getId(){
-    	return mId;
-    }
+	public String getId() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getId();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
 
 	/**
 	 * Returns the contact
 	 * 
 	 * @return ContactId
+	 * @throws RcsServiceException
 	 */
-	public ContactId getRemoteContact() {
-		return mRemoteContact;
+	public ContactId getRemoteContact() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getContact();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
 	}
 
 	/**
 	 * Returns the message content
 	 * 
 	 * @return String
+	 * @throws RcsServiceException
 	 */
-	public String getContent() {
-		return mContent;
+	public String getContent() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getContent();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
 	}
-	
+
+	/**
+	 * Returns the mime type of the chat message.
+	 * 
+	 * @return ContactId
+	 * @throws RcsServiceException
+	 */
+	public String getMimeType() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getMimeType();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the direction of message (incoming or outgoing)
+	 * 
+	 * @return Direction
+	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @throws RcsServiceException
+	 */
+	public int getDirection() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getDirection();
+		} catch(Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Returns the local time-stamp of when the chat message was sent and/or
 	 * queued for outgoing messages or the local time-stamp of when the chat
 	 * message was received for incoming messages.
 	 * 
 	 * @return long
+	 * @throws RcsServiceException
 	 */
-	public long getTimestamp() {
-		/* TODO: This method will be implemented in CR018. */
-		throw new UnsupportedOperationException("Method not supported yet!");
+	public long getTimestamp() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getTimestamp();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
 	}
 
 	/**
@@ -189,9 +138,99 @@ public class ChatMessage implements Parcelable {
 	 * message was sent for incoming messages.
 	 * 
 	 * @return long
+	 * @throws RcsServiceException
 	 */
-	public long getTimestampSent() {
-		/* TODO: This method will be implemented in CR018. */
-		throw new UnsupportedOperationException("Method not supported yet!");
+	public long getTimestampSent() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getTimestampSent();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the chat message was delivered for
+	 * outgoing messages or 0 for incoming messages or it was not yet delivered.
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestampDelivered() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getTimestampDelivered();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the chat message was displayed for
+	 * outgoing messages or 0 for incoming messages or it was not yes displayed.
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestampDisplayed() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getTimestampDisplayed();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the status of the chat message.
+	 * 
+	 * @return Status
+	 * @throws RcsServiceException
+	 */
+	public int getStatus() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getStatus();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the reason code of the chat message.
+	 * 
+	 * @return ReasonCode
+	 * @throws RcsServiceException
+	 */
+	public int getReasonCode() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getReasonCode();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the chat ID of this chat message.
+	 * 
+	 * @return String
+	 * @throws RcsServiceException
+	 */
+	public String getChatId() throws RcsServiceException {
+		try {
+			return mChatMessageInf.getChatId();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns true is this chat message has been marked as read.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean isRead() throws RcsServiceException {
+		try {
+			return mChatMessageInf.isRead();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
 	}
 }
