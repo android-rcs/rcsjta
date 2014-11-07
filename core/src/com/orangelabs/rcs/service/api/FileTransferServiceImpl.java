@@ -99,7 +99,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 	}
 
-	private int imdnToFailedReasonCode(ImdnDocument imdn) {
+	private int imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
 		String notificationType = imdn.getNotificationType();
 		if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
 			return ReasonCode.FAILED_DELIVERY;
@@ -223,6 +223,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			logger.info("Receive FT invitation from " + contact + " file=" + session.getContent().getName()
 					+ " size=" + session.getContent().getSize() + " displayName=" + displayName);
 		}
+
 
 		// Update displayName of remote contact
 		ContactsManager.getInstance().setContactDisplayName(contact, displayName);
@@ -539,7 +540,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
 				|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
 				|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-			int reasonCode = imdnToFailedReasonCode(imdn);
+			int reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
 			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.FAILED, reasonCode);
@@ -549,79 +550,84 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 	}
 
+    private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
+            ContactId contact) {
+        MessagingLog messagingLog = MessagingLog.getInstance();
+        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+                GroupDeliveryInfoLog.Status.DELIVERED, GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+        mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
+                fileTransferId, GroupDeliveryInfoLog.Status.DELIVERED,
+                GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+        if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
+            messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
+            ContactId contact) {
+        MessagingLog messagingLog = MessagingLog.getInstance();
+        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+                GroupDeliveryInfoLog.Status.DISPLAYED, GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+        mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
+                fileTransferId, GroupDeliveryInfoLog.Status.DISPLAYED,
+                GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+        if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+            messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
+            ContactId contact, int reasonCode) {
+        MessagingLog messagingLog = MessagingLog.getInstance();
+        if (ReasonCode.FAILED_DELIVERY == reasonCode) {
+            messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+                    GroupDeliveryInfoLog.Status.FAILED,
+                    GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
+            mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
+                    fileTransferId, GroupDeliveryInfoLog.Status.FAILED,
+                    GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
+            return;
+        }
+        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+                GroupDeliveryInfoLog.Status.FAILED, GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
+        mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
+                fileTransferId, GroupDeliveryInfoLog.Status.FAILED,
+                GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
+    }
+
     /**
-     * Group File Transfer delivery status delivered
-     *
-     * @param chatId
-     * @param fileTransferId File transfer Id
-     * @param contact Contact who received file
-     * @param state State to set
+     * Handles group file transfer delivery status.
+     * 
+     * @param chatId Chat ID
+     * @param imdn Imdn Document
+     * @param contact Contact ID
      */
-	private void handleGroupFileDeliveryStatus(String chatId, String fileTransferId,
-			ContactId contact, int state, int reasonCode) {
-		MessagingLog messagingLog = MessagingLog.getInstance();
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact, state,
-				GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
-		switch (state) {
-			case GroupDeliveryInfoLog.Status.FAILED:
-				break;
-			case GroupDeliveryInfoLog.Status.DELIVERED:
-				if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
-					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-							FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
-
-					mGroupFileTransferBroadcaster.broadcastStateChanged(chatId,
-							fileTransferId, FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
-				}
-				break;
-			case GroupDeliveryInfoLog.Status.DISPLAYED:
-				if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
-							FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
-
-					mGroupFileTransferBroadcaster.broadcastStateChanged(chatId,
-							fileTransferId, FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
-				}
-				break;
-			default:
-				if (logger.isActivated()) {
-					logger.error("Unexpected delivery status received(state=" + state + ")");
-				}
-				throw new IllegalArgumentException(
-						"Unknown state in FileTransferServiceImpl.handleGroupFileDeliveryStatus: "
-								+ state + "!");
-		}
-
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact, state,
-				reasonCode);
-
-		mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId,
-				contact, fileTransferId, state, reasonCode);
-	}
-
-    /**
-	 * Group File Transfer delivery status.
-	 *
-	 * @param ImdnDocument imdn Imdn Document
-	 * @param contact contact who received file
-	 */
-	public void handleGroupFileDeliveryStatus(String chatId, ImdnDocument imdn,
-			ContactId contact) {
-		String status = imdn.getStatus();
-		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					GroupDeliveryInfoLog.Status.DELIVERED, ReasonCode.UNSPECIFIED);
-		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					GroupDeliveryInfoLog.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
-		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
-				|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
-				|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-			int reasonCode = imdnToFailedReasonCode(imdn);
-			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					GroupDeliveryInfoLog.Status.FAILED, reasonCode);
-		}
-	}
+    public void handleGroupFileDeliveryStatus(String chatId, ImdnDocument imdn, ContactId contact) {
+        String status = imdn.getStatus();
+        String msgId = imdn.getMsgId();
+        if (logger.isActivated()) {
+            logger.info(new StringBuilder("Handling group file delivery status; contact=")
+                    .append(contact).append(", msgId=").append(msgId).append(", status=")
+                    .append(status).append(", notificationType=")
+                    .append(imdn.getNotificationType()).toString());
+        }
+        if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+            handleGroupFileDeliveryStatusDelivered(chatId, msgId, contact);
+        } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+            handleGroupFileDeliveryStatusDisplayed(chatId, msgId, contact);
+        } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
+                || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
+                || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
+            int reasonCode = imdnToFileTransferFailedReasonCode(imdn);
+            handleGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode);
+        }
+    }
 
 	/**
 	 * Returns service version
