@@ -259,17 +259,13 @@ public class RichCallHistory {
 	/**
 	 * Update the image sharing progress
 	 * 
-	 * @param sessionId Session ID of the entry
-	 * @param current Current size
-	 * @param total Total size
+	 * @param sharingId Session ID of the entry
+	 * @param currentSize Current size
 	 */
-	public void setImageSharingProgress(String sessionId, long current, long total) {
+	public void updateImageSharingProgress(String sharingId, long currentSize) {
 		ContentValues values = new ContentValues();
-		values.put(ImageSharingData.KEY_SIZE, current);
-		values.put(ImageSharingData.KEY_TOTAL_SIZE, total);
-		values.put(ImageSharingData.KEY_STATE, ImageSharing.State.STARTED);
-		values.put(ImageSharingData.KEY_REASON_CODE, ImageSharing.ReasonCode.UNSPECIFIED);
-		String[] whereArgs = new String[] { sessionId };
+		values.put(ImageSharingData.KEY_SIZE, currentSize);
+		String[] whereArgs = new String[] { sharingId };
 		cr.update(ishDatabaseUri, values, WHERE_CLAUSE_ISH, whereArgs);
 	}
 

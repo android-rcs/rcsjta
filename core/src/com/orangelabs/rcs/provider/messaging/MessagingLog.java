@@ -330,11 +330,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long, long)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long)
 	 */
 	@Override
-	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize) {
-		fileTransferLog.updateFileTransferProgress(fileTransferId, size, totalSize);
+	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
+		fileTransferLog.updateFileTransferProgress(fileTransferId, currentSize);
 	}
 
 	/* (non-Javadoc)

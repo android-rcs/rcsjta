@@ -473,8 +473,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	public void handleTransferProgress(long currentSize, long totalSize) {
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize,
-					totalSize);
+			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize);
 
 			mGroupFileTransferBroadcaster.broadcastTransferprogress(getChatId(), fileTransferId,
 					currentSize, totalSize);

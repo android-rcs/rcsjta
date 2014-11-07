@@ -385,12 +385,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param totalSize Total size to be transferred
      */
     public void handleSharingProgress(long currentSize, long totalSize) {
+        String sharingId = getSharingId();
     	synchronized(lock) {
-			RichCallHistory.getInstance().setImageSharingProgress(session.getSessionID(),
-					currentSize, totalSize);
+			RichCallHistory.getInstance().updateImageSharingProgress(sharingId,
+					currentSize);
 
 			mImageSharingEventBroadcaster.broadcastImageSharingProgress(getRemoteContact(),
-					getSharingId(), currentSize, totalSize);
+					sharingId, currentSize, totalSize);
 	     }
     }
     
