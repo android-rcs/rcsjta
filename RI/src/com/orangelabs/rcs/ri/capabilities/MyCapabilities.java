@@ -56,9 +56,6 @@ public class MyCapabilities extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_mine);
         
-        // Set title
-        setTitle(R.string.menu_my_capabilities);
-        
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {

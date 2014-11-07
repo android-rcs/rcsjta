@@ -47,9 +47,6 @@ public class DisplayGeoloc extends MapActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		// Set title
-		setTitle(R.string.title_display_geoloc);
-
 		// Set layout
 		setContentView(R.layout.geoloc_display);
 

@@ -46,9 +46,6 @@ public class RI extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-		// Set title
-        setTitle(getString(R.string.app_name));
-
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                

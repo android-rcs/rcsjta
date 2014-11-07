@@ -140,7 +140,6 @@ public class RcsSettingsTest extends AndroidTestCase {
 	}
 	
 	public void testRcsSettingsQueryByKeyTer() {
-
 		Cursor c = null;
 		try {
 			Uri uri = Uri.withAppendedPath(RcsServiceConfiguration.Settings.CONTENT_URI, RcsServiceConfiguration.Settings.MY_COUNTRY_CODE);

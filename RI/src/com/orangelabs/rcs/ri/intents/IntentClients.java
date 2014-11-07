@@ -53,9 +53,6 @@ public class IntentClients extends ListActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.intents_clients);
 
-		// Set UI title
-        setTitle(getString(R.string.menu_clients));
-        
 		// Get the list of clients
 	    clients = RcsUtils.getRcsClients(this);
 

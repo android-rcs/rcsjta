@@ -37,7 +37,6 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharingIntent;
@@ -183,9 +182,6 @@ public class ReceiveGeolocSharing extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_receive);
         
-        // Set title
-		setTitle(R.string.title_geoloc_sharing);
-
         // Get invitation info
         sharingId = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
         // TODO CR025 implement provider for geolocation sharing
@@ -237,8 +233,7 @@ public class ReceiveGeolocSharing extends Activity {
 			
 	    	// Display sharing infos
     		TextView fromTextView = (TextView)findViewById(R.id.from);
-    		String displayName = RcsDisplayName.get(this, remoteContact);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remoteContact, displayName);
+			String from = RcsDisplayName.getInstance(this).getDisplayName(remoteContact);
 			fromTextView.setText(getString(R.string.label_from_args, from));
 	    	
 			// Display accept/reject dialog

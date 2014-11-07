@@ -22,8 +22,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import com.orangelabs.rcs.utils.PhoneUtils;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -36,6 +34,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
+import com.gsma.services.rcs.chat.ChatLog;
+import com.orangelabs.rcs.utils.PhoneUtils;
 
 /**
  * Chat provider
@@ -73,6 +74,8 @@ public class ChatProvider extends ContentProvider {
 		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
     }
 
+    private static final int INVALID_ROW_ID = -1;
+    
     /**
      * Database helper class
      */
@@ -82,7 +85,7 @@ public class ChatProvider extends ContentProvider {
      * Database name
      */
     public static final String DATABASE_NAME = "chat.db";
-
+    
     /**
      * Helper class for opening, creating and managing database version control
      */
@@ -163,13 +166,14 @@ public class ChatProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
+        boolean queryMessage = true;
         // Generate the body of the query
         int match = uriMatcher.match(uri);
         switch(match) {
             case CHATS:
 			case RCSAPI_CHATS:
 		        qb.setTables(TABLE_CHAT);
+		        queryMessage = false;
 		        break;
 			case MESSAGES:
 			case RCSAPI_MESSAGES:
@@ -179,6 +183,7 @@ public class ChatProvider extends ContentProvider {
 			case RCSAPI_CHAT_ID:
 		        qb.setTables(TABLE_CHAT);
                 qb.appendWhere(ChatData.KEY_CHAT_ID + "= '"+uri.getPathSegments().get(1)+"'");
+                queryMessage = false;
                 break;
 			case MESSAGE_ID:
 			case RCSAPI_MESSAGE_ID:
@@ -194,7 +199,11 @@ public class ChatProvider extends ContentProvider {
 
 		// Register the contexts ContentResolver to be notified if the cursor result set changes
         if (c != null) {
-            c.setNotificationUri(getContext().getContentResolver(), uri);
+        	if (queryMessage) {
+        		c.setNotificationUri(getContext().getContentResolver(), ChatLog.Message.CONTENT_URI);
+        	} else {
+        		c.setNotificationUri(getContext().getContentResolver(), ChatLog.GroupChat.CONTENT_URI);
+        	}
         }
         return c;
     }
@@ -203,11 +212,12 @@ public class ChatProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
         int count = 0;
         SQLiteDatabase db = openHelper.getWritableDatabase();
-
+        boolean updateMessage = true;
         int match = uriMatcher.match(uri);
         switch(match) {
 	        case CHATS:
 	            count = db.update(TABLE_CHAT, values, where, whereArgs);
+	            updateMessage = false;
 		        break;
 			case MESSAGES:
 	            count = db.update(TABLE_MESSAGE, values, where, whereArgs);
@@ -215,6 +225,7 @@ public class ChatProvider extends ContentProvider {
 			case CHAT_ID:
                 count = db.update(TABLE_CHAT, values,
                 		ChatData.KEY_ID + "=" + Integer.parseInt(uri.getPathSegments().get(1)), null);
+                updateMessage = false;
 	            break;
 			case MESSAGE_ID:
                 count = db.update(TABLE_MESSAGE, values,
@@ -223,7 +234,13 @@ public class ChatProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Cannot update URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (count != 0) {
+        	if (updateMessage) {
+        		getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
+        	} else {
+        		getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
+        	}
+        }
         return count;
     }
 
@@ -233,18 +250,23 @@ public class ChatProvider extends ContentProvider {
         switch(uriMatcher.match(uri)) {
 	        case CHATS:
 	        case CHAT_ID:
-	    		long chatRowId = db.insert(TABLE_CHAT, null, initialValues);
+	        	long chatRowId = db.insert(TABLE_CHAT, null, initialValues);
 	    		uri = ContentUris.withAppendedId(ChatData.CONTENT_URI, chatRowId);
+	    		if (chatRowId != INVALID_ROW_ID)  {
+	    			getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
+	    		}
 	        	break;
 	        case MESSAGES:
 	        case MESSAGE_ID:
 	    		long msgRowId = db.insert(TABLE_MESSAGE, null, initialValues);
 	    		uri = ContentUris.withAppendedId(MessageData.CONTENT_URI, msgRowId);
+	    		if (msgRowId != INVALID_ROW_ID)  {
+	    			getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
+	    		}
 	        	break;
 	        default:
 	    		throw new SQLException("Failed to insert row into " + uri);
         }
-		getContext().getContentResolver().notifyChange(uri, null);
         return uri;
     }
 
@@ -252,10 +274,12 @@ public class ChatProvider extends ContentProvider {
     public int delete(Uri uri, String where, String[] whereArgs) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         int count = 0;
+        boolean deleteMessage = true;
         switch(uriMatcher.match(uri)) {
 	        case CHATS:
 	        case RCSAPI_CHATS:
 	        	count = db.delete(TABLE_CHAT, where, whereArgs);
+	        	deleteMessage = false;
 	        	break;
 	        case CHAT_ID:
 	        case RCSAPI_CHAT_ID:
@@ -263,6 +287,7 @@ public class ChatProvider extends ContentProvider {
 						+ uri.getPathSegments().get(1)
 						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
 						whereArgs);
+				deleteMessage = false;
 				break;
 	        case MESSAGES:
 	        case RCSAPI_MESSAGES:
@@ -278,7 +303,13 @@ public class ChatProvider extends ContentProvider {
 	        default:
 	    		throw new SQLException("Failed to delete row " + uri);
         }
-		getContext().getContentResolver().notifyChange(uri, null);
+        if (count != 0) {
+        	if (deleteMessage) {
+        		getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
+        	} else {
+        		getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
+        	}
+        }
         return count;    
     }
 }

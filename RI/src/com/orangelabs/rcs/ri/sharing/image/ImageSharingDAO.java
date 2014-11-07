@@ -146,7 +146,7 @@ public class ImageSharingDAO implements Parcelable {
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param sharingId
 	 *            the unique key field
 	 * @throws Exception

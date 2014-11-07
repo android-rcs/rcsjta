@@ -16,12 +16,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.messaging.chat;
+
+package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -33,7 +33,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.MultiContactListAdapter;
 
 /**
  * Initiate group chat
@@ -45,6 +45,8 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
      * List of participants
      */
     private ArrayList<String> participants = new ArrayList<String>();
+    
+    private MultiContactListAdapter mAdapter;
     
     /**
      * Invite button
@@ -58,13 +60,11 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_group);
-        
-        // Set title
-        setTitle(R.string.menu_initiate_group_chat);
-        
+
         // Set contact selector
         ListView contactList = (ListView)findViewById(R.id.contacts);
-        contactList.setAdapter(Utils.createMultiContactImCapableListAdapter(this));
+        mAdapter = MultiContactListAdapter.createMultiRcsContactListAdapter(this);
+        contactList.setAdapter(mAdapter);
         contactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         contactList.setOnItemClickListener(this);
         
@@ -82,15 +82,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         	// Get subject
         	EditText subjectTxt = (EditText)findViewById(R.id.subject);
         	String subject = subjectTxt.getText().toString();
-        	
-        	// Display chat view
-        	Intent intent = new Intent(InitiateGroupChat.this, GroupChatView.class);
-        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	intent.putStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS, participants);
-        	intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatView.MODE_OUTGOING);
-        	intent.putExtra(GroupChatView.EXTRA_SUBJECT, subject);
-        	startActivity(intent);
-        	
+        	GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, participants);
         	// Exit activity
         	finish();
         }
@@ -98,7 +90,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
     
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 		// Check if number is in participants list
-		String number = (String)view.getTag();
+		String number =  mAdapter.getSelectedNumber(view);
 		if (participants.contains(number)){
 			// Number is in list, we remove it
 			participants.remove(number);

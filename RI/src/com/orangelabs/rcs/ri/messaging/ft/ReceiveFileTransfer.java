@@ -43,7 +43,6 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferListener;
@@ -102,6 +101,8 @@ public class ReceiveFileTransfer extends Activity {
 	 * The log tag for this class
 	 */
 	private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
+	
+	private static final String VCARD_MIME_TYPE = "text/x-vcard";
 	
 	/**
 	 * Group File transfer listener
@@ -174,9 +175,6 @@ public class ReceiveFileTransfer extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_receive);
 
-        // Set title
-		setTitle(R.string.title_file_transfer);
-        
 		// Set pause and resume button
 		Button pauseBtn = (Button) findViewById(R.id.pause_btn);
 		pauseBtn.setOnClickListener(btnPauseListener);
@@ -258,9 +256,7 @@ public class ReceiveFileTransfer extends Activity {
 				ftApi.addOneToOneFileTransferListener(ftListener);
 			}
 
-			ContactId remote = ftDao.getContact();
-			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.getInstance(this).getDisplayName(ftDao.getContact());
 			
 			// Display transfer infos
 			TextView fromTextView = (TextView) findViewById(R.id.from);
@@ -315,7 +311,7 @@ public class ReceiveFileTransfer extends Activity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_file_transfer);
 				
-				builder.setMessage(getString(R.string.label_ft_from_size, displayName, ftDao.getSize()/1024));
+				builder.setMessage(getString(R.string.label_ft_from_size, from, ftDao.getSize()/1024));
 				builder.setCancelable(false);
 				if (ftDao.getThumbnail() != null) {
 					try {
@@ -327,7 +323,7 @@ public class ReceiveFileTransfer extends Activity {
 						}
 					}
 				} else {
-					if (ftDao.getMimeType().equals("text/vcard")) {
+					if (VCARD_MIME_TYPE.equals(ftDao.getMimeType())) {
 						builder.setIcon(R.drawable.ri_contact_card_icon);
 					} else {
 						builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
@@ -680,10 +676,10 @@ public class ReceiveFileTransfer extends Activity {
 		Button resumeBtn = (Button) findViewById(R.id.resume_btn);
 		resumeBtn.setEnabled(false);
 
-		if (ftDao.getMimeType().equals("text/vcard")) {
+		if (VCARD_MIME_TYPE.equals(ftDao.getMimeType())) {
 			// Show the transferred vCard
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(ftDao.getFile(), "text/x-vcard");
+			intent.setDataAndType(ftDao.getFile(), VCARD_MIME_TYPE);
 			startActivity(intent);
 		} else {
 			if (ftDao.getMimeType().startsWith("image/")) {

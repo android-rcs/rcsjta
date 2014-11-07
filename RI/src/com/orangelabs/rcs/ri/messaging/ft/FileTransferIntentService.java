@@ -34,7 +34,7 @@ import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.GroupChatDAO;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -116,7 +116,7 @@ public class FileTransferIntentService extends IntentService {
 				}
 				// TODO check File Transfer state to know if rejected
 				// TODO check validity of direction, etc ...
-				addFileTransferInvitationNotification(this, intent, ftDao);
+				addFileTransferInvitationNotification(intent, ftDao);
 			} else {
 				if (LogUtils.isActive) {
 					Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
@@ -143,14 +143,12 @@ public class FileTransferIntentService extends IntentService {
 	/**
 	 * Add file transfer notification
 	 * 
-	 * @param context
-	 *            Context
 	 * @param invitation
 	 *            Intent invitation
 	 * @param ftDao
 	 * 				the file transfer data object
 	 */
-	private void addFileTransferInvitationNotification(Context context, Intent invitation, FileTransferDAO ftDao) {
+	private void addFileTransferInvitationNotification(Intent invitation, FileTransferDAO ftDao) {
 		if (ftDao.getContact() == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "addFileTransferInvitationNotification failed: cannot parse contact");
@@ -159,18 +157,17 @@ public class FileTransferIntentService extends IntentService {
 		}
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, ReceiveFileTransfer.class);
+		intent.setClass(this, ReceiveFileTransfer.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		ContactId contact = ftDao.getContact();
-		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
 		
-		String title = context.getString(R.string.title_recv_file_transfer, displayName);
+		String title = getString(R.string.title_recv_file_transfer, displayName);
 
 		// Create notification
-		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
 		notif.setContentIntent(contentIntent);
 		notif.setSmallIcon(R.drawable.ri_notif_file_transfer_icon);
 		notif.setWhen(Calendar.getInstance().getTimeInMillis());
@@ -182,7 +179,7 @@ public class FileTransferIntentService extends IntentService {
 		notif.setContentText(ftDao.getFilename());
 				
 		// Send notification
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif.build());
 	}
 

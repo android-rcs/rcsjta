@@ -67,9 +67,6 @@ public class SelectGeoloc extends MapActivity implements OnTouchListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Set title
-		setTitle(R.string.label_select_geoloc);
-
 		// Set layout
 		setContentView(R.layout.geoloc_select);
 

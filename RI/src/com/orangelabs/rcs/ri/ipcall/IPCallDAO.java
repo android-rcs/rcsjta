@@ -111,7 +111,7 @@ public class IPCallDAO implements Parcelable {
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param callId
 	 *            the unique key field
 	 * @throws Exception

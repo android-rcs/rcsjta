@@ -42,31 +42,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferService;
-import com.gsma.services.rcs.ft.GroupFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Send file to group
+ * Send file
  * 
- * @author jexa7410
  * @author Philippe LEMORDANT
  */
-public class SendGroupFile extends Activity {
-	/**
-	 * Intent parameters
-	 */
-	/* package private */ final static String EXTRA_CHAT_ID = "chat_id";
+public abstract class SendFile extends Activity implements ISendFile {
 
 	/**
 	 * Activity result constants
@@ -76,23 +67,18 @@ public class SendGroupFile extends Activity {
 	/**
 	 * UI handler
 	 */
-	private final Handler handler = new Handler();
-
-    /**
-     * CHAT ID 
-     */
-	private String chatId;
+	protected final Handler handler = new Handler();
 
 	/**
 	 * Transfer Id
 	 */
-	private String transferId;
+	protected String mTransferId;
 	
 	/**
 	 * Selected filename
 	 */
-	private String filename;
-	
+	protected String filename;
+
 	/**
 	 * Selected fileUri
 	 */
@@ -101,22 +87,22 @@ public class SendGroupFile extends Activity {
 	/**
 	 * Selected filesize (kB)
 	 */
-	private long filesize = -1;
+	protected long filesize = -1;
 	
    	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	protected ApiConnectionManager connectionManager;
     
     /**
      * File transfer
      */
-    private FileTransfer fileTransfer;
+    protected FileTransfer fileTransfer;
     
     /**
    	 * The log tag for this class
    	 */
-   	private static final String LOGTAG = LogUtils.getTag(SendGroupFile.class.getSimpleName());
+   	private static final String LOGTAG = LogUtils.getTag(SendFile.class.getSimpleName());
     
     /**
      * Progress dialog
@@ -126,99 +112,7 @@ public class SendGroupFile extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
-    
-    /**
-     * File transfer listener
-     */
-	private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
-
-		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
-						+ transferId + " state=" + state+ " reason="+reasonCode);
-			}
-		}
-
-		@Override
-		public void onTransferProgress(String chatId, String transferId, final long currentSize, final long totalSize) {
-			// Discard event if not for current transferId
-			if (SendGroupFile.this.transferId == null || !SendGroupFile.this.transferId.equals(transferId)) {
-				return;
-			}
-			handler.post(new Runnable() {
-				public void run() {
-					// Display transfer progress
-					updateProgressBar(currentSize, totalSize);
-				}
-			});
-		}
-
-		@Override
-		public void onTransferStateChanged(String chatId, String transferId, final int state, final int reasonCode) {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state
-						+ " reason=" + reasonCode);
-			}
-			if (state > RiApplication.FT_STATES.length) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
-				}
-				return;
-			}
-			if (reasonCode > RiApplication.FT_REASON_CODES.length) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
-				}
-				return;
-			}
-			// Discard event if not for current transferId
-			if (SendGroupFile.this.transferId == null || !SendGroupFile.this.transferId.equals(transferId)) {
-				return;
-			}
-			final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
-			handler.post(new Runnable() {
-				public void run() {
-					TextView statusView = (TextView) findViewById(R.id.progress_status);
-					switch (state) {
-					case FileTransfer.State.STARTED:
-					case FileTransfer.State.TRANSFERRED:
-						// hide progress dialog
-						hideProgressDialog();
-						// Display transfer state started
-						statusView.setText(RiApplication.FT_STATES[state]);
-						break;
-
-					case FileTransfer.State.ABORTED:
-						// Transfer is aborted: hide progress dialog then exit
-						hideProgressDialog();
-						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_aborted, _reasonCode),
-								exitOnce);
-						break;
-
-					case FileTransfer.State.REJECTED:
-						// Transfer is rejected: hide progress dialog then exit
-						hideProgressDialog();
-						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_rejected, _reasonCode),
-								exitOnce);
-						break;
-
-					case FileTransfer.State.FAILED:
-						// Transfer failed: hide progress dialog then exit
-						hideProgressDialog();
-						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_failed, _reasonCode),
-								exitOnce);
-						break;
-
-					default:
-						statusView.setText(getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], _reasonCode));
-					}
-				}
-			});
-		}
-
-	};
+	protected LockAccess exitOnce = new LockAccess();
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -228,12 +122,6 @@ public class SendGroupFile extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_send_file);
         
-        // Set title
-        setTitle(R.string.menu_transfer_file);
-        
-        // Get chat ID
-        chatId = getIntent().getStringExtra(GroupChatView.EXTRA_CHAT_ID);
-
         // Set buttons callback
         Button inviteBtn = (Button)findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
@@ -244,25 +132,18 @@ public class SendGroupFile extends Activity {
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_service_not_available), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 		} else {
 			connectionManager
 					.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
 			FileTransferService ftApi = connectionManager.getFileTransferApi();
 			try {
-//				// Enable thumbnail option if supported
-//				CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-//				if (ftApi.getConfiguration().isFileIconSupported()) {
-//					ftThumb.setEnabled(true);
-//				}
-
-				// Add group file listener
-				ftApi.addGroupFileTransferListener(ftListener);
+				addFileTransferEventListener(ftApi);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "API failure", e);
 				}
-				Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_api_failed), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
 			}
 		}
     }
@@ -275,13 +156,10 @@ public class SendGroupFile extends Activity {
 		}
 		connectionManager.stopMonitorServices(this);
 		if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			// Remove Group file listener
+			// Remove file listener
 			try {
-				connectionManager.getFileTransferApi().removeGroupFileTransferListener(ftListener);
+				removeFileTransferEventListener(connectionManager.getFileTransferApi());
 			} catch (RcsServiceException e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Failed to remove listener", e);
-				}
 			}
 		}
     }
@@ -300,7 +178,7 @@ public class SendGroupFile extends Activity {
         	
             if ((warnSize > 0) && (filesize >= warnSize)) {
 				// Display a warning message
-            	AlertDialog.Builder builder = new AlertDialog.Builder(SendGroupFile.this);
+            	AlertDialog.Builder builder = new AlertDialog.Builder(SendFile.this);
             	builder.setMessage(getString(R.string.label_sharing_warn_size, filesize));
             	builder.setCancelable(false);
             	builder.setPositiveButton(getString(R.string.label_yes), new DialogInterface.OnClickListener() {
@@ -329,46 +207,30 @@ public class SendGroupFile extends Activity {
 			e.printStackTrace();
 		}
 		if (!registered) {
-			Utils.showMessage(SendGroupFile.this, getString(R.string.label_service_not_available));
+			Utils.showMessage(SendFile.this, getString(R.string.label_service_not_available));
 			return;
 		}
 
 		// Get thumbnail option
 		CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-		// Initiate session in background
-		try {
-			// Get chat session
-			GroupChat groupChat = connectionManager.getChatApi().getGroupChat(chatId);
-			if (groupChat == null) {
-				Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_chat_aborted), exitOnce);
-				return;
-			}
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize);
-			}
-			// Initiate transfer
-			fileTransfer = connectionManager.getFileTransferApi().transferFileToGroupChat(chatId, file, ftThumb.isChecked());
-			transferId = fileTransfer.getTransferId();
-		} catch (Exception e) {
-			hideProgressDialog();
-			Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_invitation_failed), exitOnce);
-		}
-        
-        // Display a progress dialog
-        progressDialog = Utils.showProgressDialog(SendGroupFile.this, getString(R.string.label_command_in_progress));
-        progressDialog.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-				Toast.makeText(SendGroupFile.this, getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT).show();
-				quitSession();
-			}
-		});            
+		if (transferFile(file, ftThumb.isChecked())) {
 
-        // Hide buttons
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
-    	inviteBtn.setVisibility(View.INVISIBLE);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
-        selectBtn.setVisibility(View.INVISIBLE);
-        ftThumb.setVisibility(View.INVISIBLE);
+			// Display a progress dialog
+			progressDialog = Utils.showProgressDialog(SendFile.this, getString(R.string.label_command_in_progress));
+			progressDialog.setOnCancelListener(new OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					Toast.makeText(SendFile.this, getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT).show();
+					quitSession();
+				}
+			});
+
+			// Hide buttons
+			Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+			inviteBtn.setVisibility(View.INVISIBLE);
+			Button selectBtn = (Button) findViewById(R.id.select_btn);
+			selectBtn.setVisibility(View.INVISIBLE);
+			ftThumb.setVisibility(View.INVISIBLE);
+		}
     }
        
     /**
@@ -376,7 +238,7 @@ public class SendGroupFile extends Activity {
      */
 	private OnClickListener btnSelectListener = new OnClickListener() {
 		public void onClick(View v) {
-			FileUtils.openFile(SendGroupFile.this, "image/*", SELECT_IMAGE);
+			FileUtils.openFile(SendFile.this, "image/*", SELECT_IMAGE);
 		}
 	};
     
@@ -431,7 +293,7 @@ public class SendGroupFile extends Activity {
      * @param currentSize Current size transferred
      * @param totalSize Total size to be transferred
      */
-    private void updateProgressBar(long currentSize, long totalSize) {
+    protected void updateProgressBar(long currentSize, long totalSize) {
     	TextView statusView = (TextView)findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
     	
@@ -496,4 +358,5 @@ public class SendGroupFile extends Activity {
 		}
 		return true;
 	}
+    
 }

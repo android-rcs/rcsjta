@@ -58,7 +58,7 @@ public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
      * Add geoloc share notification
      * 
      * @param context Context
-     * @param intent Intent invitation
+     * @param invitation Intent invitation
      */
 	public static void addGeolocSharingInvitationNotification(Context context, Intent invitation) {
 		// Get remote contact

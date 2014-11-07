@@ -69,9 +69,6 @@ public class SupportedContactsList extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.contacts_supported_list);
         
-        // Set title
-        setTitle(R.string.menu_list_supported_contacts);
-
 		// Set a default tag
 		EditText tagEdit = (EditText)findViewById(R.id.tag);			
 		tagEdit.setText("game");

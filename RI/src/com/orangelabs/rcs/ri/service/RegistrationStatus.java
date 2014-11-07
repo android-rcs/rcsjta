@@ -66,9 +66,6 @@ public class RegistrationStatus extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_registration);
         
-        // Set title
-        setTitle(R.string.menu_registration_status);
-        
     	// Display registration status by default
     	displayRegistrationStatus(false);        
         

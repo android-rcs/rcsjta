@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharingListener;
@@ -192,9 +191,6 @@ public class ReceiveVideoSharing extends Activity {
         // Set layout
         setContentView(R.layout.video_sharing_receive);
 
-        // Set title
-        setTitle(R.string.menu_video_sharing);
-
         // Get invitation info
         vshDao = (VideoSharingDAO) (getIntent().getExtras().getParcelable(VideoSharingIntentService.BUNDLE_VSHDAO_ID));
 		if (vshDao == null) {
@@ -264,8 +260,7 @@ public class ReceiveVideoSharing extends Activity {
 			}
 			
 			ContactId remote = vshDao.getContact();
-			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.getInstance(this).getDisplayName(remote);
 			
 	    	// Display sharing infos
     		TextView fromTextView = (TextView)findViewById(R.id.from);

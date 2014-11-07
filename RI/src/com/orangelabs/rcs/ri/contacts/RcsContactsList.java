@@ -58,9 +58,6 @@ public class RcsContactsList extends ListActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.contacts_rcs_list);
         
-        // Set title
-        setTitle(R.string.menu_list_rcs_contacts);
-
         // Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {

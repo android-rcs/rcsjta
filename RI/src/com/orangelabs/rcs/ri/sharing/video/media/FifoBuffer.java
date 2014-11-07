@@ -115,7 +115,7 @@ public class FifoBuffer {
     /**
      * clean FIFO
      *
-     * @return size of the FIFO
+     * @param size
      */
     public void clean(int size) {
         if (fifo.size() > size) {

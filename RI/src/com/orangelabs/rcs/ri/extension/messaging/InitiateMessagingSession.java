@@ -18,11 +18,9 @@
 package com.orangelabs.rcs.ri.extension.messaging;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 
 /**
@@ -31,13 +29,6 @@ import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
  * @author Jean-Marc AUFFRET
  */
 public class InitiateMessagingSession extends InitiateMultimediaSession {
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		// Set title
-		setTitle(R.string.menu_initiate_messaging_session);
-	}
 
 	/**
 	 * Initiate session

@@ -35,7 +35,6 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingListener;
@@ -184,9 +183,6 @@ public class ReceiveImageSharing extends Activity {
     	// Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_receive);
-        
-        // Set title
-		setTitle(R.string.title_image_sharing);
 
 		// Get invitation info
 		ishDao = (ImageSharingDAO) (getIntent().getExtras().getParcelable(ImageSharingIntentService.BUNDLE_ISHDAO_ID));
@@ -241,10 +237,7 @@ public class ReceiveImageSharing extends Activity {
 				return;
 			}
 			
-			ContactId remote = ishDao.getContact();
-			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
-
+			String from = RcsDisplayName.getInstance(this).getDisplayName(ishDao.getContact());
 			// Display sharing infos
 			TextView fromTextView = (TextView) findViewById(R.id.from);
 			fromTextView.setText(getString(R.string.label_from_args, from));
@@ -256,7 +249,7 @@ public class ReceiveImageSharing extends Activity {
 			// Display accept/reject dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.title_image_sharing);
-			builder.setMessage(getString(R.string.label_ft_from_size, displayName, ishDao.getSize() / 1024));
+			builder.setMessage(getString(R.string.label_ft_from_size, from, ishDao.getSize() / 1024));
 			builder.setCancelable(false);
 			builder.setIcon(R.drawable.ri_notif_csh_icon);
 			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
