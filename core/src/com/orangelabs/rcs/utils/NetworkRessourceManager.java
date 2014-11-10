@@ -51,7 +51,7 @@ public class NetworkRessourceManager {
      * @return Local SIP port
      */
     public static synchronized int generateLocalSipPort() {
-    	return generateLocalUdpPort(DEFAULT_LOCAL_SIP_PORT_BASE);
+    	return generateLocalUdpTcpPort(DEFAULT_LOCAL_SIP_PORT_BASE);
     }
 
     /**
@@ -84,6 +84,27 @@ public class NetworkRessourceManager {
 		while((resp == -1) && (port < Integer.MAX_VALUE)) {
 			if (isLocalUdpPortFree(port)) {
 				// Free UDP port found
+				resp = port;
+			} else {
+                // +2 needed for RTCP port
+                port += 2;
+			}
+		}
+    	return resp;
+    }
+
+    /**
+     * Generate a free UDP/TCP port number from a specific port base
+     *
+     * @param portBase UDP/TCP port base
+     * @return Local UDP/TCP port
+     */
+    private static int generateLocalUdpTcpPort(int portBase) {
+        int resp = -1;
+        int port = portBase;
+        while((resp == -1) && (port < Integer.MAX_VALUE)) {
+            if (isLocalUdpPortFree(port) && isLocalTcpPortFree(port)) {
+                // Free port found
 				resp = port;
 			} else {
                 // +2 needed for RTCP port
