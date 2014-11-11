@@ -33,9 +33,11 @@ import com.gsma.services.rcs.ft.IFileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
@@ -50,12 +52,15 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements FileSharingSessionListener {
 	
-	/**
-	 * Core session
-	 */
-	private FileSharingSession session;
+	private final String mFileTransferId;
 
-	private final IOneToOneFileTransferBroadcaster mOneToOneFileTransferBroadcaster;
+	private final IOneToOneFileTransferBroadcaster mBroadcaster;
+
+	private final InstantMessagingService mImService;
+
+	private final FileTransferPersistedStorageAccessor mPersistentStorage;
+
+	private final FileTransferServiceImpl mFileTransferService;
 
 	/**
 	 * Lock used for synchronization
@@ -65,19 +70,25 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(OneToOneFileTransferImpl.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
 	 * Constructor
-	 *
-	 * @param session Session
+	 * 
+	 * @param transferId Transfer ID
 	 * @param broadcaster IOneToOneFileTransferBroadcaster
+	 * @param imService InstantMessagingService
+	 * @param persistentStorage FileTransferPersistedStorageAccessor
+	 * @param fileTransferService FileTransferServiceImpl
 	 */
-	public OneToOneFileTransferImpl(FileSharingSession session,
-			IOneToOneFileTransferBroadcaster broadcaster) {
-		this.session = session;
-		mOneToOneFileTransferBroadcaster = broadcaster;
-		session.addListener(this);
+	public OneToOneFileTransferImpl(String transferId,
+			IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
+			FileTransferPersistedStorageAccessor persistentStorage, FileTransferServiceImpl fileTransferService) {
+		mFileTransferId = transferId;
+		mBroadcaster = broadcaster;
+		mImService = imService;
+		mPersistentStorage = persistentStorage;
+		mFileTransferService = fileTransferService;
 	}
 
 	/**
@@ -96,7 +107,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @return Transfer ID
 	 */
 	public String getTransferId() {
-		return session.getFileTransferId();
+		return mFileTransferId;
 	}
 	
 	/**
@@ -105,6 +116,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @return ContactId
 	 */
 	public ContactId getRemoteContact() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getRemoteContact();
+		}
 		return session.getRemoteContact();
 	}
 	
@@ -114,6 +129,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * @return Filename
      */
 	public String getFileName() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getFileName();
+		}
 		return session.getContent().getName();
 	}
 
@@ -123,6 +142,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * @return Filename
      */
 	public Uri getFile() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getFile();
+		}
 		return session.getContent().getUri();
 	}
 
@@ -132,6 +155,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * @return Size in bytes
      */
 	public long getFileSize() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getFileSize();
+		}
 		return session.getContent().getSize();
 	}	
 
@@ -140,9 +167,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * 
      * @return Type
      */
-    public String getMimeType() {
-        return session.getContent().getEncoding();
-    }
+	public String getMimeType() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getMimeType();
+		}
+		return session.getContent().getEncoding();
+	}
 
 	/**
 	 * Returns the Uri of the file icon
@@ -150,7 +181,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @return Uri
 	 */
 	public Uri getFileIcon() {
-		MmContent fileIcon = session.getFileicon();
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getFileIcon();
+		}
+		MmContent fileIcon = session.getContent();
 		return fileIcon != null ? fileIcon.getUri() : null;
 	}
 
@@ -160,6 +195,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @return State
 	 */
 	public int getState() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getState();
+		}
 		if (session instanceof HttpFileTransferSession) {
 			int state = ((HttpFileTransferSession)session).getSessionState();
 			if (state == HttpTransferState.ESTABLISHED) {
@@ -169,7 +208,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 
 				return FileTransfer.State.STARTED;
 			}
-
 		} else {
 			// MSRP transfer
 			SipDialogPath dialogPath = session.getDialogPath();
@@ -177,15 +215,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 				return FileTransfer.State.STARTED;
 			}
 		}
-
 		if (session.isInitiatedByRemote()) {
 			if (session.isSessionAccepted()) {
 				return FileTransfer.State.ACCEPTING;
 			}
-
 			return FileTransfer.State.INVITED;
 		}
-
 		return FileTransfer.State.INITIATED;
 	}
 
@@ -195,6 +230,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @return ReasonCode
 	 */
 	public int getReasonCode() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getReasonCode();
+		}
 		if (isSessionPaused()) {
 			/*
 			 * If session is paused and still established it must have been
@@ -202,7 +241,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			 */
 			return ReasonCode.PAUSED_BY_USER;
 		}
-
 		return ReasonCode.UNSPECIFIED;
 	}
 
@@ -213,13 +251,16 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @see Direction
 	 */
 	public int getDirection() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getDirection();
+		}
 		if (session.isInitiatedByRemote()) {
 			return Direction.INCOMING;
-		} else {
-			return Direction.OUTGOING;
 		}
-	}	
-		
+		return Direction.OUTGOING;
+	}
+
 	/**
 	 * Accepts file transfer invitation
 	 */
@@ -227,7 +268,16 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Accept session invitation");
 		}
-		
+		final FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with file transfer ID '" + mFileTransferId
+					+ "' not available.");
+		}
+
 		// Accept invitation
         new Thread() {
     		public void run() {
@@ -242,6 +292,15 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	public void rejectInvitation() {
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
+		}
+		final FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with file transfer ID '" + mFileTransferId
+					+ "' not available.");
 		}
 
   		// Reject invitation
@@ -259,12 +318,19 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Cancel session");
 		}
-		
+		final FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with file transfer ID '" + mFileTransferId
+					+ "' not available.");
+		}
 		if (session.isFileTransfered()) {
 			// File already transferred and session automatically closed after transfer
 			return;
 		}
-
 		// Abort the session
          new Thread() {
     		public void run() {
@@ -277,10 +343,21 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * Is HTTP transfer
      *
      * @return Boolean
+     * @throws ServerApiException 
      */
-    public boolean isHttpTransfer() {
-        return (session instanceof HttpFileTransferSession);
-    }
+	public boolean isHttpTransfer() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException(
+					"Unable to check if it is HTTP transfer since session with file transfer ID '"
+							+ mFileTransferId + "' not available.");
+		}
+
+		return (session instanceof HttpFileTransferSession);
+	}
     
 	/**
 	 * Pauses the file transfer (only for HTTP transfer)
@@ -289,45 +366,77 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Pause session");
 		}
-
-		if (isHttpTransfer()) {
-			((HttpFileTransferSession) session).pauseFileTransfer();
-		} else {
+		FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException(
+					"Unable to pause transfer since session with file transfer ID '"
+							+ mFileTransferId + "' not available.");
+		}
+		if (!isHttpTransfer()) {
 			if (logger.isActivated()) {
 				logger.info("Pause available only for HTTP transfer");
 			}
+			return;
 		}
+
+		((HttpFileTransferSession)session).pauseFileTransfer();
 	}
 
 	/**
 	 * Pause the session (only for HTTP transfer)
 	 */
 	public boolean isSessionPaused() {
-		if (isHttpTransfer()) {
-			return ((HttpFileTransferSession) session).isFileTransferPaused();
-		} else {
+		FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException(
+					"Unable to check if transfer is paused since session with file transfer ID '"
+							+ mFileTransferId + "' not available.");
+		}
+		if (!isHttpTransfer()) {
 			if (logger.isActivated()) {
 				logger.info("Pause available only for HTTP transfer");
 			}
 			return false;
 		}
+		return ((HttpFileTransferSession)session).isFileTransferPaused();
 	}
 
 	/**
 	 * Resume the session (only for HTTP transfer)
 	 */
 	public void resumeTransfer() {
+		FileSharingSession session = mImService
+				.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException(
+					"Unable to resume transfer since session with file transfer ID '"
+							+ mFileTransferId + "' not available.");
+		}
+		boolean fileSharingSessionPaused = isSessionPaused();
+		boolean fileTransferOverHttp = isHttpTransfer();
 		if (logger.isActivated()) {
-			logger.info("Resuming session paused=" + isSessionPaused() + " http=" + isHttpTransfer());
+			logger.info("Resuming session paused=" + fileSharingSessionPaused + " http=" + fileTransferOverHttp);
 		}
 
-		if (isHttpTransfer() && isSessionPaused()) {
-			((HttpFileTransferSession) session).resumeFileTransfer();
-		} else {
+		if (!(fileTransferOverHttp && fileSharingSessionPaused)) {
 			if (logger.isActivated()) {
 				logger.info("Resuming can only be used on a paused HTTP transfer");
 			}
+			return;
 		}
+
+		((HttpFileTransferSession)session).resumeFileTransfer();
 	}
 
 	/*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -381,15 +490,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.REJECTED, reasonCode);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.REJECTED,
+					reasonCode);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.REJECTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.REJECTED, reasonCode);
 		}
 	}
 
@@ -400,13 +508,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -420,15 +527,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			logger.info("Session aborted (reason " + reason + ")");
 		}
 		int reasonCode = sessionAbortedReasonToReasonCode(reason);
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.ABORTED, reasonCode);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ABORTED,
+					reasonCode);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.ABORTED, reasonCode);
 		}
 	}
 
@@ -439,16 +545,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
-
-			if (!session.isFileTransfered()) {
-				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
+			mFileTransferService.removeFileTransfer(mFileTransferId);
+			FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+			if (session != null && !session.isFileTransfered()) {
+				mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ABORTED,
+						ReasonCode.ABORTED_BY_REMOTE);
+				mBroadcaster.broadcastStateChanged(getRemoteContact(), mFileTransferId,
 						FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
-
-				mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-						fileTransferId, FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			}
 		}
 	}
@@ -463,18 +567,16 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			logger.info("Sharing error " + error.getErrorCode());
 		}
 
-		String fileTransferId = getTransferId();
 		FileTransferStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
 		int state = stateAndReasonCode.getState();
 		int reasonCode = stateAndReasonCode.getReasonCode();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId, state,
-					reasonCode);
+			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, state, reasonCode);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, state, reasonCode);
 		}
 	}
 
@@ -485,13 +587,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * @param totalSize Total size to be transferred
 	 */
 	public void handleTransferProgress(long currentSize, long totalSize) {
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize);
+			mPersistentStorage.setProgress(currentSize);
 
-			// Notify event listeners
-			mOneToOneFileTransferBroadcaster.broadcastProgressUpdate(getRemoteContact(),
-					fileTransferId, currentSize, totalSize);
+			mBroadcaster.broadcastProgressUpdate(getRemoteContact(),
+					mFileTransferId, currentSize, totalSize);
 		}
 	}
 
@@ -500,15 +600,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 */
 	@Override
 	public void handleTransferNotAllowedToSend() {
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.FAILED,
+					ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.FAILED,
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.FAILED,
 					ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 		}
 	}
@@ -523,14 +622,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			logger.info("Content transferred");
 		}
 
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferred(fileTransferId, content);
+			mPersistentStorage.setTransferred(content);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -541,13 +639,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Transfer paused by user");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_USER);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.PAUSED,
+					ReasonCode.PAUSED_BY_USER);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_USER);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_USER);
 		}
 	}
 
@@ -558,15 +655,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Transfer paused by system");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			FileTransferServiceImpl.removeFileTransferSession(fileTransferId);
+			mFileTransferService.removeFileTransfer(mFileTransferId);
 
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.PAUSED,
+					ReasonCode.PAUSED_BY_SYSTEM);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
 		}
 	}
 
@@ -577,13 +673,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Transfer resumed");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -592,13 +687,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Accepting transfer");
 		}
-		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
-					FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
 
-			mOneToOneFileTransferBroadcaster.broadcastStateChanged(getRemoteContact(),
-					fileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(getRemoteContact(),
+					mFileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -622,14 +716,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Invited to one-to-one file transfer session");
 		}
-		String fileTransferId = session.getFileTransferId();
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		synchronized (lock) {
-			MessagingLog.getInstance().addFileTransfer(getRemoteContact(), fileTransferId,
-					Direction.INCOMING, session.getContent(), session.getFileicon(),
-					FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.addFileTransfer(getRemoteContact(), Direction.INCOMING,
+					session.getContent(), session.getFileicon(), FileTransfer.State.INVITED,
+					ReasonCode.UNSPECIFIED);
 		}
 
-		mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
+		mBroadcaster.broadcastInvitation(mFileTransferId);
 	}
 
 	@Override
@@ -637,13 +731,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		if (logger.isActivated()) {
 			logger.info("Session auto accepted");
 		}
-		String fileTransferId = session.getFileTransferId();
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		synchronized (lock) {
-			MessagingLog.getInstance().addFileTransfer(getRemoteContact(), fileTransferId,
-					Direction.INCOMING, session.getContent(), session.getFileicon(),
-					FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.addFileTransfer(getRemoteContact(), Direction.INCOMING,
+					session.getContent(), session.getFileicon(), FileTransfer.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
 		}
 
-		mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
+		mBroadcaster.broadcastInvitation(mFileTransferId);
 	}
 }

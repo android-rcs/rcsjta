@@ -22,9 +22,9 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.os.IBinder;
 
@@ -40,10 +40,11 @@ import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallPersistedStorageAccessor;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
@@ -59,14 +60,19 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class IPCallServiceImpl extends IIPCallService.Stub {
 
-	private final IPCallEventBroadcaster mIPCallEventBroadcaster = new IPCallEventBroadcaster();
+	private final IPCallEventBroadcaster mBroadcaster = new IPCallEventBroadcaster();
 
 	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
 
-	/**
-	 * List of IP call sessions
-	 */
-	private static Hashtable<String, IIPCall> ipCallSessions = new Hashtable<String, IIPCall>();
+	private final IPCallService mIPCallService;
+
+	private final IPCallHistory mIPCallLog;
+
+	private final RcsSettings mRcsSettings;
+
+	private final ContactsManager mContactsManager;
+
+	private final Map<String, IIPCall> mIPCallCache = new HashMap<String, IIPCall>();
 
 	/**
 	 * The logger
@@ -80,11 +86,21 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param ipCallService IPCallService
+	 * @param ipCallLog IPCallHistory
+	 * @param contactsManager ContactsManager
+	 * @param rcsSettings RcsSettings
 	 */
-	public IPCallServiceImpl() {
+	public IPCallServiceImpl(IPCallService ipCallService, IPCallHistory ipCallLog,
+			ContactsManager contactsManager, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
 			logger.info("IP call service API is loaded");
 		}
+		mIPCallService = ipCallService;
+		mIPCallLog = ipCallLog;
+		mRcsSettings = rcsSettings;
+		mContactsManager = contactsManager;
 	}
 
 		/**
@@ -92,7 +108,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 */
 	public void close() {
 		// Clear lists of sessions
-		ipCallSessions.clear();
+		mIPCallCache.clear();
 
 		if (logger.isActivated()) {
 			logger.info("IP call service API is closed");
@@ -100,30 +116,31 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	}
 
 	/**
-     * Add an IP Call session in the list
-     * 
-     * @param session IP call session
-     */
-	
-	protected static void addIPCallSession(IPCallImpl session) {
+	 * Add an IP Call session in the list
+	 * 
+	 * @param ipCall IP call session
+	 */
+
+	protected void addIPCall(IPCallImpl ipCall) {
 		if (logger.isActivated()) {
-			logger.debug("Add an IP Call session in the list (size=" + ipCallSessions.size() + ")");
+			logger.debug("Add an IP Call session in the list (size=" + mIPCallCache.size() + ")");
 		}
-		
-		ipCallSessions.put(session.getCallId(), session);
+
+		mIPCallCache.put(ipCall.getCallId(), ipCall);
 	}
 
-    /**
-     * Remove an IP Call session from the list
-     * 
-     * @param sessionId Session ID
-     */
-	protected static void removeIPCallSession(String sessionId) {
+	/**
+	 * Remove an IP Call session from the list
+	 * 
+	 * @param sessionId Session ID
+	 */
+	protected void removeIPCall(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove an IP Call session from the list (size=" + ipCallSessions.size() + ")");
+			logger.debug("Remove an IP Call session from the list (size=" + mIPCallCache.size()
+					+ ")");
 		}
-		
-		ipCallSessions.remove(sessionId);
+
+		mIPCallCache.remove(sessionId);
 	}
 
     /**
@@ -191,11 +208,15 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		}
 		
 		// Update displayName of remote contact
-		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
-				 
-		// Add session in the list
-		IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
-		IPCallServiceImpl.addIPCallSession(sessionApi);
+		mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+
+		String callId = session.getSessionID();
+		IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
+				mIPCallLog);
+		IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService, storageAccessor,
+				this);
+		addIPCall(ipCall);
+		session.addListener(ipCall);
 	}
 
     /**
@@ -224,19 +245,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, false, player, renderer);
+			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, false, player, renderer);
 
 			String callId = session.getSessionID();
-			IPCallHistory.getInstance().addCall(contact, callId,
+			mIPCallLog.addCall(callId, contact,
 					Direction.OUTGOING, session.getAudioContent(),
 					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(contact, callId,
+			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
 					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			// Add session in the list
-			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
+			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
+					mIPCallLog);
+			IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
+					storageAccessor, this);
 
-			IPCallServiceImpl.addIPCallSession(sessionApi);
+			addIPCall(ipCall);
+			session.addListener(ipCall);
 
 			// Start the session
 	        Thread t = new Thread() {
@@ -245,9 +269,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	    		}
 	    	};
 	    	t.start();
-			return sessionApi;
+			return ipCall;
+
 		} catch (Exception e) {
-			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
+			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
 					Direction.OUTGOING, null, null, IPCall.State.FAILED,
 					ReasonCode.FAILED_INITIATION);
 			;
@@ -281,19 +306,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		
 		try {
 			// Initiate a new session
-			final IPCallSession session = Core.getInstance().getIPCallService().initiateIPCallSession(contact, true, player, renderer);
+			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, true, player, renderer);
 
 			String callId = session.getSessionID();
-			IPCallHistory.getInstance().addCall(contact, callId,
+			mIPCallLog.addCall(callId, contact,
 					Direction.OUTGOING, session.getAudioContent(),
 					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(contact, callId,
+			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
 					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			// Add session in the list
-			IPCallImpl sessionApi = new IPCallImpl(session, mIPCallEventBroadcaster);
+			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
+					mIPCallLog);
+			IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
+					storageAccessor, this);
 
-			IPCallServiceImpl.addIPCallSession(sessionApi);
+			addIPCall(ipCall);
+			session.addListener(ipCall);
 
 			// Start the session
 	        Thread t = new Thread() {
@@ -302,9 +330,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	    		}
 	    	};
 	    	t.start();
-			return sessionApi;
+			return ipCall;
+
 		} catch (Exception e) {
-			IPCallHistory.getInstance().addCall(contact, SessionIdGenerator.getNewId(),
+			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
 					Direction.OUTGOING, null, null, IPCall.State.FAILED,
 					ReasonCode.FAILED_INITIATION);
 			throw new ServerApiException(e.getMessage());
@@ -315,17 +344,23 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * Returns a current IP call from its unique ID
      * 
      * @param callId Call ID
-     * @return IP call or null if not found
+     * @return IP call
      * @throws ServerApiException
      */
-    public IIPCall getIPCall(String callId) throws ServerApiException {
+	public IIPCall getIPCall(String callId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get IP call session " + callId);
+			logger.info("Get IP call " + callId);
 		}
 
-		return ipCallSessions.get(callId);
+		IIPCall ipCall = mIPCallCache.get(callId);
+		if (ipCall != null) {
+			return ipCall;
+		}
+		IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
+				mIPCallLog);
+		return new IPCallImpl(callId, mBroadcaster, mIPCallService, storageAccessor, this);
 	}
-	
+
     /**
      * Returns the list of IP calls in progress
      * 
@@ -338,12 +373,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(ipCallSessions.size());
-			for (Enumeration<IIPCall> e = ipCallSessions.elements() ; e.hasMoreElements() ;) {
-				IIPCall sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
+			List<IBinder> ipCalls = new ArrayList<IBinder>(mIPCallCache.size());
+			for (IIPCall ipCall : mIPCallCache.values()) {
+				ipCalls.add(ipCall.asBinder());
 			}
-			return result;
+			return ipCalls;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -357,9 +392,9 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * 
      * @return Configuration
      */
-    public IPCallServiceConfiguration getConfiguration() {
-    	return new IPCallServiceConfiguration(
-    			RcsSettings.getInstance().isIPVoiceCallBreakoutAA() || RcsSettings.getInstance().isIPVoiceCallBreakoutAA());    	
+	public IPCallServiceConfiguration getConfiguration() {
+		return new IPCallServiceConfiguration(mRcsSettings.isIPVoiceCallBreakoutAA()
+				|| mRcsSettings.isIPVoiceCallBreakoutAA());
 	}
 
 	/**
@@ -373,9 +408,9 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	public void addAndBroadcastIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
 			VideoContent videoContent, int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		IPCallHistory.getInstance().addCall(contact, sessionId, Direction.INCOMING,
+		mIPCallLog.addCall(sessionId, contact, Direction.INCOMING,
 				audioContent, videoContent, IPCall.State.REJECTED, reasonCode);
-		mIPCallEventBroadcaster.broadcastIPCallInvitation(sessionId);
+		mBroadcaster.broadcastIPCallInvitation(sessionId);
 	}
 
     /**
@@ -388,7 +423,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			logger.info("Add an IP call event listener");
 		}
 		synchronized (lock) {
-			mIPCallEventBroadcaster.addEventListener(listener);
+			mBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -402,7 +437,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			logger.info("Remove an IP call event listener");
 		}
 		synchronized (lock) {
-			mIPCallEventBroadcaster.removeEventListener(listener);
+			mBroadcaster.removeEventListener(listener);
 		}
 	}
 

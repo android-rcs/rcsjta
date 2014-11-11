@@ -21,16 +21,14 @@ interface IChatService {
 
 	ChatServiceConfiguration getConfiguration();
     
-	IOneToOneChat openSingleChat(in ContactId contact);
-
 	IGroupChat initiateGroupChat(in List<ContactId> contacts, in String subject);
     
 	IGroupChat rejoinGroupChat(in String chatId);
     
 	IGroupChat restartGroupChat(in String chatId);
     
-	IOneToOneChat getChat(in ContactId contact);
-    
+	IOneToOneChat getOneToOneChat(in ContactId contact);
+
 	IGroupChat getGroupChat(in String chatId);
 	
 	void markMessageAsRead(in String msgId);

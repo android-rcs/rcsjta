@@ -17,4 +17,6 @@ interface IOneToOneChat {
 	void sendIsComposingEvent(in boolean status);
 
 	GeolocMessage sendMessage2(in Geoloc geoloc);
+
+	void openChat();
 }

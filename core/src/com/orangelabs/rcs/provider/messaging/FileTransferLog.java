@@ -59,7 +59,14 @@ public class FileTransferLog implements IFileTransferLog {
 			.append(" AND ").append(FileTransferData.KEY_REASON_CODE).append("=")
 			.append(FileTransfer.ReasonCode.PAUSED_BY_SYSTEM).toString();
 
+	private static final String SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT = new StringBuilder(
+			FileTransferData.KEY_FT_ID).append("=? AND ")
+			.append(FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
+			.toString();
+
 	private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
+
+	private static final int FIRST_COLUMN_IDX = 0;
 
 	private final LocalContentResolver mLocalContentResolver;
 
@@ -88,7 +95,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
 			MmContent content, MmContent fileIcon, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=")
@@ -179,8 +186,8 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contact,
-			String fileTransferId, MmContent content, MmContent fileIcon, int state, int reasonCode) {
+	public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
+			ContactId contact, MmContent content, MmContent fileIcon, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=")
 					.append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
@@ -216,7 +223,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void updateFileTransferStateAndReasonCode(String fileTransferId, int state,
+	public void setFileTransferStateAndReasonCode(String fileTransferId, int state,
 			int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
@@ -256,7 +263,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
+	public void setFileTransferProgress(String fileTransferId, long currentSize) {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_TRANSFERRED, currentSize);
 		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
@@ -264,7 +271,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void updateFileTransferred(String fileTransferId, MmContent content) {
+	public void setFileTransferred(String fileTransferId, MmContent content) {
 		if (logger.isActivated()) {
 			logger.debug("updateFileTransferUri (fileTransferId=" + fileTransferId + ") (uri=" + content.getUri() + ")");
 		}
@@ -447,6 +454,244 @@ public class FileTransferLog implements IFileTransferLog {
 				logger.error(e.getMessage(), e);
 			}
 			return null;
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileTransferData(java.lang.String)
+	 */
+	private Cursor getFileTransferData(String columnName, String fileTransferId)
+			throws SQLException {
+		String[] projection = new String[] {
+			columnName
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), projection,
+					null, null, null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+
+			throw new SQLException(
+					"No row returned while querying for file transfer data with fileTransferId : "
+							+ fileTransferId);
+
+		} catch (RuntimeException e) {
+			if (logger.isActivated()) {
+				logger.error("Exception occured while retrieving file info of fileTransferId = '"
+						+ fileTransferId + "' ! ", e);
+			}
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
+		}
+	}
+
+
+	private String getDataAsString(Cursor cursor) {
+		try {
+			return cursor.getString(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private int getDataAsInt(Cursor cursor) {
+		try {
+			return cursor.getInt(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private long getDataAsLong(Cursor cursor) {
+		try {
+			return cursor.getLong(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getChatId(java.lang.String)
+	 */
+	public String getChatId(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer chatId for " + fileTransferId);
+		}
+		return getDataAsString(getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getContact(java.lang.String)
+	 */
+	public ContactId getRemoteContact(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer contact for " + fileTransferId);
+		}
+		String number = getDataAsString(getFileTransferData(FileTransferData.KEY_CONTACT,
+				fileTransferId));
+		/*
+		 * null is legal value here only when this is a outgoing group file
+		 * transfer
+		 */
+		if (number == null) {
+			return null;
+		}
+		return ContactUtils.createContactId(number);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFile(java.lang.String)
+	 */
+	public Uri getFile(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file for " + fileTransferId);
+		}
+		return Uri.parse(getDataAsString(getFileTransferData(FileTransferData.KEY_FILE,
+				fileTransferId)));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileName(java.lang.String)
+	 */
+	public String getFileName(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file name for " + fileTransferId);
+		}
+		return getDataAsString(getFileTransferData(FileTransferData.KEY_FILENAME, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileType(java.lang.String)
+	 */
+	public String getMimeType(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file type for " + fileTransferId);
+		}
+		return getDataAsString(getFileTransferData(FileTransferData.KEY_MIME_TYPE, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileicon(java.lang.String)
+	 */
+	public Uri getFileIcon(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file icon for " + fileTransferId);
+		}
+		String fileIcon = getDataAsString(getFileTransferData(FileTransferData.KEY_FILEICON,
+				fileTransferId));
+		/*
+		 * null is legal value here only when this is a outgoing group file
+		 * transfer
+		 */
+		if (fileIcon == null) {
+			return null;
+		}
+		return Uri.parse(fileIcon);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileTransferDirection(java.lang.String)
+	 */
+	public int getFileTransferDirection(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer direction for " + fileTransferId);
+		}
+		return getDataAsInt(getFileTransferData(FileTransferData.KEY_DIRECTION, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IFileTransferLog#getFileTransferState
+	 * (java.lang.String)
+	 */
+	public int getFileTransferState(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer state for " + fileTransferId);
+		}
+		return getDataAsInt(getFileTransferData(FileTransferData.KEY_STATE, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileTransferStateReasonCode(java.lang.String)
+	 */
+	public int getFileTransferStateReasonCode(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer reason code for " + fileTransferId);
+		}
+		return getDataAsInt(getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileTransferSize(java.lang.String)
+	 */
+	public long getFileSize(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file size for " + fileTransferId);
+		}
+		return getDataAsLong(getFileTransferData(FileTransferData.KEY_FILESIZE, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * isGroupFileTransfer(java.lang.String)
+	 */
+	public boolean isGroupFileTransfer(String fileTransferId) {
+		String[] projection = new String[] {
+			FileTransferData.KEY_FT_ID
+		};
+		String[] selArgs = new String[] {
+			fileTransferId
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, projection,
+					SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT, selArgs, null); 
+			/*
+			 * For a one-to-one file transfer, value of chatID is equal to the
+			 * value of contact
+			 */
+			return !cursor.moveToFirst();
 
 		} finally {
 			if (cursor != null) {

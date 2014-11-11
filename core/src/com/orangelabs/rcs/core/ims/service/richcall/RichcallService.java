@@ -309,7 +309,7 @@ public class RichcallService extends ImsService {
 		}.start();
 	}
 
-	public VideoStreamingSession getVideoStreamingSession(String sessionId) {
+	public VideoStreamingSession getVideoSharingSession(String sessionId) {
 		if (logger.isActivated()) {
 			logger.debug("Get VideoStreamingSession with sessionId '" + sessionId + "'");
 		}

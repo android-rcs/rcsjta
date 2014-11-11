@@ -27,6 +27,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 
+
 /**
  * Interface for the chat table
  * 
@@ -64,7 +65,7 @@ public interface IGroupChatLog {
 	public void acceptGroupChatNextInvitation(String chatId);
 
 	/**
-	 * Update group chat status
+	 * Set group chat status and reason code
 	 * 
 	 * @param chatId
 	 *            Chat ID
@@ -73,7 +74,7 @@ public interface IGroupChatLog {
 	 * @param reasonCode
 	 *            Group chat state reason code
 	 */
-	public void updateGroupChatStateAndReasonCode(String chatId, int state, int reasonCode);
+	public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode);
 
 	/**
 	 * Update group chat set of participants
@@ -86,7 +87,7 @@ public interface IGroupChatLog {
 	public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants);
 
 	/**
-	 * Update group chat rejoin ID
+	 * Set group chat rejoin ID
 	 * 
 	 * @param chatId
 	 *            Chat ID
@@ -95,7 +96,7 @@ public interface IGroupChatLog {
 	 * @param status
 	 *            Status
 	 */
-	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId);
+	public void setGroupChatRejoinId(String chatId, String rejoinId);
 
 	/**
 	 * Get the group chat info
@@ -123,4 +124,59 @@ public interface IGroupChatLog {
 	 * @return true if next GC invitation should be rejected
 	 */
 	public boolean isGroupChatNextInviteRejected(String chatId);
+
+	/**
+	 * Set reject the next group chat invitation
+	 * 
+	 * @param chatId Chat ID
+	 */
+	public void setRejectNextGroupChatNextInvitation(String chatId);
+
+	/**
+	 * Convert String to ParticipantInfo
+	 *
+	 * @param participants String
+	 * @return Set<ParticipantInfo>
+	 */
+	public Set<ParticipantInfo> getParticipants(String participants);
+
+	/**
+	 * Get group chat direction from its chat ID
+	 * 
+	 * @param chatId Chat ID of the group chat
+	 * @return Direction
+	 */
+	public int getGroupChatDirection(String chatId);
+
+	/**
+	 * Get group chat state from its chat ID
+	 * 
+	 * @param chatId Chat ID of the group chat
+	 * @return State
+	 */
+	public int getGroupChatState(String chatId);
+
+	/**
+	 * Get group chat state reason code from its chat ID
+	 * 
+	 * @param chatId Chat ID of the group chat
+	 * @return Reason code of the state
+	 */
+	public int getGroupChatReasonCode(String chatId);
+
+	/**
+	 * Get group chat subject from its chat ID
+	 * 
+	 * @param chatId Chat ID of the group chat
+	 * @return subject
+	 */
+	public String getSubject(String chatId);
+
+	/**
+	 * Get group chat participants from its chat ID
+	 * 
+	 * @param chatId Chat ID of the group chat
+	 * @return Set of participants
+	 */
+	public Set<ParticipantInfo> getGroupChatParticipants(String chatId);
 }

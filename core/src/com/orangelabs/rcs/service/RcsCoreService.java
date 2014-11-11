@@ -59,17 +59,21 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
+import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
+import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -90,6 +94,7 @@ import com.orangelabs.rcs.service.api.GeolocSharingServiceImpl;
 import com.orangelabs.rcs.service.api.IPCallServiceImpl;
 import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
+import com.orangelabs.rcs.service.api.ServerApiException;
 import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
 import com.orangelabs.rcs.settings.SettingsDisplay;
 import com.orangelabs.rcs.utils.AppUtils;
@@ -158,7 +163,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
 	 * IP call API
 	 */
-    private IPCallServiceImpl ipcallApi = null; 
+    private IPCallServiceImpl ipcallApi = null;
 
     /**
 	 * Multimedia session API
@@ -229,27 +234,6 @@ public class RcsCoreService extends Service implements CoreListener {
             
             // Instantiate the contactUtils instance (CountryCode is already set)
             com.gsma.services.rcs.contacts.ContactUtils.getInstance(this);
-            
-        	// Instantiate API
-            contactsApi = new ContactsServiceImpl(); 
-            capabilityApi = new CapabilityServiceImpl(); 
-            chatApi = new ChatServiceImpl(); 
-            ftApi = new FileTransferServiceImpl(); 
-            vshApi = new VideoSharingServiceImpl(); 
-            ishApi = new ImageSharingServiceImpl(); 
-            gshApi = new GeolocSharingServiceImpl(); 
-            ipcallApi = new IPCallServiceImpl(); 
-        	sessionApi = new MultimediaSessionServiceImpl();             
-            uploadApi = new FileUploadServiceImpl(); 
-            
-            // Set the logger properties
-    		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
-    		Logger.traceLevel = RcsSettings.getInstance().getTraceLevel();
-
-    		// Terminal version
-            if (logger.isActivated()) {
-                logger.info("RCS stack release is " + TerminalInfo.getProductVersion());
-            }
 
             ContentResolver contentResolver = ctx.getContentResolver();
             LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
@@ -261,6 +245,36 @@ public class RcsCoreService extends Service implements CoreListener {
             
             // Create the core
 			Core.createCore(this);
+
+        	// Instantiate API
+            contactsApi = new ContactsServiceImpl(); 
+            capabilityApi = new CapabilityServiceImpl();
+            Core core = Core.getInstance();
+            InstantMessagingService imService = core.getImService();
+            RichcallService richCallService = core.getRichcallService();
+            IPCallService ipCallService = core.getIPCallService();
+            SipService sipService = core.getSipService();
+            MessagingLog messgaingLog = MessagingLog.getInstance();
+            RichCallHistory richcallLog = RichCallHistory.getInstance();
+            RcsSettings rcsSettings = RcsSettings.getInstance();
+            ContactsManager contactsManager = ContactsManager.getInstance();
+            chatApi = new ChatServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
+            ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings, contactsManager);
+            vshApi = new VideoSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager, core);
+            ishApi = new ImageSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager);
+            gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager);
+            ipcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(), contactsManager, rcsSettings);
+        	sessionApi = new MultimediaSessionServiceImpl(sipService, rcsSettings, contactsManager);
+            uploadApi = new FileUploadServiceImpl(imService);
+            
+            // Set the logger properties
+    		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
+    		Logger.traceLevel = RcsSettings.getInstance().getTraceLevel();
+
+    		// Terminal version
+            if (logger.isActivated()) {
+                logger.info("RCS stack release is " + TerminalInfo.getProductVersion());
+            }
 
 			// Start the core
 			Core.getInstance().startCore();		
@@ -828,8 +842,8 @@ public class RcsCoreService extends Service implements CoreListener {
 	}
 
 	@Override
-	public void handleGroupChatInvitationRejected(String chatId, ContactId contact,
-			String subject, Set<ParticipantInfo> participants, int reasonCode) {
+	public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
+			Set<ParticipantInfo> participants, int reasonCode) {
 		chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants, reasonCode);
 	}
 
@@ -855,5 +869,9 @@ public class RcsCoreService extends Service implements CoreListener {
 	public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
 			VideoContent videoContent, int reasonCode) {
 		ipcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode);
+	}
+
+	public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {
+		chatApi.handleOneToOneChatSessionInitiation(session);
 	}
 }

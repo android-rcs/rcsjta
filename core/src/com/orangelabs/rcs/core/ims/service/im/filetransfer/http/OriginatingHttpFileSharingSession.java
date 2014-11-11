@@ -31,12 +31,14 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.service.api.ServerApiException;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -47,6 +49,10 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author vfml3370
  */
 public class OriginatingHttpFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener {
+
+	private final Core mCore;
+
+	private final MessagingLog mMessagingLog;
 
     /**
      * HTTP upload manager
@@ -73,10 +79,15 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            true if the stack must try to attach file icon
 	 * @param tId
 	 *            TID of the upload
+	 * @param core Core
+	 * @param messagingLog MessagingLog
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
-			ContactId contact, String remoteUri, boolean fileIcon, String tId) {
+			ContactId contact, String remoteUri, boolean fileIcon, String tId, Core core,
+			MessagingLog messagingLog) {
 		super(parent, content, contact, remoteUri, null, null, null, IdGenerator.generateMessageID());
+		mCore = core;
+		mMessagingLog = messagingLog;
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact+ " remoteURI= "+remoteUri);
 		}
@@ -107,11 +118,15 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            File transfer Id
 	 * @param tId
 	 *            TID of the upload
+	 * @param core Core
+	 * @param messagingLog MessagingLog
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
 			ContactId contact, String remoteUri, MmContent fileIconContent, String fileTransferId,
-			String tId) {
+			String tId, Core core, MessagingLog messagingLog) {
 		super(parent, content, contact, remoteUri, fileIconContent, null, null, fileTransferId);
+		mCore = core;
+		mMessagingLog = messagingLog;
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}
@@ -151,13 +166,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 logger.debug("Upload done with success: " + fileInfo);
             }
 
-            // Send the file transfer info via a chat message
-            ChatSession chatSession = Core.getInstance().getImService()
+            OneToOneChatSession chatSession = mCore.getImService()
                     .getOneToOneChatSession(getRemoteContact());
             // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
             String msgId = getFileTransferId();
             if (chatSession != null) {
-				// A chat session exists
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via an existing chat session");
                 }
@@ -165,24 +178,18 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     setChatSessionID(chatSession.getSessionID());
                     setContributionID(chatSession.getContributionID());
                 }
-                // Get the last chat session in progress to send file transfer info
 				String mime = CpimMessage.MIME_TYPE;
 				String from = ChatUtils.ANOMYNOUS_URI;
 				String to = ChatUtils.ANOMYNOUS_URI;
-				// Send file info in CPIM message
 				String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
-				
-				// Send content
 				chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, MsrpSession.TypeMsrpChunk.HttpFileSharing);
 			} else {
-				// A chat session should be initiated
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via a new chat session");
                 }
                 FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false, msgId);
-                // Initiate a new chat session to send file transfer info in the first message, session does not need to be retrieved since it is not used
                 try {
-					chatSession = Core.getInstance().getImService().initiateOne2OneChatSession(getRemoteContact(), firstMsg);
+					chatSession = mCore.getImService().initiateOneToOneChatSession(getRemoteContact(), firstMsg);
 				} catch (CoreException e) {
 					if (logger.isActivated()) {
 	                    logger.debug("Couldn't initiate One to one session :"+e);
@@ -195,10 +202,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 				setContributionID(chatSession.getContributionID());
 
                 chatSession.startSession();
-                // Add session in the list
-				//ChatImpl sessionApi = new ChatImpl(getRemoteContact(), (OneOneChatSession)chatSession);
-				//ChatServiceImpl.addChatSession(getRemoteContact(), sessionApi); // TODO: method is normally protected, use a callback event instead to separate layers
-                // TODO : Check session response ?
+                mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
 			}
 
             // File transfered
@@ -272,7 +276,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
 	@Override
 	public void uploadStarted() {
-		MessagingLog.getInstance().setFileUploadTId(getFileTransferId(), uploadManager.getTId());
+		mMessagingLog.setFileUploadTId(getFileTransferId(), uploadManager.getTId());
 	}
 
 	public HttpUploadManager getUploadManager() {

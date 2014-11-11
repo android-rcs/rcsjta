@@ -165,15 +165,15 @@ public class GroupChat {
     /**
      * Group chat interface
      */
-    private IGroupChat chatInf;
+    private final IGroupChat mGroupChatInf;
     
     /**
      * Constructor
      * 
      * @param chatIntf Group chat interface
      */
-    GroupChat(IGroupChat chatIntf) {
-    	this.chatInf = chatIntf;
+    public GroupChat(IGroupChat chatIntf) {
+    	mGroupChatInf = chatIntf;
     }
 
     /**
@@ -184,7 +184,7 @@ public class GroupChat {
      */
 	public String getChatId() throws RcsServiceException {
 		try {
-			return chatInf.getChatId();
+			return mGroupChatInf.getChatId();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -199,7 +199,7 @@ public class GroupChat {
 	 */
 	public int getDirection() throws RcsServiceException {
 		try {
-			return chatInf.getDirection();
+			return mGroupChatInf.getDirection();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -214,7 +214,7 @@ public class GroupChat {
 	 */
 	public int getState() throws RcsServiceException {
 		try {
-			return chatInf.getState();
+			return mGroupChatInf.getState();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -229,27 +229,12 @@ public class GroupChat {
 	 */
 	public int getReasonCode() throws RcsServiceException {
 		try {
-			return chatInf.getReasonCode();
+			return mGroupChatInf.getReasonCode();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
-	
-	/**
-	 * Returns the remote contact
-	 * 
-	 * @return Contact
-	 * @throws RcsServiceException
-	 */
-	public ContactId getRemoteContact() throws RcsServiceException {
-		try {
-			return chatInf.getRemoteContact();
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
-	
 	/**
 	 * Returns the subject of the group chat
 	 * 
@@ -258,7 +243,7 @@ public class GroupChat {
 	 */
 	public String getSubject() throws RcsServiceException {
 		try {
-			return chatInf.getSubject();
+			return mGroupChatInf.getSubject();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -273,38 +258,12 @@ public class GroupChat {
 	 */
 	public Set<ParticipantInfo> getParticipants() throws RcsServiceException {
 		try {
-			return new HashSet<ParticipantInfo>(chatInf.getParticipants());
+			return new HashSet<ParticipantInfo>(mGroupChatInf.getParticipants());
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
 	}
-	
-	/**
-	 * Accepts chat invitation
-	 *  
-	 * @throws RcsServiceException
-	 */
-	public void acceptInvitation() throws RcsServiceException {
-		try {
-			chatInf.acceptInvitation();
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Rejects chat invitation
-	 * 
-	 * @throws RcsServiceException
-	 */
-	public void rejectInvitation() throws RcsServiceException {
-		try {
-			chatInf.rejectInvitation();
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
-	
+
 	/**
 	 * Sends a text message to the group
 	 * 
@@ -314,7 +273,7 @@ public class GroupChat {
 	 */
 	public ChatMessage sendMessage(String text) throws RcsServiceException {
 		try {
-			return chatInf.sendMessage(text);
+			return mGroupChatInf.sendMessage(text);
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -329,7 +288,7 @@ public class GroupChat {
      */
     public GeolocMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
 		try {
-			return chatInf.sendMessage2(geoloc);
+			return mGroupChatInf.sendMessage2(geoloc);
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}    	
@@ -344,7 +303,7 @@ public class GroupChat {
 	 */
 	public void sendIsComposingEvent(boolean status) throws RcsServiceException {
 		try {
-			chatInf.sendIsComposingEvent(status);
+			mGroupChatInf.sendIsComposingEvent(status);
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -358,7 +317,7 @@ public class GroupChat {
 	 */
 	public void addParticipants(Set<ContactId> participants) throws RcsServiceException {
 		try {
-			chatInf.addParticipants(new ArrayList<ContactId>(participants));
+			mGroupChatInf.addParticipants(new ArrayList<ContactId>(participants));
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -374,7 +333,7 @@ public class GroupChat {
 	 */
 	public int getMaxParticipants() throws RcsServiceException {
 		try {
-			return chatInf.getMaxParticipants();
+			return mGroupChatInf.getMaxParticipants();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -388,8 +347,21 @@ public class GroupChat {
 	 */
 	public void leave() throws RcsServiceException {
 		try {
-			chatInf.leave();
+			mGroupChatInf.leave();
 		} catch(Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * open the chat conversation. Note: if it’s an incoming pending chat
+	 * session and the parameter IM SESSION START is 0 then the session is
+	 * accepted now.
+	 */
+	public void openChat() throws RcsServiceException {
+		try {
+			mGroupChatInf.openChat();
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}

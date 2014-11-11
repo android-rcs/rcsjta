@@ -21,11 +21,13 @@ w * Software Name : RCS IMS Stack
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -50,9 +52,11 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param resumeUpload the data object in DB
      */
 	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
-		super(parent, content, resumeUpload.getContact(), PhoneUtils.formatContactIdToUri(resumeUpload.getContact()), resumeUpload
-				.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, resumeUpload
-				.getFileTransferId(), resumeUpload.getTId());
+		super(parent, content, resumeUpload.getContact(), PhoneUtils
+				.formatContactIdToUri(resumeUpload.getContact()),
+				resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
+						.getFileicon()) : null, resumeUpload.getFileTransferId(), resumeUpload
+						.getTId(), Core.getInstance(), MessagingLog.getInstance());
 		this.resumeFT = resumeUpload;
 	}
 

@@ -54,7 +54,7 @@ public interface IGroupDeliveryInfoLog {
      * @param status Delivery info status
      * @param reasonCode Delivery info status reason code
      */
-    public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+    public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
             int status, int reasonCode);
 
     /**

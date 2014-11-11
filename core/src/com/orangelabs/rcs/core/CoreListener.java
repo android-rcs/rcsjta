@@ -352,4 +352,11 @@ public interface CoreListener {
      */
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
             VideoContent videoContent, int reasonCode);
+
+    /**
+     * Handle one-to-one chat session initiation
+     * 
+     * @param session Chat session
+     */
+    public void handleOneOneChatSessionInitiation(OneToOneChatSession session);
 }

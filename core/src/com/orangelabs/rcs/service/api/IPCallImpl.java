@@ -38,6 +38,8 @@ import com.gsma.services.rcs.ipcall.VideoCodec;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallPersistedStorageAccessor;
+import com.orangelabs.rcs.core.ims.service.ipcall.IPCallService;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener;
 import com.orangelabs.rcs.provider.ipcall.IPCallStateAndReasonCode;
@@ -52,12 +54,16 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionListener { 
 
-	/**
-	 * Core session
-	 */
-	private IPCallSession session;
+	private final String mCallId;
 
-	private final IIPCallEventBroadcaster mIPCallEventBroadcaster;
+	private final IIPCallEventBroadcaster mBroadcaster;
+
+	private final IPCallService mIPCallService;
+
+	private final IPCallPersistedStorageAccessor mPersistentStorage;
+
+	private final IPCallServiceImpl mIPCallServiceImpl;
+
 	/**
 	 * Lock used for synchronisation
 	 */
@@ -109,14 +115,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Call rejected; reasonCode=" + reasonCode + ".");
 		}
 
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallServiceImpl.removeIPCallSession(callId);
+			mIPCallServiceImpl.removeIPCall(mCallId);
 
-			IPCallHistory.getInstance().setCallState(callId,
-					IPCall.State.REJECTED, reasonCode);
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.REJECTED, reasonCode);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.REJECTED, reasonCode);
 		}
 	}
@@ -124,13 +128,20 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	/**
 	 * Constructor
 	 * 
-	 * @param session Session
+	 * @param callId Call ID
 	 * @param broadcaster IIPCallEventBroadcaster
+	 * @param ipCallService IPCallService
+	 * @param persistentStorage IPCallPersistedStorageAccessor
+	 * @param ipCallServiceImpl IPCallServiceImpl
 	 */
-	public IPCallImpl(IPCallSession session, IIPCallEventBroadcaster broadcaster) {
-		this.session = session;
-		mIPCallEventBroadcaster = broadcaster;
-		session.addListener(this);
+	public IPCallImpl(String callId, IIPCallEventBroadcaster broadcaster,
+			IPCallService ipCallService, IPCallPersistedStorageAccessor persistentStorage,
+			IPCallServiceImpl ipCallServiceImpl) {
+		mCallId = callId;
+		mBroadcaster = broadcaster;
+		mIPCallService = ipCallService;
+		mPersistentStorage = persistentStorage;
+		mIPCallServiceImpl = ipCallServiceImpl;
 	}
 
     /**
@@ -139,7 +150,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return Call ID
 	 */
 	public String getCallId() {
-		return session.getSessionID();
+		return mCallId;
 	}
 
 	/**
@@ -148,6 +159,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return ContactId
 	 */
 	public ContactId getRemoteContact() {
+		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			return mPersistentStorage.getRemoteContact();
+		}
 		return session.getRemoteContact();
 	}
 
@@ -157,44 +172,52 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return State
 	 */
 	public int getState() {
+		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			return mPersistentStorage.getState();
+		}
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null && dialogPath.isSessionEstablished()) {
 			return IPCall.State.STARTED;
-
 		} else if (session.isInitiatedByRemote()) {
 			if (session.isSessionAccepted()) {
 				return IPCall.State.ACCEPTING;
 			}
-
 			return IPCall.State.INVITED;
 		}
-
 		return IPCall.State.INITIATED;
 	}
 
 	/**
 	 * Returns the reason code of the state of the IP call
-	 *
+	 * 
 	 * @return ReasonCode
 	 */
 	public int getReasonCode() {
+		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			return mPersistentStorage.getReasonCode();
+		}
 		return ReasonCode.UNSPECIFIED;
 	}
-	
+
 	/**
 	 * Returns the direction of the call (incoming or outgoing)
 	 * 
 	 * @return Direction
-	 * @see IPCall.Direction
+	 * @see IpCall.Direction
 	 */
 	public int getDirection() {
+		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			return mPersistentStorage.getDirection();
+		}
 		if (session.isInitiatedByRemote()) {
 			return Direction.INCOMING;
-		} else {
-			return Direction.OUTGOING;
 		}
+		return Direction.OUTGOING;
 	}
-	
+
 	/**
 	 * Accepts call invitation
 	 * 
@@ -204,6 +227,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public void acceptInvitation(IIPCallPlayer player, IIPCallRenderer renderer) {
 		if (logger.isActivated()) {
 			logger.info("Accept call invitation");
+		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
 		}
 
 		// Set player and renderer
@@ -225,6 +255,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+		}
 
 		// Reject invitation
         new Thread() {
@@ -241,6 +278,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Abort session");
 		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+		}
 
 		// Abort the session
         new Thread() {
@@ -256,6 +300,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * @return Boolean
 	 */
 	public boolean isVideo() {
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+		}
 		return session.isVideoActivated();
 	}
 
@@ -265,6 +316,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public void addVideo() {
 		if (logger.isActivated()) {
 			logger.info("Add video");
+		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to add video since session with call ID '"
+					+ mCallId + "' not available.");
 		}
 
 		// Add video to session
@@ -281,6 +340,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public void removeVideo() {
 		if (logger.isActivated()) {
 			logger.info("Remove video");
+		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to remove video since session with call ID '"
+					+ mCallId + "' not available.");
 		}
 
 		// Remove video from session
@@ -299,7 +366,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Accept invitation to add video");
 		}
-		
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to accept add video since session with call ID '"
+					+ mCallId + "' not available.");
+		}
+
 		// Accept to add video
         new Thread() {
     		public void run() {
@@ -316,7 +391,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Reject invitation to add video");
 		}
-		
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to reject add video since session with call ID '"
+					+ mCallId + "' not available.");
+		}
+
 		//set video content to null
 		session.setVideoContent(null);
 		
@@ -335,6 +418,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Hold call");
 		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to hold call since session with call ID '"
+					+ mCallId + "' not available.");
+		}
 
         new Thread() {
     		public void run() {
@@ -349,6 +440,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public void continueCall() {
 		if (logger.isActivated()) {
 			logger.info("Continue call");
+		}
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to continue call since session with call ID '"
+					+ mCallId + "' not available.");
 		}
 
         new Thread() {
@@ -372,9 +471,17 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Returns the video codec used during sharing
 	 *
 	 * @return VideoCodec
-	 * @throws RcsServiceException
+	 * @throws JoynServiceException
 	 */
 	public VideoCodec getVideoCodec() {
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to get VideoCodec since session with call ID '"
+					+ mCallId + "' not available.");
+		}
 		try {
 			return session.getPlayer().getVideoCodec();
 		} catch (RemoteException e) {
@@ -389,9 +496,17 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Returns the audio codec used during sharing
 	 *
 	 * @return AudioCodec
-	 * @throws RcsServiceException
+	 * @throws JoynServiceException
 	 */
 	public AudioCodec getAudioCodec() {
+		final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+		if (session == null) {
+			/*
+			 * TODO: Throw correct exception as part of CR037 implementation
+			 */
+			throw new IllegalStateException("Unale to get AudioCodec since session with call ID '"
+					+ mCallId + "' not available.");
+		}
 		try {
 			return session.getPlayer().getAudioCodec();
 		} catch (RemoteException e) {
@@ -413,7 +528,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// Notify event listeners
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -427,20 +542,19 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call aborted (reason " + reason + ")");
 		}
-		String callId = getCallId();
+		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
 		synchronized (lock) {
-			if (session.getDialogPath().isSessionCancelled()) {
-				IPCallHistory.getInstance().setCallState(callId,
-						IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+			if (session != null && session.getDialogPath().isSessionCancelled()) {
+				mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED,
+						ReasonCode.ABORTED_BY_REMOTE);
 			} else {
 				int reasonCode = imsServiceSessionErrorToReasonCode(reason);
-				IPCallHistory.getInstance().setCallState(callId,
-						IPCall.State.ABORTED, reasonCode);
+				mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
 
-				mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(),
-						callId, IPCall.State.ABORTED, reasonCode);
+				mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(),
+						mCallId, IPCall.State.ABORTED, reasonCode);
 			}
-			IPCallServiceImpl.removeIPCallSession(callId);
+			mIPCallServiceImpl.removeIPCall(mCallId);
 		}
 	}
 
@@ -451,14 +565,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call terminated by remote");
 		}
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallServiceImpl.removeIPCallSession(callId);
+			mIPCallServiceImpl.removeIPCall(mCallId);
 
-			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ABORTED,
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED,
 					ReasonCode.ABORTED_BY_REMOTE);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
@@ -475,13 +588,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		IPCallStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
 		int state = stateAndReasonCode.getState();
 		int reasonCode = stateAndReasonCode.getReasonCode();
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallServiceImpl.removeIPCallSession(callId);
+			mIPCallServiceImpl.removeIPCall(mCallId);
 
-			IPCallHistory.getInstance().setCallState(callId, state, reasonCode);
+			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId, state,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId, state,
 					reasonCode);
 		}
 	}
@@ -499,7 +611,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -513,7 +625,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
@@ -528,7 +640,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the
 			// right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -543,7 +655,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the
 			// right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_USER);
 		}
 	}
@@ -559,10 +671,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(session.getSessionID(), IPCall.State.ABORTED,
-					reasonCode);
+			IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.ABORTED, reasonCode);
 
 		}
@@ -578,11 +690,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Remove video aborted (reason " + reason + ")");
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ABORTED,
-					reasonCode);
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.ABORTED, reasonCode);
 		}
 	}
@@ -595,12 +705,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call hold");
 		}
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(callId, IPCall.State.HOLD,
-					ReasonCode.UNSPECIFIED);
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -613,12 +721,11 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Call Resume invitation");
 		}
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(callId, IPCall.State.STARTED,
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.STARTED,
 					ReasonCode.UNSPECIFIED);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -633,7 +740,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -649,7 +756,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(errorCode);
 		synchronized (lock) {
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.ABORTED, reasonCode);
 		}		
 	}
@@ -664,7 +771,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -680,7 +787,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
 		}		
 	}
@@ -691,7 +798,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public void handle486Busy() {
 		// Notify event listeners
 		// TODO : Verify if the state change callback listener used is the right one!
-		mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
+		mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
 				IPCall.State.REJECTED, ReasonCode.REJECTED_TIME_OUT);
 	}
 
@@ -730,12 +837,11 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			logger.info("Accepting call");
 		}
 
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().setCallState(callId, IPCall.State.ACCEPTING,
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.ACCEPTING,
 					ReasonCode.UNSPECIFIED);
 
-			mIPCallEventBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), callId,
+			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
 					IPCall.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -760,13 +866,13 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		if (logger.isActivated()) {
 			logger.info("Invited to ipcall session");
 		}
-		String callId = getCallId();
 		synchronized (lock) {
-			IPCallHistory.getInstance().addCall(getRemoteContact(), callId, Direction.INCOMING,
+			IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+			mPersistentStorage.addCall(getRemoteContact(), Direction.INCOMING,
 					session.getAudioContent(), session.getVideoContent(), IPCall.State.INVITED,
 					ReasonCode.UNSPECIFIED);
 		}
 
-		mIPCallEventBroadcaster.broadcastIPCallInvitation(callId);
+		mBroadcaster.broadcastIPCallInvitation(mCallId);
 	}
 }

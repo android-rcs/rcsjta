@@ -29,6 +29,9 @@ import java.util.Set;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+import android.util.SparseArray;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
@@ -56,7 +59,6 @@ public class GroupChatLog implements IGroupChatLog {
 	
 	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
 
-	/* TODO: This constant should not use a magic number. */
 	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
 			ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
 			.append(GroupChat.State.ABORTED).append(" AND ").append(ChatData.KEY_REASON_CODE)
@@ -68,6 +70,8 @@ public class GroupChatLog implements IGroupChatLog {
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(GroupChatLog.class.getSimpleName());
+
+	private static final int FIRST_COLUMN_IDX = 0;
 
 	/**
 	 * Constructor
@@ -109,10 +113,9 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java
-	 * .lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
-	 * java.util.Set, int, int)
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set,
+	 * int, int)
 	 */
 	public void addGroupChat(String chatId, ContactId contact, String subject, Set<ParticipantInfo> participants,
 			int state, int reasonCode, int direction) {
@@ -157,7 +160,7 @@ public class GroupChatLog implements IGroupChatLog {
 	}
 
 	@Override
-	public void updateGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
+	public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (state=" + state
 					+ ") (reasonCode=" + reasonCode + ")");
@@ -193,7 +196,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId) {
+	public void setGroupChatRejoinId(String chatId, String rejoinId) {
 		if (logger.isActivated()) {
 			logger.debug("Update group chat rejoin ID to " + rejoinId);
 		}
@@ -304,5 +307,156 @@ public class GroupChatLog implements IGroupChatLog {
 			}
 		}
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatData(
+	 * java.lang.String, java.lang.String)
+	 */
+	private Cursor getGroupChatData(String columnName, String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat info for " + chatId);
+		}
+		String[] projection = new String[] {
+			columnName
+		};
+		String[] selArgs = new String[] {
+			chatId
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
+					ORDER_BY_TIMESTAMP_DESC);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+
+			throw new SQLException(
+					"No row returned while querying for group chat data with chatId : " + chatId);
+
+		} catch (RuntimeException e) {
+			if (logger.isActivated()) {
+				logger.error("Error in retrieving group chat info with chatId : " + chatId);
+			}
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
+		}
+	}
+
+	private String getDataAsString(Cursor cursor) {
+		try {
+			return cursor.getString(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private int getDataAsInt(Cursor cursor) {
+		try {
+			return cursor.getInt(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getParticipants(java
+	 * .lang.String)
+	 */
+	public Set<ParticipantInfo> getParticipants(String participants) {
+		return ChatLog.GroupChat.getParticipantInfo(mCtx, participants);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatDirection
+	 * (java.lang.String)
+	 */
+	public int getGroupChatDirection(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat direction for " + chatId);
+		}
+		return getDataAsInt(getGroupChatData(ChatData.KEY_DIRECTION, chatId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatState
+	 * (java.lang.String)
+	 */
+	public int getGroupChatState(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat state for " + chatId);
+		}
+		return getDataAsInt(getGroupChatData(ChatData.KEY_STATE, chatId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatReasonCode
+	 * (java.lang.String)
+	 */
+	public int getGroupChatReasonCode(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat reason code for " + chatId);
+		}
+		return getDataAsInt(getGroupChatData(ChatData.KEY_REASON_CODE, chatId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getSubject(java.lang
+	 * .String)
+	 */
+	public String getSubject(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat subject for " + chatId);
+		}
+		return getDataAsString(getGroupChatData(ChatData.KEY_SUBJECT, chatId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatParticipants
+	 * (java.lang.String)
+	 */
+	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat participants for " + chatId);
+		}
+		return getParticipants(getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#setRejectNextGroupChatNextInvitation
+	 * (java.lang.String)
+	 */
+	public void setRejectNextGroupChatNextInvitation(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
+		}
+		ContentValues values = new ContentValues();
+		values.put(ChatData.KEY_DEPARTED_BY_USER, DEPARTED_BY_USER);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
+				+ chatId + "'", null);
 	}
 }

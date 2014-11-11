@@ -188,7 +188,7 @@ public class ImageSharing {
     /**
      * Image sharing interface
      */
-    private IImageSharing sharingInf;
+    private final IImageSharing mSharingInf;
     
     /**
      * Constructor
@@ -196,7 +196,7 @@ public class ImageSharing {
      * @param sharingInf Image sharing interface
      */
     ImageSharing(IImageSharing sharingInf) {
-    	this.sharingInf = sharingInf;
+    	mSharingInf = sharingInf;
     }
     	
     /**
@@ -207,7 +207,7 @@ public class ImageSharing {
 	 */
 	public String getSharingId() throws RcsServiceException {
 		try {
-			return sharingInf.getSharingId();
+			return mSharingInf.getSharingId();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -221,7 +221,7 @@ public class ImageSharing {
 	 */
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
-			return sharingInf.getRemoteContact();
+			return mSharingInf.getRemoteContact();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -235,7 +235,7 @@ public class ImageSharing {
 	 */
 	public Uri getFile() throws RcsServiceException {
 		try {
-			return sharingInf.getFile();
+			return mSharingInf.getFile();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -249,7 +249,7 @@ public class ImageSharing {
      */
 	public String getFileName() throws RcsServiceException {
 		try {
-			return sharingInf.getFileName();
+			return mSharingInf.getFileName();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -263,7 +263,7 @@ public class ImageSharing {
      */
 	public long getFileSize() throws RcsServiceException {
 		try {
-			return sharingInf.getFileSize();
+			return mSharingInf.getFileSize();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -277,7 +277,7 @@ public class ImageSharing {
      */
     public String getMimeType() throws RcsServiceException {
 		try {
-			return sharingInf.getMimeType();
+			return mSharingInf.getMimeType();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -292,7 +292,7 @@ public class ImageSharing {
 	 */
 	public int getState() throws RcsServiceException {
 		try {
-			return sharingInf.getState();
+			return mSharingInf.getState();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -307,7 +307,7 @@ public class ImageSharing {
 	 */
 	public int getReasonCode() throws RcsServiceException {
 		try {
-			return sharingInf.getReasonCode();
+			return mSharingInf.getReasonCode();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -322,7 +322,7 @@ public class ImageSharing {
 	 */
 	public int getDirection() throws RcsServiceException {
 		try {
-			return sharingInf.getDirection();
+			return mSharingInf.getDirection();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -335,7 +335,7 @@ public class ImageSharing {
 	 */
 	public void acceptInvitation() throws RcsServiceException {
 		try {
-			sharingInf.acceptInvitation();
+			mSharingInf.acceptInvitation();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -348,7 +348,7 @@ public class ImageSharing {
 	 */
 	public void rejectInvitation() throws RcsServiceException {
 		try {
-			sharingInf.rejectInvitation();
+			mSharingInf.rejectInvitation();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -361,7 +361,7 @@ public class ImageSharing {
 	 */
 	public void abortSharing() throws RcsServiceException {
 		try {
-			sharingInf.abortSharing();
+			mSharingInf.abortSharing();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

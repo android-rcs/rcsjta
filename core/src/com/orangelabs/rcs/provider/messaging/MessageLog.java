@@ -271,7 +271,7 @@ public class MessageLog implements IMessageLog {
 	}
 
 	@Override
-	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status) {
+	public void addGroupChatEvent(String chatId, ContactId contact, int status) {
 		if (logger.isActivated()) {
 			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
 		}
@@ -311,7 +311,7 @@ public class MessageLog implements IMessageLog {
 	}
 
 	@Override
-	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
+	public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
 					.append(", status=").append(status).append("reasonCode=").append(reasonCode)
@@ -338,7 +338,7 @@ public class MessageLog implements IMessageLog {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Mark incoming chat message status as received for msgID=").append(msgId).toString());
 		}
-		updateChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
+		setChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
 	}
 
 	@Override

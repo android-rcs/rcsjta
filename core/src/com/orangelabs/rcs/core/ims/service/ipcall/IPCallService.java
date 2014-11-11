@@ -60,7 +60,9 @@ public class IPCallService extends ImsService {
      */
     public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
     		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL , FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL};
-    
+
+	private final RcsSettings mRcsSettings;
+
 	/**
 	 * Max sessions
 	 */
@@ -80,12 +82,13 @@ public class IPCallService extends ImsService {
      * Constructor
      *
      * @param parent IMS module
+     * @param rcsSettings RcsSettings
      * @throws CoreException
      */
-    public IPCallService(ImsModule parent) throws CoreException {
+    public IPCallService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
 		super(parent, true);
-		
-		this.maxSessions = RcsSettings.getInstance().getMaxIPCallSessions();
+		mRcsSettings = rcsSettings;
+		this.maxSessions = mRcsSettings.getMaxIPCallSessions();
     }
 
 	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {

@@ -24,13 +24,19 @@ package com.orangelabs.rcs.provider.ipcall;
 import java.util.Calendar;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallLog;
+import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.LocalContentResolver;
+import com.orangelabs.rcs.provider.sharing.ImageSharingData;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -50,6 +56,65 @@ public class IPCallHistory {
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(IPCallHistory.class.getSimpleName());
+
+	private static final int FIRST_COLUMN_IDX = 0;
+
+	/**
+	 * Get IPCall session info from its unique Id
+	 * 
+	 * @param columnName
+	 * @param callId
+	 * @return Cursor the caller of this method has to close the cursor if a
+	 *         cursor is returned
+	 */
+	private Cursor getIPCallData(String columnName, String callId) {
+		String[] projection = new String[] {
+			columnName
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), projection, null, null,
+					null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+			throw new SQLException("No row returned while querying for IP call data with callId : "
+					+ callId);
+
+		} catch (RuntimeException e) {
+			if (logger.isActivated()) {
+				logger.error("Exception occured while retrieving IP call info of callId = '"
+						+ callId + "' ! ", e);
+			}
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
+		}
+	}
+
+	private String getDataAsString(Cursor cursor) {
+		try {
+			return cursor.getString(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	private int getDataAsInt(Cursor cursor) {
+		try {
+			return cursor.getInt(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
 
 	/**
 	 * Create instance
@@ -82,17 +147,17 @@ public class IPCallHistory {
 	}
 	
 	/**
-	 * Add a new entry in the call history 
+	 * Add a new entry in the call history
 	 * 
-	 * @param contact Remote contact Id
 	 * @param callId Call ID
+	 * @param contact Remote contact Id
 	 * @param direction Direction 
 	 * @param audiocontent Audio content
 	 * @param videocontent Video content
 	 * @param state Call state
 	 * @param  Reason code
 	 */
-	public Uri addCall(ContactId contact, String callId, int direction, AudioContent audiocontent,
+	public Uri addCall(String callId, ContactId contact, int direction, AudioContent audiocontent,
 			VideoContent videocontent, int state, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
@@ -119,13 +184,13 @@ public class IPCallHistory {
 	}
 
 	/**
-	 * Update the call state
+	 * Set the call state and reason code
 	 * 
 	 * @param callId Call ID
 	 * @param state New state
 	 * @param reasonCode Reason code
 	 */
-	public void setCallState(String callId, int state, int reasonCode) {
+	public void setCallStateAndReasonCode(String callId, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Update call state of call ").append(callId)
 					.append(" state=").append(state).append(", reasonCode=").append(reasonCode)
@@ -144,5 +209,58 @@ public class IPCallHistory {
 	 */
 	public void deleteAllEntries() {
 		mLocalContentResolver.delete(IPCallLog.CONTENT_URI, null, null);
+	}
+
+	/**
+	 * Get IPCall session remote contact from unique Id
+	 * 
+	 * @param callId
+	 * @return ContactId
+	 */
+	public ContactId getRemoteContact(String callId) {
+		if (logger.isActivated()) {
+			logger.debug("Get IP call contact for callId '" + callId + "'");
+		}
+		return ContactUtils.createContactId(getDataAsString(getIPCallData(
+				IPCallData.KEY_CONTACT, callId)));
+	}
+
+	/**
+	 * Get IPCall session state from unique Id
+	 * 
+	 * @param callId
+	 * @return State
+	 */
+	public int getState(String callId) {
+		if (logger.isActivated()) {
+			logger.debug("Get IP call state for callId '" + callId + "'");
+		}
+		return getDataAsInt(getIPCallData(IPCallData.KEY_STATE, callId));
+	}
+
+	/**
+	 * Get IPCall session reason code from unique Id
+	 * 
+	 * @param callId
+	 * @return Reason code
+	 */
+	public int getReasonCode(String callId) {
+		if (logger.isActivated()) {
+			logger.debug("Get IP call state reason code for callId '" + callId + "'");
+		}
+		return getDataAsInt(getIPCallData(IPCallData.KEY_REASON_CODE, callId));
+	}
+
+	/**
+	 * Get IPCall session direction from unique Id
+	 * 
+	 * @param callId
+	 * @return Direction
+	 */
+	public int getDirection(String callId) {
+		if (logger.isActivated()) {
+			logger.debug("Get IP call direction for callId '" + callId + "'");
+		}
+		return getDataAsInt(getIPCallData(IPCallData.KEY_DIRECTION, callId));
 	}
 }

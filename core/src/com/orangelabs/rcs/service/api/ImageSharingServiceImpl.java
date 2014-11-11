@@ -22,9 +22,9 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.net.Uri;
 import android.os.IBinder;
@@ -43,6 +43,8 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
+import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
+import com.orangelabs.rcs.core.ims.service.richcall.image.ImageSharingPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
@@ -60,14 +62,19 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
-	/**
-	 * List of image sharing sessions
-	 */
-	private static Hashtable<String, IImageSharing> ishSessions = new Hashtable<String, IImageSharing>();
-
-	private final ImageSharingEventBroadcaster mImageSharingEventBroadcaster = new ImageSharingEventBroadcaster();
+	private final ImageSharingEventBroadcaster mBroadcaster = new ImageSharingEventBroadcaster();
 
 	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
+
+	private final RichcallService mRichcallService;
+
+	private final RichCallHistory mRichCallLog;
+
+	private final RcsSettings mRcsSettings;
+
+	private final ContactsManager mContactsManager;
+
+	private final Map<String, IImageSharing> mImageSharingCache = new HashMap<String, IImageSharing>();
 
 	/**
 	 * The logger
@@ -81,11 +88,21 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param richcallService RichcallService
+	 * @param richCallLog RichCallHistory
+	 * @param rcsSettings RcsSettings
+	 * @param contactsManager ContactsManager
 	 */
-	public ImageSharingServiceImpl() {
+	public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
+			RcsSettings rcsSettings, ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Image sharing service API is loaded");
 		}
+		mRichcallService = richcallService;
+		mRichCallLog = richCallLog;
+		mRcsSettings = rcsSettings;
+		mContactsManager = contactsManager;
 	}
 
 	/**
@@ -93,7 +110,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 */
 	public void close() {
 		// Clear list of sessions
-		ishSessions.clear();
+		mImageSharingCache.clear();
 		
 		if (logger.isActivated()) {
 			logger.info("Image sharing service API is closed");
@@ -101,29 +118,29 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
-	 * Add an image sharing session in the list
+	 * Add an image sharing in the list
 	 * 
-	 * @param session Image sharing session
+	 * @param imageSharing Image sharing
 	 */
-	private static void addImageSharingSession(ImageSharingImpl session) {
+	private void addImageSharing(ImageSharingImpl imageSharing) {
 		if (logger.isActivated()) {
-			logger.debug("Add an image sharing session in the list (size=" + ishSessions.size() + ")");
+			logger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size() + ")");
 		}
 		
-		ishSessions.put(session.getSharingId(), session);
+		mImageSharingCache.put(imageSharing.getSharingId(), imageSharing);
 	}
 
 	/**
-	 * Remove an image sharing session from the list
+	 * Remove an image sharing from the list
 	 * 
-	 * @param sessionId Session ID
+	 * @param sharingId Sharing ID
 	 */
-	/* package private */ static void removeImageSharingSession(String sessionId) {
+	/* package private */ void removeImageSharing(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove an image sharing session from the list (size=" + ishSessions.size() + ")");
+			logger.debug("Remove an image sharing from the list (size=" + mImageSharingCache.size() + ")");
 		}
 		
-		ishSessions.remove(sessionId);
+		mImageSharingCache.remove(sharingId);
 	}
     
     /**
@@ -192,11 +209,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		ContactId contact = session.getRemoteContact();
 
 		// Update displayName of remote contact
-		 ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
-		// Add session in the list
-		ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
-		ImageSharingServiceImpl.addImageSharingSession(sessionApi);
+		 mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
+		String sharingId = session.getSessionID();
+		ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
+				sharingId, mRichCallLog);
+		ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
+				mBroadcaster, storageAccessor, this);
+		addImageSharing(imageSharing);
+		session.addListener(imageSharing);
     }
 
     /**
@@ -204,9 +225,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * 
      * @return Configuration
      */
-    public ImageSharingServiceConfiguration getConfiguration() {
-    	return new ImageSharingServiceConfiguration(
-    			RcsSettings.getInstance().getMaxImageSharingSize());
+	public ImageSharingServiceConfiguration getConfiguration() {
+		return new ImageSharingServiceConfiguration(mRcsSettings.getMaxImageSharingSize());
 	}    
     
     /**
@@ -230,32 +250,33 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		ServerApiUtils.testIms();
 
 		try {
-			// Create an image content
 			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
 
-			// Initiate a sharing session
-			final ImageTransferSession session = Core.getInstance().getRichcallService().initiateImageSharingSession(contact, content, null);
+			final ImageTransferSession session = mRichcallService.initiateImageSharingSession(contact, content, null);
 
 			String sharingId = session.getSessionID();
-			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
+			mRichCallLog.addImageSharing(session.getSessionID(), contact,
 					Direction.OUTGOING, session.getContent(),
 					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mImageSharingEventBroadcaster.broadcastStateChanged(contact, sharingId,
+			mBroadcaster.broadcastStateChanged(contact, sharingId,
 					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			// Add session listener
-			ImageSharingImpl sessionApi = new ImageSharingImpl(session, mImageSharingEventBroadcaster);
+			ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
+					sharingId, mRichCallLog);
+			ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
+					mBroadcaster, storageAccessor, this);
 
-			addImageSharingSession(sessionApi);
+			addImageSharing(imageSharing);
+			session.addListener(imageSharing);
 
-			// Start the session
 	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
 	    	}.start();	
-			return sessionApi;
+			return imageSharing;
+
 		} catch(Exception e) {
 			// TODO:Handle Security exception in CR026
 			if (logger.isActivated()) {
@@ -277,12 +298,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(ishSessions.size());
-			for (Enumeration<IImageSharing> e = ishSessions.elements() ; e.hasMoreElements() ;) {
-				IImageSharing sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
+			List<IBinder> imageSharings = new ArrayList<IBinder>(mImageSharingCache.size());
+			for (IImageSharing imageSharing : mImageSharingCache.values()) {
+				imageSharings.add(imageSharing.asBinder());
 			}
-			return result;
+			return imageSharings;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -297,13 +318,19 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @return Image sharing
      * @throws ServerApiException
      */
-    public IImageSharing getImageSharing(String sharingId) throws ServerApiException {
+	public IImageSharing getImageSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get image sharing session " + sharingId);
 		}
-
-		return ishSessions.get(sharingId);
-    }    
+		IImageSharing imageSharing = mImageSharingCache.get(sharingId);
+		if (imageSharing != null) {
+			return imageSharing;
+		}
+		ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
+				sharingId, mRichCallLog);
+		return new ImageSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
+				this);
+	}
 
 	/**
 	 * Add and broadcast image sharing invitation rejection
@@ -316,9 +343,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	public void addAndBroadcastImageSharingInvitationRejected(ContactId contact,
 			MmContent content, int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		RichCallHistory.getInstance().addImageSharing(contact, sessionId,
+		mRichCallLog.addImageSharing(sessionId, contact,
 				Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
-		mImageSharingEventBroadcaster.broadcastInvitation(sessionId);
+		mBroadcaster.broadcastInvitation(sessionId);
 	}
 
     /**
@@ -331,7 +358,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			logger.info("Add an Image sharing event listener");
 		}
 		synchronized (lock) {
-			mImageSharingEventBroadcaster.addEventListener(listener);
+			mBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -345,7 +372,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			logger.info("Remove an Image sharing event listener");
 		}
 		synchronized (lock) {
-			mImageSharingEventBroadcaster.removeEventListener(listener);
+			mBroadcaster.removeEventListener(listener);
 		}
 	}
 

@@ -23,9 +23,10 @@ package com.orangelabs.rcs.service.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.net.Uri;
@@ -49,8 +50,10 @@ import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -70,16 +73,21 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
-	/**
-	 * List of file transfer sessions
-	 */
-	private static Hashtable<String, IFileTransfer> ftSessions = new Hashtable<String, IFileTransfer>();  
-
 	private final OneToOneFileTransferBroadcaster mOneToOneFileTransferBroadcaster = new OneToOneFileTransferBroadcaster();
 
 	private final GroupFileTransferBroadcaster mGroupFileTransferBroadcaster = new GroupFileTransferBroadcaster();
 
 	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
+
+	private final InstantMessagingService mImService;
+
+	private final MessagingLog mMessagingLog;
+
+	private final RcsSettings mRcsSettings;
+
+	private final ContactsManager mContactsManager;
+
+	private final Map<String, IFileTransfer> mFileTransferCache = new HashMap<String, IFileTransfer>();
 
 	/**
 	 * The logger
@@ -93,11 +101,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param imService InstantMessagingService
+	 * @param messagingLog MessagingLog
+	 * @param rcsSettings RcsSettings
+	 * @param contactsManager ContactsManager
 	 */
-	public FileTransferServiceImpl() {
+	public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
+			RcsSettings rcsSettings, ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("File transfer service API is loaded");
 		}
+		mImService = imService;
+		mMessagingLog = messagingLog;
+		mRcsSettings = rcsSettings;
+		mContactsManager = contactsManager;
 	}
 
 	private int imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
@@ -119,7 +137,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	public void close() {
 		// Clear list of sessions
-		ftSessions.clear();
+		mFileTransferCache.clear();
 		
 		if (logger.isActivated()) {
 			logger.info("File transfer service API is closed");
@@ -127,35 +145,35 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	}
 
 	/**
-	 * Add a file transfer session in the list
+	 * Add a file transfer in the list
 	 * 
-	 * @param session File transfer session
+	 * @param fileTransfer File transfer
 	 */
-	public static void addFileTransferSession(IFileTransfer session) {
+	public void addFileTransfer(IFileTransfer fileTransfer) {
 		if (logger.isActivated()) {
-			logger.debug("Add a file transfer session in the list (size=" + ftSessions.size() + ")");
+			logger.debug("Add a file transfer in the list (size=" + mFileTransferCache.size() + ")");
 		}
 
 		try {
-			ftSessions.put(session.getTransferId(), session);
+			mFileTransferCache.put(fileTransfer.getTransferId(), fileTransfer);
 		} catch (RemoteException e) {
 			if (logger.isActivated()) {
-				logger.info("Unable to add file transfer session! " +e);
+				logger.info("Unable to add file transfer to the list! " +e);
 			}
 		}
 	}
 
 	/**
-	 * Remove a file transfer session from the list
+	 * Remove a file transfer from the list
 	 * 
 	 * @param fileTransferId File transfer ID
 	 */
-	/* package private */ static void removeFileTransferSession(String fileTransferId) {
+	/* package private */ void removeFileTransfer(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a file transfer session from the list (size=" + ftSessions.size() + ")");
+			logger.debug("Remove a file transfer from the list (size=" + mFileTransferCache.size() + ")");
 		}
 		
-		ftSessions.remove(fileTransferId);
+		mFileTransferCache.remove(fileTransferId);
 	}
 	
     /**
@@ -227,17 +245,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 
 		// Update displayName of remote contact
-		ContactsManager.getInstance().setContactDisplayName(contact, displayName);
+		mContactsManager.setContactDisplayName(contact,  displayName);
 
 		// Add session in the list
+		String fileTransferId = session.getFileTransferId();
+		FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+				fileTransferId, mMessagingLog);
 		if (isGroup) {
-			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(session,
-					mGroupFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(groupFileTransfer);
+			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+					session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
+					storageAccessor, this);
+			session.addListener(groupFileTransfer);
+			addFileTransfer(groupFileTransfer);
 		} else {
-			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(oneToOneFileTransfer);
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
 		}
     }
 
@@ -247,15 +272,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @return Configuration
      */
     public FileTransferServiceConfiguration getConfiguration() {
-    	RcsSettings rs = RcsSettings.getInstance();
     	return new FileTransferServiceConfiguration(
-    			rs.getWarningMaxFileTransferSize(),
-    			rs.getMaxFileTransferSize(),
-    			rs.isFtAutoAcceptedModeChangeable(),
-    			rs.isFileTransferAutoAccepted(),
-    			rs.isFileTransferAutoAcceptedInRoaming(),
-    			rs.getMaxFileTransferSessions()	,
-    			rs.getImageResizeOption().toInt());
+    			mRcsSettings.getWarningMaxFileTransferSize(),
+    			mRcsSettings.getMaxFileTransferSize(),
+    			mRcsSettings.isFtAutoAcceptedModeChangeable(),
+    			mRcsSettings.isFileTransferAutoAccepted(),
+    			mRcsSettings.isFileTransferAutoAcceptedInRoaming(),
+    			mRcsSettings.getMaxFileTransferSessions()	,
+    			mRcsSettings.getImageResizeOption().toInt());
     }    
 
 	/**
@@ -291,22 +315,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					|| content.getName() == null) {
 				throw new ServerApiException("FileTransfer initiation failed: invalid file");
 			}
-			final FileSharingSession session = Core.getInstance().getImService()
-					.initiateFileTransferSession(contact, content, attachfileIcon);
-
-			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
+			final FileSharingSession session = mImService.initiateFileTransferSession(contact, content, attachfileIcon);
 
 			String fileTransferId = session.getFileTransferId();
-			MessagingLog.getInstance().addFileTransfer(contact, fileTransferId,
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, mMessagingLog);
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+
+			
+			mMessagingLog.addFileTransfer(fileTransferId, contact,
 					Direction.OUTGOING, session.getContent(), session.getFileicon(),
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 			mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			addFileTransferSession(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
 
-			// Start the session
 			new Thread() {
 				public void run() {
 					session.startSession();
@@ -321,7 +348,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				logger.error("Core Exception cought, outgoing session rejected due to max size exceeded", e);
 			}
 			MmContent fileiconContent = null;
-			MessagingLog.getInstance().addFileTransfer(contact, IdGenerator.generateMessageID(),
+			mMessagingLog.addFileTransfer(IdGenerator.generateMessageID(), contact,
 					Direction.OUTGOING, content, fileiconContent,
 					FileTransfer.State.REJECTED, ReasonCode.REJECTED_MAX_SIZE);
 			throw new ServerApiException(e);
@@ -364,36 +391,33 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			logger.info("sendFile (file=" + file + ") (fileicon=" + attachfileIcon + ")");
 		}
 		try {
-			// Initiate the session
 			FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
 					fileDescription.getName());
 			if (content == null || content.getSize() <= 0 || content.getEncoding() == null || content.getName() == null) {
 				throw new IllegalArgumentException("FileTransfer initiation failed: invalid file");
 			}
-			Set<ParticipantInfo> participants = MessagingLog.getInstance()
+			Set<ParticipantInfo> participants = mMessagingLog
 					.getGroupChatConnectedParticipants(chatId);
-			final FileSharingSession session = Core
-					.getInstance()
-					.getImService()
-					.initiateGroupFileTransferSession(participants, content, attachfileIcon,
-							chatId);
-
-			// Add session listener
-			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(session, mGroupFileTransferBroadcaster);
+			final FileSharingSession session = mImService.initiateGroupFileTransferSession(
+					participants, content, attachfileIcon, chatId);
 
 			String fileTransferId = session.getFileTransferId();
-			MessagingLog.getInstance().addOutgoingGroupFileTransfer(session.getContributionID(),
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, mMessagingLog);
+			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+					chatId, mGroupFileTransferBroadcaster, mImService, storageAccessor, this);
+			session.addListener(groupFileTransfer);
+
+			mMessagingLog.addOutgoingGroupFileTransfer(session.getContributionID(),
 					fileTransferId, session.getContent(), session.getFileicon());
 			mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
 					FileTransfer.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			FileTransferServiceImpl.addFileTransferSession(groupFileTransfer);
+			addFileTransfer(groupFileTransfer);
 
-			// Start the session
 			new Thread() {
 				public void run() {
-					// Start the session
 					session.startSession();
 				}
 			}.start();
@@ -423,12 +447,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(ftSessions.size());
-			for (Enumeration<IFileTransfer> e = ftSessions.elements() ; e.hasMoreElements() ;) {
-				IFileTransfer sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
+			List<IBinder> fileTransfers = new ArrayList<IBinder>(mFileTransferCache.size());
+			for (IFileTransfer fileTransfer : mFileTransferCache.values()) {
+				fileTransfers.add(fileTransfer.asBinder());
 			}
-			return result;
+			return fileTransfers;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -443,13 +467,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @return File transfer
      * @throws ServerApiException
      */
-    public IFileTransfer getFileTransfer(String transferId) throws ServerApiException {
+	public IFileTransfer getFileTransfer(String transferId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get file transfer session " + transferId);
 		}
 
-		return ftSessions.get(transferId);
-    }    
+		IFileTransfer fileTransfer = mFileTransferCache.get(transferId);
+		if (fileTransfer != null) {
+			return fileTransfer;
+		}
+		FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+				transferId, mMessagingLog);
+		if (mMessagingLog.isGroupFileTransfer(transferId)) {
+			return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster, mImService,
+					storageAccessor, this);
+		}
+		return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
+				mImService, storageAccessor, this);
+	}
     
     /**
 	 * Adds a listener on file transfer events
@@ -523,17 +558,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	public void handleFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
 		String status = imdn.getStatus();
-		MessagingLog messagingLog = MessagingLog.getInstance();
 		/*Note: File transfer ID always corresponds to message ID in the imdn pay-load*/
 		String fileTransferId = imdn.getMsgId();
 		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+			mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
 					FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+			mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 			mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
@@ -543,7 +577,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
 			int reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
-			messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+			mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.FAILED, reasonCode);
 
 			mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
@@ -553,14 +587,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
             ContactId contact) {
-        MessagingLog messagingLog = MessagingLog.getInstance();
-        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                 GroupDeliveryInfoLog.Status.DELIVERED, GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
                 fileTransferId, GroupDeliveryInfoLog.Status.DELIVERED,
                 GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
-        if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
-            messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+        if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
                     FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -569,14 +602,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
             ContactId contact) {
-        MessagingLog messagingLog = MessagingLog.getInstance();
-        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                 GroupDeliveryInfoLog.Status.DISPLAYED, GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
                 fileTransferId, GroupDeliveryInfoLog.Status.DISPLAYED,
                 GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
-        if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-            messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
+        if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
                     FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
@@ -585,9 +617,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
             ContactId contact, int reasonCode) {
-        MessagingLog messagingLog = MessagingLog.getInstance();
         if (ReasonCode.FAILED_DELIVERY == reasonCode) {
-            messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+            mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                     GroupDeliveryInfoLog.Status.FAILED,
                     GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
             mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
@@ -595,7 +626,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
             return;
         }
-        messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                 GroupDeliveryInfoLog.Status.FAILED, GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
         mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId, contact,
                 fileTransferId, GroupDeliveryInfoLog.Status.FAILED,
@@ -653,16 +684,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 
 		// Add session in the list
+		String fileTransferId = session.getFileTransferId();
+		FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+				fileTransferId, mMessagingLog);
 		if (isGroup) {
-			GroupFileTransferImpl sessionApi = new GroupFileTransferImpl(session,
-					mGroupFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(sessionApi);
-			mGroupFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
+			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+					session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
+					storageAccessor, this);
+			session.addListener(groupFileTransfer);
+			addFileTransfer(groupFileTransfer);
 		} else {
-			OneToOneFileTransferImpl sessionApi = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(sessionApi);
-			mOneToOneFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
 		}
 	}
 
@@ -679,17 +715,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (logger.isActivated()) {
             logger.info("Resume incoming file transfer from " + session.getRemoteContact());
         }
-
+		String fileTransferId = session.getFileTransferId();
+		FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+				fileTransferId, mMessagingLog);
 		if (isGroup) {
-			GroupFileTransferImpl sessionApi = new GroupFileTransferImpl(session,
-					mGroupFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(sessionApi);
-			mGroupFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
+			GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+					session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
+					storageAccessor, this);
+			session.addListener(groupFileTransfer);
+			addFileTransfer(groupFileTransfer);
 		} else {
-			OneToOneFileTransferImpl sessionApi = new OneToOneFileTransferImpl(session,
-					mOneToOneFileTransferBroadcaster);
-			FileTransferServiceImpl.addFileTransferSession(sessionApi);
-			mOneToOneFileTransferBroadcaster.broadcastResumeFileTransfer(session.getFileTransferId());
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
 		}
     }
 	
@@ -701,7 +741,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	@Override
 	public void markFileTransferAsRead(String transferId) throws RemoteException {
 		//No notification type corresponds currently to mark as read
-		MessagingLog.getInstance().markFileTransferAsRead(transferId);
+		mMessagingLog.markFileTransferAsRead(transferId);
 	}
 
 	/**
@@ -710,14 +750,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	@Override
 	public void setAutoAccept(boolean enable) throws RemoteException {
-		RcsSettings rs = RcsSettings.getInstance();
-		if (!rs.isFtAutoAcceptedModeChangeable()) {
+		if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
 			throw new IllegalArgumentException("Auto accept mode is not changeable");
 		}
-		rs.setFileTransferAutoAccepted(enable);
+		mRcsSettings.setFileTransferAutoAccepted(enable);
 		if (!enable) {
 			// If AA is disabled in normal conditions then it must be disabled while roaming
-			rs.setFileTransferAutoAcceptedInRoaming(false);
+			mRcsSettings.setFileTransferAutoAcceptedInRoaming(false);
 		}
 	}
 
@@ -727,14 +766,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	@Override
 	public void setAutoAcceptInRoaming(boolean enable) throws RemoteException {
-		RcsSettings rs = RcsSettings.getInstance();
-		if (!rs.isFtAutoAcceptedModeChangeable()) {
+		if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
 			throw new IllegalArgumentException("Auto accept mode in roaming is not changeable");
 		}
-		if (!rs.isFileTransferAutoAccepted()) {
+		if (!mRcsSettings.isFileTransferAutoAccepted()) {
 			throw new IllegalArgumentException("Auto accept mode in normal conditions must be enabled");
 		}
-		rs.setFileTransferAutoAcceptedInRoaming(enable);
+		mRcsSettings.setFileTransferAutoAcceptedInRoaming(enable);
 	}
 
 	/**
@@ -748,7 +786,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		try {
 			// TODO CR031
 			ImageResizeOption imageResizeOption = ImageResizeOption.valueOf(option);
-			RcsSettings.getInstance().setImageResizeOption(imageResizeOption);
+			mRcsSettings.setImageResizeOption(imageResizeOption);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -765,7 +803,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	public void addAndBroadcastFileTransferInvitationRejected(ContactId contact,
 			MmContent content, MmContent fileIcon, int reasonCode) {
 		String fileTransferId = IdGenerator.generateMessageID();
-		MessagingLog.getInstance().addFileTransfer(contact, fileTransferId, Direction.INCOMING,
+		mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING,
 				content, fileIcon, FileTransfer.State.REJECTED, reasonCode);
 
 		mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);

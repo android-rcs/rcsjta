@@ -260,12 +260,7 @@ public class ImageSharingService extends RcsService {
     public ImageSharing getImageSharing(String sharingId) throws RcsServiceException {
 		if (api != null) {
 			try {
-				IImageSharing sharingIntf = api.getImageSharing(sharingId);
-				if (sharingIntf != null) {
-					return new ImageSharing(sharingIntf);
-				} else {
-					return null;
-				}
+				return new ImageSharing(api.getImageSharing(sharingId));
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

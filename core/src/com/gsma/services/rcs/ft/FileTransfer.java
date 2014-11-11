@@ -232,7 +232,7 @@ public class FileTransfer {
     /**
      * File transfer interface
      */
-    private IFileTransfer transferInf;
+    private final IFileTransfer mTransferInf;
     
     /**
      * Constructor
@@ -241,7 +241,7 @@ public class FileTransfer {
      * @hide
      */
     public FileTransfer(IFileTransfer transferIntf) {
-    	this.transferInf = transferIntf;
+    	mTransferInf = transferIntf;
     }
 
 	/**
@@ -252,7 +252,7 @@ public class FileTransfer {
 	 */
 	public String getChatId() throws RcsServiceException {
 		try {
-			return transferInf.getChatId();
+			return mTransferInf.getChatId();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -266,7 +266,7 @@ public class FileTransfer {
 	 */
 	public String getTransferId() throws RcsServiceException {
 		try {
-			return transferInf.getTransferId();
+			return mTransferInf.getTransferId();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -280,7 +280,7 @@ public class FileTransfer {
 	 */
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
-			return transferInf.getRemoteContact();
+			return mTransferInf.getRemoteContact();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -294,7 +294,7 @@ public class FileTransfer {
      */
 	public String getFileName() throws RcsServiceException {
 		try {
-			return transferInf.getFileName();
+			return mTransferInf.getFileName();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -308,7 +308,7 @@ public class FileTransfer {
      */
 	public long getFileSize() throws RcsServiceException {
 		try {
-			return transferInf.getFileSize();
+			return mTransferInf.getFileSize();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -322,7 +322,7 @@ public class FileTransfer {
      */
     public String getMimeType() throws RcsServiceException {
 		try {
-			return transferInf.getMimeType();
+			return mTransferInf.getMimeType();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -336,7 +336,7 @@ public class FileTransfer {
 	 */
 	public Uri getFileIcon() throws RcsServiceException {
 		try {
-			return transferInf.getFileIcon();
+			return mTransferInf.getFileIcon();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -350,7 +350,7 @@ public class FileTransfer {
 	 */
 	public Uri getFile() throws RcsServiceException {
 		try {
-			return transferInf.getFile();
+			return mTransferInf.getFile();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -365,7 +365,7 @@ public class FileTransfer {
 	 */
 	public int getState() throws RcsServiceException {
 		try {
-			return transferInf.getState();
+			return mTransferInf.getState();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -380,7 +380,7 @@ public class FileTransfer {
 	 */
 	public int getReasonCode() throws RcsServiceException {
 		try {
-			return transferInf.getReasonCode();
+			return mTransferInf.getReasonCode();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -395,7 +395,7 @@ public class FileTransfer {
 	 */
 	public int getDirection() throws RcsServiceException {
 		try {
-			return transferInf.getDirection();
+			return mTransferInf.getDirection();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -408,7 +408,7 @@ public class FileTransfer {
 	 */
 	public void acceptInvitation() throws RcsServiceException {
 		try {
-			transferInf.acceptInvitation();
+			mTransferInf.acceptInvitation();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -421,7 +421,7 @@ public class FileTransfer {
 	 */
 	public void rejectInvitation() throws RcsServiceException {
 		try {
-			transferInf.rejectInvitation();
+			mTransferInf.rejectInvitation();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -434,7 +434,7 @@ public class FileTransfer {
 	 */
 	public void abortTransfer() throws RcsServiceException {
 		try {
-			transferInf.abortTransfer();
+			mTransferInf.abortTransfer();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -447,7 +447,7 @@ public class FileTransfer {
 	 */
 	public void pauseTransfer() throws RcsServiceException {
 		try {
-			transferInf.pauseTransfer();
+			mTransferInf.pauseTransfer();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
@@ -460,7 +460,7 @@ public class FileTransfer {
 	 */
 	public void resumeTransfer() throws RcsServiceException {
 		try {
-			transferInf.resumeTransfer();
+			mTransferInf.resumeTransfer();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

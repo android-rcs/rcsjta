@@ -22,16 +22,10 @@ interface IGroupChat {
 
 	int getReasonCode();
 
-	ContactId getRemoteContact();
-
 	String getSubject();	
 
 	List<ParticipantInfo> getParticipants();
-	
-	void acceptInvitation();
-	
-	void rejectInvitation();
-	
+
 	ChatMessage sendMessage(in String text);
 
 	void sendIsComposingEvent(in boolean status);
@@ -43,4 +37,6 @@ interface IGroupChat {
 	void leave();
 
 	GeolocMessage sendMessage2(in Geoloc geoloc);
+
+	void openChat();
 }

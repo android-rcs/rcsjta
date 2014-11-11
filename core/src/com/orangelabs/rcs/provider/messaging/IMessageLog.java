@@ -86,7 +86,7 @@ public interface IMessageLog {
 	 * @param status
 	 *            Status
 	 */
-	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status);
+	public void addGroupChatEvent(String chatId, ContactId contact, int status);
 
 	/**
 	 * Update chat message read status
@@ -99,7 +99,7 @@ public interface IMessageLog {
 	public void markMessageAsRead(String msgId);
 
 	/**
-	 * Update chat message status
+	 * Set chat message status and reason code
 	 * 
 	 * @param msgId
 	 *            Message ID
@@ -108,7 +108,7 @@ public interface IMessageLog {
 	 * @param reasonCode
 	 *            Message status reason code
 	 */
-	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode);
+	public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode);
 
 	/**
 	 * Mark incoming chat message status as received

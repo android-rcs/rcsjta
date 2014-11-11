@@ -23,9 +23,10 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.os.IBinder;
 
@@ -43,6 +44,8 @@ import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
+import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
+import com.orangelabs.rcs.core.ims.service.richcall.video.VideoSharingPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -58,14 +61,21 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
-	private final VideoSharingEventBroadcaster mVideoSharingEventBroadcaster = new VideoSharingEventBroadcaster();
+	private final VideoSharingEventBroadcaster mBroadcaster = new VideoSharingEventBroadcaster();
 
 	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
 
-	/**
-	 * List of video sharing sessions
-	 */
-    private static Hashtable<String, IVideoSharing> videoSharingSessions = new Hashtable<String, IVideoSharing>();
+	private final RichcallService mRichcallService;
+
+	private final RichCallHistory mRichCallLog;
+
+	private final RcsSettings mRcsSettings;
+
+	private final ContactsManager mContactsManager;
+
+	private final Core mCore;
+
+	private final Map<String, IVideoSharing> mVideoSharingCache = new HashMap<String, IVideoSharing>();
 
 	/**
 	 * Lock used for synchronization
@@ -79,11 +89,22 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 	/**
 	 * Constructor
+	 * @param richcallService RichcallService
+	 * @param richCallLog RichCallHistory
+	 * @param rcsSettings RcsSettings
+	 * @param contactsManager ContactsManager
+	 * @param core Core
 	 */
-	public VideoSharingServiceImpl() {
+	public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
+			RcsSettings rcsSettings, ContactsManager contactsManager, Core core) {
 		if (logger.isActivated()) {
 			logger.info("Video sharing API is loaded");
 		}
+		mRichcallService = richcallService;
+		mRichCallLog = richCallLog;
+		mRcsSettings = rcsSettings;
+		mContactsManager = contactsManager;
+		mCore = core;
 	}
 
 	/**
@@ -91,7 +112,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 */
 	public void close() {
 		// Clear list of sessions
-		videoSharingSessions.clear();
+		mVideoSharingCache.clear();
 		
 		if (logger.isActivated()) {
 			logger.info("Video sharing service API is closed");
@@ -99,29 +120,29 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	}
 
     /**
-     * Add a video sharing session in the list
+     * Add a video sharing in the list
      * 
-     * @param session Video sharing session
+     * @param videoSharing Video sharing
      */
-	private static void addVideoSharingSession(VideoSharingImpl session) {
+	private void addVideoSharing(VideoSharingImpl videoSharing) {
 		if (logger.isActivated()) {
-			logger.debug("Add a video sharing session in the list (size=" + videoSharingSessions.size() + ")");
+			logger.debug("Add a video sharing in the list (size=" + mVideoSharingCache.size() + ")");
 		}
 		
-		videoSharingSessions.put(session.getSharingId(), session);
+		mVideoSharingCache.put(videoSharing.getSharingId(), videoSharing);
 	}
 
     /**
-     * Remove a video sharing session from the list
+     * Remove a video sharing from the list
      * 
-     * @param sessionId Session ID
+     * @param sharingId Sharing ID
      */
-	/* package private */ static void removeVideoSharingSession(String sessionId) {
+	/* package private */ void removeVideoSharing(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a video sharing session from the list (size=" + videoSharingSessions.size() + ")");
+			logger.debug("Remove a video sharing from the list (size=" + mVideoSharingCache.size() + ")");
 		}
 		
-		videoSharingSessions.remove(sessionId);
+		mVideoSharingCache.remove(sharingId);
 	}
 
     /**
@@ -192,7 +213,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		ServerApiUtils.testCore();
 
 		try {
-			return Core.getInstance().getImsModule().getCallManager().getContact();
+			return mCore.getImsModule().getCallManager().getContact();
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -213,10 +234,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		}
 
 		// Update displayName of remote contact
-		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
-		// Add session in the list
-		VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
-		VideoSharingServiceImpl.addVideoSharingSession(sessionApi);
+		mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+		String sharingId = session.getSessionID();
+		VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+				sharingId, mRichCallLog);
+		VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
+				mBroadcaster, storageAccessor, this);
+		addVideoSharing(videoSharing);
+		session.addListener(videoSharing);
     }
     
     /**
@@ -225,8 +250,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @return Configuration
      */
     public VideoSharingServiceConfiguration getConfiguration() {
-    	return new VideoSharingServiceConfiguration(
-    			RcsSettings.getInstance().getMaxVideoShareDuration());    	
+		return new VideoSharingServiceConfiguration(mRcsSettings.getMaxVideoShareDuration());
 	}
 
     /**
@@ -255,29 +279,31 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		}
 
 		try {
-		     // Initiate a new session
-            final VideoStreamingSession session = Core.getInstance().getRichcallService().initiateLiveVideoSharingSession(contact, player);
+            final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(contact, player);
 
 			String sharingId = session.getSessionID();
-			RichCallHistory.getInstance().addVideoSharing(contact, sharingId,
+			mRichCallLog.addVideoSharing(sharingId, contact,
 					Direction.OUTGOING, (VideoContent)session.getContent(),
 					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mVideoSharingEventBroadcaster.broadcastStateChanged(contact, sharingId,
+			mBroadcaster.broadcastStateChanged(contact, sharingId,
 					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			// Add session listener
-			VideoSharingImpl sessionApi = new VideoSharingImpl(session, mVideoSharingEventBroadcaster);
+			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+					sharingId, mRichCallLog);
+			VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
+					mBroadcaster, storageAccessor, this);
 
-			addVideoSharingSession(sessionApi);
+			addVideoSharing(videoSharing);
+			session.addListener(videoSharing);
 
-			// Start the session
 	        Thread t = new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
 	    	};
 	    	t.start();	
-			return sessionApi;
+			return videoSharing;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -289,15 +315,22 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     /**
      * Returns a current video sharing from its unique ID
      * 
-     * @return Video sharing or null if not found
+     * @return Video sharing
      * @throws ServerApiException
      */
-    public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
+	public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get video sharing session " + sharingId);
+			logger.info("Get video sharing " + sharingId);
 		}
 
-		return videoSharingSessions.get(sharingId);
+		IVideoSharing videoSharing = mVideoSharingCache.get(sharingId);
+		if (videoSharing != null) {
+			return videoSharing;
+		}
+		VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+				sharingId, mRichCallLog);
+		return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
+				this);
 	}
 
     /**
@@ -312,12 +345,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(videoSharingSessions.size());
-			for (Enumeration<IVideoSharing> e = videoSharingSessions.elements() ; e.hasMoreElements() ;) {
-				IVideoSharing sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
+			List<IBinder> videoSharings = new ArrayList<IBinder>(mVideoSharingCache.size());
+			for (IVideoSharing videoSharing : mVideoSharingCache.values()) {
+				videoSharings.add(videoSharing.asBinder());
 			}
-			return result;
+			return videoSharings;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -336,9 +369,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact, VideoContent content,
 			int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		RichCallHistory.getInstance().addVideoSharing(contact, sessionId,
+		mRichCallLog.addVideoSharing(sessionId, contact,
 				Direction.INCOMING, content, VideoSharing.State.REJECTED, reasonCode);
-		mVideoSharingEventBroadcaster.broadcastInvitation(sessionId);
+		mBroadcaster.broadcastInvitation(sessionId);
 	}
 
     /**
@@ -351,7 +384,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			logger.info("Add a video sharing event listener");
 		}
 		synchronized (lock) {
-			mVideoSharingEventBroadcaster.addEventListener(listener);
+			mBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -365,7 +398,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			logger.info("Remove a video sharing event listener");
 		}
 		synchronized (lock) {
-			mVideoSharingEventBroadcaster.removeEventListener(listener);
+			mBroadcaster.removeEventListener(listener);
 		}
 	}
 

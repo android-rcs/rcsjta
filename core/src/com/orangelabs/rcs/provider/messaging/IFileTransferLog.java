@@ -41,11 +41,10 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add outgoing file transfer
-	 * 
-	 * @param contact
-	 *            Contact ID
 	 * @param fileTransferId
 	 *            File Transfer ID
+	 * @param contact
+	 *            Contact ID
 	 * @param direction
 	 *            Direction
 	 * @param content
@@ -57,7 +56,7 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            Reason code
 	 */
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
 			MmContent content, MmContent fileIcon, int state, int reasonCode);
 
 	/**
@@ -77,13 +76,12 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add incoming group file transfer
-	 * 
-	 * @param contact
-	 *            Contact ID
 	 * @param fileTransferId
 	 *            File transfer ID
 	 * @param chatId
 	 *            Chat ID
+	 * @param contact
+	 *            Contact ID
 	 * @param content
 	 *            File content
 	 * @param fileIcon
@@ -93,11 +91,11 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            Reason code
 	 */
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String fileTransferId, String chatId, ContactId contact, MmContent content,
 			MmContent fileIcon, int state, int reasonCode);
 
 	/**
-	 * Update file transfer state
+	 * Set file transfer state and reason code
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
@@ -106,7 +104,7 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            File transfer state reason code
 	 */
-	public void updateFileTransferStateAndReasonCode(String fileTransferId,
+	public void setFileTransferStateAndReasonCode(String fileTransferId,
 			int state, int reasonCode);
 
 	/**
@@ -125,17 +123,17 @@ public interface IFileTransferLog {
 	 * @param currentSize
 	 *            Current size
 	 */
-	public void updateFileTransferProgress(String fileTransferId, long currentSize);
+	public void setFileTransferProgress(String fileTransferId, long currentSize);
 
 	/**
-	 * Update file transfer URI
+	 * Set file transfer URI
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
 	 * @param content
 	 *            the MmContent of received file
 	 */
-	public void updateFileTransferred(String fileTransferId, MmContent content);
+	public void setFileTransferred(String fileTransferId, MmContent content);
 
 	/**
 	 * Tells if the MessageID corresponds to that of a file transfer
@@ -177,4 +175,92 @@ public interface IFileTransferLog {
 	 * @param tId Unique Id used while uploading
 	 */
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
+
+	/**
+	 * Get file transfer chatId from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return chatId
+	 */
+	public String getChatId(String fileTransferId);
+
+	/**
+	 * Get file transfer remote contact from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return contact
+	 */
+	public ContactId getRemoteContact(String fileTransferId);
+
+	/**
+	 * Get file from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return file
+	 */
+	public Uri getFile(String fileTransferId);
+
+	/**
+	 * Get file name from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return name
+	 */
+	public String getFileName(String fileTransferId);
+
+	/**
+	 * Get file transfer direction from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return Direction
+	 */
+	public String getMimeType(String fileTransferId);
+
+	/**
+	 * Get file icon from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return fileicon
+	 */
+	public Uri getFileIcon(String fileTransferId);
+
+	/**
+	 * Get file transfer direction from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return Direction
+	 */
+	public int getFileTransferDirection(String fileTransferId);
+
+	/**
+	 * Get file transfer state from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return State
+	 */
+	public int getFileTransferState(String fileTransferId);
+
+	/**
+	 * Get file transfer reason code from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return reason code of the state
+	 */
+	public int getFileTransferStateReasonCode(String fileTransferId);
+
+	/**
+	 * Get file size from its unique ID
+	 * 
+	 * @param fileTransferId Unique ID of file transfer
+	 * @return size of the file
+	 */
+	public long getFileSize(String fileTransferId);
+
+	/**
+	 * Is group file transfer
+	 * 
+	 * @param fileTransferId
+	 * @return true if it is group file transfer
+	 */
+	public boolean isGroupFileTransfer(String fileTransferId);
 }

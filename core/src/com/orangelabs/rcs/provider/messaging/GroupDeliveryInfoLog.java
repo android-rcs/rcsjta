@@ -88,7 +88,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
      * @param status Status
      * @param reasonCode Reason code
      */
-    public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+    public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
             int status, int reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status);

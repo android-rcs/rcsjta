@@ -26,9 +26,9 @@ interface IFileTransferService {
 	
 	IFileTransfer getFileTransfer(in String transferId);
 
-	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean fileicon);
+	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean attachFileicon);
 
-	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean fileicon);
+	IFileTransfer transferFileToGroupChat(in String chatId, in Uri file, in boolean attachFileicon);
 
 	void markFileTransferAsRead(in String transferId);
 	

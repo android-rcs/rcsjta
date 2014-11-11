@@ -177,12 +177,7 @@ public class GeolocSharingService extends RcsService {
     public GeolocSharing getGeolocSharing(String sharingId) throws RcsServiceException {
 		if (api != null) {
 			try {
-				IGeolocSharing sharingIntf = api.getGeolocSharing(sharingId);
-				if (sharingIntf != null) {
-					return new GeolocSharing(sharingIntf);
-				} else {
-					return null;
-				}
+				return new GeolocSharing(api.getGeolocSharing(sharingId));
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

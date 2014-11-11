@@ -22,6 +22,8 @@
 package com.gsma.services.rcs.chat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.content.ComponentName;
@@ -129,33 +131,7 @@ public class ChatService extends RcsService {
 			throw new RcsServiceNotAvailableException();
 		}
 	}    
-    
-    /**
-     * Open a single chat with a given contact and returns a Chat instance.
-     * The parameter contact supports the following formats: MSISDN in national
-     * or international format, SIP address, SIP-URI or Tel-URI.
-     * 
-     * @param contact the ContactId
-     * @return OneToOneChat or null 
-     * @throws RcsServiceException
-     */
-    public OneToOneChat openSingleChat(ContactId contact) throws RcsServiceException {
-		if (api != null) {
-			try {
-				IOneToOneChat chatIntf = api.openSingleChat(contact);
-				if (chatIntf != null) {
-					return new OneToOneChat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
-			throw new RcsServiceNotAvailableException();
-		}
-    }
-    
+  
     /**
      * Initiates a group chat with a group of contact and returns a GroupChat
      * instance. The subject is optional and may be null.
@@ -228,47 +204,38 @@ public class ChatService extends RcsService {
 			throw new RcsServiceNotAvailableException();
 		}
     }
-    
+   
     /**
-     * Returns a chat in progress with a given contact
+     * Returns a chat with a given contact
      * 
      * @param contact ContactId
-     * @return OneToOneChat or null if not found
+     * @return Chat
      * @throws RcsServiceException
      */
-    public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceException {
+	public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceException {
 		if (api != null) {
 			try {
-				IOneToOneChat chatIntf = api.getChat(contact);
-				if (chatIntf != null) {
-					return new OneToOneChat(chatIntf);
-				} else {
-					return null;
-				}
-			} catch(Exception e) {
+				return new OneToOneChat(api.getOneToOneChat(contact));
+			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
 			throw new RcsServiceNotAvailableException();
 		}
-    }
-    
-    /**
-     * Returns a group chat in progress from its unique ID
-     * 
-     * @param chatId Chat ID
-     * @return Group chat or null if not found
-     * @throws RcsServiceException
-     */
+	}
+
+	/**
+	 * Returns a group chat from its unique ID. An exception is thrown if the
+	 * chat ID does not exist
+	 *
+	 * @param chatId Chat ID
+	 * @return GroupChat
+	 * @throws RcsServiceException
+	 */
     public GroupChat getGroupChat(String chatId) throws RcsServiceException {
 		if (api != null) {
 			try {
-				IGroupChat chatIntf = api.getGroupChat(chatId);
-				if (chatIntf != null) {
-					return new GroupChat(chatIntf);
-				} else {
-					return null;
-				}
+				return new GroupChat(api.getGroupChat(chatId));
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

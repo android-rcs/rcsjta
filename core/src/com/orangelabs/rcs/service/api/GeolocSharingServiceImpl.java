@@ -22,9 +22,9 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.os.IBinder;
 
@@ -37,13 +37,13 @@ import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
 import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.GeolocContent;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
+import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
@@ -58,14 +58,15 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
-	/**
-	 * List of geoloc sharing sessions
-	 */
-	private static Hashtable<String, IGeolocSharing> gshSessions = new Hashtable<String, IGeolocSharing>();  
-
-	private final GeolocSharingEventBroadcaster mGeolocSharingEventBroadcaster = new GeolocSharingEventBroadcaster();
+	private final GeolocSharingEventBroadcaster mBroadcaster = new GeolocSharingEventBroadcaster();
 
 	private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
+
+	private final RichcallService mRichcallService;
+
+	private final ContactsManager mContactsManager;
+
+	private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<String, IGeolocSharing>();
 
 	/**
 	 * The logger
@@ -79,11 +80,16 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param richcallService RichcallService
+	 * @param contactsManager ContactsManager
 	 */
-	public GeolocSharingServiceImpl() {
+	public GeolocSharingServiceImpl(RichcallService richcallService, ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Geoloc sharing service API is loaded");
 		}
+		mRichcallService = richcallService;
+		mContactsManager = contactsManager;
 	}
 
 	/**
@@ -91,7 +97,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 */
 	public void close() {
 		// Clear list of sessions
-		gshSessions.clear();
+		mGeolocSharingCache.clear();
 		
 		if (logger.isActivated()) {
 			logger.info("Geoloc sharing service API is closed");
@@ -99,29 +105,29 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	}
 
 	/**
-	 * Add an geoloc sharing session in the list
+	 * Add an geoloc sharing in the list
 	 * 
-	 * @param session Geoloc sharing session
+	 * @param geolocSharing Geoloc sharing
 	 */
-	private static void addGeolocSharingSession(GeolocSharingImpl session) {
+	private void addGeolocSharing(GeolocSharingImpl geolocSharing) {
 		if (logger.isActivated()) {
-			logger.debug("Add a geoloc sharing session in the list (size=" + gshSessions.size() + ")");
+			logger.debug("Add a geoloc sharing in the list (size=" + mGeolocSharingCache.size() + ")");
 		}
 		
-		gshSessions.put(session.getSharingId(), session);
+		mGeolocSharingCache.put(geolocSharing.getSharingId(), geolocSharing);
 	}
 
 	/**
-	 * Remove an geoloc sharing session from the list
+	 * Remove an geoloc sharing from the list
 	 * 
-	 * @param sessionId Session ID
+	 * @param sharingId Sharing ID
 	 */
-	/* package private */ static void removeGeolocSharingSession(String sessionId) {
+	/* package private */ void removeGeolocSharing(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a geoloc sharing session from the list (size=" + gshSessions.size() + ")");
+			logger.debug("Remove a geoloc sharing from the list (size=" + mGeolocSharingCache.size() + ")");
 		}
 		
-		gshSessions.remove(sessionId);
+		mGeolocSharingCache.remove(sharingId);
 	}
     
     /**
@@ -189,11 +195,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		// TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
 		
 		// Update displayName of remote contact
-		ContactsManager.getInstance().setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
+		mContactsManager.setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
 
 		// Add session in the list
-		GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
-		GeolocSharingServiceImpl.addGeolocSharingSession(sessionApi);
+		GeolocSharingImpl geolocSharing = new GeolocSharingImpl(session.getSessionID(),
+				mBroadcaster, mRichcallService, this);
+		addGeolocSharing(geolocSharing);
+		session.addListener(geolocSharing);
     }
     
     /**
@@ -225,12 +233,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			MmContent content = new GeolocContent("geoloc.xml", geolocDoc.getBytes().length, geolocDoc.getBytes());
 
 			// Initiate a sharing session
-			final GeolocTransferSession session = Core.getInstance().getRichcallService().initiateGeolocSharingSession(contact, content, geolocPush);
-			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(contact,
-					session.getSessionID(), GeolocSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+			final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(contact, content, geolocPush);
+			String sharingId = session.getSessionID();
+			mBroadcaster.broadcastGeolocSharingStateChanged(contact,
+					sharingId, GeolocSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
-			GeolocSharingImpl sessionApi = new GeolocSharingImpl(session, mGeolocSharingEventBroadcaster);
+			GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster, mRichcallService, this);
 
 			// Start the session
 	        new Thread() {
@@ -240,8 +249,10 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	    	}.start();
 	    	
 			// Add session in the list
-			addGeolocSharingSession(sessionApi);
-			return sessionApi;			
+			addGeolocSharing(geolocSharing);
+			session.addListener(geolocSharing);
+			return geolocSharing;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -262,12 +273,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		}
 
 		try {
-			ArrayList<IBinder> result = new ArrayList<IBinder>(gshSessions.size());
-			for (Enumeration<IGeolocSharing> e = gshSessions.elements() ; e.hasMoreElements() ;) {
-				IGeolocSharing sessionApi = e.nextElement() ;
-				result.add(sessionApi.asBinder());
+			List<IBinder> geolocSharings = new ArrayList<IBinder>(
+					mGeolocSharingCache.size());
+			for (IGeolocSharing geolocSharing : mGeolocSharingCache.values()) {
+				geolocSharings.add(geolocSharing.asBinder());
 			}
-			return result;
+			return geolocSharings;
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -282,12 +294,17 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return Geoloc sharing
      * @throws ServerApiException
      */
-    public IGeolocSharing getGeolocSharing(String sharingId) throws ServerApiException {
+	public IGeolocSharing getGeolocSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get geoloc sharing session " + sharingId);
 		}
 
-		return gshSessions.get(sharingId);
+		IGeolocSharing geolocSharing = mGeolocSharingCache.get(sharingId);
+		if (geolocSharing != null) {
+			return geolocSharing;
+		}
+		return new GeolocSharingImpl(sharingId,
+				mBroadcaster, mRichcallService, this);
 	}
 
 	/**
@@ -300,7 +317,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			logger.info("Add a Geoloc sharing event listener");
 		}
 		synchronized (lock) {
-			mGeolocSharingEventBroadcaster.addEventListener(listener);
+			mBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -314,7 +331,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			logger.info("Remove a Geoloc sharing event listener");
 		}
 		synchronized (lock) {
-			mGeolocSharingEventBroadcaster.removeEventListener(listener);
+			mBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -333,6 +350,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			int reasonCode) {
 		String sharingId = SessionIdGenerator.getNewId();
 		/* TODO: Persist in geoloc content provider */
-		mGeolocSharingEventBroadcaster.broadcastInvitation(sharingId);
+		mBroadcaster.broadcastInvitation(sharingId);
 	}
 }

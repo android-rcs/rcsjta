@@ -203,12 +203,7 @@ public class VideoSharingService extends RcsService {
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				IVideoSharing sharingIntf = api.getVideoSharing(sharingId);
-				if (sharingIntf != null) {
-					return new VideoSharing(sharingIntf);
-				} else {
-					return null;
-				}
+				return new VideoSharing(api.getVideoSharing(sharingId));
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

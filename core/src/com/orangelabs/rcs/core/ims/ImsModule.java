@@ -49,6 +49,8 @@ import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService;
 import com.orangelabs.rcs.core.ims.userprofile.UserProfile;
 import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -139,27 +141,33 @@ public class ImsModule implements SipEventListener {
 	    	}
 	    	throw new CoreException("Keystore manager exeception");			
 		}
-		
+
+		RcsSettings rcsSettings = RcsSettings.getInstance();
+
+		ContactsManager contactsManager = ContactsManager.getInstance();
+
+		MessagingLog messagingLog = MessagingLog.getInstance();
+
 		// Instanciates the IMS services
         services = new ImsService[7];
         
         // Create terms & conditions service
-        services[ImsService.TERMS_SERVICE] = new TermsConditionsService(this);
+        services[ImsService.TERMS_SERVICE] = new TermsConditionsService(this,rcsSettings);
 
         // Create capability discovery service
-        services[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this);
+        services[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this, rcsSettings, contactsManager);
         
         // Create IM service (mandatory)
-        services[ImsService.IM_SERVICE] = new InstantMessagingService(this);
+        services[ImsService.IM_SERVICE] = new InstantMessagingService(this, core, rcsSettings, contactsManager, messagingLog);
         
         // Create IP call service (optional)
-        services[ImsService.IPCALL_SERVICE] = new IPCallService(this);
+        services[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings);
         
         // Create richcall service (optional)
         services[ImsService.RICHCALL_SERVICE] = new RichcallService(this);
 
         // Create presence service (optional)
-        services[ImsService.PRESENCE_SERVICE] = new PresenceService(this);
+        services[ImsService.PRESENCE_SERVICE] = new PresenceService(this, rcsSettings, contactsManager);
 
         // Create generic SIP service
         services[ImsService.SIP_SERVICE] = new SipService(this);

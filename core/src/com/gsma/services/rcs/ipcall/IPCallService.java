@@ -220,12 +220,7 @@ public class IPCallService extends RcsService {
     public IPCall getIPCall(String callId) throws RcsServiceException {
 		if (api != null) {
 			try {
-				IIPCall callIntf = api.getIPCall(callId);
-				if (callIntf != null) {
-					return new IPCall(callIntf);
-				} else {
-					return null;
-				}
+				return new IPCall(api.getIPCall(callId));
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

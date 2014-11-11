@@ -32,6 +32,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
@@ -64,6 +65,42 @@ public class RcsSettings {
 	private static final int GROUP_CHAT_SUBJECT_MAX_LENGTH = 50;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(RcsSettingsData.KEY_KEY).append("=?").toString();
+
+	/**
+	 * Option for what ux-operation to react on when handling manual acceptance
+	 * of one2one and group chat invitations.
+	 */
+	public static enum ImSessionStartMode {
+
+		ON_OPENING(0), ON_COMPOSING(1), ON_SENDING(2);
+
+		private final int mValue;
+
+		private static SparseArray<ImSessionStartMode> mValueToEnum = new SparseArray<ImSessionStartMode>();
+		static {
+			for (ImSessionStartMode entry : ImSessionStartMode.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private ImSessionStartMode(int value) {
+			mValue = value;
+		}
+
+		public final int toInt() {
+			return mValue;
+		}
+
+		public final static ImSessionStartMode valueOf(int value) {
+			ImSessionStartMode entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException("No enum const class "
+					+ ImSessionStartMode.class.getName() + "." + value);
+		}
+
+	}
 
 	// Purposely put in comments. Remove comment strongly impact performance.
 //	 /**
@@ -1267,8 +1304,9 @@ public class RcsSettings {
 	 *         </ul>
 	 * 
 	 */
-	public int getImSessionStartMode() {
-		return readInteger(RcsSettingsData.IM_SESSION_START, RcsSettingsData.DEFAULT_IM_SESSION_START);
+	public ImSessionStartMode getImSessionStartMode() {
+		return ImSessionStartMode.valueOf(readInteger(RcsSettingsData.IM_SESSION_START,
+				ImSessionStartMode.ON_OPENING.toInt()));
 	}
 
 	/**

@@ -135,8 +135,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * updateGroupChatStatusAndReasonCode (java.lang.String, int, int)
 	 */
 	@Override
-	public void updateGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
-		groupChatLog.updateGroupChatStateAndReasonCode(chatId, state, reasonCode);
+	public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
+		groupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
 	}
 
 	/*
@@ -152,11 +152,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart(java.lang.String, java.lang.String)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#setGroupChatRejoinId(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void updateGroupChatRejoinIdOnSessionStart(String chatId, String rejoinId) {
-		groupChatLog.updateGroupChatRejoinIdOnSessionStart(chatId, rejoinId);
+	public void setGroupChatRejoinId(String chatId, String rejoinId) {
+		groupChatLog.setGroupChatRejoinId(chatId, rejoinId);
 	}
 
 	/*
@@ -227,11 +227,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatSystemMessage(java.lang.String, java.lang.String, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatEvent(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public void addGroupChatSystemMessage(String chatId, ContactId contact, int status) {
-		messageLog.addGroupChatSystemMessage(chatId, contact, status);
+	public void addGroupChatEvent(String chatId, ContactId contact, int status) {
+		messageLog.addGroupChatEvent(chatId, contact, status);
 	}
 
 	/*
@@ -250,8 +250,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * updateChatMessageStatusAndReasonCode (java.lang.String, int, int)
 	 */
 	@Override
-	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
-		messageLog.updateChatMessageStatusAndReasonCode(msgId, status, reasonCode);
+	public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
+		messageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
 	}
 
 	/*
@@ -281,9 +281,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
 			MmContent content, MmContent fileIcon, int status, int reasonCode) {
-		fileTransferLog.addFileTransfer(contact, fileTransferId, direction, content, fileIcon,
+		fileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
 				status, reasonCode);
 	}
 
@@ -305,9 +305,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * java.lang.String, com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
+	public void addIncomingGroupFileTransfer(String fileTransferId, String chatId, ContactId contact, MmContent content,
 			MmContent fileIcon, int state, int reasonCode) {
-		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content,
+		fileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
 				fileIcon, state, reasonCode);
 	}
 
@@ -317,9 +317,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * updateFileTransferStateAndReasonCode(java.lang.String, int, int
 	 */
 	@Override
-	public void updateFileTransferStateAndReasonCode(String fileTransferId, int state,
+	public void setFileTransferStateAndReasonCode(String fileTransferId, int state,
 			int reasonCode) {
-		fileTransferLog.updateFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+		fileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
 	}
 
 	/*
@@ -338,16 +338,16 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long)
 	 */
 	@Override
-	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
-		fileTransferLog.updateFileTransferProgress(fileTransferId, currentSize);
+	public void setFileTransferProgress(String fileTransferId, long currentSize) {
+		fileTransferLog.setFileTransferProgress(fileTransferId, currentSize);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferred(java.lang.String, com.orangelabs.rcs.core.content.MmContent)
 	 */
 	@Override
-	public void updateFileTransferred(String fileTransferId, MmContent content) {
-		fileTransferLog.updateFileTransferred(fileTransferId, content);
+	public void setFileTransferred(String fileTransferId, MmContent content) {
+		fileTransferLog.setFileTransferred(fileTransferId, content);
 	}
 
 	/*
@@ -401,9 +401,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * int, int)
 	 */
 	@Override
-	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+	public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
 			int status, int reasonCode) {
-		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+		groupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
 				status, reasonCode);
 	}
 
@@ -445,5 +445,95 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
 		return fileTransferLog.retrieveFtHttpResumeUpload(tId);
+	}
+
+	@Override
+	public Set<ParticipantInfo> getParticipants(String participants) {
+		return groupChatLog.getParticipants(participants);
+	}
+
+	@Override
+	public int getGroupChatDirection(String chatId) {
+		return groupChatLog.getGroupChatDirection(chatId);
+	}
+
+	@Override
+	public int getGroupChatState(String chatId) {
+		return groupChatLog.getGroupChatState(chatId);
+	}
+
+	@Override
+	public int getGroupChatReasonCode(String chatId) {
+		return groupChatLog.getGroupChatReasonCode(chatId);
+	}
+
+	@Override
+	public int getFileTransferDirection(String fileTransferId) {
+		return fileTransferLog.getFileTransferDirection(fileTransferId);
+	}
+
+	@Override
+	public int getFileTransferState(String fileTransferId) {
+		return fileTransferLog.getFileTransferState(fileTransferId);
+	}
+
+	@Override
+	public int getFileTransferStateReasonCode(String fileTransferId) {
+		return fileTransferLog.getFileTransferStateReasonCode(fileTransferId);
+	}
+
+	@Override
+	public long getFileSize(String fileTransferId) {
+		return fileTransferLog.getFileSize(fileTransferId);
+	}
+
+	@Override
+	public String getChatId(String fileTransferId) {
+		return fileTransferLog.getChatId(fileTransferId);
+	}
+
+	@Override
+	public ContactId getRemoteContact(String fileTransferId) {
+		return fileTransferLog.getRemoteContact(fileTransferId);
+	}
+
+	@Override
+	public Uri getFile(String fileTransferId) {
+		return fileTransferLog.getFile(fileTransferId);
+	}
+
+	@Override
+	public String getFileName(String fileTransferId) {
+		return fileTransferLog.getFileName(fileTransferId);
+	}
+
+	@Override
+	public String getMimeType(String fileTransferId) {
+		return fileTransferLog.getMimeType(fileTransferId);
+	}
+
+	@Override
+	public Uri getFileIcon(String fileTransferId) {
+		return fileTransferLog.getFileIcon(fileTransferId);
+	}
+
+	@Override
+	public String getSubject(String chatId) {
+		return groupChatLog.getSubject(chatId);
+	}
+
+	@Override
+	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
+		return groupChatLog.getGroupChatParticipants(chatId);
+	}
+
+	@Override
+	public boolean isGroupFileTransfer(String fileTransferId) {
+		return fileTransferLog.isGroupFileTransfer(fileTransferId);
+	}
+
+	@Override
+	public void setRejectNextGroupChatNextInvitation(String chatId) {
+		groupChatLog.setRejectNextGroupChatNextInvitation(chatId);
 	}
 }
