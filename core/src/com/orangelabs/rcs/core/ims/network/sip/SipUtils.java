@@ -193,7 +193,7 @@ public class SipUtils {
 	}
 
 	/**
-     * Build User Agent value
+     * Build User Agent value for UAC
      *
      * @return UA value
      */
@@ -213,14 +213,15 @@ public class SipUtils {
 	    return userAgentHeader;
     }
 	
-	/**
+    /**
      * Build Server header
      * 
      * @return Header
      * @throws Exception
      */
 	public static Header buildServerHeader() throws Exception {
-		return HEADER_FACTORY.createHeader(ServerHeader.NAME, userAgentString());
+        String userAgent = "ExttoExt-serv/Ext1.0 IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
+		return HEADER_FACTORY.createHeader(ServerHeader.NAME, userAgent);
     }
     
 	/**
