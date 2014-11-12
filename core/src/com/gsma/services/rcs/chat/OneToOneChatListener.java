@@ -19,14 +19,35 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.service.broadcaster;
+
+package com.gsma.services.rcs.chat;
+
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * Interface to perform broadcast events on FileUploadListeners
+ * One-to-One Chat event listener
+ * 
+ * @author Jean-Marc AUFFRET
  */
-public interface IFileUploadEventBroadcaster {
+public abstract class OneToOneChatListener extends IOneToOneChatListener.Stub {
 
-	public void broadcastStateChanged(String uploadId, int status);
+	/**
+	 * Callback called when a message status/reasonCode is changed.
+	 * 
+	 * @param contact Contact ID
+	 * @param msgId Message Id
+	 * @param status Status
+	 * @param reasonCode Reason code
+	 */
+	public abstract void onMessageStatusChanged(ContactId contact, String msgId, int status,
+			int reasonCode);
 
-	public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
+	/**
+	 * Callback called when an Is-composing event has been received. If the
+	 * remote is typing a message the status is set to true, else it is false.
+	 * 
+	 * @param contact Contact ID
+	 * @param status Is-composing status
+	 */
+	public abstract void onComposingEvent(ContactId contact, boolean status);
 }

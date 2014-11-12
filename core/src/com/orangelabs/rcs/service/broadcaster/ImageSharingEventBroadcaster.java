@@ -47,12 +47,12 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		mImageSharingListeners.unregister(listener);
 	}
 
-	public void broadcastImageSharingStateChanged(ContactId contact, String sharingId, int state,
+	public void broadcastStateChanged(ContactId contact, String sharingId, int state,
 			int reasonCode) {
 		final int N = mImageSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mImageSharingListeners.getBroadcastItem(i).onImageSharingStateChanged(contact,
+				mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact,
 						sharingId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -63,12 +63,12 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		mImageSharingListeners.finishBroadcast();
 	}
 
-	public void broadcastImageSharingProgress(ContactId contact, String sharingId, long currentSize,
+	public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
 			long totalSize) {
 		final int N = mImageSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mImageSharingListeners.getBroadcastItem(i).onImageSharingProgress(contact,
+				mImageSharingListeners.getBroadcastItem(i).onProgressUpdate(contact,
 						sharingId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -79,7 +79,7 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		mImageSharingListeners.finishBroadcast();
 	}
 
-	public void broadcastImageSharingInvitation(String sharingId) {
+	public void broadcastInvitation(String sharingId) {
 		Intent invitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(invitation);

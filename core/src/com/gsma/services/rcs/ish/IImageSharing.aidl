@@ -19,7 +19,7 @@ interface IImageSharing {
 
 	long getFileSize();
 
-	String getFileType();
+	String getMimeType();
 
 	int getState();
 

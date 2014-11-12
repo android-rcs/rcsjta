@@ -114,7 +114,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	}
 	
 	/**
-	 * Adds a listener on renderer events
+	 * Adds a listener on video renderer events
 	 * 
 	 * @param listener Listener
 	 */
@@ -123,7 +123,7 @@ public abstract class VideoRenderer extends IVideoRenderer.Stub {
 	}
 
 	/**
-	 * Removes a listener from renderer events
+	 * Removes a listener on video renderer events
 	 * 
 	 * @param listener Listener
 	 */

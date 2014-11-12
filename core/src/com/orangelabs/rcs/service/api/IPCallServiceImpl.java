@@ -140,12 +140,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -154,12 +154,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -383,7 +383,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 * 
 	 * @param listener Listener
 	 */
-	public void addEventListener(IIPCallListener listener) {
+	public void addEventListener2(IIPCallListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an IP call event listener");
 		}
@@ -397,7 +397,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	 * 
 	 * @param listener Listener
 	 */
-	public void removeEventListener(IIPCallListener listener) {
+	public void removeEventListener2(IIPCallListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an IP call event listener");
 		}

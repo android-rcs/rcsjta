@@ -72,25 +72,25 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Remote contact identifier
 	 * @param remoteUri
 	 *            the remote URI
-	 * @param fileicon
-	 *            true if the stack must try to attach fileicon
+	 * @param fileIcon
+	 *            true if the stack must try to attach file icon
 	 * @param tId
 	 *            TID of the upload
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
-			ContactId contact, String remoteUri, boolean fileicon, String tId) {
+			ContactId contact, String remoteUri, boolean fileIcon, String tId) {
 		super(parent, content, contact, remoteUri, null, null, null, IdGenerator.generateMessageID());
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact+ " remoteURI= "+remoteUri);
 		}
-		MmContent fileiconContent = null;
-		if (fileicon && MimeManager.isImageType(content.getEncoding())) {
-			// Create the fileicon
-			fileiconContent = FileTransferUtils.createFileicon(content.getUri(), getFileTransferId());
-			setFileicon(fileiconContent);
+		MmContent fileIconContent = null;
+		if (fileIcon && MimeManager.isImageType(content.getEncoding())) {
+			// Create the file icon
+			fileIconContent = FileTransferUtils.createFileicon(content.getUri(), getFileTransferId());
+			setFileicon(fileIconContent);
 		}
 		// Instantiate the upload manager
-		uploadManager = new HttpUploadManager(getContent(), fileiconContent, this, tId);
+		uploadManager = new HttpUploadManager(getContent(), fileIconContent, this, tId);
 	}
 	
 	/**
@@ -104,17 +104,17 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            Remote contact identifier
 	 * @param remoteUri
 	 *            Remote URI
-	 * @param fileiconContent
-	 *            Content of fileicon
+	 * @param fileIconContent
+	 *            Content of file icon
 	 * @param fileTransferId
 	 *            File transfer Id
 	 * @param tId
 	 *            TID of the upload
 	 */
 	public OriginatingHttpFileSharingSession(ImsService parent, MmContent content,
-			ContactId contact, String remoteUri, MmContent fileiconContent, String fileTransferId,
+			ContactId contact, String remoteUri, MmContent fileIconContent, String fileTransferId,
 			String tId) {
-		super(parent, content, contact, remoteUri, fileiconContent, null, null, fileTransferId);
+		super(parent, content, contact, remoteUri, fileIconContent, null, null, fileTransferId);
 		if (logger.isActivated()) {
 			logger.debug("OriginatingHttpFileSharingSession contact=" + contact );
 		}

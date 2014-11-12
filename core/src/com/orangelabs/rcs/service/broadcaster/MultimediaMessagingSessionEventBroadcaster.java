@@ -49,11 +49,11 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 		mMultimediaMessagingListeners.unregister(listener);
 	}
 
-	public void broadcastNewMessage(ContactId contact, String sessionId, byte[] message) {
+	public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message) {
 		final int N = mMultimediaMessagingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mMultimediaMessagingListeners.getBroadcastItem(i).onNewMessage(contact, sessionId,
+				mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived(contact, sessionId,
 						message);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -64,13 +64,13 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 		mMultimediaMessagingListeners.finishBroadcast();
 	}
 
-	public void broadcastMultimediaMessagingStateChanged(ContactId contact, String sessionId,
+	public void broadcastStateChanged(ContactId contact, String sessionId,
 			int state, int reasonCode) {
 		final int N = mMultimediaMessagingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				mMultimediaMessagingListeners.getBroadcastItem(i)
-						.onMultimediaMessagingStateChanged(contact, sessionId, state, reasonCode);
+						.onStateChanged(contact, sessionId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -80,7 +80,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 		mMultimediaMessagingListeners.finishBroadcast();
 	}
 
-	public void broadcastMultimediaMessagingInvitation(String sessionId, Intent msrpSessionInvite) {
+	public void broadcastInvitation(String sessionId, Intent msrpSessionInvite) {
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(msrpSessionInvite);
 		IntentUtils.tryToSetReceiverForegroundFlag(msrpSessionInvite);
 		msrpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);

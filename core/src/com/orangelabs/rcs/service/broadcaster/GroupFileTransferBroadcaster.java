@@ -50,12 +50,12 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastTransferStateChanged(String chatId, String transferId, int state,
+	public void broadcastStateChanged(String chatId, String transferId, int state,
 			int reasonCode) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onTransferStateChanged(chatId,
+				mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId,
 						transferId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -66,12 +66,12 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.finishBroadcast();
 	}
 
-	public void broadcastTransferprogress(String chatId, String transferId, long currentSize,
+	public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
 			long totalSize) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onTransferProgress(chatId,
+				mGroupFileTransferListeners.getBroadcastItem(i).onProgressUpdate(chatId,
 						transferId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -88,7 +88,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		for (int i = 0; i < N; i++) {
 			try {
 				mGroupFileTransferListeners.getBroadcastItem(i)
-						.onGroupDeliveryInfoChanged(chatId, contact, transferId,
+						.onDeliveryInfoChanged(chatId, contact, transferId,
 								state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -99,7 +99,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.finishBroadcast();
 	}
 
-	public void broadcastFileTransferInvitation(String fileTransferId) {
+	public void broadcastInvitation(String fileTransferId) {
 		Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(invitation);

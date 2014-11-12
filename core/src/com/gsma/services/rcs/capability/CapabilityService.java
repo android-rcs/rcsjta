@@ -286,7 +286,7 @@ public class CapabilityService extends RcsService {
 				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
 					ContactId contact = list.next();
-					api.addContactCapabilitiesListener(contact, listener);
+					api.addCapabilitiesListener2(contact, listener);
 				}
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
@@ -309,7 +309,7 @@ public class CapabilityService extends RcsService {
 				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
 					ContactId contact = list.next();
-					api.removeContactCapabilitiesListener(contact, listener);
+					api.removeCapabilitiesListener2(contact, listener);
 				}
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());

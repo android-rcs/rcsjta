@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.gsh;
 
-import com.gsma.services.rcs.chat.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -8,7 +7,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IGeolocSharingListener {
 
-	void onGeolocSharingStateChanged(in ContactId contact, in String sharingId, in int state, in int reasonCode);
+	void onStateChanged(in ContactId contact, in String sharingId, in int state, in int reasonCode);
 
-	void onGeolocSharingProgress(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
+	void onProgressUpdate(in ContactId contact, in String sharingId, in long currentSize, in long totalSize);
 }

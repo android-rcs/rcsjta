@@ -205,18 +205,18 @@ public class FileTransferService extends RcsService {
 	 * @param contact the remote contact Identifier
 	 * @param file
 	 *            Uri of file to transfer
-	 * @param fileicon
+	 * @param attachFileIcon
 	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be attached if file is not an
 	 *            image or if local or remote contact does not support fileicon.
 	 * @return File transfer
 	 * @throws RcsServiceException
 	 */
-	public FileTransfer transferFile(ContactId contact, Uri file, boolean fileicon) throws RcsServiceException {
+	public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon) throws RcsServiceException {
     	if (api != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 
-				IFileTransfer ftIntf = api.transferFile(contact, file, fileicon);
+				IFileTransfer ftIntf = api.transferFile(contact, file, attachFileIcon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -232,23 +232,23 @@ public class FileTransferService extends RcsService {
 
 	/**
 	 * Transfers a file to a group chat with an optional file icon.
-	 *
+	 * 
 	 * @param chatId
 	 * @param file Uri of file to transfer
-	 * @param fileicon File icon option. If true, the stack tries to attach
-	 *            fileicon. Fileicon may not be attached if file is not an
-	 *            image or if local or remote contact does not support
-	 *            fileicon.
-	 * @return File transfer
+	 * @param attachFileIcon Attach file icon option. If true, the stack tries
+	 *            to attach fileIcon. FileIcon may not be attached if file is
+	 *            not an image or if local or remote contact does not support
+	 *            fileIcon.
+	 * @return FileTransfer
 	 * @throws RcsServiceException
 	 */
-	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean fileicon)
+	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean attachFileIcon)
 			throws RcsServiceException {
 		if (api != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 				
-				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, fileicon);
+				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, attachFileIcon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
@@ -328,15 +328,15 @@ public class FileTransferService extends RcsService {
     }    
     
     /**
-	 * Registers a file transfer event listener
+	 * Adds a listener on file transfer events
 	 * 
-	 * @param listener OneToOne File transfer listener
+	 * @param listener One-to-one file transfer listener
 	 * @throws RcsServiceException
 	 */
-	public void addOneToOneFileTransferListener(FileTransferListener listener) throws RcsServiceException {
+	public void addEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addOneToOneFileTransferListener(listener);
+				api.addEventListener2(listener);
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -346,15 +346,15 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Unregisters a file transfer event listener
+	 * Removes a listener on file transfer events
 	 * 
 	 * @param listener File transfer listener
 	 * @throws RcsServiceException
 	 */
-	public void removeOneToOneFileTransferListener(FileTransferListener listener) throws RcsServiceException {
+	public void removeEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeOneToOneFileTransferListener(listener);
+				api.removeEventListener2(listener);
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -364,15 +364,15 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Registers a group file transfer event listener
+	 * Adds a listener on group file transfer events
 	 *
 	 * @param listener Group file transfer listener
 	 * @throws RcsServiceException
 	 */
-	public void addGroupFileTransferListener(GroupFileTransferListener listener) throws RcsServiceException {
+	public void addEventListener(GroupFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addGroupFileTransferListener(listener);
+				api.addEventListener3(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -382,15 +382,15 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Unregisters a group file transfer event listener
+	 * Removes a listener on group file transfer events
 	 *
 	 * @param listener Group file transfer listener
 	 * @throws RcsServiceException
 	 */
-	public void removeGroupFileTransferListener(GroupFileTransferListener listener) throws RcsServiceException {
+	public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeGroupFileTransferListener(listener);
+				api.removeEventListener3(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

@@ -52,7 +52,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * File icon
      */
-    private boolean fileicon = false;
+    private boolean fileIcon = false;
 
     /**
      * HTTP upload manager
@@ -78,13 +78,13 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	 * Constructor
 	 * 
 	 * @param content Content of file to upload
-	 * @param fileicon True if the stack must try to attach fileicon
+	 * @param fileIcon True if the stack must try to attach file icon
 	 */
-	public FileUploadSession(MmContent file, boolean fileicon) {
+	public FileUploadSession(MmContent file, boolean fileIcon) {
 		super();
 		
 		this.file = file;
-		this.fileicon = fileicon;
+		this.fileIcon = fileIcon;
 		this.uploadId = UUID.randomUUID().toString();
 	}
 	
@@ -133,12 +133,12 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	    		logger.info("Initiate a new HTTP upload " + uploadId);
 	    	}
 
-	    	// Create fileicon content is requested
-			MmContent fileiconContent = null;
-			if (fileicon) {
+	    	// Create fileIcon content is requested
+			MmContent fileIconContent = null;
+			if (fileIcon) {
 				// Create the file icon
 				try {
-					fileiconContent = FileTransferUtils.createFileicon(file.getUri(), uploadId);
+					fileIconContent = FileTransferUtils.createFileicon(file.getUri(), uploadId);
 				} catch (SecurityException e) {
 					/*TODO: This is not the proper way to handle the exception thrown. Will be taken care of in CR037*/
 					if (logger.isActivated()) {
@@ -152,7 +152,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 			}
 			
 			// Instantiate the upload manager
-			uploadManager = new HttpUploadManager(file, fileiconContent, this, uploadId);
+			uploadManager = new HttpUploadManager(file, fileIconContent, this, uploadId);
 	    	
 	    	// Upload the file to the HTTP server 
             byte[] result = uploadManager.uploadFile();

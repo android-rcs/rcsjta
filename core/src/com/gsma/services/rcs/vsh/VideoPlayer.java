@@ -115,7 +115,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	}
 
 	/**
-	 * Adds a listener on player events
+	 * Adds a listener on video player events
 	 * 
 	 * @param listener Listener
 	 */
@@ -124,7 +124,7 @@ public abstract class VideoPlayer extends IVideoPlayer.Stub {
 	}
 
 	/**
-	 * Removes a listener from player events
+	 * Removes a listener on video player events
 	 * 
 	 * @param listener Listener
 	 */

@@ -243,7 +243,7 @@ public class IPCallService extends RcsService {
 	public void addEventListener(IPCallListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addEventListener(listener);
+				api.addEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -261,7 +261,7 @@ public class IPCallService extends RcsService {
 	public void removeEventListener(IPCallListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeEventListener(listener);
+				api.removeEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

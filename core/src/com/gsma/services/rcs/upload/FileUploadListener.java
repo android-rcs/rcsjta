@@ -30,12 +30,12 @@ import com.gsma.services.rcs.upload.IFileUploadListener;
  */
 public abstract class FileUploadListener extends IFileUploadListener.Stub {
 	/**
-	 * Callback called when the upload state changes
+	 * Callback called when the file upload state has been changed.
 	 *
 	 * @param uploadId ID of upload
 	 * @param state State of upload 
 	 */
-	public abstract void onUploadStateChanged(String uploadId, int state);
+	public abstract void onStateChanged(String uploadId, int state);
 
 	/**
 	 * Callback called during the upload progress
@@ -44,5 +44,5 @@ public abstract class FileUploadListener extends IFileUploadListener.Stub {
 	 * @param currentSize Current transferred size in bytes
 	 * @param totalSize Total size to transfer in bytes
 	 */
-	public abstract void onUploadProgress(String uploadId, long currentSize, long totalSize);
+	public abstract void onProgressUpdate(String uploadId, long currentSize, long totalSize);
 }

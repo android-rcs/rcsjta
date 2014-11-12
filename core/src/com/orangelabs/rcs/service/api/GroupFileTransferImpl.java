@@ -132,7 +132,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	 * 
 	 * @return Type
 	 */
-	public String getFileType() {
+	public String getMimeType() {
 		return session.getContent().getEncoding();
 	}
 
@@ -331,7 +331,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -392,7 +392,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.REJECTED, reasonCode);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.REJECTED, reasonCode);
 		}
 	}
@@ -414,7 +414,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.ABORTED, reasonCode);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.ABORTED, reasonCode);
 		}
 	}
@@ -434,7 +434,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 				MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 						FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-				mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+				mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 						fileTransferId, FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			}
 		}
@@ -459,7 +459,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId, state,
 					reasonCode);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, state, reasonCode);
 		}
 	}
@@ -473,10 +473,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	public void handleTransferProgress(long currentSize, long totalSize) {
 		String fileTransferId = getTransferId();
 		synchronized (lock) {
-			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize,
-					totalSize);
+			MessagingLog.getInstance().updateFileTransferProgress(fileTransferId, currentSize);
 
-			mGroupFileTransferBroadcaster.broadcastTransferprogress(getChatId(), fileTransferId,
+			mGroupFileTransferBroadcaster.broadcastProgressUpdate(getChatId(), fileTransferId,
 					currentSize, totalSize);
 		}
 	}
@@ -491,7 +490,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.FAILED,
 					ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 		}
@@ -512,7 +511,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 			MessagingLog.getInstance().updateFileTransferred(fileTransferId, content);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -530,7 +529,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.PAUSED, FileTransfer.ReasonCode.PAUSED_BY_USER);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.PAUSED, FileTransfer.ReasonCode.PAUSED_BY_USER);
 		}
 	}
@@ -550,7 +549,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.PAUSED, FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.PAUSED, FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
 		}
 	}
@@ -567,7 +566,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -582,7 +581,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			MessagingLog.getInstance().updateFileTransferStateAndReasonCode(fileTransferId,
 					FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 
-			mGroupFileTransferBroadcaster.broadcastTransferStateChanged(getChatId(),
+			mGroupFileTransferBroadcaster.broadcastStateChanged(getChatId(),
 					fileTransferId, FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -614,7 +613,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 					session.getFileicon(), FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 
-		mGroupFileTransferBroadcaster.broadcastFileTransferInvitation(fileTransferId);
+		mGroupFileTransferBroadcaster.broadcastInvitation(fileTransferId);
 	}
 
 	@Override
@@ -629,6 +628,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 					session.getFileicon(), FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 
-		mGroupFileTransferBroadcaster.broadcastFileTransferInvitation(fileTransferId);
+		mGroupFileTransferBroadcaster.broadcastInvitation(fileTransferId);
 	}
 }

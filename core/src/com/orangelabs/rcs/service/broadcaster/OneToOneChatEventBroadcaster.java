@@ -18,8 +18,8 @@ package com.orangelabs.rcs.service.broadcaster;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
-import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.IChatListener;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
+import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.IntentUtils;
@@ -32,18 +32,18 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcaster {
 
-	private final RemoteCallbackList<IChatListener> mOneToOneChatListeners = new RemoteCallbackList<IChatListener>();
+	private final RemoteCallbackList<IOneToOneChatListener> mOneToOneChatListeners = new RemoteCallbackList<IOneToOneChatListener>();
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	public OneToOneChatEventBroadcaster() {
 	}
 
-	public void addOneToOneChatEventListener(IChatListener listener) {
+	public void addOneToOneChatEventListener(IOneToOneChatListener listener) {
 		mOneToOneChatListeners.register(listener);
 	}
 
-	public void removeOneToOneChatEventListener(IChatListener listener) {
+	public void removeOneToOneChatEventListener(IOneToOneChatListener listener) {
 		mOneToOneChatListeners.unregister(listener);
 	}
 
@@ -78,10 +78,10 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 	}
 
 	public void broadcastMessageReceived(String msgId) {
-		Intent newOneToOneMessage = new Intent(ChatIntent.ACTION_NEW_ONE2ONE_CHAT_MESSAGE);
+		Intent newOneToOneMessage = new Intent(OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneMessage);
 		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneMessage);
-		newOneToOneMessage.putExtra(ChatIntent.EXTRA_MESSAGE_ID, msgId);
+		newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID, msgId);
 		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
 	}
 }

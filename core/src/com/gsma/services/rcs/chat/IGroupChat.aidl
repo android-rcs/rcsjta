@@ -1,9 +1,11 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.chat.IGroupChatListener;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -30,7 +32,7 @@ interface IGroupChat {
 	
 	void rejectInvitation();
 	
-	String sendMessage(in String text);
+	ChatMessage sendMessage(in String text);
 
 	void sendIsComposingEvent(in boolean status);
 
@@ -38,7 +40,7 @@ interface IGroupChat {
 	
 	int getMaxParticipants();
 	
-	void quitConversation();
+	void leave();
 
-	String sendGeoloc(in Geoloc geoloc);
+	GeolocMessage sendMessage2(in Geoloc geoloc);
 }

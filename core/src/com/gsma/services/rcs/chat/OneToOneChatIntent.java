@@ -19,14 +19,28 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.service.broadcaster;
+
+package com.gsma.services.rcs.chat;
 
 /**
- * Interface to perform broadcast events on FileUploadListeners
+ * Intent for one-to-one chat conversation
+ * 
+ * @author Jean-Marc AUFFRET
  */
-public interface IFileUploadEventBroadcaster {
+public class OneToOneChatIntent {
 
-	public void broadcastStateChanged(String uploadId, int status);
+	/**
+	 * Broadcast action: a new chat message has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of chat message.
+	 * </ul>
+	 */
+	public final static String ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE";
 
-	public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
+	/**
+	 * Message ID of received message
+	 */
+	public final static String EXTRA_MESSAGE_ID = "messageId";
 }

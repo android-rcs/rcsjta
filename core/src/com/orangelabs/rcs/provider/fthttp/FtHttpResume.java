@@ -67,9 +67,9 @@ public abstract class FtHttpResume {
     final private long size;
 
 	/**
-	 * The fileicon URI
+	 * The fileIcon URI
 	 */
-	final private Uri fileicon;
+	final private Uri fileIcon;
 
 	/**
 	 * The remote contact identifier
@@ -98,9 +98,9 @@ public abstract class FtHttpResume {
 	 * @see #FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
 	 */
 	public FtHttpResume(int direction, Uri file, String fileName,
-			String mimeType, long size, Uri fileicon, ContactId contact, String chatId,
+			String mimeType, long size, Uri fileIcon, ContactId contact, String chatId,
 			String fileTransferId, boolean isGroup) {
-		this(direction, file, fileName, mimeType, size, fileicon, contact, chatId,
+		this(direction, file, fileName, mimeType, size, fileIcon, contact, chatId,
 				fileTransferId, isGroup, null);
 	}
 
@@ -117,8 +117,8 @@ public abstract class FtHttpResume {
      *            the {@code mimeType} value.
      * @param size
      *            the {@code size} value.
-	 * @param fileicon
-	 *            the {@code fileicon} value.
+	 * @param fileIcon
+	 *            the {@code fileIcon} value.
 	 * @param contact
 	 *            the {@code contactId} value.
 	 * @param chatId
@@ -131,7 +131,7 @@ public abstract class FtHttpResume {
 	 *            the {@code date} value.
 	 */
 	public FtHttpResume(int direction, Uri file, String fileName, String mimeType, long size,
-	        Uri fileicon, ContactId contact, String chatId, String fileTransferId,
+	        Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
 	        boolean isGroup, Date date) {
 		if (size <= 0 || mimeType == null || file == null || fileName == null)
 			throw new IllegalArgumentException("Null argument");
@@ -141,7 +141,7 @@ public abstract class FtHttpResume {
 		this.fileName = fileName;
         this.mimeType = mimeType;
         this.size = size;
-		this.fileicon = fileicon;
+		this.fileIcon = fileIcon;
 		this.contact = contact;
 		this.chatId = chatId;
 		this.fileTransferId = fileTransferId;
@@ -173,7 +173,7 @@ public abstract class FtHttpResume {
     }
 
 	public Uri getFileicon() {
-		return fileicon;
+		return fileIcon;
 	}
 
 	public ContactId getContact() {
@@ -194,7 +194,7 @@ public abstract class FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResume [date=" + date + ", dir=" + direction + ", file=" + file + ", fileName=" + fileName + ",fileicon="+fileicon+"]";
+		return "FtHttpResume [date=" + date + ", dir=" + direction + ", file=" + file + ", fileName=" + fileName + ",fileIcon="+fileIcon+"]";
 	}
 
 }

@@ -301,9 +301,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	@Override
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent fileicon, int state, int reasonCode) {
+			MmContent fileIcon, int state, int reasonCode) {
 		fileTransferLog.addIncomingGroupFileTransfer(chatId, contact, fileTransferId, content,
-				fileicon, state, reasonCode);
+				fileIcon, state, reasonCode);
 	}
 
 	/*
@@ -330,11 +330,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long, long)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang.String, long)
 	 */
 	@Override
-	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize) {
-		fileTransferLog.updateFileTransferProgress(fileTransferId, size, totalSize);
+	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
+		fileTransferLog.updateFileTransferProgress(fileTransferId, currentSize);
 	}
 
 	/* (non-Javadoc)

@@ -143,15 +143,15 @@ public class ContactUtils {
 	}
 
 	/**
-	 * Formats the given ContactId to uniquely represent a Rcs contact.
+	 * Formats the given contact to uniquely represent a Rcs contact phone number.
 	 * <p>
 	 * May throw a RcsContactFormatException exception if the string contact parameter is not enabled to produce a valid ContactId.
 	 * 
 	 * @param contact
-	 *            the contact number
+	 *            the contact phone number
 	 * @return the ContactId
 	 */
-	public ContactId formatContactId(String contact) {
+	public ContactId formatContact(String contact) {
 		contact = stripSeparators(contact);
 		if (!TextUtils.isEmpty(contact)) {
 			// Is Country Code provided ?

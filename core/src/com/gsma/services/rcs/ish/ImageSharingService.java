@@ -275,7 +275,7 @@ public class ImageSharingService extends RcsService {
     }    
 
 	/**
-	 * Adds an event listener on image sharing events
+	 * Adds a listener on image sharing events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -283,7 +283,7 @@ public class ImageSharingService extends RcsService {
 	public void addEventListener(ImageSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addEventListener(listener);
+				api.addEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -293,7 +293,7 @@ public class ImageSharingService extends RcsService {
 	}
 
 	/**
-	 * Removes an event listener from image sharing
+	 * Removes a listener on image sharing events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -301,7 +301,7 @@ public class ImageSharingService extends RcsService {
 	public void removeEventListener(ImageSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeEventListener(listener);
+				api.removeEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

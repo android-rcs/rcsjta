@@ -15,9 +15,9 @@ interface IMultimediaSessionService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	MultimediaSessionServiceConfiguration getConfiguration();
 
@@ -35,13 +35,13 @@ interface IMultimediaSessionService {
 
 	int getServiceVersion();
 
-	void addMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+	void addEventListener2(in IMultimediaMessagingSessionListener listener);
 
-	void removeMessagingEventListener(in IMultimediaMessagingSessionListener listener);
+	void removeEventListener2(in IMultimediaMessagingSessionListener listener);
 
-	void addStreamingEventListener(in IMultimediaStreamingSessionListener listener);
+	void addEventListener3(in IMultimediaStreamingSessionListener listener);
 
-	void removeStreamingEventListener(in IMultimediaStreamingSessionListener listener);
+	void removeEventListener3(in IMultimediaStreamingSessionListener listener);
 }
 
 

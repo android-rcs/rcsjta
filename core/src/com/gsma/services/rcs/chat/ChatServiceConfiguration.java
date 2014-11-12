@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
@@ -56,9 +56,9 @@ public class ChatServiceConfiguration {
 	private int maxGroupChatParticipants;
 	
 	/**
-	 * Max length of a message in a single chat
+	 * Max length of a message in a one-to-one chat
 	 */
-	private int maxMsgLengthSingleChat;
+	private int mMaxMsgLengthOneToOneChat;
 
 	/**
 	 * Max length of a message in a group chat
@@ -88,7 +88,7 @@ public class ChatServiceConfiguration {
 	private int minGroupChatParticipants;
 
 	/**
-	 * The maximum length a group chat subject can have. 
+	 * The maximum length a group chat subject can have.
 	 * <p>The length is the number of bytes of the message encoded in UTF-8.
 	 */
 	private int groupChatSubjectMaxLength;
@@ -102,7 +102,7 @@ public class ChatServiceConfiguration {
 	 * @param isComposingTimeout Is-composing timeout
 	 * @param maxGroupChatParticipants Max participants in a group chat
 	 * @param minGroupChatParticipants Min participants in a group chat
-	 * @param maxMsgLengthSingleChat Max length of a message in a single chat
+	 * @param maxMsgLengthOneToOneChat Max length of a message in a one-to-one chat
 	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
 	 * @param groupChatSubjectMaxLength Max length of subject in a group chat
 	 * @param smsFallback SMS fallback
@@ -112,7 +112,7 @@ public class ChatServiceConfiguration {
      * @hide
 	 */
 	public ChatServiceConfiguration(boolean imAlwaysOn, boolean warnSF, int chatTimeout, int isComposingTimeout,
-			int maxGroupChatParticipants, int minGroupChatParticipants, int maxMsgLengthSingleChat, int maxMsgLengthGroupChat,
+			int maxGroupChatParticipants, int minGroupChatParticipants, int maxMsgLengthOneToOneChat, int maxMsgLengthGroupChat,
 			int groupChatSubjectMaxLength, boolean smsFallback, boolean respondToDisplayReports, int maxGeolocLabelLength,
 			int geolocExpireTime) {
 		this.imAlwaysOn = imAlwaysOn;
@@ -121,7 +121,7 @@ public class ChatServiceConfiguration {
 		this.isComposingTimeout = isComposingTimeout;
 		this.maxGroupChatParticipants = maxGroupChatParticipants;
 		this.minGroupChatParticipants = minGroupChatParticipants;
-		this.maxMsgLengthSingleChat = maxMsgLengthSingleChat;
+		mMaxMsgLengthOneToOneChat = maxMsgLengthOneToOneChat;
 		this.maxMsgLengthGroupChat = maxMsgLengthGroupChat;
 		this.groupChatSubjectMaxLength = groupChatSubjectMaxLength;
 		this.smsFallback = smsFallback;
@@ -143,7 +143,6 @@ public class ChatServiceConfiguration {
 		this.isComposingTimeout = source.readInt();
 		this.maxGroupChatParticipants = source.readInt();
 		this.minGroupChatParticipants = source.readInt();
-		this.maxMsgLengthSingleChat = source.readInt();
 		this.maxMsgLengthGroupChat = source.readInt();
 		this.groupChatSubjectMaxLength = source.readInt();
 		this.smsFallback = source.readInt() != 0;
@@ -177,7 +176,7 @@ public class ChatServiceConfiguration {
     	dest.writeInt(isComposingTimeout);
     	dest.writeInt(maxGroupChatParticipants);
     	dest.writeInt(minGroupChatParticipants);
-    	dest.writeInt(maxMsgLengthSingleChat);
+    	dest.writeInt(mMaxMsgLengthOneToOneChat);
     	dest.writeInt(maxMsgLengthGroupChat);
     	dest.writeInt(groupChatSubjectMaxLength);
     	dest.writeInt(smsFallback ? 1 : 0);
@@ -259,14 +258,14 @@ public class ChatServiceConfiguration {
 	}
 	
 	/**
-	 * Return maximum length of a single chat message.
+	 * Returns the maximum one-to-one chat message’s length can have.
 	 * <p>
 	 * The length is the number of bytes of the message encoded in UTF-8.
 	 * 
 	 * @return Number of bytes
 	 */
-	public int getSingleChatMessageMaxLength() {
-		return maxMsgLengthSingleChat;
+	public int getOneToOneChatMessageMaxLength() {
+		return mMaxMsgLengthOneToOneChat;
 	}
 	
 	/**

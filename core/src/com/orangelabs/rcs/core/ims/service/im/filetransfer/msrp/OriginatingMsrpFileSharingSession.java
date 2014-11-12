@@ -90,14 +90,14 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 *            Content to be shared
 	 * @param contact
 	 *            Remote contact identifier
-	 * @param fileicon
-	 *            true if the stack must try to attach fileicon
+	 * @param fileIcon
+	 *            true if the stack must try to attach file icon
 	 */
-	public OriginatingMsrpFileSharingSession(ImsService parent, MmContent content, ContactId contact, boolean fileicon) {
+	public OriginatingMsrpFileSharingSession(ImsService parent, MmContent content, ContactId contact, boolean fileIcon) {
 		super(parent, content, contact, null, IdGenerator.generateMessageID());
 		
 		if (logger.isActivated()) {
-			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileicon="+fileicon);
+			logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="+content.getName()+" fileIcon="+fileIcon);
 		}
 		// Create dialog path
 		createOriginatingDialogPath();
@@ -106,9 +106,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
 		setContributionID(id);
 		
-		if (fileicon) {
+		if (fileIcon) {
 			try {
-				// Create the fileicon
+				// Create the file icon
 				setFileicon(FileTransferUtils.createFileicon(content.getUri(), getSessionID()));
 			} catch (SecurityException e) {
 				if (logger.isActivated()) {
@@ -171,7 +171,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	    	if (getFileicon() != null) {
 	    		sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 
-	    		// Encode the fileicon file
+	    		// Encode the file icon file
 	    	    String imageEncoded = Base64.encodeBase64ToString(getFileicon().getData());
 
 	    		// Build multipart

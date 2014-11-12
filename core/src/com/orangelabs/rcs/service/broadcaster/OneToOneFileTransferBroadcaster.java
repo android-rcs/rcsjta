@@ -17,7 +17,7 @@ package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransferIntent;
-import com.gsma.services.rcs.ft.IFileTransferListener;
+import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.service.api.ServerApiException;
 import com.orangelabs.rcs.utils.IntentUtils;
@@ -33,28 +33,28 @@ import android.os.RemoteCallbackList;
  */
 public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBroadcaster {
 
-	private final RemoteCallbackList<IFileTransferListener> mOneToOneFileTransferListeners = new RemoteCallbackList<IFileTransferListener>();
+	private final RemoteCallbackList<IOneToOneFileTransferListener> mOneToOneFileTransferListeners = new RemoteCallbackList<IOneToOneFileTransferListener>();
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
 	public OneToOneFileTransferBroadcaster() {
 	}
 
-	public void addOneToOneFileTransferListener(IFileTransferListener listener)
+	public void addOneToOneFileTransferListener(IOneToOneFileTransferListener listener)
 			throws ServerApiException {
 		mOneToOneFileTransferListeners.register(listener);
 	}
 
-	public void removeOneToOneFileTransferListener(IFileTransferListener listener)
+	public void removeOneToOneFileTransferListener(IOneToOneFileTransferListener listener)
 			throws ServerApiException {
 		mOneToOneFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastTransferStateChanged(ContactId contact, String transferId, int state, int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String transferId, int state, int reasonCode) {
 		final int N = mOneToOneFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mOneToOneFileTransferListeners.getBroadcastItem(i).onTransferStateChanged(contact,
+				mOneToOneFileTransferListeners.getBroadcastItem(i).onStateChanged(contact,
 						transferId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -65,12 +65,12 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 		mOneToOneFileTransferListeners.finishBroadcast();
 	}
 
-	public void broadcastTransferprogress(ContactId contact, String transferId, long currentSize,
+	public void broadcastProgressUpdate(ContactId contact, String transferId, long currentSize,
 			long totalSize) {
 		final int N = mOneToOneFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mOneToOneFileTransferListeners.getBroadcastItem(i).onTransferProgress(contact,
+				mOneToOneFileTransferListeners.getBroadcastItem(i).onProgressUpdate(contact,
 						transferId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -81,7 +81,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 		mOneToOneFileTransferListeners.finishBroadcast();
 	}
 
-	public void broadcastFileTransferInvitation(String fileTransferId) {
+	public void broadcastInvitation(String fileTransferId) {
 		Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(invitation);

@@ -130,7 +130,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			RichCallHistory.getInstance().setVideoSharingState(sharingId,
 					VideoSharing.State.ABORTED, reasonCode);
 
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 					sharingId, VideoSharing.State.ABORTED, reasonCode);
 		}
 	}
@@ -288,7 +288,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 					VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
 			startedAt = System.currentTimeMillis();
 
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 					sharingId, VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -310,14 +310,14 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 				RichCallHistory.getInstance().setVideoSharingState(sharingId,
 						VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 
-				mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+				mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 						sharingId, VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			} else {
 				int reasonCode = imsServiceSessionErrorToReasonCode(reason);
 				RichCallHistory.getInstance().setVideoSharingState(sharingId,
 						VideoSharing.State.ABORTED, reasonCode);
 
-				mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+				mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 						sharingId, VideoSharing.State.ABORTED, reasonCode);
 				RichCallHistory.getInstance().setVideoSharingDuration(sharingId,
 						(System.currentTimeMillis() - startedAt) / 100);
@@ -341,7 +341,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			RichCallHistory.getInstance().setVideoSharingDuration(sharingId,
 					(System.currentTimeMillis() - startedAt) / 100);
 
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 					getSharingId(), VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
@@ -364,7 +364,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
 			RichCallHistory.getInstance().setVideoSharingState(sharingId, state, reasonCode);
 
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 					sharingId, state, reasonCode);
 		}
 	}
@@ -378,7 +378,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		synchronized (lock) {
 			RichCallHistory.getInstance().setVideoSharingState(sharingId,
 					VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(getRemoteContact(),
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
 					sharingId, VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -420,6 +420,6 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 					.addVideoSharing(getRemoteContact(), sharingId, Direction.INCOMING, content,
 							VideoSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
-		mVideoSharingEventBroadcaster.broadcastVideoSharingInvitation(sharingId);
+		mVideoSharingEventBroadcaster.broadcastInvitation(sharingId);
 	}
 }

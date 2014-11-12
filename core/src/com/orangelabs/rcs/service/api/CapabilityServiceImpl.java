@@ -87,12 +87,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -101,12 +101,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -293,7 +293,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * @param contact ContactId
 	 * @param listener Capabilities listener
 	 */
-	public void addContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
+	public void addCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a listener for contact " + contact);
 		}
@@ -308,7 +308,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * @param contact ContactId
 	 * @param listener Capabilities listener
 	 */
-	public void removeContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
+	public void removeCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a listener for contact " + contact);
 		}

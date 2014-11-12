@@ -74,14 +74,14 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 	 * @param content Content to share
 	 * @param contact Remote contact identifier
 	 * @param remoteUri the remote URI
-	 * @param fileicon Content of fileicon
+	 * @param fileIcon Content of file icon
 	 * @param chatSessionId Chat session ID
 	 * @param chatContributionId Chat contribution Id
 	 * @param fileTransferId File transfer Id
 	 */
-	public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileicon, String chatSessionID,
+	public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileIcon, String chatSessionID,
 			String chatContributionId, String fileTransferId) {
-		super(parent, content, contact, remoteUri, fileicon, fileTransferId);
+		super(parent, content, contact, remoteUri, fileIcon, fileTransferId);
 		this.chatSessionId = chatSessionID;
 		setContributionID(chatContributionId);
 		this.sessionState = HttpTransferState.PENDING;

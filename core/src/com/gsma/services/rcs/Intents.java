@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+  *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs;
 
@@ -24,35 +28,34 @@ package com.gsma.services.rcs;
  */
 public class Intents {
     /**
-     * Intents for rcs client
+     * Intents for rcs service
      */
-    public static class Client {
+    public static class Service {
     	/**
-    	 * Intent to load the settings activity to enable or disable the client
+    	 * Intent to load the settings activity to enable or disable the rcs service.
     	 */
     	public static final String ACTION_VIEW_SETTINGS = "com.gsma.services.rcs.action.VIEW_SETTINGS";
 
     	/**
-    	 * Intent to request the client status. The result is received via an Intent
-    	 * having the following extras:
+    	 * Intent to get the rcs service status.
     	 * <ul>
-    	 * <li> {@link #EXTRA_CLIENT} containing the client package name.
-    	 * <li> {@link #EXTRA_STATUS} containing the boolean status of the client. True
-    	 *  means that the client is activated, else the client is not activated.
+    	 * <li> {@link #EXTRA_SERVICE} containing the service package name.
+    	 * <li> {@link #EXTRA_STATUS} containing the boolean status of the service. True
+    	 *  means that the service is activated, else the service is not activated.
     	 */
-    	public static final String ACTION_CLIENT_GET_STATUS = ".client.action.GET_STATUS";
+    	public static final String ACTION_SERVICE_GET_STATUS = ".service.action.GET_STATUS";
 
     	/**
-    	 * Client package name
+    	 * Service name
     	 */
-    	public final static String EXTRA_CLIENT = "client";
+    	public final static String EXTRA_SERVICE = "service";
     	
     	/**
-    	 * Client status
+    	 * Service status
     	 */
     	public final static String EXTRA_STATUS = "status";
 
-    	private Client() {
+    	private Service() {
         }    	
     }
     
@@ -66,15 +69,15 @@ public class Intents {
     	 * (i.e. content://chats/chat_ID). If no parameter found the main
     	 * entry of the chat application is displayed.
     	 */
-		public static final String ACTION_VIEW_CHAT = "com.gsma.services.rcs.action.VIEW_CHAT";
+		public static final String ACTION_VIEW_ONE_TO_ONE_CHAT = "com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT";
 
 		/**
-		 * Load the chat application to start a new conversation with a
-		 * given contact. This Intent takes into parameter a contact URI
-		 * (i.e. content://contacts/people/contact_ID). If no parameter the
-		 * main entry of the chat application is displayed.
+		 * Load the chat application to send a new chat message to a given
+		 * contact. This Intent takes into parameter a contact URI (i.e.
+		 * content://contacts/people/contact_ID). If no parameter the main entry
+		 * of the chat application is displayed.
 		 */
-		public static final String ACTION_INITIATE_CHAT = "com.gsma.services.rcs.action.INITIATE_CHAT";
+		public static final String ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE = "com.gsma.services.rcs.action.SEND_ONE_TO_ONE_CHAT_MESSAGE";
 
 		/**
 		 * Load the group chat application. This Intent takes into parameter an
@@ -103,14 +106,14 @@ public class Intents {
     	 * takes into parameter an URI on the file transfer (i.e. content://filetransfers/ft_ID).
     	 * If no parameter found the main entry of the file transfer application is displayed.
     	 */
-    	public static final String ACTION_VIEW_FT = "com.gsma.services.rcs.action.VIEW_FT";
+    	public static final String ACTION_VIEW_FILE_TRANSFER = "com.gsma.services.rcs.action.VIEW_FILE_TRANSFER";
 
     	/**
     	 * Load the file transfer application to start a new file transfer to a given
     	 * contact. This Intent takes into parameter a contact URI (i.e. content://contacts/people/contact_ID).
     	 * If no parameter the main entry of the file transfer application is displayed.
     	 */
-    	public static final String ACTION_INITIATE_FT = "com.gsma.services.rcs.action.INITIATE_FT";
+    	public static final String ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER = "com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER";
 
     	private FileTransfer() {
         }    	

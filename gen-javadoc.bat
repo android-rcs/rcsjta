@@ -1,1 +1,1 @@
-"%ANT_HOME%"/bin/ant -f build-local.xml doclava
+"%ANT_HOME%"/bin/ant -f build-local.xml docs

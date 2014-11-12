@@ -50,7 +50,7 @@ public interface IFileTransferLog {
 	 *            Direction
 	 * @param content
 	 *            File content
-	 * @param fileicon
+	 * @param fileIcon
 	 *            Fileicon content
 	 * @param state
 	 *            File transfer state
@@ -58,7 +58,7 @@ public interface IFileTransferLog {
 	 *            Reason code
 	 */
 	public void addFileTransfer(ContactId contact, String fileTransferId, int direction,
-			MmContent content, MmContent fileicon, int state, int reasonCode);
+			MmContent content, MmContent fileIcon, int state, int reasonCode);
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
@@ -70,10 +70,10 @@ public interface IFileTransferLog {
 	 * @param content
 	 *            the File content
 	 * @param Fileicon
-	 *            the fileicon content
+	 *            the fileIcon content
 	 */
 	public void addOutgoingGroupFileTransfer(String chatId, String fileTransferId,
-			MmContent content, MmContent fileicon);
+			MmContent content, MmContent fileIcon);
 
 	/**
 	 * Add incoming group file transfer
@@ -86,7 +86,7 @@ public interface IFileTransferLog {
 	 *            Chat ID
 	 * @param content
 	 *            File content
-	 * @param fileicon
+	 * @param fileIcon
 	 *            Fileicon contentID
 	 * @param state
 	 *            File transfer state
@@ -94,7 +94,7 @@ public interface IFileTransferLog {
 	 *            Reason code
 	 */
 	public void addIncomingGroupFileTransfer(String chatId, ContactId contact, String fileTransferId, MmContent content,
-			MmContent fileicon, int state, int reasonCode);
+			MmContent fileIcon, int state, int reasonCode);
 
 	/**
 	 * Update file transfer state
@@ -122,12 +122,10 @@ public interface IFileTransferLog {
 	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
-	 * @param size
-	 *            Downloaded size
-	 * @param totalSize
-	 *            Total size to download
+	 * @param currentSize
+	 *            Current size
 	 */
-	public void updateFileTransferProgress(String fileTransferId, long size, long totalSize);
+	public void updateFileTransferProgress(String fileTransferId, long currentSize);
 
 	/**
 	 * Update file transfer URI

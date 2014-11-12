@@ -7,5 +7,5 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IVideoSharingListener {
 
-	void onVideoSharingStateChanged(in ContactId contact, in String sharingId, int state, in int reasonCode);
+	void onStateChanged(in ContactId contact, in String sharingId, int state, in int reasonCode);
 }

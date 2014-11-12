@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 package com.orangelabs.rcs.service;
 
@@ -34,11 +38,11 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 public class GetStatusReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-    	if (intent.getAction().endsWith(Intents.Client.ACTION_CLIENT_GET_STATUS)) {
+    	if (intent.getAction().endsWith(Intents.Service.ACTION_SERVICE_GET_STATUS)) {
 	    	RcsSettings.createInstance(context);
 	    	Bundle results = getResultExtras(true);
-	        results.putString(Intents.Client.EXTRA_CLIENT, context.getPackageName());
-	        results.putBoolean(Intents.Client.EXTRA_STATUS, RcsSettings.getInstance().isServiceActivated());
+	        results.putString(Intents.Service.EXTRA_SERVICE, context.getPackageName());
+	        results.putBoolean(Intents.Service.EXTRA_STATUS, RcsSettings.getInstance().isServiceActivated());
 	        setResultExtras(results);	  
     	}
     }

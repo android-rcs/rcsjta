@@ -423,7 +423,7 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     public static void addRcsServiceNotification(boolean state, String label) {
     	// Create notification
-    	Intent intent = new Intent(Intents.Client.ACTION_VIEW_SETTINGS);
+    	Intent intent = new Intent(Intents.Service.ACTION_VIEW_SETTINGS);
     	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(AndroidFactory.getApplicationContext(), 0, intent, 0);
 		int iconId; 

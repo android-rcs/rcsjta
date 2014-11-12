@@ -15,9 +15,9 @@ interface IIPCallService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	IPCallServiceConfiguration getConfiguration();
 
@@ -29,9 +29,9 @@ interface IIPCallService {
 	
 	IIPCall initiateVisioCall(in ContactId contact, in IIPCallPlayer player, in IIPCallRenderer renderer);
 
-	void addEventListener(in IIPCallListener listener);
+	void addEventListener2(in IIPCallListener listener);
 
-	void removeEventListener(in IIPCallListener listener);
+	void removeEventListener2(in IIPCallListener listener);
 	
 	int getServiceVersion();
 }
