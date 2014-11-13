@@ -130,12 +130,15 @@ public class CapabilityUtils {
 			tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
 		}
 
-		// RCS extensions support
-		for (String extension : RcsSettings.getInstance().getSupportedRcsExtensions()) {
-			StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
-			iariTags.add(sb.toString());
+		// Extensions
+		if (RcsSettings.getInstance().isExtensionsAllowed()) {
+			for (String extension : RcsSettings.getInstance().getSupportedRcsExtensions()) {
+				StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(extension);
+				iariTags.add(sb.toString());
+			}
+			icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
 		}
-
+		
 		// Add IARI prefix
 		if (!iariTags.isEmpty()) {
             tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");

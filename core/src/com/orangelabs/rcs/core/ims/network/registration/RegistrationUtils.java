@@ -82,7 +82,7 @@ public class RegistrationUtils {
 			iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
 		}
 		
-		// Extension
+		// Extensions
 		if (RcsSettings.getInstance().isExtensionsAllowed()) {
 			icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
 		}

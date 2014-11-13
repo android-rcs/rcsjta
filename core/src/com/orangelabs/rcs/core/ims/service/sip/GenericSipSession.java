@@ -105,7 +105,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
 
         try {
 	    	ExtensionHeader header =  (ExtensionHeader)SipUtils.HEADER_FACTORY.createHeader(PPreferredServiceHeader.NAME,
-	    			FeatureTags.FEATURE_3GPP_EXTENSION);
+	    			FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
 	    	invite.getStackMessage().addHeader(header);
 		} catch(Exception e) {
 			if (logger.isActivated()) {
