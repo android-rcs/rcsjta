@@ -18,12 +18,10 @@ package com.orangelabs.rcs.service.api;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
