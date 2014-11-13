@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
@@ -40,37 +40,44 @@ public class ChatMessage implements Parcelable {
 	/**
 	 * Unique message Id
 	 */
-	private String id;
+	private final String mId;
 
 	/**
 	 * Contact who has sent the message
 	 */
-	private ContactId contact;
+	private final ContactId mRemoteContact;
 	
 	/**
 	 * Message content
 	 */
-	private String message;
+	private final String mContent;
 	
 	/**
-	 * Receipt date of the message
+	 * Time-stamp
 	 */
-	private Date receiptAt;
+	private final long mTimestamp;
+
+	/**
+	 * Time-stamp sent
+	 */
+	private final long mTimestampSent;
 
     /**
      * Constructor for outgoing message
      * 
-     * @param messageId Message Id
-     * @param remote Contact
-     * @param message Message content
-     * @param receiptAt Receipt date
+     * @param id Message Id
+     * @param remoteContact Contact Id
+     * @param content Message content
+     * @param timestamp Time-stamp
+     * @param timestampSent Time-stamp sent
      * @hide
 	 */
-	public ChatMessage(String messageId, ContactId remote, String message, Date receiptAt) {
-		this.id = messageId;
-		this.contact = remote;
-		this.message = message;
-		this.receiptAt = receiptAt;
+	public ChatMessage(String id, ContactId remoteContact, String content, long timestamp, long timestampSent) {
+		mId = id;
+		mRemoteContact = remoteContact;
+		mContent = content;
+		mTimestamp = timestamp;
+		mTimestampSent = timestampSent;
 	}
 	
 	/**
@@ -80,15 +87,16 @@ public class ChatMessage implements Parcelable {
      * @hide
 	 */
 	public ChatMessage(Parcel source) {
-		this.id = source.readString();
+		mId = source.readString();
 		boolean containsContactId = source.readInt() != 0;
 		if (containsContactId) {
-			this.contact = ContactId.CREATOR.createFromParcel(source);
+			mRemoteContact = ContactId.CREATOR.createFromParcel(source);
 		} else {
-			this.contact = null;
+			mRemoteContact = null;
 		}
-		this.message = source.readString();
-		this.receiptAt = new Date(source.readLong());
+		mContent = source.readString();
+		mTimestamp = source.readLong();
+		mTimestampSent = source.readLong();
     }
 	
 	/**
@@ -110,15 +118,16 @@ public class ChatMessage implements Parcelable {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(id);
-    	if (contact != null) {
+    	dest.writeString(mId);
+    	if (mRemoteContact != null) {
     		dest.writeInt(1);
-    		contact.writeToParcel(dest, flags);
+    		mRemoteContact.writeToParcel(dest, flags);
     	} else {
     		dest.writeInt(0);
     	}
-    	dest.writeString(message);
-    	dest.writeLong(receiptAt.getTime());
+    	dest.writeString(mContent);
+    	dest.writeLong(mTimestamp);
+    	dest.writeLong(mTimestampSent);
     }
 
     /**
@@ -143,7 +152,7 @@ public class ChatMessage implements Parcelable {
 	 * @return ID
 	 */
     public String getId(){
-    	return id;
+    	return mId;
     }
 
 	/**
@@ -151,8 +160,8 @@ public class ChatMessage implements Parcelable {
 	 * 
 	 * @return ContactId
 	 */
-	public ContactId getContact() {
-		return contact;
+	public ContactId getRemoteContact() {
+		return mRemoteContact;
 	}
 
 	/**
@@ -160,17 +169,31 @@ public class ChatMessage implements Parcelable {
 	 * 
 	 * @return String
 	 */
-	public String getMessage() {
-		return message;
+	public String getContent() {
+		return mContent;
 	}
 	
 	/**
-	 * Returns the receipt date
+	 * Returns the local time-stamp of when the chat message was sent and/or
+	 * queued for outgoing messages or the local time-stamp of when the chat
+	 * message was received for incoming messages.
 	 * 
-	 * @return Date
+	 * @return long
 	 */
-	public Date getReceiptDate() {
-		return receiptAt;
+	public long getTimestamp() {
+		/* TODO: This method will be implemented in CR018. */
+		throw new UnsupportedOperationException("Method not supported yet!");
 	}
 
+	/**
+	 * Returns the local time-stamp of when the chat message was sent and/or
+	 * queued for outgoing messages or the remote time-stamp of when the chat
+	 * message was sent for incoming messages.
+	 * 
+	 * @return long
+	 */
+	public long getTimestampSent() {
+		/* TODO: This method will be implemented in CR018. */
+		throw new UnsupportedOperationException("Method not supported yet!");
+	}
 }

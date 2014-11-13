@@ -88,7 +88,7 @@ public class InitiateIPCall extends Activity {
 			ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
 			String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 			try {
-				ContactId contact = contactUtils.formatContactId(phoneNumber);
+				ContactId contact = contactUtils.formatContact(phoneNumber);
 				// Get video option
 				CheckBox videoCheck = (CheckBox) findViewById(R.id.video);
 
@@ -106,6 +106,7 @@ public class InitiateIPCall extends Activity {
 				Utils.showMessage(InitiateIPCall.this, getString(R.string.label_invalid_contact, phoneNumber));
 				return;
 			}
+
 		}
 	};
 

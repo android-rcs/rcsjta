@@ -121,7 +121,7 @@ public class SingleChatList extends Activity {
 
 				ContactId contact;
 				try {
-					contact = mContactUtils.formatContactId(number);
+					contact = mContactUtils.formatContact(number);
 					// Open chat
 					startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
 				} catch (RcsContactFormatException e) {

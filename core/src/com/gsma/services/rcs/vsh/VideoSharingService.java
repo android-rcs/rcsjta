@@ -218,7 +218,7 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Adds an event listener on video sharing events
+	 * Adds a listener on video sharing events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -226,7 +226,7 @@ public class VideoSharingService extends RcsService {
 	public void addEventListener(VideoSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addEventListener(listener);
+				api.addEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -236,7 +236,7 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Removes an event listener from video sharing
+	 * Removes a listener on video sharing events
 	 * 
 	 * @param listener Listener
 	 * @throws RcsServiceException
@@ -244,7 +244,7 @@ public class VideoSharingService extends RcsService {
 	public void removeEventListener(VideoSharingListener listener) throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeEventListener(listener);
+				api.removeEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

@@ -123,7 +123,7 @@ public class MessagingSessionView extends Activity {
 	private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
 
 		@Override
-		public void onMultimediaMessagingStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
+		public void onStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onMultimediaMessagingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
 						+ state + " reason=" + reasonCode);
@@ -187,7 +187,7 @@ public class MessagingSessionView extends Activity {
 		}
 
 		@Override
-		public void onNewMessage(ContactId contact, String sessionId, byte[] content) {
+		public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
 			}
@@ -229,7 +229,7 @@ public class MessagingSessionView extends Activity {
 		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACTS);
 		try {
 			// Add service listener
-			connectionManager.getMultimediaSessionApi().addMessagingEventListener(serviceListener);
+			connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);
 			initialiseMessagingSession();
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
@@ -249,7 +249,7 @@ public class MessagingSessionView extends Activity {
 		if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
 			// Remove listener
 			try {
-				connectionManager.getMultimediaSessionApi().removeMessagingEventListener(serviceListener);
+				connectionManager.getMultimediaSessionApi().removeEventListener(serviceListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);

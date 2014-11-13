@@ -25,6 +25,7 @@ import javax2.sip.header.ContactHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.message.Request;
 import javax2.sip.message.Response;
+
 import android.content.Intent;
 
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -445,11 +446,11 @@ public class ImsServiceDispatcher extends Thread {
 						sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
 		    		}
 		    	} else {
-					// Unknown service: reject the invitation with a 606 Not Acceptable
+					// Unknown service: reject the invitation with a 403 forbidden
 					if (logger.isActivated()) {
 						logger.debug("Unknown IMS service: automatically reject");
 					}
-					sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
+					sendFinalResponse(request, Response.FORBIDDEN, "Unsupported Extension");
 		    	}
     		}
 		} else
@@ -463,11 +464,11 @@ public class ImsServiceDispatcher extends Thread {
 	    		// Terms & conditions service
 	    		imsModule.getTermsConditionsService().receiveMessage(request);
 	    	} else {
-				// Unknown service: reject the message with a 606 Not Acceptable
+				// Unknown service: reject the message with a 403 Forbidden
 				if (logger.isActivated()) {
 					logger.debug("Unknown IMS service: automatically reject");
 				}
-				sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
+				sendFinalResponse(request, Response.FORBIDDEN);
 	    	}
 		} else
 	    if (request.getMethod().equals(Request.NOTIFY)) {
@@ -522,10 +523,11 @@ public class ImsServiceDispatcher extends Thread {
         		session.receiveUpdate(request);
         	}
 		} else {
-			// Unknown request received
+			// Unknown request: : reject the request with a 403 Forbidden
 			if (logger.isActivated()) {
 				logger.debug("Unknown request " + request.getMethod());
 			}
+			sendFinalResponse(request, Response.FORBIDDEN);
 		}
     }
 
@@ -656,4 +658,22 @@ public class ImsServiceDispatcher extends Thread {
     		}
     	}
     }
+    
+    /**
+     * Send a final response
+     * 
+     * @param request SIP request
+     * @param code Response code
+     * @param warning Warning message
+     */
+    private void sendFinalResponse(SipRequest request, int code, String warning) {
+    	try {
+	    	SipResponse resp = SipMessageFactory.createResponse(request, IdGenerator.getIdentifier(), code, warning);
+	    	imsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(resp);
+    	} catch(Exception e) {
+    		if (logger.isActivated()) {
+    			logger.error("Can't send a " + code + " response");
+    		}
+    	}
+    }    
 }

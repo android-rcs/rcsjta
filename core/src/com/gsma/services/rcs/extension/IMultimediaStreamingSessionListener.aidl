@@ -7,7 +7,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IMultimediaStreamingSessionListener {
 
-	void onMultimediaStreamingStateChanged(in ContactId contact, in String sessionId, in int state, in int reasonCode);
+	void onStateChanged(in ContactId contact, in String sessionId, in int state, in int reasonCode);
 
-	void onNewPayload(in ContactId contact, in String sessionId, in byte[] content);
+	void onPayloadReceived(in ContactId contact, in String sessionId, in byte[] content);
 }

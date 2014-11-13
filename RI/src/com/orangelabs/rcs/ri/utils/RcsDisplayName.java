@@ -124,7 +124,7 @@ public class RcsDisplayName {
 			return DefaultDisplayName;
 		}
 		try {
-			ContactId contact = mContactUtils.formatContactId(number);
+			ContactId contact = mContactUtils.formatContact(number);
 			return getDisplayName(contact);
 		} catch (RcsContactFormatException e) {
 			return number;

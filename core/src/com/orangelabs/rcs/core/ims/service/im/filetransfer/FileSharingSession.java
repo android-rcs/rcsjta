@@ -63,7 +63,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
 	 * Fileicon
 	 */
-	private MmContent fileicon;
+	private MmContent fileIcon;
 	
 	/**
 	 * File transfer paused
@@ -87,13 +87,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param content Content to be shared
 	 * @param contact Remote contactId
 	 * @param remoteUri the remote URI
-	 * @param fileicon Thumbnail
+	 * @param fileIcon File icon
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileicon, String filetransferId) {
+	public FileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId) {
 		super(parent, contact, remoteUri);
 		
 		this.content = content;
-		this.fileicon = fileicon;
+		this.fileIcon = fileIcon;
 		this.filetransferId = filetransferId;
 	}
 
@@ -201,21 +201,21 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	}
 
     /**
-     * Returns the fileicon content
+     * Returns the fileIcon content
      * 
      * @return Fileicon
      */
     public MmContent getFileicon() {
-    	return fileicon;
+    	return fileIcon;
     }
 
 	/**
-	 * Set the fileicon
+	 * Set the fileIcon
 	 * 
-	 * @param fileicon Fileicon content
+	 * @param fileIcon Fileicon content
 	 */
-    public void setFileicon(MmContent fileicon) {
-        this.fileicon = fileicon;
+    public void setFileicon(MmContent fileIcon) {
+        this.fileIcon = fileIcon;
     }
     
 	/**

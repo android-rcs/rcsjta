@@ -99,7 +99,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			String number = cursor.getString(holder.columnContact);
 			if (number != null) {
 				try {
-					ContactId contact = mContactUtils.formatContactId(number);
+					ContactId contact = mContactUtils.formatContact(number);
 					if (!mContactIdDisplayNameMap.containsKey(contact)) {
 						// Display name is not known, save it into map
 						displayName = RcsDisplayName.getInstance(context).getDisplayName(contact);

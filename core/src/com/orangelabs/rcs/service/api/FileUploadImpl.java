@@ -96,18 +96,18 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	public FileUploadInfo getUploadInfo() {
 		if (session != null) {
 			FileTransferHttpInfoDocument file = session.getFileInfoDocument();
-			FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
-			if (fileicon != null) {
+			FileTransferHttpThumbnail fileIcon = file.getFileThumbnail();
+			if (fileIcon != null) {
 				return new FileUploadInfo(
 						file.getFileUri(),
 						file.getTransferValidity(),
 						file.getFilename(),
 						file.getFileSize(),
 						file.getFileType(),
-						fileicon.getThumbnailUri(),
-						fileicon.getThumbnailValidity(),
-						fileicon.getThumbnailSize(),
-						fileicon.getThumbnailType());
+						fileIcon.getThumbnailUri(),
+						fileIcon.getThumbnailValidity(),
+						fileIcon.getThumbnailSize(),
+						fileIcon.getThumbnailType());
 			} else {
 				return new FileUploadInfo(
 						file.getFileUri(),
@@ -171,9 +171,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	    		logger.debug("File upload started");
 	    	}
     		state = FileUpload.State.STARTED;
-
-    		// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+			mFileUploadEventBroadcaster.broadcastStateChanged(getUploadId(), state);
 	    }
     }
 
@@ -185,8 +183,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	 */
     public void handleUploadProgress(long currentSize, long totalSize) {
     	synchronized(lock) {
-	    	// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadProgress(getUploadId(), currentSize, totalSize);
+            mFileUploadEventBroadcaster.broadcastProgressUpdate(getUploadId(), currentSize, totalSize);
 	     }
     }
     
@@ -202,11 +199,10 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	    	}
     		state = FileUpload.State.TRANSFERRED;
 
-    		// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+            String uploadId = getUploadId();
+            mFileUploadEventBroadcaster.broadcastStateChanged(uploadId, state);
 			
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
+            FileUploadServiceImpl.removeFileUploadSession(uploadId);
 	    }
     }
 
@@ -222,11 +218,10 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	    	}
     		state = FileUpload.State.FAILED;
 
-    		// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+            String uploadId = getUploadId();
+            mFileUploadEventBroadcaster.broadcastStateChanged(uploadId, state);
 			
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
+            FileUploadServiceImpl.removeFileUploadSession(uploadId);
 	    }
     }
 
@@ -240,11 +235,10 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	    	}
     		state = FileUpload.State.ABORTED;
 
-    		// Notify event listeners
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(getUploadId(), state);
+            String uploadId = getUploadId();
+            mFileUploadEventBroadcaster.broadcastStateChanged(uploadId, state);
 			
-	        // Remove session from the list
-	        FileTransferServiceImpl.removeFileTransferSession(session.getUploadID());
+            FileUploadServiceImpl.removeFileUploadSession(uploadId);
 	    }
     }
 
@@ -255,9 +249,9 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 		}
 		String uploadId = getUploadId();
 		synchronized (lock) {
-			mFileUploadEventBroadcaster.broadcastFileUploadStateChanged(uploadId,
+			mFileUploadEventBroadcaster.broadcastStateChanged(uploadId,
 					FileUpload.State.FAILED);
-			FileTransferServiceImpl.removeFileTransferSession(uploadId);
+			FileUploadServiceImpl.removeFileUploadSession(uploadId);
 		}
 	}
 }

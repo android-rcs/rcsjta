@@ -174,12 +174,12 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -188,12 +188,12 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -295,7 +295,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			// Add session listener
 			MultimediaMessagingSessionImpl sessionApi = new MultimediaMessagingSessionImpl(session,
 					mMultimediaMessagingSessionEventBroadcaster);
-			mMultimediaMessagingSessionEventBroadcaster.broadcastMultimediaMessagingStateChanged(
+			mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(
 					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
 					ReasonCode.UNSPECIFIED);
 
@@ -391,7 +391,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 			// Add session listener
 			MultimediaStreamingSessionImpl sessionApi = new MultimediaStreamingSessionImpl(session,
 					mMultimediaStreamingSessionEventBroadcaster);
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
 					ReasonCode.UNSPECIFIED);
 
@@ -468,11 +468,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
 	/**
-	 * Adds an event listener on messaging session events
+	 * Adds a listener on multimedia messaging session events
 	 *
 	 * @param listener Session event listener
 	 */
-	public void addMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+	public void addEventListener2(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an event listener");
 		}
@@ -483,11 +483,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
 	/**
-	 * Removes an event listener on messaging session events
+	 * Removes a listener on multimedia messaging session events
 	 *
 	 * @param listener Session event listener
 	 */
-	public void removeMessagingEventListener(IMultimediaMessagingSessionListener listener) {
+	public void removeEventListener2(IMultimediaMessagingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an event listener");
 		}
@@ -497,11 +497,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
 	/**
-	 * Adds an event listener on streaming session events
+	 * Adds a listener on multimedia streaming session events
 	 *
 	 * @param listener Session event listener
 	 */
-	public void addStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+	public void addEventListener3(IMultimediaStreamingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an event listener");
 		}
@@ -511,11 +511,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 	}
 
 	/**
-	 * Removes an event listener on streaming session events
+	 * Removes a listener on multimedia streaming session events
 	 *
 	 * @param listener Session event listener
 	 */
-	public void removeStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+	public void removeEventListener3(IMultimediaStreamingSessionListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an event listener");
 		}

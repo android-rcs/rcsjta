@@ -220,7 +220,7 @@
         
    		<receiver android:name="com.orangelabs.rcs.service.GetStatusReceiver">
 	        <intent-filter>
-	     		<action android:name="com.orangelabs.rcs.client.action.GET_STATUS"/>
+	     		<action android:name="com.orangelabs.rcs.service.action.GET_STATUS"/>
 	        </intent-filter>
 	    </receiver>
         

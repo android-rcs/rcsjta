@@ -417,6 +417,6 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
 	@Override
 	public void handleSessionInvited() {
-		mGeolocSharingEventBroadcaster.broadcastGeolocSharingInvitation(getSharingId());
+		mGeolocSharingEventBroadcaster.broadcastInvitation(getSharingId());
 	}
 }

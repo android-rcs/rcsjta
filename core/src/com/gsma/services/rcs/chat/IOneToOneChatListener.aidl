@@ -5,9 +5,9 @@ import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * Chat event listener
+ * One-to-One Chat event listener
  */
-interface IChatListener {
+interface IOneToOneChatListener {
 
 	void onMessageStatusChanged(in ContactId contact, in String msgId, in int status, in int reasonCode);
 

@@ -26,7 +26,7 @@ package com.orangelabs.rcs.service.broadcaster;
  */
 public interface IFileUploadEventBroadcaster {
 
-	public void broadcastFileUploadStateChanged(String uploadId, int status);
+	public void broadcastStateChanged(String uploadId, int status);
 
-	public void broadcastFileUploadProgress(String uploadId, long currentSize, long totalSize);
+	public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
 }

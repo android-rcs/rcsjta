@@ -39,7 +39,7 @@ import com.orangelabs.rcs.ri.R;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IntentClients extends ListActivity {
+public class IntentServices extends ListActivity {
 	/**
 	 * List of clients detected
 	 */
@@ -54,13 +54,13 @@ public class IntentClients extends ListActivity {
         setContentView(R.layout.intents_clients);
 
 		// Get the list of clients
-	    clients = RcsUtils.getRcsClients(this);
+	    clients = RcsUtils.getRcsServices(this);
 
 	    // Set list adapter
         String[] items = new String[clients.size()];
         for(int i=0; i < clients.size(); i++) {
         	items[i] = clients.get(i).activityInfo.packageName;
-        	RcsUtils.isRcsClientActivated(this, clients.get(i), receiverResult);
+        	RcsUtils.isRcsServiceActivated(this, clients.get(i), receiverResult);
         }
         setListAdapter(new ArrayAdapter<String>(
         	      this,
@@ -72,7 +72,7 @@ public class IntentClients extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 
-		RcsUtils.loadRcsClientSettings(this, clients.get(position));
+		RcsUtils.loadRcsServiceSettings(this, clients.get(position));
 	}
 
 	/**
@@ -85,12 +85,12 @@ public class IntentClients extends ListActivity {
 			if (bundle == null) {
 				return;
 			}
-			String client = bundle.getString(com.gsma.services.rcs.Intents.Client.EXTRA_CLIENT);
-			boolean status = bundle.getBoolean(com.gsma.services.rcs.Intents.Client.EXTRA_STATUS, false);
+			String client = bundle.getString(com.gsma.services.rcs.Intents.Service.EXTRA_SERVICE);
+			boolean status = bundle.getBoolean(com.gsma.services.rcs.Intents.Service.EXTRA_STATUS, false);
 			
 			for(int i=0; i < clients.size(); i++) {
 				if (clients.get(i).activityInfo.packageName.equals(client)) {
-					View v = IntentClients.this.getListView().getChildAt(i);
+					View v = IntentServices.this.getListView().getChildAt(i);
 					if (status) {
 						v.setBackgroundColor(Color.GREEN);
 					} else {

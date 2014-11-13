@@ -51,7 +51,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGeolocSharingListeners.getBroadcastItem(i).onGeolocSharingStateChanged(contact,
+				mGeolocSharingListeners.getBroadcastItem(i).onStateChanged(contact,
 						sharingId, state, reasonCode);
 			} catch (Exception e) {
 			}
@@ -59,12 +59,12 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		mGeolocSharingListeners.finishBroadcast();
 	}
 
-	public void broadcastGeolocSharingprogress(ContactId contact, String sharingId, long currentSize,
+	public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
 			long totalSize) {
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGeolocSharingListeners.getBroadcastItem(i).onGeolocSharingProgress(contact,
+				mGeolocSharingListeners.getBroadcastItem(i).onProgressUpdate(contact,
 						sharingId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -75,7 +75,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		mGeolocSharingListeners.finishBroadcast();
 	}
 
-	public void broadcastGeolocSharingInvitation(String sharingId) {
+	public void broadcastInvitation(String sharingId) {
 		Intent invitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(invitation);

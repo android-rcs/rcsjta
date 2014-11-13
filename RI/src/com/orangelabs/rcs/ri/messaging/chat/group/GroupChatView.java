@@ -51,8 +51,10 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
@@ -161,7 +163,7 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
+		public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onGroupDeliveryInfoChanged chatId=" + chatId + " contact=" + contact + " msgId=" + msgId
 						+ " status=" + status + " reason=" + reasonCode);
@@ -169,7 +171,7 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onGroupChatStateChanged(String chatId, final int state, final int reasonCode) {
+		public void onStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onGroupChatStateChanged chatId=" + chatId + " state=" + state + " reason=" + reasonCode);
 			}
@@ -299,7 +301,7 @@ public class GroupChatView extends ChatView {
 				if (contacts != null && !contacts.isEmpty()) {
 					for (String contact : contacts) {
 						try {
-							mParticipants.add(contactUtils.formatContactId(contact));
+							mParticipants.add(contactUtils.formatContact(contact));
 						} catch (RcsContactFormatException e) {
 							if (LogUtils.isActive) {
 								Log.e(LOGTAG, "processIntent invalid participant " + contact);
@@ -538,7 +540,7 @@ public class GroupChatView extends ChatView {
 		// Stop session
 		try {
 			if (mGroupChat != null) {
-				mGroupChat.quitConversation();
+				mGroupChat.leave();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -622,7 +624,7 @@ public class GroupChatView extends ChatView {
 					Set<ContactId> contacts = new HashSet<ContactId>();
 					ContactUtils contactUtils = ContactUtils.getInstance(GroupChatView.this);
 					for (String participant : selectedParticipants) {
-						contacts.add(contactUtils.formatContactId(participant));
+						contacts.add(contactUtils.formatContact(participant));
 					}
 					// Add participants
 					mGroupChat.addParticipants(contacts);
@@ -842,7 +844,7 @@ public class GroupChatView extends ChatView {
 	}
 
 	@Override
-	public String sendTextMessage(String message) {
+	public ChatMessage sendTextMessage(String message) {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
@@ -859,14 +861,14 @@ public class GroupChatView extends ChatView {
 	}
 
 	@Override
-	public String sendGeolocMessage(Geoloc geoloc) {
+	public GeolocMessage sendGeolocMessage(Geoloc geoloc) {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "sendGeolocMessage geoloc=" + geoloc);
 			}
 			// Send the text to remote
-			return mGroupChat.sendGeoloc(geoloc);
+			return mGroupChat.sendMessage(geoloc);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "sendGeolocMessage failed", e);
@@ -877,12 +879,12 @@ public class GroupChatView extends ChatView {
 
 	@Override
 	public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().addGroupChatEventListener(mListener);
+		connectionManager.getChatApi().addEventListener(mListener);
 	}
 
 	@Override
 	public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().removeGroupChatEventListener(mListener);
+		connectionManager.getChatApi().removeEventListener(mListener);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferListener;
+import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
@@ -59,10 +59,10 @@ public class SendSingleFile extends SendFile {
 	/**
 	 * File transfer listener
 	 */
-	private FileTransferListener ftListener = new FileTransferListener() {
+	private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
 
 		@Override
-		public void onTransferProgress(ContactId contact, String transferId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String transferId, final long currentSize, final long totalSize) {
 			// Discard event if not for current transferId
 			if (mTransferId == null || !mTransferId.equals(transferId)) {
 				return;
@@ -76,7 +76,7 @@ public class SendSingleFile extends SendFile {
 		}
 
 		@Override
-		public void onTransferStateChanged(ContactId contact, String transferId, final int state, final int reasonCode) {
+		public void onStateChanged(ContactId contact, String transferId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state
 						+ " reason=" + reasonCode);
@@ -178,11 +178,11 @@ public class SendSingleFile extends SendFile {
 
 	@Override
 	public void addFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException {
-		fileTransferService.addOneToOneFileTransferListener(ftListener);
+		fileTransferService.addEventListener(ftListener);
 	}
 
 	@Override
 	public void removeFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException {
-		fileTransferService.removeOneToOneFileTransferListener(ftListener);
+		fileTransferService.removeEventListener(ftListener);
 	}
 }

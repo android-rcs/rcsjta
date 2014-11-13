@@ -165,7 +165,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 	private VideoSharingListener vshListener = new VideoSharingListener() {
 
 		@Override
-		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
+		public void onStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
 			// Discard event if not for current sharingId
 			if (InitiateVideoSharing.this.sharingId == null || !InitiateVideoSharing.this.sharingId.equals(sharingId)) {
 				return;
@@ -310,6 +310,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 		}
 	}
 
+//<<<<<<< HEAD
 	/**
 	 * Dial button listener
 	 */
@@ -350,7 +351,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 			ContactUtils contactUtils = ContactUtils.getInstance(InitiateVideoSharing.this);
 			final ContactId remote;
 			try {
-				remote = contactUtils.formatContactId(phoneNumber);
+				remote = contactUtils.formatContact(phoneNumber);
 			} catch (RcsContactFormatException e1) {
 				Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_invalid_contact, phoneNumber));
 				return;
@@ -372,6 +373,71 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 						e.printStackTrace();
 						handler.post(new Runnable() {
 							public void run() {
+//=======
+//    /**
+//     * Dial button listener
+//     */
+//    private OnClickListener btnDialListener = new OnClickListener() {
+//        public void onClick(View v) {
+//        	// Get the remote contact
+//            Spinner spinner = (Spinner)findViewById(R.id.contact);
+//            MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
+//            String remote = cursor.getString(1);
+//
+//            // Initiate a GSM call before to be able to share content
+//            Intent intent = new Intent(Intent.ACTION_CALL);
+//        	intent.setData(Uri.parse("tel:"+remote));
+//            startActivity(intent);
+//        }
+//    };
+//
+//    /**
+//     * Invite button listener
+//     */
+//    private OnClickListener btnInviteListener = new OnClickListener() {
+//        public void onClick(View v) {
+//            // Check if the service is available
+//        	boolean registered = false;
+//        	try {
+//        		registered = connectionManager.getVideoSharingApi().isServiceRegistered();
+//        	} catch(Exception e) {
+//        		e.printStackTrace();
+//        	}
+//            if (!registered) {
+//    	    	Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_service_not_available));
+//    	    	return;
+//            } 
+//            
+//            // Get the remote contact
+//            Spinner spinner = (Spinner)findViewById(R.id.contact);
+//            MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
+//
+//            ContactUtils contactUtils = ContactUtils.getInstance(InitiateVideoSharing.this);
+//            final ContactId remote;
+//    		try {
+//    			remote = contactUtils.formatContact(cursor.getString(1));
+//    		} catch (RcsContactFormatException e1) {
+//    			Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
+//    	    	return;
+//    		}
+//    		
+//            new Thread() {
+//            	public void run() {
+//		        	try {
+//		                // Create the video player
+//		        		videoPlayer = new MyVideoPlayer();
+//		        		
+//		                // Start the camera
+//		        		openCamera();
+//		
+//		        		// Initiate sharing
+//		        		videoSharing = connectionManager.getVideoSharingApi().shareVideo(remote, videoPlayer);
+//		        		sharingId = videoSharing.getSharingId();
+//		        	} catch(Exception e) {
+//		        		e.printStackTrace();
+//	            		handler.post(new Runnable() { 
+//	    					public void run() {
+////>>>>>>> 5dd3b8312b37639b0ae7f2038e22eee578785335
 								hideProgressDialog();
 								Utils.showMessageAndExit(InitiateVideoSharing.this, getString(R.string.label_invitation_failed), exitOnce);
 							}

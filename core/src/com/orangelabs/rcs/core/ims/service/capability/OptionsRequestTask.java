@@ -245,7 +245,15 @@ public class OptionsRequestTask implements Runnable {
     	// Update the database capabilities
     	if (capabilities.isImSessionSupported()) {
     		// The contact is RCS capable
-   			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
+    		
+    		// Note RCS5.1 chapter 2.7.1.1: "a user shall be considered as unregistered when ... a response 
+        	// that included the automata tag defined in [RFC3840]".
+    		if (capabilities.isSipAutomata()) {
+    			
+    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_OFFLINE);
+    		} else {
+    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
+    		}
     	} else {
     		// The contact is not RCS
     		ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);

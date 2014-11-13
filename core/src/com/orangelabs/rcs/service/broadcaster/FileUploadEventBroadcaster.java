@@ -48,11 +48,11 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		mFileUploadListeners.unregister(listener);
 	}
 
-	public void broadcastFileUploadStateChanged(String uploadId, int state) {
+	public void broadcastStateChanged(String uploadId, int state) {
 		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mFileUploadListeners.getBroadcastItem(i).onUploadStateChanged(uploadId, state);
+				mFileUploadListeners.getBroadcastItem(i).onStateChanged(uploadId, state);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -62,11 +62,11 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		mFileUploadListeners.finishBroadcast();
 	}
 
-	public void broadcastFileUploadProgress(String uploadId, long currentSize, long totalSize) {
+	public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize) {
 		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mFileUploadListeners.getBroadcastItem(i).onUploadProgress(uploadId, currentSize, totalSize);
+				mFileUploadListeners.getBroadcastItem(i).onProgressUpdate(uploadId, currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

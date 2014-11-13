@@ -127,7 +127,7 @@ public class IPCallDAO implements Parcelable {
 				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT_NUMBER));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContactId(_contact);
+					contact = contactUtils.formatContact(_contact);
 				}
 				state = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.STATE));
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION));

@@ -140,12 +140,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -154,12 +154,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -241,7 +241,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			RichCallHistory.getInstance().addImageSharing(contact, session.getSessionID(),
 					Direction.OUTGOING, session.getContent(),
 					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mImageSharingEventBroadcaster.broadcastImageSharingStateChanged(contact, sharingId,
+			mImageSharingEventBroadcaster.broadcastStateChanged(contact, sharingId,
 					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
@@ -318,15 +318,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		String sessionId = SessionIdGenerator.getNewId();
 		RichCallHistory.getInstance().addImageSharing(contact, sessionId,
 				Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
-		mImageSharingEventBroadcaster.broadcastImageSharingInvitation(sessionId);
+		mImageSharingEventBroadcaster.broadcastInvitation(sessionId);
 	}
 
     /**
-	 * Adds an event listener on image sharing events
+	 * Adds a listener on image sharing events
 	 * 
 	 * @param listener Listener
 	 */
-	public void addEventListener(IImageSharingListener listener) {
+	public void addEventListener2(IImageSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add an Image sharing event listener");
 		}
@@ -336,11 +336,11 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
-	 * Removes an event listener on image sharing events
+	 * Removes a listener on image sharing events
 	 * 
 	 * @param listener Listener
 	 */
-	public void removeEventListener(IImageSharingListener listener) {
+	public void removeEventListener2(IImageSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove an Image sharing event listener");
 		}

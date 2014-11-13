@@ -70,7 +70,7 @@ public class RcsContactTest extends AndroidTestCase {
 				extensions, automata, timestamp, valid);
 		registered = random.nextBoolean();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
-		contactId = contactUtils.formatContactId("+33123456789");
+		contactId = contactUtils.formatContact("+33123456789");
 		displayName = "displayName";
 	}
 

@@ -89,7 +89,7 @@ public abstract class InitiateMultimediaSession extends Activity {
 			try {
 				// Convert phone number to contactId
 				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
-				ContactId contact = contactUtils.formatContactId(phoneNumber);
+				ContactId contact = contactUtils.formatContact(phoneNumber);
 				// Initiate session
 				initiateSession(contact);
 			} catch (RcsContactFormatException e) {

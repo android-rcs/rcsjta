@@ -41,8 +41,10 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.Chat;
-import com.gsma.services.rcs.chat.ChatListener;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.chat.OneToOneChat;
+import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -73,7 +75,7 @@ public class SingleChatView extends ChatView {
 	/**
 	 * The chat session instance
 	 */
-	private Chat mChat;
+	private OneToOneChat mChat;
 
 	/**
 	 * ContactId of the displayed single chat
@@ -105,7 +107,7 @@ public class SingleChatView extends ChatView {
 	/**
 	 * Single Chat listener
 	 */
-	private ChatListener mListener = new ChatListener() {
+	private OneToOneChatListener mListener = new OneToOneChatListener() {
 		// Callback called when an Is-composing event has been received
 		@Override
 		public void onComposingEvent(ContactId contact, boolean status) {
@@ -292,7 +294,7 @@ public class SingleChatView extends ChatView {
 	}
 
 	@Override
-	public String sendTextMessage(String message) {
+	public ChatMessage sendTextMessage(String message) {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
@@ -309,14 +311,14 @@ public class SingleChatView extends ChatView {
 	}
 
 	@Override
-	public String sendGeolocMessage(Geoloc geoloc) {
+	public GeolocMessage sendGeolocMessage(Geoloc geoloc) {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "sendGeolocMessage geoloc=" + geoloc);
 			}
 			// Send the text to remote
-			return mChat.sendGeoloc(geoloc);
+			return mChat.sendMessage(geoloc);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "sendGeolocMessage failed", e);
@@ -327,12 +329,12 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().addOneToOneChatEventListener(mListener);
+		connectionManager.getChatApi().addEventListener(mListener);
 	}
 
 	@Override
 	public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().removeOneToOneChatEventListener(mListener);
+		connectionManager.getChatApi().removeEventListener(mListener);
 	}
 
 	@Override

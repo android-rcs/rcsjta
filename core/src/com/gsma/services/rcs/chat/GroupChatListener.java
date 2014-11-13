@@ -37,7 +37,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param state group chat state
 	 * @param reasonCode reason code
 	 */
-	public abstract void onGroupChatStateChanged(String chatId, int state, int reasonCode);
+	public abstract void onStateChanged(String chatId, int state, int reasonCode);
 
 	/**
 	 * Callback called when an Is-composing event has been received. If the
@@ -69,7 +69,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 	 * @param status message status
 	 * @param reasonCode status reason code
 	 */
-	public abstract void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId, int status, int reasonCode);
+	public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId, int status, int reasonCode);
 
 	/**
 	 * Callback called when a participant status has been changed in a group chat.

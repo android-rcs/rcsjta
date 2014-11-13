@@ -43,10 +43,9 @@
 		<activity
             android:name=".intents.TestIntentsApi"
             android:label="@string/menu_intents" />
-        
-        <activity
-            android:name=".intents.IntentClients"
-            android:label="@string/menu_clients" />
+
+        <activity android:name=".intents.IntentServices"
+			android:label="@string/menu_services" />
 
 		<activity
             android:name=".intents.IntentApps"
@@ -114,7 +113,7 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="com.gsma.services.rcs.action.VIEW_FT"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER"/>
             </intent-filter>
         </activity>
 
@@ -130,7 +129,7 @@
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="com.gsma.services.rcsaction.INITIATE_FT"/>                
+                <action android:name="com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER"/>                
             </intent-filter>					
 		</activity>
         
@@ -162,7 +161,7 @@
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="com.gsma.services.rcs.action.VIEW_CHAT"/>
+			    <action android:name="com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT"/>
             </intent-filter>            
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -181,14 +180,14 @@
                 <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session"/>
             </intent-filter>
 			<intent-filter>
-                <action android:name="com.gsma.services.rcs.action.INITIATE_CHAT"/>
+                <action android:name="com.gsma.services.rcs.action.SEND_ONE_TO_ONE_CHAT_MESSAGE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 		</activity>        
         
 		<receiver android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatInvitationReceiver">
             <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_ONE2ONE_CHAT_MESSAGE"/>
+		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         

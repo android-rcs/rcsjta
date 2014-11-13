@@ -18,8 +18,10 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
 
 /**
@@ -35,7 +37,7 @@ public interface IChatView {
 	 *            Message to send
 	 * @return Message ID or null if sending failed
 	 */
-	String sendTextMessage(String message);
+	ChatMessage sendTextMessage(String message);
 
 	/**
 	 * Send geoloc message
@@ -44,7 +46,7 @@ public interface IChatView {
 	 *            Geoloc
 	 * @return Message ID or null if sending failed
 	 */
-	String sendGeolocMessage(Geoloc geoloc);
+	GeolocMessage sendGeolocMessage(Geoloc geoloc);
 
 	/**
 	 * Process intent

@@ -41,7 +41,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		MessagingLog.createInstance(getContext());
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		try {
-			remote = contactUtils.formatContactId("+339000000");
+			remote = contactUtils.formatContact("+339000000");
 		} catch (RcsContactFormatException e) {
 			fail( "Cannot create contactID");
 		}

@@ -275,9 +275,9 @@ public class ImageSharing {
      * @return Type
 	 * @throws RcsServiceException
      */
-    public String getFileType() throws RcsServiceException {
+    public String getMimeType() throws RcsServiceException {
 		try {
-			return sharingInf.getFileType();
+			return sharingInf.getMimeType();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

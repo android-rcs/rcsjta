@@ -283,16 +283,16 @@ public class MultimediaSessionService extends RcsService {
     }    
     
 	/**
-	 * Adds an event listener on messaging session events
+	 * Adds a listener on multimedia messaging session events
 	 *
 	 * @param listener Session event listener
 	 * @throws RcsServiceException
 	 */
-	public void addMessagingEventListener(MultimediaMessagingSessionListener listener)
+	public void addEventListener(MultimediaMessagingSessionListener listener)
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addMessagingEventListener(listener);
+				api.addEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -302,16 +302,16 @@ public class MultimediaSessionService extends RcsService {
 	}
 
 	/**
-	 * Removes an event listener on messaging session events
+	 * Removes a listener on multimedia messaging session events
 	 *
 	 * @param listener Session event listener
 	 * @throws RcsServiceException
 	 */
-	public void removeMessagingEventListener(MultimediaMessagingSessionListener listener)
+	public void removeEventListener(MultimediaMessagingSessionListener listener)
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeMessagingEventListener(listener);
+				api.removeEventListener2(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -321,16 +321,16 @@ public class MultimediaSessionService extends RcsService {
 	}
 
 	/**
-	 * Adds a listener on streaming session events
+	 * Adds a listener on multimedia streaming session events
 	 *
 	 * @param listener Session event listener
 	 * @throws RcsServiceException
 	 */
-	public void addStreamingEventListener(MultimediaStreamingSessionListener listener)
+	public void addEventListener(MultimediaStreamingSessionListener listener)
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.addStreamingEventListener(listener);
+				api.addEventListener3(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -340,16 +340,16 @@ public class MultimediaSessionService extends RcsService {
 	}
 
 	/**
-	 * Removes a listener on streaming session events
+	 * Removes a listener on multimedia streaming session events
 	 *
 	 * @param listener Session event listener
 	 * @throws RcsServiceException
 	 */
-	public void removeStreamingEventListener(MultimediaStreamingSessionListener listener)
+	public void removeEventListener(MultimediaStreamingSessionListener listener)
 			throws RcsServiceException {
 		if (api != null) {
 			try {
-				api.removeStreamingEventListener(listener);
+				api.removeEventListener3(listener);
 			} catch (Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

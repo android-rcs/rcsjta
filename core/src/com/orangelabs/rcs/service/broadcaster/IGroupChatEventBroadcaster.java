@@ -26,16 +26,16 @@ public interface IGroupChatEventBroadcaster {
 	public void broadcastMessageStatusChanged(String chatId, String msgId, int status,
 			int reasonCode);
 
-	public void broadcastDeliveryInfoStatusChanged(String chatId, ContactId contact, String msgId,
+	public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId,
 			int status, int reasonCode);
 
 	public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
 
-	public void broadcastGroupChatStateChanged(String chatId, int state, int reasonCode);
+	public void broadcastStateChanged(String chatId, int state, int reasonCode);
 
 	public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
 
-	public void broadcastGroupChatInvitation(String chatId);
+	public void broadcastInvitation(String chatId);
 
 	public void broadcastMessageReceived(String msgId);
 }

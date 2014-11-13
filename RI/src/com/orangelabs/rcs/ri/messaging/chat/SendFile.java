@@ -113,6 +113,7 @@ public abstract class SendFile extends Activity implements ISendFile {
 	 * A locker to exit only once
 	 */
 	protected LockAccess exitOnce = new LockAccess();
+
     
     @Override
     public void onCreate(Bundle savedInstanceState) {

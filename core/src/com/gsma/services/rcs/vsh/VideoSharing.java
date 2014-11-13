@@ -166,7 +166,7 @@ public class VideoSharing {
         /**
          * H264
          */
-        public static final int H264 = 0;
+        public static final String H264 = "H264";
     }      
     
     /**

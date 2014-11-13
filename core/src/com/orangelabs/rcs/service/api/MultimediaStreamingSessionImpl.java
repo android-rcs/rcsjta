@@ -81,7 +81,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		synchronized (lock) {
 			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
 
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.REJECTED, reasonCode);
 		}
 	}
@@ -250,7 +250,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 			logger.info("Session started");
 		}
 		synchronized (lock) {
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					getRemoteContact(), getSessionId(), MultimediaSession.State.STARTED,
 					ReasonCode.UNSPECIFIED);
 		}
@@ -269,7 +269,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		synchronized (lock) {
 			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
 
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
 		}
@@ -286,7 +286,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		synchronized (lock) {
 			MultimediaSessionServiceImpl.removeStreamingSipSession(sessionId);
 
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					getRemoteContact(), sessionId, MultimediaSession.State.ABORTED,
 					ReasonCode.UNSPECIFIED);
 		}
@@ -308,19 +308,19 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 			switch (error.getErrorCode()) {
 				case SipSessionError.SESSION_INITIATION_DECLINED:
 					mMultimediaStreamingSessionEventBroadcaster
-							.broadcastMultimediaStreamingStateChanged(getRemoteContact(),
+							.broadcastStateChanged(getRemoteContact(),
 									sessionId, MultimediaSession.State.REJECTED,
 									ReasonCode.REJECTED_BY_REMOTE);
 					break;
 				case SipSessionError.MEDIA_FAILED:
 					mMultimediaStreamingSessionEventBroadcaster
-							.broadcastMultimediaStreamingStateChanged(getRemoteContact(),
+							.broadcastStateChanged(getRemoteContact(),
 									sessionId, MultimediaSession.State.FAILED,
 									ReasonCode.FAILED_MEDIA);
 					break;
 				default:
 					mMultimediaStreamingSessionEventBroadcaster
-							.broadcastMultimediaStreamingStateChanged(getRemoteContact(),
+							.broadcastStateChanged(getRemoteContact(),
 									sessionId, MultimediaSession.State.FAILED,
 									ReasonCode.FAILED_SESSION);
 			}
@@ -335,7 +335,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     public void handleReceiveData(byte[] data) {
 		synchronized (lock) {
 			// Notify event listeners
-			mMultimediaStreamingSessionEventBroadcaster.broadcastNewPayload(getRemoteContact(),
+			mMultimediaStreamingSessionEventBroadcaster.broadcastPayloadReceived(getRemoteContact(),
 					getSessionId(), data);
 		}
     }
@@ -346,7 +346,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 			logger.info("Accepting session");
 		}
 		synchronized (lock) {
-			mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingStateChanged(
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
 					getRemoteContact(), getSessionId(), MultimediaSession.State.ACCEPTING,
 					ReasonCode.UNSPECIFIED);
 		}
@@ -372,7 +372,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		if (logger.isActivated()) {
 			logger.info("Invited to multimedia streaming session");
 		}
-		mMultimediaStreamingSessionEventBroadcaster.broadcastMultimediaStreamingInvitation(
+		mMultimediaStreamingSessionEventBroadcaster.broadcastInvitation(
 				getSessionId(), ((TerminatingSipRtpSession)session).getSessionInvite());
 	}
 }

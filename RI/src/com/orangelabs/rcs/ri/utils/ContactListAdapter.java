@@ -131,7 +131,7 @@ public class ContactListAdapter extends CursorAdapter {
                     // Keep a trace of already treated row
                     String phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
                     try {
-                        ContactId contact = contactUtils.formatContactId(phoneNumber);
+                        ContactId contact = contactUtils.formatContact(phoneNumber);
                         // If this number is RCS and not already in the list,
                         // take it
                         if (rcsContactIds.contains(contact) && !treatedContactIDs.contains(contact)) {

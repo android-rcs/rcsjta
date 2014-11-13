@@ -87,7 +87,7 @@ public class InitiateSingleChat extends Activity {
 			// Format phone number to contactId
 			ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
 			try {
-				ContactId contact = contactUtils.formatContactId(phoneNumber);
+				ContactId contact = contactUtils.formatContact(phoneNumber);
 				// start chat view activity
 				startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
 			} catch (RcsContactFormatException e) {

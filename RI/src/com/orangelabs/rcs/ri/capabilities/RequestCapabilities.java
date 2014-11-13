@@ -196,6 +196,7 @@ public class RequestCapabilities extends Activity {
 			try {
 				// Get selected contact
 				ContactId contactId = getSelectedContact();
+
 				// Get current capabilities
 				Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
 
@@ -222,7 +223,7 @@ public class RequestCapabilities extends Activity {
 	private ContactId getSelectedContact() {
 		// get selected phone number
 		ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-		return mContactUtils.formatContactId(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+		return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
 	}
 
 	/**

@@ -64,7 +64,7 @@ public class SendGroupFile extends SendFile {
 	private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state,
+		public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state,
 				int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId + " contact=" + contact + " trasnferId="
@@ -73,7 +73,7 @@ public class SendGroupFile extends SendFile {
 		}
 
 		@Override
-		public void onTransferProgress(String chatId, String transferId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(String chatId, String transferId, final long currentSize, final long totalSize) {
 			// Discard event if not for current transferId
 			if (mTransferId == null || !mTransferId.equals(transferId)) {
 				return;
@@ -87,7 +87,7 @@ public class SendGroupFile extends SendFile {
 		}
 
 		@Override
-		public void onTransferStateChanged(String chatId, String transferId, final int state, final int reasonCode) {
+		public void onStateChanged(String chatId, String transferId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state
 						+ " reason=" + reasonCode);
@@ -189,12 +189,12 @@ public class SendGroupFile extends SendFile {
 
 	@Override
 	public void addFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException {
-		fileTransferService.addGroupFileTransferListener(ftListener);
+		fileTransferService.addEventListener(ftListener);
 	}
 
 	@Override
 	public void removeFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException {
-		fileTransferService.removeGroupFileTransferListener(ftListener);
+		fileTransferService.removeEventListener(ftListener);
 	}
 
 }

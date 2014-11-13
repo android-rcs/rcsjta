@@ -265,7 +265,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     }    
 
 	/**
-	 * Adds an event listener on file upload events
+	 * Adds a listener on file upload events
 	 * 
 	 * @param listener Listener
 	 */
@@ -279,7 +279,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	}
 
 	/**
-	 * Removes an event listener on file upload events
+	 * Removes a listener on file upload events
 	 * 
 	 * @param listener Listener
 	 */

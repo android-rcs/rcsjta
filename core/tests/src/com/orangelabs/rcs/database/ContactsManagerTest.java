@@ -56,7 +56,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 		cm = ContactsManager.getInstance();
 		contactUtils = ContactUtils.getInstance(ctx);
 		// info.setContact(contact);
-		contactIdo = contactUtils.formatContactId("+33633139785");
+		contactIdo = contactUtils.formatContact("+33633139785");
 	}
 
 	protected void tearDown() throws Exception {
@@ -83,7 +83,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 		info.setRegistrationState(ContactInfo.REGISTRATION_STATUS_ONLINE);
 
 		// info.setContact(contact);
-		ContactId contactId = contactUtils.formatContactId(contact);
+		ContactId contactId = contactUtils.formatContact(contact);
 		info.setContact(contactId);
 		Capabilities capa = new Capabilities();
 		capa.setCsVideoSupport(false);

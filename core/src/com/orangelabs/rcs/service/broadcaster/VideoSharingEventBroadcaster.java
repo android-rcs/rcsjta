@@ -47,12 +47,12 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 		mVideoSharingListeners.unregister(listener);
 	}
 
-	public void broadcastVideoSharingStateChanged(ContactId contact, String sharingId, int state,
+	public void broadcastStateChanged(ContactId contact, String sharingId, int state,
 			int reasonCode) {
 		final int N = mVideoSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mVideoSharingListeners.getBroadcastItem(i).onVideoSharingStateChanged(contact,
+				mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact,
 						sharingId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
@@ -63,7 +63,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 		mVideoSharingListeners.finishBroadcast();
 	}
 
-	public void broadcastVideoSharingInvitation(String sharingId) {
+	public void broadcastInvitation(String sharingId) {
 		Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
 		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);

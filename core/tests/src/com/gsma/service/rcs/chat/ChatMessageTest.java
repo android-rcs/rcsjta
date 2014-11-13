@@ -17,11 +17,11 @@
  ******************************************************************************/
 package com.gsma.service.rcs.chat;
 
-import java.util.Date;
 import java.util.Random;
 
 import android.os.Parcel;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -30,7 +30,8 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 public class ChatMessageTest extends AndroidTestCase {
 
 	private String messageId;
-	private Date receiptAt;
+	private long receiptAt;
+	private long sentAt;
 	private String message;
 	private ContactId remote;
 	
@@ -39,9 +40,11 @@ public class ChatMessageTest extends AndroidTestCase {
 		Random random = new Random();
 		messageId = String.valueOf (random.nextInt(96) + 32);
 		message = String.valueOf (random.nextInt(96) + 32);
-		receiptAt = new Date();
+		receiptAt = random.nextLong();
+		sentAt = random.nextLong();
+		
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
-		remote = contactUtils.formatContactId("+33123456789");
+		remote = contactUtils.formatContact("+33123456789");
 	}
 
 	protected void tearDown() throws Exception {
@@ -49,20 +52,24 @@ public class ChatMessageTest extends AndroidTestCase {
 	}
 
 	private boolean chatMessageIsEqual(ChatMessage chatMessage1, ChatMessage chatMessage2) {
-		if (!chatMessage1.getId().equals(chatMessage2.getId()) )
-			return false;
-		if (!chatMessage1.getMessage().equals(chatMessage2.getMessage())) {
+		if (!chatMessage1.getId().equals(chatMessage2.getId()) ) {
 			return false;
 		}
-		if (!chatMessage1.getReceiptDate().equals(chatMessage2.getReceiptDate())) {
+		if (!chatMessage1.getContent().equals(chatMessage2.getContent())) {
 			return false;
 		}
-		if (chatMessage1.getContact() != null) {
-			if (!chatMessage1.getContact().equals(chatMessage2.getContact())) {
+		if (chatMessage1.getTimestamp()!=chatMessage2.getTimestamp()) {
+			return false;
+		}
+		if (chatMessage1.getTimestampSent()!=chatMessage2.getTimestampSent()) {
+			return false;
+		}
+		if (chatMessage1.getRemoteContact() != null) {
+			if (!chatMessage1.getRemoteContact().equals(chatMessage2.getRemoteContact())) {
 				return false;
 			}
 		} else {
-			if (chatMessage2.getContact() != null) {
+			if (chatMessage2.getRemoteContact() != null) {
 				return false;
 			}
 		}
@@ -70,7 +77,7 @@ public class ChatMessageTest extends AndroidTestCase {
 	}
 
 	public void testChatMessageContactNull() {
-		ChatMessage chatMessage = new ChatMessage(messageId, null, message, receiptAt);
+		ChatMessage chatMessage = new ChatMessage(messageId, null, message, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
 		chatMessage.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -81,7 +88,7 @@ public class ChatMessageTest extends AndroidTestCase {
 	}
 	
 	public void testChatMessageContact() {
-		ChatMessage chatMessage = new ChatMessage(messageId, remote, message, receiptAt);
+		ChatMessage chatMessage = new ChatMessage(messageId, remote, message, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
 		chatMessage.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading

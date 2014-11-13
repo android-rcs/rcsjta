@@ -138,12 +138,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void addServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.addServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
 
@@ -152,12 +152,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 *
 	 * @param listener Service registration listener
 	 */
-	public void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener) {
+	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
 		synchronized (lock) {
-			mRcsServiceRegistrationEventBroadcaster.removeServiceRegistrationListener(listener);
+			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
 
@@ -262,7 +262,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			RichCallHistory.getInstance().addVideoSharing(contact, sharingId,
 					Direction.OUTGOING, (VideoContent)session.getContent(),
 					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mVideoSharingEventBroadcaster.broadcastVideoSharingStateChanged(contact, sharingId,
+			mVideoSharingEventBroadcaster.broadcastStateChanged(contact, sharingId,
 					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
@@ -338,15 +338,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		String sessionId = SessionIdGenerator.getNewId();
 		RichCallHistory.getInstance().addVideoSharing(contact, sessionId,
 				Direction.INCOMING, content, VideoSharing.State.REJECTED, reasonCode);
-		mVideoSharingEventBroadcaster.broadcastVideoSharingInvitation(sessionId);
+		mVideoSharingEventBroadcaster.broadcastInvitation(sessionId);
 	}
 
     /**
-	 * Adds an event listener on video sharing events
+	 * Adds a listener on video sharing events
 	 * 
 	 * @param listener Listener
 	 */
-	public void addEventListener(IVideoSharingListener listener) {
+	public void addEventListener2(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Add a video sharing event listener");
 		}
@@ -356,11 +356,11 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	}
 
 	/**
-	 * Removes an event listener from video sharing events
+	 * Removes a listener from video sharing events
 	 * 
 	 * @param listener Listener
 	 */
-	public void removeEventListener(IVideoSharingListener listener) {
+	public void removeEventListener2(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
 			logger.info("Remove a video sharing event listener");
 		}

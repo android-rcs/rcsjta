@@ -14,9 +14,9 @@ interface IVideoSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	VideoSharingServiceConfiguration getConfiguration();
 
@@ -26,9 +26,9 @@ interface IVideoSharingService {
 
 	IVideoSharing shareVideo(in ContactId contact, in IVideoPlayer player);
 
-	void addEventListener(in IVideoSharingListener listener);
+	void addEventListener2(in IVideoSharingListener listener);
 
-	void removeEventListener(in IVideoSharingListener listener);
+	void removeEventListener2(in IVideoSharingListener listener);
 
 	int getServiceVersion();
 }

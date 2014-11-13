@@ -157,9 +157,9 @@ public class InstantMessagingService extends ImsService {
 	private void handleFileTransferInvitationRejected(SipRequest invite, int reasonCode) {
 		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 		MmContent content = ContentManager.createMmContentFromSdp(invite);
-		MmContent fileicon = FileTransferUtils.extractFileIcon(invite);
+		MmContent fileIcon = FileTransferUtils.extractFileIcon(invite);
 		getImsModule().getCore().getListener()
-				.handleFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
+				.handleFileTransferInvitationRejected(contact, content, fileIcon, reasonCode);
 	}
 
 	private void handleGroupChatInvitationRejected(SipRequest invite, int reasonCode) {
@@ -317,12 +317,12 @@ public class InstantMessagingService extends ImsService {
 	 *            Remote contact identifier
 	 * @param content
 	 *            Content of file to sent
-	 * @param fileicon
-	 *            true if the stack must try to attach fileicon
+	 * @param fileIcon
+	 *            true if the stack must try to attach fileIcon
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateFileTransferSession(ContactId contact, MmContent content, boolean fileicon) throws CoreException {
+	public FileSharingSession initiateFileTransferSession(ContactId contact, MmContent content, boolean fileIcon) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -359,8 +359,8 @@ public class InstantMessagingService extends ImsService {
 			}
 		}
 
-		if (fileicon && (MimeManager.isImageType(content.getEncoding()) == false)) {
-			fileicon = false;
+		if (fileIcon && (MimeManager.isImageType(content.getEncoding()) == false)) {
+			fileIcon = false;
 		}
 
 		// Initiate session
@@ -368,26 +368,26 @@ public class InstantMessagingService extends ImsService {
 		if (isHttpProtocol) {
 			// Create a new session
 			session = new OriginatingHttpFileSharingSession(this, content, contact,
-					PhoneUtils.formatContactIdToUri(contact), fileicon, UUID.randomUUID()
+					PhoneUtils.formatContactIdToUri(contact), fileIcon, UUID.randomUUID()
 							.toString());
 		} else {
-			if (fileicon) {
+			if (fileIcon) {
 				// Check thumbnail capabilities
 				if (capability != null && capability.isFileTransferThumbnailSupported() == false) {
-					fileicon = false;
+					fileIcon = false;
 					if (logger.isActivated()) {
 						logger.warn("Thumbnail not supported by remote");
 					}
 				}
-				if (fileicon && myCapability.isFileTransferThumbnailSupported() == false) {
-					fileicon = false;
+				if (fileIcon && myCapability.isFileTransferThumbnailSupported() == false) {
+					fileIcon = false;
 					if (logger.isActivated()) {
 						logger.warn("Thumbnail not supported !");
 					}
 				}
 			}
 			// Create a new session
-			session = new OriginatingMsrpFileSharingSession(this, content, contact, fileicon);
+			session = new OriginatingMsrpFileSharingSession(this, content, contact, fileIcon);
 		}
 		return session;
 	}
@@ -399,14 +399,14 @@ public class InstantMessagingService extends ImsService {
 	 *            Set of remote contacts
 	 * @param content
 	 *            The file content to be sent
-	 * @param fileicon
-	 *            true if the stack must try to attach fileicon
+	 * @param fileIcon
+	 *            true if the stack must try to attach fileIcon
 	 * @param chatContributionId
 	 *            Chat contribution ID
 	 * @return File transfer session
 	 * @throws CoreException
 	 */
-	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> participants, MmContent content, boolean fileicon,
+	public FileSharingSession initiateGroupFileTransferSession(Set<ParticipantInfo> participants, MmContent content, boolean fileIcon,
 			String chatContributionId) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Send file " + content.toString() + " to " + participants.size() + " contacts");
@@ -441,7 +441,7 @@ public class InstantMessagingService extends ImsService {
 		// TODO Cannot transfer file to group if Group Chat is not established: to implement with CR018
 		// Create a new session
 		FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this, content,
-				fileicon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), participants,
+				fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), participants,
 				groupChatSession.getSessionID(), chatContributionId, UUID.randomUUID()
 				.toString());
 

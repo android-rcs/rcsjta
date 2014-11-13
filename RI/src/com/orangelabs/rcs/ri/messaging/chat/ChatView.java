@@ -49,9 +49,11 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
@@ -213,7 +215,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			addChatEventListener(chatService);
 			ChatServiceConfiguration configuration = chatService.getConfiguration();
 			// Set max label length
-			int maxMsgLength = configuration.getSingleChatMessageMaxLength();
+			int maxMsgLength = configuration.getOneToOneChatMessageMaxLength();
 			if (maxMsgLength > 0) {
 				// Set the message composer max length
 				InputFilter[] filterArray = new InputFilter[1];
@@ -323,8 +325,8 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			return;
 		}
 		// Send text message
-		String msgId = sendTextMessage(text);
-		if (msgId != null) {
+		ChatMessage message = sendTextMessage(text);
+		if (message != null) {
 			// Warn the composing manager that the message was sent
 			composingManager.messageWasSent();
 			composeText.setText(null);
@@ -344,8 +346,8 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			return;
 		}
 		// Send text message
-		String msgId = sendGeolocMessage(geoloc);
-		if (msgId == null) {
+		GeolocMessage message = sendGeolocMessage(geoloc);
+		if (message == null) {
 			Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
 		}
 	}

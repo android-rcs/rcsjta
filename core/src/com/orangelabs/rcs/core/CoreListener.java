@@ -291,12 +291,12 @@ public interface CoreListener {
      *
      * @param contact Remote contact
      * @param content File content
-     * @param fileicon Fileicon content
+     * @param fileIcon Fileicon content
      * @param reasonCode Rejected reason code
      */
 
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileicon, int reasonCode);
+            MmContent fileIcon, int reasonCode);
 
     /**
      * Handle the case of rejected group chat

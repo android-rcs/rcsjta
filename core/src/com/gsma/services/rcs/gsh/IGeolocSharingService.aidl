@@ -13,9 +13,9 @@ interface IGeolocSharingService {
 
 	boolean isServiceRegistered();
 
-	void addServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void addEventListener(IRcsServiceRegistrationListener listener);
 
-	void removeServiceRegistrationListener(IRcsServiceRegistrationListener listener);
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	List<IBinder> getGeolocSharings();
 	
@@ -23,9 +23,9 @@ interface IGeolocSharingService {
 
 	IGeolocSharing shareGeoloc(in ContactId contact, in Geoloc geoloc);
 
-	void addEventListener(in IGeolocSharingListener listener);
+	void addEventListener2(in IGeolocSharingListener listener);
 
-	void removeEventListener(in IGeolocSharingListener listener);
+	void removeEventListener2(in IGeolocSharingListener listener);
 
 	int getServiceVersion();
 }

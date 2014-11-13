@@ -126,7 +126,7 @@ public class ChatLog {
 						status = Integer.parseInt(keyValue[1]) % 9;
 					} catch (NumberFormatException e) {
 					}
-					result.add(new ParticipantInfo(contactUtils.formatContactId(contact), status));
+					result.add(new ParticipantInfo(contactUtils.formatContact(contact), status));
 				}
 			}
 			return result;
