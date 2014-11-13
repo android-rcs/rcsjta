@@ -75,7 +75,7 @@ public class ChatServiceConfigurationTest extends AndroidTestCase {
 			return false;
 		if (conf1.getGroupChatMinParticipants() != conf2.getGroupChatMinParticipants())
 			return false;
-		if (conf1.getSingleChatMessageMaxLength() != conf2.getSingleChatMessageMaxLength())
+		if (conf1.getOneToOneChatMessageMaxLength() != conf2.getOneToOneChatMessageMaxLength())
 			return false;
 		if (conf1.getGroupChatMessageMaxLength() != conf2.getGroupChatMessageMaxLength())
 			return false;

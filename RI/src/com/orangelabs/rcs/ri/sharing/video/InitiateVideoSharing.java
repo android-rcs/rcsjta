@@ -160,7 +160,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
 	private VideoSharingListener vshListener = new VideoSharingListener() {
 
 		@Override
-		public void onVideoSharingStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
+		public void onStateChanged(ContactId contact, String sharingId, final int state, final int reasonCode) {
 			// Discard event if not for current sharingId
 			if (InitiateVideoSharing.this.sharingId == null || !InitiateVideoSharing.this.sharingId.equals(sharingId)) {
 				return;
@@ -352,7 +352,7 @@ public class InitiateVideoSharing extends Activity implements SurfaceHolder.Call
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateVideoSharing.this);
             final ContactId remote;
     		try {
-    			remote = contactUtils.formatContactId(cursor.getString(1));
+    			remote = contactUtils.formatContact(cursor.getString(1));
     		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateVideoSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;

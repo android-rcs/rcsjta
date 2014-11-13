@@ -55,7 +55,9 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -332,10 +334,10 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         }
 
 		// Send text message
-		String msgId = sendTextMessage(text);
-		if (msgId != null) {
+		ChatMessage message = sendTextMessage(text);
+		if (message != null) {
 			// Add text to the message history
-			TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
+			TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, message.getId());
 			addMessageHistory(item);
 			composeText.setText(null);
 		} else {
@@ -362,12 +364,12 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
         }
 
         // Send text message
-        String msgId = sendGeolocMessage(geoloc);
-    	if (msgId != null) {
+        GeolocMessage message = sendGeolocMessage(geoloc);
+    	if (message != null) {
 	    	// Add geoloc to the message history
     		// Add text to the message history
     		String text = geoloc.getLabel() + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
-    		TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, msgId);
+    		TextMessageItem item = new TextMessageItem(RcsCommon.Direction.OUTGOING, getString(R.string.label_me), text, message.getId());
     		addMessageHistory(item);
     	} else {
 	    	Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
@@ -699,17 +701,17 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
      * Send text message
      * 
      * @param msg Message
-     * @return Message ID
+     * @return Chat message
      */
-    protected abstract String sendTextMessage(String msg);
+    protected abstract ChatMessage sendTextMessage(String msg);
     
     /**
      * Send geoloc message
      * 
      * @param geoloc Geoloc
-     * @return Message ID
+     * @return geoloc message
      */
-    protected abstract String sendGeolocMessage(Geoloc geoloc);
+    protected abstract GeolocMessage sendGeolocMessage(Geoloc geoloc);
 
     /**
      * Quit the session
@@ -818,7 +820,7 @@ public abstract class ChatView extends ListActivity implements OnClickListener, 
 				ContactId contact = null;
 				if (_contact != null) {
 					try {
-						contact = contactUtils.formatContactId(_contact);
+						contact = contactUtils.formatContact(_contact);
 						// Do not fill map if record already exists
 						if (!participants.containsKey(contact)) {
 							participants.put(contact, RcsDisplayName.get(this, contact));

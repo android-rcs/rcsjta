@@ -98,7 +98,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 
 	public void testFormatContactIdNull() {
 		try {
-			contactUtils.formatContactId(null);
+			contactUtils.formatContact(null);
 			fail("Expected RcsContactFormatException to be thrown");
 		} catch (RcsContactFormatException e) {
 			assertTrue(e instanceof RcsContactFormatException);
@@ -107,7 +107,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 
 	public void testFormatContactIdWithInternationalNumbering() {
 		try {
-			ContactId cid = contactUtils.formatContactId("+33612345678");
+			ContactId cid = contactUtils.formatContact("+33612345678");
 			assertTrue(cid.toString().equals("+33612345678"));
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");
@@ -120,7 +120,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 			return;
 		String cc = rcsSettings.getCountryCode();
 		try {
-			ContactId cid = contactUtils.formatContactId(cac+"612345678");
+			ContactId cid = contactUtils.formatContact(cac+"612345678");
 			assertTrue(cid.toString().equals(cc+"612345678"));
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");
@@ -133,7 +133,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 			return;
 		try {
 			int cacInteger = Integer.parseInt(cac);
-			contactUtils.formatContactId((++cacInteger)+"612345678");
+			contactUtils.formatContact((++cacInteger)+"612345678");
 			fail("RcsContactFormatException expected");
 		} catch (Exception e) {
 			assertTrue(e instanceof RcsContactFormatException);
@@ -143,7 +143,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 	public void testFormatContactIdWithPrefixedInternationalNumbering() {
 		String cc = rcsSettings.getCountryCode();
 		try {
-			ContactId cid = contactUtils.formatContactId("00"+cc.substring(1)+"612345678");
+			ContactId cid = contactUtils.formatContact("00"+cc.substring(1)+"612345678");
 			assertTrue(cid.toString().equals(cc+"612345678"));
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");

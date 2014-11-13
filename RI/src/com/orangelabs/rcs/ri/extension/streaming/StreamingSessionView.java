@@ -124,7 +124,7 @@ public class StreamingSessionView extends Activity {
     private MultimediaStreamingSessionListener serviceListener = new MultimediaStreamingSessionListener() {
 
 		@Override
-		public void onMultimediaStreamingStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
+		public void onStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onMultimediaStreamingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
 						+ state + " reason=" + reasonCode);
@@ -189,7 +189,7 @@ public class StreamingSessionView extends Activity {
 		}
 
 		@Override
-		public void onNewPayload(ContactId contact, String sessionId, byte[] content) {
+		public void onPayloadReceived(ContactId contact, String sessionId, byte[] content) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
 			}
@@ -234,7 +234,7 @@ public class StreamingSessionView extends Activity {
 		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACTS);
 		try {
 			// Add service listener
-			connectionManager.getMultimediaSessionApi().addStreamingEventListener(serviceListener);
+			connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);
 			initialiseStreamingSession();
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
@@ -254,7 +254,7 @@ public class StreamingSessionView extends Activity {
 		if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
 			// Remove listener
 			try {
-				connectionManager.getMultimediaSessionApi().removeStreamingEventListener(serviceListener);
+				connectionManager.getMultimediaSessionApi().removeEventListener(serviceListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);

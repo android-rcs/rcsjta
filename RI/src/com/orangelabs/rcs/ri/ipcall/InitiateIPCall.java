@@ -82,7 +82,7 @@ public class InitiateIPCall extends Activity {
             ContactId contact = null;
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateIPCall.this);
     		try {
-    			contact = contactUtils.formatContactId(cursor.getString(1));
+    			contact = contactUtils.formatContact(cursor.getString(1));
     		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateIPCall.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;

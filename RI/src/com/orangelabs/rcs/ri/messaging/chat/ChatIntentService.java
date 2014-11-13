@@ -32,7 +32,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.chat.ChatIntent;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
@@ -105,7 +105,7 @@ public class ChatIntentService extends IntentService {
 	 */
 	private void handleNewOneToOneChatMessage(Intent messageIntent) {
 		// Gets data from the incoming Intent
-		String msgId = messageIntent.getStringExtra(ChatIntent.EXTRA_MESSAGE_ID);
+		String msgId = messageIntent.getStringExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
 		if (msgId != null) {
 			try {
 				// Read message from provider

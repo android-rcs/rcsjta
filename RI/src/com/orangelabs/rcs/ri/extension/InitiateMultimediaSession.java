@@ -84,7 +84,7 @@ public abstract class InitiateMultimediaSession extends Activity {
 			String remoteContact = cursor.getString(1);
 			try {
 				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
-				ContactId contact = contactUtils.formatContactId(remoteContact);
+				ContactId contact = contactUtils.formatContact(remoteContact);
 				// Initiate session
 				initiateSession(contact);
 			} catch (RcsContactFormatException e) {

@@ -31,7 +31,7 @@ public class ParticipantInfoTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
-		contact = contactUtils.formatContactId("+33123456789");
+		contact = contactUtils.formatContact("+33123456789");
 		
 	}
 
