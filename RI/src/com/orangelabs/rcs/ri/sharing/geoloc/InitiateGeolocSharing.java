@@ -121,7 +121,7 @@ public class InitiateGeolocSharing extends Activity {
 	private GeolocSharingListener gshListener = new GeolocSharingListener() {
 
 		@Override
-		public void onGeolocSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
 			// Discard event if not for current sharingId
 			if (InitiateGeolocSharing.this.sharingId == null || !InitiateGeolocSharing.this.sharingId.equals(sharingId)) {
 				return;
@@ -135,7 +135,7 @@ public class InitiateGeolocSharing extends Activity {
 		}
 
 		@Override
-		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state, int reasonCode) {
+		public void onStateChanged(final ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);
@@ -322,7 +322,7 @@ public class InitiateGeolocSharing extends Activity {
             
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateGeolocSharing.this);
     		try {
-    			contact = contactUtils.formatContactId(cursor.getString(1));
+    			contact = contactUtils.formatContact(cursor.getString(1));
     		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;

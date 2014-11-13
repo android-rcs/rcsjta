@@ -92,7 +92,7 @@ public class ReceiveImageSharing extends Activity {
 	private ImageSharingListener ishListener = new ImageSharingListener() {
 
 		@Override
-		public void onImageSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
 			// Discard event if not for current sharingId
 			if (ReceiveImageSharing.this.ishDao == null || !ReceiveImageSharing.this.ishDao.getSharingId().equals(sharingId)) {
 				return;
@@ -106,7 +106,7 @@ public class ReceiveImageSharing extends Activity {
 		}
 
 		@Override
-		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
+		public void onStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);

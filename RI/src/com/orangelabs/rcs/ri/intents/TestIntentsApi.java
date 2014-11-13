@@ -43,7 +43,7 @@ public class TestIntentsApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_clients),
+    		getString(R.string.menu_services),
     		getString(R.string.menu_apps)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -53,7 +53,7 @@ public class TestIntentsApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch(position) {
 	        case 0:
-            	startActivity(new Intent(this, IntentClients.class));
+            	startActivity(new Intent(this, IntentServices.class));
                 break;
                 
 	        case 1:

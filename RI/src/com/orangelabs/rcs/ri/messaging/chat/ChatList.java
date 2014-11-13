@@ -208,7 +208,7 @@ public class ChatList extends Activity {
         	ContactUtils contactUtils = ContactUtils.getInstance(ChatList.this);
         	ContactId contact;
 			try {
-				contact = contactUtils.formatContactId(cache.contact);
+				contact = contactUtils.formatContact(cache.contact);
 			} catch (RcsContactFormatException e) {
 				if (LogUtils.isActive) {
 	    			Log.e(LOGTAG, "Cannot parse contact "+cache.contact);

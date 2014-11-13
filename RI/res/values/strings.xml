@@ -279,7 +279,7 @@
 
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>
-<string name="menu_clients">Client intents</string>
+<string name="menu_services">Service intents</string>
 <string name="menu_apps">Application intents</string>
 <string name="label_no_clients">No other client detected on the device</string>
 <string name="label_load_settings">Load settings</string>

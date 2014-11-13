@@ -100,7 +100,7 @@ public class ReceiveGeolocSharing extends Activity {
 	private GeolocSharingListener gshListener = new GeolocSharingListener() {
 
 		@Override
-		public void onGeolocSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
 			// Discard event if not for current sharingId
 			if (ReceiveGeolocSharing.this.sharingId == null || !ReceiveGeolocSharing.this.sharingId.equals(sharingId)) {
 				return;
@@ -114,7 +114,7 @@ public class ReceiveGeolocSharing extends Activity {
 		}
 
 		@Override
-		public void onGeolocSharingStateChanged(final ContactId contact, String sharingId, final int state, final int reasonCode) {
+		public void onStateChanged(final ContactId contact, String sharingId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);

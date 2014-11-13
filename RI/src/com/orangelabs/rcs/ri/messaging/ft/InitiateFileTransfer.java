@@ -50,7 +50,7 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferListener;
+import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -131,10 +131,10 @@ public class InitiateFileTransfer extends Activity {
 	/**
 	 * File transfer listener
 	 */
-	private FileTransferListener ftListener = new FileTransferListener() {
+	private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
 
 		@Override
-		public void onTransferProgress(ContactId contact, String transferId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String transferId, final long currentSize, final long totalSize) {
 			// Discard event if not for current transferId
 			if (InitiateFileTransfer.this.ftId == null || !InitiateFileTransfer.this.ftId.equals(transferId)) {
 				return;
@@ -148,7 +148,7 @@ public class InitiateFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(ContactId contact, String transferId, final int state, final int reasonCode) {
+		public void onStateChanged(ContactId contact, String transferId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
@@ -267,7 +267,7 @@ public class InitiateFileTransfer extends Activity {
 		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.FILE_TRANSFER);
 		try {
 			// Add service listener
-			connectionManager.getFileTransferApi().addOneToOneFileTransferListener(ftListener);
+			connectionManager.getFileTransferApi().addEventListener(ftListener);
 			if (resuming) {
 				// Get resuming info
 				FileTransferDAO ftdao = (FileTransferDAO) (getIntent().getExtras()
@@ -333,7 +333,7 @@ public class InitiateFileTransfer extends Activity {
 		if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
 			// Remove file transfer listener
 			try {
-				connectionManager.getFileTransferApi().removeOneToOneFileTransferListener(ftListener);
+				connectionManager.getFileTransferApi().removeEventListener(ftListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -395,7 +395,7 @@ public class InitiateFileTransfer extends Activity {
         ContactUtils contactUtils = ContactUtils.getInstance(this);
         ContactId remote;
 		try {
-			remote = contactUtils.formatContactId(cursor.getString(1));
+			remote = contactUtils.formatContact(cursor.getString(1));
 		} catch (RcsContactFormatException e1) {
 			Utils.showMessage(this, getString(R.string.label_invalid_contact,cursor.getString(1)));
 	    	return;

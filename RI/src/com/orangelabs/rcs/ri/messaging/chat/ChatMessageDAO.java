@@ -146,7 +146,7 @@ public class ChatMessageDAO implements Parcelable {
 				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContactId(_contact);
+					contact = contactUtils.formatContact(_contact);
 				}
 				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
 				body = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));

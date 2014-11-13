@@ -109,7 +109,7 @@ public class VideoSharingDAO implements Parcelable {
 				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContactId(_contact);
+					contact = contactUtils.formatContact(_contact);
 				}
 				state = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.STATE));
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));

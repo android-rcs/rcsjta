@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.gsma.service.rcs.chat;
 
-import java.util.Date;
 import java.util.Random;
 
 import android.os.Parcel;
@@ -31,7 +30,8 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 public class GeolocMessageTest extends AndroidTestCase {
 
 	private String messageId;
-	private Date receiptAt;
+	private long receiptAt;
+	private long sentAt;
 	private ContactId remote;
 	private double longitude;
 	private long expiration;
@@ -42,13 +42,13 @@ public class GeolocMessageTest extends AndroidTestCase {
 	private boolean geolocMessageIsEqual(GeolocMessage geolocMessage1, GeolocMessage geolocMessage2) {
 		if (!geolocMessage1.getId().equals(geolocMessage2.getId()))
 			return false;
-		if (!geolocMessage1.getReceiptDate().equals(geolocMessage2.getReceiptDate()))
+		if (geolocMessage1.getTimestamp() != geolocMessage2.getTimestamp())
 			return false;
-		if (geolocMessage1.getContact() != null) {
-			if (!geolocMessage1.getContact().equals(geolocMessage2.getContact()))
+		if (geolocMessage1.getRemoteContact() != null) {
+			if (!geolocMessage1.getRemoteContact().equals(geolocMessage2.getRemoteContact()))
 				return false;
 		} else {
-			if (geolocMessage2.getContact() != null)
+			if (geolocMessage2.getRemoteContact() != null)
 				return false;
 		}
 		if (geolocMessage1.getGeoloc() != null) {
@@ -73,9 +73,10 @@ public class GeolocMessageTest extends AndroidTestCase {
 		super.setUp();
 		Random random = new Random();
 		messageId = String.valueOf(random.nextInt(96) + 32);
-		receiptAt = new Date();
+		receiptAt = random.nextLong();
+		sentAt = random.nextLong();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
-		remote = contactUtils.formatContactId("+33123456789");
+		remote = contactUtils.formatContact("+33123456789");
 		longitude = random.nextDouble();
 		expiration = random.nextLong();
 		label = String.valueOf(random.nextInt(96) + 32);
@@ -89,7 +90,7 @@ public class GeolocMessageTest extends AndroidTestCase {
 	}
 
 	public void testChatMessageContactNull() {
-		GeolocMessage geolocMessage = new GeolocMessage(messageId, null, geoloc, receiptAt);
+		GeolocMessage geolocMessage = new GeolocMessage(messageId, null, geoloc, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
 		geolocMessage.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -100,7 +101,7 @@ public class GeolocMessageTest extends AndroidTestCase {
 	}
 
 	public void testChatMessageGeolocNull() {
-		GeolocMessage geolocMessage = new GeolocMessage(messageId, remote, null, receiptAt);
+		GeolocMessage geolocMessage = new GeolocMessage(messageId, remote, null, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
 		geolocMessage.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -111,7 +112,7 @@ public class GeolocMessageTest extends AndroidTestCase {
 	}
 	
 	public void testChatMessage() {
-		GeolocMessage geolocMessage = new GeolocMessage(messageId, remote, geoloc, receiptAt);
+		GeolocMessage geolocMessage = new GeolocMessage(messageId, remote, geoloc, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
 		geolocMessage.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading

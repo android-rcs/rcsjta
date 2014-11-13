@@ -187,7 +187,7 @@ public class RequestCapabilities extends Activity {
             try {
 		        // Get selected contact
 				String contact = getContactAtPosition(position);
-				ContactId contactId = ContactUtils.getInstance(RequestCapabilities.this).formatContactId(contact);
+				ContactId contactId = ContactUtils.getInstance(RequestCapabilities.this).formatContact(contact);
 				// Get current capabilities
 				Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
 	
@@ -228,7 +228,7 @@ public class RequestCapabilities extends Activity {
 	    MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
 	    ContactUtils contactUtils = ContactUtils.getInstance(RequestCapabilities.this);
 		try {
-			return contactUtils.formatContactId(cursor.getString(1));
+			return contactUtils.formatContact(cursor.getString(1));
 		} catch (RcsContactFormatException e) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "getSelectedContact cannot parse contact " + cursor.getString(1));

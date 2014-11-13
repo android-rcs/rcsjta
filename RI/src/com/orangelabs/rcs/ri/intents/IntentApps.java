@@ -78,7 +78,7 @@ public class IntentApps extends Activity {
         public void onClick(View v) {
         	if (v.getId() == R.id.load_settings) {
         		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Client.ACTION_VIEW_SETTINGS);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Service.ACTION_VIEW_SETTINGS);
 	        		startActivity(intent);
         		} catch(Exception e) {
     		    	e.printStackTrace();
@@ -87,7 +87,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.load_chat) {
         		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_ONE_TO_ONE_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -96,7 +96,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.initiate_chat) {
         		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_CHAT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -123,7 +123,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.load_ft) {
         		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FILE_TRANSFER);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();
@@ -132,7 +132,7 @@ public class IntentApps extends Activity {
         	} else
         	if (v.getId() == R.id.initiate_ft) {
         		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_FT);
+	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
 			    	e.printStackTrace();

@@ -33,8 +33,10 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.chat.Chat;
-import com.gsma.services.rcs.chat.ChatListener;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.chat.OneToOneChat;
+import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -69,12 +71,12 @@ public class SingleChatView extends ChatView {
     /**
      * CHAT 
      */
-	private Chat chat;
+	private OneToOneChat chat;
 	
     /**
      * CHAT listener
      */
-	private ChatListener chatListener = new ChatListener() {
+	private OneToOneChatListener chatListener = new OneToOneChatListener() {
 		// Callback called when an Is-composing event has been received
 		@Override
 		public void onComposingEvent(final ContactId contact, final boolean status) {
@@ -143,12 +145,12 @@ public class SingleChatView extends ChatView {
 			ChatService chatService = connectionManager.getChatApi();
 
 			// Add single chat event listener
-			chatService.addOneToOneChatEventListener(chatListener);
+			chatService.addEventListener(chatListener);
 
 			processIntent(true);
 
 			// Set max label length
-			int maxMsgLength = chatService.getConfiguration().getSingleChatMessageMaxLength();
+			int maxMsgLength = chatService.getConfiguration().getOneToOneChatMessageMaxLength();
 			if (maxMsgLength > 0) {
 				// Set the message composer max length
 				InputFilter[] filterArray = new InputFilter[1];
@@ -302,16 +304,16 @@ public class SingleChatView extends ChatView {
 	}
 	
 	@Override
-    protected String sendTextMessage(String msg) {
+    protected ChatMessage sendTextMessage(String msg) {
     	try {
     		if (LogUtils.isActive) {
         		Log.d(LOGTAG, "sendTextMessage msg=" + msg+" chat="+chat);
         	}
 			// Send the text to remote
-			String msgId = chat.sendMessage(msg);
+			ChatMessage message = chat.sendMessage(msg);
 	        // Warn the composing manager that the message was sent
 			composingManager.messageWasSent();
-			return msgId;
+			return message;
 	    } catch(Exception e) {
 	    	e.printStackTrace();
 	    	return null;
@@ -319,13 +321,13 @@ public class SingleChatView extends ChatView {
     }
     
     @Override
-    protected String sendGeolocMessage(Geoloc geoloc) {
+    protected GeolocMessage sendGeolocMessage(Geoloc geoloc) {
         try {
 			// Send the text to remote
-        	String msgId = chat.sendGeoloc(geoloc);
+        	GeolocMessage message = chat.sendMessage(geoloc);
 	        // Warn the composing manager that the message was sent
 	    	composingManager.messageWasSent();
-	    	return msgId;
+	    	return message;
 	    } catch(Exception e) {
 	    	e.printStackTrace();
 	    	return null;
@@ -396,7 +398,7 @@ public class SingleChatView extends ChatView {
 	private void removeServiceListener() {
 		if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 			try {
-				connectionManager.getChatApi().removeOneToOneChatEventListener(chatListener);
+				connectionManager.getChatApi().removeEventListener(chatListener);
 			} catch (RcsServiceException e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "removeServiceListener failed", e);

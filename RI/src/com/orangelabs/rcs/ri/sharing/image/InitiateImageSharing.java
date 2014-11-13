@@ -124,7 +124,7 @@ public class InitiateImageSharing extends Activity {
 	private ImageSharingListener ishListener = new ImageSharingListener() {
 
 		@Override
-		public void onImageSharingProgress(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
 			// Discard event if not for current sharingId
 			if (InitiateImageSharing.this.sharingId == null || !InitiateImageSharing.this.sharingId.equals(sharingId)) {
 				return;
@@ -138,7 +138,7 @@ public class InitiateImageSharing extends Activity {
 		}
 
 		@Override
-		public void onImageSharingStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
+		public void onStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);
@@ -321,7 +321,7 @@ public class InitiateImageSharing extends Activity {
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateImageSharing.this);
             final ContactId remote;
     		try {
-    			remote = contactUtils.formatContactId(cursor.getString(1));
+    			remote = contactUtils.formatContact(cursor.getString(1));
     		} catch (RcsContactFormatException e1) {
     			Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
     	    	return;

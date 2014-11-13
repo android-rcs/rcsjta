@@ -115,7 +115,7 @@ public class InitiateSingleChat extends Activity {
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
             ContactId contact;
 			try {
-				contact = contactUtils.formatContactId(phoneNumber);
+				contact = contactUtils.formatContact(phoneNumber);
 			} catch (RcsContactFormatException e) {
 				if (LogUtils.isActive) {
 	    			Log.e(LOGTAG, "Cannot parse contact "+phoneNumber);

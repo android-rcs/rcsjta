@@ -46,7 +46,7 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferListener;
+import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
 import com.gsma.services.rcs.ft.GroupFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -109,7 +109,7 @@ public class ReceiveFileTransfer extends Activity {
 	private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
 
 		@Override
-		public void onGroupDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
+		public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state
 						+ " reason=" + reasonCode);
@@ -117,7 +117,7 @@ public class ReceiveFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferProgress(String chatId, String transferId, long currentSize, long totalSize) {
+		public void onProgressUpdate(String chatId, String transferId, long currentSize, long totalSize) {
 			// Discard event if not for current transferId
 			if (!ftDao.getTransferId().equals(transferId)) {
 				return;
@@ -126,7 +126,7 @@ public class ReceiveFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(String chatId, String transferId, int state, int reasonCode) {
+		public void onStateChanged(String chatId, String transferId, int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
@@ -142,10 +142,10 @@ public class ReceiveFileTransfer extends Activity {
 	/**
 	 * File transfer listener
 	 */
-	private FileTransferListener ftListener = new FileTransferListener() {
+	private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
 
 		@Override
-		public void onTransferProgress(ContactId contact, String transferId, final long currentSize, final long totalSize) {
+		public void onProgressUpdate(ContactId contact, String transferId, final long currentSize, final long totalSize) {
 			// Discard event if not for current transferId
 			if (!ftDao.getTransferId().equals(transferId)) {
 				return;
@@ -154,7 +154,7 @@ public class ReceiveFileTransfer extends Activity {
 		}
 
 		@Override
-		public void onTransferStateChanged(ContactId contact, String transferId, final int state, int reasonCode) {
+		public void onStateChanged(ContactId contact, String transferId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId=" + transferId + " state=" + state+ " reason="+reasonCode);
 			}
@@ -226,9 +226,9 @@ public class ReceiveFileTransfer extends Activity {
 			// Remove service listener
 			try {
 				if (groupFileTransfer) {
-					connectionManager.getFileTransferApi().removeGroupFileTransferListener(groupFtListener);
+					connectionManager.getFileTransferApi().removeEventListener(groupFtListener);
 				} else {
-					connectionManager.getFileTransferApi().removeOneToOneFileTransferListener(ftListener);
+					connectionManager.getFileTransferApi().removeEventListener(ftListener);
 				}
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
@@ -253,9 +253,9 @@ public class ReceiveFileTransfer extends Activity {
 			}
 			// Add service event listener
 			if (groupFileTransfer) {
-				ftApi.addGroupFileTransferListener(groupFtListener);
+				ftApi.addEventListener(groupFtListener);
 			} else {
-				ftApi.addOneToOneFileTransferListener(ftListener);
+				ftApi.addEventListener(ftListener);
 			}
 
 			ContactId remote = ftDao.getContact();

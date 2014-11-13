@@ -162,7 +162,7 @@ public class ImageSharingDAO implements Parcelable {
 				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContactId(_contact);
+					contact = contactUtils.formatContact(_contact);
 				}
 				file = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
 				filename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
