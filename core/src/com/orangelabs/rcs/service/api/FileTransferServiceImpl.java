@@ -216,16 +216,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * @param session File transfer session
 	 * @param isGroup is group file transfer
 	 * @param contact Contact ID
+	 * @param displayName the display name of the remote contact
 	 */
-    public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup, ContactId contact) {
+	public void receiveFileTransferInvitation(FileSharingSession session, boolean isGroup, ContactId contact, String displayName) {
 		if (logger.isActivated()) {
-			logger.info("Receive FT invitation from " + session.getRemoteContact() + " file=" + session.getContent().getName()
-					+ " size=" + session.getContent().getSize() + " displayName=" + session.getRemoteDisplayName());
+			logger.info("Receive FT invitation from " + contact + " file=" + session.getContent().getName()
+					+ " size=" + session.getContent().getSize() + " displayName=" + displayName);
 		}
 
-
 		// Update displayName of remote contact
-		ContactsManager.getInstance().setContactDisplayName(contact, session.getRemoteDisplayName());
+		ContactsManager.getInstance().setContactDisplayName(contact, displayName);
 
 		// Add session in the list
 		if (isGroup) {

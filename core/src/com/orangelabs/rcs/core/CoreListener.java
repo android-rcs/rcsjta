@@ -147,8 +147,10 @@ public interface CoreListener {
 	 * @param fileSharingSession File transfer session
 	 * @param isGroup is Group file transfer
 	 * @param contact Contact ID
+	 * @param displayName the display name of the remote contact
 	 */
-	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact);
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact,
+			String displayName);
 
 	/**
 	 * A new file transfer invitation has been received

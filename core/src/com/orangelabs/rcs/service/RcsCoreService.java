@@ -628,25 +628,25 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 	
     @Override
-	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact) {
+	public void handleFileTransferInvitation(FileSharingSession fileSharingSession, boolean isGroup, ContactId contact,
+			String displayName) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 
     	// Broadcast the invitation
-		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact);
+		ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact, displayName);
 	}
     
-	/* (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.CoreListener#handle1to1FileTransferInvitation(com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession, com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession)
-	 */
+    @Override
 	public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession oneToOneChatSession) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
 		
     	// Broadcast the invitation
-    	ftApi.receiveFileTransferInvitation(fileSharingSession, false, oneToOneChatSession.getRemoteContact());
+		ftApi.receiveFileTransferInvitation(fileSharingSession, false, oneToOneChatSession.getRemoteContact(),
+				oneToOneChatSession.getRemoteDisplayName());
 	}
 
     /* (non-Javadoc)

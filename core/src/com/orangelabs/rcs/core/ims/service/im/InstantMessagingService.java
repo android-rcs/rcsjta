@@ -490,7 +490,7 @@ public class InstantMessagingService extends ImsService {
 			// Create a new session
 			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite);
 
-			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote);
+			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote, session.getRemoteDisplayName());
 
 			session.startSession();
 
@@ -1080,7 +1080,8 @@ public class InstantMessagingService extends ImsService {
 
 			// Create and start a new HTTP file transfer session
 			TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this,
-					oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite), oneToOneChatSession.getRemoteContact());
+					oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite), oneToOneChatSession.getRemoteContact(),
+					oneToOneChatSession.getRemoteDisplayName());
 
 			getImsModule().getCore().getListener().handleOneToOneFileTransferInvitation(httpFiletransferSession, oneToOneChatSession);
 
@@ -1134,7 +1135,8 @@ public class InstantMessagingService extends ImsService {
         
         // Create and start a new HTTP file transfer session
 		TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(this, one2oneChatSession,
-				ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact());
+				ftinfo, ChatUtils.getMessageId(invite), one2oneChatSession.getRemoteContact(),
+				one2oneChatSession.getRemoteDisplayName());
 
 		getImsModule().getCore().getListener().handleOneToOneFileTransferInvitation(httpFiletransferSession, one2oneChatSession);
 
