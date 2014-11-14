@@ -23,6 +23,7 @@ import java.util.ListIterator;
 import javax2.sip.header.ViaHeader;
 import javax2.sip.header.WarningHeader;
 import javax2.sip.message.Request;
+import javax2.sip.message.Response;
 
 import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface;
 import com.orangelabs.rcs.core.ims.protocol.sip.KeepAliveManager;
@@ -56,12 +57,12 @@ public class SipManager {
     /**
 	 * SIP stack
 	 */
-	private SipInterface sipstack = null;
+	private SipInterface sipstack;
 
 	/**
 	 * The logger
 	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private static Logger logger = Logger.getLogger(SipManager.class.getSimpleName());
 
 	/**
      * Constructor
@@ -164,17 +165,20 @@ public class SipManager {
     	return sendSipMessageAndWait(message, SipManager.TIMEOUT);
 	}
     
-    /**
-     * Send a SIP message and create a context to wait a response
-     *
-     * @param message SIP message
-     * @param timeout SIP timeout
-     * @return Transaction context
-     * @throws SipException
-     */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout) throws SipException {
+	/**
+	 * Send a SIP message and create a context to wait for response
+	 * 
+	 * @param message
+	 * @param timeout
+	 * @param callback
+	 *            callback to handle provisional response
+	 * @return SIP transaction context
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout, SipTransactionContext.INotifySipProvisionalResponse callback)
+			throws SipException {
         if (sipstack != null) {
-            SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message);
+            SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
 
             // wait the response
             ctx.waitResponse(timeout);
@@ -185,7 +189,7 @@ public class SipManager {
                     && ctx.isSipResponse()) {
                 // Check if not registered and warning header
                 WarningHeader warn = (WarningHeader)ctx.getSipResponse().getHeader(WarningHeader.NAME);
-                if ((ctx.getStatusCode() == 403) && (warn == null)) {
+                if ((ctx.getStatusCode() == Response.FORBIDDEN) && (warn == null)) {
                     // Launch new registration
                     networkInterface.getRegistrationManager().restart();
 
@@ -236,6 +240,18 @@ public class SipManager {
 		} else {
 			throw new SipException("Stack not initialized");
 		}
+    }
+    
+    /**
+     * Send a SIP message and create a context to wait a response
+     *
+     * @param message SIP message
+     * @param timeout SIP timeout
+     * @return Transaction context
+     * @throws SipException
+     */
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout) throws SipException {
+        return sendSipMessageAndWait(message, timeout, null);
 	}
 
 

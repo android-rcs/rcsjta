@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import android.net.Uri;
 
 import com.gsma.services.rcs.RcsCommon.Direction;
@@ -227,12 +229,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 		
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
@@ -244,12 +245,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 
   		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -266,12 +266,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 
 		// Abort the session
-        Thread t = new Thread() {
+         new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
     /**

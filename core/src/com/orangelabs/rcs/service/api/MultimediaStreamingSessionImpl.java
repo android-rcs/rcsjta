@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
@@ -58,7 +60,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     /**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final static Logger logger = Logger.getLogger(MultimediaStreamingSessionImpl.class.getSimpleName());
 
     /**
      * Constructor
@@ -110,6 +112,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 * @return State
 	 */
 	public int getState() {
+		// TODO missing states
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null && dialogPath.isSessionEstablished()) {
 			return MultimediaSession.State.STARTED;
@@ -171,12 +174,11 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -193,12 +195,11 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
     }
 
 	/**
@@ -215,12 +216,11 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -372,7 +372,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		if (logger.isActivated()) {
 			logger.info("Invited to multimedia streaming session");
 		}
-		mMultimediaStreamingSessionEventBroadcaster.broadcastInvitation(
-				getSessionId(), ((TerminatingSipRtpSession)session).getSessionInvite());
+		synchronized (lock) {
+			mMultimediaStreamingSessionEventBroadcaster.broadcastInvitation(getSessionId(),
+					((TerminatingSipRtpSession) session).getSessionInvite());
+		}
+	}
+
+	@Override
+	public void handle180Ringing() {
+		synchronized (lock) {
+			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
+					getRemoteContact(), getSessionId(), MultimediaSession.State.RINGING,
+					ReasonCode.UNSPECIFIED);
+		}
 	}
 }

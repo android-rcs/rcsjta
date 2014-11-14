@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
+import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -64,6 +65,8 @@ public abstract class ImsServiceSession extends Thread {
     public final static int TERMINATION_BY_USER = 1;
     public final static int TERMINATION_BY_TIMEOUT = 2;
     
+	private final static int SESSION_INTERVAL_TOO_SMALL = 422;
+    
 	/**
      * IMS service
      */
@@ -87,12 +90,12 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Remote display name
      */
-    private String remoteDisplayName = null;
+    private String remoteDisplayName;
 
     /**
 	 * Dialog path
 	 */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath dialogPath;
 
 	/**
 	 * Authentication agent
@@ -951,48 +954,56 @@ public abstract class ImsServiceSession extends Thread {
      * @throws SipException
      */
     public void sendInvite(SipRequest invite) throws SipException {
-        // Send INVITE request
-        SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(invite, getResponseTimeout());
+		// Send INVITE request
+		SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+				.sendSipMessageAndWait(invite, getResponseTimeout(), new SipTransactionContext.INotifySipProvisionalResponse() {
+					public void handle180Ringing(SipResponse response) {
+						ImsServiceSession.this.handle180Ringing(response);
+					}
+
+				});
 
         // Analyze the received response 
-        /* TODO: Handle provisional response such as 180 RINGING */
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                // 200 OK
-                handle200OK(ctx.getSipResponse());
-            } else
-            if (ctx.getStatusCode() == 404) {
-                // 404 session not found
-                handle404SessionNotFound(ctx.getSipResponse());
-            } else
-            if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                handle407Authentication(ctx.getSipResponse());
-            } else
-            if (ctx.getStatusCode() == 422) {
-                // 422 Session Interval Too Small
-                handle422SessionTooSmall(ctx.getSipResponse());
-            } else
-                if (ctx.getStatusCode() == 480) {
-                    // 480 Temporarily Unavailable 
-                    handle480Unavailable(ctx.getSipResponse());
-                } else
-                if (ctx.getStatusCode() == 486) {
-                    // 486 busy  
-                handle486Busy(ctx.getSipResponse());
-            } else
-            if (ctx.getStatusCode() == 487) {
+		if (ctx.isSipResponse()) {
+			// A response has been received
+			switch (ctx.getStatusCode()) {
+			case Response.OK:
+				// 200 OK
+				handle200OK(ctx.getSipResponse());
+				break;
+			case Response.NOT_FOUND:
+				// 404 session not found
+				handle404SessionNotFound(ctx.getSipResponse());
+				break;
+			case Response.PROXY_AUTHENTICATION_REQUIRED:
+				// 407 Proxy Authentication Required
+				handle407Authentication(ctx.getSipResponse());
+				break;
+			case SESSION_INTERVAL_TOO_SMALL:
+				// 422 Session Interval Too Small
+				handle422SessionTooSmall(ctx.getSipResponse());
+				break;
+			case Response.TEMPORARILY_UNAVAILABLE:
+                // 480 Temporarily Unavailable 
+                handle480Unavailable(ctx.getSipResponse());
+                break;
+			case Response.BUSY_HERE:
+                // 486 busy  
+				handle486Busy(ctx.getSipResponse());
+				break;
+			case Response.REQUEST_TERMINATED:
                 // 487 Invitation cancelled
                 handle487Cancel(ctx.getSipResponse());
-            } else {
-            if (ctx.getStatusCode() == 603) {
+                break;
+			case Response.DECLINE:
                 // 603 Invitation declined
                 handle603Declined(ctx.getSipResponse());
-            } else
-                // Other error response
+                break;
+			default:
+				// Other error response
                 handleDefaultError(ctx.getSipResponse());
-            }
+				break;
+			}
         } else {
             // No response received: timeout
             handleError(new ImsSessionBasedServiceError(ImsSessionBasedServiceError.SESSION_INITIATION_FAILED, "timeout"));
@@ -1287,4 +1298,12 @@ public abstract class ImsServiceSession extends Thread {
 	 * @return true if session is initiated by remote part
 	 */
     abstract public boolean isInitiatedByRemote();
+    
+	/**
+	 * Handle 180 Ringing
+	 *
+	 * @param response
+	 */
+	public void handle180Ringing(SipResponse response) {
+	}
 }

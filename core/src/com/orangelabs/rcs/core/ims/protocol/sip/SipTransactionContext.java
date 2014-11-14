@@ -21,6 +21,7 @@ package com.orangelabs.rcs.core.ims.protocol.sip;
 import javax2.sip.Transaction;
 import javax2.sip.header.CallIdHeader;
 import javax2.sip.message.Message;
+import javax2.sip.message.Response;
 
 /**
  * SIP transaction context object composed of a request and of the corresponding
@@ -28,26 +29,55 @@ import javax2.sip.message.Message;
  * and also for waiting an ACK message (special case).
  *
  * @author JM. Auffret
+ * @author yplo6403
+ *
  */
-public class SipTransactionContext extends Object {
+public class SipTransactionContext {
+
+	/**
+	 * An interface to handle SIP provisional response
+	 *
+	 */
+	public interface INotifySipProvisionalResponse {
+		public void handle180Ringing(SipResponse response);
+	}
 	
 	/**
 	 * Transaction
 	 */
-	private Transaction transaction;
+	private Transaction mTransaction;
 	
 	/**
 	 * Received message 
 	 */
-	private SipMessage recvMsg = null;
+	private SipMessage recvMsg;
+	
+	/**
+	 * Callback to handle SIP provisional response
+	 */
+	private INotifySipProvisionalResponse mCallbackSipProvisionalResponse;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param transaction SIP transaction
+	 * @param transaction
+	 *            SIP transaction
 	 */
 	public SipTransactionContext(Transaction transaction) {
-		this.transaction = transaction;
+		this(transaction, null);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param transaction
+	 *            SIP transaction
+	 * @param callback
+	 *            Callback to handle SIP provisional response
+	 */
+	public SipTransactionContext(Transaction transaction, INotifySipProvisionalResponse callback) {
+		mTransaction = transaction;
+		mCallbackSipProvisionalResponse = callback;
 	}
 
 	/**
@@ -56,7 +86,7 @@ public class SipTransactionContext extends Object {
 	 * @return Transaction
 	 */
 	public Transaction getTransaction() {
-		return transaction;
+		return mTransaction;
 	}
 
 	/**
@@ -69,7 +99,7 @@ public class SipTransactionContext extends Object {
 	}
 
 	/**
-	 * Determine if a timeout has occured
+	 * Determine if a timeout has occurred
 	 * 
 	 * @return Returns True if there is a timeout else returns False
 	 */
@@ -107,7 +137,7 @@ public class SipTransactionContext extends Object {
 	 */
 	public boolean isSipSuccessfullResponse() {
 		int code = getStatusCode();
-	    return ((code >= 200) && (code < 300));
+	    return ((code >= Response.OK) && (code < Response.MULTIPLE_CHOICES));
 	}
 
 	/**
@@ -231,4 +261,13 @@ public class SipTransactionContext extends Object {
 		CallIdHeader header = (CallIdHeader)msg.getHeader(CallIdHeader.NAME);
 		return header.getCallId();
 	}
+
+	/**
+	 * Get the callback to handle provisional SIP response
+	 * @return the callback
+	 */
+	public INotifySipProvisionalResponse getCallbackSipProvisionalResponse() {
+		return mCallbackSipProvisionalResponse;
+	}
+
 }

@@ -41,4 +41,9 @@ public interface VideoStreamingSessionListener extends ImsSessionListener  {
      * @param height Video height
      */
     public void handleVideoResized(int width, int height);
+    
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     */
+    public void handle180Ringing();
 }

@@ -31,8 +31,10 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.ContactUtils;
@@ -263,10 +265,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             // Remove the current session
             getImsService().removeSession(session);
 
-            // Notify listeners
-            for(int i=0; i < getListeners().size(); i++) {
-                ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
-            }
+			// Notify listeners
+			for (ImsSessionListener listener : getListeners()) {
+				((VideoStreamingSessionListener) listener).handleSharingError(new ContentSharingError(
+						ContentSharingError.MEDIA_STREAMING_FAILED));
+			}
 
             try {
 				ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
@@ -283,5 +286,16 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 	@Override
 	public boolean isInitiatedByRemote() {
 		return false;
+	}
+	
+	@Override
+	public void handle180Ringing(SipResponse response) {
+		if (logger.isActivated()) {
+			logger.debug("handle180Ringing");
+		}
+		// Notify listeners
+		for (ImsSessionListener listener : getListeners()) {
+			((VideoStreamingSessionListener)listener).handle180Ringing();
+		}
 	}
 }

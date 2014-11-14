@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
@@ -35,8 +37,8 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
-import com.orangelabs.rcs.provider.sharing.VideoSharingStateAndReasonCode;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.provider.sharing.VideoSharingStateAndReasonCode;
 import com.orangelabs.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -67,7 +69,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private static final Logger logger = Logger.getLogger(VideoSharingImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -231,12 +233,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		session.setVideoRenderer(renderer);
 		
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
@@ -248,12 +249,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		
 		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -265,12 +265,11 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();	
+    	}.start();	
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -421,5 +420,16 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 							VideoSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 		mVideoSharingEventBroadcaster.broadcastInvitation(sharingId);
+	}
+
+	@Override
+	public void handle180Ringing() {
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setVideoSharingState(sharingId,
+					VideoSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+			mVideoSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
+					sharingId, VideoSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+		}
 	}
 }

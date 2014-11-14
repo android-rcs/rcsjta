@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.Geoloc;
@@ -54,7 +56,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	 */
 	private GeolocTransferSession session;
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private final Object lock = new Object();
 
@@ -63,7 +65,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	/**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final static Logger logger = Logger.getLogger(GeolocSharingImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -167,12 +169,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
@@ -184,12 +185,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 
 		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -206,12 +206,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 		
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();		
+    	}.start();		
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -418,5 +417,16 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	@Override
 	public void handleSessionInvited() {
 		mGeolocSharingEventBroadcaster.broadcastInvitation(getSharingId());
+	}
+
+	@Override
+	public void handle180Ringing() {
+		synchronized(lock) {
+			/* TODO: Will be added with Geoloc sharing content provider CR025. */
+			//RichCallHistory.getInstance().setGeolocSharingState(sharingId,
+			//		GeolocSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+			mGeolocSharingEventBroadcaster.broadcastGeolocSharingStateChanged(getRemoteContact(),
+					getSharingId(), GeolocSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+	    }
 	}
 }

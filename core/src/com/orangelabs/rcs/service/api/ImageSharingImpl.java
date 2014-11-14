@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import android.net.Uri;
 
 import com.gsma.services.rcs.RcsCommon.Direction;
@@ -60,7 +62,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	/**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private final static Logger logger = Logger.getLogger(ImageSharingImpl.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -199,6 +201,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	 * @return State
 	 */
 	public int getState() {
+		// TODO manage other states
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null && dialogPath.isSessionEstablished()) {
 			return ImageSharing.State.STARTED;
@@ -246,12 +249,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 	
 	/**
@@ -263,12 +265,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 
 		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
     }
 
 	/**
@@ -285,12 +286,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 		
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();		
+    	}.start();		
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -458,5 +458,16 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 
 		mImageSharingEventBroadcaster.broadcastInvitation(sharingId);
+	}
+
+	@Override
+	public void handle180Ringing() {
+		String sharingId = getSharingId();
+		synchronized (lock) {
+			RichCallHistory.getInstance().setImageSharingState(sharingId,
+					ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+			mImageSharingEventBroadcaster.broadcastStateChanged(getRemoteContact(),
+					sharingId, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+		}
 	}
 }

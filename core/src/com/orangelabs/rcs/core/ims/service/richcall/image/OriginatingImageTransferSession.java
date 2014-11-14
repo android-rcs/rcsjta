@@ -29,6 +29,8 @@ import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -40,9 +42,11 @@ import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -50,8 +54,6 @@ import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.net.Uri;
 
 /**
  * Originating content sharing session (transfer)
@@ -288,8 +290,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     	getImsService().removeSession(this);
     	
     	// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((ImageTransferSessionListener)getListeners().get(j)).handleContentTransfered(getContent().getUri());
+    	for (ImsSessionListener listener : getListeners()) {
+    		((ImageTransferSessionListener)listener).handleContentTransfered(getContent().getUri());
         }
 	}
 	
@@ -312,8 +314,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	 */
 	public void msrpTransferProgress(long currentSize, long totalSize) {
 		// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingProgress(currentSize, totalSize);
+		for (ImsSessionListener listener : getListeners()) {
+    		((ImageTransferSessionListener)listener).handleSharingProgress(currentSize, totalSize);
         }
 	}	
 
@@ -373,16 +375,28 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 		// Remove the current session
     	getImsService().removeSession(this);
     	
-    	// Notify listeners
-        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-            for(int j=0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
-            }
-        }
+		// Notify listeners
+		if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+			for (ImsSessionListener listener : getListeners()) {
+				((ImageTransferSessionListener) listener).handleSharingError(new ContentSharingError(
+						ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+			}
+		}
 	}
 
 	@Override
 	public boolean isInitiatedByRemote() {
 		return false;
+	}
+	
+	@Override
+	public void handle180Ringing(SipResponse response) {
+		if (logger.isActivated()) {
+			logger.debug("handle180Ringing");
+		}
+		// Notify listeners
+		for (ImsSessionListener listener : getListeners()) {
+			((ImageTransferSessionListener)listener).handle180Ringing();
+		}
 	}
 }

@@ -54,4 +54,9 @@ public interface ImageTransferSessionListener extends ImsSessionListener  {
      * @param file Uri of file associated to the received content
      */
     public void handleContentTransfered(Uri file);
+    
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     */
+    public void handle180Ringing();
 }

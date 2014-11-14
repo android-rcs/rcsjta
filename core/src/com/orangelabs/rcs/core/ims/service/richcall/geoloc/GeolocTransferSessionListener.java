@@ -41,4 +41,9 @@ public interface GeolocTransferSessionListener extends ImsSessionListener  {
      * @param geoloc Geoloc info
      */
     public void handleContentTransfered(GeolocPush geoloc);
+    
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     */
+    public void handle180Ringing();
 }

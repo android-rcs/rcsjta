@@ -19,8 +19,11 @@ package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -91,5 +94,16 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	@Override
 	public boolean isInitiatedByRemote() {
 		return false;
+	}
+	
+	@Override
+	public void handle180Ringing(SipResponse response) {
+		if (logger.isActivated()) {
+			logger.debug("handle180Ringing");
+		}
+		// Notify listeners
+		for (ImsSessionListener listener : getListeners()) {
+			((SipSessionListener)listener).handle180Ringing();
+		}
 	}
 }

@@ -16,6 +16,8 @@
 
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import android.net.Uri;
 
 import com.gsma.services.rcs.RcsCommon.Direction;
@@ -211,12 +213,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		}
 
 		// Accept invitation
-		Thread t = new Thread() {
+		new Thread() {
 			public void run() {
 				session.acceptSession();
 			}
-		};
-		t.start();
+		}.start();
 	}
 
 	/**
@@ -228,12 +229,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		}
 
 		// Reject invitation
-		Thread t = new Thread() {
+		new Thread() {
 			public void run() {
-				session.rejectSession(603);
+				session.rejectSession(Response.DECLINE);
 			}
-		};
-		t.start();
+		}.start();
 	}
 
 	/**
@@ -251,12 +251,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		}
 
 		// Abort the session
-		Thread t = new Thread() {
+		new Thread() {
 			public void run() {
 				session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
 			}
-		};
-		t.start();
+		}.start();
 	}
 
 	/**

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.DeliveryInfo;
 import com.gsma.services.rcs.DeliveryInfo.ReasonCode;
 import com.gsma.services.rcs.RcsCommon.Direction;
@@ -247,7 +249,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         // Reject invitation
         new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
     	}.start();
 	}
@@ -390,7 +392,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }	
 
     /**
-	 * Sends a is-composing event. The status is set to true when typing
+	 * Sends a   is-composing   event. The status is set to true when typing
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status

@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.service.api;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
@@ -50,14 +52,14 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
 	private final IMultimediaMessagingSessionEventBroadcaster mMultimediaMessagingSessionEventBroadcaster;
 	/**
-	 * Lock used for synchronisation
+	 * Lock used for synchronization
 	 */
 	private final Object lock = new Object();
 	
     /**
 	 * The logger
 	 */
-	private final Logger logger = Logger.getLogger(getClass().getName());
+	private static final Logger logger = Logger.getLogger(MultimediaMessagingSessionImpl.class.getSimpleName());
 
     /**
      * Constructor
@@ -110,6 +112,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 	 * @return State
 	 */
 	public int getState() {
+		// TODO manage missing states
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null && dialogPath.isSessionEstablished()) {
 			return MultimediaSession.State.STARTED;
@@ -171,12 +174,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 		
 		// Accept invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.acceptSession();
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -193,12 +195,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Reject invitation
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
-    			session.rejectSession(603);
+    			session.rejectSession(Response.DECLINE);
     		}
-    	};
-    	t.start();
+    	}.start();
     }
 
 	/**
@@ -215,12 +216,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Abort the session
-        Thread t = new Thread() {
+        new Thread() {
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	};
-    	t.start();
+    	}.start();
 	}
 
 	/**
@@ -376,7 +376,20 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		if (logger.isActivated()) {
 			logger.info("Invited to multimedia messaging session");
 		}
-		mMultimediaMessagingSessionEventBroadcaster.broadcastInvitation(
-				getSessionId(), ((TerminatingSipMsrpSession)session).getSessionInvite());
+		synchronized (lock) {
+			mMultimediaMessagingSessionEventBroadcaster.broadcastInvitation(getSessionId(),
+					((TerminatingSipMsrpSession) session).getSessionInvite());
+		}
 	}
+
+	@Override
+	public void handle180Ringing() {
+		synchronized (lock) {
+			mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(
+					getRemoteContact(), getSessionId(), MultimediaSession.State.RINGING,
+					ReasonCode.UNSPECIFIED);
+		}
+	}
+	
+	
 }

@@ -25,6 +25,8 @@ package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -35,15 +37,15 @@ import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.net.Uri;
 
 /**
  * Originating geoloc sharing session (transfer)
@@ -243,8 +245,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     	getImsService().removeSession(this);
 
     	// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(getGeoloc());
+    	for (ImsSessionListener listener : getListeners()) {
+    		((GeolocTransferSessionListener)listener).handleContentTransfered(getGeoloc());
         }
 	}
 	
@@ -325,14 +327,26 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Remove the current session
     	getImsService().removeSession(this);
 
-    	// Notify listeners
-    	for(int j=0; j < getListeners().size(); j++) {
-    		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
-        }
+		// Notify listeners
+		for (ImsSessionListener listener : getListeners()) {
+			((GeolocTransferSessionListener) listener).handleSharingError(new ContentSharingError(
+					ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+		}
 	}
 
 	@Override
 	public boolean isInitiatedByRemote() {
 		return false;
+	}
+	
+	@Override
+	public void handle180Ringing(SipResponse response) {
+		if (logger.isActivated()) {
+			logger.debug("handle180Ringing");
+		}
+		// Notify listeners
+		for (ImsSessionListener listener : getListeners()) {
+			((GeolocTransferSessionListener)listener).handle180Ringing();
+		}
 	}
 }

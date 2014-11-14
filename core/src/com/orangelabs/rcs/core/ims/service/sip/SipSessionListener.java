@@ -39,4 +39,9 @@ public interface SipSessionListener extends ImsSessionListener  {
      * @param error Error
      */
     public void handleReceiveData(byte[] data);
+    
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     */
+    public void handle180Ringing();
 }

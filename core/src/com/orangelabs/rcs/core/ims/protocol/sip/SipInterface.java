@@ -20,6 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.sip;
 
 import gov2.nist.javax2.sip.address.AddressImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
+
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -48,18 +49,19 @@ import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
 import javax2.sip.header.RouteHeader;
 import javax2.sip.header.ViaHeader;
+import javax2.sip.message.Response;
 
 import android.net.ConnectivityManager;
 
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext.INotifySipProvisionalResponse;
 import com.orangelabs.rcs.core.ims.security.cert.KeyStoreManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.IpAddressUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
-
 /**
  * SIP interface which manage the SIP stack. The NIST stack is used
  * statefully (i.e. messages are sent via a SIP transaction).
@@ -162,17 +164,17 @@ public class SipInterface implements SipListener {
     /**
      * Public GRUU
      */
-    private String publicGruu = null;
+    private String publicGruu;
 
     /**
      * Temporary GRUU
      */
-    private String tempGruu = null;
+    private String tempGruu;
 
     /**
      * Instance ID
      */
-    private String instanceId = null;
+    private String instanceId;
 
     /**
      * Base timer T1 (in ms)
@@ -732,7 +734,7 @@ public class SipInterface implements SipListener {
      * @param id Transaction ID
      * @param msg SIP message
      */
-    public void notifyTransactionContext(String transactionId, SipMessage msg) {
+    private void notifyTransactionContext(String transactionId, SipMessage msg) {
         SipTransactionContext ctx = (SipTransactionContext)transactions.get(transactionId);
         if (ctx != null) {
             if (logger.isActivated()) {
@@ -743,14 +745,18 @@ public class SipInterface implements SipListener {
         }
    }
 
-    /**
-     * Send a SIP message and create a context to wait a response
-     *
-     * @param message SIP message
-     * @return Transaction context
-     * @throws SipException
-     */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws SipException {
+	/**
+	 * Send a SIP message and create a context to wait a response
+	 *
+	 * @param message
+	 *            SIP message
+	 * @param callbackSipProvisionalResponse
+	 *            a callback to handle SIP provisional response
+	 * @return Transaction context
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSipMessageAndWait(SipMessage message,
+			INotifySipProvisionalResponse callbackSipProvisionalResponse) throws SipException {
         try {
             if (message instanceof SipRequest) {
                 // Send a request
@@ -766,7 +772,7 @@ public class SipInterface implements SipListener {
                 }
 
                 // Create a transaction context
-                SipTransactionContext ctx = new SipTransactionContext(transaction);
+				SipTransactionContext ctx = new SipTransactionContext(transaction, callbackSipProvisionalResponse);
                 String id = SipTransactionContext.getTransactionContextId(req);
                 transactions.put(id, ctx);
                 if (logger.isActivated()) {
@@ -826,6 +832,17 @@ public class SipInterface implements SipListener {
             }
             throw new SipException("Can't send SIP message");
         }
+    }
+    
+    /**
+     * Send a SIP message and create a context to wait a response
+     *
+     * @param message SIP message
+     * @return Transaction context
+     * @throws SipException
+     */
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws SipException {
+        return sendSipMessageAndWait(message, null);
     }
 
     /**
@@ -1161,18 +1178,20 @@ public class SipInterface implements SipListener {
             return;
         }
 
-        if (responseEvent.getResponse().getStatusCode() >= 200) {
-            // Create received response with its associated transaction
-            SipResponse resp = new SipResponse(responseEvent.getResponse());
-            resp.setStackTransaction(transaction);
+        // Create received response with its associated transaction
+        SipResponse resp = new SipResponse(responseEvent.getResponse());
+        resp.setStackTransaction(transaction);
 
-            // Search the context associated to the received response and notify it
-            String transactionId = SipTransactionContext.getTransactionContextId(resp);
+        // Search the context associated to the received response and notify it
+        String transactionId = SipTransactionContext.getTransactionContextId(resp);
+        
+        if (responseEvent.getResponse().getStatusCode() >= Response.OK) {
             notifyTransactionContext(transactionId, resp);
         } else {
-            if (logger.isActivated()) {
-                logger.debug("By pass provisional response");
-            }
+        	// Is the response provisional ?
+        	if (responseEvent.getResponse().getStatusCode() >= Response.TRYING) {
+        	    notifyProvisionalResponse(transactionId, resp);
+        	}
         }
     }
 
@@ -1217,4 +1236,29 @@ public class SipInterface implements SipListener {
             logger.debug("Transaction terminated");
         }
     }
+
+	/**
+	 * Notify provisional SIP response
+	 * 
+	 * @param transactionId
+	 * @param response
+	 */
+	private void notifyProvisionalResponse(String transactionId, SipResponse response) {
+		SipTransactionContext ctx = (SipTransactionContext) transactions.get(transactionId);
+		if (ctx != null) {
+			if (logger.isActivated()) {
+				logger.debug("Callback object found for transaction " + transactionId);
+			}
+			INotifySipProvisionalResponse callback = ctx.getCallbackSipProvisionalResponse();
+			// Only consider ringing event
+			if (callback != null && response.getStatusCode() == Response.RINGING) {
+				callback.handle180Ringing(response);
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("By pass provisional response");
+				}
+			}
+		}
+	}
+
 }
