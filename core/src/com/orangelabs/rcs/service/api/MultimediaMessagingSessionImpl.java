@@ -234,7 +234,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		/* TODO: This exception handling is not correct. Will be fixed CR037. */
-		if (content.length > session.getMaxMessageSize()) {
+		// Do not consider max message size if null
+		if (session.getMaxMessageSize() != 0 && content.length > session.getMaxMessageSize()) {
 			throw new ServerApiException("Max message length exceeded!");
 		}
 		/* TODO: This exception handling is not correct. Will be fixed CR037. */
