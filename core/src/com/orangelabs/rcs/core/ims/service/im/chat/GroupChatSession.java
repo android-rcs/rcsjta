@@ -691,7 +691,7 @@ public abstract class GroupChatSession extends ChatSession {
 			FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg.getMessageContent()
 					.getBytes());
 			if (fileInfo != null) {
-				receiveHttpFileTransfer(remoteId, fileInfo, cpimMsgId);
+				receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId);
 			} else {
 				// TODO : else return error to Originating side
 			}

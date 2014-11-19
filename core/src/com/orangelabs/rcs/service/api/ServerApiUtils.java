@@ -18,17 +18,7 @@
 
 package com.orangelabs.rcs.service.api;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Binder;
-
 import com.orangelabs.rcs.core.Core;
-import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.orangelabs.rcs.platform.AndroidFactory;
 
 /**
  * Server API utils
@@ -76,34 +66,6 @@ public class ServerApiUtils {
 	 * @throws ServerApiException
 	 */
 	public static void testApiExtensionPermission(String ext) throws ServerApiException {
-		boolean authorized = false;
-
-		// Check extension authorization 
-		int pid = Binder.getCallingPid();
-		RunningAppProcessInfo processInfo = null;
-		ActivityManager manager = (ActivityManager)AndroidFactory.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-		for(RunningAppProcessInfo info : manager.getRunningAppProcesses()){
-			if (info.pid == pid) {
-				processInfo = info;
-				break;
-			}
-		}
-		if (processInfo != null) {
-			PackageManager pm = AndroidFactory.getApplicationContext().getPackageManager();
-			Intent intent = new Intent(Intent.ACTION_MAIN);
-			intent.addCategory(Intent.CATEGORY_LAUNCHER);
-			for(ResolveInfo info : pm.queryIntentActivities(intent, 0)) {
-				if (processInfo.processName.equals(info.activityInfo.packageName)) {
-					if (ServiceExtensionManager.getInstance().isExtensionAuthorized(AndroidFactory.getApplicationContext(), ext)) {
-						authorized = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		if (!authorized) {
-			throw new ServerApiException("Extension " + ext + " is not authorized"); 
-		}
+		// No control done in this release
 	}
 }

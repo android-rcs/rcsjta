@@ -537,7 +537,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 						FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg
 								.getMessageContent().getBytes());
 						if (fileInfo != null) {
-							receiveHttpFileTransfer(contact, fileInfo, cpimMsgId);
+							receiveHttpFileTransfer(contact, getRemoteDisplayName(), fileInfo, cpimMsgId);
 							// Mark the message as waiting a displayed report if needed
 							if (imdnDisplayedRequested) {
 								// TODO set File Transfer status to DISPLAY_REPORT_REQUESTED ??
@@ -788,10 +788,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * Receive HTTP file transfer event
 	 * 
 	 * @param contact Contact
+	 * @param displayName Display Name
 	 * @param fileTransferInfo Information of on file to transfer over HTTP
 	 * @param msgId Message ID
 	 */
-	protected void receiveHttpFileTransfer(ContactId contact, FileTransferHttpInfoDocument fileTransferInfo, String msgId) {
+	protected void receiveHttpFileTransfer(ContactId contact, String displayName, FileTransferHttpInfoDocument fileTransferInfo,
+			String msgId) {
 		// Test if the contact is blocked
 		if (ContactsManager.getInstance().isFtBlockedForContact(contact)) {
 			if (logger.isActivated()) {
@@ -824,9 +826,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 		
 		// Create a new session
-		FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId, contact);
+		FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this, fileTransferInfo, msgId, contact, displayName);
 
-		getImsService().getImsModule().getCoreListener().handleFileTransferInvitation(session, isGroupChat(), contact);
+		getImsService().getImsModule().getCoreListener().handleFileTransferInvitation(session, isGroupChat(), contact, displayName);
 
 		session.startSession();
 	}

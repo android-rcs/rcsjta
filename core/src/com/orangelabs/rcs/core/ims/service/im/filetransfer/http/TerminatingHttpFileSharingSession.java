@@ -65,7 +65,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	/**
 	 * Remote instance Id
 	 */
-	private String remoteInstanceId = null;
+	private String remoteInstanceId;
 
 	/**
 	 * The logger
@@ -90,14 +90,17 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the File transfer Id
 	 * @param contact
 	 *            the remote contact Id
+	 * @param displayName
+	 *            the display name of the remote contact
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contact) {
-		super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),fileTransferInfo.getFileSize(),fileTransferInfo.getFilename()),
-				chatSession.getRemoteContact(), chatSession.getRemoteUri(),null, chatSession.getSessionID(),
-				chatSession.getContributionID(), fileTransferId);
+			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contact, String displayName) {
+		super(parent, ContentManager.createMmContent(
+				ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),
+				fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact, PhoneUtils.formatContactIdToUri(contact),
+				null, chatSession.getSessionID(), chatSession.getContributionID(), fileTransferId);
 
-		setRemoteDisplayName(chatSession.getRemoteDisplayName());
+		setRemoteDisplayName(displayName);
         // Build a new dialogPath with this of chatSession and an empty CallId
 		setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
 		getDialogPath().setCallId("");

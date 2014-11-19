@@ -21,12 +21,10 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
-import java.util.Date;
-
-import com.gsma.services.rcs.contacts.ContactId;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Geoloc push message

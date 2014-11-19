@@ -219,7 +219,7 @@ public class InitiateFileUpload extends Activity {
         	// Show upload info
         	try {
         		Intent intent = new Intent(Intent.ACTION_VIEW);
-        		String filename = upload.getUploadInfo().getFile().toString() + "/" + upload.getUploadInfo().getFilename();
+        		String filename = upload.getUploadInfo().getFile().toString() + "/" + upload.getUploadInfo().getFileName();
         		intent.setData(Uri.parse(filename));
         		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         		startActivity(intent);
