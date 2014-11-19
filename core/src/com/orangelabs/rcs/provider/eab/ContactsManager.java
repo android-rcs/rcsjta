@@ -2128,7 +2128,7 @@ public final class ContactsManager {
 		String[] selectionArgs = { contact.toString() };
 		Cursor c = null;
 		try {
-			c = ctx.getContentResolver().query(Data.CONTENT_URI, PROJECTION_RABP, SELECTION_RAPB_FT_BLOCKED, selectionArgs, null);
+			c = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_RABP, SELECTION_RAPB_FT_BLOCKED, selectionArgs, null);
 			return (c.getCount() > 0);
 		} catch (Exception e) {
 			return false;
