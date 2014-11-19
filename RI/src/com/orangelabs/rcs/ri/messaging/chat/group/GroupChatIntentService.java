@@ -150,7 +150,7 @@ public class GroupChatIntentService extends IntentService {
 		// Do not display notification if activity is on foreground for this ChatID
 		if (GroupChatView.isDisplayed() && message.getChatId().equals(GroupChatView.chatIdOnForeground)) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "New message '" + message.getBody() + "' for chatId " + message.getChatId());
+				Log.d(LOGTAG, "New message '" + message.getContent() + "' for chatId " + message.getChatId());
 			}
 			startActivity(intent);
 		} else {
@@ -165,7 +165,7 @@ public class GroupChatIntentService extends IntentService {
 				msg = getString(R.string.label_geoloc_msg);
 			} else {
 				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(message.getMimeType())) {
-					msg = message.getBody();
+					msg = message.getContent();
 				} else {
 					// If the GC message does not convey user content then discards.
 					if (LogUtils.isActive) {

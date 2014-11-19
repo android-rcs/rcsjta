@@ -128,6 +128,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.msg_item_left));
 			holder.chatText.setText(formatDataToText(context, mimeType, data));
 			holder.contactText.setVisibility(View.GONE);
+			holder.statusText.setVisibility(View.VISIBLE);
 			break;
 		case RcsCommon.Direction.INCOMING:
 			lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -140,6 +141,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			} else {
 				holder.contactText.setVisibility(View.GONE);
 			}
+			holder.statusText.setVisibility(View.VISIBLE);
 			break;
 		case RcsCommon.Direction.IRRELEVANT:
 			if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {

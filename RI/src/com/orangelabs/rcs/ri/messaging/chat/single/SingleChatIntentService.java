@@ -126,7 +126,7 @@ public class SingleChatIntentService extends IntentService {
 		// Do not display notification if activity is on foreground for this contact
 		if (SingleChatView.isDisplayed() && message.getContact().equals(SingleChatView.contactOnForeground)) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "New message '" + message.getBody() + "' for contact " + message.getContact());
+				Log.d(LOGTAG, "New message '" + message.getContent() + "' for contact " + message.getContact());
 			}
 			context.startActivity(intent);
 		} else {
@@ -140,7 +140,7 @@ public class SingleChatIntentService extends IntentService {
 				msg = context.getString(R.string.label_geoloc_msg);
 			} else {
 				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(message.getMimeType())) {
-					msg = message.getBody();
+					msg = message.getContent();
 				} else {
 					if (LogUtils.isActive) {
 						Log.e(LOGTAG, "Unknown message type '" + message.getMimeType());

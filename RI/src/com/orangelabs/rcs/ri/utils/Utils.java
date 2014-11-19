@@ -225,12 +225,15 @@ public class Utils {
         try {
         	String filename = FileUtils.getFileName(activity, uri);
             Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename), Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();  
+            intent.setAction(android.content.Intent.ACTION_VIEW);  
+            intent.setDataAndType(uri, "image/*");  
+            activity.startActivity(intent);        
 		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "showPictureAndExit" ,e);
+			}
 		}
-        Intent intent = new Intent();  
-        intent.setAction(android.content.Intent.ACTION_VIEW);  
-        intent.setDataAndType(uri, "image/*");  
-        activity.startActivity(intent);        
     }
   
     /**
