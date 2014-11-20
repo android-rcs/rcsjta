@@ -220,12 +220,18 @@ public class SIPServerTransaction extends SIPTransaction implements ServerReques
 
             this.ticks = SIPTransaction.T1;
             this.ticksLeft = this.ticks;
+
+            // Fix from http://java.net/jira/browse/JSIP-443
+            // by mitchell.c.ackerman
+            this.dialogId = dialogId;
+
+            setTaskOutdatedTime(ticks);
         }
 
         protected void runTask() {
             SIPServerTransaction serverTransaction = SIPServerTransaction.this;
             ticksLeft--;
-            if (ticksLeft == -1) {
+            if (ticksLeft == -1 || isTaskOutdated()) {
                 serverTransaction.fireRetransmissionTimer();
                 this.ticksLeft = 2 * ticks;
             }
@@ -243,6 +249,8 @@ public class SIPServerTransaction extends SIPTransaction implements ServerReques
         public ProvisionalResponseTask() {
             this.ticks = SIPTransaction.T1;
             this.ticksLeft = this.ticks;
+
+            setTaskOutdatedTime(ticks);
         }
 
         protected void runTask() {
@@ -265,7 +273,7 @@ public class SIPServerTransaction extends SIPTransaction implements ServerReques
 
             } else {
                 ticksLeft--;
-                if (ticksLeft == -1) {
+                if (ticksLeft == -1 || isTaskOutdated()) {
                     serverTransaction.fireReliableResponseRetransmissionTimer();
                     this.ticksLeft = 2 * ticks;
                     this.ticks = this.ticksLeft;
