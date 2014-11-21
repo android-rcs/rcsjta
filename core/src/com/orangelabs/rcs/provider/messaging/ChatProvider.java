@@ -22,73 +22,110 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.chat.ChatLog;
+
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.chat.ChatLog;
-import com.orangelabs.rcs.utils.PhoneUtils;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Chat provider
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class ChatProvider extends ContentProvider {
-	/**
-	 * Database tables
-	 */
-    private static final String TABLE_CHAT = "chat";
+
+    private static final String TABLE_GROUP_CHAT = "groupchat";
+
     private static final String TABLE_MESSAGE = "message";
 
-	// Create the constants used to differentiate between the different URI requests
-	private static final int CHATS = 1;
-    private static final int CHAT_ID = 2;
-    private static final int RCSAPI_CHATS = 3;
-    private static final int RCSAPI_CHAT_ID = 4;
-    
-	private static final int MESSAGES = 5;
-    private static final int MESSAGE_ID = 6;
-    private static final int RCSAPI_MESSAGES = 7;
-    private static final int RCSAPI_MESSAGE_ID = 8;
+    private static final String SELECTION_WITH_CHAT_ID_ONLY = ChatData.KEY_CHAT_ID.concat("=?");
 
-	// Allocate the UriMatcher object
-    private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final String SELECTION_WITH_MSG_ID_ONLY = MessageData.KEY_MESSAGE_ID.concat("=?");
+
+    private static final String DATABASE_NAME = "chat.db";
+
+    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        uriMatcher.addURI("com.orangelabs.rcs.chat", "chat", CHATS);
-        uriMatcher.addURI("com.orangelabs.rcs.chat", "chat/#", CHAT_ID);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat", RCSAPI_CHATS);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "chat/#", RCSAPI_CHAT_ID);	
-        uriMatcher.addURI("com.orangelabs.rcs.chat", "message", MESSAGES);
-        uriMatcher.addURI("com.orangelabs.rcs.chat", "message/*", MESSAGE_ID);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message", RCSAPI_MESSAGES);
-		uriMatcher.addURI("com.gsma.services.rcs.provider.chat", "message/*", RCSAPI_MESSAGE_ID);
+        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath(),
+                UriType.InternalChat.CHAT);
+        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath()
+                .concat("/*"), UriType.InternalChat.CHAT_WITH_ID);
+        sUriMatcher.addURI(ChatLog.GroupChat.CONTENT_URI.getAuthority(),
+                ChatLog.GroupChat.CONTENT_URI.getPath(), UriType.Chat.CHAT);
+        sUriMatcher.addURI(ChatLog.GroupChat.CONTENT_URI.getAuthority(),
+                ChatLog.GroupChat.CONTENT_URI.getPath().concat("/*"), UriType.Chat.CHAT_WITH_ID);
+        sUriMatcher.addURI(ChatLog.Message.CONTENT_URI.getAuthority(),
+                ChatLog.Message.CONTENT_URI.getPath(), UriType.Message.MESSAGE);
+        sUriMatcher.addURI(ChatLog.Message.CONTENT_URI.getAuthority(), ChatLog.Message.CONTENT_URI
+                .getPath().concat("/*"), UriType.Message.MESSAGE_WITH_ID);
+
     }
 
-    private static final int INVALID_ROW_ID = -1;
-    
     /**
-     * Database helper class
+     * String to restrict projection for exposed URI to a set of columns
      */
-    private SQLiteOpenHelper openHelper;
-    
-    /**
-     * Database name
-     */
-    public static final String DATABASE_NAME = "chat.db";
-    
-    /**
-     * Helper class for opening, creating and managing database version control
-     */
+    private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
+            ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.CONTACT, ChatLog.GroupChat.STATE,
+            ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.DIRECTION, ChatLog.GroupChat.TIMESTAMP,
+            ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.PARTICIPANTS
+    };
+
+    private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
+            Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
+
+    private static final class UriType {
+
+        private static final class Chat {
+
+            private static final int CHAT = 1;
+
+            private static final int CHAT_WITH_ID = 2;
+        }
+
+        private static final class Message {
+
+            private static final int MESSAGE = 3;
+
+            private static final int MESSAGE_WITH_ID = 4;
+        }
+
+        private static final class InternalChat {
+
+            private static final int CHAT = 5;
+
+            private static final int CHAT_WITH_ID = 6;
+        }
+    }
+
+    private static final class CursorType {
+
+        private static final class Chat {
+
+            private static final String TYPE_DIRECTORY = "vnd.android.cursor.dir/groupchat";
+
+            private static final String TYPE_ITEM = "vnd.android.cursor.item/groupchat";
+        }
+
+        private static final class Message {
+
+            private static final String TYPE_DIRECTORY = "vnd.android.cursor.dir/chatmessage";
+
+            private static final String TYPE_ITEM = "vnd.android.cursor.item/chatmessage";
+        }
+    }
+
     private static class DatabaseHelper extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 12;
 
@@ -96,220 +133,312 @@ public class ChatProvider extends ContentProvider {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
-        // @formatter:off
         @Override
         public void onCreate(SQLiteDatabase db) {
-        	db.execSQL("CREATE TABLE " + TABLE_CHAT + " ("
-        			+ ChatData.KEY_ID + " integer primary key autoincrement,"
-        			+ ChatData.KEY_CHAT_ID + " TEXT,"
-        			+ ChatData.KEY_REJOIN_ID + " TEXT,"
-        			+ ChatData.KEY_SUBJECT + " TEXT,"
-        			+ ChatData.KEY_PARTICIPANTS + " TEXT,"
-        			+ ChatData.KEY_STATE + " integer,"
-        			+ ChatData.KEY_REASON_CODE + " integer,"
-        			+ ChatData.KEY_DIRECTION + " integer,"
-        			+ ChatData.KEY_TIMESTAMP + " long,"
-        			+ ChatData.KEY_REJECT_GC + " integer DEFAULT 0);");
-        	db.execSQL("CREATE TABLE " + TABLE_MESSAGE + " ("
-        			+ MessageData.KEY_ID + " integer primary key autoincrement,"
-        			+ MessageData.KEY_CHAT_ID + " TEXT,"
-        			+ MessageData.KEY_CONTACT + " TEXT,"
-        			+ MessageData.KEY_MSG_ID + " TEXT,"
-        			+ MessageData.KEY_CONTENT + " TEXT,"
-        			+ MessageData.KEY_CONTENT_TYPE + " TEXT,"
-        			+ MessageData.KEY_DIRECTION + " integer,"
-        			+ MessageData.KEY_STATUS + " integer,"
-        			+ MessageData.KEY_REASON_CODE + " integer,"
-        			+ MessageData.KEY_READ_STATUS + " integer,"
-        			+ MessageData.KEY_TIMESTAMP + " long,"
-        			+ MessageData.KEY_TIMESTAMP_SENT + " long,"
-        			+ MessageData.KEY_TIMESTAMP_DELIVERED + " long,"
-        			+ MessageData.KEY_TIMESTAMP_DISPLAYED + " long);");
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_GROUP_CHAT).append("(")
+                    .append(ChatData.KEY_CHAT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(ChatData.KEY_REJOIN_ID).append(" TEXT,")
+                    .append(ChatData.KEY_SUBJECT).append(" TEXT,")
+                    .append(ChatData.KEY_PARTICIPANTS).append(" TEXT NOT NULL,")
+                    .append(ChatData.KEY_STATE).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_REJECT_GC).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_CONTACT).append(" TEXT);").toString());
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE).append("(")
+                    .append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
+                    .append(MessageData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(MessageData.KEY_MESSAGE_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(MessageData.KEY_CONTENT).append(" TEXT,")
+                    .append(MessageData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
+                    .append(MessageData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_STATUS).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_READ_STATUS).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL);")
+                    .append("CREATE INDEX ").append(MessageData.KEY_CHAT_ID).append("_idx")
+                    .append(" ON ").append(TABLE_MESSAGE).append("(")
+                    .append(MessageData.KEY_CHAT_ID).append("); ").append("CREATE INDEX ")
+                    .append(MessageData.KEY_TIMESTAMP_SENT).append("_idx").append(" ON ")
+                    .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_TIMESTAMP_SENT)
+                    .append("); ").toString());
         }
-        // @formatter:on
-        
+
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAT);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+            db.execSQL("DROP TABLE IF EXISTS ".concat(TABLE_GROUP_CHAT));
+            db.execSQL("DROP TABLE IF EXISTS ".concat(TABLE_MESSAGE));
             onCreate(db);
         }
     }
 
+    private SQLiteOpenHelper mOpenHelper;
+
+    private String getSelectionWithChatId(String selection) {
+        if (TextUtils.isEmpty(selection)) {
+            return SELECTION_WITH_CHAT_ID_ONLY;
+        }
+        return new StringBuilder("(").append(SELECTION_WITH_CHAT_ID_ONLY).append(") AND (")
+                .append(selection).append(")").toString();
+    }
+
+    private String[] getSelectionArgsWithChatId(String[] selectionArgs, String chatId) {
+        String[] chatSelectionArg = new String[] {
+            chatId
+        };
+        if (selectionArgs == null) {
+            return chatSelectionArg;
+        }
+        return DatabaseUtils.appendSelectionArgs(chatSelectionArg, selectionArgs);
+    }
+
+    private String getSelectionWithMessageId(String selection) {
+        if (TextUtils.isEmpty(selection)) {
+            return SELECTION_WITH_MSG_ID_ONLY;
+        }
+        return new StringBuilder("(").append(SELECTION_WITH_MSG_ID_ONLY).append(") AND (")
+                .append(selection).append(")").toString();
+    }
+
+    private String[] getSelectionArgsWithMessageId(String[] selectionArgs, String messageId) {
+        String[] messageSelectionArg = new String[] {
+            messageId
+        };
+        if (selectionArgs == null) {
+            return messageSelectionArg;
+        }
+        return DatabaseUtils.appendSelectionArgs(messageSelectionArg, selectionArgs);
+    }
+
+    private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
+            throws UnsupportedOperationException {
+        if (projection == null || projection.length == 0) {
+            return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
+        }
+        for (String projectedColumn : projection) {
+            if (!RESTRICTED_PROJECTION_SET.contains(projectedColumn)) {
+                throw new UnsupportedOperationException(new StringBuilder(
+                        "No visibility to the accessed column ").append(projectedColumn)
+                        .append("!").toString());
+            }
+        }
+        return projection;
+    }
+
     @Override
     public boolean onCreate() {
-        openHelper = new DatabaseHelper(getContext());
+        mOpenHelper = new DatabaseHelper(getContext());
         return true;
     }
 
     @Override
     public String getType(Uri uri) {
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case CHATS:
-			case RCSAPI_CHATS:
-                return "vnd.android.cursor.dir/chat";
-            case CHAT_ID:
-			case RCSAPI_CHAT_ID:
-                return "vnd.android.cursor.item/chat";
-            case MESSAGES:
-			case RCSAPI_MESSAGES:
-                return "vnd.android.cursor.dir/message";
-            case MESSAGE_ID:
-			case RCSAPI_MESSAGE_ID:
-                return "vnd.android.cursor.item/message";
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalChat.CHAT:
+                /* Intentional fall through */
+            case UriType.Chat.CHAT:
+                return CursorType.Chat.TYPE_DIRECTORY;
+
+            case UriType.InternalChat.CHAT_WITH_ID:
+                /* Intentional fall through */
+            case UriType.Chat.CHAT_WITH_ID:
+                return CursorType.Chat.TYPE_ITEM;
+
+            case UriType.Message.MESSAGE:
+                return CursorType.Message.TYPE_DIRECTORY;
+
+            case UriType.Message.MESSAGE_WITH_ID:
+                return CursorType.Message.TYPE_ITEM;
+
             default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs, String sort) {
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        boolean queryMessage = true;
-        // Generate the body of the query
-        int match = uriMatcher.match(uri);
-        switch(match) {
-            case CHATS:
-			case RCSAPI_CHATS:
-		        qb.setTables(TABLE_CHAT);
-		        queryMessage = false;
-		        break;
-			case MESSAGES:
-			case RCSAPI_MESSAGES:
-		        qb.setTables(TABLE_MESSAGE);
-                break;
-			case CHAT_ID:
-			case RCSAPI_CHAT_ID:
-		        qb.setTables(TABLE_CHAT);
-                qb.appendWhere(ChatData.KEY_CHAT_ID + "= '"+uri.getPathSegments().get(1)+"'");
-                queryMessage = false;
-                break;
-			case MESSAGE_ID:
-			case RCSAPI_MESSAGE_ID:
-		        qb.setTables(TABLE_MESSAGE);
-                qb.appendWhere(MessageData.KEY_CHAT_ID + "= '" +uri.getPathSegments().get(1) + "'");
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown URI " + uri);
-        }
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sort) {
+        Uri groupChatNotificationUri = ChatLog.GroupChat.CONTENT_URI;
+        Cursor cursor = null;
+        try {
+            switch (sUriMatcher.match(uri)) {
+                case UriType.InternalChat.CHAT_WITH_ID:
+                    String chatId = uri.getLastPathSegment();
+                    selection = getSelectionWithChatId(selection);
+                    selectionArgs = getSelectionArgsWithChatId(selectionArgs, chatId);
+                    groupChatNotificationUri = Uri.withAppendedPath(groupChatNotificationUri,
+                            chatId);
+                    /* Intentional fall through */
+                case UriType.InternalChat.CHAT:
+                    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE_GROUP_CHAT, projection, selection, selectionArgs,
+                            null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            groupChatNotificationUri);
+                    return cursor;
 
-        SQLiteDatabase db = openHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projectionIn, selection, selectionArgs, null, null, sort);
+                case UriType.Chat.CHAT_WITH_ID:
+                    chatId = uri.getLastPathSegment();
+                    selection = getSelectionWithChatId(selection);
+                    selectionArgs = getSelectionArgsWithChatId(selectionArgs, chatId);
+                    /* Intentional fall through */
+                case UriType.Chat.CHAT:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE_GROUP_CHAT,
+                            restrictProjectionToExternallyDefinedColumns(projection), selection,
+                            selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                    return cursor;
 
-		// Register the contexts ContentResolver to be notified if the cursor result set changes
-        if (c != null) {
-        	if (queryMessage) {
-        		c.setNotificationUri(getContext().getContentResolver(), ChatLog.Message.CONTENT_URI);
-        	} else {
-        		c.setNotificationUri(getContext().getContentResolver(), ChatLog.GroupChat.CONTENT_URI);
-        	}
+                case UriType.Message.MESSAGE_WITH_ID:
+                    String msgId = uri.getLastPathSegment();
+                    selection = getSelectionWithMessageId(selection);
+                    selectionArgs = getSelectionArgsWithMessageId(selectionArgs, msgId);
+                    /* Intentional fall through */
+                case UriType.Message.MESSAGE:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(TABLE_MESSAGE, projection, selection, selectionArgs,
+                            null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
+                    return cursor;
+
+                default:
+                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                            .append(uri).append("!").toString());
+            }
+        } catch (RuntimeException e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
         }
-        return c;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-        int count = 0;
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        boolean updateMessage = true;
-        int match = uriMatcher.match(uri);
-        switch(match) {
-	        case CHATS:
-	            count = db.update(TABLE_CHAT, values, where, whereArgs);
-	            updateMessage = false;
-		        break;
-			case MESSAGES:
-	            count = db.update(TABLE_MESSAGE, values, where, whereArgs);
-	            break;
-			case CHAT_ID:
-                count = db.update(TABLE_CHAT, values,
-                		ChatData.KEY_ID + "=" + Integer.parseInt(uri.getPathSegments().get(1)), null);
-                updateMessage = false;
-	            break;
-			case MESSAGE_ID:
-                count = db.update(TABLE_MESSAGE, values,
-                		MessageData.KEY_ID + "=" + Integer.parseInt(uri.getPathSegments().get(1)), null);
-	            break;
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri groupChatNotificationUri = ChatLog.GroupChat.CONTENT_URI;
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalChat.CHAT_WITH_ID:
+                String chatId = uri.getLastPathSegment();
+                selection = getSelectionWithChatId(selection);
+                selectionArgs = getSelectionArgsWithChatId(selectionArgs, chatId);
+                groupChatNotificationUri = Uri.withAppendedPath(groupChatNotificationUri,
+                        chatId);
+                /* Intentional fall through */
+            case UriType.InternalChat.CHAT:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.update(TABLE_GROUP_CHAT, values, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(groupChatNotificationUri, null);
+                }
+                return count;
+
+            case UriType.Chat.CHAT_WITH_ID:
+                /* Intentional fall through */
+            case UriType.Chat.CHAT:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
+            case UriType.Message.MESSAGE_WITH_ID:
+                String msgId = uri.getLastPathSegment();
+                selection = getSelectionWithMessageId(selection);
+                selectionArgs = getSelectionArgsWithMessageId(selectionArgs, msgId);
+                /* Intentional fall through */
+            case UriType.Message.MESSAGE:
+                db = mOpenHelper.getWritableDatabase();
+                count = db.update(TABLE_MESSAGE, values, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return count;
+
             default:
-                throw new UnsupportedOperationException("Cannot update URI " + uri);
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-        if (count != 0) {
-        	if (updateMessage) {
-        		getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
-        	} else {
-        		getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
-        	}
-        }
-        return count;
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        switch(uriMatcher.match(uri)) {
-	        case CHATS:
-	        case CHAT_ID:
-	        	long chatRowId = db.insert(TABLE_CHAT, null, initialValues);
-	    		uri = ContentUris.withAppendedId(ChatData.CONTENT_URI, chatRowId);
-	    		if (chatRowId != INVALID_ROW_ID)  {
-	    			getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
-	    		}
-	        	break;
-	        case MESSAGES:
-	        case MESSAGE_ID:
-	    		long msgRowId = db.insert(TABLE_MESSAGE, null, initialValues);
-	    		uri = ContentUris.withAppendedId(MessageData.CONTENT_URI, msgRowId);
-	    		if (msgRowId != INVALID_ROW_ID)  {
-	    			getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
-	    		}
-	        	break;
-	        default:
-	    		throw new SQLException("Failed to insert row into " + uri);
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalChat.CHAT:
+                /* Intentional fall through */
+            case UriType.InternalChat.CHAT_WITH_ID:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                String chatId = initialValues.getAsString(ChatData.KEY_CHAT_ID);
+                db.insert(TABLE_GROUP_CHAT, null, initialValues);
+                Uri notificationUri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
+                return notificationUri;
+
+            case UriType.Chat.CHAT_WITH_ID:
+                /* Intentional fall through */
+            case UriType.Chat.CHAT:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
+            case UriType.Message.MESSAGE:
+                /* Intentional fall through */
+            case UriType.Message.MESSAGE_WITH_ID:
+                db = mOpenHelper.getWritableDatabase();
+                String messageId = initialValues.getAsString(MessageData.KEY_MESSAGE_ID);
+                db.insert(TABLE_MESSAGE, null, initialValues);
+                notificationUri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
+                return notificationUri;
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-        return uri;
     }
 
     @Override
-    public int delete(Uri uri, String where, String[] whereArgs) {
-        SQLiteDatabase db = openHelper.getWritableDatabase();
-        int count = 0;
-        boolean deleteMessage = true;
-        switch(uriMatcher.match(uri)) {
-	        case CHATS:
-	        case RCSAPI_CHATS:
-	        	count = db.delete(TABLE_CHAT, where, whereArgs);
-	        	deleteMessage = false;
-	        	break;
-	        case CHAT_ID:
-	        case RCSAPI_CHAT_ID:
-				count = db.delete(TABLE_CHAT, ChatData.KEY_ID + "="
-						+ uri.getPathSegments().get(1)
-						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
-						whereArgs);
-				deleteMessage = false;
-				break;
-	        case MESSAGES:
-	        case RCSAPI_MESSAGES:
-	        	count = db.delete(TABLE_MESSAGE, where, whereArgs);
-	        	break;
-	        case MESSAGE_ID:
-	        case RCSAPI_MESSAGE_ID:
-				count = db.delete(TABLE_MESSAGE, MessageData.KEY_ID + "="
-						+ PhoneUtils.formatNumberToInternational(uri.getPathSegments().get(1))
-						+ (!TextUtils.isEmpty(where) ? " AND ("	+ where + ')' : ""),
-						whereArgs);
-				break;
-	        default:
-	    		throw new SQLException("Failed to delete row " + uri);
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri groupChatNotificationUri = ChatLog.GroupChat.CONTENT_URI;
+        switch (sUriMatcher.match(uri)) {
+            case UriType.InternalChat.CHAT_WITH_ID:
+                String chatId = uri.getLastPathSegment();
+                selection = getSelectionWithChatId(selection);
+                selectionArgs = getSelectionArgsWithChatId(selectionArgs, chatId);
+                groupChatNotificationUri = Uri.withAppendedPath(groupChatNotificationUri,
+                        chatId);
+                /* Intentional fall through */
+            case UriType.InternalChat.CHAT:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.delete(TABLE_GROUP_CHAT, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(groupChatNotificationUri, null);
+                }
+                return count;
+
+            case UriType.Chat.CHAT_WITH_ID:
+                /* Intentional fall through */
+            case UriType.Chat.CHAT:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access.").toString());
+
+            case UriType.Message.MESSAGE_WITH_ID:
+                String msgId = uri.getLastPathSegment();
+                selection = getSelectionWithMessageId(selection);
+                selectionArgs = getSelectionArgsWithMessageId(selectionArgs, msgId);
+                /* Intentional fall through */
+            case UriType.Message.MESSAGE:
+                db = mOpenHelper.getWritableDatabase();
+                count = db.delete(TABLE_MESSAGE, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return count;
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
         }
-        if (count != 0) {
-        	if (deleteMessage) {
-        		getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI, null);
-        	} else {
-        		getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
-        	}
-        }
-        return count;    
     }
 }

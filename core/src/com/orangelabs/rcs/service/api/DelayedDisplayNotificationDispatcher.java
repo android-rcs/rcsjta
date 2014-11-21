@@ -36,7 +36,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 			.append(ChatLog.Message.MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE)
 			.append("','").append(MimeType.GEOLOC_MESSAGE).append("') AND ")
 			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ)
-			.append(" AND ").append(ChatLog.Message.MESSAGE_STATUS).append("=")
+			.append(" AND ").append(ChatLog.Message.STATUS).append("=")
 			.append(ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED).toString();
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = ChatLog.Message.TIMESTAMP.concat(" ASC");

@@ -21,8 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
-import android.net.Uri;
-
 import com.gsma.services.rcs.chat.ChatLog;
 
 /**
@@ -31,78 +29,77 @@ import com.gsma.services.rcs.chat.ChatLog;
  * @author Jean-Marc AUFFRET
  */
 public class MessageData {
+
 	/**
-	 * Database URI
-	 */
-	protected static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.chat/message");
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_ID = ChatLog.Message.ID;
-	
-	/**
-	 * Column name
+	 * Id of chat room
 	 */
 	static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
 
 	/**
-	 * Column name
+	 * ContactId formatted number of remote contact or null if the message is an
+	 * outgoing group chat message.
 	 */
 	static final String KEY_CONTACT = ChatLog.Message.CONTACT;
 
 	/**
-	 * Column name
+	 * Id of the message
 	 */
-	static final String KEY_MSG_ID = ChatLog.Message.MESSAGE_ID;
+	static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
 
 	/**
-	 * Column name
+	 * Content of the message (as defined by one of the mimetypes in
+	 * ChatLog.Message.Mimetype)
 	 */
 	static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
 	/**
-	 * Column name
+	 * Multipurpose Internet Mail Extensions (MIME) type of message
 	 */
-	static final String KEY_CONTENT_TYPE = ChatLog.Message.MIME_TYPE;
+	static final String KEY_MIME_TYPE = ChatLog.Message.MIME_TYPE;
 
 	/**
-	 * Column name
+	 * Status direction of message.
+	 *
+	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
 	 */
 	static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;	
 
 	/**
-	 * Column name
+	 * @see ChatLog.Message.Status.Content for the list of status.
 	 */
-	static final String KEY_STATUS = ChatLog.Message.MESSAGE_STATUS;
+	static final String KEY_STATUS = ChatLog.Message.STATUS;
 
 	/**
-	 * Column name
+	 * Reason code associated with the message status.
+	 *
+	 * @see ChatLog.Message.ReasonCode for the list of reason codes
 	 */
 	static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
 
 	/**
-	 * Column name
+	 * This is set on the receiver side when the message has been displayed.
+	 *
+	 * @see com.gsma.services.rcs.RcsCommon.ReadStatus for the list of status.
 	 */
 	static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
 
 	/**
-	 * Column name
+	 * Time when message inserted
 	 */
 	static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
 	
 	/**
-	 * Column name
+	 * Time when message sent. If 0 means not sent.
 	 */
     static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
     
 	/**
-	 * Column name
+	 * Time when message delivered. If 0 means not delivered
 	 */
     static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
     
 	/**
-	 * Column name
+	 * Time when message displayed. If 0 means not displayed.
 	 */
     static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
 }

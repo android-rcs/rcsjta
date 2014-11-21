@@ -119,24 +119,11 @@ public interface IMessageLog {
 	public void markIncomingChatMessageAsReceived(String msgId);
 
 	/**
-	 * Check if it's a new message
+	 * Check if the message is already persisted in db
 	 * 
-	 * @param chatId
-	 *            chat ID
 	 * @param msgId
 	 *            message ID
-	 * @return true if new message
+	 * @return true if the message already exists in db
 	 */
-	public boolean isNewMessage(String chatId, String msgId);
-
-	/**
-	 * Check if it's a new message
-	 * 
-	 * @param contact
-	 *            contact ID
-	 * @param msgId
-	 *            message ID
-	 * @return true if new message
-	 */
-	public boolean isNewMessage(ContactId contact, String msgId);
+	public boolean isMessagePersisted(String msgId);
 }

@@ -21,19 +21,16 @@ import android.net.Uri;
  * Delivery info (delivery information on group messages and group file
  * transfers)
  */
-public class DeliveryInfo {
+public class GroupDeliveryInfoLog {
 
 	public static final Uri CONTENT_URI = Uri
-			.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo");
+			.parse("content://com.gsma.services.rcs.provider.groupdeliveryinfo/groupdeliveryinfo");
 
-	public static final Uri CONTENT_MSG_URI = Uri
-			.parse("content://com.gsma.services.rcs.provider.groupchatdeliveryinfo/deliveryinfo/messageid/");
-
-	public static final String DELIVERY_STATUS = "status";
+	public static final String STATUS = "status";
 
 	public static final String REASON_CODE = "reason_code";
 
-	public static final String MESSAGE_ID = "msg_id";
+	public static final String ID = "id";
 
 	public static final String CHAT_ID = "chat_id";
 
