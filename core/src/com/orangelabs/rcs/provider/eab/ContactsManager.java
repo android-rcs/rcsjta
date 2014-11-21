@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provider.eab;
@@ -35,6 +39,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -191,14 +196,14 @@ public final class ContactsManager {
 	private static final String[] PROJECTION_PRESENCE_SHARING_STATUS = new String[] { RichAddressBookData.KEY_PRESENCE_SHARING_STATUS };
 	
 	/**
-     * Projection to get ID and DISPLAY_NAME from RichAddressBookProvider
+     * Projection to get DISPLAY_NAME from RichAddressBookProvider
      */
-	private static final String[] PROJECTION_RABP_DISPLAY_NAME = new String[] { RichAddressBookData.KEY_ID, RichAddressBookData.KEY_DISPLAY_NAME };
+	private static final String[] PROJECTION_RABP_DISPLAY_NAME = new String[] { RichAddressBookData.KEY_DISPLAY_NAME };
 	
 	/**
-     * Projection to get ID RichAddressBookProvider
+     * Projection to get CONTACT from RichAddressBookProvider
      */
-	private static final String[] PROJECTION_RABP = new String[] { RichAddressBookData.KEY_ID };
+	private static final String[] PROJECTION_RABP = new String[] { RichAddressBookData.KEY_CONTACT };
 
 	private static final String SELECTION_RAPB_IM_BLOCKED = new StringBuilder(RichAddressBookData.KEY_CONTACT).append("=? AND ")
 			.append(RichAddressBookData.KEY_IM_BLOCKED).append("=").append(RichAddressBookData.BLOCKED_VALUE_SET).toString();
@@ -262,32 +267,6 @@ public final class ContactsManager {
 		return getContactInfoFromCursor(cursor).getPresenceInfo(); 
 	}
 
-    /**
-     * Return the row id of a profile number in the EAB
-     *
-     * @param contact Profile number
-     * @return Row id
-     */
-	private int getProfileRowId(ContactId contact) {
-		Cursor cur = null;
-		try {
-			String[] whereArgs = new String[] { contact.toString() };
-			cur = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_RABP, SELECT_RABP_CONTACT, whereArgs, null);
-			if (cur.moveToFirst()) {
-				return cur.getInt(cur.getColumnIndex(RichAddressBookData.KEY_ID));
-			}
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Internal exception", e);
-			}
-		} finally {
-			if (cur != null) {
-				cur.close();
-			}
-		}
-		return INVALID_ID;
-	}
-
 	/**
 	 * Set the info of a contact
 	 * 
@@ -304,8 +283,8 @@ public final class ContactsManager {
 		ContactId contact = newInfo.getContact();
 				
 		// Check if we have an entry for the contact
-		boolean hasEntryInRichAddressBook = (getProfileRowId(contact) != INVALID_ID);
-		
+		boolean hasEntryInRichAddressBook = isContactIdAssociatedWithContactInRichAddressBook(contact);
+
 		ContentValues values = new ContentValues();
 		values.put(RichAddressBookData.KEY_CONTACT, contact.toString());
 
@@ -401,8 +380,8 @@ public final class ContactsManager {
         if (photoIcon != null) {
             byte photoContent[] = photoIcon.getContent();
             if (photoContent != null) {
-                int rowId = getProfileRowId(contact);
-                Uri photoUri = ContentUris.withAppendedId(RichAddressBookData.CONTENT_URI, rowId);
+                Uri photoUri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI,
+                        contact.toString());
                 OutputStream outstream = null;
                 try {
                     outstream = ctx.getContentResolver().openOutputStream(photoUri);
@@ -616,8 +595,8 @@ public final class ContactsManager {
 					PhotoIcon photoIcon = null;
 					if (Boolean.parseBoolean(cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG)))) {
 						try {
-							int rowId = cur.getInt(cur.getColumnIndex(RichAddressBookData.KEY_ID));
-							Uri photoUri = ContentUris.withAppendedId(RichAddressBookData.CONTENT_URI, rowId);
+                            Uri photoUri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI,
+                                    contact.toString());
 							String etag = cur.getString(cur.getColumnIndex(RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG));
 							InputStream stream = ctx.getContentResolver().openInputStream(photoUri);
 							byte[] content = new byte[stream.available()];
@@ -758,13 +737,11 @@ public final class ContactsManager {
 	 * @param RCS status
 	 */
 	public void modifyRcsContactInProvider(ContactId contact, int rcsStatus) {
-		long contactRowID = getProfileRowId(contact);
-
 		ContentValues values = new ContentValues();
 		values.put(RichAddressBookData.KEY_CONTACT, contact.toString());
 		values.put(RichAddressBookData.KEY_PRESENCE_SHARING_STATUS, rcsStatus);
 		values.put(RichAddressBookData.KEY_TIMESTAMP, System.currentTimeMillis());
-		if (contactRowID == INVALID_ID) {
+		if (!isContactIdAssociatedWithContactInRichAddressBook(contact)) {
 			// Contact not present in provider, insert
 			ctx.getContentResolver().insert(RichAddressBookData.CONTENT_URI, values);
 		} else {
@@ -1896,16 +1873,37 @@ public final class ContactsManager {
 		}
 		return INVALID_ID;
 	}
-    
-    /**
-     * Utility to check if a phone number is associated to an entry in the rich address book provider
-     *
-     * @param contact The contact ID
-     * @return true if contact has an entry in the rich address book provider, else false
-     */
-    public boolean isRcsAssociated(final ContactId contact) {
-    	return (getProfileRowId(contact) != INVALID_ID);
-    }
+
+	/**
+	 * Utility to check if a phone number is associated to an entry in the rich
+	 * address book provider
+	 *
+	 * @param contact The contact ID
+	 * @return true if contact has an entry in the rich address book provider,
+	 *         else false
+	 */
+	public boolean isContactIdAssociatedWithContactInRichAddressBook(final ContactId contact) {
+		Cursor cursor = null;
+		try {
+			String[] whereArgs = new String[] {
+				contact.toString()
+			};
+			cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI,
+					PROJECTION_RABP, SELECT_RABP_CONTACT, whereArgs, null);
+			if (cursor == null) {
+				throw new SQLException(
+						new StringBuilder(
+								"Exception occured while checking the entry in RichAddressBookProvider for contact:")
+								.append(contact.toString()).append("!").toString());
+			}
+			return cursor.getCount() > 0;
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
 
     /**
      * Utility method to check if a raw contact is only associated to a SIM account

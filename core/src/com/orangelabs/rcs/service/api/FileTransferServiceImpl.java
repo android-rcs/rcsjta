@@ -32,7 +32,7 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.gsma.services.rcs.DeliveryInfo;
+import com.gsma.services.rcs.GroupDeliveryInfoLog;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsCommon.Direction;
@@ -560,12 +560,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	private void handleGroupFileDeliveryStatus(String chatId, String fileTransferId,
 			ContactId contact, int state, int reasonCode) {
 		MessagingLog messagingLog = MessagingLog.getInstance();
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, state,
-				DeliveryInfo.ReasonCode.UNSPECIFIED, contact);
+		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact, state,
+				GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
 		switch (state) {
-			case DeliveryInfo.Status.FAILED:
+			case GroupDeliveryInfoLog.Status.FAILED:
 				break;
-			case DeliveryInfo.Status.DELIVERED:
+			case GroupDeliveryInfoLog.Status.DELIVERED:
 				if (messagingLog.isDeliveredToAllRecipients(fileTransferId)) {
 					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
 							FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -574,7 +574,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 							fileTransferId, FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
 				}
 				break;
-			case DeliveryInfo.Status.DISPLAYED:
+			case GroupDeliveryInfoLog.Status.DISPLAYED:
 				if (messagingLog.isDisplayedByAllRecipients(fileTransferId)) {
 					messagingLog.updateFileTransferStateAndReasonCode(fileTransferId,
 							FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
@@ -592,7 +592,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 								+ state + "!");
 		}
 
-		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId,state, reasonCode, contact);
+		messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact, state,
+				reasonCode);
 
 		mGroupFileTransferBroadcaster.broadcastGroupDeliveryInfoStateChanged(chatId,
 				contact, fileTransferId, state, reasonCode);
@@ -609,16 +610,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		String status = imdn.getStatus();
 		if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
 			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					DeliveryInfo.Status.DELIVERED, ReasonCode.UNSPECIFIED);
+					GroupDeliveryInfoLog.Status.DELIVERED, ReasonCode.UNSPECIFIED);
 		} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
 			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					DeliveryInfo.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
+					GroupDeliveryInfoLog.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
 		} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
 				|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
 				|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
 			int reasonCode = imdnToFailedReasonCode(imdn);
 			handleGroupFileDeliveryStatus(chatId, imdn.getMsgId(), contact,
-					DeliveryInfo.Status.FAILED, reasonCode);
+					GroupDeliveryInfoLog.Status.FAILED, reasonCode);
 		}
 	}
 

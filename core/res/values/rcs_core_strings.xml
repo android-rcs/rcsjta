@@ -4,9 +4,21 @@
 	<string name="rcs_core_rcs_notification_title">rcs service</string>
 	<string name="rcs_core_permission">rcs</string>
 	<string name="rcs_core_permission_ext">rcs extensions</string>
+	<string name="rcs_core_permission_read_chat">Rcs chat read</string>
+	<string name="rcs_core_permission_read_filetransfer">Rcs file transfer read</string>
+	<string name="rcs_core_permission_read_imageshare">Rcs imageShare read</string>
+	<string name="rcs_core_permission_read_videoshare">Rcs videoShare read</string>
+	<string name="rcs_core_permission_read_capability">Rcs capability read</string>
+	<string name="rcs_core_permission_read_ipcall">Rcs ipcall read</string>
 	<string name="rcs_core_permission_desc">rcs</string>
 	<string name="rcs_core_permission_ext_desc">rcs extensions</string>
-		
+	<string name="rcs_core_permission_read_chat_desc">Grants permission to read rcs chat history</string>
+	<string name="rcs_core_permission_read_filetransfer_desc">Grants permission to read rcs file transfer history</string>
+	<string name="rcs_core_permission_read_imageshare_desc">Grants permission to read rcs imageshare history</string>
+	<string name="rcs_core_permission_read_videoshare_desc">Grants permission to read rcs videoshare history</string>
+	<string name="rcs_core_permission_read_capability_desc">Grants permission to read rcs capability information</string>
+	<string name="rcs_core_permission_read_ipcall_desc">Grants permission to read ipcall history</string>
+
 	<string name="rcs_core_loaded">rcs service is loaded</string>
 	<string name="rcs_core_failed">rcs service has failed</string>
 	<string name="rcs_core_started">rcs service is started</string>

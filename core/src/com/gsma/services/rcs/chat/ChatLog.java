@@ -46,13 +46,7 @@ public class ChatLog {
         /**
          * Content provider URI for chat conversations
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.chat/chat");
-
-        /**
-         * The name of the column containing the unique ID for a row.
-         * <P>Type: primary key</P>
-         */
-        public static final String ID = "_id";
+        public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.chat/groupchat");
 
         /**
          * The name of the column containing the unique ID of the group chat.
@@ -100,6 +94,14 @@ public class ChatLog {
          */
         public static final String PARTICIPANTS = "participants";
         
+        /**
+         * ContactId formatted number of the inviter of the group chat or null
+         * if this is a group chat initiated by the local user (ie outgoing
+         * group chat).
+         * <P>Type: TEXT</P>
+         */
+        public static final String CONTACT = "contact";
+
 		/**
          * Utility method to get the set of ParticipantInfo objects from its string representation in the ChatLog provider.
          *
@@ -141,20 +143,7 @@ public class ChatLog {
         /**
          * Content provider URI for chat messages
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.chat/message");
-        
-        /**
-         * Content provider URI for chat messages of a given conversation. In case of single chat
-         * the conversation is identified by the contact phone number. In case of group chat the
-         * the conversation is identified by the unique chat ID. 
-         */
-        public static final Uri CONTENT_CHAT_URI = Uri.parse("content://com.gsma.services.rcs.provider.chat/message/#");
-
-        /**
-         * The name of the column containing the unique ID for a row.
-         * <P>Type: primary key</P>
-         */
-        public static final String ID = "_id";
+        public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.chat/chatmessage");
 
         /**
          * The name of the column containing the chat ID.
@@ -172,7 +161,7 @@ public class ChatLog {
          * The name of the column containing the message status.
          * <P>Type: INTEGER</P>
          */
-        public static final String MESSAGE_STATUS = "status";
+        public static final String STATUS = "status";
 
         /**
          * The name of the column containing the message status reason code.

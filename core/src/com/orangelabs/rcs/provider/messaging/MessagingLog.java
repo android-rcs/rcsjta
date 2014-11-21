@@ -25,6 +25,7 @@ package com.orangelabs.rcs.provider.messaging;
 import java.util.List;
 import java.util.Set;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -43,7 +44,7 @@ import android.net.Uri;
  * @author LEMORDANT Philippe
  * 
  */
-public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLog, IGroupChatDeliveryInfoLog {
+public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLog, IGroupDeliveryInfoLog {
 	/**
 	 * Current instance
 	 */
@@ -60,7 +61,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
 	private FileTransferLog fileTransferLog;
 
-	private GroupChatDeliveryInfoLog groupChatDeliveryInfoLog;
+	private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
 
 	/**
 	 * Empty constructor : prevent caller from creating multiple instances
@@ -98,7 +99,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	private MessagingLog(Context ctx) {
 		contentResolver = ctx.getContentResolver();
 		groupChatLog = new GroupChatLog(ctx);
-		groupChatDeliveryInfoLog = new GroupChatDeliveryInfoLog(contentResolver);
+		groupChatDeliveryInfoLog = new GroupDeliveryInfoLog(contentResolver);
 		messageLog = new MessageLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
 		fileTransferLog = new FileTransferLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
 	}
@@ -262,11 +263,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#isNewMessage(java.lang.String, java.lang.String)
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#isMessagePersisted(java.lang.String)
 	 */
 	@Override
-	public boolean isNewMessage(String chatId, String msgId) {
-		return messageLog.isNewMessage(chatId, msgId);
+	public boolean isMessagePersisted(String msgId) {
+		return messageLog.isMessagePersisted(msgId);
 	}
 
 	/*
@@ -380,33 +381,33 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	public void deleteAllEntries() {
 		contentResolver.delete(ChatData.CONTENT_URI, null, null);
-		contentResolver.delete(MessageData.CONTENT_URI, null, null);
+		contentResolver.delete(ChatLog.Message.CONTENT_URI, null, null);
 		contentResolver.delete(FileTransferData.CONTENT_URI, null, null);
-		contentResolver.delete(GroupChatDeliveryInfoData.CONTENT_URI, null, null);
+		contentResolver.delete(GroupDeliveryInfoData.CONTENT_URI, null, null);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry(java.lang.String,
-	 * java.lang.String, com.gsma.services.rcs.contacts.ContactId)
+	 * com.gsma.services.rcs.contacts.ContactId, java.lang.String)
 	 */
 	@Override
-	public Uri addGroupChatDeliveryInfoEntry(String chatId, String msgId, ContactId contact) {
-		return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, msgId, contact);
+	public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId) {
+		return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
-	 * updateGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String, int,
-	 * int, com.gsma.services.rcs.contacts.ContactId)
+	 * updateGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String, com.gsma.services.rcs.contacts.ContactId),
+	 * int, int)
 	 */
 	@Override
-	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, int status,
-			int reasonCode, ContactId contact) {
-		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, status,
-				reasonCode, contact);
+	public void updateGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+			int status, int reasonCode) {
+		groupChatDeliveryInfoLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+				status, reasonCode);
 	}
 
 	/*
@@ -427,11 +428,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public boolean isDisplayedByAllRecipients(String msgId) {
 		return groupChatDeliveryInfoLog.isDisplayedByAllRecipients(msgId);
-	}
-
-	@Override
-	public boolean isNewMessage(ContactId contact, String msgId) {
-		return messageLog.isNewMessage(contact, msgId);
 	}
 
 	@Override
