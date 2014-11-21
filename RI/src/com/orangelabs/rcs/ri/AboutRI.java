@@ -40,9 +40,6 @@ public class AboutRI extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
-
-        // Set title
-        setTitle(R.string.menu_about);
         
         // Display release number
         String appRelease = Utils.getApplicationVersion(this); 

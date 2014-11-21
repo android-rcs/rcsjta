@@ -28,10 +28,6 @@
 	<item android:id="@+id/menu_showus_map"
 		android:title="@string/menu_showus_map"
 		android:icon="@drawable/ri_menu_showus_map"/>
-		
-	<item android:id="@+id/menu_clear_log"
-		android:title="@string/menu_clear_log"
-		android:icon="@drawable/ri_menu_clear_log"/>
 	
 	<item android:id="@+id/menu_close_session"
 		android:title="@string/menu_close_session"

@@ -51,6 +51,7 @@ public class FileTransferDAO implements Parcelable {
 	private long sizeTransferred;
 	private long size;
 	private Uri thumbnail;
+	private int reasonCode;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(FileTransferLog.FT_ID).append("=?").toString();
 
@@ -156,6 +157,7 @@ public class FileTransferDAO implements Parcelable {
 		} else {
 			thumbnail = null;
 		}
+		reasonCode = source.readInt();
 	}
 	
 	/**
@@ -163,7 +165,7 @@ public class FileTransferDAO implements Parcelable {
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param fileTransferId
 	 *            the unique key field
 	 * @throws Exception 
@@ -198,6 +200,7 @@ public class FileTransferDAO implements Parcelable {
 				if (fileicon != null) {
 					thumbnail = Uri.parse(fileicon);
 				}
+				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE));
 			} else {
 				throw new IllegalArgumentException("Filetransfer ID not found"); 
 			}
@@ -254,6 +257,7 @@ public class FileTransferDAO implements Parcelable {
 		} else {
 			dest.writeInt(0);
 		}
+		dest.writeInt(reasonCode);
 	};
 
 	public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {
@@ -267,4 +271,8 @@ public class FileTransferDAO implements Parcelable {
 			return new FileTransferDAO[size];
 		}
 	};
+
+	public int getReasonCode() {
+		return reasonCode;
+	}
 }

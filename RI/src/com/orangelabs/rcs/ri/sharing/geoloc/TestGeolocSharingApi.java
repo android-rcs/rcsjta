@@ -38,6 +38,9 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
  * @author Jean-Marc AUFFRET
  */
 public class TestGeolocSharingApi extends ListActivity {
+	
+	private static final String[] PROJECTION = new String[] { CapabilitiesLog.CONTACT };
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,27 +57,30 @@ public class TestGeolocSharingApi extends ListActivity {
     }
 
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	        	startActivity(new Intent(this, InitiateGeolocSharing.class));
-                break;
-                
-	        case 1:
-	            String[] projection = new String[] {
-		            	CapabilitiesLog.CONTACT
-		            };
-		        	ArrayList<String> list = new ArrayList<String>(); 
-		    		Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, projection, null, null, null);
-		    		while(cursor.moveToNext()) {
-		    			String contact = cursor.getString(0);
-		    			list.add(contact);
-		    		}
-		    		cursor.close();
-		        	Intent intent = new Intent(this, ShowUsInMap.class);
-		        	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
-		        	startActivity(intent);
-                break;            
-        }
-    }
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		switch (position) {
+		case 0:
+			startActivity(new Intent(this, InitiateGeolocSharing.class));
+			break;
+
+		case 1:
+			ArrayList<String> list = new ArrayList<String>();
+			Cursor cursor = null;
+			try {
+				cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null, null, null);
+				while (cursor.moveToNext()) {
+					String contact = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CONTACT));
+					list.add(contact);
+				}
+				ShowUsInMap.startShowUsInMap(this, list);
+			} catch (Exception e) {
+				// Skip intentionally
+			} finally {
+				if (cursor != null) {
+					cursor.close();
+				}
+			}
+			break;
+		}
+	}
 }

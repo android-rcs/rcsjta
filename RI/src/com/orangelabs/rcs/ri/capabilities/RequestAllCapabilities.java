@@ -55,9 +55,6 @@ public class RequestAllCapabilities extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_refresh);
         
-        // Set title
-        setTitle(R.string.menu_refresh_capabilities);
-        
 		// Set buttons callback
         Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnSyncListener);        

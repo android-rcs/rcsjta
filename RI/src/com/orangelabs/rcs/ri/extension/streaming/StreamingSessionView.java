@@ -37,7 +37,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
@@ -217,9 +216,6 @@ public class StreamingSessionView extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_session_view);
 
-        // Set title
-        setTitle(R.string.title_streaming_session);
-    	
         // Set buttons callback
 		Button sendBtn = (Button)findViewById(R.id.send_btn);
 		sendBtn.setOnClickListener(btnSendListener);
@@ -337,8 +333,8 @@ public class StreamingSessionView extends Activity {
 					
 					// Get remote contact
 					contact = session.getRemoteContact();
-					String displayName = RcsDisplayName.get(this, contact);
-					String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
+					String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
+					
 					// Manual accept
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setTitle(R.string.title_streaming_session);
@@ -355,8 +351,7 @@ public class StreamingSessionView extends Activity {
 	    	TextView featureTagEdit = (TextView)findViewById(R.id.feature_tag);
 	    	featureTagEdit.setText(serviceId);
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
-	    	String displayName = RcsDisplayName.get(this, contact);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
+			String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
 	    	contactEdit.setText(from);
 			Button sendBtn = (Button)findViewById(R.id.send_btn);
 			if (session != null) {

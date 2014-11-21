@@ -15,30 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.messaging.chat;
+
+
+package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
 /**
- * Group chat invitation receiver
+ * CHAT invitation receiver
  * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ * 
  */
-public class GroupChatInvitationReceiver extends BroadcastReceiver {
+public class SingleChatInvitationReceiver extends BroadcastReceiver {
 
 	/**
-	 * Action New Group CHAT Invitation
+	 * Action New One to One CHAT Message
 	 */
-	/* package private */static final String ACTION_NEW_GC = "NEW_GC";
+	/* package private */static final String ACTION_NEW_121_CHAT_MSG = "NEW_121_CHAT_MSG";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Send intent to service
-		Intent receiverIntent = new Intent(context, ChatIntentService.class);
+
+		Intent receiverIntent = new Intent(context, SingleChatIntentService.class);
 		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_NEW_GC);
+		receiverIntent.setAction(ACTION_NEW_121_CHAT_MSG);
 		context.startService(receiverIntent);
 	}
 

@@ -41,6 +41,10 @@ public class VideoSharingDAO implements Parcelable {
 	private int direction;
 	private long timestamp;
 	private long duration;
+	private int height;
+	private int width;
+	// TODO private int orientation;
+	private String videoEncoding;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(VideoSharingLog.SHARING_ID).append("=?").toString();
 
@@ -62,6 +66,10 @@ public class VideoSharingDAO implements Parcelable {
 		direction = source.readInt();
 		timestamp = source.readLong();
 		duration = source.readLong();
+		height = source.readInt();
+		width = source.readInt();
+		videoEncoding = source.readString();
+
 	}
 	
 	public int getState() {
@@ -88,12 +96,24 @@ public class VideoSharingDAO implements Parcelable {
 		return duration;
 	}
 
+	public int getHeight() {
+		return height;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public String getVideoEncoding() {
+		return videoEncoding;
+	}
+
 	/**
 	 * Construct the Video Sharing data object from the provider
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param sharingId
 	 *            the unique key field
 	 * @throws Exception
@@ -115,6 +135,9 @@ public class VideoSharingDAO implements Parcelable {
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
 				duration = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION));
+				height = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.HEIGHT));
+				width = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.WIDTH));
+				videoEncoding = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.VIDEO_ENCODING));
 			} else {
 				throw new Exception("Sharing ID not found" );
 			}
@@ -151,6 +174,9 @@ public class VideoSharingDAO implements Parcelable {
 		dest.writeInt(direction);
 		dest.writeLong(timestamp);
 		dest.writeLong(duration);
+		dest.writeInt(height);
+		dest.writeInt(width);
+		dest.writeString(videoEncoding);
 	};
 
 	public static final Parcelable.Creator<VideoSharingDAO> CREATOR = new Parcelable.Creator<VideoSharingDAO>() {

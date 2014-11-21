@@ -18,7 +18,10 @@
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -57,9 +60,6 @@ public class ShowUsInMap extends MapActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		// Set title
-		setTitle(R.string.menu_showus_map);
-
 		// Set layout
 		setContentView(R.layout.geoloc_display);
 
@@ -168,5 +168,16 @@ public class ShowUsInMap extends MapActivity {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Start activity
+	 * @param context
+	 * @param contacts list of contacts
+	 */
+	public static void startShowUsInMap(Context context, List<String> contacts) {
+		Intent intent = new Intent(context, ShowUsInMap.class);
+		intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, (ArrayList<String>) contacts);
+		context.startActivity(intent);
 	}
 }

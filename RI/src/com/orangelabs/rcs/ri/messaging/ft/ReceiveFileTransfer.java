@@ -31,6 +31,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -43,12 +44,12 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.FileTransferService;
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.ft.GroupFileTransferListener;
+import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -102,6 +103,8 @@ public class ReceiveFileTransfer extends Activity {
 	 * The log tag for this class
 	 */
 	private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
+	
+	private static final String VCARD_MIME_TYPE = "text/x-vcard";
 	
 	/**
 	 * Group File transfer listener
@@ -174,9 +177,6 @@ public class ReceiveFileTransfer extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_receive);
 
-        // Set title
-		setTitle(R.string.title_file_transfer);
-        
 		// Set pause and resume button
 		Button pauseBtn = (Button) findViewById(R.id.pause_btn);
 		pauseBtn.setOnClickListener(btnPauseListener);
@@ -247,9 +247,30 @@ public class ReceiveFileTransfer extends Activity {
 			// Get the file transfer session
     		fileTransfer = ftApi.getFileTransfer(ftDao.getTransferId());
 			if (fileTransfer == null) {
-				// Session not found or expired
-				Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
-				return;
+				try {
+					// Fetch state from the provider
+					ftDao = new FileTransferDAO(this, ftDao.getTransferId());
+					if (ftDao.getState() == FileTransfer.State.TRANSFERRED) {
+						displayTransferredFile();
+						return;
+					} else {
+						String reasonCode = RiApplication.FT_REASON_CODES[ftDao.getReasonCode()];
+						if (LogUtils.isActive) {
+							Log.e(LOGTAG, "Transfer failed state: "+ftDao.getState()+" reason: "+reasonCode);
+						}
+						// Transfer failed
+						Utils.showMessageAndExit(this, getString(R.string.label_transfer_failed, reasonCode), exitOnce);
+						return;
+					}
+				} catch (Exception e) {
+					if (LogUtils.isActive) {
+						Log.e(LOGTAG, "Failed to retrieve transferred file", e);
+					}
+					
+					// Session not found or expired
+					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
+					return;
+				}
 			}
 			// Add service event listener
 			if (groupFileTransfer) {
@@ -258,9 +279,7 @@ public class ReceiveFileTransfer extends Activity {
 				ftApi.addEventListener(ftListener);
 			}
 
-			ContactId remote = ftDao.getContact();
-			String displayName = RcsDisplayName.get(this, remote);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, remote, displayName);
+			String from = RcsDisplayName.getInstance(this).getDisplayName(ftDao.getContact());
 			
 			// Display transfer infos
 			TextView fromTextView = (TextView) findViewById(R.id.from);
@@ -274,13 +293,12 @@ public class ReceiveFileTransfer extends Activity {
 	    	if (resuming) {
 	    		return;
 	    	}
-	    	// TODO Below test if wrong. It does not consider roaming conditions.
-	    	// To be changed with CR018 which will introduce a new state : ACCEPTING.
+	    	// TODO To be changed with CR018 which will introduce a new state : ACCEPTING.
 	    	// The test is kept in the meantime because it is the only way
 	    	// to know if FT is auto accepted by the stack (at least in normal conditions)
 	    	
 	    	// Check if not already accepted by the stack
-	    	if (ftApi.getConfiguration().isAutoAcceptEnabled()) {	    		
+	    	if (isFileTransferInvitationAutoAccepted(ftApi.getConfiguration())) {	    		
 	    		// File Transfer is auto accepted by the stack. Check capacity
 				isCapacityOk(ftDao.getSize());
 				
@@ -315,7 +333,7 @@ public class ReceiveFileTransfer extends Activity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle(R.string.title_file_transfer);
 				
-				builder.setMessage(getString(R.string.label_ft_from_size, displayName, ftDao.getSize()/1024));
+				builder.setMessage(getString(R.string.label_ft_from_size, from, ftDao.getSize()/1024));
 				builder.setCancelable(false);
 				if (ftDao.getThumbnail() != null) {
 					try {
@@ -327,7 +345,7 @@ public class ReceiveFileTransfer extends Activity {
 						}
 					}
 				} else {
-					if (ftDao.getMimeType().equals("text/vcard")) {
+					if (VCARD_MIME_TYPE.equals(ftDao.getMimeType())) {
 						builder.setIcon(R.drawable.ri_contact_card_icon);
 					} else {
 						builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
@@ -366,6 +384,20 @@ public class ReceiveFileTransfer extends Activity {
 			}
 			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
     	}
+	}
+	
+	/**
+	 * Check if file transfer invitation is auto-accepted
+	 * @param config the file transfer service configuration
+	 * @return True if already auto accepted by the stack
+	 */
+	private boolean isFileTransferInvitationAutoAccepted(FileTransferServiceConfiguration config) {
+		TelephonyManager telephony = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if (telephony.isNetworkRoaming()) {
+			return config.isAutoAcceptInRoamingEnabled();
+		} else {
+			return config.isAutoAcceptEnabled();
+		}
 	}
 	
 	/**
@@ -657,7 +689,6 @@ public class ReceiveFileTransfer extends Activity {
 					break;
 
 				case FileTransfer.State.TRANSFERRED:
-					statusView.setText(_state);
 					displayTransferredFile();
 					break;
 
@@ -669,6 +700,8 @@ public class ReceiveFileTransfer extends Activity {
 	}
 	
 	private void displayTransferredFile() {
+		TextView statusView = (TextView) findViewById(R.id.progress_status);
+		statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED]);
 		// Make sure progress bar is at the end
 		ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 		progressBar.setProgress(progressBar.getMax());
@@ -680,10 +713,10 @@ public class ReceiveFileTransfer extends Activity {
 		Button resumeBtn = (Button) findViewById(R.id.resume_btn);
 		resumeBtn.setEnabled(false);
 
-		if (ftDao.getMimeType().equals("text/vcard")) {
+		if (VCARD_MIME_TYPE.equals(ftDao.getMimeType())) {
 			// Show the transferred vCard
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(ftDao.getFile(), "text/x-vcard");
+			intent.setDataAndType(ftDao.getFile(), VCARD_MIME_TYPE);
 			startActivity(intent);
 		} else {
 			if (ftDao.getMimeType().startsWith("image/")) {

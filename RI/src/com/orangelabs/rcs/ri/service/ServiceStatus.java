@@ -50,9 +50,6 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_status);
         
-        // Set title
-        setTitle(R.string.menu_service);
-        
     	// Display service status by default
     	displayServiceStatus(false);
 

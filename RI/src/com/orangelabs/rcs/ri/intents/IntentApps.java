@@ -42,9 +42,6 @@ public class IntentApps extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.intents_apps);
         
-        // Set title
-        setTitle(R.string.menu_apps);
-    
 		// Set button callback
         Button btn = (Button)findViewById(R.id.load_chat);
         btn.setOnClickListener(btnListener);

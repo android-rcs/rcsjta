@@ -112,9 +112,6 @@ public class InitiateFileUpload extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.fileupload_initiate);
         
-        // Set title
-        setTitle(R.string.title_initiate_upload);
-        
         // Set buttons callback
         Button uploadBtn = (Button)findViewById(R.id.upload_btn);
         uploadBtn.setOnClickListener(btnUploadListener);

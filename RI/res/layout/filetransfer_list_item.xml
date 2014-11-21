@@ -12,7 +12,7 @@
     
     <TextView android:id="@+id/number"
 		android:paddingTop="5dip"
-        android:text="+33XXXXXXX"
+        android:text="@string/label_uninitialized_contact"
 	    android:textStyle="bold"
 	    android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,8 +21,8 @@
     <TextView android:id="@+id/filename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/number"
-        android:text="Xxxxxxxx"
+        android:layout_below="@id/number"
+        android:text="@string/label_uninitialized_filename"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>
 
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/filename"
-        android:text="Xxxxxxxx"
+        android:text="@string/label_uninitialized_filesize"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>
     
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/filesize"
-        android:text="Xxxxxxxx"
+        android:text="@string/label_state_unknown"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>
 
@@ -46,7 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/state"
-        android:text="Xxxxxxxx"
+        android:text="@string/label_uninitialized_direction"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>
 
@@ -54,7 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/direction"
-        android:text="Xxxxxxxx"
+        android:text="@string/label_uninitialized_date"
         android:textAppearance="?android:attr/textAppearanceSmall"
 		android:paddingBottom="5dip"/>
 </RelativeLayout>

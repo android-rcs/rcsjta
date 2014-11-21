@@ -23,21 +23,16 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
-import java.util.Vector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -108,138 +103,6 @@ public class Utils {
 		} catch(NameNotFoundException e) {
 		}
 		return version;
-	}
-	
-	/**
-	 * Create a contact selector based on the native address book
-	 * 
-	 * @param activity Activity
-	 * @return List adapter
-	 */
-	public static ContactListAdapter createContactListAdapter(Activity activity) {
-	    String[] PROJECTION = new String[] {
-	    		Phone._ID,
-	    		Phone.NUMBER,
-	    		Phone.LABEL,
-	    		Phone.TYPE,
-	    		Phone.CONTACT_ID
-		    };
-        ContentResolver content = activity.getContentResolver();
-		Cursor cursor = content.query(Phone.CONTENT_URI, PROJECTION, Phone.NUMBER + "!='null'", null, null);
-
-		// List of unique number
-		Vector<String> treatedNumbers = new Vector<String>();
-		
-		MatrixCursor matrix = new MatrixCursor(PROJECTION);
-		while (cursor.moveToNext()){
-			// Key is phone number
-			String phoneNumber = cursor.getString(1);
-
-			// Filter
-			if (!treatedNumbers.contains(phoneNumber)){
-				matrix.addRow(new Object[]{cursor.getLong(0), 
-						phoneNumber,
-						cursor.getString(2),
-						cursor.getInt(3),
-						cursor.getLong(4)});
-				treatedNumbers.add(phoneNumber);
-			}
-		}
-		cursor.close();
-		
-		return new ContactListAdapter(activity, matrix);
-	}
-	
-	/**
-	 * Create a contact selector with RCS capable contacts
-	 * 
-	 * @param activity Activity
-	 * @return List adapter
-	 */
-	public static ContactListAdapter createRcsContactListAdapter(Activity activity) {
-	    String[] PROJECTION = new String[] {
-	    		Phone._ID,
-	    		Phone.NUMBER,
-	    		Phone.LABEL,
-	    		Phone.TYPE,
-	    		Phone.CONTACT_ID
-		    };
-		MatrixCursor matrix = new MatrixCursor(PROJECTION);
-	    
-	    // Get the list of RCS contacts 
-	    // TODO List<String> rcsContacts = contactsApi.getRcsContacts();
-	    ContentResolver content = activity.getContentResolver();
-	    
-		// Query all phone numbers
-        Cursor cursor = content.query(Phone.CONTENT_URI, 
-        		PROJECTION, 
-        		null, 
-        		null, 
-        		null);
-
-		// List of unique number
-		Vector<String> treatedNumbers = new Vector<String>();
-		while (cursor.moveToNext()){
-			// Keep a trace of already treated row
-			String phoneNumber = cursor.getString(1);
-
-			// If this number is RCS and not already in the list, take it 
-// TODO			if (rcsContacts.contains(phoneNumber) && !treatedNumbers.contains(phoneNumber)){
-				matrix.addRow(new Object[]{cursor.getLong(0), 
-						phoneNumber,
-						cursor.getString(2),
-						cursor.getInt(3),
-						cursor.getLong(4)});
-				treatedNumbers.add(phoneNumber);
-//			}
-		}
-		cursor.close();
-		
-		return new ContactListAdapter(activity, matrix);
-	}
-
-	/**
-	 * Create a multi contacts selector with RCS capable contacts
-	 * 
-	 * @param activity Activity
-	 * @return List adapter
-	 */
-	public static MultiContactListAdapter createMultiContactImCapableListAdapter(Activity activity) {
-	    String[] PROJECTION = new String[] {
-	    		Phone._ID,
-	    		Phone.NUMBER,
-	    		Phone.LABEL,
-	    		Phone.TYPE,
-	    		Phone.CONTACT_ID
-		    };
-
-		MatrixCursor matrix = new MatrixCursor(PROJECTION);
-
-	    // Get the list of RCS contacts 
-	    // List<String> rcsContacts = contactsApi.getRcsContacts();
-	    ContentResolver content = activity.getContentResolver();
-
-	    // Query all phone numbers
-        Cursor cursor = content.query(Phone.CONTENT_URI, PROJECTION, null, null, null);
-
-		// List of unique number
-		Vector<String> treatedNumbers = new Vector<String>();
-		while (cursor.moveToNext()){
-			// Keep a trace of already treated row
-			String phoneNumber = cursor.getString(1);
-			
-			// If this number is RCS and not already in the list, take it 
-// TODO			if (rcsContacts.contains(phoneNumber) && !treatedNumbers.contains(phoneNumber)){
-				matrix.addRow(new Object[]{cursor.getLong(0), 
-						phoneNumber,
-						cursor.getString(2),
-						cursor.getInt(3),
-						cursor.getLong(4)});
-				treatedNumbers.add(phoneNumber);
-//			}
-		}
-		cursor.close();
-		return new MultiContactListAdapter(activity, matrix);
 	}
 	
 	/**
@@ -362,12 +225,15 @@ public class Utils {
         try {
         	String filename = FileUtils.getFileName(activity, uri);
             Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename), Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();  
+            intent.setAction(android.content.Intent.ACTION_VIEW);  
+            intent.setDataAndType(uri, "image/*");  
+            activity.startActivity(intent);        
 		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "showPictureAndExit" ,e);
+			}
 		}
-        Intent intent = new Intent();  
-        intent.setAction(android.content.Intent.ACTION_VIEW);  
-        intent.setDataAndType(uri, "image/*");  
-        activity.startActivity(intent);        
     }
   
     /**

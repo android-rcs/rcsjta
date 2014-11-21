@@ -16,7 +16,7 @@
 		android:title="@string/menu_showus_map"
 		android:icon="@drawable/ri_menu_showus_map"/>
 	
-	<item android:id="@+id/menu_clear_log"
-		android:title="@string/menu_clear_log"
-		android:icon="@drawable/ri_menu_clear_log"/>
+	<item android:id="@+id/menu_send_file"
+		android:title="@string/menu_send_file"
+		android:icon="@drawable/ri_menu_file_transfer"/>
 </menu>

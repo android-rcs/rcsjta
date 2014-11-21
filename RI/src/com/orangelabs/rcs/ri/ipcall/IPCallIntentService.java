@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.orangelabs.rcs.ri.R;
@@ -105,7 +104,7 @@ public class IPCallIntentService extends IntentService {
 			// TODO check state to know if rejected
 			// TODO check validity of direction, etc ...
 			// Display invitation notification
-			addIPCallInvitationNotification(this, intent, ipCallDao);
+			addIPCallInvitationNotification(intent, ipCallDao);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot read IP Call data from provider", e);
@@ -116,14 +115,12 @@ public class IPCallIntentService extends IntentService {
 	/**
 	 * Add IP Call notification
 	 * 
-	 * @param context
-	 *            Context
 	 * @param intent
 	 *            Intent invitation
 	 * @param ipCallDao
 	 *            the IP Call data object
 	 */
-	private void addIPCallInvitationNotification(Context context, Intent invitation, IPCallDAO ipCallDao) {
+	private void addIPCallInvitationNotification(Intent invitation, IPCallDAO ipCallDao) {
 		if (ipCallDao.getContact() == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "addIPCallInvitationNotification failed: cannot parse contact");
@@ -133,24 +130,23 @@ public class IPCallIntentService extends IntentService {
 
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, IPCallView.class);
+		intent.setClass(this, IPCallView.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(ipCallDao.getCallId());
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		ContactId contact = ipCallDao.getContact();
-		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
+		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
 		
 		String notifTitle;
 		if (ipCallDao.getVideoEncoding() != null) {
-			notifTitle = context.getString(R.string.title_recv_ipcall_video, displayName);
+			notifTitle = getString(R.string.title_recv_ipcall_video, displayName);
 		} else {
-			notifTitle = context.getString(R.string.title_recv_ipcall, displayName);
+			notifTitle = getString(R.string.title_recv_ipcall, displayName);
 		}
 		
 		// Create notification
-		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
 		notif.setContentIntent(contentIntent);
 		notif.setSmallIcon(R.drawable.ri_notif_ipcall_icon);
 		notif.setWhen(Calendar.getInstance().getTimeInMillis());
@@ -162,7 +158,7 @@ public class IPCallIntentService extends IntentService {
 		notif.setContentText(getString(R.string.label_from_args, displayName));
 
 		// Send notification
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(ipCallDao.getCallId(), Utils.NOTIF_ID_IP_CALL, notif.build());
 	}
 }
