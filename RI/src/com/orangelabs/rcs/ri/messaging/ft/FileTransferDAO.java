@@ -179,7 +179,7 @@ public class FileTransferDAO implements Parcelable {
 			if (cursor.moveToFirst()) {
 				transferId = fileTransferId;
 				chatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT_NUMBER));
+				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
 					contact = contactUtils.formatContact(_contact);

@@ -22,7 +22,6 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -41,6 +40,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -61,6 +61,8 @@ public class MessageLog implements IMessageLog {
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
+	
+	private static final String[] PROJECTION_MESSAGE_ID = new String[] { MessageData.KEY_MESSAGE_ID };
 
 	/**
 	 * Constructor
@@ -181,25 +183,12 @@ public class MessageLog implements IMessageLog {
 		cr.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addSpamMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
-	 */
 	@Override
 	public void addSpamMessage(InstantMessage msg) {
 		addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.REJECTED,
 				ChatLog.Message.ReasonCode.REJECTED_SPAM);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage,
-	 * int)
-	 */
 	@Override
 	public void addIncomingOneToOneChatMessage(InstantMessage msg) {
 			if (msg.isImdnDisplayedRequested()) {
@@ -214,13 +203,6 @@ public class MessageLog implements IMessageLog {
 
 	}
 
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatMessage(java.lang.String,
-	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage, int, int, int)
-	 */
 	@Override
 	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction, int status, int reasonCode) {
 		String msgId = msg.getMessageId();
@@ -295,19 +277,19 @@ public class MessageLog implements IMessageLog {
 		if (contact != null) {
 			values.put(MessageData.KEY_CONTACT, contact.toString());
 		}
+		values.put(MessageData.KEY_MESSAGE_ID, IdGenerator.generateMessageID());
 		values.put(MessageData.KEY_MIME_TYPE, MimeType.GROUPCHAT_EVENT);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		values.put(MessageData.KEY_DIRECTION, Direction.IRRELEVANT);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
+		values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 		cr.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#markMessageAsRead(java.lang.String)
-	 */
 	@Override
 	public void markMessageAsRead(String msgId) {
 		if (logger.isActivated()) {
@@ -325,11 +307,6 @@ public class MessageLog implements IMessageLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
-	 * updateChatMessageStatusAndReasonCode(java.lang.String, int, int)
-	 */
 	@Override
 	public void updateChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
 		if (logger.isActivated()) {
@@ -353,11 +330,6 @@ public class MessageLog implements IMessageLog {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#markIncomingChatMessageAsReceived(java.lang.String)
-	 */
 	@Override
 	public void markIncomingChatMessageAsReceived(String msgId) {
 		if (logger.isActivated()) {
@@ -366,20 +338,12 @@ public class MessageLog implements IMessageLog {
 		updateChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#isMessagePersisted(java.lang.String)
-	 */
 	@Override
 	public boolean isMessagePersisted(String msgId) {
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), new String[] {
-				MessageData.KEY_MESSAGE_ID
-			}, null, null, null);
-			return (cursor != null);
-
+			cursor = cr.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID, null, null, null);
+			return cursor.moveToFirst();
 		} finally {
 			if (cursor != null) {
 				cursor.close();

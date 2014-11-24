@@ -128,7 +128,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			.toString();
 
 	protected static final String[] PROJECTION = new String[] { MESSAGE_ID_AS_ID, ChatLog.Message.MIME_TYPE,
-			ChatLog.Message.CONTENT, ChatLog.Message.TIMESTAMP, ChatLog.Message.MESSAGE_STATUS, ChatLog.Message.DIRECTION,
+			ChatLog.Message.CONTENT, ChatLog.Message.TIMESTAMP, ChatLog.Message.STATUS, ChatLog.Message.DIRECTION,
 			ChatLog.Message.CONTACT };
 
 	protected final static String QUERY_SORT_ORDER = new StringBuilder(ChatLog.Message.TIMESTAMP).append(" ASC").toString();

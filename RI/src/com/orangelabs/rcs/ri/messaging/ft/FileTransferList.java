@@ -61,7 +61,7 @@ public class FileTransferList extends Activity {
 	// @formatter:off
  	private static final String[] PROJECTION = new String[] {
  			FILE_TRANSFER_ID_AS_ID,
- 			FileTransferLog.CONTACT_NUMBER,
+ 			FileTransferLog.CONTACT,
  			FileTransferLog.FILENAME,
  			FileTransferLog.FILESIZE,
  			FileTransferLog.STATE,
@@ -182,7 +182,7 @@ public class FileTransferList extends Activity {
 		TextView timestamptext;
 
 		public FileTransferItemViewHolder(View base, Cursor cursor) {
-			columnNumber = cursor.getColumnIndex(FileTransferLog.CONTACT_NUMBER);
+			columnNumber = cursor.getColumnIndex(FileTransferLog.CONTACT);
 			columnFilename = cursor.getColumnIndex(FileTransferLog.FILENAME);
 			columnFilesize = cursor.getColumnIndex(FileTransferLog.FILESIZE);
 			columnState = cursor.getColumnIndex(FileTransferLog.STATE);

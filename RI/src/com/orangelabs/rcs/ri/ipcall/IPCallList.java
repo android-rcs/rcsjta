@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,6 +49,13 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class IPCallList extends Activity {
+	
+	/**
+	 * Contact is the ID since there is a single contact occurrence in the query result
+	 */
+	private static final String CONTACT_AS_ID = new StringBuilder(IPCallLog.CONTACT).append(" AS ").append(BaseColumns._ID)
+			.toString();
+
 	
 	/**
 	 * List view
@@ -85,8 +93,7 @@ public class IPCallList extends Activity {
 	private CallListAdapter createListAdapter() {
 		Uri uri = IPCallLog.CONTENT_URI;
         String[] projection = new String[] {
-    		IPCallLog.ID,
-    		IPCallLog.CONTACT_NUMBER,
+        	CONTACT_AS_ID,
     		IPCallLog.STATE,
     		IPCallLog.DIRECTION,
     		IPCallLog.TIMESTAMP
@@ -120,10 +127,10 @@ public class IPCallList extends Activity {
             View view = inflater.inflate(R.layout.ipcall_list_item, parent, false);
             
             CallItemCache cache = new CallItemCache();
-    		cache.number = cursor.getString(1);
-    		cache.state = cursor.getInt(2);
-    		cache.direction = cursor.getInt(3);
-    		cache.date = cursor.getLong(4);
+    		cache.number = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+    		cache.state = cursor.getInt(cursor.getColumnIndex(IPCallLog.STATE));
+    		cache.direction = cursor.getInt(cursor.getColumnIndex(IPCallLog.DIRECTION));
+    		cache.date = cursor.getLong(cursor.getColumnIndex(IPCallLog.TIMESTAMP));
             view.setTag(cache);
             
             return view;

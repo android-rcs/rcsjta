@@ -156,7 +156,7 @@ public class ChatMessageDAO implements Parcelable {
 				}
 				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
 				content = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
-				status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_STATUS));
+				status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
 				readStatus = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.READ_STATUS));
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION));
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP));

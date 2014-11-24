@@ -60,7 +60,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
     	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
@@ -99,7 +99,7 @@ public class ChatMessageTest extends AndroidTestCase {
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(geolocMsg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, remote.toString());		
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
     	Cursor cursor = getContext().getContentResolver().query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,

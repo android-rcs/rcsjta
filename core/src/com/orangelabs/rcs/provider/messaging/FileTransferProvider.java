@@ -106,7 +106,7 @@ public class FileTransferProvider extends ContentProvider {
             Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 11;
+        private static final int DATABASE_VERSION = 12;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -116,7 +116,7 @@ public class FileTransferProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
                     .append(FileTransferData.KEY_FT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(FileTransferData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(FileTransferData.KEY_CONTACT).append(" TEXT,")
                     .append(FileTransferData.KEY_FILE).append(" TEXT NOT NULL,")
                     .append(FileTransferData.KEY_FILENAME).append(" TEXT NOT NULL,")
                     .append(FileTransferData.KEY_CHAT_ID).append(" TEXT NOT NULL,")

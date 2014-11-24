@@ -22,7 +22,9 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import com.gsma.services.rcs.chat.ChatLog;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -35,9 +37,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.services.rcs.chat.ChatLog;
 
 /**
  * Chat provider
@@ -127,7 +127,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 12;
+        private static final int DATABASE_VERSION = 13;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -148,7 +148,7 @@ public class ChatProvider extends ContentProvider {
                     .append(ChatData.KEY_CONTACT).append(" TEXT);").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE).append("(")
                     .append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
-                    .append(MessageData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(MessageData.KEY_CONTACT).append(" TEXT,")
                     .append(MessageData.KEY_MESSAGE_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(MessageData.KEY_CONTENT).append(" TEXT,")
                     .append(MessageData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")

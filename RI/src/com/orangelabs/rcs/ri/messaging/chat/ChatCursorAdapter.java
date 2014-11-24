@@ -216,7 +216,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			columnDirection = cursor.getColumnIndex(ChatLog.Message.DIRECTION);
 			columnTimestamp = cursor.getColumnIndex(ChatLog.Message.TIMESTAMP);
 			columnContent = cursor.getColumnIndex(ChatLog.Message.CONTENT);
-			columnMessageStatus = cursor.getColumnIndex(ChatLog.Message.MESSAGE_STATUS);
+			columnMessageStatus = cursor.getColumnIndex(ChatLog.Message.STATUS);
 			columnContact = cursor.getColumnIndex(ChatLog.Message.CONTACT);
 			columnMimetype = cursor.getColumnIndex(ChatLog.Message.MIME_TYPE);
 			// Save children views

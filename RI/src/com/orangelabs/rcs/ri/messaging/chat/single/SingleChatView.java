@@ -41,6 +41,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.OneToOneChat;
@@ -98,11 +99,10 @@ public class SingleChatView extends ChatView {
 			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
 			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("')").toString();
 
-	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.READ_STATUS).append("=? AND (")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("')").toString();
-
-	private final static String[] UNREADS_WHERE_ARGS_CLAUSE = new String[] { Integer.toString(RcsCommon.ReadStatus.UNREAD) };
+	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.CONTACT).append("=? AND ").append(ChatLog.Message.READ_STATUS)
+			.append("=").append(ReadStatus.UNREAD).append(" AND (").append(ChatLog.Message.MIME_TYPE).append("='")
+			.append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ").append(ChatLog.Message.MIME_TYPE).append("='")
+			.append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("')").toString();
 
 	/**
 	 * Single Chat listener
@@ -211,7 +211,7 @@ public class SingleChatView extends ChatView {
 		menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
 		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
 		if (direction == RcsCommon.Direction.OUTGOING) {
-			int status = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.MESSAGE_STATUS));
+			int status = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.STATUS));
 			switch (status) {
 			case ChatLog.Message.Status.Content.FAILED:
 				menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND, R.string.menu_resend_message);
@@ -269,15 +269,15 @@ public class SingleChatView extends ChatView {
 	/**
 	 * Get unread messages for contact
 	 * @param contact
-	 * @return set of unread messages
+	 * @return set of unread message IDs
 	 */
 	private Set<String> getUnreadMessageIds(ContactId contact) {
 		Set<String> unReadMessageIDs = new HashSet<String>();
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_CHAT_URI, contact.toString());
+		String[] where_args = new String[] { contact.toString() };
+		String[] projection = new String[] { ChatLog.Message.MESSAGE_ID };
 		Cursor cursor = null;
 		try {
-			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID };
-			cursor = getContentResolver().query(uri, projection, UNREADS_WHERE_CLAUSE, UNREADS_WHERE_ARGS_CLAUSE, QUERY_SORT_ORDER);
+			cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, projection, UNREADS_WHERE_CLAUSE, where_args, QUERY_SORT_ORDER);
 			while (cursor.moveToNext()) {
 				unReadMessageIDs.add(cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID)));
 			}
