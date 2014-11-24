@@ -137,7 +137,7 @@ public class SipTransactionContext {
 	 */
 	public boolean isSipSuccessfullResponse() {
 		int code = getStatusCode();
-	    return ((code >= Response.OK) && (code < Response.MULTIPLE_CHOICES));
+	    return (Response.OK <= code && Response.MULTIPLE_CHOICES > code);
 	}
 
 	/**
