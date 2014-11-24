@@ -16,62 +16,111 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_CAPABILITIES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_USE_CHATS"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_CHATS"/>
+	<uses-permission android:name="com.gsma.services.rcs.READ_RCS_STATE"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_FILETRANSFERS"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_FILETRANSFERS"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_FILETRANSFERS"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_IMAGESHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_IMAGESHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_IMAGESHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_VIDEOSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_VIDEOSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_VIDEOSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_GEOLOCSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_GEOLOCSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_GEOLOCSHARES"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_FILEUPLOADS"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_USE_HISTORY"/>
+	<uses-permission android:name="com.gsma.services.rcs.RCS_READ_HISTORY"/>		
 
     <application android:icon="@drawable/app_icon" android:label="@string/app_name" android:name=".RiApplication">
 
         <uses-library android:name="com.google.android.maps"/>
         
 		<!-- Main -->
-        <activity android:name=".RI">
+        <activity
+            android:name=".RI"
+            android:label="@string/app_name" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".AboutRI"/>
+        
+        <activity
+            android:name=".AboutRI"
+            android:label="@string/menu_about" />
 
 		<!-- Intents API -->
-        
-        <activity android:name=".intents.TestIntentsApi"/>
+		
+		<activity
+            android:name=".intents.TestIntentsApi"
+            android:label="@string/menu_intents" />
 
-        <activity android:name=".intents.IntentServices"/>
+        <activity android:name=".intents.IntentServices"
+			android:label="@string/menu_services" />
 
-        <activity android:name=".intents.IntentApps"/>
+		<activity
+            android:name=".intents.IntentApps"
+            android:label="@string/menu_apps" />
         
 		<!-- Service API -->
         
         <activity android:name=".service.TestServiceApi"/>
+        
+        <activity
+            android:name=".service.ServiceStatus"
+            android:label="@string/menu_service" />
 
-        <activity android:name=".service.ServiceStatus"/>
-        
-        <activity android:name=".service.RegistrationStatus"/>
-        
-        <!-- Contacts API -->
+		<activity
+            android:name=".service.RegistrationStatus"
+            android:label="@string/menu_registration_status" />
+
+		<!-- Contacts API -->
         
         <activity android:name=".contacts.TestContactsApi"/>
         
-        <activity android:name=".contacts.JoynContactsList"/>
+        <activity
+            android:name=".contacts.RcsContactsList"
+            android:label="@string/menu_list_rcs_contacts" />
         
-        <activity android:name=".contacts.OnlineContactsList"/>
+        <activity
+            android:name=".contacts.OnlineContactsList"
+            android:label="@string/menu_list_online_contacts" />
         
-        <activity android:name=".contacts.SupportedContactsList"/>
+        <activity
+            android:name=".contacts.SupportedContactsList"
+            android:label="@string/menu_list_supported_contacts" />
         
-        <activity android:name=".contacts.ContactVCard"/>
-        
+        <activity
+            android:name=".contacts.ContactVCard"
+            android:label="@string/menu_contact_vcard" />
+                
         <!-- Capabilities API -->
 
         <activity android:name=".capabilities.TestCapabilitiesApi"/>
-
-        <activity android:name=".capabilities.RequestCapabilities"/>
-
-		<activity android:name=".capabilities.MyCapabilities"/>
-
-		<activity android:name=".capabilities.RequestAllCapabilities"/>
-		
-		<activity android:name=".capabilities.CapabilitiesList"/>
+        
+        <activity
+            android:name=".capabilities.RequestCapabilities"
+            android:label="@string/menu_capabilities" />
+        
+        <activity
+            android:name=".capabilities.MyCapabilities"
+            android:label="@string/menu_my_capabilities" />
+        
+        <activity
+            android:name=".capabilities.RequestAllCapabilities"
+            android:label="@string/menu_refresh_capabilities" />
+				
+		<activity
+		    android:name=".capabilities.CapabilitiesList"
+		    android:label="@string/menu_capabilities_log" />
 		
 		<!-- Messaging API -->
 		
@@ -88,7 +137,7 @@
         </activity>
 
         <activity android:icon="@drawable/ri_quick_ft_icon"
-            android:label="@string/label_quick_ft"
+            android:label="@string/menu_transfer_file"
         	android:name=".messaging.ft.InitiateFileTransfer">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -115,13 +164,19 @@
             </intent-filter>
         </receiver>
         
-        <activity android:name=".messaging.ft.ReceiveFileTransfer"/>
-
-        <activity android:name=".messaging.ft.FileTransferList"/>
+        <activity
+            android:name=".messaging.ft.ReceiveFileTransfer"
+            android:label="@string/title_file_transfer" />
+        
+        <activity
+            android:name=".messaging.ft.FileTransferList"
+            android:label="@string/menu_file_transfer_log" />
         
         <!-- Chat API -->
         
-        <activity android:name=".messaging.chat.TestChatApi">
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:name=".messaging.chat.TestChatApi">
 			<intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -134,9 +189,10 @@
             </intent-filter>            
 		</activity>
 
-        <activity android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/label_quick_chat"
-            android:name=".messaging.chat.InitiateSingleChat">
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/menu_initiate_chat"
+            android:name="com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -148,17 +204,27 @@
             </intent-filter>
 		</activity>        
         
-		<receiver android:name=".messaging.chat.SingleChatInvitationReceiver">
+		<receiver android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         
-        <activity android:name=".messaging.chat.SingleChatView" android:launchMode="singleTop"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatView"
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/label_quick_chat"
+            android:launchMode="singleTop" />
 				
-        <activity android:name=".messaging.chat.ChatList"/>
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/menu_chat_log"
+            android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList"/>
         
-        <activity android:name=".messaging.chat.InitiateGroupChat">
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon" 
+            android:label="@string/menu_initiate_group_chat"
+            android:name=".messaging.chat.group.InitiateGroupChat">
 			<intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -169,31 +235,59 @@
             </intent-filter>
 		</activity>        
 
-        <receiver android:name="com.orangelabs.rcs.ri.messaging.chat.GroupChatMessageReceiver">
+        <receiver android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatMessageReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         
-		<receiver android:name=".messaging.chat.GroupChatInvitationReceiver">
+		<receiver android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 		
-        <activity android:name=".messaging.chat.GroupChatView" android:launchMode="singleTop"/>
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/title_group_chat"
+            android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView" 
+            android:launchMode="singleTop"/>
+        
+         <activity 
+            android:label="@string/title_group_delivery_info"
+            android:name="com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList"/>
                 
-        <activity android:name=".messaging.chat.GroupChatList"/>
+        <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/menu_group_chat_log"
+            android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList"/>
         
-        <activity android:name=".messaging.geoloc.EditGeoloc" android:windowSoftInputMode="stateHidden"/> 
+        <activity
+            android:name=".messaging.geoloc.EditGeoloc"
+            android:label="@string/menu_send_geoloc"
+            android:windowSoftInputMode="stateHidden" />
         
-        <activity android:name=".messaging.geoloc.SelectGeoloc"/>
+        <activity
+            android:name=".messaging.geoloc.SelectGeoloc"
+            android:label="@string/label_select_geoloc" />
         
-        <activity android:name=".messaging.geoloc.DisplayGeoloc"/>
+        <activity
+            android:name=".messaging.geoloc.DisplayGeoloc"
+            android:label="@string/title_display_geoloc" />
         
-        <activity android:name=".messaging.geoloc.ShowUsInMap"/>        
+        <activity
+            android:name=".messaging.geoloc.ShowUsInMap"
+            android:label="@string/menu_showus_map" />
         
-        <activity android:name=".messaging.chat.SendGroupFile"/>        
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.chat.group.SendGroupFile"
+            android:label="@string/menu_transfer_file"
+            android:icon="@drawable/ri_quick_ft_icon" />
+        
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.chat.single.SendSingleFile"
+            android:label="@string/menu_transfer_file" 
+            android:icon="@drawable/ri_quick_ft_icon" />
         
         <!-- Sharing API -->
         
@@ -201,66 +295,102 @@
 
         <!-- Image sharing API -->
         
-        <activity android:name=".sharing.image.TestImageSharingApi"/>
-
-        <activity android:name=".sharing.image.InitiateImageSharing"/>
+        <activity
+            android:name=".sharing.image.TestImageSharingApi"
+            android:label="@string/title_image_sharing" />
+        
+        <activity
+            android:name=".sharing.image.InitiateImageSharing"
+            android:label="@string/menu_initiate_image_sharing" />
         
 		<receiver android:name=".sharing.image.ImageSharingInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.ish.action.NEW_IMAGE_SHARING"/>
             </intent-filter>
         </receiver>
-
-        <activity android:name=".sharing.image.ReceiveImageSharing"/>
         
-        <activity android:name=".sharing.image.ImageSharingList"/>
+        <activity
+            android:name=".sharing.image.ReceiveImageSharing"
+            android:label="@string/title_image_sharing" />
+        
+        <activity
+            android:name=".sharing.image.ImageSharingList"
+            android:label="@string/menu_image_sharing_log" />
         
         <!-- Geoloc sharing API -->
         
-        <activity android:name=".sharing.geoloc.TestGeolocSharingApi"/>
+        <activity
+            android:name=".sharing.geoloc.TestGeolocSharingApi"
+            android:label="@string/title_geoloc_sharing" />
 
-        <activity android:name=".sharing.geoloc.InitiateGeolocSharing"/>
+		<activity
+            android:name=".sharing.geoloc.InitiateGeolocSharing"
+            android:label="@string/menu_initiate_geoloc_sharing" />
         
 		<receiver android:name=".sharing.geoloc.GeolocSharingInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.gsh.action.NEW_GEOLOC_SHARING"/>
             </intent-filter>
         </receiver>
-
-        <activity android:name=".sharing.geoloc.ReceiveGeolocSharing"/>
+        
+        <activity
+            android:name=".sharing.geoloc.ReceiveGeolocSharing"
+            android:label="@string/title_geoloc_sharing" />
         
         <!-- Video sharing API -->
         
-        <activity android:name=".sharing.video.TestVideoSharingApi"/>
-
-        <activity android:name=".sharing.video.InitiateVideoSharing" android:screenOrientation="landscape"/>
+        <activity
+            android:name=".sharing.video.TestVideoSharingApi"
+            android:label="@string/title_video_sharing" />
+        
+        <activity
+            android:name=".sharing.video.InitiateVideoSharing"
+            android:label="@string/menu_initiate_video_sharing"
+            android:screenOrientation="landscape" />
         
 		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING"/>
             </intent-filter>
         </receiver>
-
-        <activity android:name=".sharing.video.ReceiveVideoSharing" android:screenOrientation="landscape"/>
         
-        <activity android:name=".sharing.video.VideoSharingList"/>
+        <activity
+            android:name=".sharing.video.ReceiveVideoSharing"
+            android:label="@string/menu_video_sharing"
+            android:screenOrientation="landscape" />
         
-        <!-- MM session API -->
+        <activity
+            android:name=".sharing.video.VideoSharingList"
+            android:label="@string/menu_video_sharing_log" />
+            
+		<!-- MM session API -->
 
         <activity android:name=".extension.TestMultimediaSessionApi"/>
-
-        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"/>
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"
+            android:label="@string/menu_initiate_messaging_session" />
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"
+            android:label="@string/title_messaging_session" />
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList"
+            android:label="@string/menu_messaging_sessions_list" />
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession"
+            android:label="@string/menu_initiate_streaming_session" />
         
-        <activity android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"/>
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"
+            android:label="@string/title_streaming_session" />
         
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"
+            android:label="@string/menu_streaming_sessions_list" />
+"
         <receiver android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver">
             <intent-filter>
 		    	<action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
@@ -320,13 +450,17 @@
 	 	
 	 	<service android:name=".ipcall.IPCallIntentService" android:exported="false" />
 	 	
-	 	<service android:name=".messaging.chat.ChatIntentService" android:exported="false" />
+	 	<service android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatIntentService" android:exported="false" />*
+	 	
+	 	<service android:name=".messaging.chat.single.SingleChatIntentService" android:exported="false" />
 	 	
 	 	<service android:name=".extension.MultiMediaSessionIntentService" android:exported="false" />
 	 	
         <!-- File Upload API -->
-	 	
-        <activity android:name=".upload.InitiateFileUpload" />
+        
+        <activity
+            android:name=".upload.InitiateFileUpload"
+            android:label="@string/title_initiate_upload" />
 	 		 	
 </application>
 

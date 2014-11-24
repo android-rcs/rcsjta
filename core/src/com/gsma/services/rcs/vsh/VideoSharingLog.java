@@ -32,14 +32,9 @@ public class VideoSharingLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.vsh/vsh");
+    public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.services.rcs.provider.videoshare/videoshare");
 
-    /**
-     * The name of the column containing the unique ID for a row.
-     * <P>Type: primary key</P>
-     */
-    public static final String ID = "_id";
-    
     /**
      * The name of the column containing the unique ID of the video sharing.
      * <P>Type: TEXT</P>
@@ -104,4 +99,11 @@ public class VideoSharingLog {
      * <P>Type: INTEGER</P>
      */
     public static final String HEIGHT = "height";
+
+    /**
+     * The name of the column containing the video orientation
+     * <P>Type: INTEGER</P>
+     * @see VideoSharing.Orientation
+     */
+    public static final String ORIENTATION = "orientation";
 }

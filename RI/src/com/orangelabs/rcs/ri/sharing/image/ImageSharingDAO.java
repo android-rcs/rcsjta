@@ -45,6 +45,7 @@ public class ImageSharingDAO implements Parcelable {
 	private long timestamp;
 	private long sizeTransferred;
 	private long size;
+	private int reasonCode;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(ImageSharingLog.SHARING_ID).append("=?").toString();
 
@@ -75,6 +76,7 @@ public class ImageSharingDAO implements Parcelable {
 		timestamp = source.readLong();
 		sizeTransferred = source.readLong();
 		size = source.readLong();
+		reasonCode = source.readInt();
 	}
 
 	@Override
@@ -99,6 +101,7 @@ public class ImageSharingDAO implements Parcelable {
 		dest.writeLong(timestamp);
 		dest.writeLong(sizeTransferred);
 		dest.writeLong(size);
+		dest.writeInt(reasonCode);
 	};
 
 	public int getState() {
@@ -141,12 +144,16 @@ public class ImageSharingDAO implements Parcelable {
 		return size;
 	}
 
+	public int getReasonCode() {
+		return reasonCode;
+	}
+
 	/**
 	 * Construct the Image Sharing data object from the provider
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param sharingId
 	 *            the unique key field
 	 * @throws Exception
@@ -172,6 +179,7 @@ public class ImageSharingDAO implements Parcelable {
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
 				sizeTransferred = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
 				size = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.REASON_CODE));
 			} else {
 				throw new IllegalArgumentException("Sharing ID not found");
 			}

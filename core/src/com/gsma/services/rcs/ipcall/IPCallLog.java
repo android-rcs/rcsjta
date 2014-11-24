@@ -35,12 +35,6 @@ public class IPCallLog {
     public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.ipcall/ipcall");
 
     /**
-     * The name of the column containing the unique ID for a row.
-     * <P>Type: primary key</P>
-     */
-    public static final String ID = "_id";
-    
-    /**
      * The name of the column containing the unique ID of the call.
      * <P>Type: TEXT</P>
      */
@@ -50,7 +44,7 @@ public class IPCallLog {
      * The name of the column containing the MSISDN of the remote contact.
      * <P>Type: TEXT</P>
      */
-    public static final String CONTACT_NUMBER = "contact_number";
+    public static final String CONTACT = "contact";
     
     /**
      * The name of the column containing the direction of the call.

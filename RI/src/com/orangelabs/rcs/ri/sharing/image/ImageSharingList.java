@@ -24,8 +24,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +40,7 @@ import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -48,6 +49,27 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingList extends Activity {
+	
+	/**
+	 * SHARING_ID is the ID since it is a primary key
+	 */
+	private static final String SHARING_ID_AS_ID = new StringBuilder(ImageSharingLog.SHARING_ID).append(" AS ")
+			.append(BaseColumns._ID).toString();
+	
+	// @formatter:off
+	 private static final String[] PROJECTION = new String[] {
+		SHARING_ID_AS_ID,
+		ImageSharingLog.CONTACT,
+ 		ImageSharingLog.FILENAME,
+ 		ImageSharingLog.FILESIZE,
+ 		ImageSharingLog.STATE,
+ 		ImageSharingLog.DIRECTION,
+ 		ImageSharingLog.TIMESTAMP
+	 };
+	 // @formatter:on
+	 
+	private static final String SORT_ORDER = new StringBuilder(ImageSharingLog.TIMESTAMP).append(" DESC").toString();
+
 	/**
 	 * List view
 	 */
@@ -61,9 +83,6 @@ public class ImageSharingList extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_list);
         
-        // Set title
-        setTitle(R.string.menu_image_sharing_log);
-
         // Set list adapter
         listView = (ListView)findViewById(android.R.id.list);
         TextView emptyView = (TextView)findViewById(android.R.id.empty);
@@ -82,18 +101,7 @@ public class ImageSharingList extends Activity {
 	 * Create list adapter
 	 */
 	private ImageSharingListAdapter createListAdapter() {
-		Uri uri = ImageSharingLog.CONTENT_URI;
-        String[] projection = new String[] {
-    		ImageSharingLog.ID,
-    		ImageSharingLog.CONTACT,
-    		ImageSharingLog.FILENAME,
-    		ImageSharingLog.FILESIZE,
-    		ImageSharingLog.STATE,
-    		ImageSharingLog.DIRECTION,
-    		ImageSharingLog.TIMESTAMP
-    		};
-        String sortOrder = ImageSharingLog.TIMESTAMP + " DESC ";
-		Cursor cursor = getContentResolver().query(uri, projection, null, null, sortOrder);
+		Cursor cursor = getContentResolver().query(ImageSharingLog.CONTENT_URI, PROJECTION, null, null, SORT_ORDER);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
@@ -120,13 +128,7 @@ public class ImageSharingList extends Activity {
             LayoutInflater inflater = LayoutInflater.from(context);
             View view = inflater.inflate(R.layout.image_sharing_list_item, parent, false);
             
-            ImageSharingItemCache cache = new ImageSharingItemCache();
-    		cache.number = cursor.getString(1);
-    		cache.filename = cursor.getString(2);
-    		cache.filesize = cursor.getLong(3);
-    		cache.state = cursor.getInt(4);
-    		cache.direction = cursor.getInt(5);
-    		cache.date = cursor.getLong(6);
+            ImageSharingItemCache cache = new ImageSharingItemCache(view, cursor);
             view.setTag(cache);
             
             return view;
@@ -134,19 +136,27 @@ public class ImageSharingList extends Activity {
         
     	@Override
     	public void bindView(View view, Context context, Cursor cursor) {
-    		ImageSharingItemCache cache = (ImageSharingItemCache)view.getTag();
-    		TextView numberView = (TextView)view.findViewById(R.id.number);
-    		numberView.setText(getString(R.string.label_contact, cache.number));
-    		TextView filenameView = (TextView)view.findViewById(R.id.filename);
-    		filenameView.setText(getString(R.string.label_filename, cache.filename));
-    		TextView filesizeView = (TextView)view.findViewById(R.id.filesize);
-    		filesizeView.setText(getString(R.string.label_filesize, cache.filesize));
-    		TextView stateView = (TextView)view.findViewById(R.id.state);
-    		stateView.setText(getString(R.string.label_session_state, decodeState(cache.state)));
-    		TextView directionView = (TextView)view.findViewById(R.id.direction);
-    		directionView.setText(getString(R.string.label_direction, decodeDirection(cache.direction)));
-    		TextView dateView = (TextView)view.findViewById(R.id.date);
-    		dateView.setText(getString(R.string.label_session_date, decodeDate(cache.date)));
+    		ImageSharingItemCache holder = (ImageSharingItemCache)view.getTag();
+    		
+    		String number = cursor.getString(holder.columnNumber);
+    		
+			String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
+			holder.numberText.setText(getString(R.string.label_contact, displayName));
+			
+			String filename = cursor.getString(holder.columnFilename);
+			holder.filenameText.setText(getString(R.string.label_filename, filename));
+			
+			Long filesize = cursor.getLong(holder.columnFilesize);
+			holder.filesizeText.setText(getString(R.string.label_filesize, filesize));
+			
+			int state = cursor.getInt(holder.columnState);
+			holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
+			
+			int direction = cursor.getInt(holder.columnDirection);
+			holder.directionText.setText(getString(R.string.label_direction, decodeDirection(direction)));
+
+			Long timestamp = cursor.getLong(holder.columnTimestamp);
+			holder.timestamptext.setText(getString(R.string.label_session_date, decodeDate(timestamp)));
     	}
     }
 
@@ -154,12 +164,34 @@ public class ImageSharingList extends Activity {
      * Image sharing item in cache
      */
 	private class ImageSharingItemCache {
-		public String number;
-		public String filename;
-		public long filesize;
-		public int direction;
-		public int state;
-		public long date;
+		int columnFilename;
+		int columnFilesize;
+		int columnDirection;
+		int columnState;
+		int columnTimestamp;
+		int columnNumber;
+
+		TextView numberText;
+		TextView filenameText;
+		TextView filesizeText;
+		TextView stateText;
+		TextView directionText;
+		TextView timestamptext;
+		
+		public ImageSharingItemCache(View view, Cursor cursor) {
+			columnNumber = cursor.getColumnIndex(ImageSharingLog.CONTACT);
+			columnFilename = cursor.getColumnIndex(ImageSharingLog.FILENAME);
+			columnFilesize = cursor.getColumnIndex(ImageSharingLog.FILESIZE);
+			columnState = cursor.getColumnIndex(ImageSharingLog.STATE);
+			columnDirection = cursor.getColumnIndex(ImageSharingLog.DIRECTION);
+			columnTimestamp = cursor.getColumnIndex(ImageSharingLog.TIMESTAMP);
+			numberText = (TextView) view.findViewById(R.id.number);
+			filenameText = (TextView) view.findViewById(R.id.filename);
+			filesizeText = (TextView) view.findViewById(R.id.filesize);
+			stateText = (TextView) view.findViewById(R.id.state);
+			directionText = (TextView) view.findViewById(R.id.direction);
+			timestamptext = (TextView) view.findViewById(R.id.date);
+		}
 	}    
  
 	/**

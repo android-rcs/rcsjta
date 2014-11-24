@@ -37,7 +37,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
@@ -339,8 +338,7 @@ public class IPCallView extends Activity {
 
 					// Get remote contact
 					contact = call.getRemoteContact();
-					String displayName = RcsDisplayName.get(this, contact);
-					String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
+					String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
 					// Get video option
 					video = call.isVideo();
 
@@ -360,9 +358,7 @@ public class IPCallView extends Activity {
 				}
 			}
 			
-			String displayName = RcsDisplayName.get(this, contact);
-			String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
-			
+			String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
 			// Display call info
 	    	TextView contactEdit = (TextView)findViewById(R.id.contact);
 	    	contactEdit.setText(from);

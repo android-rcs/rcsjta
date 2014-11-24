@@ -38,11 +38,12 @@ public class ChatMessageDAO implements Parcelable {
 	private String msgId;
 	private ContactId contact;
 	private String chatId;
-	private int state;
+	private int status;
+	private int reasonCode;
 	private int readStatus;
 	private int direction;
 	private String mimeType;
-	private String body;
+	private String content;
 	private long timestamp;
 	private long timestampSent;
 	private long timestampDelivered;
@@ -50,8 +51,8 @@ public class ChatMessageDAO implements Parcelable {
 
 	private static final String WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MESSAGE_ID).append("=?").toString();
 
-	public int getState() {
-		return state;
+	public int getStatus() {
+		return status;
 	}
 
 	public String getMsgId() {
@@ -94,8 +95,12 @@ public class ChatMessageDAO implements Parcelable {
 		return timestamp;
 	}
 
-	public String getBody() {
-		return body;
+	public String getContent() {
+		return content;
+	}
+
+	public int getReasonCode() {
+		return reasonCode;
 	}
 
 	/**
@@ -114,14 +119,15 @@ public class ChatMessageDAO implements Parcelable {
 		}
 		chatId = source.readString();
 		mimeType = source.readString();
-		body = source.readString();
-		state = source.readInt();
+		content = source.readString();
+		status = source.readInt();
 		readStatus = source.readInt();
 		direction = source.readInt();
 		timestamp = source.readLong();
 		timestampSent = source.readLong();
 		timestampDelivered = source.readLong();
 		timestampDisplayed = source.readLong();
+		reasonCode = source.readInt();
 	}
 
 	/**
@@ -129,7 +135,7 @@ public class ChatMessageDAO implements Parcelable {
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param messageId
 	 *            the unique key field
 	 * @throws Exception
@@ -149,14 +155,15 @@ public class ChatMessageDAO implements Parcelable {
 					contact = contactUtils.formatContact(_contact);
 				}
 				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
-				body = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
-				state = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_STATUS));
+				content = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+				status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
 				readStatus = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.READ_STATUS));
 				direction = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION));
 				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP));
 				timestampSent = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_SENT));
 				timestampDelivered = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DELIVERED));
 				timestampDisplayed = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DISPLAYED));
+				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.REASON_CODE));
 			} else {
 				throw new IllegalArgumentException("messageId no found");
 			}
@@ -185,14 +192,15 @@ public class ChatMessageDAO implements Parcelable {
 		}
 		dest.writeString(chatId);
 		dest.writeString(mimeType);
-		dest.writeString(body);
-		dest.writeInt(state);
+		dest.writeString(content);
+		dest.writeInt(status);
 		dest.writeInt(readStatus);
 		dest.writeInt(direction);
 		dest.writeLong(timestamp);
 		dest.writeLong(timestampSent);
 		dest.writeLong(timestampDelivered);
 		dest.writeLong(timestampDisplayed);
+		dest.writeInt(reasonCode);
 	};
 
 	public static final Parcelable.Creator<ChatMessageDAO> CREATOR = new Parcelable.Creator<ChatMessageDAO>() {
@@ -210,7 +218,7 @@ public class ChatMessageDAO implements Parcelable {
 	@Override
 	public String toString() {
 		return "ChatMessageDAO [msgId=" + msgId + ", contact=" + contact + ", chatId=" + chatId + ", direction=" + direction
-				+ ", mimeType=" + mimeType + ", body='" + body + "']";
+				+ ", mimeType=" + mimeType + ", body='" + content + "']";
 	}
 
 }

@@ -18,11 +18,9 @@
 package com.orangelabs.rcs.ri.extension.streaming;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 /**
  * Initiate streaming session
@@ -30,13 +28,6 @@ import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
  * @author Jean-Marc AUFFRET
  */
 public class InitiateStreamingSession extends InitiateMultimediaSession {
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		// Set title
-		setTitle(R.string.menu_initiate_streaming_session);
-	}
 
 	/**
 	 * Initiate session

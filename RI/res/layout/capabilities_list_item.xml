@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="5dip"
         android:singleLine="true"
-        android:text="+33XXXXXXX"
+        android:text="@string/label_uninitialized_contact"
         android:textStyle="bold" />
 
     <TableLayout
@@ -44,7 +44,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+                />
 
             <CheckBox
                 android:id="@+id/video_sharing"
@@ -57,7 +57,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+                />
 
             <CheckBox
                 android:id="@+id/file_transfer"
@@ -70,7 +70,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+                />
 
             <CheckBox
                 android:id="@+id/im"
@@ -83,7 +83,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+                />
 
             <CheckBox
                 android:id="@+id/geoloc_push"
@@ -96,7 +96,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+               />
 
             <CheckBox
                 android:id="@+id/ip_voice_call"
@@ -109,7 +109,7 @@
 
             <TextView
                 android:gravity="right"
-                android:text="" />
+               />
 
             <CheckBox
                 android:id="@+id/ip_video_call"

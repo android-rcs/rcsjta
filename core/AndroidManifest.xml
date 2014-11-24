@@ -40,6 +40,46 @@
         android:description="@string/rcs_core_permission_ext_desc"
         android:protectionLevel="normal" />
 
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_CHATS"
+        android:description="@string/rcs_core_permission_read_chat_desc"
+        android:label="@string/rcs_core_permission_read_chat"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_FILETRANSFERS"
+        android:description="@string/rcs_core_permission_read_filetransfer_desc"
+        android:label="@string/rcs_core_permission_read_filetransfer"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_IMAGESHARES"
+        android:description="@string/rcs_core_permission_read_imageshare_desc"
+        android:label="@string/rcs_core_permission_read_imageshare"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_VIDEOSHARES"
+        android:description="@string/rcs_core_permission_read_videoshare_desc"
+        android:label="@string/rcs_core_permission_read_videoshare"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_CAPABILITIES"
+        android:description="@string/rcs_core_permission_read_capability_desc"
+        android:label="@string/rcs_core_permission_read_capability"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.gsma.services.rcs.RCS_READ_IPCALLS"
+        android:description="@string/rcs_core_permission_read_ipcall_desc"
+        android:label="@string/rcs_core_permission_read_ipcall"
+        android:protectionLevel="normal" />
+
+	<permission
+        android:name="com.orangelabs.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"
+        android:protectionLevel="signature" />
+
 	<application android:icon="@drawable/rcs_icon" android:label="@string/rcs_core_application_title">  
 		
 		<!-- RCS service -->	
@@ -122,40 +162,55 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 		</activity>
-        
-		<!-- RCS data providers -->	
 
-		<provider android:authorities="com.orangelabs.rcs.settings;com.gsma.services.rcs.provider.settings"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"/>
+		<!-- RCS data providers -->
 
-		<provider android:authorities="com.orangelabs.rcs.eab;com.gsma.services.rcs.provider.capabilities"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"/>
+        <provider
+            android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"
+            android:authorities="com.orangelabs.rcs.chat;com.gsma.services.rcs.provider.chat"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_CHATS"/>
 
-		<provider android:authorities="com.orangelabs.rcs.ft;com.gsma.services.rcs.provider.ft"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.messaging.FileTransferProvider"/>
-		
-		<provider android:authorities="com.orangelabs.rcs.ish;com.gsma.services.rcs.provider.ish"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.sharing.ImageSharingProvider"/>
-	
-		<provider android:authorities="com.orangelabs.rcs.vsh;com.gsma.services.rcs.provider.vsh"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.sharing.VideoSharingProvider"/>
-		
-		<provider android:authorities="com.orangelabs.rcs.chat;com.gsma.services.rcs.provider.chat"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.messaging.ChatProvider"/>
-		
-		<provider android:authorities="com.gsma.services.rcs.provider.groupchatdeliveryinfo"
-			android:exported="true"
-			android:name="com.orangelabs.rcs.provider.messaging.GroupChatDeliveryInfoProvider"/>
-			
-		<provider android:authorities="com.orangelabs.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
-		    android:exported="true"
-			android:name="com.orangelabs.rcs.provider.ipcall.IPCallProvider"/>
+        <provider
+            android:name="com.orangelabs.rcs.provider.messaging.GroupDeliveryInfoProvider"
+            android:authorities="com.gsma.services.rcs.provider.groupdeliveryinfo"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_CHATS"/>
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.messaging.FileTransferProvider"
+            android:authorities="com.orangelabs.rcs.filetransfer;com.gsma.services.rcs.provider.filetransfer"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_FILETRANSFERS" />
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.sharing.ImageSharingProvider"
+            android:authorities="com.gsma.services.rcs.provider.imageshare"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_IMAGESHARES" />
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.sharing.VideoSharingProvider"
+            android:authorities="com.gsma.services.rcs.provider.videoshare"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_VIDEOSHARES" />
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.eab.RichAddressBookProvider"
+            android:authorities="com.orangelabs.rcs.capability;com.gsma.services.rcs.provider.capability"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_CAPABILITIES" />
+
+        <provider
+            android:name=".provider.ipcall.IPCallProvider"
+            android:authorities="com.gsma.services.rcs.provider.ipcall"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_IPCALLS" />
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"
+            android:authorities="com.orangelabs.rcs.settings;com.gsma.services.rcs.provider.setting"
+            android:exported="true" />
 
 		<!-- Device events receiver -->	
 

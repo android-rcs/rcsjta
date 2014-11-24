@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +50,7 @@ import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -112,6 +112,11 @@ public class InitiateImageSharing extends Activity {
 	 * API connection manager
 	 */
 	private ApiConnectionManager connectionManager;
+    
+    /**
+     * Spinner for contact selection
+     */
+    private Spinner mSpinner;
     
     /**
    	 * The log tag for this class
@@ -220,12 +225,9 @@ public class InitiateImageSharing extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_initiate);
         
-        // Set title
-        setTitle(R.string.menu_initiate_image_sharing);
-        
         // Set contact selector
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        spinner.setAdapter(Utils.createRcsContactListAdapter(this));
+        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
         // Set buttons callback
         Button inviteBtn = (Button)findViewById(R.id.invite_btn);
@@ -238,7 +240,7 @@ public class InitiateImageSharing extends Activity {
         dialBtn.setOnClickListener(btnDialListener);
         dialBtn.setEnabled(false);
         // Disable button if no contact available
-        if (spinner.getAdapter().getCount() != 0) {
+        if (mSpinner.getAdapter().getCount() != 0) {
         	dialBtn.setEnabled(true);
         	selectBtn.setEnabled(true);
         }
@@ -285,14 +287,13 @@ public class InitiateImageSharing extends Activity {
      */
     private OnClickListener btnDialListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Get the remote contact
-            Spinner spinner = (Spinner)findViewById(R.id.contact);
-            MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-            String remote = cursor.getString(1);
+        	// get selected phone number
+    		ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+    		String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             // Initiate a GSM call before to be able to share content
             Intent intent = new Intent(Intent.ACTION_CALL);
-        	intent.setData(Uri.parse("tel:"+remote));
+        	intent.setData(Uri.parse("tel:"+phoneNumber));
             startActivity(intent);
         }
     };
@@ -315,17 +316,17 @@ public class InitiateImageSharing extends Activity {
             }    
             
             // Get the remote contact
-            Spinner spinner = (Spinner)findViewById(R.id.contact);
-            MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
-
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+    		String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateImageSharing.this);
-            final ContactId remote;
-    		try {
-    			remote = contactUtils.formatContact(cursor.getString(1));
-    		} catch (RcsContactFormatException e1) {
-    			Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_invalid_contact,cursor.getString(1)));
-    	    	return;
-    		}
+			final ContactId remote;
+			try {
+				remote = contactUtils.formatContact(phoneNumber);
+			} catch (RcsContactFormatException e1) {
+				Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_invalid_contact, phoneNumber));
+				return;
+			}
+
             if (LogUtils.isActive) {
 				Log.d(LOGTAG, "shareImage image="+filename+" size="+filesize);
 			}    		
@@ -345,7 +346,7 @@ public class InitiateImageSharing extends Activity {
 				});
 
 				// Disable UI
-				spinner.setEnabled(false);
+				mSpinner.setEnabled(false);
 
 				// Hide buttons
 				Button inviteBtn = (Button) findViewById(R.id.invite_btn);

@@ -548,7 +548,7 @@ public class InstantMessagingService extends ImsService {
 			if (firstMsg != null) {
 				String msgId = ChatUtils.getMessageId(invite);
 				if (msgId != null) {
-					if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
+					if (MessagingLog.getInstance().isMessagePersisted(msgId)) {
 						// Send a 603 Decline response
 						sendErrorResponse(invite, Response.DECLINE);
 						return;
@@ -953,7 +953,7 @@ public class InstantMessagingService extends ImsService {
 		if (firstMsg != null) {
 			String msgId = ChatUtils.getMessageId(invite);
 			if (msgId != null) {
-				if (MessagingLog.getInstance().isNewMessage(remote, msgId) == false) {
+				if (MessagingLog.getInstance().isMessagePersisted(msgId)) {
 					// Send a 603 Decline response
 					sendErrorResponse(invite, Response.DECLINE);
 					return;

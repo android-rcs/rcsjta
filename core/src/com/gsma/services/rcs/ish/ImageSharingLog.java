@@ -32,13 +32,8 @@ public class ImageSharingLog {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.ish/ish");
-	
-    /**
-     * The name of the column containing the unique ID for a row.
-     * <P>Type: primary key</P>
-     */
-    public static final String ID = "_id";
+    public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.services.rcs.provider.imageshare/imageshare");
 
     /**
      * The name of the column containing the unique ID of the image sharing.

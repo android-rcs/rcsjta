@@ -124,6 +124,7 @@ public class GroupChatLog implements IGroupChatLog {
 		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
 		values.put(ChatData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+		values.put(ChatData.KEY_REJECT_GC, 0);
 		cr.insert(chatDatabaseUri, values);
 	}
 

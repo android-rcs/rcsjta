@@ -28,8 +28,8 @@ import java.util.Set;
 
 import javax2.sip.message.Response;
 
-import com.gsma.services.rcs.DeliveryInfo;
-import com.gsma.services.rcs.DeliveryInfo.ReasonCode;
+import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -392,7 +392,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }	
 
     /**
-	 * Sends a   is-composing   event. The status is set to true when typing
+	 * Sends a is-composing event. The status is set to true when typing
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
@@ -627,17 +627,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		synchronized (lock) {
 			MessagingLog messagingLog = MessagingLog.getInstance();
 			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId,
-						DeliveryInfo.Status.DELIVERED, ReasonCode.UNSPECIFIED, contact);
+				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+						GroupDeliveryInfoLog.Status.DELIVERED, ReasonCode.UNSPECIFIED);
 
 				mGroupChatEventBroadcaster.broadcastMessageGroupDeliveryInfoChanged(getChatId(), contact,
-						msgId, DeliveryInfo.Status.DELIVERED, ReasonCode.UNSPECIFIED);
+						msgId, GroupDeliveryInfoLog.Status.DELIVERED, ReasonCode.UNSPECIFIED);
 			} else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId,
-						DeliveryInfo.Status.DISPLAYED, ReasonCode.UNSPECIFIED, contact);
+				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+						GroupDeliveryInfoLog.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
 
 				mGroupChatEventBroadcaster.broadcastMessageGroupDeliveryInfoChanged(getChatId(), contact,
-						msgId, DeliveryInfo.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
+						msgId, GroupDeliveryInfoLog.Status.DISPLAYED, ReasonCode.UNSPECIFIED);
 			} else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
 					|| ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
 					|| ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
@@ -648,11 +648,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				} else {
 					reasonCode = ReasonCode.FAILED_DISPLAY;
 				}
-				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId,
-						DeliveryInfo.Status.FAILED, reasonCode, contact);
+				messagingLog.updateGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+						GroupDeliveryInfoLog.Status.FAILED, reasonCode);
 
 				mGroupChatEventBroadcaster.broadcastMessageStatusChanged(getChatId(), msgId,
-						DeliveryInfo.Status.FAILED, reasonCode);
+						GroupDeliveryInfoLog.Status.FAILED, reasonCode);
 			}
 			if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)
 					&& messagingLog.isDeliveredToAllRecipients(msgId)) {

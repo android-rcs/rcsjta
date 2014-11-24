@@ -90,7 +90,7 @@ public abstract class MultimediaSessionList extends ListActivity {
 	/**
 	 * Display a session
 	 * 
-	 * @param sessionId Session ID
+	 * @param position
 	 */
 	public abstract void displaySession(int position);
 	

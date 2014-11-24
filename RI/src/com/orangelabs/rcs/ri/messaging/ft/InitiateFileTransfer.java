@@ -25,7 +25,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,6 +54,7 @@ import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -127,6 +127,11 @@ public class InitiateFileTransfer extends Activity {
      * File transfer identifier
      */
     private String ftId;
+    
+    /**
+     * Spinner for contact selection
+     */
+    private Spinner mSpinner;
    
 	/**
 	 * File transfer listener
@@ -236,11 +241,8 @@ public class InitiateFileTransfer extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.filetransfer_initiate);
 
-		// Set title
-		setTitle(R.string.menu_transfer_file);
-
 		// Set contact selector
-		Spinner spinner = (Spinner) findViewById(R.id.contact);
+		mSpinner = (Spinner) findViewById(R.id.contact);
 		
 		// Set buttons callback
 		Button inviteBtn = (Button) findViewById(R.id.invite_btn);
@@ -285,7 +287,7 @@ public class InitiateFileTransfer extends Activity {
 				filesize = ftdao.getSize();
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
 						new String[] { remoteContact.toString() });
-				spinner.setAdapter(adapter);
+				mSpinner.setAdapter(adapter);
 				TextView uriEdit = (TextView) findViewById(R.id.uri);
 				TextView sizeEdit = (TextView) findViewById(R.id.size);
 				sizeEdit.setText((filesize / 1024) + " KB");
@@ -302,9 +304,9 @@ public class InitiateFileTransfer extends Activity {
 					Log.d(LOGTAG, "onCreate (file=" + filename + ") (size=" + filesize + ") (contact=" + remoteContact + ")");
 				}
 			} else {
-				spinner.setAdapter(Utils.createRcsContactListAdapter(this));
+				mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 				// Enable button if contact available
-				if (spinner.getAdapter().getCount() != 0) {
+				if (mSpinner.getAdapter().getCount() != 0) {
 					selectBtn.setEnabled(true);
 				}
 				if (LogUtils.isActive) {
@@ -389,16 +391,16 @@ public class InitiateFileTransfer extends Activity {
 			return;
 		}    	    	
     	
-    	// Get remote contact
-        Spinner spinner = (Spinner)findViewById(R.id.contact);
-        MatrixCursor cursor = (MatrixCursor)spinner.getSelectedItem();
+		// get selected phone number
+		ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+		String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
         ContactUtils contactUtils = ContactUtils.getInstance(this);
         ContactId remote;
 		try {
-			remote = contactUtils.formatContact(cursor.getString(1));
+			remote = contactUtils.formatContact(phoneNumber);
 		} catch (RcsContactFormatException e1) {
-			Utils.showMessage(this, getString(R.string.label_invalid_contact,cursor.getString(1)));
-	    	return;
+			Utils.showMessage(this, getString(R.string.label_invalid_contact, phoneNumber));
+			return;
 		}
 
         // Get thumbnail option
@@ -427,7 +429,7 @@ public class InitiateFileTransfer extends Activity {
     		});
             
             // Disable UI
-            spinner.setEnabled(false);
+            mSpinner.setEnabled(false);
 
             // Hide buttons
             Button inviteBtn = (Button)findViewById(R.id.invite_btn);

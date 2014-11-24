@@ -18,7 +18,6 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
@@ -49,7 +48,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 	public MultiMediaSessionIntentService() {
 		super("MultiMediaSessionIntentService");
 	}
-	
+
 	/**
 	 * MM session API
 	 */
@@ -109,20 +108,20 @@ public class MultiMediaSessionIntentService extends IntentService {
 				MultimediaMessagingSession mms = connectionManager.getMultimediaSessionApi().getMessagingSession(sessionId);
 				if (mms != null) {
 					ContactId contact = mms.getRemoteContact();
-					addSessionInvitationNotification(this, sessionId, contact, true);
+					addSessionInvitationNotification(sessionId, contact, true);
 				} else {
 					if (LogUtils.isActive) {
-						Log.w(LOGTAG, "Cannot get messaging session for ID "+sessionId);
+						Log.w(LOGTAG, "Cannot get messaging session for ID " + sessionId);
 					}
 				}
 			} else {
 				MultimediaStreamingSession mss = connectionManager.getMultimediaSessionApi().getStreamingSession(sessionId);
 				if (mss != null) {
 					ContactId contact = mss.getRemoteContact();
-					addSessionInvitationNotification(this, sessionId, contact, false);
+					addSessionInvitationNotification(sessionId, contact, false);
 				} else {
 					if (LogUtils.isActive) {
-						Log.w(LOGTAG, "Cannot get streaming session for ID "+sessionId);
+						Log.w(LOGTAG, "Cannot get streaming session for ID " + sessionId);
 					}
 				}
 			}
@@ -136,12 +135,11 @@ public class MultiMediaSessionIntentService extends IntentService {
 	/**
 	 * Add session invitation notification
 	 * 
-	 * @param context
-	 *            Context
-	 * @param invitation
-	 *            Intent invitation
+	 * @param sessionId
+	 * @param contact
+	 * @param mms True is messaging session
 	 */
-	private void addSessionInvitationNotification(Context context, String sessionId, ContactId contact, boolean mms) {
+	private void addSessionInvitationNotification(String sessionId, ContactId contact, boolean mms) {
 		// Get remote contact and session
 		if (contact == null) {
 			if (LogUtils.isActive) {
@@ -153,23 +151,22 @@ public class MultiMediaSessionIntentService extends IntentService {
 		Intent invitation = new Intent();
 		String title;
 		if (mms) {
-			invitation.setClass(context, MessagingSessionView.class);
-			title = context.getString(R.string.title_recv_messaging_session);
+			invitation.setClass(this, MessagingSessionView.class);
+			title = getString(R.string.title_recv_messaging_session);
 		} else {
-			invitation.setClass(context, StreamingSessionView.class);
-			title = context.getString(R.string.title_recv_streaming_session);
+			invitation.setClass(this, StreamingSessionView.class);
+			title = getString(R.string.title_recv_streaming_session);
 		}
 		invitation.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		invitation.setAction(sessionId);
 		invitation.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, invitation, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, invitation, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		String displayName = RcsDisplayName.get(this, contact);
-		String from = RcsDisplayName.convert(this, RcsCommon.Direction.INCOMING, contact, displayName);
+		String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
 
 		// Create notification
-		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
 		notif.setContentIntent(contentIntent);
 		notif.setSmallIcon(R.drawable.ri_notif_mm_session_icon);
 		notif.setWhen(Calendar.getInstance().getTimeInMillis());
@@ -181,7 +178,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		notif.setContentText(getString(R.string.label_from_args, from));
 
 		// Send notification
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(sessionId, Utils.NOTIF_ID_MM_SESSION, notif.build());
 	}
 

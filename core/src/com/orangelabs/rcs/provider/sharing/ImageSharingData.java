@@ -24,76 +24,69 @@ package com.orangelabs.rcs.provider.sharing;
 
 import com.gsma.services.rcs.ish.ImageSharingLog;
 
-import android.net.Uri;
-
 /**
  * Image sharing data constants
  * 
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingData {
-	/**
-	 * Database URI
-	 */
-	protected static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.ish/ish");
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_ID = ImageSharingLog.ID;
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_SESSION_ID = ImageSharingLog.SHARING_ID;
 
 	/**
-	 * Column name
+	 * Unique sharing identifier
+	 */
+	static final String KEY_SHARING_ID = ImageSharingLog.SHARING_ID;
+
+	/**
+	 * Date of the sharing
 	 */
 	static final String KEY_TIMESTAMP = ImageSharingLog.TIMESTAMP;
 
 	/**
-	 * Column name
+	 * ContactId formatted number of the remote contact
 	 */
 	static final String KEY_CONTACT = ImageSharingLog.CONTACT;
 	
 	/**
-	 * Column name
+	 * @see ImageSharing.State
 	 */
 	static final String KEY_STATE = ImageSharingLog.STATE;
 
 	/**
-	 * Column name
+	 * Reason code associated with the image sharing state.
+	 *
+	 * @see ImageSharing.ReasonCode for the list of reason codes
 	 */
 	static final String KEY_REASON_CODE = ImageSharingLog.REASON_CODE;
 
 	/**
-	 * Column name
+	 * Multipurpose Internet Mail Extensions (MIME) type of file
 	 */
 	static final String KEY_MIME_TYPE = ImageSharingLog.MIME_TYPE;
 	
 	/**
-	 * Column name
+	 * URI of the file
 	 */
 	static final String KEY_FILE = ImageSharingLog.FILE;
 
 	/**
-	 * Column name
+	 * Filename
 	 */
-	static final String KEY_NAME = ImageSharingLog.FILENAME;
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_SIZE = ImageSharingLog.TRANSFERRED;
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_TOTAL_SIZE = ImageSharingLog.FILESIZE;	
+	static final String KEY_FILENAME = ImageSharingLog.FILENAME;
 
 	/**
-	 * Column name
+	 * Size transferred in bytes
+	 */
+	static final String KEY_TRANSFERRED = ImageSharingLog.TRANSFERRED;
+
+	/**
+	 * File size in bytes
+	 */
+	static final String KEY_FILESIZE = ImageSharingLog.FILESIZE;
+
+	/**
+	 * Incoming sharing or outgoing sharing.
+	 *
+	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
 	 */
 	static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;	
 }

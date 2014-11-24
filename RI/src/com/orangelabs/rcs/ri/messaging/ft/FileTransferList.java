@@ -24,8 +24,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,37 +40,57 @@ import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List file transfers from the content provider 
- *   
+ * List file transfers from the content provider
+ * 
  * @author Jean-Marc AUFFRET
+ * @author YPLO6403
+ *
  */
 public class FileTransferList extends Activity {
-	
+
+	/**
+	 * FT_ID is the ID since it is a primary key
+	 */
+	private static final String FILE_TRANSFER_ID_AS_ID = new StringBuilder(FileTransferLog.FT_ID).append(" AS ")
+			.append(BaseColumns._ID).toString();
+
+	// @formatter:off
+ 	private static final String[] PROJECTION = new String[] {
+ 			FILE_TRANSFER_ID_AS_ID,
+ 			FileTransferLog.CONTACT,
+ 			FileTransferLog.FILENAME,
+ 			FileTransferLog.FILESIZE,
+ 			FileTransferLog.STATE,
+ 			FileTransferLog.DIRECTION,
+ 			FileTransferLog.TIMESTAMP
+     		};
+ 	// @formatter:on
+
+	private static final String SORT_ORDER = new StringBuilder(FileTransferLog.TIMESTAMP).append(" DESC").toString();
+
 	/**
 	 * List view
 	 */
-    private ListView listView;
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.filetransfer_list);
-        
-        // Set title
-        setTitle(R.string.menu_file_transfer_log);
+	private ListView listView;
 
-        // Set list adapter
-        listView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
-        listView.setEmptyView(emptyView);
-    }
-    
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		// Set layout
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setContentView(R.layout.filetransfer_list);
+
+		// Set list adapter
+		listView = (ListView) findViewById(android.R.id.list);
+		TextView emptyView = (TextView) findViewById(android.R.id.empty);
+		listView.setEmptyView(emptyView);
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -78,95 +98,110 @@ public class FileTransferList extends Activity {
 		// Refresh view
 		listView.setAdapter(createListAdapter());
 	}
-	
+
 	/**
 	 * Create list adapter
 	 */
 	private FtListAdapter createListAdapter() {
-		Uri uri = FileTransferLog.CONTENT_URI;
-        String[] projection = new String[] {
-    		FileTransferLog.ID,
-    		FileTransferLog.CONTACT_NUMBER,
-    		FileTransferLog.FILENAME,
-    		FileTransferLog.FILESIZE,
-    		FileTransferLog.STATE,
-    		FileTransferLog.DIRECTION,
-    		FileTransferLog.TIMESTAMP
-    		};
-        String sortOrder = FileTransferLog.TIMESTAMP + " DESC ";
-		Cursor cursor = getContentResolver().query(uri, projection, null, null, sortOrder);
+		Cursor cursor = getContentResolver().query(FileTransferLog.CONTENT_URI, PROJECTION, null, null, SORT_ORDER);
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
 		}
 		return new FtListAdapter(this, cursor);
 	}
-	
-    /**
-     * List adapter
-     */
-    private class FtListAdapter extends CursorAdapter {
-    	/**
-    	 * Constructor
-    	 * 
-    	 * @param context Context
-    	 * @param c Cursor
-    	 */
+
+	/**
+	 * List adapter
+	 */
+	private class FtListAdapter extends CursorAdapter {
+		/**
+		 * Constructor
+		 * 
+		 * @param context
+		 *            Context
+		 * @param c
+		 *            Cursor
+		 */
 		public FtListAdapter(Context context, Cursor c) {
-            super(context, c);
-        }
+			super(context, c);
+		}
 
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View view = inflater.inflate(R.layout.filetransfer_list_item, parent, false);
-            
-            FileTransferItemCache cache = new FileTransferItemCache();
-    		cache.number = cursor.getString(1);
-    		cache.filename = cursor.getString(2);
-    		cache.filesize = cursor.getLong(3);
-    		cache.state = cursor.getInt(4);
-    		cache.direction = cursor.getInt(5);
-    		cache.date = cursor.getLong(6);
-            view.setTag(cache);
-            
-            return view;
-        }
-        
-    	@Override
-    	public void bindView(View view, Context context, Cursor cursor) {
-    		FileTransferItemCache cache = (FileTransferItemCache)view.getTag();
-    		TextView numberView = (TextView)view.findViewById(R.id.number);
-    		numberView.setText(getString(R.string.label_contact, cache.number));
-    		TextView filenameView = (TextView)view.findViewById(R.id.filename);
-    		filenameView.setText(getString(R.string.label_filename, cache.filename));
-    		TextView filesizeView = (TextView)view.findViewById(R.id.filesize);
-    		filesizeView.setText(getString(R.string.label_filesize, cache.filesize));
-    		TextView stateView = (TextView)view.findViewById(R.id.state);
-    		stateView.setText(getString(R.string.label_session_state, decodeState(cache.state)));
-    		TextView directionView = (TextView)view.findViewById(R.id.direction);
-    		directionView.setText(getString(R.string.label_direction, decodeDirection(cache.direction)));
-    		TextView dateView = (TextView)view.findViewById(R.id.date);
-    		dateView.setText(getString(R.string.label_session_date, decodeDate(cache.date)));
-    	}
-    }
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			LayoutInflater inflater = LayoutInflater.from(context);
+			View view = inflater.inflate(R.layout.filetransfer_list_item, parent, false);
 
-    /**
-     * File transfer item in cache
-     */
-	private class FileTransferItemCache {
-		public String number;
-		public String filename;
-		public long filesize;
-		public int direction;
-		public int state;
-		public long date;
+			FileTransferItemViewHolder holder = new FileTransferItemViewHolder(view, cursor);
+			view.setTag(holder);
+			return view;
+		}
+
+		@Override
+		public void bindView(View view, Context context, Cursor cursor) {
+			FileTransferItemViewHolder holder = (FileTransferItemViewHolder) view.getTag();
+			String number = cursor.getString(holder.columnNumber);
+			String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
+			holder.numberText.setText(getString(R.string.label_contact, displayName));
+
+			String filename = cursor.getString(holder.columnFilename);
+			holder.filenameText.setText(getString(R.string.label_filename, filename));
+
+			Long filesize = cursor.getLong(holder.columnFilesize);
+			holder.filesizeText.setText(getString(R.string.label_filesize, filesize));
+
+			int state = cursor.getInt(holder.columnState);
+			holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
+
+			int direction = cursor.getInt(holder.columnDirection);
+			holder.directionText.setText(getString(R.string.label_direction, decodeDirection(direction)));
+
+			Long timestamp = cursor.getLong(holder.columnTimestamp);
+			holder.timestamptext.setText(getString(R.string.label_session_date, decodeDate(timestamp)));
+		}
+
 	}
-	
+
+	/**
+	 * A ViewHolder class keeps references to children views to avoid unnecessary calls to findViewById() or getColumnIndex() on
+	 * each row.
+	 */
+	private class FileTransferItemViewHolder {
+		int columnFilename;
+		int columnFilesize;
+		int columnDirection;
+		int columnState;
+		int columnTimestamp;
+		int columnNumber;
+
+		TextView numberText;
+		TextView filenameText;
+		TextView filesizeText;
+		TextView stateText;
+		TextView directionText;
+		TextView timestamptext;
+
+		public FileTransferItemViewHolder(View base, Cursor cursor) {
+			columnNumber = cursor.getColumnIndex(FileTransferLog.CONTACT);
+			columnFilename = cursor.getColumnIndex(FileTransferLog.FILENAME);
+			columnFilesize = cursor.getColumnIndex(FileTransferLog.FILESIZE);
+			columnState = cursor.getColumnIndex(FileTransferLog.STATE);
+			columnDirection = cursor.getColumnIndex(FileTransferLog.DIRECTION);
+			columnTimestamp = cursor.getColumnIndex(FileTransferLog.TIMESTAMP);
+			numberText = (TextView) base.findViewById(R.id.number);
+			filenameText = (TextView) base.findViewById(R.id.filename);
+			filesizeText = (TextView) base.findViewById(R.id.filesize);
+			stateText = (TextView) base.findViewById(R.id.state);
+			directionText = (TextView) base.findViewById(R.id.direction);
+			timestamptext = (TextView) base.findViewById(R.id.date);
+		}
+	}
+
 	/**
 	 * Decode state
 	 * 
-	 * @param state State
+	 * @param state
+	 *            State
 	 * @return String
 	 */
 	private String decodeState(int state) {
@@ -203,7 +238,8 @@ public class FileTransferList extends Activity {
 	/**
 	 * Decode direction
 	 * 
-	 * @param direction Direction
+	 * @param direction
+	 *            Direction
 	 * @return String
 	 */
 	private String decodeDirection(int direction) {
@@ -217,32 +253,33 @@ public class FileTransferList extends Activity {
 	/**
 	 * Decode date
 	 * 
-	 * @param date Date
+	 * @param date
+	 *            Date
 	 * @return String
 	 */
 	private String decodeDate(long date) {
 		return DateFormat.getInstance().format(new Date(date));
 	}
-	
-    @Override
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater=new MenuInflater(getApplicationContext());
+		MenuInflater inflater = new MenuInflater(getApplicationContext());
 		inflater.inflate(R.menu.menu_log, menu);
 
 		return true;
 	}
-    
-    @Override
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.menu_clear_log:
-				// Delete all
-				getContentResolver().delete(FileTransferLog.CONTENT_URI, null, null);
-				
-				// Refresh view
-		        listView.setAdapter(createListAdapter());		
-				break;
+		case R.id.menu_clear_log:
+			// Delete all TODO CR005 delete method
+			getContentResolver().delete(FileTransferLog.CONTENT_URI, null, null);
+
+			// Refresh view
+			listView.setAdapter(createListAdapter());
+			break;
 		}
 		return true;
-	}	
+	}
 }

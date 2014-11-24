@@ -30,8 +30,11 @@ import android.widget.ListView;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
+import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
+import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
+import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * CHAT API
@@ -39,6 +42,9 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class TestChatApi extends ListActivity {
+	
+	private static final String[] PROJECTION = new String[] { CapabilitiesLog.CONTACT };
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,50 +59,48 @@ public class TestChatApi extends ListActivity {
     		getString(R.string.menu_initiate_group_chat),
     		getString(R.string.menu_group_chat_log),
     		getString(R.string.menu_showus_map),
-    		getString(R.string.menu_spambox)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, InitiateSingleChat.class));
-	            break;
-	            
-	        case 1: 
-            	startActivity(new Intent(this, ChatList.class));
-	            break;
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		switch (position) {
+		case 0:
+			startActivity(new Intent(this, InitiateSingleChat.class));
+			break;
 
-	        case 2:
-	        	startActivity(new Intent(this, InitiateGroupChat.class));
-	            break;
-	            
-	        case 3: 
-            	startActivity(new Intent(this, GroupChatList.class));
-	            break;
+		case 1:
+			startActivity(new Intent(this, SingleChatList.class));
+			break;
 
-	        case 4:
-	            String[] projection = new String[] {
-	            	CapabilitiesLog.CONTACT
-	            };
-	        	ArrayList<String> list = new ArrayList<String>(); 
-	    		Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, projection, null, null, null);
-	    		while(cursor.moveToNext()) {
-	    			String contact = cursor.getString(0);
-	    			list.add(contact);
-	    		}
-	    		cursor.close();
-	        	Intent intent = new Intent(this, ShowUsInMap.class);
-	        	intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, list);
-	        	startActivity(intent);
-	        	break;
-	        	
-	        case 5:
-            	Utils.showMessage(this, getString(R.string.label_not_implemented));
-	        	// TODO startActivity(new Intent(this, SpamBox.class));
-	        	break;
-        }
+		case 2:
+			startActivity(new Intent(this, InitiateGroupChat.class));
+			break;
+
+		case 3:
+			startActivity(new Intent(this, GroupChatList.class));
+			break;
+
+		case 4:
+			ArrayList<String> list = new ArrayList<String>();
+			Cursor cursor = null;
+			try {
+				cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null, null, null);
+				while (cursor.moveToNext()) {
+					String contact = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CONTACT));
+					list.add(contact);
+				}
+				ShowUsInMap.startShowUsInMap(this, list);
+			} catch (Exception e) {
+				// Skip intentionally
+			} finally {
+				if (cursor != null) {
+					cursor.close();
+				}
+			}
+			break;
+
+		}
     }
 }

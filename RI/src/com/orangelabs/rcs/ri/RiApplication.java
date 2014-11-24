@@ -122,6 +122,11 @@ public class RiApplication extends Application {
 	 */
 	public static String[] MMS_REASON_CODES;
 	
+	/**
+	 * Array of group chat events
+	 */
+	public static String[] GROUP_CHAT_EVENTS;
+	
 	private static Context mContext;
 
 	@Override
@@ -147,6 +152,7 @@ public class RiApplication extends Application {
 		IPCALL_REASON_CODES = getResources().getStringArray(R.array.ipcall_reason_codes);
 		MMS_STATES = getResources().getStringArray(R.array.mms_states);
 		MMS_REASON_CODES = getResources().getStringArray(R.array.mms_reason_codes);
+		GROUP_CHAT_EVENTS = getResources().getStringArray(R.array.group_chat_event);
 		
 		ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
 	}

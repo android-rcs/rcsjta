@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -41,19 +40,11 @@ public class MessagingSessionList extends MultimediaSessionList {
 	 * List of sessions
 	 */
 	private List<MultimediaMessagingSession> sessions = new ArrayList<MultimediaMessagingSession>();
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-        // Set title
-        setTitle(R.string.menu_messaging_sessions_list);
-	}
 	
 	/**
 	 * Display a session
 	 * 
-	 * @param sessionId Session ID
+	 * @param position
 	 */
 	public void displaySession(int position) {
 		try {

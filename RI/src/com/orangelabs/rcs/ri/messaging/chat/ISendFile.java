@@ -15,34 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+import android.net.Uri;
+
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.ft.FileTransferService;
+
 
 /**
- * CHAT invitation receiver
- * 
- * @author Jean-Marc AUFFRET
  * @author YPLO6403
- * 
+ *
  */
-public class SingleChatInvitationReceiver extends BroadcastReceiver {
+public interface ISendFile {
 
 	/**
-	 * Action New One to One CHAT Message
+	 * Transfer file
+	 * @param file
+	 *            Uri of file to transfer
+	 * @param fileicon
+	 *            File icon option. If true, the stack tries to attach fileicon.
+	 * @return True if file transfer is successful
 	 */
-	/* package private */static final String ACTION_NEW_121_CHAT_MSG = "NEW_121_CHAT_MSG";
+	boolean transferFile(Uri file, boolean fileicon);
+	
+	/**
+	 * Add file transfer event listener
+	 * 
+	 * @param fileTransferService
+	 */
+	void addFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException;
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		// Send intent to service
-		Intent receiverIntent = new Intent(context, ChatIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_NEW_121_CHAT_MSG);
-		context.startService(receiverIntent);
-	}
+	/**
+	 * Remove file transfer event listener
+	 * 
+	 * @param fileTransferService
+	 */
+	void removeFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException;
 
 }

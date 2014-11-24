@@ -30,8 +30,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharingIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -102,7 +100,7 @@ public class ImageSharingIntentService extends IntentService {
 			// TODO check ISH state to know if rejected
 			// TODO check validity of direction, etc ...
 			// Display invitation notification
-			addImageSharingInvitationNotification(this, intent, ishDao);
+			addImageSharingInvitationNotification(intent, ishDao);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot read ISH data from provider", e);
@@ -113,14 +111,12 @@ public class ImageSharingIntentService extends IntentService {
 	/**
 	 * Add image share notification
 	 * 
-	 * @param context
-	 *            Context
 	 * @param intent
 	 *            Intent invitation
 	 * @param ishDao
 	 *            the image sharing data object
 	 */
-	private void addImageSharingInvitationNotification(Context context, Intent invitation, ImageSharingDAO ishDao) {
+	private void addImageSharingInvitationNotification(Intent invitation, ImageSharingDAO ishDao) {
 		if (ishDao.getContact() == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "addImageSharingInvitationNotification failed: cannot parse contact");
@@ -129,17 +125,15 @@ public class ImageSharingIntentService extends IntentService {
 		}
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(context, ReceiveImageSharing.class);
+		intent.setClass(this, ReceiveImageSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
-		ContactId contact = ishDao.getContact();
-		String displayName = RcsDisplayName.get(context, contact);
-		displayName = RcsDisplayName.convert(context, RcsCommon.Direction.INCOMING, contact, displayName);
-		String title = context.getString(R.string.title_recv_image_sharing, displayName);
+		String displayName = RcsDisplayName.getInstance(this).getDisplayName(ishDao.getContact());
+		String title = getString(R.string.title_recv_image_sharing, displayName);
 
 		// Create notification
-		NotificationCompat.Builder notif = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
 		notif.setContentIntent(contentIntent);
 		notif.setSmallIcon(R.drawable.ri_notif_csh_icon);
 		notif.setWhen(Calendar.getInstance().getTimeInMillis());
@@ -151,7 +145,7 @@ public class ImageSharingIntentService extends IntentService {
 		notif.setContentText(getString(R.string.label_from_args, ishDao.getFilename()));
 				
 		// Send notification
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif.build());
 	}
 }

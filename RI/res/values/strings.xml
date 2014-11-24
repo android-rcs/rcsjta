@@ -2,7 +2,7 @@
 <resources>
 
 <!-- Application -->
-<string name="app_name">joyn RI</string>
+<string name="app_name">RCS RI</string>
 <string name="menu_about">About</string>
 <string name="label_ab_not_found">The address book is not found, launch it manually from your device home screen.</string>
 
@@ -16,7 +16,7 @@
 <string name="label_command_in_progress">Command in progress...</string>
 <string name="label_session_not_found">Session not found</string>
 <string name="label_api_failed">Call API method has failed</string>
-<string name="label_api_disabled">joyn service is not available</string>
+<string name="label_api_disabled">RCS service is not available</string>
 <string name="label_ok">OK</string>
 <string name="label_cancel">Cancel</string>
 <string name="title_msg">Information</string>
@@ -46,6 +46,10 @@
 <string name="label_state_paused">paused</string>
 <string name="label_state_delivered">delivered</string>
 <string name="label_state_displayed">displayed</string>
+<string name="label_state_delivered_at">Delivered at %s</string>
+<string name="label_state_displayed_at">Displayed at %s</string>
+<string name="label_status">Status: %s</string>
+<string name="label_reason_code">Reason: %s</string>
 <string name="label_state_queued">queued</string>
 <string name="label_session_state">State: %s</string>
 <string name="label_session_date">Date: %s</string>
@@ -61,6 +65,12 @@
 <string name="label_select_file">Select file</string>
 <string name="label_invalid_contact">Invalid contact %s</string>
 <string name="label_invalid_contacts">Invalid list of participants</string>
+<string name="label_uninitialized_contact">+33XXXXXXX</string>
+<string name="label_uninitialized_text">blah, blah, blah</string>
+<string name="label_uninitialized_date">date</string>
+<string name="label_uninitialized_filename">filename</string>
+<string name="label_uninitialized_filesize">filesize</string>
+<string name="label_uninitialized_direction">direction</string>
 
 <!-- About menu -->
 <string name="label_about_title">Reference Implementation</string>
@@ -69,13 +79,12 @@
 
 <!--  Quick contact badge -->
 <string name="label_quick_chat">Chat</string>
-<string name="label_quick_ft">File transfer</string>
 
 <!-- Contacts API -->
 <string name="menu_contacts">Contacts</string>
 <string name="menu_address_book">Native address book</string>
-<string name="menu_list_rcs_contacts">All joyn contacts</string>
-<string name="menu_list_online_contacts">Online joyn contacts</string>        		
+<string name="menu_list_rcs_contacts">All RCS contacts</string>
+<string name="menu_list_online_contacts">Online RCS contacts</string>        		
 <string name="menu_list_supported_contacts">Contacts supporting a service</string>
 <string name="label_ext_tag">Extension tag:</string>
 <string name="menu_contact_vcard">Contact visit card</string>
@@ -100,7 +109,6 @@
 <string name="label_request_in_background">Request has been sent in background for %s</string>
 <string name="label_capabilities_empty">No capabilities</string>
 <string name="label_contact">Contact %s</string>
-<string name="label_extensions">Extensions: %s</string>
 <string name="label_capabilities_geolocation_push">Geolocation push</string>
 <string name="label_capabilities_ip_voice_call">IP voice call</string>
 <string name="label_capabilities_ip_video_call">IP video call</string>
@@ -129,21 +137,19 @@
 <string name="label_transfer_failed_too_big">Transfer is aborted because file is too big</string>
 <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
 <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
-<string name="label_ft_state_changed">FT state %1$s (%2$s)</string>
+<string name="label_ft_state_changed">%1$s (%2$s)</string>
 <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
-
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>
 <string name="menu_initiate_group_chat">Initiate group chat</string>
 <string name="menu_chat_log">Chat log</string>
 <string name="menu_group_chat_log">Group chat log</string>
-<string name="menu_spambox">Spambox</string>
 <string name="label_invite">Invite</string>
 <string name="title_recv_chat">Chat with %s</string>
 <string name="title_recv_group_chat">Group chat initiated by %s</string>
 <string name="title_group_chat">Group chat</string>
-<string name="title_chat">Chat with</string>
+<string name="title_chat">Chat with %s</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
 <string name="label_chat_aborted">Chat session aborted (%1$s)</string>
 <string name="label_chat_rejected">Chat session rejected (%1$s)</string>
@@ -159,10 +165,10 @@
 <string name="label_select_quicktext">Quick text</string>
 <string name="menu_quicktext">Quick text</string>
 <string name="label_add_participant_failed">Request to add participant(s) has failed</string>
-<string name="label_chat">Chat</string>
 <string name="label_group_chat">Group chat</string>
-<string name="label_continue_chat_failed">Can\'t continue the conversation: joyn service is not available</string>
-<string name="label_subject">Subject:</string>
+<string name="label_continue_chat_failed">Can\'t continue the conversation: RCS service is not available</string>
+<string name="label_subject">Subject: </string>
+<string name="label_subject_notif">Subject: %s</string>
 <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
 <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
 <string name="label_me">Me</string>
@@ -173,11 +179,10 @@
 <string name="label_ft_thumb">Thumbnail</string>
 <string name="menu_send_file">Send file</string>
 <string name="label_geoloc_msg">Geoloc</string>
-<string name="label_contact_status_changed">Contact %1$s status %2$s</string>
-<string name="label_delivery_status_changed">Contact %1$s delivery status %2$s (%3$s)</string>
-<string name="label_gc_state_changed">GC state %1$s (%2$s)</string>
-<string name="label_message_status_changed">%1$s (%2$s)</string>
 <string name="label_gc_from_subject">From: %1$s\nSubject: %2$s</string>
+<string name="label_chat_send">Send</string>
+<string name="label_groupchat_event">Contact has %1$s</string>
+
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
@@ -208,6 +213,7 @@
 <string name="label_video_duration">Duration: %s s</string>
 <string name="label_note_sharing_codec">Note: the video codec is an H264 codec from the Google Android open source and is a contribution from PacketVideo (Apache 2 license).</string>
 <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
+<string name="label_vsh_uninitialized_duration">duration</string>
 
 <!-- Geoloc sharing menu -->
 <string name="title_recv_geoloc_sharing">New geoloc sharing invitation</string>
@@ -215,8 +221,10 @@
 <string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
 <string name="title_geoloc_sharing">Geoloc sharing</string>
 <string name="label_gsh_state_changed">GSH state %1$s (%2$s)</string>
-
-<!-- Geoloc sharing menu -->
+<string name="label_gsh_default_label"></string>
+<string name="label_gsh_default_latitude">0.0</string>
+<string name="label_gsh_default_longitude">0.0</string>
+<string name="label_gsh_default_accuracy">0</string>
 
 <!--  MM session menu -->
 <string name="menu_mm_session">Multimedia session</string>
@@ -247,6 +255,7 @@
 <string name="menu_showus_map">Show us in a map</string>
 <string name="menu_send_geoloc">Send geoloc</string>
 <string name="title_display_geoloc">Show a geoloc</string>
+<string name="label_geolocation_msg">Geolocation message</string>
 <string name="label_location">Label:</string>
 <string name="label_latitude">Latitude:</string>
 <string name="label_longitude">Longitude:</string>
@@ -309,6 +318,17 @@
 <string name="label_upload_aborted">File upload has been aborted</string>
 <string name="label_show_upload">Show upload</string>
 <string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
+
+<!-- Group delivery information menu -->
+<string name="title_group_delivery_info">Group delivery information</string>
+<string name="label_group_delivery_unknown_status">unknown status</string>
+<string name="label_group_delivery_unknown_reason">unknown reason</string>
+
+<!-- Chat message menu -->
+<string name="menu_view_groupdelivery">View delivery information</string>
+<string name="menu_delete_message">Delete</string>
+<string name="menu_resend_message">Resend</string>
+<string name="menu_revoke_message">Revoke</string>
 
 <string-array name="file_transfer_states">
     <item>INVITED</item>
@@ -541,6 +561,17 @@
 	<item>REJECTED_TIME_OUT</item>
 	<item>FAILED_INITIATION</item>
 	<item>FAILED_IPCALL</item>
+</string-array>
+
+<string-array name="group_chat_event">
+    <item>PENDING</item>
+    <item>ACCEPTED</item>
+    <item>DECLINED</item>
+    <item>FAILED</item>
+    <item>JOINED</item>
+    <item>GONE</item>
+    <item>DISCONNECTED</item>
+    <item>BUSY</item>
 </string-array>
 
 </resources>

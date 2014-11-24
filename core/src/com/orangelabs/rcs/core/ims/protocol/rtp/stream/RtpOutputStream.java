@@ -59,27 +59,27 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
     /**
      * RTP receiver
      */
-    private RtpPacketReceiver rtpReceiver = null;
+    private RtpPacketReceiver rtpReceiver;
 
     /**
      * RTCP receiver
      */
-    private RtcpPacketReceiver rtcpReceiver = null;
+    private RtcpPacketReceiver rtcpReceiver;
 
 	/**
 	 * RTP transmitter
 	 */
-	private RtpPacketTransmitter rtpTransmitter =  null;
+	private RtpPacketTransmitter rtpTransmitter;
 
 	/**
 	 * RTCP transmitter
 	 */
-	private RtcpPacketTransmitter rtcpTransmitter =  null;
+	private RtcpPacketTransmitter rtcpTransmitter;
 
     /**
      * RTCP Session
      */
-    private RtcpSession rtcpSession = null;
+    private RtcpSession rtcpSession;
 
     /**
      * RTCP socket timeout
@@ -94,12 +94,12 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
     /**
      * RTP Input stream
      */
-    private RtpInputStream rtpInputStream = null;
+    private RtpInputStream rtpInputStream;
 
     /**
      * The logger
      */
-	private final Logger logger = Logger.getLogger(this.getClass().getName());
+	private final static Logger logger = Logger.getLogger(RtpOutputStream.class.getSimpleName());
 
     /**
      * Constructor
@@ -180,7 +180,7 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
             
             // Create the RTCP transmitter
             rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
-                    rtpInputStream.getRtpReceiver().getConnection());
+                    rtpInputStream.getRtcpReceiver().getConnection());
         } else {
             // Create the RTP transmitter
             rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession);

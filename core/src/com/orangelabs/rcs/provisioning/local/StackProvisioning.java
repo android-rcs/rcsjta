@@ -214,6 +214,7 @@ public class StackProvisioning extends Activity {
 		saveEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
 		saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
 				bundle);
+		saveEditTextParameter(this, R.id.ImsServicePollingPeriod, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, bundle);
 		saveEditTextParameter(this, R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, bundle);
 		saveEditTextParameter(this, R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, bundle);
 		saveEditTextParameter(this, R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, bundle);

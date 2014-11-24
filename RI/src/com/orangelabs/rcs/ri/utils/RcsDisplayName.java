@@ -20,8 +20,10 @@ package com.orangelabs.rcs.ri.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contacts.ContactsService;
 import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
@@ -37,49 +39,95 @@ public class RcsDisplayName {
 	private static final String LOGTAG = LogUtils.getTag(RcsDisplayName.class.getSimpleName());
 
 	/**
-	 * Get the RCS display name
+	 * Singleton of RcsDisplayName
+	 */
+	private static volatile RcsDisplayName mInstance;
+
+	private Context mContext;
+	private ContactsService mService;
+	private ContactUtils mContactUtils;
+	
+	/**
+	 * The default display name
+	 */
+	private static String DefaultDisplayName; 
+
+	/**
+	 * Constructor
+	 * @param context
+	 */
+	private RcsDisplayName(Context context) {
+		mContext = context;
+		mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
+		mContactUtils = ContactUtils.getInstance(mContext);
+		DefaultDisplayName = context.getString(R.string.label_no_contact);
+	}
+
+	/**
+	 * Get an instance of RcsDisplayName.
 	 * 
 	 * @param context
-	 * @param contact
-	 * @return the RCS display name or null
+	 *            the context
+	 * @return the singleton instance.
 	 */
-	public static String get(Context ctx, ContactId contact) {
-		try {
-			if (contact == null) {
-				return null;
+	public static RcsDisplayName getInstance(Context context) {
+		if (mInstance == null) {
+			synchronized (RcsDisplayName.class) {
+				if (mInstance == null) {
+					if (context == null) {
+						throw new IllegalArgumentException("Context is null");
+					}
+					mInstance = new RcsDisplayName(context);
+				}
 			}
-			RcsContact rcsContact = ApiConnectionManager.getInstance(ctx).getContactsApi().getRcsContact(contact);
-			return rcsContact.getDisplayName();
+		}
+		return mInstance;
+	}
+
+	/**
+	 * Returns RCS display name which can be displayed on UI
+	 * 
+	 * @param contact
+	 * @return the RCS display name
+	 */
+	public String getDisplayName(ContactId contact) {
+		if (contact == null) {
+			return DefaultDisplayName;
+		}
+		try {
+			if (mService == null) {
+				mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
+			}
+			RcsContact rcsContact = mService.getRcsContact(contact);
+			String displayName = rcsContact.getDisplayName();
+			if (displayName == null) {
+				return contact.toString();
+			} else {
+				return displayName;
+			}
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot get displayName", e);
 			}
+			return contact.toString();
 		}
-		return null;
 	}
 
 	/**
-	 * Convert RCS display name according to direction and contactId in a String which can be displayed to UI
+	 * get RCS display in a String which can be displayed on UI
 	 * 
-	 * @param context
-	 * @param direction
-	 * @param contact
-	 * @param rcsDisplayName
-	 * @return the display name which can be displayed to client
+	 * @param number
+	 * @return the name which can be displayed on UI
 	 */
-	public static String convert(Context ctx, int direction, ContactId contact, String rcsDisplayName) {
-		if (direction == RcsCommon.Direction.OUTGOING) {
-			return ctx.getString(R.string.label_me);
-		} else {
-			if (rcsDisplayName == null) {
-				if (contact != null) {
-					return contact.toString();
-				} else {
-					return ctx.getString(R.string.label_no_contact);
-				}
-			} else {
-				return rcsDisplayName;
-			}
+	public String getDisplayName(String number) {
+		if (number == null) {
+			return DefaultDisplayName;
+		}
+		try {
+			ContactId contact = mContactUtils.formatContact(number);
+			return getDisplayName(contact);
+		} catch (RcsContactFormatException e) {
+			return number;
 		}
 	}
 }

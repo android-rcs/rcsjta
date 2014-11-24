@@ -111,7 +111,7 @@ public class IPCallDAO implements Parcelable {
 	 * <p>
 	 * Note: to change with CR025 (enums)
 	 * 
-	 * @param contentResolver
+	 * @param context
 	 * @param callId
 	 *            the unique key field
 	 * @throws Exception
@@ -124,7 +124,7 @@ public class IPCallDAO implements Parcelable {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
 			if (cursor.moveToFirst()) {
 				this.callId = callId;
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT_NUMBER));
+				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
 				if (_contact != null) {
 					ContactUtils contactUtils = ContactUtils.getInstance(context);
 					contact = contactUtils.formatContact(_contact);
