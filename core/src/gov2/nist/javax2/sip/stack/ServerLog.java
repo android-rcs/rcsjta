@@ -199,23 +199,6 @@ public class ServerLog implements ServerLogger {
                 FileWriter fw = new FileWriter(logFileName, !overwrite);
 
                 printWriter = new PrintWriter(fw, true);
-                printWriter.println("<!-- "
-                        + "Use the  Trace Viewer in src/tools/tracesviewer to"
-                        + " view this  trace  \n"
-                        + "Here are the stack configuration properties \n"
-                        + "javax2.sip.IP_ADDRESS= "
-                        + configurationProperties.getProperty("javax2.sip.IP_ADDRESS") + "\n"
-                        + "javax2.sip.STACK_NAME= "
-                        + configurationProperties.getProperty("javax2.sip.STACK_NAME") + "\n"
-                        + "javax2.sip.ROUTER_PATH= "
-                        + configurationProperties.getProperty("javax2.sip.ROUTER_PATH") + "\n"
-                        + "javax2.sip.OUTBOUND_PROXY= "
-                        + configurationProperties.getProperty("javax2.sip.OUTBOUND_PROXY") + "\n"
-                        + "-->");
-                printWriter.println("<description\n logDescription=\"" + description
-                        + "\"\n name=\""
-                        + configurationProperties.getProperty("javax2.sip.STACK_NAME")
-                        + "\"\n auxInfo=\"" + auxInfo + "\"/>\n ");
                 if (auxInfo != null) {
 
                     if (sipStack.isLoggingEnabled()) {
