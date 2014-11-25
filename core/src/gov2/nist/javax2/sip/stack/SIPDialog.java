@@ -390,9 +390,14 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
 
         SIPServerTransaction transaction;
 
+        int ticks;
+
         public DialogTimerTask(SIPServerTransaction transaction) {
             this.transaction = transaction;
             this.nRetransmissions = 0;
+
+            this.ticks = 64 * SIPTransaction.T1;
+            setTaskOutdatedTime(ticks);
         }
 
         protected void runTask() {
@@ -411,7 +416,7 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
              * be terminated.
              */
 
-            if (nRetransmissions > 64 * SIPTransaction.T1) {
+            if (nRetransmissions > ticks || isTaskOutdated()) {
                 if (sipProvider.getSipListener() != null && sipProvider.getSipListener() instanceof SipListenerExt ) {
                     raiseErrorEvent(SIPDialogErrorEvent.DIALOG_ACK_NOT_RECEIVED_TIMEOUT);
                 } else  {
@@ -807,7 +812,7 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
     /**
      * Add a route list extacted from the contact list of the incoming message.
      * 
-     * @param contactList -- contact list extracted from the incoming message.
+     * @param contact -- contact list extracted from the incoming message.
      * 
      */
 
@@ -824,7 +829,7 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
      * Extract the route information from this SIP Message and add the relevant information to the
      * route set.
      * 
-     * @param sipMessage is the SIP message for which we want to add the route.
+     * @param sipResponse is the SIP message for which we want to add the route.
      */
     private synchronized void addRoute(SIPResponse sipResponse) {
 
@@ -927,7 +932,6 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
      * @param request the new ACK Request message to send.
      * @param throwIOExceptionAsSipException - throws SipException if IOEx encountered. Otherwise,
      *        no exception is propagated.
-     * @param releaseAckSem - release ack semaphore.
      * @throws SipException if implementation cannot send the ACK Request for any other reason
      * 
      */
@@ -1866,7 +1870,7 @@ public class SIPDialog implements javax2.sip.Dialog, DialogExt {
      * The method that actually does the work of creating a request.
      * 
      * @param method
-     * @param response
+     * @param sipResponse
      * @return
      * @throws SipException
      */
