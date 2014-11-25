@@ -51,9 +51,9 @@ public class IPCallProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath(),
+        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath().substring(1),
                 UriType.IPCALL);
-        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath()
+        sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath().substring(1)
                 .concat("/*"), UriType.IPCALL_WITH_CALLID);
     }
 

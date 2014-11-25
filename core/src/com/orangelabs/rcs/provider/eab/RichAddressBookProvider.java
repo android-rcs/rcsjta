@@ -68,18 +68,18 @@ public class RichAddressBookProvider extends ContentProvider {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         sUriMatcher.addURI(RichAddressBookData.CONTENT_URI.getAuthority(),
-                RichAddressBookData.CONTENT_URI.getPath(), UriType.InternalContacts.INTERNAL_CONTACTS);
+                RichAddressBookData.CONTENT_URI.getPath().substring(1), UriType.InternalContacts.INTERNAL_CONTACTS);
         sUriMatcher.addURI(RichAddressBookData.CONTENT_URI.getAuthority(),
-                RichAddressBookData.CONTENT_URI.getPath().concat("/*"),
+                RichAddressBookData.CONTENT_URI.getPath().substring(1).concat("/*"),
                 UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID);
         sUriMatcher.addURI(AggregationData.CONTENT_URI.getAuthority(),
-                AggregationData.CONTENT_URI.getPath(), UriType.Aggregation.AGGREGATION);
+                AggregationData.CONTENT_URI.getPath().substring(1), UriType.Aggregation.AGGREGATION);
         sUriMatcher.addURI(AggregationData.CONTENT_URI.getAuthority(), AggregationData.CONTENT_URI
-                .getPath().concat("/*"), UriType.Aggregation.AGGREGATION_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.Aggregation.AGGREGATION_WITH_ID);
         sUriMatcher.addURI(CapabilitiesLog.CONTENT_URI.getAuthority(),
-                CapabilitiesLog.CONTENT_URI.getPath(), UriType.Contacts.CONTACTS);
+                CapabilitiesLog.CONTENT_URI.getPath().substring(1), UriType.Contacts.CONTACTS);
         sUriMatcher.addURI(CapabilitiesLog.CONTENT_URI.getAuthority(), CapabilitiesLog.CONTENT_URI
-                .getPath().concat("/*"), UriType.Contacts.CONTACTS_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.Contacts.CONTACTS_WITH_ID);
     }
 
     /**

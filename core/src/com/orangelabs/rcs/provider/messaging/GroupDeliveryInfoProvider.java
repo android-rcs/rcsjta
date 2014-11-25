@@ -33,9 +33,9 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(GroupDeliveryInfoLog.CONTENT_URI.getAuthority(),
-                GroupDeliveryInfoLog.CONTENT_URI.getPath(), UriType.DELIVERY);
+                GroupDeliveryInfoLog.CONTENT_URI.getPath().substring(1), UriType.DELIVERY);
         sUriMatcher.addURI(GroupDeliveryInfoLog.CONTENT_URI.getAuthority(), GroupDeliveryInfoLog.CONTENT_URI
-                .getPath().concat("/*"), UriType.DELIVERY_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.DELIVERY_WITH_ID);
     }
 
     private static final class UriType {

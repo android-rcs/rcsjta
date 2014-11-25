@@ -57,13 +57,13 @@ public class RcsSettingsProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(RcsSettingsData.CONTENT_URI.getAuthority(),
-                RcsSettingsData.CONTENT_URI.getPath(), UriType.InternalSettings.INTERNAL_SETTINGS);
+                RcsSettingsData.CONTENT_URI.getPath().substring(1), UriType.InternalSettings.INTERNAL_SETTINGS);
         sUriMatcher.addURI(RcsSettingsData.CONTENT_URI.getAuthority(), RcsSettingsData.CONTENT_URI
-                .getPath().concat("/*"), UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY);
+                .getPath().substring(1).concat("/*"), UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY);
         sUriMatcher.addURI(RcsServiceConfiguration.Settings.CONTENT_URI.getAuthority(),
-                RcsServiceConfiguration.Settings.CONTENT_URI.getPath(), UriType.Settings.SETTINGS);
+                RcsServiceConfiguration.Settings.CONTENT_URI.getPath().substring(1), UriType.Settings.SETTINGS);
         sUriMatcher.addURI(RcsServiceConfiguration.Settings.CONTENT_URI.getAuthority(),
-                RcsServiceConfiguration.Settings.CONTENT_URI.getPath().concat("/*"),
+                RcsServiceConfiguration.Settings.CONTENT_URI.getPath().substring(1).concat("/*"),
                 UriType.Settings.SETTINGS_WITH_KEY);
     }
 

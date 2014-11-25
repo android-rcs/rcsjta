@@ -79,13 +79,13 @@ public class FileTransferProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(FileTransferLog.CONTENT_URI.getAuthority(),
-                FileTransferLog.CONTENT_URI.getPath(), UriType.FileTransfer.FILE_TRANSFER);
+                FileTransferLog.CONTENT_URI.getPath().substring(1), UriType.FileTransfer.FILE_TRANSFER);
         sUriMatcher.addURI(FileTransferLog.CONTENT_URI.getAuthority(), FileTransferLog.CONTENT_URI
-                .getPath().concat("/*"), UriType.FileTransfer.FILE_TRANSFER_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.FileTransfer.FILE_TRANSFER_WITH_ID);
         sUriMatcher.addURI(FileTransferData.CONTENT_URI.getAuthority(),
-                FileTransferData.CONTENT_URI.getPath(), UriType.InternalFileTransfer.FILE_TRANSFER);
+                FileTransferData.CONTENT_URI.getPath().substring(1), UriType.InternalFileTransfer.FILE_TRANSFER);
         sUriMatcher.addURI(FileTransferData.CONTENT_URI.getAuthority(),
-                FileTransferData.CONTENT_URI.getPath().concat("/*"),
+                FileTransferData.CONTENT_URI.getPath().substring(1).concat("/*"),
                 UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID);
     }
 

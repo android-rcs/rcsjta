@@ -51,9 +51,9 @@ public class VideoSharingProvider extends ContentProvider {
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(VideoSharingLog.CONTENT_URI.getAuthority(),
-                VideoSharingLog.CONTENT_URI.getPath(), UriType.VIDEO_SHARING);
+                VideoSharingLog.CONTENT_URI.getPath().substring(1), UriType.VIDEO_SHARING);
         sUriMatcher.addURI(VideoSharingLog.CONTENT_URI.getAuthority(), VideoSharingLog.CONTENT_URI
-                .getPath().concat("/*"), UriType.VIDEO_SHARING_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.VIDEO_SHARING_WITH_ID);
     }
 
     private static final class UriType {

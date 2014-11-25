@@ -58,18 +58,18 @@ public class ChatProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath(),
+        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath().substring(1),
                 UriType.InternalChat.CHAT);
-        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath()
+        sUriMatcher.addURI(ChatData.CONTENT_URI.getAuthority(), ChatData.CONTENT_URI.getPath().substring(1)
                 .concat("/*"), UriType.InternalChat.CHAT_WITH_ID);
         sUriMatcher.addURI(ChatLog.GroupChat.CONTENT_URI.getAuthority(),
-                ChatLog.GroupChat.CONTENT_URI.getPath(), UriType.Chat.CHAT);
+                ChatLog.GroupChat.CONTENT_URI.getPath().substring(1), UriType.Chat.CHAT);
         sUriMatcher.addURI(ChatLog.GroupChat.CONTENT_URI.getAuthority(),
-                ChatLog.GroupChat.CONTENT_URI.getPath().concat("/*"), UriType.Chat.CHAT_WITH_ID);
+                ChatLog.GroupChat.CONTENT_URI.getPath().substring(1).concat("/*"), UriType.Chat.CHAT_WITH_ID);
         sUriMatcher.addURI(ChatLog.Message.CONTENT_URI.getAuthority(),
-                ChatLog.Message.CONTENT_URI.getPath(), UriType.Message.MESSAGE);
+                ChatLog.Message.CONTENT_URI.getPath().substring(1), UriType.Message.MESSAGE);
         sUriMatcher.addURI(ChatLog.Message.CONTENT_URI.getAuthority(), ChatLog.Message.CONTENT_URI
-                .getPath().concat("/*"), UriType.Message.MESSAGE_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.Message.MESSAGE_WITH_ID);
 
     }
 

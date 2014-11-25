@@ -53,9 +53,9 @@ public class ImageSharingProvider extends ContentProvider {
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(ImageSharingLog.CONTENT_URI.getAuthority(),
-                ImageSharingLog.CONTENT_URI.getPath(), UriType.IMAGE_SHARING);
+                ImageSharingLog.CONTENT_URI.getPath().substring(1), UriType.IMAGE_SHARING);
         sUriMatcher.addURI(ImageSharingLog.CONTENT_URI.getAuthority(), ImageSharingLog.CONTENT_URI
-                .getPath().concat("/*"), UriType.IMAGE_SHARING_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.IMAGE_SHARING_WITH_ID);
     }
 
     private static final class UriType {

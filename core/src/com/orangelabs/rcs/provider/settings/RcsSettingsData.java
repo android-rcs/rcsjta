@@ -35,7 +35,7 @@ import com.gsma.services.rcs.RcsServiceConfiguration;
 public class RcsSettingsData {
 
 	public static final Uri CONTENT_URI = Uri
-			.parse("content://com.orangelabs.rcs.settings/settings");
+			.parse("content://com.orangelabs.rcs.setting/setting");
 
 	/**
 	 * Key of the Rcs configuration parameter
