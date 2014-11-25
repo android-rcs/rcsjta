@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +15,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.addressbook;
 
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 
@@ -42,7 +48,8 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
 		}
 		
 		// We have to modify the strings that are used in contacts manager
-		ContactsManager.createInstance(context);
+		ContentResolver contentResolver = context.getContentResolver();
+		ContactsManager.createInstance(context, contentResolver, new LocalContentResolver(contentResolver));
 		ContactsManager.getInstance().updateStrings();
 	}
 }

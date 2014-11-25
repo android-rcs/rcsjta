@@ -28,6 +28,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -74,6 +75,7 @@ import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
@@ -222,8 +224,8 @@ public class RcsCoreService extends Service implements CoreListener {
     			logger.debug("Start RCS core service");
     		}
     		
-			// Instantiate the settings manager
-            RcsSettings.createInstance(getApplicationContext());
+            Context ctx = getApplicationContext();
+            RcsSettings.createInstance(ctx);
             
             // Instantiate the contactUtils instance (CountryCode is already set)
             com.gsma.services.rcs.contacts.ContactUtils.getInstance(this);
@@ -248,21 +250,14 @@ public class RcsCoreService extends Service implements CoreListener {
             if (logger.isActivated()) {
                 logger.info("RCS stack release is " + TerminalInfo.getProductVersion());
             }
-    		
-    		// Instantiate the contacts manager
-            ContactsManager.createInstance(getApplicationContext());
 
-            // Instantiate the rich messaging history 
-            MessagingLog.createInstance(getApplicationContext());
-            
-            // Instantiate the rich call history 
-            RichCallHistory.createInstance(getApplicationContext());
-
-            // Instantiate the IP call history 
-            IPCallHistory.createInstance(getApplicationContext());
-
-            // Instantiate the FT HTTP DAO interface
-            FtHttpResumeDaoImpl.createInstance(getApplicationContext());
+            ContentResolver contentResolver = ctx.getContentResolver();
+            LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
+            ContactsManager.createInstance(ctx, contentResolver, localContentResolver);
+            MessagingLog.createInstance(ctx, localContentResolver);
+            RichCallHistory.createInstance(localContentResolver);
+            IPCallHistory.createInstance(localContentResolver);
+            FtHttpResumeDaoImpl.createInstance(ctx);
             
             // Create the core
 			Core.createCore(this);

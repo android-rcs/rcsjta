@@ -27,7 +27,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -40,6 +39,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -61,10 +61,8 @@ public class FileTransferLog implements IFileTransferLog {
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
-	/**
-	 * Content resolver
-	 */
-	private final ContentResolver mContentResolver;
+	private final LocalContentResolver mLocalContentResolver;
+
 	private final GroupChatLog mGroupChatLog;
 	private final GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 	/**
@@ -75,14 +73,16 @@ public class FileTransferLog implements IFileTransferLog {
 	/**
 	 * Constructor
 	 *
-	 * @param mContentResolver
-	 *            Content resolver
-	 * @param mGroupChatLog
+	 * @param localContentResolver
+	 *            Local content resolver
+	 * @param groupChatLog
+	 *            Group chat log
 	 * @param groupChatDeliveryInfoLog
+	 *            Group chat delivery info log
 	 */
-	/* package private */FileTransferLog(ContentResolver contentResolver, GroupChatLog groupChatLog,
+	/* package private */FileTransferLog(LocalContentResolver localContentResolver, GroupChatLog groupChatLog,
 			GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
-		mContentResolver = contentResolver;
+		mLocalContentResolver = localContentResolver;
 		mGroupChatLog = groupChatLog;
 		mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
 	}
@@ -128,7 +128,7 @@ public class FileTransferLog implements IFileTransferLog {
 			values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
 		}
-		mContentResolver.insert(FileTransferData.CONTENT_URI, values);
+		mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class FileTransferLog implements IFileTransferLog {
 		if (thumbnail != null) {
 			values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
 		}
-		mContentResolver.insert(FileTransferData.CONTENT_URI, values);
+		mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 
 		try {
 			Set<ParticipantInfo> participants = mGroupChatLog.getGroupChatConnectedParticipants(chatId);
@@ -170,8 +170,8 @@ public class FileTransferLog implements IFileTransferLog {
 			if (logger.isActivated()) {
 				logger.error("Group file transfer with fileTransferId '" + fileTransferId + "' could not be added to database!", e);
 			}
-			mContentResolver.delete(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null);
-			mContentResolver.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, fileTransferId), null, null);
+			mLocalContentResolver.delete(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null);
+			mLocalContentResolver.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, fileTransferId), null, null);
 			/* TODO: Throw exception */
 		}
 	}
@@ -210,7 +210,7 @@ public class FileTransferLog implements IFileTransferLog {
 			values.put(FileTransferData.KEY_FILEICON, fileIcon.getUri().toString());
 		}
 
-		mContentResolver.insert(FileTransferData.CONTENT_URI, values);
+		mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class FileTransferLog implements IFileTransferLog {
 			values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance()
 					.getTimeInMillis());
 		}
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
 				null);
 	}
 
@@ -244,7 +244,7 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ);
-		if (mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
+		if (mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
 				null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
@@ -257,7 +257,7 @@ public class FileTransferLog implements IFileTransferLog {
 	public void updateFileTransferProgress(String fileTransferId, long currentSize) {
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_TRANSFERRED, currentSize);
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
 				null);
 	}
 
@@ -270,7 +270,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_STATE, FileTransfer.State.TRANSFERRED);
 		values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED);
 		values.put(FileTransferData.KEY_TRANSFERRED, content.getSize());
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
 				null);
 	}
 
@@ -278,7 +278,7 @@ public class FileTransferLog implements IFileTransferLog {
 	public boolean isFileTransfer(String fileTransferId) {
 		Cursor cursor = null;
 		try {
-			cursor = mContentResolver.query(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
+			cursor = mLocalContentResolver.query(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
 					new String[] {
 						FileTransferData.KEY_FT_ID
 				}, null, null, null);
@@ -303,7 +303,7 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
 				null);
 	}
 
@@ -315,7 +315,7 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_UPLOAD_TID, tId);
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
 				null);
 	}
 
@@ -327,7 +327,7 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(FileTransferData.KEY_DOWNLOAD_URI, downloadAddress.toString());
-		mContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
 				null);
 	}
 
@@ -335,7 +335,7 @@ public class FileTransferLog implements IFileTransferLog {
 	public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
 		Cursor cursor = null;
 		try {
-			cursor = mContentResolver.query(FileTransferData.CONTENT_URI, null, SELECTION_BY_PAUSED_BY_SYSTEM,
+			cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null, SELECTION_BY_PAUSED_BY_SYSTEM,
 					null, ORDER_BY_TIMESTAMP_ASC);
 			if (!cursor.moveToFirst()) {
 				return new ArrayList<FtHttpResume>();
@@ -412,7 +412,7 @@ public class FileTransferLog implements IFileTransferLog {
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
 		Cursor cursor = null;
 		try {
-			cursor = mContentResolver.query(FileTransferData.CONTENT_URI, null, SELECTION_FILE_BY_T_ID, new String[] {
+			cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null, SELECTION_FILE_BY_T_ID, new String[] {
 				tId
 			}, null);
 

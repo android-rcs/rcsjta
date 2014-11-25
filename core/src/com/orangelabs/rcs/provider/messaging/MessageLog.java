@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -49,10 +51,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class MessageLog implements IMessageLog {
 
-	/**
-	 * Content resolver
-	 */
-	private ContentResolver cr;
+	private LocalContentResolver mLocalContentResolver;
 
 	private GroupChatLog groupChatLog;
 
@@ -67,13 +66,13 @@ public class MessageLog implements IMessageLog {
 	/**
 	 * Constructor
 	 * 
-	 * @param cr
-	 *            Content resolver
+	 * @param localContentResolver
+	 *            Local content resolver
 	 * @param groupChatLog
 	 * @param groupChatDeliveryInfoLog
 	 */
-	/* package private */MessageLog(ContentResolver cr, GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
-		this.cr = cr;
+	/* package private */MessageLog(LocalContentResolver localContentResolver, GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
+		mLocalContentResolver = localContentResolver;
 		this.groupChatLog = groupChatLog;
 		this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
 	}
@@ -136,7 +135,7 @@ public class MessageLog implements IMessageLog {
 
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
-		cr.insert(ChatLog.Message.CONTENT_URI, values);
+		mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	/**
@@ -180,7 +179,7 @@ public class MessageLog implements IMessageLog {
 
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
-		cr.insert(ChatLog.Message.CONTENT_URI, values);
+		mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	@Override
@@ -247,7 +246,7 @@ public class MessageLog implements IMessageLog {
 			values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
 			values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 		}
-		cr.insert(ChatLog.Message.CONTENT_URI, values);
+		mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
 
 		if (direction == Direction.OUTGOING) {
 			try {
@@ -257,8 +256,8 @@ public class MessageLog implements IMessageLog {
 							participant.getContact(), msgId);
 				}
 			} catch (Exception e) {
-				cr.delete(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
-				cr.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
+				mLocalContentResolver.delete(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
+				mLocalContentResolver.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
 				/* TODO: Throw exception */
 				if (logger.isActivated()) {
 					logger.warn("Group chat message with msgId '" + msgId + "' could not be added to database!");
@@ -287,7 +286,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
 		values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
 		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-		cr.insert(ChatLog.Message.CONTENT_URI, values);
+		mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
 	}
 
 	@Override
@@ -299,7 +298,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ);
 		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 
-		if (cr.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
+		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
@@ -322,7 +321,7 @@ public class MessageLog implements IMessageLog {
 					.getTimeInMillis());
 		}
 
-		if (cr.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
+		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to update status for.");
@@ -342,7 +341,7 @@ public class MessageLog implements IMessageLog {
 	public boolean isMessagePersisted(String msgId) {
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID, null, null, null);
+			cursor = mLocalContentResolver.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID, null, null, null);
 			return cursor.moveToFirst();
 		} finally {
 			if (cursor != null) {

@@ -24,9 +24,7 @@ package com.orangelabs.rcs.provider.sharing;
 
 import java.util.Calendar;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -36,6 +34,7 @@ import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -49,10 +48,7 @@ public class RichCallHistory {
 	 */
 	private static RichCallHistory instance;
 
-	/**
-	 * Content resolver
-	 */
-	private ContentResolver cr;
+	private final LocalContentResolver mLocalContentResolver;
 
 	/**
 	 * The logger
@@ -60,19 +56,13 @@ public class RichCallHistory {
 	private final static Logger logger = Logger.getLogger(RichCallHistory.class.getSimpleName());
 
 	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private RichCallHistory() {
-	}
-
-	/**
 	 * Create instance
 	 * 
-	 * @param ctx Context
+	 * @param localContentResolver Local content resolver
 	 */
-	public static synchronized void createInstance(Context ctx) {
+	public static synchronized void createInstance(LocalContentResolver localContentResolver) {
 		if (instance == null) {
-			instance = new RichCallHistory(ctx);
+			instance = new RichCallHistory(localContentResolver);
 		}
 	}
 	
@@ -88,13 +78,12 @@ public class RichCallHistory {
 	/**
      * Constructor
      * 
-     * @param ctx Application context
+     * @param localContentResolver Local content resolver
      */
-	private RichCallHistory(Context ctx) {
+	private RichCallHistory(LocalContentResolver localContentResolver) {
 		super();
-		
-        this.cr = ctx.getContentResolver();
-    }
+		mLocalContentResolver = localContentResolver;
+	}
 	
 	/*--------------------- Video sharing methods ----------------------*/
 	
@@ -127,7 +116,7 @@ public class RichCallHistory {
 		values.put(VideoSharingData.KEY_VIDEO_ENCODING, content.getEncoding());
 		values.put(VideoSharingData.KEY_WIDTH, content.getWidth());
 		values.put(VideoSharingData.KEY_HEIGHT, content.getHeight());
-		return cr.insert(VideoSharingLog.CONTENT_URI, values);
+		return mLocalContentResolver.insert(VideoSharingLog.CONTENT_URI, values);
 	}
 
 	/**
@@ -146,7 +135,8 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_STATE, state);
 		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
-		cr.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), values, null, null);
+		mLocalContentResolver.update(
+				Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
 
 	/**
@@ -161,7 +151,8 @@ public class RichCallHistory {
 		}
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_DURATION, duration);
-		cr.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), values, null, null);
+		mLocalContentResolver.update(
+				Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
 	
 	/*--------------------- Image sharing methods ----------------------*/
@@ -194,7 +185,7 @@ public class RichCallHistory {
 		values.put(ImageSharingData.KEY_STATE, status);
 		values.put(ImageSharingData.KEY_REASON_CODE, reasonCode);
 		values.put(ImageSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-		return cr.insert(ImageSharingLog.CONTENT_URI, values);
+		return mLocalContentResolver.insert(ImageSharingLog.CONTENT_URI, values);
 	}
 
 	/**
@@ -218,7 +209,8 @@ public class RichCallHistory {
 				values.put(ImageSharingData.KEY_TRANSFERRED, total);
 			}
 		}
-		cr.update(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), values, null, null);
+		mLocalContentResolver.update(
+				Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
 	
 	/**
@@ -231,8 +223,9 @@ public class RichCallHistory {
 		Cursor c = null;
 		try {
 			String[] projection = new String[] { ImageSharingData.KEY_FILESIZE };
-			c = cr.query(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection,
-					null, null, null);
+			c = mLocalContentResolver.query(
+					Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,
+					null, null);
 			if (c.moveToFirst()) {
 				return c.getLong(0);
 			}
@@ -254,14 +247,15 @@ public class RichCallHistory {
 	public void updateImageSharingProgress(String sharingId, long currentSize) {
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_TRANSFERRED, currentSize);
-		cr.update(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), values, null, null);
+		mLocalContentResolver.update(
+				Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
 
 	/**
 	 * Delete all entries in Rich Call history
 	 */
 	public void deleteAllEntries() {
-		cr.delete(ImageSharingLog.CONTENT_URI, null, null);
-		cr.delete(VideoSharingLog.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(ImageSharingLog.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(VideoSharingLog.CONTENT_URI, null, null);
 	}	
 }

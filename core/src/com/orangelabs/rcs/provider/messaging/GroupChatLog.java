@@ -30,12 +30,14 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -50,8 +52,9 @@ public class GroupChatLog implements IGroupChatLog {
 
 	private final static String ORDER_BY_TIMESTAMP_DESC = ChatData.KEY_TIMESTAMP.concat(" DESC");
 
-	private Context context;
-	private ContentResolver cr;
+	private final Context mCtx;
+
+	private final LocalContentResolver mLocalContentResolver;
 	
 	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
 
@@ -71,12 +74,12 @@ public class GroupChatLog implements IGroupChatLog {
 	/**
 	 * Constructor
 	 * 
-	 * @param cr
-	 *            Content resolver
+	 * @param localContentResolver
+	 *            Local content resolver
 	 */
-	/* package private */GroupChatLog(Context context) {
-		this.context = context;
-		this.cr = context.getContentResolver();
+	/* package private */GroupChatLog(Context ctx, LocalContentResolver localContentResolver) {
+		mCtx = ctx;
+		mLocalContentResolver = localContentResolver;
 	}
 
 	/**
@@ -133,7 +136,7 @@ public class GroupChatLog implements IGroupChatLog {
 		values.put(ChatData.KEY_DIRECTION, direction);
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(ChatData.KEY_DEPARTED_BY_USER, NOT_DEPARTED_BY_USER);
-		cr.insert(ChatData.CONTENT_URI, values);
+		mLocalContentResolver.insert(ChatData.CONTENT_URI, values);
 	}
 
 	/*
@@ -149,7 +152,7 @@ public class GroupChatLog implements IGroupChatLog {
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_DEPARTED_BY_USER, NOT_DEPARTED_BY_USER);
 		String[] selectionArgs = { chatId };
-		cr.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
 		}
@@ -167,7 +170,7 @@ public class GroupChatLog implements IGroupChatLog {
 		String selectionArgs[] = new String[] {
 			chatId
 		};
-		cr.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
 	}
 
 	/*
@@ -183,7 +186,7 @@ public class GroupChatLog implements IGroupChatLog {
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
-		cr.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 
 	/*
@@ -199,7 +202,7 @@ public class GroupChatLog implements IGroupChatLog {
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJOIN_ID, rejoinId);
 		values.put(ChatData.KEY_STATE, GroupChat.State.STARTED);
-		cr.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
 	}
 
 	/*
@@ -221,11 +224,11 @@ public class GroupChatLog implements IGroupChatLog {
 		// @formatter:on
 		String[] selArgs = new String[] { chatId };
 		try {
-			cursor = cr.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
 					ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(context, cursor.getString(2));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx, cursor.getString(2));
 				result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId, participants, cursor.getString(3));
 			}
 		} finally {
@@ -251,11 +254,11 @@ public class GroupChatLog implements IGroupChatLog {
 		String[] selArgs = new String[] { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
 					ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(context, cursor.getString(0));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx, cursor.getString(0));
 				if (participants != null) {
 					for (ParticipantInfo participantInfo : participants) {
 						// Only consider participants who have not declined or left GC
@@ -292,7 +295,7 @@ public class GroupChatLog implements IGroupChatLog {
 		String[] selectionArgs = { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = cr.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID_STATUS_REJECTED,
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID_STATUS_REJECTED,
 					selectionArgs, ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.getCount() != 0) {
 				return true;

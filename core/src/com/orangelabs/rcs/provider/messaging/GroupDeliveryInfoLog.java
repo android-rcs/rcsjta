@@ -22,12 +22,12 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -55,15 +55,15 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     private static final Logger logger = Logger.getLogger(GroupDeliveryInfoLog.class
             .getSimpleName());
 
-    private final ContentResolver mContentResolver;
+    private final LocalContentResolver mLocalContentResolver;
 
     /**
      * Constructor
      *
-     * @param mContentResolver Content resolver
+     * @param localContentResolver Local content resolver
      */
-    /* package private */ GroupDeliveryInfoLog(ContentResolver contentResolver) {
-        mContentResolver = contentResolver;
+    /* package private */ GroupDeliveryInfoLog(LocalContentResolver localContentResolver) {
+        mLocalContentResolver = localContentResolver;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, 0);
-        return mContentResolver.insert(GroupDeliveryInfoData.CONTENT_URI, values);
+        return mLocalContentResolver.insert(GroupDeliveryInfoData.CONTENT_URI, values);
     }
 
     /**
@@ -100,7 +100,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
         };
-        if (mContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
+        if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
                 SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
             /*
              * TODO: Skip catching exception, which should be implemented in
@@ -123,8 +123,9 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     public boolean isDeliveredToAllRecipients(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mContentResolver.query(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId),
-                    null, SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE, null, null);
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
+                    SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE, null, null);
             return !cursor.moveToFirst();
 
         } finally {
@@ -144,7 +145,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     public boolean isDisplayedByAllRecipients(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mContentResolver.query(
+            cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
                     SELECTION_DELIVERY_INFO_NOT_DISPLAYED, null, null);
 

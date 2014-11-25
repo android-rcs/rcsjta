@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.service.api;
@@ -27,11 +31,14 @@ import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
+import com.orangelabs.rcs.core.ims.service.capability.CapabilityService;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.CapabilitiesBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.os.Handler;
 
 /**
  * Capability service API implementation
@@ -55,6 +62,40 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 */
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
+	private final Handler mOptionsExchangeRequestHandler;
+
+	private class CapabilitesRequester implements Runnable {
+
+		private final ContactId mContact;
+
+		private final CapabilityService mCapabilityService;
+
+		public CapabilitesRequester(CapabilityService capabilityService, ContactId contact) {
+			mContact = contact;
+			mCapabilityService = capabilityService;
+		}
+
+		public void run() {
+			mCapabilityService.requestContactCapabilities(mContact);
+		}
+	}
+
+	private class AllCapabilitesRequester implements Runnable {
+
+		private final ContactsManager mContactManager;
+
+		private final CapabilityService mCapabilityService;
+
+		public AllCapabilitesRequester(ContactsManager contactManager, CapabilityService capabilityService) {
+			mContactManager = contactManager;
+			mCapabilityService = capabilityService;
+		}
+
+		public void run() {
+			mCapabilityService.requestContactCapabilities(mContactManager.getAllContacts());
+		}
+	}
+
 	/**
 	 * Constructor
 	 */
@@ -62,6 +103,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Capability service API is loaded");
 		}
+		mOptionsExchangeRequestHandler = new Handler();
 	}
 
 	/**
@@ -177,13 +219,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
-		// Request contact capabilities
 		try {
-	        new Thread() {
-	    		public void run() {
-					Core.getInstance().getCapabilityService().requestContactCapabilities(contact);
-	    		}
-	    	}.start();
+			mOptionsExchangeRequestHandler.post(new CapabilitesRequester(Core.getInstance().getCapabilityService(), contact));
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -243,14 +280,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 
-		// Request all contacts capabilities
 		try {
-	        new Thread() {
-	    		public void run() {
-	    			Set<ContactId> contactSet = ContactsManager.getInstance().getAllContacts();
-	    			Core.getInstance().getCapabilityService().requestContactCapabilities(contactSet);
-	    		}
-	    	}.start();
+			mOptionsExchangeRequestHandler.post(new AllCapabilitesRequester(ContactsManager.getInstance(), Core
+					.getInstance().getCapabilityService()));
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);

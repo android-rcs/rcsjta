@@ -25,6 +25,7 @@ package com.orangelabs.rcs.service;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,6 +35,7 @@ import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -171,41 +173,43 @@ public class LauncherUtils {
     /**
      * Reset RCS config
      *
-     * @param context Application context
+     * @param ctx Application context
      */
-	public static void resetRcsConfig(Context context) {
+	public static void resetRcsConfig(Context ctx) {
 		if (logger.isActivated()) {
 			logger.debug("Reset RCS config");
 		}
         // Stop the Core service
-        context.stopService(new Intent(context, RcsCoreService.class));
+        ctx.stopService(new Intent(ctx, RcsCoreService.class));
 
         // Reset user profile
-        RcsSettings.createInstance(context);
+        RcsSettings.createInstance(ctx);
         RcsSettings.getInstance().resetUserProfile();
 
+        ContentResolver contentResolver = ctx.getContentResolver();
+        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
         // Clear all entries in chat, message and file transfer tables
-        MessagingLog.createInstance(context);
+        MessagingLog.createInstance(ctx, localContentResolver);
         MessagingLog.getInstance().deleteAllEntries();
 
         // Clear all entries in IP call table 
-        IPCallHistory.createInstance(context);
+        IPCallHistory.createInstance(localContentResolver);
         IPCallHistory.getInstance().deleteAllEntries();
         
         // Clear all entries in Rich Call tables (image and video)
-        RichCallHistory.createInstance(context);
+        RichCallHistory.createInstance(localContentResolver);
         RichCallHistory.getInstance().deleteAllEntries();
         
 		// Clean the previous account RCS databases : because
 		// they may not be overwritten in the case of a very new account
 		// or if the back-up files of an older one have been destroyed
-		ContactsManager.createInstance(context);
+		ContactsManager.createInstance(ctx, contentResolver, localContentResolver);
         ContactsManager.getInstance().deleteRCSEntries();
 
         // Remove the RCS account 
-        AuthenticationService.removeRcsAccount(context, null);
+        AuthenticationService.removeRcsAccount(ctx, null);
         // Ensure that factory is set up properly to avoid NullPointerException in AccountChangedReceiver.setAccountResetByEndUser
-        AndroidFactory.setApplicationContext(context);
+        AndroidFactory.setApplicationContext(ctx);
         AccountChangedReceiver.setAccountResetByEndUser(false);
 
         // Clean terms status
