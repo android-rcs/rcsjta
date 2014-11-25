@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.provider.eab;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +38,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
@@ -60,6 +63,8 @@ public class RichAddressBookProvider extends ContentProvider {
             .concat("=?");
 
     private static final String AGGREGATION_DATA_SELECTION_WITH_ID_ONLY = AggregationData.KEY_ID.concat("=?");
+
+    private final static String[] PHOTO_DATA_PROJECTION = new String[] { RichAddressBookData.KEY_PRESENCE_PHOTO_DATA };
 
     private static final String FILENAME_PREFIX = "photoData";
 
@@ -280,6 +285,29 @@ public class RichAddressBookProvider extends ContentProvider {
             }
         }
         return projection;
+    }
+
+    private ParcelFileDescriptor openPhotoDataFile(Uri uri, String mode)
+            throws FileNotFoundException {
+        Cursor cursor = null;
+        try {
+            cursor = query(uri, PHOTO_DATA_PROJECTION, null, null, null);
+            if (!cursor.moveToFirst()) {
+                throw new FileNotFoundException(new StringBuilder("No item found for URI ").append(uri)
+                        .append("!").toString());
+            }
+            String path = cursor.getString(cursor
+                    .getColumnIndexOrThrow(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA));
+            if (path == null) {
+                throw new FileNotFoundException(new StringBuilder("No photo is defined for URI ").append(uri).append("!").toString());
+            }
+            return ParcelFileDescriptor.open(new File(path), ParcelFileDescriptor.parseMode(mode));
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     @Override
@@ -515,6 +543,30 @@ public class RichAddressBookProvider extends ContentProvider {
                 }
                 return count;
 
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
+                        .append(uri).append("!").toString());
+        }
+    }
+
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        switch (sUriMatcher.match(uri)) {
+            case UriType.Contacts.CONTACTS_WITH_ID:
+                /* Intentional fall through */
+            case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
+                    return openPhotoDataFile(uri, mode);
+
+            case UriType.InternalContacts.INTERNAL_CONTACTS:
+                /* Intentional fall through */
+            case UriType.Contacts.CONTACTS:
+                /* Intentional fall through */
+            case UriType.Aggregation.AGGREGATION:
+                /* Intentional fall through */
+            case UriType.Aggregation.AGGREGATION_WITH_ID:
+                throw new UnsupportedOperationException(new StringBuilder(
+                        "Opening file stream is not supported for URI ").append(uri).append("!")
+                        .toString());
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                         .append(uri).append("!").toString());
