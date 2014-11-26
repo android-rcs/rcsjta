@@ -62,36 +62,6 @@ public class ChatServiceConfigurationTest extends AndroidTestCase {
 		super.tearDown();
 	}
 
-	private boolean chatServiceConfigurationisEqual(ChatServiceConfiguration conf1, ChatServiceConfiguration conf2) {
-		if (conf1.isChatSf() != conf2.isChatSf())
-			return false;
-		if (conf1.isChatWarnSF() != conf2.isChatWarnSF())
-			return false;
-		if (conf1.getChatTimeout() != conf2.getChatTimeout())
-			return false;
-		if (conf1.getIsComposingTimeout() != conf2.getIsComposingTimeout())
-			return false;
-		if (conf1.getGroupChatMaxParticipants() != conf2.getGroupChatMaxParticipants())
-			return false;
-		if (conf1.getGroupChatMinParticipants() != conf2.getGroupChatMinParticipants())
-			return false;
-		if (conf1.getOneToOneChatMessageMaxLength() != conf2.getOneToOneChatMessageMaxLength())
-			return false;
-		if (conf1.getGroupChatMessageMaxLength() != conf2.getGroupChatMessageMaxLength())
-			return false;
-		if (conf1.getGroupChatSubjectMaxLength() != conf2.getGroupChatSubjectMaxLength())
-			return false;
-		if (conf1.isSmsFallback() != conf2.isSmsFallback())
-			return false;
-		if (conf1.isRespondToDisplayReportsEnabled() != conf2.isRespondToDisplayReportsEnabled())
-			return false;
-		if (conf1.getGeolocLabelMaxLength() != conf2.getGeolocLabelMaxLength())
-			return false;
-		if (conf1.getGeolocExpirationTime() != conf2.getGeolocExpirationTime())
-			return false;
-		return true;
-	}
-
 	public void testChatServiceConfiguration() {
 		ChatServiceConfiguration config = new ChatServiceConfiguration(imAlwaysOn, warnSF, chatTimeout, isComposingTimeout,
 				maxGroupChatParticipants, minGroupChatParticipants, maxMsgLengthSingleChat, maxMsgLengthGroupChat,
@@ -102,6 +72,18 @@ public class ChatServiceConfigurationTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		ChatServiceConfiguration createFromParcel = ChatServiceConfiguration.CREATOR.createFromParcel(parcel);
-		assertTrue(chatServiceConfigurationisEqual(createFromParcel, config));
+		assertEquals(createFromParcel.isChatSf(), config.isChatSf());
+		assertEquals(createFromParcel.isChatWarnSF(), config.isChatWarnSF());
+		assertEquals(createFromParcel.getChatTimeout(), config.getChatTimeout());
+		assertEquals(createFromParcel.getIsComposingTimeout(), config.getIsComposingTimeout());
+		assertEquals(createFromParcel.getGroupChatMaxParticipants(), config.getGroupChatMaxParticipants());
+		assertEquals(createFromParcel.getGroupChatMinParticipants(), config.getGroupChatMinParticipants());
+		assertEquals(createFromParcel.getGroupChatMessageMaxLength(), config.getGroupChatMessageMaxLength());
+		assertEquals(createFromParcel.getGroupChatSubjectMaxLength(), config.getGroupChatSubjectMaxLength());
+		assertEquals(createFromParcel.getOneToOneChatMessageMaxLength(), config.getOneToOneChatMessageMaxLength());
+		assertEquals(createFromParcel.isSmsFallback(), config.isSmsFallback());
+		assertEquals(createFromParcel.isRespondToDisplayReportsEnabled(), config.isRespondToDisplayReportsEnabled());
+		assertEquals(createFromParcel.getGeolocLabelMaxLength(), config.getGeolocLabelMaxLength());
+		assertEquals(createFromParcel.getGeolocExpirationTime(), config.getGeolocExpirationTime());
 	}
 }

@@ -21,7 +21,6 @@ import java.util.Random;
 
 import android.os.Parcel;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.contacts.ContactId;
