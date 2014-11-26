@@ -25,6 +25,7 @@ import java.net.UnknownHostException;
 
 import javax2.sip.ListeningPoint;
 
+import org.xbill.DNS.Cache;
 import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.NAPTRRecord;
@@ -57,6 +58,11 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public abstract class ImsNetworkInterface {
+	
+	/**
+	 * The maximum time in seconds that a negative response will be stored in this DNS Cache.
+	 */
+	private static int DNS_NEGATIVE_CACHING_TIME = 5;
 	
 	// Changed by Deutsche Telekom
 	private static final String REGEX_IPV4 = "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b";
@@ -372,6 +378,10 @@ public abstract class ImsNetworkInterface {
             }
             Lookup lookup = new Lookup(domain, type);
             lookup.setResolver(resolver);
+			// Default negative cache TTL value is "cache forever". We do not want that.
+			Cache cache = Lookup.getDefaultCache(type);
+			cache.setMaxNCache(DNS_NEGATIVE_CACHING_TIME);
+			lookup.setCache(cache);
             Record[] result = lookup.run();
             int code = lookup.getResult();
             if (code != Lookup.SUCCESSFUL) {
