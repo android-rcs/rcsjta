@@ -54,7 +54,7 @@ public class ImageSharingData {
 	/**
 	 * Reason code associated with the image sharing state.
 	 *
-	 * @see ImageSharing.ReasonCode for the list of reason codes
+	 * @see ImageSharing.ReasonCode
 	 */
 	static final String KEY_REASON_CODE = ImageSharingLog.REASON_CODE;
 

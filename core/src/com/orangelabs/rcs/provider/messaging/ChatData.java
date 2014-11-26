@@ -86,9 +86,9 @@ public class ChatData {
 	static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
 
 	/**
-	 * Column name : reject next Group Chat
+	 * Column name : Departed by usert
 	 */
-	public static final String KEY_REJECT_GC = "reject_gc";
+	public static final String KEY_DEPARTED_BY_USER = "departure_status";
 
 	/**
 	 * ContactId formatted number of the inviter of the group chat or null if

@@ -75,9 +75,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_CHAT_ID, chatId);
         values.put(GroupDeliveryInfoData.KEY_ID, msgId);
-        if (contact != null) {
-            values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
-        }
+        values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
         values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED);
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);

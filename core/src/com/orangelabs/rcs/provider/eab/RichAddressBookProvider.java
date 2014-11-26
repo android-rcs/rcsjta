@@ -34,7 +34,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -43,6 +42,7 @@ import android.text.TextUtils;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -157,7 +157,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
         private static final String DATABASE_NAME = "capability.db";
 
-        private static final int DATABASE_VERSION = 24;
+        private static final int DATABASE_VERSION = 25;
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE).append("(")
@@ -199,12 +199,12 @@ public class RichAddressBookProvider extends ContentProvider {
                     .append(RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_TIMESTAMP).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_AUTOMATA).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH).append(" INTEGER);").toString());
+                    .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH).append(" INTEGER)").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(AGGREGATION_TABLE).append("(")
-                    .append(AggregationData.KEY_ID).append(" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,")
+                    .append(AggregationData.KEY_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
                     .append(AggregationData.KEY_RCS_NUMBER).append(" TEXT NOT NULL,")
                     .append(AggregationData.KEY_RAW_CONTACT_ID).append(" INTEGER NOT NULL,")
-                    .append(AggregationData.KEY_RCS_RAW_CONTACT_ID).append(" INTEGER NOT NULL);").toString());
+                    .append(AggregationData.KEY_RCS_RAW_CONTACT_ID).append(" INTEGER NOT NULL)").toString());
         }
 
         public DatabaseHelper(Context context) {
@@ -301,7 +301,7 @@ public class RichAddressBookProvider extends ContentProvider {
             if (path == null) {
                 throw new FileNotFoundException(new StringBuilder("No photo is defined for URI ").append(uri).append("!").toString());
             }
-            return ParcelFileDescriptor.open(new File(path), ParcelFileDescriptor.parseMode(mode));
+            return ParcelFileDescriptor.open(new File(path), DatabaseUtils.parseMode(mode));
 
         } finally {
             if (cursor != null) {
@@ -347,6 +347,7 @@ public class RichAddressBookProvider extends ContentProvider {
             case UriType.InternalContacts.INTERNAL_CONTACTS:
                 /* Intentional fall through */
             case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
+                Context context = getContext();
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String contact = initialValues.getAsString(RichAddressBookData.KEY_CONTACT);
                 db.insert(CAPABILITY_TABLE, null, initialValues);
@@ -357,8 +358,8 @@ public class RichAddressBookProvider extends ContentProvider {
                          * Creating a empty file to get the path for the photo
                          * data
                          */
-                        getContext().openFileOutput(filename, Context.MODE_PRIVATE).close();
-                        String path = getContext().getFileStreamPath(filename).getAbsolutePath();
+                        context.openFileOutput(filename, Context.MODE_PRIVATE).close();
+                        String path = context.getFileStreamPath(filename).getAbsolutePath();
                         initialValues.put(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA, path);
                         initialValues.put(RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
                                 RichAddressBookData.FALSE_VALUE);
@@ -374,7 +375,7 @@ public class RichAddressBookProvider extends ContentProvider {
                         RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY,
                         getSelectionArgsWithContact(null, contact));
                 Uri notificationUri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact);
-                getContext().getContentResolver().notifyChange(notificationUri, null);
+                context.getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
 
             case UriType.Contacts.CONTACTS_WITH_ID:

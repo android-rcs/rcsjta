@@ -23,13 +23,13 @@
 package com.orangelabs.rcs.provider.sharing;
 
 import com.gsma.services.rcs.ish.ImageSharingLog;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -92,7 +92,13 @@ public class ImageSharingProvider extends ContentProvider {
                     .append(ImageSharingData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL);").toString());
+                    .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_CONTACT)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(ImageSharingData.KEY_CONTACT).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_TIMESTAMP)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(ImageSharingData.KEY_TIMESTAMP).append(")").toString());
         }
 
         @Override

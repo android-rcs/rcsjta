@@ -31,13 +31,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
 import com.gsma.services.rcs.chat.ChatLog;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 
 /**
  * Chat provider
@@ -127,7 +127,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 13;
+        private static final int DATABASE_VERSION = 14;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -135,19 +135,22 @@ public class ChatProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_GROUP_CHAT).append("(")
-                    .append(ChatData.KEY_CHAT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(ChatData.KEY_REJOIN_ID).append(" TEXT,")
-                    .append(ChatData.KEY_SUBJECT).append(" TEXT,")
-                    .append(ChatData.KEY_PARTICIPANTS).append(" TEXT NOT NULL,")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_GROUP_CHAT)
+                    .append("(").append(ChatData.KEY_CHAT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(ChatData.KEY_REJOIN_ID).append(" TEXT,").append(ChatData.KEY_SUBJECT)
+                    .append(" TEXT,").append(ChatData.KEY_PARTICIPANTS).append(" TEXT NOT NULL,")
                     .append(ChatData.KEY_STATE).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
-                    .append(ChatData.KEY_REJECT_GC).append(" INTEGER NOT NULL,")
-                    .append(ChatData.KEY_CONTACT).append(" TEXT);").toString());
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE).append("(")
-                    .append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
+                    .append(ChatData.KEY_DEPARTED_BY_USER).append(" INTEGER NOT NULL,")
+                    .append(ChatData.KEY_CONTACT).append(" TEXT)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_GROUP_CHAT).append("_")
+                    .append(ChatData.KEY_TIMESTAMP).append("_idx").append(" ON ")
+                    .append(TABLE_GROUP_CHAT).append("(").append(ChatData.KEY_TIMESTAMP)
+                    .append(")").toString());
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE)
+                    .append("(").append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
                     .append(MessageData.KEY_CONTACT).append(" TEXT,")
                     .append(MessageData.KEY_MESSAGE_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(MessageData.KEY_CONTENT).append(" TEXT,")
@@ -159,13 +162,18 @@ public class ChatProvider extends ContentProvider {
                     .append(MessageData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(MessageData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
                     .append(MessageData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL);")
-                    .append("CREATE INDEX ").append(MessageData.KEY_CHAT_ID).append("_idx")
-                    .append(" ON ").append(TABLE_MESSAGE).append("(")
-                    .append(MessageData.KEY_CHAT_ID).append("); ").append("CREATE INDEX ")
-                    .append(MessageData.KEY_TIMESTAMP_SENT).append("_idx").append(" ON ")
-                    .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_TIMESTAMP_SENT)
-                    .append("); ").toString());
+                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL)")
+                    .toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append("_")
+                    .append(MessageData.KEY_CHAT_ID).append("_idx").append(" ON ")
+                    .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_CHAT_ID).append(")")
+                    .toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(MessageData.KEY_TIMESTAMP)
+                    .append("_idx").append(" ON ").append(TABLE_MESSAGE).append("(")
+                    .append(MessageData.KEY_TIMESTAMP).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(MessageData.KEY_TIMESTAMP_SENT)
+                    .append("_idx").append(" ON ").append(TABLE_MESSAGE).append("(")
+                    .append(MessageData.KEY_TIMESTAMP_SENT).append(")").toString());
         }
 
         @Override

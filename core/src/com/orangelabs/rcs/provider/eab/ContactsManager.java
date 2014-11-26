@@ -39,7 +39,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -177,7 +176,15 @@ public final class ContactsManager {
      * Account name for SIM contacts
      */
     private static final String SIM_ACCOUNT_NAME = "com.android.contacts.sim";
-    
+
+    private final static String NOT_SIM_ACCOUNT_SELECTION = new StringBuilder("(")
+            .append(RawContacts.ACCOUNT_TYPE).append(" IS NULL OR ")
+            .append(RawContacts.ACCOUNT_TYPE).append("!='").append(SIM_ACCOUNT_NAME)
+            .append("') AND ").append(RawContacts._ID).append("=?").toString();
+
+    private final static String SIM_ACCOUNT_SELECTION = new StringBuilder(RawContacts.ACCOUNT_TYPE).append("='").append(SIM_ACCOUNT_NAME)
+            .append("' AND ").append(RawContacts._ID).append("=?").toString();
+
     /**
      * Contact for "Me"
      */
@@ -1883,20 +1890,14 @@ public final class ContactsManager {
 	 *         else false
 	 */
 	public boolean isContactIdAssociatedWithContactInRichAddressBook(final ContactId contact) {
+		String[] selectionArgs = new String[] {
+			contact.toString()
+		};
 		Cursor cursor = null;
 		try {
-			String[] whereArgs = new String[] {
-				contact.toString()
-			};
 			cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI,
-					PROJECTION_RABP, SELECT_RABP_CONTACT, whereArgs, null);
-			if (cursor == null) {
-				throw new SQLException(
-						new StringBuilder(
-								"Exception occured while checking the entry in RichAddressBookProvider for contact:")
-								.append(contact.toString()).append("!").toString());
-			}
-			return cursor.getCount() > 0;
+					PROJECTION_RABP, SELECT_RABP_CONTACT, selectionArgs, null);
+			return cursor.moveToFirst();
 
 		} finally {
 			if (cursor != null) {
@@ -1913,21 +1914,21 @@ public final class ContactsManager {
      */
     public boolean isOnlySimAssociated(final ContactId contact) {
 		List<Long> rawContactIds = getRawContactIdsFromPhoneNumber(contact);
-		for (int i = 0; i < rawContactIds.size(); i++) {
-			Cursor rawCur = null;
+		for (Long rawContactId : rawContactIds) {
+			String[] selectionArgs = new String[] {
+				Long.toString(rawContactId)
+			};
+			Cursor cursor = null;
 			try {
-				rawCur = ctx.getContentResolver().query(
-						RawContacts.CONTENT_URI,
-						new String[] { RawContacts._ID },
-						"(" + RawContacts.ACCOUNT_TYPE + " IS NULL OR " + RawContacts.ACCOUNT_TYPE + " <> \'" + SIM_ACCOUNT_NAME
-								+ "\') AND " + RawContacts._ID + "= " + Long.toString(rawContactIds.get(i)), null, null);
-				if (rawCur.getCount() > 0) {
+				cursor = ctx.getContentResolver().query(RawContacts.CONTENT_URI, new String[] {
+					RawContacts._ID
+				}, NOT_SIM_ACCOUNT_SELECTION, selectionArgs, null);
+				if (cursor.moveToFirst()) {
 					return false;
 				}
-			} catch (Exception e) {
-			} finally {
-				if (rawCur != null) {
-					rawCur.close();
+			}finally {
+				if (cursor != null) {
+					cursor.close();
 				}
 			}
 		}
@@ -1941,19 +1942,22 @@ public final class ContactsManager {
      * @return
      */
 	public boolean isSimAccount(final long rawContactId) {
-		Cursor rawCur = null;
+		Cursor cursor = null;
 		try {
-			rawCur = ctx.getContentResolver().query(
+			String[] selectionArgs = new String[] {
+				String.valueOf(rawContactId)
+			};
+			cursor = ctx.getContentResolver().query(
 					RawContacts.CONTENT_URI,
 					new String[] { RawContacts._ID },
-					RawContacts.ACCOUNT_TYPE + "= \'" + SIM_ACCOUNT_NAME + "\' AND " + RawContacts._ID + "= "
-							+ Long.toString(rawContactId), null, null);
-			return (rawCur.getCount() > 0);
+					SIM_ACCOUNT_SELECTION, selectionArgs, null);
+			return cursor.moveToFirst();
+
 		} catch (Exception e) {
 			return false;
 		} finally {
-			if (rawCur != null) {
-				rawCur.close();
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
 	}
@@ -2106,9 +2110,11 @@ public final class ContactsManager {
 		Cursor c = null;
 		try {
 			c = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_RABP, SELECTION_RAPB_IM_BLOCKED, selectionArgs, null);
-			return (c.getCount() > 0);
+			return c.moveToFirst();
+
 		} catch (Exception e) {
 			return false;
+
 		} finally {
 			if (c != null) {
 				c.close();
@@ -2124,15 +2130,17 @@ public final class ContactsManager {
      */
 	public boolean isFtBlockedForContact(ContactId contact) {
 		String[] selectionArgs = { contact.toString() };
-		Cursor c = null;
+		Cursor cursor = null;
 		try {
-			c = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_RABP, SELECTION_RAPB_FT_BLOCKED, selectionArgs, null);
-			return (c.getCount() > 0);
+			cursor = ctx.getContentResolver().query(RichAddressBookData.CONTENT_URI, PROJECTION_RABP, SELECTION_RAPB_FT_BLOCKED, selectionArgs, null);
+			return cursor.moveToFirst();
+
 		} catch (Exception e) {
 			return false;
+
 		} finally {
-			if (c != null) {
-				c.close();
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
 	}

@@ -22,13 +22,13 @@
 package com.orangelabs.rcs.provider.sharing;
 
 import com.gsma.services.rcs.vsh.VideoSharingLog;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -94,6 +94,12 @@ public class VideoSharingProvider extends ContentProvider {
                     .append(VideoSharingData.KEY_WIDTH).append(" INTEGER NOT NULL,")
                     .append(VideoSharingData.KEY_HEIGHT).append(" INTEGER NOT NULL,")
                     .append(VideoSharingData.KEY_ORIENTATION).append(" INTEGER);").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_CONTACT)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(VideoSharingData.KEY_CONTACT).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_TIMESTAMP)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(VideoSharingData.KEY_TIMESTAMP).append(")").toString());
         }
 
         @Override

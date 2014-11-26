@@ -23,13 +23,13 @@ package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.provider.messaging.FileTransferData;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -106,7 +106,7 @@ public class FileTransferProvider extends ContentProvider {
             Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 12;
+        private static final int DATABASE_VERSION = 13;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -134,17 +134,17 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_FILEICON).append(" TEXT,")
                     .append(FileTransferData.KEY_UPLOAD_TID).append(" TEXT,")
                     .append(FileTransferData.KEY_DOWNLOAD_URI).append(" TEXT,")
-                    .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT);")
-                    .append("CREATE INDEX ").append(FileTransferData.KEY_CHAT_ID).append("_idx")
-                    .append(" ON ").append(TABLE).append("(").append(FileTransferData.KEY_CHAT_ID)
-                    .append("); ").append("CREATE INDEX ").append(FileTransferData.KEY_CONTACT)
+                    .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_CHAT_ID)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(FileTransferData.KEY_CONTACT).append("); ").append("CREATE INDEX ")
-                    .append(FileTransferData.KEY_TIMESTAMP).append("_idx").append(" ON ")
-                    .append(TABLE).append("(").append(FileTransferData.KEY_TIMESTAMP).append("); ")
-                    .append("CREATE INDEX ").append(FileTransferData.KEY_TIMESTAMP_SENT)
+                    .append(FileTransferData.KEY_CHAT_ID).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_TIMESTAMP)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(FileTransferData.KEY_TIMESTAMP_SENT).append("); ").toString());
+                    .append(FileTransferData.KEY_TIMESTAMP).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ")
+                    .append(FileTransferData.KEY_TIMESTAMP_SENT).append("_idx").append(" ON ")
+                    .append(TABLE).append("(").append(FileTransferData.KEY_TIMESTAMP_SENT)
+                    .append(")").toString());
         }
 
         @Override
