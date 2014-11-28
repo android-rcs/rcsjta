@@ -833,9 +833,9 @@ public class RcsCoreService extends Service implements CoreListener {
 	}
 
 	@Override
-	public void handleGroupChatInvitationRejected(String chatId, String subject,
-			Set<ParticipantInfo> participants, int reasonCode) {
-		chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, subject, participants, reasonCode);
+	public void handleGroupChatInvitationRejected(String chatId, ContactId contact,
+			String subject, Set<ParticipantInfo> participants, int reasonCode) {
+		chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants, reasonCode);
 	}
 
 	@Override

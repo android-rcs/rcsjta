@@ -500,9 +500,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 			// Add session listener
 			GroupChatImpl sessionApi = new GroupChatImpl((GroupChatSession)session, mGroupChatEventBroadcaster);
 
-			MessagingLog.getInstance().addGroupChat(session.getContributionID(),
-					session.getSubject(), session.getParticipants(), GroupChat.State.INITIATED,
-					GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING);
+			MessagingLog.getInstance()
+					.addGroupChat(session.getContributionID(), session.getRemoteContact(),
+							session.getSubject(), session.getParticipants(),
+							GroupChat.State.INITIATED, GroupChat.ReasonCode.UNSPECIFIED,
+							Direction.OUTGOING);
 
 			ChatServiceImpl.addGroupChatSession(sessionApi);
 
@@ -523,7 +525,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 			String callId = Core.getInstance().getImsModule().getSipManager().getSipStack().generateCallId();
 			MessagingLog.getInstance().addGroupChat(
-					ContributionIdGenerator.getContributionId(callId), subject, participants,
+					ContributionIdGenerator.getContributionId(callId), null, subject, participants,
 					GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_MAX_CHATS,
 					Direction.OUTGOING);
 			throw new ServerApiException(e.getMessage());
@@ -747,15 +749,16 @@ public class ChatServiceImpl extends IChatService.Stub {
 	/**
 	 * Add and broadcast group chat invitation rejections.
 	 *
-	 * @param chatId Chat Id
+	 * @param chatId Chat ID
+	 * @param contact Contact ID
 	 * @param subject Subject
 	 * @param participants Participants
 	 * @param reasonCode Reason code
 	 */
-	public void addAndBroadcastGroupChatInvitationRejected(String chatId, String subject,
-			Set<ParticipantInfo> participants, int reasonCode) {
+	public void addAndBroadcastGroupChatInvitationRejected(String chatId, ContactId contact,
+			String subject, Set<ParticipantInfo> participants, int reasonCode) {
 
-		MessagingLog.getInstance().addGroupChat(chatId, subject, participants,
+		MessagingLog.getInstance().addGroupChat(chatId, contact, subject, participants,
 				GroupChat.State.REJECTED, reasonCode, Direction.INCOMING);
 
 		mGroupChatEventBroadcaster.broadcastInvitation(chatId);

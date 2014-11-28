@@ -34,6 +34,7 @@ import android.database.Cursor;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -107,18 +108,24 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set,
-	 * int, int)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java
+	 * .lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+	 * java.util.Set, int, int)
 	 */
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants,
+	public void addGroupChat(String chatId, ContactId contact, String subject, Set<ParticipantInfo> participants,
 			int state, int reasonCode, int direction) {
 		if (logger.isActivated()) {
-			logger.debug("addGroupChat (chatID=" + chatId + ") (subject=" + subject + ") (status="
-					+ state + ") (reasonCode=" + reasonCode + ") (dir=" + direction					+ ")");
+			logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
+					.append(",subject=").append(subject).append(",state").append(state)
+					.append("reasonCode=").append(reasonCode).append(",direction=")
+					.append(direction).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_CHAT_ID, chatId);
+		if (contact != null) {
+			values.put(ChatData.KEY_CONTACT, contact.toString());
+		}
 		values.put(ChatData.KEY_STATE, state);
 		values.put(ChatData.KEY_REASON_CODE, reasonCode);
 		values.put(ChatData.KEY_SUBJECT, subject);

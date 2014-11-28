@@ -106,13 +106,16 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set, int,
-	 * int, int)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java
+	 * .lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+	 * java.util.Set, int, int, int)
 	 */
 	@Override
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
-		groupChatLog.addGroupChat(chatId, subject, participants, status, reasonCode, direction);
+	public void addGroupChat(String chatId, ContactId contact, String subject,
+			Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
+		groupChatLog.addGroupChat(chatId, contact, subject, participants, status, reasonCode,
+				direction);
 	}
 
 	/*

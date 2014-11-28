@@ -24,6 +24,7 @@ package com.orangelabs.rcs.provider.messaging;
 import java.util.Set;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 
 /**
@@ -39,6 +40,8 @@ public interface IGroupChatLog {
 	 * 
 	 * @param chatId
 	 *            Chat ID
+	 * @param contact
+	 *            Contact ID
 	 * @param subject
 	 *            Subject
 	 * @param participants
@@ -50,8 +53,8 @@ public interface IGroupChatLog {
 	 * @param direction
 	 *            Direction
 	 */
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants,
-			int state, int reasonCode, int direction);
+	public void addGroupChat(String chatId, ContactId contact, String subject,
+			Set<ParticipantInfo> participants, int state, int reasonCode, int direction);
 
 	/**
 	 * Accept next Group Chat invitation
