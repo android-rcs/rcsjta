@@ -23,6 +23,7 @@ import com.orangelabs.rcs.platform.network.NetworkFactory;
 import com.orangelabs.rcs.platform.network.SocketServerConnection;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Network ressource manager
@@ -33,7 +34,12 @@ public class NetworkRessourceManager {
     /**
      * Default SIP port base
      */
-    public static final int DEFAULT_LOCAL_SIP_PORT_BASE = RcsSettings.getInstance().getSipListeningPort();
+    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MIN = RcsSettings.getInstance().getSipListeningPort();
+
+    /**
+     * Default SIP port max
+     */
+    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MAX = 65000;
 
     /**
      * Default RTP port base
@@ -48,10 +54,31 @@ public class NetworkRessourceManager {
     /**
      * Generate a default free SIP port number
      *
+     * <br>This returns a random port which is free both in UDP and in TCP
+     * <br>Note that it does not bind to those ports, so there still is a chance that something else binds to it before you do.
+     * <br>Minimize this chance by using those ports as soon as possible
+     *
      * @return Local SIP port
      */
     public static synchronized int generateLocalSipPort() {
-    	return generateLocalUdpTcpPort(DEFAULT_LOCAL_SIP_PORT_BASE);
+    	int candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN, DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
+    	while (!isLocalUdpPortFree(candidatePort) && !isLocalTcpPortFree(candidatePort)){
+    		// Loop until candidate port is free in UDP and in TCP
+    		 candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN, DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
+    	}
+		return candidatePort;
+    }
+
+    /**
+     * Generate a default number from a given range
+     *
+     * @param minRange
+     * @param maxRange
+     * @return number Random number between minRange and maxRange
+     */
+    private static int getDefaultNumber(int minRange, int maxRange){
+    	Random random = new Random();
+    	return (random.nextInt(maxRange - minRange + 1) + minRange);
     }
 
     /**
@@ -84,27 +111,6 @@ public class NetworkRessourceManager {
 		while((resp == -1) && (port < Integer.MAX_VALUE)) {
 			if (isLocalUdpPortFree(port)) {
 				// Free UDP port found
-				resp = port;
-			} else {
-                // +2 needed for RTCP port
-                port += 2;
-			}
-		}
-    	return resp;
-    }
-
-    /**
-     * Generate a free UDP/TCP port number from a specific port base
-     *
-     * @param portBase UDP/TCP port base
-     * @return Local UDP/TCP port
-     */
-    private static int generateLocalUdpTcpPort(int portBase) {
-        int resp = -1;
-        int port = portBase;
-        while((resp == -1) && (port < Integer.MAX_VALUE)) {
-            if (isLocalUdpPortFree(port) && isLocalTcpPortFree(port)) {
-                // Free port found
 				resp = port;
 			} else {
                 // +2 needed for RTCP port
