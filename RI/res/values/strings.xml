@@ -288,10 +288,8 @@
 
 <!-- Intents menu -->
 <string name="menu_intents">Intents</string>
-<string name="menu_services">Service intents</string>
-<string name="menu_apps">Application intents</string>
+<string name="menu_apps">Applications</string>
 <string name="label_no_clients">No other client detected on the device</string>
-<string name="label_load_settings">Load settings</string>
 <string name="label_load_chat">Load a chat</string>
 <string name="label_initiate_chat">Start a chat</string>
 <string name="label_load_group_chat">Load a group chat</string>
@@ -301,6 +299,7 @@
 <string name="label_intent_failed">Intent not found</string>
 <string name="label_load_ipcall">Load an IP call</string>
 <string name="label_initiate_ipcall">Start an IP call</string>
+<string name="menu_settings">Settings</string>
 
 <!-- Service menu -->
 <string name="menu_service">Service</string>
@@ -308,6 +307,7 @@
 <string name="menu_registration_status">Registration status</string>
 <string name="label_service_status">Service enabled:</string>
 <string name="label_registration_status">Service registered:</string>
+<string name="menu_others">Other services</string>
 
 <!-- File upload menu -->
 <string name="menu_upload">File upload</string>

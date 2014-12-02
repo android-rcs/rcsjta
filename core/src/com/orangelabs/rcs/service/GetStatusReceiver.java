@@ -38,10 +38,10 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 public class GetStatusReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-    	if (intent.getAction().endsWith(Intents.Service.ACTION_SERVICE_GET_STATUS)) {
+    	if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
 	    	RcsSettings.createInstance(context);
 	    	Bundle results = getResultExtras(true);
-	        results.putString(Intents.Service.EXTRA_SERVICE, context.getPackageName());
+	        results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
 	        results.putBoolean(Intents.Service.EXTRA_STATUS, RcsSettings.getInstance().isServiceActivated());
 	        setResultExtras(results);	  
     	}

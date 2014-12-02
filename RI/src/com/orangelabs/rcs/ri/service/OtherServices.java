@@ -1,21 +1,4 @@
-/*******************************************************************************
- * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010 France Telecom S.A.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-package com.orangelabs.rcs.ri.intents;
+package com.orangelabs.rcs.ri.service;
 
 import java.util.List;
 
@@ -35,15 +18,15 @@ import com.gsma.services.rcs.RcsUtils;
 import com.orangelabs.rcs.ri.R;
 
 /**
- * List existing RCS clients
+ * List others RCS services on the device
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IntentServices extends ListActivity {
+public class OtherServices extends ListActivity {
 	/**
-	 * List of clients detected
+	 * List of service detected
 	 */
-    private List<ResolveInfo> clients;
+    private static List<ResolveInfo> clients = null;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,24 +34,33 @@ public class IntentServices extends ListActivity {
 
 	    // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.intents_clients);
+        setContentView(R.layout.service_other);
 
 		// Get the list of clients
-	    clients = RcsUtils.getRcsServices(this);
+        clients = RcsUtils.getRcsServices(this);
 
 	    // Set list adapter
         String[] items = new String[clients.size()];
         for(int i=0; i < clients.size(); i++) {
         	items[i] = clients.get(i).activityInfo.packageName;
-        	RcsUtils.isRcsServiceActivated(this, clients.get(i), receiverResult);
         }
         setListAdapter(new ArrayAdapter<String>(
         	      this,
         	      android.R.layout.simple_expandable_list_item_1,
         	      items)); 
-	}
+    }
 	
-	@Override
+    @Override
+	protected void onResume() {
+    	super.onResume();
+    
+        // Request status of each stack
+        for(int i=0; i < clients.size(); i++) {
+        	RcsUtils.isRcsServiceActivated(this, clients.get(i), receiverResult);
+        }
+    }
+    	
+    @Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 
@@ -85,16 +77,18 @@ public class IntentServices extends ListActivity {
 			if (bundle == null) {
 				return;
 			}
-			String client = bundle.getString(com.gsma.services.rcs.Intents.Service.EXTRA_SERVICE);
+			String client = bundle.getString(com.gsma.services.rcs.Intents.Service.EXTRA_PACKAGENAME);
 			boolean status = bundle.getBoolean(com.gsma.services.rcs.Intents.Service.EXTRA_STATUS, false);
 			
 			for(int i=0; i < clients.size(); i++) {
 				if (clients.get(i).activityInfo.packageName.equals(client)) {
-					View v = IntentServices.this.getListView().getChildAt(i);
-					if (status) {
-						v.setBackgroundColor(Color.GREEN);
-					} else {
-						v.setBackgroundColor(Color.RED);
+					View v = OtherServices.this.getListView().getChildAt(i);
+					if (v!= null) {
+						if (status) {
+							v.setBackgroundColor(Color.GREEN);
+						} else {
+							v.setBackgroundColor(Color.RED);
+						}
 					}
 				}
 			}

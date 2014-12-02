@@ -63,9 +63,6 @@
             android:name=".intents.TestIntentsApi"
             android:label="@string/menu_intents" />
 
-        <activity android:name=".intents.IntentServices"
-			android:label="@string/menu_services" />
-
 		<activity
             android:name=".intents.IntentApps"
             android:label="@string/menu_apps" />
@@ -82,7 +79,11 @@
             android:name=".service.RegistrationStatus"
             android:label="@string/menu_registration_status" />
 
-		<!-- Contacts API -->
+        <activity
+            android:name=".service.OtherServices"
+			android:label="@string/menu_others" />
+		
+   		<!-- Contacts API -->
         
         <activity android:name=".contacts.TestContactsApi"/>
         

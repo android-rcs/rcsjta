@@ -8,11 +8,6 @@
 	    android:layout_height="wrap_content"
 	    android:stretchColumns="1"
 	    android:paddingTop="10dip">
-	        <Button android:text="@string/label_load_settings"
- 			 android:layout_marginLeft="5dip"
- 			 android:id="@+id/load_settings"
-	         android:gravity="center"/>
-	        
 		    <Button android:text="@string/label_load_chat"
  			 android:layout_marginLeft="5dip"
  			 android:id="@+id/load_chat"

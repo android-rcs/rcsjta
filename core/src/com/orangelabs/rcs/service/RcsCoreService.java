@@ -34,19 +34,18 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 
-import com.gsma.services.rcs.Intents;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
-import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.gsh.IGeolocSharingService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ish.IImageSharingService;
+import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.vsh.IVideoSharingService;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AccountChangedReceiver;
@@ -83,13 +82,14 @@ import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.api.CapabilityServiceImpl;
 import com.orangelabs.rcs.service.api.ChatServiceImpl;
 import com.orangelabs.rcs.service.api.ContactsServiceImpl;
-import com.orangelabs.rcs.service.api.FileUploadServiceImpl;
 import com.orangelabs.rcs.service.api.FileTransferServiceImpl;
+import com.orangelabs.rcs.service.api.FileUploadServiceImpl;
 import com.orangelabs.rcs.service.api.GeolocSharingServiceImpl;
 import com.orangelabs.rcs.service.api.IPCallServiceImpl;
 import com.orangelabs.rcs.service.api.ImageSharingServiceImpl;
 import com.orangelabs.rcs.service.api.MultimediaSessionServiceImpl;
 import com.orangelabs.rcs.service.api.VideoSharingServiceImpl;
+import com.orangelabs.rcs.settings.SettingsDisplay;
 import com.orangelabs.rcs.utils.AppUtils;
 import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -423,7 +423,7 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     public static void addRcsServiceNotification(boolean state, String label) {
     	// Create notification
-    	Intent intent = new Intent(Intents.Service.ACTION_VIEW_SETTINGS);
+    	Intent intent = new Intent(AndroidFactory.getApplicationContext(), SettingsDisplay.class);
     	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(AndroidFactory.getApplicationContext(), 0, intent, 0);
 		int iconId; 

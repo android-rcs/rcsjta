@@ -28,27 +28,28 @@ package com.gsma.services.rcs;
  */
 public class Intents {
     /**
-     * Intents for rcs service
+     * Intents for RCS service
      */
     public static class Service {
     	/**
-    	 * Intent to load the settings activity to enable or disable the rcs service.
+    	 * Intent to load the settings activity to enable or disable the service
     	 */
     	public static final String ACTION_VIEW_SETTINGS = "com.gsma.services.rcs.action.VIEW_SETTINGS";
 
     	/**
-    	 * Intent to get the rcs service status.
+    	 * Intent to request the service status. The result is received via an Intent
+    	 * having the following extras:
     	 * <ul>
-    	 * <li> {@link #EXTRA_SERVICE} containing the service package name.
+    	 * <li> {@link #EXTRA_PACKAGENAME} containing the service package name.
     	 * <li> {@link #EXTRA_STATUS} containing the boolean status of the service. True
     	 *  means that the service is activated, else the service is not activated.
     	 */
-    	public static final String ACTION_SERVICE_GET_STATUS = ".service.action.GET_STATUS";
+    	public static final String ACTION_GET_STATUS = ".service.action.GET_STATUS";
 
     	/**
-    	 * Service name
+    	 * Service package name
     	 */
-    	public final static String EXTRA_SERVICE = "service";
+    	public final static String EXTRA_PACKAGENAME = "packagename";
     	
     	/**
     	 * Service status
@@ -58,7 +59,7 @@ public class Intents {
     	private Service() {
         }    	
     }
-    
+
     /**
      * Intents for chat service
      */

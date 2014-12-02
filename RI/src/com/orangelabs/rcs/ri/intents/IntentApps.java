@@ -45,8 +45,6 @@ public class IntentApps extends Activity {
 		// Set button callback
         Button btn = (Button)findViewById(R.id.load_chat);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.load_settings);
-        btn.setOnClickListener(btnListener);
         btn = (Button)findViewById(R.id.load_ft);
         btn.setOnClickListener(btnListener);
         btn = (Button)findViewById(R.id.load_group_chat);
@@ -73,15 +71,6 @@ public class IntentApps extends Activity {
      */
     private OnClickListener btnListener = new OnClickListener() {
         public void onClick(View v) {
-        	if (v.getId() == R.id.load_settings) {
-        		try {
-	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Service.ACTION_VIEW_SETTINGS);
-	        		startActivity(intent);
-        		} catch(Exception e) {
-    		    	e.printStackTrace();
-    				Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
-        		}
-        	} else
         	if (v.getId() == R.id.load_chat) {
         		try {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_ONE_TO_ONE_CHAT);

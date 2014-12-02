@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Stack2</string>
+    <string name="label_main">Simulate another RCS stack</string>
+
+</resources>
