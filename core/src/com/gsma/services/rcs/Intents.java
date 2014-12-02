@@ -49,7 +49,7 @@ public class Intents {
     	/**
     	 * Service package name
     	 */
-    	public final static String EXTRA_PACKAGENAME = "packagename";
+    	public final static String EXTRA_PACKAGENAME = "packageName";
     	
     	/**
     	 * Service status
