@@ -23,7 +23,6 @@ package com.orangelabs.rcs.provider.ipcall;
 
 import java.util.Calendar;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
@@ -32,6 +31,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -45,30 +45,21 @@ public class IPCallHistory {
 	 */
 	private static IPCallHistory instance;
 
-	/**
-	 * Content resolver
-	 */
-	private ContentResolver cr;
+	private final LocalContentResolver mLocalContentResolver;
 
 	/**
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(IPCallHistory.class.getSimpleName());
-	
-	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private IPCallHistory() {
-	}
-	
+
 	/**
 	 * Create instance
 	 * 
-	 * @param ctx Context
+	 * @param localContentResolver Local content resolver
 	 */
-	public static synchronized void createInstance(Context ctx) {
+	public static synchronized void createInstance(LocalContentResolver localContentResolver) {
 		if (instance == null) {
-			instance = new IPCallHistory(ctx);
+			instance = new IPCallHistory(localContentResolver);
 		}
 	}
 	
@@ -84,13 +75,12 @@ public class IPCallHistory {
 	/**
      * Constructor
      * 
-     * @param ctx Application context
+     * @param localContentResolver Local content resolver
      */
-	private IPCallHistory(Context ctx) {
+	private IPCallHistory(LocalContentResolver localContentResolver) {
 		super();
-		
-        this.cr = ctx.getContentResolver();
-    }
+		mLocalContentResolver = localContentResolver;
+	}
 	
 	/**
 	 * Add a new entry in the call history 
@@ -126,7 +116,7 @@ public class IPCallHistory {
 		if (audiocontent != null) {
 			values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
 		}
-		return cr.insert(IPCallLog.CONTENT_URI, values);
+		return mLocalContentResolver.insert(IPCallLog.CONTENT_URI, values);
 	}
 
 	/**
@@ -146,13 +136,14 @@ public class IPCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(IPCallData.KEY_STATE, state);
 		values.put(IPCallData.KEY_REASON_CODE, reasonCode);
-		cr.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), values, null, null);
+		mLocalContentResolver.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId),
+				values, null, null);
 	}
 
 	/**
 	 * Delete all entries in IP call history
 	 */
 	public void deleteAllEntries() {
-		cr.delete(IPCallLog.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(IPCallLog.CONTENT_URI, null, null);
 	}
 }

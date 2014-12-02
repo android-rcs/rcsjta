@@ -148,7 +148,7 @@ public class RcsSettingsProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
                     .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT)").toString());
+                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT NOT NULL)").toString());
 
             /* Insert default values for parameters */
             addParameter(db, RcsSettingsData.SERVICE_ACTIVATED,               false);

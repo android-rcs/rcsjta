@@ -164,12 +164,11 @@ public class InstantMessagingService extends ImsService {
 
 	private void handleGroupChatInvitationRejected(SipRequest invite, int reasonCode) {
 		String chatId = ChatUtils.getContributionId(invite);
+		ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
 		String subject = ChatUtils.getSubject(invite);
 		Set<ParticipantInfo> participants = ChatUtils.getListOfParticipants(invite);
-		getImsModule()
-				.getCore()
-				.getListener()
-				.handleGroupChatInvitationRejected(chatId, subject, participants, reasonCode);
+		getImsModule().getCore().getListener()
+				.handleGroupChatInvitationRejected(chatId, contact, subject, participants, reasonCode);
 	}
 
 	/**

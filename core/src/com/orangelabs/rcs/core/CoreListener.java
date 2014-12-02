@@ -303,13 +303,14 @@ public interface CoreListener {
     /**
      * Handle the case of rejected group chat
      *
-     * @param chatId Chat Id
+     * @param chatId Chat ID
+     * @param contact Contact ID
      * @param subject Subject
      * @param participants Participants
      * @param reasonCode Rejected reason code
      */
-    public void handleGroupChatInvitationRejected(String chatId, String subject,
-            Set<ParticipantInfo> participants, int reasonCode);
+    public void handleGroupChatInvitationRejected(String chatId, ContactId contact,
+            String subject, Set<ParticipantInfo> participants, int reasonCode);
 
     /**
      * Handles image sharing rejection

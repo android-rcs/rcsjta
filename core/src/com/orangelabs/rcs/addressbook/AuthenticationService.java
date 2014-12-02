@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.addressbook;
@@ -33,6 +37,7 @@ import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Groups;
 
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -86,8 +91,8 @@ public class AuthenticationService extends Service {
      * @param showUngroupedContacts true to show ungrouped contacts
      */
     public static void createRcsAccount(Context context, String username, boolean enableSync) {
-		// Instanciate contacts manager
-		ContactsManager.createInstance(context);
+    	ContentResolver contentResolver = context.getContentResolver();
+    	ContactsManager.createInstance(context, contentResolver, new LocalContentResolver(contentResolver));
     	
         // Save the account info into the AccountManager if needed
         Account mAccount = getAccount(context, username);

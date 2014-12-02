@@ -787,9 +787,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 		String chatId = getChatId();
 		synchronized (lock) {
-			MessagingLog.getInstance().addGroupChat(chatId, getSubject(),
-					session.getParticipants(), GroupChat.State.INVITED, ReasonCode.UNSPECIFIED,
-					Direction.INCOMING);
+			MessagingLog.getInstance().addGroupChat(chatId, session.getRemoteContact(),
+					getSubject(), session.getParticipants(), GroupChat.State.INVITED,
+					ReasonCode.UNSPECIFIED, Direction.INCOMING);
 		}
 
 		mGroupChatEventBroadcaster.broadcastInvitation(chatId);
@@ -802,9 +802,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 		String chatId = getChatId();
 		synchronized (lock) {
-			MessagingLog.getInstance().addGroupChat(chatId, getSubject(),
-					session.getParticipants(), GroupChat.State.ACCEPTING, ReasonCode.UNSPECIFIED,
-					Direction.INCOMING);
+			MessagingLog.getInstance().addGroupChat(chatId, session.getRemoteContact(),
+					getSubject(), session.getParticipants(), GroupChat.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED, Direction.INCOMING);
 		}
 
 		mGroupChatEventBroadcaster.broadcastInvitation(chatId);

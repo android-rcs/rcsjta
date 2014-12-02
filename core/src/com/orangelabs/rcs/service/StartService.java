@@ -31,6 +31,7 @@ import android.accounts.Account;
 import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,6 +49,7 @@ import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.registry.AndroidRegistryFactory;
 import com.orangelabs.rcs.provider.BackupRestoreDb;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
@@ -306,11 +308,12 @@ public class StartService extends Service {
      * @return true if an account is available
      */
     private boolean checkAccount() {
-        AndroidFactory.setApplicationContext(getApplicationContext());
+    	Context ctx = getApplicationContext();
+        AndroidFactory.setApplicationContext(ctx);
         
         // Read the current and last end user account
-        currentUserAccount = LauncherUtils.getCurrentUserAccount(getApplicationContext());
-        lastUserAccount = LauncherUtils.getLastUserAccount(getApplicationContext());
+        currentUserAccount = LauncherUtils.getCurrentUserAccount(ctx);
+        lastUserAccount = LauncherUtils.getLastUserAccount(ctx);
         if (logger.isActivated()) {
             logger.info("Last user account is " + lastUserAccount);
             logger.info("Current user account is " + currentUserAccount);
@@ -358,7 +361,7 @@ public class StartService extends Service {
             }
 
             // Reset RCS account 
-            LauncherUtils.resetRcsConfig(getApplicationContext());
+            LauncherUtils.resetRcsConfig(ctx);
 
             // Restore current account settings
     		if (logger.isActivated()) {
@@ -408,20 +411,21 @@ public class StartService extends Service {
                 if (logger.isActivated()) {
                     logger.debug("Deleting the old RCS account for " + lastUserAccount);
                 }
-                ContactsManager.createInstance(getApplicationContext());
+                ContentResolver contentResolver = ctx.getContentResolver();
+                ContactsManager.createInstance(ctx, contentResolver, new LocalContentResolver(contentResolver));
                 ContactsManager.getInstance().deleteRCSEntries();
-                AuthenticationService.removeRcsAccount(getApplicationContext(), null);
+                AuthenticationService.removeRcsAccount(ctx, null);
     
                 if (logger.isActivated()) {
                     logger.debug("Creating a new RCS account for " + currentUserAccount);
                 }
-                AuthenticationService.createRcsAccount(getApplicationContext(),
+                AuthenticationService.createRcsAccount(ctx,
                         getString(R.string.rcs_core_account_username), true);
             }
         }
 
         // Save the current end user account
-        LauncherUtils.setLastUserAccount(getApplicationContext(), currentUserAccount);
+        LauncherUtils.setLastUserAccount(ctx, currentUserAccount);
 
         return true;
     }

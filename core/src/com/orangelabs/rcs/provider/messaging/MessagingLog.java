@@ -31,10 +31,10 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 
@@ -50,10 +50,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	private static MessagingLog instance;
 
-	/**
-	 * Content resolver
-	 */
-	private ContentResolver contentResolver;
+	private LocalContentResolver mLocalContentResolver;
 
 	private GroupChatLog groupChatLog;
 
@@ -72,12 +69,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/**
 	 * Create instance
 	 * 
-	 * @param ctx
+	 * @param context
 	 *            Context
+	 * @param localContentResolver
+	 *            Local content resolver
 	 */
-	public static synchronized void createInstance(Context ctx) {
+	public static synchronized void createInstance(Context context, LocalContentResolver localContentResolver) {
 		if (instance == null) {
-			instance = new MessagingLog(ctx);
+			instance = new MessagingLog(context, localContentResolver);
 		}
 	}
 
@@ -93,26 +92,31 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	/**
 	 * Constructor
 	 * 
-	 * @param ctx
+	 * @param context
 	 *            Application context
+	 * @param localContentResolver
+	 *            Local content provider
 	 */
-	private MessagingLog(Context ctx) {
-		contentResolver = ctx.getContentResolver();
-		groupChatLog = new GroupChatLog(ctx);
-		groupChatDeliveryInfoLog = new GroupDeliveryInfoLog(contentResolver);
-		messageLog = new MessageLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
-		fileTransferLog = new FileTransferLog(contentResolver, groupChatLog, groupChatDeliveryInfoLog);
+	private MessagingLog(Context context, LocalContentResolver localContentResolver) {
+		mLocalContentResolver = localContentResolver;
+		groupChatLog = new GroupChatLog(context, localContentResolver);
+		groupChatDeliveryInfoLog = new GroupDeliveryInfoLog(localContentResolver);
+		messageLog = new MessageLog(mLocalContentResolver, groupChatLog, groupChatDeliveryInfoLog);
+		fileTransferLog = new FileTransferLog(localContentResolver, groupChatLog, groupChatDeliveryInfoLog);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set, int,
-	 * int, int)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java
+	 * .lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+	 * java.util.Set, int, int, int)
 	 */
 	@Override
-	public void addGroupChat(String chatId, String subject, Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
-		groupChatLog.addGroupChat(chatId, subject, participants, status, reasonCode, direction);
+	public void addGroupChat(String chatId, ContactId contact, String subject,
+			Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
+		groupChatLog.addGroupChat(chatId, contact, subject, participants, status, reasonCode,
+				direction);
 	}
 
 	/*
@@ -380,10 +384,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * Delete all entries in Chat, Message and FileTransfer Logs
 	 */
 	public void deleteAllEntries() {
-		contentResolver.delete(ChatData.CONTENT_URI, null, null);
-		contentResolver.delete(ChatLog.Message.CONTENT_URI, null, null);
-		contentResolver.delete(FileTransferData.CONTENT_URI, null, null);
-		contentResolver.delete(GroupDeliveryInfoData.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(ChatData.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(ChatLog.Message.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(FileTransferData.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI, null, null);
 	}
 
 	/*
