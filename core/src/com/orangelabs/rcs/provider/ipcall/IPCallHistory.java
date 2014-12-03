@@ -24,7 +24,6 @@ package com.orangelabs.rcs.provider.ipcall;
 import java.util.Calendar;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;

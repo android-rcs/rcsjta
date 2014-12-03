@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +15,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.addressbook;
 
 import com.orangelabs.rcs.R;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.service.LauncherUtils;
 
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.os.Bundle;
 
 /**
@@ -30,11 +36,14 @@ import android.os.Bundle;
  */
 public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivity {
 
+	private LocalContentResolver mLocalContentResolver;
+
 	public void onCreate(Bundle icicle){
 		super.onCreate(icicle);
-		
-		// Create RCS account
-		AuthenticationService.createRcsAccount(this, getString(R.string.rcs_core_account_username), true);
+		Context ctx = getApplicationContext();
+		mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
+		AuthenticationService.createRcsAccount(this, mLocalContentResolver,
+				getString(R.string.rcs_core_account_username), true);
 		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -45,7 +54,7 @@ public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivi
 			response.onResult(result);
 
 			// Start the service
-            LauncherUtils.launchRcsService(getApplicationContext(), false, false);
+            LauncherUtils.launchRcsService(ctx, false, false);
 		}
 		finish();
 	}

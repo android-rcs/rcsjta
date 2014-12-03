@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.https;
@@ -30,6 +34,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.service.LauncherUtils;
@@ -63,6 +68,8 @@ public class HttpsProvisioningService extends Service {
      */
     HttpsProvisioningManager httpsProvisioningMng;
 
+    LocalContentResolver mLocalContentResolver;
+
     /**
 	 * Retry action for provisioning failure
 	 */
@@ -78,8 +85,9 @@ public class HttpsProvisioningService extends Service {
 		if (logger.isActivated()) {
 			logger.debug("onCreate");
 		}
-		// Instantiate RcsSettings
-		RcsSettings.createInstance(getApplicationContext());
+		Context ctx = getApplicationContext();
+		mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
+		RcsSettings.createInstance(ctx);
 		this.retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_RETRY), 0);
 	}
 
@@ -108,7 +116,8 @@ public class HttpsProvisioningService extends Service {
 		}
 		registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
-		httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(), retryIntent, first, user);
+		httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(),
+				mLocalContentResolver, retryIntent, first, user);
 		if (logger.isActivated()) {
 			logger.debug("Provisioning parameter: boot=" + first + ", user=" + user + ", version=" + version);
 		}

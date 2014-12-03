@@ -49,7 +49,8 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
 		
 		// We have to modify the strings that are used in contacts manager
 		ContentResolver contentResolver = context.getContentResolver();
-		ContactsManager.createInstance(context, contentResolver, new LocalContentResolver(contentResolver));
+		LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
+		ContactsManager.createInstance(context, contentResolver, localContentResolver);
 		ContactsManager.getInstance().updateStrings();
 	}
 }

@@ -22,11 +22,9 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Set;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;

@@ -25,7 +25,6 @@ package com.orangelabs.rcs.service;
 import java.util.Date;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -174,8 +173,9 @@ public class LauncherUtils {
      * Reset RCS config
      *
      * @param ctx Application context
+     * @param localContentResolver Local content resolver
      */
-	public static void resetRcsConfig(Context ctx) {
+	public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver) {
 		if (logger.isActivated()) {
 			logger.debug("Reset RCS config");
 		}
@@ -186,8 +186,6 @@ public class LauncherUtils {
         RcsSettings.createInstance(ctx);
         RcsSettings.getInstance().resetUserProfile();
 
-        ContentResolver contentResolver = ctx.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
         // Clear all entries in chat, message and file transfer tables
         MessagingLog.createInstance(ctx, localContentResolver);
         MessagingLog.getInstance().deleteAllEntries();
@@ -203,7 +201,7 @@ public class LauncherUtils {
 		// Clean the previous account RCS databases : because
 		// they may not be overwritten in the case of a very new account
 		// or if the back-up files of an older one have been destroyed
-		ContactsManager.createInstance(ctx, contentResolver, localContentResolver);
+		ContactsManager.createInstance(ctx, ctx.getContentResolver(), localContentResolver);
         ContactsManager.getInstance().deleteRCSEntries();
 
         // Remove the RCS account 

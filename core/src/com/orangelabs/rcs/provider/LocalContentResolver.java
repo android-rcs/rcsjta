@@ -22,6 +22,20 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/*
+ * The purpose of this class is to allow query-/insert-/update-/delete-
+ * and stream operations directly on the local providers. The usage
+ * of this class allows the local providers to be write protected for
+ * external use like from applications accessing the terminal api while
+ * still allowing internal write access to the same providers by the
+ * service implementations.
+ */
+
 public class LocalContentResolver {
 
     private final ContentResolver mContentResolver;
@@ -79,6 +93,38 @@ public class LocalContentResolver {
             return contentProviderClient.getLocalContentProvider().delete(uri, selection,
                     selectionArgs);
 
+        } finally {
+            if (contentProviderClient != null) {
+                contentProviderClient.release();
+            }
+        }
+    }
+
+    public final InputStream openContentInputStream(Uri uri) throws FileNotFoundException {
+        ContentProviderClient contentProviderClient = null;
+        try {
+            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+            return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "r")
+                    .createInputStream();
+
+        } catch (IOException e) {
+            throw new FileNotFoundException("Unable to create stream");
+        } finally {
+            if (contentProviderClient != null) {
+                contentProviderClient.release();
+            }
+        }
+    }
+
+    public final OutputStream openContentOutputStream(Uri uri) throws FileNotFoundException {
+        ContentProviderClient contentProviderClient = null;
+        try {
+            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+            return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "w")
+                    .createOutputStream();
+
+        } catch (IOException e) {
+            throw new FileNotFoundException("Unable to create stream");
         } finally {
             if (contentProviderClient != null) {
                 contentProviderClient.release();

@@ -22,7 +22,6 @@
 package com.orangelabs.rcs.provider.ipcall;
 
 import com.gsma.services.rcs.ipcall.IPCallLog;
-import com.orangelabs.rcs.provider.sharing.VideoSharingData;
 import com.orangelabs.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;

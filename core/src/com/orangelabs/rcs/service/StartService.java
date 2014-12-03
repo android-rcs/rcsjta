@@ -70,6 +70,8 @@ public class StartService extends Service {
      */
     public static final String REGISTRY_NEW_USER_ACCOUNT = "NewUserAccount";
 
+    private LocalContentResolver mLocalContentResolver;
+
     /**
      * Connection manager
      */
@@ -112,6 +114,8 @@ public class StartService extends Service {
     @Override
     public void onCreate() {
         // Instantiate RcsSettings
+        Context ctx = getApplicationContext();
+        mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
         RcsSettings.createInstance(getApplicationContext());
         int autoConfigMode = RcsSettings.getInstance().getAutoConfigMode();
     	if (logger.isActivated()) {
@@ -153,7 +157,7 @@ public class StartService extends Service {
 					boot = intent.getBooleanExtra(INTENT_KEY_BOOT, false);
 					user = intent.getBooleanExtra(INTENT_KEY_USER, false);
 				}
-				if (checkAccount()) {
+				if (checkAccount(mLocalContentResolver)) {
 					launchRcsService(boot, user);
 				} else {
 					// User account can't be initialized (no radio to read IMSI, .etc)
@@ -307,7 +311,7 @@ public class StartService extends Service {
      *
      * @return true if an account is available
      */
-    private boolean checkAccount() {
+    private boolean checkAccount(LocalContentResolver localContentResolver) {
     	Context ctx = getApplicationContext();
         AndroidFactory.setApplicationContext(ctx);
         
@@ -361,7 +365,7 @@ public class StartService extends Service {
             }
 
             // Reset RCS account 
-            LauncherUtils.resetRcsConfig(ctx);
+            LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver);
 
             // Restore current account settings
     		if (logger.isActivated()) {
@@ -384,7 +388,7 @@ public class StartService extends Service {
         }
         
         // Check if the RCS account exists
-        Account account = AuthenticationService.getAccount(getApplicationContext(),
+        Account account = AuthenticationService.getAccount(ctx,
                 getString(R.string.rcs_core_account_username));
         if (account == null) {
             // No account exists 
@@ -401,7 +405,7 @@ public class StartService extends Service {
                 if (logger.isActivated()) {
                     logger.debug("Recreate a new RCS account");
                 }
-                AuthenticationService.createRcsAccount(getApplicationContext(),
+                AuthenticationService.createRcsAccount(ctx, localContentResolver,
                         getString(R.string.rcs_core_account_username), true);
             }
         } else {
@@ -412,14 +416,14 @@ public class StartService extends Service {
                     logger.debug("Deleting the old RCS account for " + lastUserAccount);
                 }
                 ContentResolver contentResolver = ctx.getContentResolver();
-                ContactsManager.createInstance(ctx, contentResolver, new LocalContentResolver(contentResolver));
+                ContactsManager.createInstance(ctx, contentResolver, localContentResolver);
                 ContactsManager.getInstance().deleteRCSEntries();
                 AuthenticationService.removeRcsAccount(ctx, null);
     
                 if (logger.isActivated()) {
                     logger.debug("Creating a new RCS account for " + currentUserAccount);
                 }
-                AuthenticationService.createRcsAccount(ctx,
+                AuthenticationService.createRcsAccount(ctx, localContentResolver,
                         getString(R.string.rcs_core_account_username), true);
             }
         }

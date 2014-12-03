@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.https;
@@ -24,6 +28,7 @@ import java.util.Random;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.LauncherUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -96,12 +101,13 @@ public class HttpsProvisioningSMS {
     /**
      * Register the SMS provisioning receiver
      * 
+     * @param localContentResolver pocal content resolver
      * @param smsPort SMS port
      * @param requestUri Request URI
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
      */
-    public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
+    public void registerSmsProvisioningReceiver(final LocalContentResolver localContentResolver, final String smsPort, final String requestUri,
             final DefaultHttpClient client, final HttpContext localContext) {
         // Unregister previous one
         unregisterSmsProvisioningReceiver();
@@ -113,7 +119,7 @@ public class HttpsProvisioningSMS {
         // Instantiate the receiver
         smsProvisioningReceiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(final Context context, final Intent intent) {
+            public void onReceive(final Context ctx, final Intent intent) {
                 if (logger.isActivated()) {
                     logger.debug("SMS provider receiver - Received broadcast: " + intent.toString());
                 }
@@ -157,7 +163,7 @@ public class HttpsProvisioningSMS {
                                     logger.debug("Binary SMS reconfiguration received with suffix reconf");
                                 }
                                 
-                                TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+                                TelephonyManager tm = (TelephonyManager)ctx.getSystemService(Context.TELEPHONY_SERVICE);
                                
                                 if(!smsData.contains(tm.getSubscriberId()) && !smsData.contains(RcsSettings.getInstance().getUserProfileImsPrivateId())) {
                                 	if (logger.isActivated()) {
@@ -169,9 +175,9 @@ public class HttpsProvisioningSMS {
                                 Thread t = new Thread() {
                                     public void run() {
                                     	RcsSettings.getInstance().setProvisioningVersion("0");
-                                    	LauncherUtils.stopRcsService(context);
-                                    	LauncherUtils.resetRcsConfig(context);
-                                    	LauncherUtils.launchRcsService(context, true, false);
+                                    	LauncherUtils.stopRcsService(ctx);
+                                    	LauncherUtils.resetRcsConfig(ctx, localContentResolver);
+                                    	LauncherUtils.launchRcsService(ctx, true, false);
                                     }
                                 };
                                 t.start();

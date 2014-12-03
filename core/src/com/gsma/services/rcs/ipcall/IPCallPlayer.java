@@ -20,8 +20,6 @@ package com.gsma.services.rcs.ipcall;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gsma.services.rcs.RcsServiceException;
-
 /**
  * IP call player offers an interface to manage the IP call player instance
  * independently of the rcs service. The IP call player is implemented in

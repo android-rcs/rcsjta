@@ -86,13 +86,13 @@ public class AuthenticationService extends Service {
      * Create the RCS account if it does not already exist
      * 
      * @param context The context
+     * @param localContentResolver Local content resolver
      * @param username The username
      * @param enableSync true to enable synchronization
      * @param showUngroupedContacts true to show ungrouped contacts
      */
-    public static void createRcsAccount(Context context, String username, boolean enableSync) {
-    	ContentResolver contentResolver = context.getContentResolver();
-    	ContactsManager.createInstance(context, contentResolver, new LocalContentResolver(contentResolver));
+    public static void createRcsAccount(Context context, LocalContentResolver localContentResolver, String username, boolean enableSync) {
+    	ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver);
     	
         // Save the account info into the AccountManager if needed
         Account mAccount = getAccount(context, username);

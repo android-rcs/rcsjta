@@ -40,7 +40,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -395,7 +394,7 @@ public final class ContactsManager {
                         contact.toString());
                 OutputStream outstream = null;
                 try {
-                    outstream = mContentResolver.openOutputStream(photoUri);
+                    outstream = mLocalContentResolver.openContentOutputStream(photoUri);
                     outstream.write(photoContent);
                     outstream.flush();
                 } catch (IOException e) {
@@ -609,7 +608,7 @@ public final class ContactsManager {
                             Uri photoUri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI,
                                     contact.toString());
 							String etag = cursor.getString(cursor.getColumnIndex(RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG));
-							InputStream stream = mContentResolver.openInputStream(photoUri);
+							InputStream stream = mLocalContentResolver.openContentInputStream(photoUri);
 							byte[] content = new byte[stream.available()];
 							stream.read(content, 0, content.length);
 							Bitmap bmp = BitmapFactory.decodeByteArray(content, 0, content.length);
