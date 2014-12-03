@@ -43,13 +43,13 @@ public class MobileNetworkInterface extends ImsNetworkInterface {
      * @param imsModule IMS module
      * @throws CoreException
      */
-    public MobileNetworkInterface(ImsModule imsModule) throws CoreException {
+    public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
     	super(imsModule, ConnectivityManager.TYPE_MOBILE,
     			new MobileNetworkAccess(),
-    			RcsSettings.getInstance().getImsProxyAddrForMobile(),
-    			RcsSettings.getInstance().getImsProxyPortForMobile(),
-    			RcsSettings.getInstance().getSipDefaultProtocolForMobile(),
-    			RcsSettings.getInstance().getImsAuhtenticationProcedureForMobile());
+    			rcsSettings.getImsProxyAddrForMobile(),
+    			rcsSettings.getImsProxyPortForMobile(),
+    			rcsSettings.getSipDefaultProtocolForMobile(),
+    			rcsSettings.getImsAuthenticationProcedureForMobile());
 
     	if (logger.isActivated()) {
     		logger.info("Mobile network interface has been loaded");

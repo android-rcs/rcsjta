@@ -545,12 +545,12 @@ public class RcsSettingsData {
 	/**
 	 * IMS authentication procedure for mobile access
 	 */
-	public static final String IMS_AUTHENT_PROCEDURE_MOBILE = "ImsAuhtenticationProcedureForMobile";
+	public static final String IMS_AUTHENT_PROCEDURE_MOBILE = "ImsAuthenticationProcedureForMobile";
 
 	/**
 	 * IMS authentication procedure for Wi-Fi access
 	 */
-	public static final String IMS_AUTHENT_PROCEDURE_WIFI = "ImsAuhtenticationProcedureForWifi";
+	public static final String IMS_AUTHENT_PROCEDURE_WIFI = "ImsAuthenticationProcedureForWifi";
 
 	/**
 	 * Activate or not Tel-URI format

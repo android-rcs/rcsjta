@@ -124,19 +124,20 @@ public class ImsConnectionManager implements Runnable {
 	public ImsConnectionManager(ImsModule imsModule) throws CoreException {
 		this.imsModule = imsModule;
 
+		RcsSettings rcsSettings = RcsSettings.getInstance();
 		// Get network access parameters
-		network = RcsSettings.getInstance().getNetworkAccess();
+		network = rcsSettings.getNetworkAccess();
 
 		// Get network operator parameters
-		operator = RcsSettings.getInstance().getNetworkOperator();
-		apn = RcsSettings.getInstance().getNetworkApn();
+		operator = rcsSettings.getNetworkOperator();
+		apn = rcsSettings.getNetworkApn();
 		
 		// Set the connectivity manager
 		connectivityMgr = (ConnectivityManager)AndroidFactory.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		
         // Instanciates the IMS network interfaces
-        networkInterfaces[0] = new MobileNetworkInterface(imsModule);
-        networkInterfaces[1] = new WifiNetworkInterface(imsModule);
+        networkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
+        networkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
 
         // Set the mobile network interface by default
 		currentNetworkInterface = getMobileNetworkInterface();

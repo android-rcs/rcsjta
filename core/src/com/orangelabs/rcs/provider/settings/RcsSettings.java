@@ -1359,7 +1359,7 @@ public class RcsSettings {
      *
      * @return Authentication procedure
      */
-	public String getImsAuhtenticationProcedureForMobile() {
+	public String getImsAuthenticationProcedureForMobile() {
 		return readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE);
 	}
 
@@ -1368,8 +1368,8 @@ public class RcsSettings {
      *
      * @return Authentication procedure
      */
-	public String getImsAuhtenticationProcedureForWifi() {
-		return readParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI);
+	public String getImsAuthenticationProcedureForWifi() {
+		return readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI);
 	}
 
     /**
@@ -1905,7 +1905,7 @@ public class RcsSettings {
          if (TextUtils.isEmpty(getUserProfileImsDomain())) {
         	 return false;
          }
-         String mode = getImsAuhtenticationProcedureForMobile();
+         String mode = getImsAuthenticationProcedureForMobile();
 		 if (mode.equals(RcsSettingsData.DIGEST_AUTHENT)) {
 	         if (TextUtils.isEmpty(getUserProfileImsUserName())) {
 	        	 return false;
