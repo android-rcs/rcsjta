@@ -17,6 +17,8 @@
  ******************************************************************************/
 package com.gsma.service.rcs.database;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
@@ -30,18 +32,23 @@ import com.gsma.services.rcs.chat.Geoloc;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 
 public class ChatMessageTest extends AndroidTestCase {
-	private ContactId remote = null;
+	private ContactId mContact;
+	private Context mContext;
+	private ContentResolver mContentResolver;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		MessagingLog.createInstance(getContext());
-		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
+		mContext = getContext();
+		mContentResolver = mContext.getContentResolver();
+		LocalContentResolver localContentResolver = new LocalContentResolver(mContentResolver);
+		MessagingLog.createInstance(mContext, localContentResolver);
+		ContactUtils contactUtils = ContactUtils.getInstance(mContext);
 		try {
-			remote = contactUtils.formatContact("+339000000");
+			mContact = contactUtils.formatContact("+339000000");
 		} catch (RcsContactFormatException e) {
 			fail( "Cannot create contactID");
 		}
@@ -54,14 +61,14 @@ public class ChatMessageTest extends AndroidTestCase {
 	public void testTextMessage() {
 		String msgId = "" + System.currentTimeMillis();
 		String txt = "Hello";
-		InstantMessage msg = new InstantMessage(msgId, remote, txt, true, "display");
+		InstantMessage msg = new InstantMessage(msgId, mContact, txt, true, "display");
 		
 		// Add entry
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
-    	Cursor cursor = getContext().getContentResolver().query(uri, 
+    	Cursor cursor = mContentResolver.query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
     				ChatLog.Message.CONTACT,
@@ -83,7 +90,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
     		
     		assertEquals(direction, RcsCommon.Direction.OUTGOING);
-    		assertEquals(contact, remote.toString());
+    		assertEquals(contact, mContact.toString());
     		assertEquals(readTxt, txt);
     		assertEquals(mimeType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.TEXT_MESSAGE);
     		assertEquals(id, msgId);
@@ -93,14 +100,14 @@ public class ChatMessageTest extends AndroidTestCase {
 	public void testGeolocMessage() {
 		String msgId = "" + System.currentTimeMillis();
 		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 2000);
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, remote, geoloc, true,"display");
+		GeolocMessage geolocMsg = new GeolocMessage(msgId, mContact, geoloc, true,"display");
 		
 		// Add entry
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(geolocMsg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		
 		// Read entry
 		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
-    	Cursor cursor = getContext().getContentResolver().query(uri, 
+    	Cursor cursor = mContentResolver.query(uri, 
     			new String[] {
     				ChatLog.Message.DIRECTION,
     				ChatLog.Message.CONTACT,
@@ -124,7 +131,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
     		
     		assertEquals(direction, RcsCommon.Direction.OUTGOING);
-    		assertEquals(contact, remote.toString());
+    		assertEquals(contact, mContact.toString());
     		assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
     		assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
     		assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
