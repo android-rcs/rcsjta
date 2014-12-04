@@ -46,24 +46,6 @@ public class RcsServiceConfiguration {
 	private static final String WHERE_CLAUSE = new StringBuilder(Settings.KEY).append("=?")
 			.toString();
 
-	// TODO make public with API 1.5.1
-	private static final String SERVICE_ACTIVATED = "ServiceActivated";
-	
-	/**
-	 * Checks the RCS service is activated.
-	 * 
-	 * @param ctx
-	 *            Context
-	 * @return Boolean True if the RCS service is activated.
-	 */
-	public static boolean isServiceActivated(Context ctx) {
-		try {
-			return Boolean.parseBoolean(getStringValueSetting(ctx, SERVICE_ACTIVATED));
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 	/**
 	 * Checks the RCS configuration validity.
 	 * 

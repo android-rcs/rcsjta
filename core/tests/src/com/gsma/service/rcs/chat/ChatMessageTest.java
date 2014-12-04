@@ -33,15 +33,15 @@ public class ChatMessageTest extends AndroidTestCase {
 	private long sentAt;
 	private String message;
 	private ContactId remote;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		Random random = new Random();
-		messageId = String.valueOf (random.nextInt(96) + 32);
-		message = String.valueOf (random.nextInt(96) + 32);
+		messageId = String.valueOf(random.nextInt(96) + 32);
+		message = String.valueOf(random.nextInt(96) + 32);
 		receiptAt = random.nextLong();
 		sentAt = random.nextLong();
-		
+
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		remote = contactUtils.formatContact("+33123456789");
 	}
@@ -50,29 +50,13 @@ public class ChatMessageTest extends AndroidTestCase {
 		super.tearDown();
 	}
 
-	private boolean chatMessageIsEqual(ChatMessage chatMessage1, ChatMessage chatMessage2) {
-		if (!chatMessage1.getId().equals(chatMessage2.getId()) ) {
-			return false;
-		}
-		if (!chatMessage1.getContent().equals(chatMessage2.getContent())) {
-			return false;
-		}
-		if (chatMessage1.getTimestamp()!=chatMessage2.getTimestamp()) {
-			return false;
-		}
-		if (chatMessage1.getTimestampSent()!=chatMessage2.getTimestampSent()) {
-			return false;
-		}
-		if (chatMessage1.getRemoteContact() != null) {
-			if (!chatMessage1.getRemoteContact().equals(chatMessage2.getRemoteContact())) {
-				return false;
-			}
-		} else {
-			if (chatMessage2.getRemoteContact() != null) {
-				return false;
-			}
-		}
-		return true;
+	private void chatMessageIsEqual(ChatMessage chatMessage1, ChatMessage chatMessage2) {
+		assertEquals(chatMessage1.getId(), chatMessage2.getId());
+		assertEquals(chatMessage1.getContent(), chatMessage2.getContent());
+		// TODO These methods will be implemented in CR018
+		// assertEquals(chatMessage1.getTimestamp(),chatMessage2.getTimestamp());
+		// assertEquals(chatMessage1.getTimestampSent(),chatMessage2.getTimestampSent());
+		assertEquals(chatMessage1.getRemoteContact(), chatMessage2.getRemoteContact());
 	}
 
 	public void testChatMessageContactNull() {
@@ -83,9 +67,9 @@ public class ChatMessageTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		ChatMessage createFromParcel = ChatMessage.CREATOR.createFromParcel(parcel);
-		assertTrue(chatMessageIsEqual(createFromParcel, chatMessage));
+		chatMessageIsEqual(createFromParcel, chatMessage);
 	}
-	
+
 	public void testChatMessageContact() {
 		ChatMessage chatMessage = new ChatMessage(messageId, remote, message, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
@@ -94,6 +78,6 @@ public class ChatMessageTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		ChatMessage createFromParcel = ChatMessage.CREATOR.createFromParcel(parcel);
-		assertTrue(chatMessageIsEqual(createFromParcel, chatMessage));
+		chatMessageIsEqual(createFromParcel, chatMessage);
 	}
 }

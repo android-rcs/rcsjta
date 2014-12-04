@@ -39,34 +39,26 @@ public class GeolocMessageTest extends AndroidTestCase {
 	private double latitude;
 	private Geoloc geoloc;
 
-	private boolean geolocMessageIsEqual(GeolocMessage geolocMessage1, GeolocMessage geolocMessage2) {
-		if (!geolocMessage1.getId().equals(geolocMessage2.getId()))
-			return false;
-		if (geolocMessage1.getTimestamp() != geolocMessage2.getTimestamp())
-			return false;
-		if (geolocMessage1.getRemoteContact() != null) {
-			if (!geolocMessage1.getRemoteContact().equals(geolocMessage2.getRemoteContact()))
-				return false;
-		} else {
-			if (geolocMessage2.getRemoteContact() != null)
-				return false;
-		}
+	private void geolocMessageIsEqual(GeolocMessage geolocMessage1, GeolocMessage geolocMessage2) {
+		assertEquals(geolocMessage1.getId(), geolocMessage2.getId());
+		assertEquals(geolocMessage1.getRemoteContact(), geolocMessage2.getRemoteContact());
+		// TODO These methods will be implemented in CR018
+		// assertEquals(geolocMessage1.getTimestamp(), geolocMessage2.getTimestamp());
+		// assertEquals(geolocMessage1.getTimestampSent(), geolocMessage2.getTimestampSent());
+
 		if (geolocMessage1.getGeoloc() != null) {
-			if (geolocMessage2.getGeoloc() == null)
-				return false;
-			if (geolocMessage1.getGeoloc().getExpiration() != geolocMessage2.getGeoloc().getExpiration())
-				return false;
-			if (!geolocMessage1.getGeoloc().getLabel().equals(geolocMessage2.getGeoloc().getLabel()))
-				return false;
-			if (geolocMessage1.getGeoloc().getLatitude() != geolocMessage2.getGeoloc().getLatitude())
-				return false;
-			if (geolocMessage1.getGeoloc().getLongitude() != geolocMessage2.getGeoloc().getLongitude())
-				return false;
+			if (geolocMessage2.getGeoloc() == null) {
+				fail("One geoloc message is null");
+			}
+			assertEquals(geolocMessage1.getGeoloc().getExpiration(), geolocMessage2.getGeoloc().getExpiration());
+			assertEquals(geolocMessage1.getGeoloc().getLabel(), (geolocMessage2.getGeoloc().getLabel()));
+			assertEquals(geolocMessage1.getGeoloc().getLatitude(), geolocMessage2.getGeoloc().getLatitude());
+			assertEquals(geolocMessage1.getGeoloc().getLongitude(), geolocMessage2.getGeoloc().getLongitude());
 		} else {
-			if (geolocMessage2.getGeoloc() != null)
-				return false;
+			if (geolocMessage2.getGeoloc() != null) {
+				fail("One geoloc message is null");
+			}
 		}
-		return true;
 	}
 
 	protected void setUp() throws Exception {
@@ -97,7 +89,7 @@ public class GeolocMessageTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		GeolocMessage createFromParcel = GeolocMessage.CREATOR.createFromParcel(parcel);
-		assertTrue(geolocMessageIsEqual(createFromParcel, geolocMessage));
+		geolocMessageIsEqual(createFromParcel, geolocMessage);
 	}
 
 	public void testChatMessageGeolocNull() {
@@ -108,9 +100,9 @@ public class GeolocMessageTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		GeolocMessage createFromParcel = GeolocMessage.CREATOR.createFromParcel(parcel);
-		assertTrue(geolocMessageIsEqual(createFromParcel, geolocMessage));
+		geolocMessageIsEqual(createFromParcel, geolocMessage);
 	}
-	
+
 	public void testChatMessage() {
 		GeolocMessage geolocMessage = new GeolocMessage(messageId, remote, geoloc, receiptAt, sentAt);
 		Parcel parcel = Parcel.obtain();
@@ -119,6 +111,6 @@ public class GeolocMessageTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		GeolocMessage createFromParcel = GeolocMessage.CREATOR.createFromParcel(parcel);
-		assertTrue(geolocMessageIsEqual(createFromParcel, geolocMessage));
+		geolocMessageIsEqual(createFromParcel, geolocMessage);
 	}
 }

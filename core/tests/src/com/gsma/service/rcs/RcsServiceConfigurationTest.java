@@ -97,11 +97,6 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 		}
 	}
 
-	public void testIsServiceActivated() {
-		boolean serviceActivated = rcsSettings.isServiceActivated();
-		assertEquals(serviceActivated, RcsServiceConfiguration.isServiceActivated(getContext()));
-	}
-
 	public void testGetMyCountryCode() {
 		String countryCode = rcsSettings.getCountryCode();
 		assertEquals(countryCode, RcsServiceConfiguration.getMyCountryCode(getContext()));

@@ -27,44 +27,40 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 public class ParticipantInfoTest extends AndroidTestCase {
 
 	private ContactId contact;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
 		contact = contactUtils.formatContact("+33123456789");
-		
+
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
-	private boolean participantInfoisEqual(ParticipantInfo participantInfo1, ParticipantInfo participantInfo2) {
-		if (participantInfo1.getStatus() != participantInfo2.getStatus())
-			return false;
+	private void participantInfoisEqual(ParticipantInfo participantInfo1, ParticipantInfo participantInfo2) {
+		assertEquals(participantInfo1.getStatus(), participantInfo2.getStatus());
 		if (participantInfo1.getContact() != null) {
-			if (!participantInfo1.getContact().equals(participantInfo2.getContact())) {
-				return false;
-			}
+			assertEquals(participantInfo1.getContact(), participantInfo2.getContact());
 		} else {
 			if (participantInfo2.getContact() != null) {
-				return false;
+				fail("Only one ParticipantInfo is null");
 			}
 		}
-		return true;
 	}
 
 	public void testParticipantInfoContactNull() {
-		ParticipantInfo participant = new ParticipantInfo((ContactId)null);
+		ParticipantInfo participant = new ParticipantInfo((ContactId) null);
 		Parcel parcel = Parcel.obtain();
 		participant.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
 		parcel.setDataPosition(0);
 		// finish round trip
 		ParticipantInfo createFromParcel = ParticipantInfo.CREATOR.createFromParcel(parcel);
-		assertTrue(participantInfoisEqual(createFromParcel, participant));
+		participantInfoisEqual(createFromParcel, participant);
 	}
-	
+
 	public void testParticipantInfo() {
 		ParticipantInfo participant = new ParticipantInfo(contact);
 		Parcel parcel = Parcel.obtain();
@@ -73,6 +69,6 @@ public class ParticipantInfoTest extends AndroidTestCase {
 		parcel.setDataPosition(0);
 		// finish round trip
 		ParticipantInfo createFromParcel = ParticipantInfo.CREATOR.createFromParcel(parcel);
-		assertTrue(participantInfoisEqual(createFromParcel, participant));
+		participantInfoisEqual(createFromParcel, participant);
 	}
 }
