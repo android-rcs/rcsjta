@@ -75,7 +75,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	/**
 	 * Is File Transfer initiated from a GC
 	 */
-	protected boolean isGroup = false;
+	protected final boolean mGroupFileTransfer;
 		
 	/**
 	 * Constructor
@@ -109,7 +109,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		if (inviteContactHeader != null) {
 			this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);
 		}
-		isGroup = chatSession.isGroupChat();
+		mGroupFileTransfer = chatSession.isGroupChat();
 		
 		// Instantiate the download manager
 		MmContent content = getContent();
@@ -142,7 +142,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
 						.getFileicon()) : null, null, resume.getChatId(),
 				resume.getFileTransferId());
-		this.isGroup = resume.isGroup();
+		mGroupFileTransfer = resume.isGroup();
 		this.resumeFT = resume;
 		// Instantiate the download manager
 		downloadManager = new HttpDownloadManager(getContent(), this, resume.getDownloadServerAddress());
@@ -164,6 +164,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		}
 
 		return RcsSettings.getInstance().isFileTransferAutoAccepted();
+	}
+
+	protected boolean isGroupFileTransfer(){
+		return mGroupFileTransfer;
 	}
 
 	/**
@@ -212,7 +216,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 							logger.debug("Transfer has been rejected by user");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
@@ -224,7 +228,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 							logger.debug("Transfer has been rejected on timeout");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
@@ -235,7 +239,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 						if (logger.isActivated()) {
 							logger.debug("Http transfer has been rejected by remote.");
 
-							getImsService().removeSession(this);
+							removeSession();
 
 							for (ImsSessionListener listener : listeners) {
 								listener.handleSessionRejectedByRemote();
@@ -293,7 +297,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
 				// Send delivery report "displayed"
 				// According to BB PDD section 6.1.4 there should be no display for GC messages.
-				if (!isGroup) {
+				if (!mGroupFileTransfer) {
 					sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 				}
 			} else {
@@ -332,7 +336,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		}
 			
 		// Remove the session in the session manager
-		getImsService().removeSession(this);
+		removeSession();
 	}
 
 	@Override
@@ -353,20 +357,24 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 */
 	protected void sendDeliveryReport(String status) {
 		String msgId = getFileTransferId();
-		if (msgId != null) {
-			if (logger.isActivated()) {
-				logger.debug("Send delivery report " + status);
-			}
-
-			ChatSession chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
-			if (chatSession != null && chatSession.isMediaEstablished()) {
-				// Send message delivery status via a MSRP
-				chatSession.sendMsrpMessageDeliveryStatus(getRemoteContact(),msgId, status);
-			} else {
-				// Send message delivery status via a SIP MESSAGE
-				((InstantMessagingService) getImsService()).getImdnManager().sendMessageDeliveryStatusImmediately(
-						getRemoteContact(), msgId, status, remoteInstanceId);
-			}
+		if (logger.isActivated()) {
+			logger.debug("Send delivery report " + status);
+		}
+		ChatSession chatSession;
+		ContactId contact = getRemoteContact();
+		InstantMessagingService imService = Core.getInstance().getImService();
+		if (mGroupFileTransfer) {
+			chatSession = imService.getGroupChatSession(getContributionID());
+		} else {
+			chatSession = imService.getOneToOneChatSession(contact);
+		}
+		if (chatSession != null && chatSession.isMediaEstablished()) {
+			// Send message delivery status via a MSRP
+			chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status);
+		} else {
+			// Send message delivery status via a SIP MESSAGE
+			imService.getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
+					remoteInstanceId);
 		}
 	}
 

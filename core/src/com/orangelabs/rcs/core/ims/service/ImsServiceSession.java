@@ -310,13 +310,9 @@ public abstract class ImsServiceSession extends Thread {
 	/**
 	 * Start the session in background
 	 */
-	public void startSession() {
-		// Add the session in the session manager
-		imsService.addSession(this);
-		
-		// Start the session
-		start();
-	}
+	public abstract void startSession();
+
+	public abstract void removeSession();
 	
 	/**
 	 * Return the IMS service
@@ -432,7 +428,7 @@ public abstract class ImsServiceSession extends Thread {
 		sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), code);
 			
 		// Remove the session in the session manager
-		imsService.removeSession(this);
+		removeSession();
 	}	
 	
 	/**
@@ -521,7 +517,7 @@ public abstract class ImsServiceSession extends Thread {
 
 		closeMediaSession();
 
-		getImsService().removeSession(this);
+		removeSession();
 
 		/* TODO: This will be changed anyway by the implementation of CR018 */
 		Collection<ImsSessionListener> listeners = getListeners();
@@ -610,7 +606,7 @@ public abstract class ImsServiceSession extends Thread {
         sessionTerminatedByRemote = true;
 
     	// Remove the current session
-    	getImsService().removeSession(this);
+        removeSession();
 	
     	// Stop session timer
     	getSessionTimerManager().stop();		
@@ -670,7 +666,7 @@ public abstract class ImsServiceSession extends Thread {
 		}
 
 		// Remove the current session
-		getImsService().removeSession(this);
+		removeSession();
 
 		// Set invitation status
 		invitationStatus = ImsServiceSession.INVITATION_CANCELED;

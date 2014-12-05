@@ -241,8 +241,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_USER);
 	   	
-    	// Remove the current session
-    	getImsService().removeSession(this);
+		// Remove the current session
+		removeSession();
 
     	// Notify listeners
     	for (ImsSessionListener listener : getListeners()) {
@@ -325,7 +325,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		}
 		
 		// Remove the current session
-    	getImsService().removeSession(this);
+		removeSession();
 
 		// Notify listeners
 		for (ImsSessionListener listener : getListeners()) {

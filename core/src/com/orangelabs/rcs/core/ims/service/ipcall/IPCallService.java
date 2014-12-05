@@ -21,9 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
@@ -42,6 +39,9 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * IP call service offers one-to-on IP voice call and IP video call
@@ -70,6 +70,11 @@ public class IPCallService extends ImsService {
      * The logger
      */
     private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
+
+	/**
+	 * IPCallSessionCache with Session ID (Call ID) as key
+	 */
+	private Map<String, IPCallSession> mIPCallSessionCache = new HashMap<String, IPCallSession>();
 
     /**
      * Constructor
@@ -121,22 +126,63 @@ public class IPCallService extends ImsService {
      */
 	public void check() {
 	}
-	
-    /**
-     * Returns the IP call sessions
-     *
-     * @return session
-     */
-    public Vector<IPCallSession> getIPCallSessions() {
-        Vector<IPCallSession> result = new Vector<IPCallSession>();
-        Enumeration<ImsServiceSession> list = getSessions();
-        while (list.hasMoreElements()) {
-            ImsServiceSession session = list.nextElement();
-            result.add((IPCallSession) session);
-        }
-        return result;
-    }
-    
+
+	public void addSession(IPCallSession session) {
+		String callId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add IPCallSession with call ID '" + callId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mIPCallSessionCache.put(callId, session);
+			addImsServiceSession(session);
+		}
+	}
+
+	public void removeSession(final IPCallSession session) {
+		final String callId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove IPCallSession with call ID '" + callId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mIPCallSessionCache.remove(callId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public IPCallSession getIPCallSession(String sessionId) {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mIPCallSessionCache.get(sessionId);
+		}
+	}
+
+	protected void assertAvailableIpCallSession(String errorMessage) throws CoreException {
+		synchronized (getImsServiceSessionOperationLock()) {
+			if (maxSessions != 0 && mIPCallSessionCache.size() >= maxSessions) {
+				/*
+				 * TODO : Exceptions will be handled better in CR037
+				 * implementation
+				 */
+				throw new CoreException(errorMessage);
+			}
+		}
+	}
+
+	private boolean isCurrentSharingUnidirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mIPCallSessionCache.size() >= SharingDirection.UNIDIRECTIONAL;
+		}
+	}
+
     /**
      * Initiate an IP call session
      *
@@ -153,13 +199,8 @@ public class IPCallService extends ImsService {
 		}
 		
 		// Test number of sessions
-		if ((maxSessions != 0) && (getIPCallSessions().size() >= maxSessions)) {
-			if (logger.isActivated()) {
-                logger.debug("The max number of IP call sessions is achieved: cancel the initiation");
-			}
-			throw new CoreException("Max sessions achieved");
-		}
-		
+		assertAvailableIpCallSession("Max sessions achieved");
+
 		// Create content
         AudioContent audioContent = ContentManager.createGenericLiveAudioContent();
         VideoContent videoContent = null;
@@ -180,8 +221,7 @@ public class IPCallService extends ImsService {
      */
 	public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
         // Reject if there is already a call in progress
-        Vector<IPCallSession> currentSessions = getIPCallSessions();
-        if (currentSessions.size() >= 1) {
+        if (isCurrentSharingUnidirectional()) {
             // Max session
             if (logger.isActivated()) {
                 logger.debug("The max number of IP call sessions is achieved: reject the invitation");
@@ -216,14 +256,8 @@ public class IPCallService extends ImsService {
 		if (logger.isActivated()) {
 			logger.debug("Abort all pending sessions");
 		}
-		for (Enumeration<ImsServiceSession> e = getSessions(); e.hasMoreElements() ;) {
-			ImsServiceSession session = (ImsServiceSession)e.nextElement();
-			if (logger.isActivated()) {
-				logger.debug("Abort pending session " + session.getSessionID());
-			}
-			session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-		}
-    }
+		abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
+	}
 	
 	/**
      * Is call connected
@@ -231,8 +265,9 @@ public class IPCallService extends ImsService {
      * @return Boolean
      */
 	public boolean isCallConnected() {
-		Vector<IPCallSession> sessions = getIPCallSessions(); 
-		return (sessions.size() > 0);
+		synchronized (getImsServiceSessionOperationLock()) {
+			return (mIPCallSessionCache.size() > 0);
+		}
 	}
 
 	/**
@@ -242,15 +277,13 @@ public class IPCallService extends ImsService {
      * @return Boolean
      */
 	public boolean isCallConnectedWith(ContactId contact) {
-		boolean connected = false;
-		Vector<IPCallSession> sessions = getIPCallSessions(); 
-		for(int i=0; i < sessions.size(); i++) {
-			IPCallSession session = sessions.get(i);
-			if (contact != null && contact.equals(session.getRemoteContact())) {
-				connected = true;
-				break;
+		synchronized (getImsServiceSessionOperationLock()) {
+			for (IPCallSession session : mIPCallSessionCache.values()) {
+				if (contact.equals(session.getRemoteContact())) {
+					return true;
+				}
 			}
 		}
-		return connected;
-	}	
+		return false;
+	}
 }

@@ -259,4 +259,15 @@ public abstract class FileSharingSession extends ImsServiceSession {
 		// Request capabilities to the remote
 		getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}
+
+	@Override
+	public void startSession() {
+		getImsService().getImsModule().getInstantMessagingService().addSession(this);
+		start();
+	}
+
+	@Override
+	public void removeSession() {
+		getImsService().getImsModule().getInstantMessagingService().removeSession(this);
+	}
 }

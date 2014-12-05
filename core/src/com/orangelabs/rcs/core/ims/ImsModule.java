@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims;
-
-import java.util.Enumeration;
 
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
@@ -437,28 +439,12 @@ public class ImsModule implements SipEventListener {
 	 * Abort all sessions
 	 */
 	public void abortAllSessions() {
-        try {
-            if (logger.isActivated()) {
-                logger.debug("Abort all pending sessions");
-            }
-            ImsService[] services = getImsServices();
-            for (int i = 0; i < services.length; i++) {
-                ImsService service = services[i];
-                for (Enumeration<ImsServiceSession> e = service.getSessions(); e.hasMoreElements();) {
-                    ImsServiceSession session = (ImsServiceSession) e.nextElement();
-                    if (logger.isActivated()) {
-                        logger.debug("Abort session " + session.getSessionID());
-                    }
-                    session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-                }
-            }
-        } catch (Exception e) {
-            // Aborting sessions may fail (e.g. due to ConcurrentModificationException)
-            // we don't want the whole shutdown to be interrupted just because of this
-            if (logger.isActivated()) {
-                logger.error("Aborting all sessions failed", e);
-            }
-        }
+		if (logger.isActivated()) {
+			logger.debug("Abort all pending sessions");
+		}
+		for (ImsService service : getImsServices()) {
+			service.abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
+		}
 	}
 	
     /**

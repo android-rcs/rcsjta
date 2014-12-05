@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.chat.event;
@@ -32,6 +36,7 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -150,7 +155,16 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     public Set<ParticipantInfo> getParticipants() {
 		return participants;
 	}
-    
+
+	/**
+	 * Returns the dialog path of the conference subscriber
+	 * 
+	 * @return SipDialogPath
+	 */
+	public SipDialogPath getDialogPath() {
+		return dialogPath;
+	}
+
     /**
      * Receive a notification
      * 
@@ -475,9 +489,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Reset the dialog path
      */
-    private void resetDialogPath() {
-        dialogPath = null;
-    }
+	private void resetDialogPath() {
+		if (dialogPath != null) {
+			Core.getInstance().getImService()
+					.removeGroupChatConferenceSubscriber(dialogPath.getCallId());
+			dialogPath = null;
+		}
+	}
 
 	/**
      * Retrieve the expire period
@@ -582,6 +600,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         
         // Start the periodic subscribe
         startTimer(expirePeriod, 0.5);
+
+        Core.getInstance().getImService().addGroupChatConferenceSubscriber(dialogPath.getCallId(), session);
 	}
 	
 	/**

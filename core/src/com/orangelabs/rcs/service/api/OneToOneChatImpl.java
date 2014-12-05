@@ -36,7 +36,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
@@ -57,7 +57,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Core session
 	 */
-	private OneOneChatSession session;
+	private OneToOneChatSession session;
 
 	private final IOneToOneChatEventBroadcaster mChatEventBroadcaster;
 
@@ -78,7 +78,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * @param session Session
 	 * @param broadcaster IChatEventBroadcaster
 	 */
-	public OneToOneChatImpl(ContactId contact, OneOneChatSession session,
+	public OneToOneChatImpl(ContactId contact, OneToOneChatSession session,
 			IOneToOneChatEventBroadcaster broadcaster) {
 		this.contact = contact;
 		this.session = session;
@@ -117,7 +117,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * 
 	 * @param session Core session
 	 */
-	public void setCoreSession(OneOneChatSession session) {
+	public void setCoreSession(OneToOneChatSession session) {
 		this.session = session;
 		
 		session.addListener(this);
@@ -135,7 +135,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * 
 	 * @return Core session
 	 */
-	public OneOneChatSession getCoreSession() {
+	public OneToOneChatSession getCoreSession() {
 		return session;
 	}
 	
@@ -211,7 +211,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 						logger.debug("Core session is not yet established: initiate a new session to send the message");
 					}
 					// Initiate a new session
-					session = (OneOneChatSession) Core.getInstance().getImService().initiateOne2OneChatSession(contact, msg);
+					session = (OneToOneChatSession) Core.getInstance().getImService().initiateOne2OneChatSession(contact, msg);
 					// Update with new session
 					setCoreSession(session);
 					// Start the session

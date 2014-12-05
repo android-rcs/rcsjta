@@ -312,7 +312,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		terminateSession(ImsServiceSession.TERMINATION_BY_USER);
 	   	
     	// Remove the current session
-    	getImsService().removeSession(this);
+    	removeSession();
 
     	// Notify listeners
     	for(int j=0; j < getListeners().size(); j++) {

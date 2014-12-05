@@ -178,24 +178,21 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 logger.debug("Upload done with success: " + fileInfo);
             }
 
-			// Send the file transfer info via a chat message
-            chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
+            // Send the file transfer info via a chat message
+            chatSession = Core.getInstance().getImService()
+                    .getGroupChatSession(getContributionID());
             if (chatSession != null) {
-				// A chat session exists
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via an existing chat session");
                 }
 
-                // Send file transfer info
                 sendFileTransferInfo();
 
-                // File transfered
                 handleFileTransfered();
             } else {
-                // No chat error
                 handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
-			}
-		} else {
+            }
+        } else {
             if (logger.isActivated()) {
                 logger.debug("Upload has failed");
             }

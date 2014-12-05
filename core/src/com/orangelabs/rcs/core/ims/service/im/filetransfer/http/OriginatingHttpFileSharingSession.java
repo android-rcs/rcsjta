@@ -21,9 +21,6 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
-import java.util.NoSuchElementException;
-import java.util.Vector;
-
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
@@ -154,22 +151,9 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 logger.debug("Upload done with success: " + fileInfo);
             }
 
-			// Send the file transfer info via a chat message
-            ChatSession chatSession = (ChatSession) Core.getInstance().getImService().getSession(getChatSessionID());
-            if (chatSession == null) {
-            	 Vector<ChatSession> chatSessions = Core.getInstance().getImService().getImSessionsWith(getRemoteContact());
-            	 try {
-            		 chatSession = chatSessions.lastElement();
-            		 if (chatSession.isMediaEstablished()) {
-            			 setChatSessionID(chatSession.getSessionID());
-            			 setContributionID(chatSession.getContributionID());
-            		 } else {
-            			 chatSession = null;
-            		 }
-            	 } catch(NoSuchElementException nsee) {
-                     chatSession = null;
-                 }
-            }
+            // Send the file transfer info via a chat message
+            ChatSession chatSession = Core.getInstance().getImService()
+                    .getOneToOneChatSession(getRemoteContact());
             // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
             String msgId = getFileTransferId();
             if (chatSession != null) {
@@ -177,7 +161,10 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via an existing chat session");
                 }
-
+                if (chatSession.isMediaEstablished()) {
+                    setChatSessionID(chatSession.getSessionID());
+                    setContributionID(chatSession.getContributionID());
+                }
                 // Get the last chat session in progress to send file transfer info
 				String mime = CpimMessage.MIME_TYPE;
 				String from = ChatUtils.ANOMYNOUS_URI;

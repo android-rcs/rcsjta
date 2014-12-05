@@ -22,10 +22,10 @@
 
 package com.orangelabs.rcs.core.ims.service.sip;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import android.content.Intent;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -36,7 +36,6 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
@@ -62,6 +61,16 @@ public class SipService extends ImsService {
 	 * MIME-type for multimedia services
 	 */
 	public final static String MIME_TYPE = "application/*";
+
+	/**
+	 * GenericSipMsrpSessionCache with SessionId as key
+	 */
+	private Map<String, GenericSipMsrpSession> mGenericSipMsrpSessionCache = new HashMap<String, GenericSipMsrpSession>();
+
+	/**
+	 * GenericSipRtpSessionCache with SessionId as key
+	 */
+	private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<String, GenericSipRtpSession>();
 
 	/**
      * Constructor
@@ -169,45 +178,88 @@ public class SipService extends ImsService {
 
 		session.startSession();
 	}
-	
-	/**
-     * Returns SIP sessions
-     * 
-     * @return List of sessions
-     */
-	public Vector<GenericSipMsrpSession> getSipSessions() {
-		// Search all SIP sessions
-		Vector<GenericSipMsrpSession> result = new Vector<GenericSipMsrpSession>();
-		Enumeration<ImsServiceSession> list = getSessions();
-		while(list.hasMoreElements()) {
-			ImsServiceSession session = list.nextElement();
-			if (session instanceof GenericSipMsrpSession) {
-				result.add((GenericSipMsrpSession)session);
-			}
+
+	public void addSession(GenericSipMsrpSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add GenericSipMsrpSession with sessionId '" + sessionId + "'");
 		}
-
-		return result;
-    }
-
-	/**
-     * Returns SIP sessions with a given contact
-     * 
-     * @param contact Contact Id
-     * @return List of sessions
-     */
-	public Vector<GenericSipMsrpSession> getSipSessionsWith(ContactId contact) {
-		// Search all SIP sessions
-		Vector<GenericSipMsrpSession> result = new Vector<GenericSipMsrpSession>();
-		Enumeration<ImsServiceSession> list = getSessions();
-		while(list.hasMoreElements()) {
-			ImsServiceSession session = list.nextElement();
-			if ((session instanceof GenericSipMsrpSession) && session.getRemoteContact().equals(contact)) {
-				result.add((GenericSipMsrpSession)session);
-			}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mGenericSipMsrpSessionCache.put(sessionId, session);
+			addImsServiceSession(session);
 		}
+	}
 
-		return result;
-    }
+	public void removeSession(final GenericSipMsrpSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove GenericSipMsrpSession with sessionId '" + sessionId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mGenericSipMsrpSessionCache.remove(sessionId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public GenericSipMsrpSession getGenericSipMsrpSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Get GenericSipMsrpSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGenericSipMsrpSessionCache.get(sessionId);
+		}
+	}
+
+	public void addSession(GenericSipRtpSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add GenericSipRtpSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mGenericSipRtpSessionCache.put(sessionId, session);
+			addImsServiceSession(session);
+		}
+	}
+
+	public void removeSession(final GenericSipRtpSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove GenericSipRtpSession with sessionId '" + sessionId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mGenericSipRtpSessionCache.remove(sessionId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public GenericSipRtpSession getGenericSipRtpSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Get GenericSipRtpSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGenericSipRtpSessionCache.get(sessionId);
+		}
+	}
 
 	/**
 	 * Send an instant message (SIP MESSAGE)

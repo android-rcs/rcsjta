@@ -90,7 +90,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                         logger.debug("Session has been rejected by user");
                     }
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByUser();
@@ -105,7 +105,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     // Ringing period timeout
                     send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout();
@@ -117,7 +117,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                         logger.debug("Session has been canceled");
                     }
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByRemote();

@@ -49,7 +49,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -226,7 +226,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * 
 	 * @param session Chat session
 	 */
-    public void receiveOneOneChatInvitation(OneOneChatSession session) {
+    public void receiveOneOneChatInvitation(OneToOneChatSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
 			logger.info("Receive chat invitation from " + contact + " (display=" + session.getRemoteDisplayName() + ")");
@@ -270,7 +270,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 				}
 
 				// Check core session state
-				final OneOneChatSession coreSession = sessionApi.getCoreSession();
+				final OneToOneChatSession coreSession = sessionApi.getCoreSession();
 				if (coreSession != null) {
 					if (logger.isActivated()) {
 						logger.debug("Core chat session already exists: " + coreSession.getSessionID());

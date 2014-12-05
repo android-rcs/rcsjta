@@ -46,6 +46,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -196,7 +197,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 							logger.debug("Session has been rejected by user");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
@@ -211,7 +212,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						// Ringing period timeout
 						send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
@@ -223,7 +224,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 							logger.debug("Session has been rejected by remote");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByRemote();
@@ -441,5 +442,30 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 		}
 		return sb.toString();
 	}
-	
+
+	@Override
+	public void startSession() {
+		String chatId = getContributionID();
+		if (logger.isActivated()) {
+			logger.debug("Start GroupChatSession with chatID '" + chatId + "'");
+		}
+		InstantMessagingService imService = getImsService().getImsModule()
+				.getInstantMessagingService();
+		GroupChatSession currentSession = imService.getGroupChatSession(chatId);
+		if (currentSession != null) {
+			/*
+			 * If there is already a groupchat session with same chatId
+			 * existing, we should not reject the new session but update cache
+			 * with this groupchat session and mark the old groupchat session
+			 * pending for removal which will timeout eventually
+			 */
+			if (logger.isActivated()) {
+				logger.debug("Ongoing GrooupChat session detected for chatId '" + chatId
+						+ "' marking that session pending for removal");
+			}
+			currentSession.markForPendingRemoval();
+		}
+		imService.addSession(this);
+		start();
+	}
 }

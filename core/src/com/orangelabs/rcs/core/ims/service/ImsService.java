@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Vector;
-
-import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
@@ -32,6 +29,10 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract IMS service
@@ -89,15 +90,24 @@ public abstract class ImsService {
 	 */
 	private ImsModule imsModule;
 
-    /**
-     * List of managed sessions
-     */
-    private Map<String, ImsServiceSession> sessions = Collections.synchronizedMap(new LinkedHashMap<String, ImsServiceSession>());
+	/**
+	 * ImsServiceSessionCache with session dialog path's CallId as key
+	 */
+	private Map<String, ImsServiceSession> mImsServiceSessionCache = new HashMap<String, ImsServiceSession>();
 
 	/**
      * The logger
      */
     private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
+
+	protected final static class SharingDirection {
+
+		public static final int UNIDIRECTIONAL = 1;
+
+		public static final int BIDIRECTIONAL = 2;
+	}
+
+	protected static final int UNIDIRECTIONAL_SESSION_POSITION = 0;
 
     /**
      * Constructor
@@ -138,114 +148,35 @@ public abstract class ImsService {
 		return imsModule;
 	}
 
-    /**
-     * Returns a session
-     * 
-     * @param id Session ID
-     * @return Session
-     */
-	public ImsServiceSession getSession(String id) {
-		return (ImsServiceSession)sessions.get(id);
-    }
+	/*
+	 * This method is by choice not synchronized here since the class
+	 * extending this base-class will need to handle the synchronization
+	 * over a larger scope when calling this method anyway and we would like
+	 * to avoid double locks.
+	 */
+	protected void addImsServiceSession(ImsServiceSession session){
+		mImsServiceSessionCache.put(session.getDialogPath().getCallId(), session);
+	}
 
-    /**
-     * Returns sessions associated to a contact
-     * 
-     * @param contact Contact identifier
-     * @return List of sessions
-     */
-	public Enumeration<ImsServiceSession> getSessions(ContactId contact) {
-		Vector<ImsServiceSession> result = new Vector<ImsServiceSession>();
-        synchronized(sessions) {
-            Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
-            while(list.hasMoreElements()) {
-                ImsServiceSession session = list.nextElement();
-                if (contact!= null && contact.equals(session.getRemoteContact())) {
-                    result.add(session);
-                }
-            }
-        }
-		return result.elements();
-    }
+	/*
+	 * This method is by choice not synchronized here since the class
+	 * extending this base-class will need to handle the synchronization
+	 * over a larger scope when calling this method anyway and we would like
+	 * to avoid double locks.
+	 */
+	protected void removeImsServiceSession(ImsServiceSession session){
+		mImsServiceSessionCache.remove(session.getDialogPath().getCallId());
+	}
 
-    /**
-     * Returns the number of sessions in progress associated to a contact
-     * 
-     * @param contact Contact identifier
-     * @return number of sessions
-     */
-    public int getNumberOfSessions(ContactId contact) {
-        int result = 0;
-        synchronized(sessions) {
-            Enumeration<ImsServiceSession> list = Collections.enumeration(sessions.values());
-            while (list.hasMoreElements()) {
-                ImsServiceSession session = list.nextElement();
-                if (contact != null && contact.equals(session.getRemoteContact())) {
-                    result++;
-                }
-            }
-        }
-        return result;
-    }
-
-	/**
-     * Returns the list of sessions
-     * 
-     * @return List of sessions
-     */
-	public Enumeration<ImsServiceSession> getSessions() {
-        Vector<ImsServiceSession> result;
-        synchronized(sessions) {
-            result = new Vector<ImsServiceSession>(sessions.values());
-        }
-        return result.elements();
-
-    }
-
-    /**
-     * Returns the number of sessions in progress
-     * 
-     * @return Number of sessions
-     */
-	public int getNumberOfSessions() {
-		return sessions.size();
-    }
-
-    /**
-     * Add a session
-     * 
-     * @param session Session
-     */
-	public void addSession(ImsServiceSession session) {
-		if (logger.isActivated()) {
-			logger.debug("Add new session " + session.getSessionID());
+	public ImsServiceSession getImsServiceSession(String callId) {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mImsServiceSessionCache.get(callId);
 		}
-		sessions.put(session.getSessionID(), session);
-    }
+	}
 
-    /**
-     * Remove a session
-     * 
-     * @param session Session
-     */
-	public void removeSession(ImsServiceSession session) {
-		if (logger.isActivated()) {
-			logger.debug("Remove session " + session.getSessionID());
-		}
-		sessions.remove(session.getSessionID());
-    }
-
-    /**
-     * Remove a session
-     * 
-     * @param id Session ID
-     */
-	public void removeSession(String id) {
-		if (logger.isActivated()) {
-			logger.debug("Remove session " + id);
-		}
-		sessions.remove(id);
-    }
+	protected Object getImsServiceSessionOperationLock() {
+		return mImsServiceSessionCache;
+	}
 
     /**
      * Is service started
@@ -279,7 +210,15 @@ public abstract class ImsService {
      * Check the IMS service
      */
 	public abstract void check();
-	
+
+	public void abortAllSessions(int imsAbortionReason) {
+		synchronized (getImsServiceSessionOperationLock()) {
+			for (ImsServiceSession session : mImsServiceSessionCache.values()) {
+				session.abortSession(imsAbortionReason);
+			}
+		}
+	}
+
     /**
      * Send an error response to an invitation before to create a service session
      *

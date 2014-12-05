@@ -23,6 +23,7 @@ package com.orangelabs.rcs.core.ims.service.upload;
 
 import java.util.UUID;
 
+import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -146,6 +147,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 								"File icon creation has failed due to that the file is not accessible!",
 								e);
 					}
+					removeSession();
 					listener.handleUploadNotAllowedToSend();
 					return;
 				}
@@ -161,7 +163,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 	    	if (logger.isActivated()) {
 	    		logger.error("File transfer has failed", e);
 	    	}
-	    	
+	    	removeSession();
         	// Unexpected error
 	    	listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
 		}
@@ -203,14 +205,14 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
                 logger.debug("Upload done with success: " + fileInfoDoc.getFileUri().toString());
             }
 
-        	// Notify listener
+            removeSession();
 	    	listener.handleUploadTerminated(fileInfoDoc);
 		} else {
 			// Upload error
             if (logger.isActivated()) {
                 logger.debug("Upload has failed");
             }
-            
+            removeSession();
         	// Notify listener
 	    	listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
 		}
@@ -226,7 +228,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 		uploadManager.interrupt();
 
 		if (fileInfoDoc == null) {
-			// Notify listener
+			removeSession();
 			listener.handleUploadAborted();
 		}
 	}
@@ -263,6 +265,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
          * the lower layers and in the scope of file upload this corresponds to
          * failure since pause/resume does not exist for file upload
          */
+        removeSession();
         listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
     }
     
@@ -293,6 +296,16 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 
 	@Override
 	public void httpTransferNotAllowedToSend() {
+		removeSession();
 		listener.handleUploadNotAllowedToSend();
+	}
+
+	public void startSession() {
+		Core.getInstance().getImService().addSession(this);
+		start();
+	}
+
+	public void removeSession() {
+		Core.getInstance().getImService().removeSession(this);
 	}
 }

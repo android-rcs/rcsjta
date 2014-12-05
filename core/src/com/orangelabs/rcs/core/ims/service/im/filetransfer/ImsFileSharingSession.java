@@ -153,7 +153,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         // Notify listeners
         for(int j=0; j < getListeners().size(); j++) {
@@ -200,7 +200,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 		}
         
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         // Notify listeners
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {

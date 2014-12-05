@@ -35,8 +35,10 @@ import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 import com.gsma.services.rcs.upload.IFileUploadService;
+import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.platform.file.FileDescription;
@@ -63,11 +65,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	private final FileUploadEventBroadcaster mFileUploadEventBroadcaster = new FileUploadEventBroadcaster();
 
 	/**
-	 * Max file upload sessions
-	 */
-	private int maxUploadSessions;
-	
-	/**
 	 * Max file upload size
 	 */
 	private int maxUploadSize;	
@@ -91,7 +88,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		}
 		
 		// Get configuration
-		maxUploadSessions = RcsSettings.getInstance().getMaxFileTransferSessions();
 		maxUploadSize = FileSharingSession.getMaxFileSharingSize();
 	}
 
@@ -161,40 +157,25 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		ServerApiUtils.testCore();
 
 		try {
-			// Test number of sessions
-			if ((maxUploadSessions != 0) && (uploadSessions.size() >= maxUploadSessions)) {
-				if (logger.isActivated()) {
-					logger.debug("The max number of file upload sessions is achieved: cancel the initiation");
-				}
-				throw new ServerApiException("Max file transfer sessions achieved");
-			}
+			InstantMessagingService imService = Core.getInstance().getImService();
+			imService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
-			// Create a file content
 			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
 			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
 
-			// Test max size
-	        if (maxUploadSize > 0 && content.getSize() > maxUploadSize) {
-	            if (logger.isActivated()) {
-	                logger.debug("File exceeds max size: cancel the initiation");
-	            }
-	            throw new ServerApiException("File exceeds max size");
-	        }
+			imService.assertFileSizeNotExceedingMaxLimit(content.getSize(), "File exceeds max size.");
 
-			// Initiate an upload session
 			final FileUploadSession session = new FileUploadSession(content, fileicon);
 
-			// Add session listener
-			FileUploadImpl sessionApi = new FileUploadImpl(session, mFileUploadEventBroadcaster);
+			FileUploadImpl fileUpload = new FileUploadImpl(session, mFileUploadEventBroadcaster);
 
-			// Start the session
-			session.start();
+			session.startSession();
 			
-			// Add session in the list
-			addFileUploadSession(sessionApi);
-			return sessionApi;
+			addFileUploadSession(fileUpload);
+			return fileUpload;
+
 		} catch(Exception e) {
-			// TODO:Handle Security exception in CR026
+			// TODO:Handle Security exception in CR037
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
@@ -216,12 +197,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testCore();
 
-		// Test number of ongoing sessions
-		if ((maxUploadSessions != 0) && (uploadSessions.size() >= maxUploadSessions)) {
-			return false;
-		} else {
-			return true;
-		}
+		return Core.getInstance().getImService().isFileTransferSessionAvailable();
     }
     
     /**

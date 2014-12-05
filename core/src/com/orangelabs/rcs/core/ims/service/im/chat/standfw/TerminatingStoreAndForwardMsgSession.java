@@ -42,11 +42,12 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
@@ -58,7 +59,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession implements MsrpEventListener {
+public class TerminatingStoreAndForwardMsgSession extends OneToOneChatSession implements MsrpEventListener {
 	/**
      * The logger
      */
@@ -160,7 +161,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 							logger.debug("Session has been rejected by user");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
@@ -175,7 +176,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 						// Ringing period timeout
 						send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
@@ -187,7 +188,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 							logger.debug("Session has been rejected by remote");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByRemote();
@@ -251,7 +252,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 	    	String sdp = SdpUtils.buildChatSDP(ipAddress, localMsrpPort, getMsrpMgr().getLocalSocketProtocol(),
-                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(), getDirection());
+                    getAcceptTypes(), getWrappedTypes(), localSetup, getMsrpMgr().getLocalMsrpPath(), getSdpDirection());
 
 	    	// Set the local SDP part in the dialog path
 	        getDialogPath().setLocalContent(sdp);
@@ -359,12 +360,67 @@ public class TerminatingStoreAndForwardMsgSession extends OneOneChatSession impl
 	}
 	
     @Override
-    public String getDirection() {
+    public String getSdpDirection() {
         return SdpUtils.DIRECTION_RECVONLY;
     }
 
 	@Override
 	public boolean isInitiatedByRemote() {
 		return true;
+	}
+
+	@Override
+	public void startSession() {
+		ContactId contact = getRemoteContact();
+		if (logger.isActivated()) {
+			logger.debug("Start OneToOneChatSession with '" + contact + "'");
+		}
+		InstantMessagingService imService = getImsService().getImsModule()
+				.getInstantMessagingService();
+		OneToOneChatSession currentSession = imService.getOneToOneChatSession(contact);
+		if (currentSession != null) {
+			boolean currentSessionInitiatedByRemote = currentSession.isInitiatedByRemote();
+			boolean currentSessionEstablished = currentSession.getDialogPath()
+					.isSessionEstablished();
+			if (!currentSessionEstablished && !currentSessionInitiatedByRemote) {
+				/*
+				 * Rejecting the NEW invitation since there is already a PENDING
+				 * OneToOneChatSession that was locally originated with the same
+				 * contact.
+				 */
+				if (logger.isActivated()) {
+					logger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
+							+ "') with '" + contact + "'");
+				}
+				rejectSession();
+				return;
+			}
+			/*
+			 * If this oneToOne session does NOT already contain another
+			 * oneToOne chat session which in state PENDING and also LOCALLY
+			 * originating we should leave (reject or abort) the CURRENT rcs
+			 * chat session if there is one and replace it with the new one.
+			 */
+			if (logger.isActivated()) {
+				logger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
+						+ getSessionID() + "') with '" + contact + "'");
+			}
+			if (currentSessionInitiatedByRemote) {
+				if (currentSessionEstablished) {
+					currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+				} else {
+					currentSession.rejectSession();
+				}
+			} else {
+				currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+			}
+		}
+		imService.addSession(this);
+		start();
+	}
+
+	@Override
+	public void removeSession() {
+		getImsService().getImsModule().getInstantMessagingService().removeSession(this);
 	}
 }

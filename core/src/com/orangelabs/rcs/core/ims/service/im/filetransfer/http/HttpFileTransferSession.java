@@ -148,7 +148,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                     terminateSession(reason);
 
                     // Remove the current session
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     Collection<ImsSessionListener> listeners = getListeners();
                     for (ImsSessionListener listener : listeners) {
@@ -180,7 +180,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         Collection<ImsSessionListener> listeners = getListeners();
         for (ImsSessionListener listener : listeners) {
@@ -224,7 +224,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         fileTransfered();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         Collection<ImsSessionListener> listeners = getListeners();
         for (ImsSessionListener listener : listeners) {

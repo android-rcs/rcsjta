@@ -151,7 +151,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 							logger.debug("Session has been rejected by user");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByUser();
@@ -165,7 +165,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						// Ringing period timeout
 						send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByTimeout();
@@ -177,7 +177,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 							logger.debug("Session has been rejected by remote");
 						}
 
-						getImsService().removeSession(this);
+						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
 							listener.handleSessionRejectedByRemote();

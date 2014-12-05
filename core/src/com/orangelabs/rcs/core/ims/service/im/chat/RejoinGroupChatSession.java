@@ -180,4 +180,10 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	public boolean isInitiatedByRemote() {
 		return false;
 	}
+
+	@Override
+	public void startSession() {
+		getImsService().getImsModule().getInstantMessagingService().addSession(this);
+		start();
+	}
 }

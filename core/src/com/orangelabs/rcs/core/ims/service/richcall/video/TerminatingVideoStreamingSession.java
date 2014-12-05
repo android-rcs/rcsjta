@@ -104,7 +104,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                         logger.debug("Session has been rejected by user");
                     }
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByUser();
@@ -119,7 +119,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     // Ringing period timeout
                     send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout();
@@ -131,7 +131,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                         logger.debug("Session has been rejected by remote");
                     }
 
-                    getImsService().removeSession(this);
+                    removeSession();
 
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByRemote();
@@ -278,7 +278,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         // Notify listener
         for(int i=0; i < getListeners().size(); i++) {
@@ -396,7 +396,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
             // Remove the current session
-            getImsService().removeSession(session);
+            removeSession();
 
             // Notify listeners
             for(int i=0; i < getListeners().size(); i++) {

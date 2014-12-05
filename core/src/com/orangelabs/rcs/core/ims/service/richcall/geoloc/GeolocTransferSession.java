@@ -138,11 +138,22 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         // Notify listeners
         for(int j=0; j < getListeners().size(); j++) {
             ((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(error));
         }
     }
+
+	@Override
+	public void startSession() {
+		getImsService().getImsModule().getRichcallService().addSession(this);
+		start();
+	}
+
+	@Override
+	public void removeSession() {
+		getImsService().getImsModule().getRichcallService().removeSession(this);
+	}
 }

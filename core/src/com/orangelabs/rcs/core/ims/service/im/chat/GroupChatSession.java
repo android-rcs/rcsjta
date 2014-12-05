@@ -71,7 +71,14 @@ public abstract class GroupChatSession extends ChatSession {
 	 * Conference event subscribe manager
 	 */
 	private ConferenceEventSubscribeManager conferenceSubscriber;
-		
+
+	/**
+	 * Boolean variable indicating that the session is no longer marked as the
+	 * active one for outgoing operations and pending to be removed when it
+	 * times out.
+	 */
+	private boolean mPendingRemoval = false;
+
 	/**
      * The logger
      */
@@ -741,4 +748,45 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 	}
 
+	/**
+	 * Since the session is no longer used it is marked to be removed when
+	 * it times out.
+	 */
+	public void markForPendingRemoval() {
+		mPendingRemoval = true;
+	}
+
+	/**
+	 * Returns true if this session is no longer used and it is pending to be removed
+	 * upon timeout.
+	 */
+	public boolean isPendingForRemoval() {
+		return mPendingRemoval;
+	}
+
+	@Override
+	public void abortSession(int abortedReason) {
+		/*
+		 * If there is an ongoing group chat session with same chatId, this
+		 * session has to be silently aborted so after aborting the session we
+		 * make sure to not call the rest of this method that would otherwise
+		 * abort the "current" session also and the GroupChat as a whole which
+		 * is of course not the intention here
+		 */
+		if (!isPendingForRemoval()) {
+			super.abortSession(abortedReason);
+			return;
+		}
+
+		interruptSession();
+
+		terminateSession(abortedReason);
+
+		closeMediaSession();
+	}
+
+	@Override
+	public void removeSession() {
+			getImsService().getImsModule().getInstantMessagingService().removeSession(this);
+	}
 }

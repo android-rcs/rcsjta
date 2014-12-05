@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service;
-
-import java.util.Enumeration;
 
 import javax2.sip.address.SipURI;
 import javax2.sip.header.ContactHeader;
@@ -207,7 +209,7 @@ public class ImsServiceDispatcher extends Thread {
         }
         
         // Update remote SIP instance ID in the dialog path of the session
-        ImsServiceSession session = searchSession(request.getCallId());
+        ImsServiceSession session = getImsServiceSession(request.getCallId());
         if (session != null) {
             ContactHeader contactHeader = (ContactHeader)request.getHeader(ContactHeader.NAME);
             if (contactHeader != null) {
@@ -606,23 +608,15 @@ public class ImsServiceDispatcher extends Thread {
      * @param callId Call-ID
      * @return IMS session
      */
-    private ImsServiceSession searchSession(String callId) {
-        if (callId == null) {
-            return null;
-        }
-    	ImsService[] list = imsModule.getImsServices();
-    	for(int i=0; i< list.length; i++) {
-    		for(Enumeration<ImsServiceSession> e = list[i].getSessions(); e.hasMoreElements();) {
-	    		ImsServiceSession session = (ImsServiceSession)e.nextElement();
-	    		if (session != null && session.getDialogPath() != null) {
-					if (session.getDialogPath().getCallId().equals(callId)) {
-						return session;
-					}
-				}
-    		}
-    	}    	
-    	return null;
-    }
+	private ImsServiceSession getImsServiceSession(String callId) {
+		for (ImsService service : imsModule.getImsServices()) {
+			ImsServiceSession session = service.getImsServiceSession(callId);
+			if (session != null) {
+				return session;
+			}
+		}
+		return null;
+	}
 
 
     /**

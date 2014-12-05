@@ -22,9 +22,6 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
@@ -55,6 +52,9 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Rich call service has in charge to monitor the GSM call in order to stop the
  * current content sharing when the call terminates, to process capability
@@ -81,7 +81,22 @@ public class RichcallService extends ImsService {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(RichcallService.class.getSimpleName());
+    private final static Logger logger = Logger.getLogger(RichcallService.class.getSimpleName());
+
+	/**
+	 * ImageTransferSessionCache with Session ID as key
+	 */
+	private Map<String, ImageTransferSession> mImageTransferSessionCache = new HashMap<String, ImageTransferSession>();
+
+	/**
+	 * VideoStreamingSessionCache with Session ID as key
+	 */
+	private Map<String, VideoStreamingSession> mVideoStremaingSessionCache = new HashMap<String, VideoStreamingSession>();
+
+	/**
+	 * GeolocTransferSessionCache with Session ID as key
+	 */
+	private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<String, GeolocTransferSession>();
 
     /**
      * Constructor
@@ -143,39 +158,207 @@ public class RichcallService extends ImsService {
 	public void check() {
 	}
 
-    /**
-     * Returns CSh sessions
-     *
-     * @return List of sessions
-     */
-    public Vector<ContentSharingSession> getCShSessions() {
-        Vector<ContentSharingSession> result = new Vector<ContentSharingSession>();
-        Enumeration<ImsServiceSession> list = getSessions();
-        while (list.hasMoreElements()) {
-            ImsServiceSession session = list.nextElement();
-            result.add((ContentSharingSession) session);
-        }
-        return result;
-    }
+	private ImageTransferSession getUnidirectionalImageSharingSession() {
+		if (logger.isActivated()) {
+			logger.debug("Get Unidirection ImageTransferSession ");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mImageTransferSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+		}
+	}
 
-    /**
-     * Returns CSh sessions with a contact
-     *
-     * @param contact Contact identifier
-     * @return List of sessions
-     */
-    public Vector<ContentSharingSession> getCShSessions(ContactId contact) {
-        Vector<ContentSharingSession> result = new Vector<ContentSharingSession>();
-        Enumeration<ImsServiceSession> list = getSessions();
-        while (list.hasMoreElements()) {
-            ImsServiceSession session = list.nextElement();
-			if (contact != null && contact.equals(session.getRemoteContact())) {
-				result.add((ContentSharingSession) session);
+	private boolean isCurrentlyImageSharingUniDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mImageTransferSessionCache.size() >= SharingDirection.UNIDIRECTIONAL;
+		}
+	}
+
+	private boolean isCurrentlyImageSharingBiDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mImageTransferSessionCache.size() >= SharingDirection.BIDIRECTIONAL;
+		}
+	}
+
+	private void assertMaximumImageTransferSize(long size, String errorMessage)
+			throws CoreException {
+		int maxSize = ImageTransferSession.getMaxImageSharingSize();
+		if (maxSize > 0 && size > maxSize) {
+			if (logger.isActivated()) {
+				logger.error(errorMessage);
 			}
-        }
-        return result;
-    }    
-    
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
+			throw new CoreException(errorMessage);
+		}
+	}
+
+	private VideoStreamingSession getUnidirectionalVideoSharingSession() {
+		if (logger.isActivated()) {
+			logger.debug("Get Unidirection VideoStreamingSession ");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mVideoStremaingSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+		}
+	}
+
+	private boolean isCurrentlyVideoSharingUniDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mVideoStremaingSessionCache.size() >= SharingDirection.UNIDIRECTIONAL;
+		}
+	}
+
+	private boolean isCurrentlyVideoSharingBiDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mVideoStremaingSessionCache.size() >= SharingDirection.BIDIRECTIONAL;
+		}
+	}
+
+	private GeolocTransferSession getUnidirectionalGeolocSharingSession() {
+		if (logger.isActivated()) {
+			logger.debug("Get Unidirection GeolocTransferSession ");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGeolocTransferSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+		}
+	}
+
+	private boolean isCurrentlyGeolocSharingUniDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGeolocTransferSessionCache.size() >= SharingDirection.UNIDIRECTIONAL;
+		}
+	}
+
+	private boolean isCurrentlyGeolocSharingBiDirectional() {
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGeolocTransferSessionCache.size() >= SharingDirection.BIDIRECTIONAL;
+		}
+	}
+
+	public void addSession(ImageTransferSession session) {
+		String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add ImageTransferSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mImageTransferSessionCache.put(sessionId, session);
+			addImsServiceSession(session);
+		}
+	}
+
+	public void removeSession(final ImageTransferSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove ImageTransferSession with sessionId '" + sessionId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mImageTransferSessionCache.remove(sessionId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public ImageTransferSession getImageTransferSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Get ImageTransferSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mImageTransferSessionCache.get(sessionId);
+		}
+	}
+
+	public void addSession(VideoStreamingSession session) {
+		String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add VideoStreamingSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mVideoStremaingSessionCache.put(sessionId, session);
+			addImsServiceSession(session);
+		}
+	}
+
+	public void removeSession(final VideoStreamingSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove VideoStreamingSession with sessionId '" + sessionId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mVideoStremaingSessionCache.remove(sessionId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public VideoStreamingSession getVideoStreamingSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Get VideoStreamingSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mVideoStremaingSessionCache.get(sessionId);
+		}
+	}
+
+	public void addSession(GeolocTransferSession session) {
+		String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Add GeolocTransferSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			mGeolocTransferSessionCache.put(sessionId, session);
+			addImsServiceSession(session);
+		}
+	}
+
+	public void removeSession(final GeolocTransferSession session) {
+		final String sessionId = session.getSessionID();
+		if (logger.isActivated()) {
+			logger.debug("Remove GeolocTransferSession with sessionId '" + sessionId + "'");
+		}
+		/*
+		 * Performing remove session operation on a new thread so that ongoing
+		 * threads accessing that session can finish up before it is actually
+		 * removed
+		 */
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (getImsServiceSessionOperationLock()) {
+					mGeolocTransferSessionCache.remove(sessionId);
+					removeImsServiceSession(session);
+				}
+			}
+		}.start();
+	}
+
+	public GeolocTransferSession getGeolocTransferSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug("Get GeolocTransferSession with sessionId '" + sessionId + "'");
+		}
+		synchronized (getImsServiceSessionOperationLock()) {
+			return mGeolocTransferSessionCache.get(sessionId);
+		}
+	}
+
 	/**
      * Is call connected with a given contact
      * 
@@ -212,30 +395,26 @@ public class RichcallService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cancel the initiation");
 			}
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
             throw new CoreException("Call not established");
         }
 
-        // Test max size
-        int maxSize = ImageTransferSession.getMaxImageSharingSize();
-        if (maxSize > 0 && content.getSize() > maxSize) {
-            if (logger.isActivated()) {
-                logger.debug("File exceeds max size: cancel the initiation");
-            }
-            throw new CoreException("File exceeds max size");
-        }
+		assertMaximumImageTransferSize(content.getSize(), "File exceeds max size.");
 
         // Reject if there are already 2 bidirectional sessions with a given contact
 		boolean rejectInvitation = false;
-        Vector<ContentSharingSession> currentSessions = getCShSessions();
-        if (currentSessions.size() >= 2) {
+        if (isCurrentlyImageSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
                 logger.debug("Max sessions reached");
             }
         	rejectInvitation = true;
         } else
-        if (currentSessions.size() == 1) {
-        	ContentSharingSession currentSession = currentSessions.elementAt(0);
+        if (isCurrentlyImageSharingUniDirectional()) {
+			ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
         	if (isSessionOriginating(currentSession)){
         		// Originating session already used
 				if (logger.isActivated()) {
@@ -295,8 +474,7 @@ public class RichcallService extends ImsService {
 			return;
 		}
 
-        Vector<ContentSharingSession> currentSessions = getCShSessions();
-        if (currentSessions.size() >= 2) {
+        if (isCurrentlyImageSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
                 logger.debug("Max sessions reached");
@@ -304,8 +482,8 @@ public class RichcallService extends ImsService {
         	rejectInvitation = true;
         	handleImageSharingInvitationRejected(invite, ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         } else
-        if (currentSessions.size() == 1) {
-        	ContentSharingSession currentSession = currentSessions.elementAt(0);
+        	if (isCurrentlyImageSharingUniDirectional()) {
+        		ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
         	if (isSessionTerminating(currentSession)) {
         		// Terminating session already used
 				if (logger.isActivated()) {
@@ -357,21 +535,24 @@ public class RichcallService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cancel the initiation");
 			}
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
             throw new CoreException("Call not established");
         }
 
         // Reject if there are already 2 bidirectional sessions with a given contact
 		boolean rejectInvitation = false;
-        Vector<ContentSharingSession> currentSessions = getCShSessions();
-        if (currentSessions.size() >= 2) {
+        if (isCurrentlyVideoSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
                 logger.debug("Max sessions reached");
             }
         	rejectInvitation = true;
         } else
-        if (currentSessions.size() == 1) {
-        	ContentSharingSession currentSession = currentSessions.elementAt(0);
+        if (isCurrentlyVideoSharingUniDirectional()) {
+			VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
         	if (isSessionOriginating(currentSession)) {
         		// Originating session already used
 				if (logger.isActivated()) {
@@ -391,6 +572,10 @@ public class RichcallService extends ImsService {
             if (logger.isActivated()) {
                 logger.debug("The max number of sharing sessions is achieved: cancel the initiation");
             }
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
             throw new CoreException("Max content sharing sessions achieved");
         }
 
@@ -435,8 +620,7 @@ public class RichcallService extends ImsService {
 			return;
 		}
 
-        Vector<ContentSharingSession> currentSessions = getCShSessions();
-        if (currentSessions.size() >= 2) {
+        if (isCurrentlyVideoSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
                 logger.debug("Max sessions reached");
@@ -444,8 +628,8 @@ public class RichcallService extends ImsService {
         	rejectInvitation = true;
         	handleVideoSharingInvitationRejected(invite, VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
         } else
-        if (currentSessions.size() == 1) {
-        	ContentSharingSession currentSession = currentSessions.elementAt(0);
+        	if (isCurrentlyVideoSharingUniDirectional()) {
+        		VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
 			if (isSessionTerminating(currentSession)) {
         		// Terminating session already used
 				if (logger.isActivated()) {
@@ -499,6 +683,10 @@ public class RichcallService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cancel the initiation");
 			}
+			/*
+			 * TODO : Proper exception handling will be added here as part of
+			 * the CR037 implementation
+			 */
 			throw new CoreException("Call not established");
 		}
 
@@ -538,8 +726,7 @@ public class RichcallService extends ImsService {
 			return;
 		}
 
-		Vector<ContentSharingSession> currentSessions = getCShSessions();
-		if (currentSessions.size() >= 2) {
+		if (isCurrentlyGeolocSharingBiDirectional()) {
 			// Already a bidirectional session
 			if (logger.isActivated()) {
 				logger.debug("Max sessions reached");
@@ -547,8 +734,8 @@ public class RichcallService extends ImsService {
 			handleGeolocSharingInvitationRejected(invite,
 					GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
 			rejectInvitation = true;
-		} else if (currentSessions.size() == 1) {
-			ContentSharingSession currentSession = currentSessions.elementAt(0);
+		} else if (isCurrentlyGeolocSharingUniDirectional()) {
+    		GeolocTransferSession currentSession = getUnidirectionalGeolocSharingSession();
 			if (isSessionTerminating(currentSession)) {
 				// Terminating session already used
 				if (logger.isActivated()) {
@@ -590,13 +777,7 @@ public class RichcallService extends ImsService {
 		if (logger.isActivated()) {
 			logger.debug("Abort all pending sessions");
 		}
-		for (Enumeration<ImsServiceSession> e = getSessions(); e.hasMoreElements() ;) {
-			ImsServiceSession session = (ImsServiceSession)e.nextElement();
-			if (logger.isActivated()) {
-				logger.debug("Abort pending session " + session.getSessionID());
-			}
-			session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-		}
+		abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
     }
 	
 	/**

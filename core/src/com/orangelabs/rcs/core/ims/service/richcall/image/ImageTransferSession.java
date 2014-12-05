@@ -147,7 +147,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         // Notify listeners
         for(int j=0; j < getListeners().size(); j++) {
@@ -187,5 +187,16 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void startSession() {
+		getImsService().getImsModule().getRichcallService().addSession(this);
+		start();
+	}
+
+	@Override
+	public void removeSession() {
+		getImsService().getImsModule().getRichcallService().removeSession(this);
 	}
 }

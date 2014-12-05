@@ -94,7 +94,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 						logger.debug("Session has been rejected by user");
 					}
 
-					getImsService().removeSession(this);
+					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByUser();
@@ -109,7 +109,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 					// Ringing period timeout
 					send603Decline(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-					getImsService().removeSession(this);
+					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByTimeout();
@@ -121,7 +121,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 						logger.debug("Session has been rejected by remote");
 					}
 
-					getImsService().removeSession(this);
+					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
 						listener.handleSessionRejectedByRemote();
@@ -261,7 +261,7 @@ public class TerminatingIPCallSession extends IPCallSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
         
         // Notify listener
         for(int i=0; i < getListeners().size(); i++) {

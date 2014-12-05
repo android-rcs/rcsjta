@@ -286,8 +286,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 		// Terminate session
 		terminateSession(ImsServiceSession.TERMINATION_BY_USER);
 	   	
-    	// Remove the current session
-    	getImsService().removeSession(this);
+		// Remove the current session
+		removeSession();
     	
     	// Notify listeners
     	for (ImsSessionListener listener : getListeners()) {
@@ -373,7 +373,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 		}
 
 		// Remove the current session
-    	getImsService().removeSession(this);
+		removeSession();
     	
 		// Notify listeners
 		if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {

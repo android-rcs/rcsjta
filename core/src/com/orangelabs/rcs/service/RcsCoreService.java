@@ -59,9 +59,9 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.ImsError;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
-import com.orangelabs.rcs.core.ims.service.im.chat.OneOneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
@@ -634,7 +634,7 @@ public class RcsCoreService extends Service implements CoreListener {
 	}
     
     @Override
-	public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession, OneOneChatSession oneToOneChatSession) {
+	public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession, OneToOneChatSession oneToOneChatSession) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event file transfer invitation");
 		}
@@ -671,7 +671,7 @@ public class RcsCoreService extends Service implements CoreListener {
 	/* (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.CoreListener#handleOneOneChatSessionInvitation(com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession)
 	 */
-	public void handleOneOneChatSessionInvitation(TerminatingOne2OneChatSession session) {
+	public void handleOneOneChatSessionInvitation(TerminatingOneToOneChatSession session) {
 		if (logger.isActivated()) {
 			logger.debug("Handle event receive 1-1 chat session invitation");
 		}

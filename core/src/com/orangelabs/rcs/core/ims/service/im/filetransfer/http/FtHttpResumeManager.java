@@ -137,7 +137,7 @@ public class FtHttpResumeManager {
 					.getImsModule()
 					.getCore()
 					.getListener()
-					.handleIncomingFileTransferResuming(resumeDownload, resumeDownload.isGroup, resumeDownload.getChatSessionID(),
+					.handleIncomingFileTransferResuming(resumeDownload, resumeDownload.isGroupFileTransfer(), resumeDownload.getChatSessionID(),
 							resumeDownload.getContributionID());
 			break;
 		case Direction.OUTGOING:
@@ -260,5 +260,4 @@ public class FtHttpResumeManager {
 	public void terminate() {
 		this.terminate = true;
 	}
-
 }

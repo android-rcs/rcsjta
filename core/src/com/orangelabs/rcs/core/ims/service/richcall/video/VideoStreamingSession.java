@@ -165,7 +165,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         closeMediaSession();
 
         // Remove the current session
-        getImsService().removeSession(this);
+        removeSession();
 
         try {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
@@ -183,4 +183,15 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
                     .handleSharingError(new ContentSharingError(error));
         }
     }
+
+	@Override
+	public void startSession() {
+		getImsService().getImsModule().getRichcallService().addSession(this);
+		start();
+	}
+
+	@Override
+	public void removeSession() {
+		getImsService().getImsModule().getRichcallService().removeSession(this);
+	}
 }

@@ -506,6 +506,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * (int)
 	 */
 	public void handleSessionAborted(int reason) {
+		if (session.isPendingForRemoval()) {
+			/*
+			 * If there is an ongoing group chat session with same chatId, this
+			 * session has to be silently aborted so after aborting the session we
+			 * make sure to not call the rest of this method that would otherwise
+			 * abort the "current" session also and the GroupChat as a whole which
+			 * is of course not the intention here
+			 */
+			if (logger.isActivated()) {
+				logger.info("Session marked pending for removal - aborted(reason " + reason + ")");
+			}
+			return;
+		}
+
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
@@ -526,6 +540,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
 	public void handleSessionTerminatedByRemote() {
+		if (session.isPendingForRemoval()) {
+			/*
+			 * If there is an ongoing group chat session with same chatId, this
+			 * session has to be silently aborted so after aborting the session
+			 * we make sure to not call the rest of this method that would
+			 * otherwise abort the "current" session also and the GroupChat as a
+			 * whole which is of course not the intention here
+			 */
+
+			if (logger.isActivated()) {
+				logger.info("Session marked pending for removal - terminated");
+			}
+			return;
+		}
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
@@ -567,6 +595,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
 	 */
 	public void handleImError(ChatError error) {
+		if (session.isPendingForRemoval()) {
+			/*
+			 * If there is an ongoing group chat session with same chatId, this
+			 * session has to be silently aborted so after aborting the session we
+			 * make sure to not call the rest of this method that would otherwise
+			 * abort the "current" session also and the GroupChat as a whole which
+			 * is of course not the intention here
+			 */
+			if (logger.isActivated()) {
+				logger.info("Session marked pending for removal - Error " + error.getErrorCode());
+			}
+			return;
+		}
+
 		if (logger.isActivated()) {
 			logger.info("IM error " + error.getErrorCode());
 		}
@@ -582,8 +624,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				MessagingLog.getInstance().updateGroupChatStateAndReasonCode(getChatId(), state,
 						reasonCode);
 
-				mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state,
-						reasonCode);
+				mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state, reasonCode);
 			}
 		}
 	}
