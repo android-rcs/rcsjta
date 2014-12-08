@@ -209,6 +209,26 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
     				}
     			};
     			thread.start();
+            } else {
+            	// Active mode: client should connect
+            	// MSRP session without TLS 
+            	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this, null);
+    			session.setFailureReportOption(false);
+    			session.setSuccessReportOption(false);
+    			
+    			// Open the MSRP session
+    			Thread thread = new Thread(){
+    				public void run(){
+    					try {
+    						getMsrpMgr().openMsrpSession();
+						} catch (IOException e) {
+							if (logger.isActivated()) {
+				        		logger.error("Can't create the MSRP server session", e);
+				        	}
+						}		
+    				}
+    			};
+    			thread.start();
             }
 			
 	        // Test if the session should be interrupted
@@ -241,18 +261,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 				// The session is established
 				getDialogPath().sessionEstablished();
 
-        		// Create the MSRP client session
-                if (localSetup.equals("active")) {
-                	// Active mode: client should connect
-                	// MSRP session without TLS 
-                	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this, null);
-        			session.setFailureReportOption(false);
-        			session.setSuccessReportOption(false);
-        			
-        			// Open the MSRP session
-        			getMsrpMgr().openMsrpSession();
-                }
-				
             	// Start session timer
             	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
