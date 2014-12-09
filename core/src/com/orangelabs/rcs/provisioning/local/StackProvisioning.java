@@ -43,6 +43,9 @@ import android.widget.Toast;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 
 /**
  * Stack parameters provisioning File
@@ -56,24 +59,24 @@ public class StackProvisioning extends Activity {
 	public static final String CERTIFICATE_FOLDER_PATH = Environment.getExternalStorageDirectory().getPath();
 
 	/**
-	 * Auto config mode
+	 * Configuration modes
 	 */
-	private static final String[] AUTO_CONFIG = { "None", "HTTPS" };
-
+	private String[] mConfigModes;
+	
 	/**
 	 * SIP protocol
 	 */
 	private static final String[] SIP_PROTOCOL = { "UDP", "TCP", "TLS" };
 
 	/**
-	 * Network access
+	 * Network accesses
 	 */
-	private static final String[] NETWORK_ACCESS = { "All networks", "Mobile only", "Wi-Fi only" };
+	private String[] mNetworkAccesses;
 
 	/**
 	 * FT protocol
 	 */
-	private static final String[] FT_PROTOCOL = { RcsSettingsData.FT_PROTOCOL_HTTP, RcsSettingsData.FT_PROTOCOL_MSRP };
+	private static final String[] FT_PROTOCOL = { RcsSettingsData.FileTransferProtocol.HTTP.name(),  RcsSettingsData.FileTransferProtocol.MSRP.name() };
 
 	private boolean isInFront;
 
@@ -87,6 +90,8 @@ public class StackProvisioning extends Activity {
 		// Set buttons callback
 		Button btn = (Button) findViewById(R.id.save_btn);
 		btn.setOnClickListener(saveBtnListener);
+		mConfigModes = getResources().getStringArray(R.array.provisioning_config_mode);
+		mNetworkAccesses = getResources().getStringArray(R.array.provisioning_network_access);
 		updateView(bundle);
 		isInFront = true;
 	}
@@ -118,10 +123,21 @@ public class StackProvisioning extends Activity {
 	 */
 	private void saveInstanceState(Bundle bundle) {
 		Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
-		if (bundle != null) {
-			bundle.putInt(RcsSettingsData.AUTO_CONFIG_MODE, spinner.getSelectedItemPosition());
-		} else {
-			RcsSettings.getInstance().writeInteger(RcsSettingsData.AUTO_CONFIG_MODE, spinner.getSelectedItemPosition());
+		switch (spinner.getSelectedItemPosition()) {
+		case 0:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.CONFIG_MODE, ConfigurationMode.MANUAL.toInt());
+			} else {
+				RcsSettings.getInstance().setConfigurationMode(ConfigurationMode.MANUAL);
+			}
+			break;
+		case 1:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.CONFIG_MODE, ConfigurationMode.AUTO.toInt());
+			} else {
+				RcsSettings.getInstance().setConfigurationMode(ConfigurationMode.AUTO);
+			}
+			break;
 		}
 
 		spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForMobile);
@@ -175,36 +191,35 @@ public class StackProvisioning extends Activity {
 		}
 
 		spinner = (Spinner) findViewById(R.id.NetworkAccess);
-		int index = spinner.getSelectedItemPosition();
-		switch (index) {
-		case 0:
-			if (bundle != null) {
-				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.ANY_ACCESS);
-			} else {
-				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.ANY_ACCESS);
-			}
-			break;
+		switch (spinner.getSelectedItemPosition()) {
 		case 1:
 			if (bundle != null) {
-				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.MOBILE_ACCESS);
+				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.MOBILE.toInt());
 			} else {
-				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.MOBILE_ACCESS);
+				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.MOBILE);
 			}
 			break;
 		case 2:
 			if (bundle != null) {
-				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.WIFI_ACCESS);
+				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.WIFI.toInt());
 			} else {
-				RcsSettings.getInstance().writeInteger(RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.WIFI_ACCESS);
+				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.WIFI);
 			}
 			break;
+		default:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.ANY.toInt());
+			} else {
+				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.ANY);
+			}
 		}
 
 		spinner = (Spinner) findViewById(R.id.FtProtocol);
 		if (bundle != null) {
 			bundle.putString(RcsSettingsData.FT_PROTOCOL, (String) spinner.getSelectedItem());
 		} else {
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_PROTOCOL, (String) spinner.getSelectedItem());
+			FileTransferProtocol protocol = FileTransferProtocol.valueOf((String) spinner.getSelectedItem());
+			RcsSettings.getInstance().setFtProtocol(protocol);
 		}
 
         spinner = (Spinner)findViewById(R.id.client_vendor);
@@ -260,16 +275,16 @@ public class StackProvisioning extends Activity {
 	private void updateView(Bundle bundle) {
 		// Display stack parameters
 		Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, AUTO_CONFIG);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mConfigModes);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		int mode = 0;
-		if (bundle != null && bundle.containsKey(RcsSettingsData.AUTO_CONFIG_MODE)) {
-			mode = bundle.getInt(RcsSettingsData.AUTO_CONFIG_MODE);
+		ConfigurationMode mode;
+		if (bundle != null && bundle.containsKey(RcsSettingsData.CONFIG_MODE)) {
+			mode = ConfigurationMode.valueOf(bundle.getInt(RcsSettingsData.CONFIG_MODE));
 		} else {
-			mode = RcsSettings.getInstance().getAutoConfigMode();
+			mode = RcsSettings.getInstance().getConfigurationMode();
 		}
-		spinner.setSelection((mode == RcsSettingsData.HTTPS_AUTO_CONFIG) ? 1 : 0);
+		spinner.setSelection(ConfigurationMode.AUTO.equals(mode) ? 1 : 0);
 
         spinner = (Spinner)findViewById(R.id.client_vendor);
         ArrayAdapter<CharSequence> adapterVendor = ArrayAdapter.createFromResource(this,
@@ -295,20 +310,23 @@ public class StackProvisioning extends Activity {
 				bundle);
 
 		spinner = (Spinner) findViewById(R.id.NetworkAccess);
-		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, NETWORK_ACCESS);
+		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mNetworkAccesses);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		int access = 0;
+		NetworkAccessType access;
 		if (bundle != null && bundle.containsKey(RcsSettingsData.NETWORK_ACCESS)) {
-			access = bundle.getInt(RcsSettingsData.NETWORK_ACCESS);
+			access = NetworkAccessType.valueOf(bundle.getInt(RcsSettingsData.NETWORK_ACCESS));
 		} else {
 			access = RcsSettings.getInstance().getNetworkAccess();
 		}
-		if (access == RcsSettingsData.WIFI_ACCESS) {
-			spinner.setSelection(2);
-		} else if (access == RcsSettingsData.MOBILE_ACCESS) {
+		switch (access) {
+		case MOBILE:
 			spinner.setSelection(1);
-		} else {
+			break;
+		case WIFI:
+			spinner.setSelection(2);
+			break;
+		case ANY:
 			spinner.setSelection(0);
 		}
 
@@ -398,13 +416,13 @@ public class StackProvisioning extends Activity {
 		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, FT_PROTOCOL);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		String ftProtocol = null;
+		FileTransferProtocol ftProtocol;
 		if (bundle != null && bundle.containsKey(RcsSettingsData.FT_PROTOCOL)) {
-			ftProtocol = bundle.getString(RcsSettingsData.FT_PROTOCOL);
+			ftProtocol = FileTransferProtocol.valueOf(bundle.getString(RcsSettingsData.FT_PROTOCOL));
 		} else {
 			ftProtocol = RcsSettings.getInstance().getFtProtocol();
 		}
-		if ((ftProtocol != null) && ftProtocol.equalsIgnoreCase(FT_PROTOCOL[0])) {
+		if (FileTransferProtocol.HTTP.equals(ftProtocol)) {
 			spinner.setSelection(0);
 		} else {
 			spinner.setSelection(1);

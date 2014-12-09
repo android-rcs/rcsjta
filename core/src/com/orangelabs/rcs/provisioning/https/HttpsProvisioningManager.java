@@ -72,7 +72,8 @@ import android.text.TextUtils;
 import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.provisioning.ProvisioningFailureReasons;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo.Version;
@@ -707,14 +708,14 @@ public class HttpsProvisioningManager {
 				ProvisioningParser parser = new ProvisioningParser(result.content);
 				
 				// Save GSMA release set into the provider
-				int gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+				GsmaRelease gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
 				// Save client Messaging Mode set into the provider
-				int messagingMode = RcsSettings.getInstance().getMessagingMode();
+				MessagingMode messagingMode = RcsSettings.getInstance().getMessagingMode();
 				
 				// Before parsing the provisioning, the GSMA release is set to Albatros
-				RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_ALBATROS);
+				RcsSettings.getInstance().setGsmaRelease(GsmaRelease.ALBATROS);
 				// Before parsing the provisioning, the client Messaging mode is set to NONE 
-				RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_NONE);
+				RcsSettings.getInstance().setMessagingMode(MessagingMode.NONE);
 				
 				if (parser.parse(gsmaRelease, first)) {
 					// Successfully provisioned, 1st time reg finalized

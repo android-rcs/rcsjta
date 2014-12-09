@@ -23,6 +23,8 @@ import junit.framework.Assert;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceConfiguration;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 
 import android.test.AndroidTestCase;
 
@@ -75,7 +77,7 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 	}
 
 	public void testDefaultMessagingMethod() {
-		int defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
+		DefaultMessagingMethod defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
 		RcsServiceConfiguration.setDefaultMessagingMethod(getContext(),
 				RcsServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC);
 		assertEquals(RcsServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC,
@@ -157,14 +159,15 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 	}
 
 	public void testGetMessaginUX() {
-		int getMessagingUXSav = rcsSettings.getMessagingMode();
-		rcsSettings.setMessagingMode(RcsServiceConfiguration.Settings.MessagingModes.CONVERGED);
-		assertEquals(RcsServiceConfiguration.Settings.MessagingModes.CONVERGED,
+		MessagingMode getMessagingUXSav = rcsSettings.getMessagingMode();
+		rcsSettings.setMessagingMode(MessagingMode.CONVERGED);
+		assertEquals(MessagingMode.CONVERGED.ordinal(),
 				RcsServiceConfiguration.getMessagingUX(getContext()));
-		rcsSettings.setMessagingMode(RcsServiceConfiguration.Settings.MessagingModes.SEAMLESS);
-		assertEquals(RcsServiceConfiguration.Settings.MessagingModes.SEAMLESS,
+		rcsSettings.setMessagingMode(MessagingMode.SEAMLESS);
+		assertEquals(MessagingMode.SEAMLESS.ordinal(),
 				RcsServiceConfiguration.getMessagingUX(getContext()));
 		rcsSettings.setMessagingMode(getMessagingUXSav);
 	}
+
 
 }

@@ -28,7 +28,8 @@ import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
-import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -170,12 +171,12 @@ public class OptionsManager implements DiscoveryManager {
 			// Update capabilities in database
 			if (capabilities.isImSessionSupported()) {
 				// RCS-e contact
-				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.RCS_CAPABLE,
-						ContactInfo.REGISTRATION_STATUS_ONLINE);
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
+						RegistrationState.ONLINE);
 			} else {
 				// Not a RCS-e contact
-				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NOT_RCS,
-						ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.NOT_RCS,
+						RegistrationState.UNKNOWN);
 			}
 
 			// Notify listener

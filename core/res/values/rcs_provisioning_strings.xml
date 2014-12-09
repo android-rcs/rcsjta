@@ -89,7 +89,7 @@
     <string name="Auto_accept_chat_invitation">Auto-accept chat invitation</string>
     <string name="Auto_accept_group_chat_invitation">Auto-accept group chat invitation</string>
     <!-- rcs_provisioning_stack.xml -->
-    <string name="Auto_config_mode">Auto config mode:</string>
+    <string name="config_mode">Configuration mode:</string>
     <string name="Vendor">Vendor:</string>
     <string name="Secondary_provisioning_server">Secondary provisioning server:</string>
     <string name="Use_only_the_secondary_provisioning_server">Use only the secondary provisioning server</string>

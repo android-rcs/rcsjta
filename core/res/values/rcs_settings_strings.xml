@@ -99,4 +99,16 @@
         <item>Only above maximum size</item>
         <item>Ask</item>
     </string-array>
+    
+    <string-array name="provisioning_network_access">
+        <item>All networks</item>
+        <item>Mobile only</item>
+        <item>Wi-Fi only</item>
+    </string-array>
+    
+    <string-array name="provisioning_config_mode">
+        <item>Manual</item>
+        <item>Automatic</item>
+    </string-array>
+    
 </resources>

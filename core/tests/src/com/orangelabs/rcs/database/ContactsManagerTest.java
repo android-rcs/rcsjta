@@ -27,6 +27,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 //import com.gsma.services.rcs.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.presence.FavoriteLink;
 import com.orangelabs.rcs.core.ims.service.presence.Geoloc;
@@ -81,11 +83,11 @@ public class ContactsManagerTest extends AndroidTestCase {
 	public void testSetRcsContact() {
 		// Init ContactInfo
 		ContactInfo info = new ContactInfo();
-		info.setRcsStatus(ContactInfo.RCS_ACTIVE);
+		info.setRcsStatus(RcsStatus.ACTIVE);
 
 		info.setRcsStatusTimestamp(timestamp);
 
-		info.setRegistrationState(ContactInfo.REGISTRATION_STATUS_ONLINE);
+		info.setRegistrationState(RegistrationState.ONLINE);
 
 		// info.setContact(contact);
 		ContactId contactId = contactUtils.formatContact(mNumber);
@@ -184,17 +186,17 @@ public class ContactsManagerTest extends AndroidTestCase {
 			assertEquals(PresenceInfo.ONLINE, getPres.getPresenceStatus());
 			assertEquals(timestamp, getPres.getTimestamp());
 		}
-		assertEquals(ContactInfo.RCS_ACTIVE, getInfo.getRcsStatus());
+		assertEquals(RcsStatus.ACTIVE, getInfo.getRcsStatus());
 		assertEquals(timestamp, getInfo.getRcsStatusTimestamp());
-		assertEquals(ContactInfo.REGISTRATION_STATUS_ONLINE, getInfo.getRegistrationState());
+		assertEquals(RegistrationState.ONLINE, getInfo.getRegistrationState());
 	}
 
 	public void contactoCreate() {
 		ContactInfo info = new ContactInfo();
 		info.setContact(mContact);
-		info.setRcsStatus(ContactInfo.RCS_ACTIVE);
+		info.setRcsStatus(RcsStatus.ACTIVE);
 		info.setRcsStatusTimestamp(timestamp);
-		info.setRegistrationState(ContactInfo.REGISTRATION_STATUS_ONLINE);
+		info.setRegistrationState(RegistrationState.ONLINE);
 
 		Capabilities capa = new Capabilities();
 		capa.setCsVideoSupport(false);
@@ -269,9 +271,9 @@ public class ContactsManagerTest extends AndroidTestCase {
 		PresenceInfo prese = new PresenceInfo();
 		prese.setFavoriteLink(new FavoriteLink("fav_link_name", "http://fav_link_url"));
 		newInfo.setPresenceInfo(prese);
-		newInfo.setRcsStatus(ContactInfo.NOT_RCS);
+		newInfo.setRcsStatus(RcsStatus.NOT_RCS);
 		newInfo.setRcsStatusTimestamp(timestamp);
-		newInfo.setRegistrationState(ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+		newInfo.setRegistrationState(RegistrationState.UNKNOWN);
 		// Set not RCS contact info and test
 		try {
 			cm.setContactInfo(newInfo, oldinfo);
@@ -294,10 +296,10 @@ public class ContactsManagerTest extends AndroidTestCase {
 		 */
 
 		oldinfo = cm.getContactInfo(mContact);
-		newInfo.setRcsStatus(ContactInfo.RCS_ACTIVE);
+		newInfo.setRcsStatus(RcsStatus.ACTIVE);
 		timestamp = 1354874212;
 		newInfo.setRcsStatusTimestamp(timestamp);
-		newInfo.setRegistrationState(ContactInfo.REGISTRATION_STATUS_ONLINE);
+		newInfo.setRegistrationState(RegistrationState.ONLINE);
 		capa.setImSessionSupport(true);
 		capa.setPresenceDiscoverySupport(true);
 		capa.setSocialPresenceSupport(true);

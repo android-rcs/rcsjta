@@ -18,15 +18,7 @@
 
 package com.orangelabs.rcs.core.ims.network;
 
-import com.orangelabs.rcs.core.CoreException;
-import com.orangelabs.rcs.core.ims.ImsModule;
-import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
-import com.orangelabs.rcs.platform.AndroidFactory;
-import com.orangelabs.rcs.platform.network.NetworkFactory;
-import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
-import com.orangelabs.rcs.service.LauncherUtils;
-import com.orangelabs.rcs.utils.logger.Logger;
+import java.util.Random;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -41,7 +33,15 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 
-import java.util.Random;
+import com.orangelabs.rcs.core.CoreException;
+import com.orangelabs.rcs.core.ims.ImsModule;
+import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.orangelabs.rcs.platform.AndroidFactory;
+import com.orangelabs.rcs.platform.network.NetworkFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.orangelabs.rcs.service.LauncherUtils;
+import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * IMS connection manager
@@ -83,7 +83,7 @@ public class ImsConnectionManager implements Runnable {
 	/**
 	 * Network access type
 	 */
-	private int network;
+	private NetworkAccessType network;
 
 	/**
 	 * Operator
@@ -135,7 +135,7 @@ public class ImsConnectionManager implements Runnable {
 		// Set the connectivity manager
 		connectivityMgr = (ConnectivityManager)AndroidFactory.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		
-        // Instanciates the IMS network interfaces
+        // Instantiates the IMS network interfaces
         networkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
         networkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
 
@@ -416,7 +416,7 @@ public class ImsConnectionManager implements Runnable {
 			}
 
 			// Test network access type
-			if ((network != RcsSettingsData.ANY_ACCESS) && (network != networkInfo.getType())) {
+			if (!NetworkAccessType.ANY.equals(network) && (network.toInt() != networkInfo.getType())) {
 				if (logger.isActivated()) {
 					logger.warn("Network access " + networkInfo.getTypeName() + " is not authorized");
 				}

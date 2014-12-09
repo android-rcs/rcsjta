@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax2.sip.ListeningPoint;
 
 import org.w3c.dom.Document;
@@ -29,6 +30,11 @@ import org.w3c.dom.Node;
 
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -101,7 +107,7 @@ public class ProvisioningParser {
 	/**
 	 * Parse the provisioning document
 	 * 
-	 * @param gsmaRelease
+	 * @param release
 	 *            The GSMA release (Albatros, Blackbird, Crane...) before parsing
 	 * @param first
 	 *            True if it is a first provisioning
@@ -112,7 +118,7 @@ public class ProvisioningParser {
 	 *         GSMA release is set to blackbird if SERVICES node is present, otherwise release is unchanged
 	 *         </p>
 	 */
-	public boolean parse(int gsmaRelease, boolean first) {
+	public boolean parse(GsmaRelease release, boolean first) {
         try {
             if (logger.isActivated()) {
                 logger.debug("Start the parsing of content first="+first);
@@ -219,7 +225,7 @@ public class ProvisioningParser {
 				// We received a single node (the version one) !
 				// This is the case if the version number is negative or in order to extend the validity of the provisioning.
 				// In that case we restore the relevant GSMA release saved before parsing.
-				RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
+				RcsSettings.getInstance().setGsmaRelease(release);
             }
             return true;
         } catch (Exception e) {
@@ -510,7 +516,7 @@ public class ProvisioningParser {
 			// Node "SERVICES" is mandatory in GSMA release Blackbird and not present in previous one Albatros.
 			// Only if the parsing result contains a SERVICE tree, Blackbird is assumed as release.
 			// This trick is used to detect the GSMA release as provisioned by the network.
-			RcsSettings.getInstance().setGsmaRelease(RcsSettingsData.VALUE_GSMA_REL_BLACKBIRD);
+			RcsSettings.getInstance().setGsmaRelease(GsmaRelease.BLACKBIRD);
             do {
 
                 if (chatAuth == null) {
@@ -754,12 +760,12 @@ public class ProvisioningParser {
 				if (messagingUX == null) {
 					if ((messagingUX = getValueByParamName("messagingUX", childnode, TYPE_INT)) != null) {
 						if (messagingUX.equals("1")) {
-							RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_INTEGRATED);
+							RcsSettings.getInstance().setMessagingMode(MessagingMode.INTEGRATED);
 						} else {
 							if (ImsServerVersion.JOYN.equals(isJoyn)) {
-								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_CONVERGED);
+								RcsSettings.getInstance().setMessagingMode(MessagingMode.CONVERGED);
 							} else {
-								RcsSettings.getInstance().setMessagingMode(RcsSettingsData.VALUE_MESSAGING_MODE_SEAMLESS);
+								RcsSettings.getInstance().setMessagingMode(MessagingMode.SEAMLESS);
 							}
 						}
 						continue;
@@ -815,9 +821,9 @@ public class ProvisioningParser {
 						// set default IM messaging method if first provisioning
 						if (first) {
 							if (_imCapAlwaysOn) {
-								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_RCS);
+								rcsSettings.setDefaultMessagingMethod(DefaultMessagingMethod.RCS);
 							} else {
-								rcsSettings.setDefaultMessagingMethod(RcsSettingsData.VALUE_DEF_MSG_METHOD_AUTOMATIC);
+								rcsSettings.setDefaultMessagingMethod(DefaultMessagingMethod.AUTOMATIC);
 							}
 						}
 						continue;
@@ -907,7 +913,8 @@ public class ProvisioningParser {
 
                 if (ftDefaultMech == null) {
                     if ((ftDefaultMech = getValueByParamName("ftDefaultMech", childnode, TYPE_TXT)) != null) {
-                        RcsSettings.getInstance().writeParameter(RcsSettingsData.FT_PROTOCOL, ftDefaultMech);
+                    	FileTransferProtocol protocol = FileTransferProtocol.valueOf(ftDefaultMech);
+                        RcsSettings.getInstance().setFtProtocol(protocol);
                         continue;
                     }
                 }
@@ -1540,13 +1547,9 @@ public class ProvisioningParser {
                 if (authType == null) {
                     if ((authType = getValueByParamName("AuthType", childnode, TYPE_TXT)) != null) {
                         if (authType.equals("EarlyIMS")) {
-                            RcsSettings.getInstance().writeParameter(
-                                    RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
-                                    RcsSettingsData.GIBA_AUTHENT);
+                            RcsSettings.getInstance().setImsAuthenticationProcedureForMobile(AuthenticationProcedure.GIBA);
                         } else {
-                            RcsSettings.getInstance().writeParameter(
-                                    RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
-                                    RcsSettingsData.DIGEST_AUTHENT);
+                            RcsSettings.getInstance().setImsAuthenticationProcedureForMobile(AuthenticationProcedure.DIGEST);
                         }
                         continue;
                     }

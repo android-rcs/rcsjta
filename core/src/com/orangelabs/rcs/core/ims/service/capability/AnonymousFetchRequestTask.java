@@ -33,7 +33,8 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceError;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -278,6 +279,6 @@ public class AnonymousFetchRequestTask {
         
 		// We update the database with empty capabilities
     	Capabilities capabilities = new Capabilities();
-    	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+    	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
 	}
 }

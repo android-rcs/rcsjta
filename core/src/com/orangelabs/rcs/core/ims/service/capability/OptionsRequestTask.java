@@ -25,6 +25,8 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -190,15 +192,15 @@ public class OptionsRequestTask implements Runnable {
         }
 
         ContactInfo info = ContactsManager.getInstance().getContactInfo(mContact);
-        if (info.getRcsStatus() == ContactInfo.NO_INFO) {
+        if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
         	// If we do not have already some info on this contact
         	// We update the database with empty capabilities
         	Capabilities capabilities = new Capabilities();
-        	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NO_INFO, ContactInfo.REGISTRATION_STATUS_OFFLINE);
+        	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO, RegistrationState.OFFLINE);
     	} else {
     		// We have some info on this contact
     		// We update the database with its previous infos and set the registration state to offline
-    		ContactsManager.getInstance().setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(), ContactInfo.REGISTRATION_STATUS_OFFLINE);
+    		ContactsManager.getInstance().setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(), RegistrationState.OFFLINE);
     		
         	// Notify listener
         	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, info.getCapabilities());
@@ -218,7 +220,7 @@ public class OptionsRequestTask implements Runnable {
 
         // The contact is not RCS
         Capabilities capabilities = new Capabilities();
-        ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+        ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
         
     	// Notify listener
     	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
@@ -250,13 +252,13 @@ public class OptionsRequestTask implements Runnable {
         	// that included the automata tag defined in [RFC3840]".
     		if (capabilities.isSipAutomata()) {
     			
-    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_OFFLINE);
+    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.OFFLINE);
     		} else {
-    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_ONLINE);
+    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
     		}
     	} else {
     		// The contact is not RCS
-    		ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, ContactInfo.NOT_RCS, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+    		ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
     	}
 
     	// Notify listener

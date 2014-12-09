@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.core.ims.service.capability;
 
 import java.io.ByteArrayInputStream;
-import java.util.Vector;
 
 import org.xml.sax.InputSource;
 
@@ -28,7 +27,9 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
-import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
+import com.orangelabs.rcs.core.ims.service.presence.PresenceInfo;
 import com.orangelabs.rcs.core.ims.service.presence.PresenceUtils;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.orangelabs.rcs.core.ims.service.presence.pidf.PidfParser;
@@ -83,21 +84,24 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * @param notify Received notify
      */
     public void receiveNotification(SipRequest notify) {
-    	if (logger.isActivated()) {
+    	boolean isLogActivated = logger.isActivated();
+    	if (isLogActivated) {
 			logger.debug("Anonymous fetch notification received");
 		}
     	
 		// Parse XML part
 	    byte[] content = notify.getContentBytes();
 	    if (content != null) {
-	    	if (logger.isActivated()) {
+	    	if (isLogActivated) {
 	    		logger.debug("Anonymous fetch notification with PIDF document");
 	    	}
 	    	try {
 		    	InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
 		    	PidfParser pidfParser = new PidfParser(pidfInput);
 		    	PidfDocument presence = pidfParser.getPresence();
-		    	if (presence != null) {
+		    	if (presence == null) {
+		    		return;
+		    	}
 		    		// Extract capabilities
 			    	Capabilities capabilities =  new Capabilities();
 			    	
@@ -105,45 +109,40 @@ public class AnonymousFetchManager implements DiscoveryManager {
 			    	capabilities.setPresenceDiscoverySupport(true);
 			    	
 		    		ContactId contact = ContactUtils.createContactId(presence.getEntity());
-		    		Vector<Tuple> tuples = presence.getTuplesList();
-		    		for(int i=0; i < tuples.size(); i++) {
-		    			Tuple tuple = (Tuple)tuples.elementAt(i);
+		    		for (Tuple tuple : presence.getTuplesList()) {
 		    			boolean state = false; 
-		    			if (tuple.getStatus().getBasic().getValue().equals("open")) {
-		    				state = true;
-		    			}
-		    			String id = tuple.getService().getId();
-		    			if (id.equalsIgnoreCase(PresenceUtils.FEATURE_RCS2_VIDEO_SHARE)) {
-		    				capabilities.setVideoSharingSupport(state);
-		    			} else
-	    				if (id.equalsIgnoreCase(PresenceUtils.FEATURE_RCS2_IMAGE_SHARE)) {
-	    					capabilities.setImageSharingSupport(state);
-	    				} else
-    					if (id.equalsIgnoreCase(PresenceUtils.FEATURE_RCS2_FT)) {
-    						capabilities.setFileTransferSupport(state);
-    					} else
-						if (id.equalsIgnoreCase(PresenceUtils.FEATURE_RCS2_CS_VIDEO)) {
+						if (PresenceInfo.ONLINE.equals(tuple.getStatus().getBasic().getValue())) {
+							state = true;
+						}
+						String id = tuple.getService().getId();
+						if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
+							capabilities.setVideoSharingSupport(state);
+						} else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
+							capabilities.setImageSharingSupport(state);
+						} else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
+							capabilities.setFileTransferSupport(state);
+						} else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
 							capabilities.setCsVideoSupport(state);
-						} else
-						if (id.equalsIgnoreCase(PresenceUtils.FEATURE_RCS2_CHAT)) {
+						} else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
 							capabilities.setImSessionSupport(state);
 						}
-		    		}
+					}
 
-		    		// Update capabilities in database
-		    		ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.RCS_CAPABLE, ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+					// Update capabilities in database
+					ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
+							RegistrationState.UNKNOWN);
 
 		    		// Notify listener
 		    		imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
-		    	}
+		    	
 	    	} catch(Exception e) {
-	    		if (logger.isActivated()) {
+	    		if (isLogActivated) {
 	    			logger.error("Can't parse XML notification", e);
 	    		}
 	    	}    	
 	    } else {
 			try {
-				if (logger.isActivated()) {
+				if (isLogActivated) {
 					logger.debug("Anonymous fetch notification is empty");
 				}
 				ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(notify));
@@ -152,13 +151,13 @@ public class AnonymousFetchManager implements DiscoveryManager {
 				Capabilities capabilities = new Capabilities();
 
 				// Update capabilities in database
-				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, ContactInfo.NO_INFO,
-						ContactInfo.REGISTRATION_STATUS_UNKNOWN);
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.NO_INFO,
+						RegistrationState.UNKNOWN);
 
 				// Notify listener
 				imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
 			} catch (RcsContactFormatException e) {
-				if (logger.isActivated()) {
+				if (isLogActivated) {
 					logger.error("Cannot get contact from notify");
 				}
 			}

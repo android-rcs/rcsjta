@@ -83,7 +83,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpF
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.MimeManager;
@@ -353,7 +353,7 @@ public class InstantMessagingService extends ImsService {
 		Capabilities myCapability = RcsSettings.getInstance().getMyCapabilities();
 		boolean isHttpProtocol = false;
 		if (isFToHttpSupportedByRemote && myCapability.isFileTransferHttpSupported()) {
-			if (RcsSettings.getInstance().getFtProtocol().equals(RcsSettingsData.FT_PROTOCOL_HTTP)) {
+			if (FileTransferProtocol.HTTP.equals(RcsSettings.getInstance().getFtProtocol())) {
 				isHttpProtocol = true;
 			}
 		}

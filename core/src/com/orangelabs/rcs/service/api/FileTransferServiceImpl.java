@@ -34,17 +34,17 @@ import android.os.RemoteException;
 
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.IFileTransferService;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
+import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -56,9 +56,10 @@ import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImageResizeOption;
 import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
-import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
+import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -254,7 +255,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     			rs.isFileTransferAutoAccepted(),
     			rs.isFileTransferAutoAcceptedInRoaming(),
     			rs.getMaxFileTransferSessions()	,
-    			rs.getImageResizeOption());
+    			rs.getImageResizeOption().toInt());
     }    
 
 	/**
@@ -744,7 +745,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 */
 	@Override
 	public void setImageResizeOption(int option) throws RemoteException {
-		RcsSettings.getInstance().setImageResizeOption(option);
+		try {
+			// TODO CR031
+			ImageResizeOption imageResizeOption = ImageResizeOption.valueOf(option);
+			RcsSettings.getInstance().setImageResizeOption(imageResizeOption);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 	/**

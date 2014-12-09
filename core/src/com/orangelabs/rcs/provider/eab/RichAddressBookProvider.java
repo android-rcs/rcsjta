@@ -41,7 +41,7 @@ import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.orangelabs.rcs.utils.DatabaseUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -106,9 +106,9 @@ public class RichAddressBookProvider extends ContentProvider {
             Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
 
     private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            "(" + RichAddressBookData.KEY_RCS_STATUS).append("!=").append(ContactInfo.NO_INFO)
+            "(" + RichAddressBookData.KEY_RCS_STATUS).append("!=").append(RcsStatus.NO_INFO.toInt())
             .append(") AND (").append(RichAddressBookData.KEY_RCS_STATUS).append("!=")
-            .append(ContactInfo.NOT_RCS).append(")").toString();
+            .append(RcsStatus.NOT_RCS.toInt()).append(")").toString();
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 

@@ -59,7 +59,6 @@ public class Provisioning extends TabActivity {
                 .setContent(new Intent(this, LoggerProvisioning.class)));
     }
 	
-	
 	/**
 	 * 
 	 * Set edit text either from bundle or from RCS settings if bundle is null
@@ -74,11 +73,31 @@ public class Provisioning extends TabActivity {
 	 *            the bundle to save parameter
 	 */
 	public static void setEditTextParameter(final Activity activity, int viewID, String rcsSettingsKey, final Bundle bundle) {
+		setEditTextParameter(activity, viewID, rcsSettingsKey, bundle, true);
+	}
+	
+	/**
+	 * 
+	 * Set edit text either from bundle or from RCS settings if bundle is null
+	 * 
+	 * @param activity
+	 *            the activity
+	 * @param viewID
+	 *            the view ID for the text edit
+	 * @param rcsSettingsKey
+	 *            the key of the RCS parameter
+	 * @param bundle
+	 *            the bundle to save parameter
+	 * @param tryReadFromCache
+	 *            try to read parameter from cache
+	 */
+	public static void setEditTextParameter(final Activity activity, int viewID, String rcsSettingsKey, final Bundle bundle,
+			boolean tryReadFromCache) {
 		String parameter = null;
 		if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
 			parameter = bundle.getString(rcsSettingsKey);
 		} else {
-			parameter = RcsSettings.getInstance().readParameter(rcsSettingsKey);
+			parameter = RcsSettings.getInstance().readParameter(rcsSettingsKey, tryReadFromCache);
 		}
 		EditText editText = (EditText) activity.findViewById(viewID);
 		editText.setText(parameter);
@@ -147,11 +166,28 @@ public class Provisioning extends TabActivity {
 	 *            the bundle to save parameter
 	 */
 	public static void saveEditTextParameter(Activity activity, int viewID, String rcsSettingsKey, Bundle bundle) {
+		saveEditTextParameter(activity, viewID, rcsSettingsKey, bundle, true);
+	}
+	
+	/**
+	 * Save string either in bundle or in RCS settings if bundle is null
+	 * 
+	 * @param activity
+	 *            the activity
+	 * @param viewID
+	 *            the view ID
+	 * @param rcsSettingsKey
+	 *            the key of the RCS parameter
+	 * @param bundle
+	 *            the bundle to save parameter
+	 * @param updateCache
+	 */
+	public static void saveEditTextParameter(Activity activity, int viewID, String rcsSettingsKey, Bundle bundle, boolean updateCache) {
 		EditText txt = (EditText) activity.findViewById(viewID);
 		if (bundle != null) {
 			bundle.putString(rcsSettingsKey, txt.getText().toString());
 		} else {
-			RcsSettings.getInstance().writeParameter(rcsSettingsKey, txt.getText().toString());
+			RcsSettings.getInstance().writeParameter(rcsSettingsKey, txt.getText().toString(), updateCache);
 		}
 	}
     

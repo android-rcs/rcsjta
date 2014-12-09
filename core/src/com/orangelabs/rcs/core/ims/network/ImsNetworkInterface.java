@@ -49,7 +49,7 @@ import com.orangelabs.rcs.core.ims.userprofile.SettingsUserProfileInterface;
 import com.orangelabs.rcs.core.ims.userprofile.UserProfile;
 import com.orangelabs.rcs.core.ims.userprofile.UserProfileInterface;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -104,7 +104,7 @@ public abstract class ImsNetworkInterface {
 	/**
 	 * IMS authentication mode associated to the network interface
 	 */
-	protected String imsAuthentMode;
+	protected AuthenticationProcedure imsAuthentMode;
 
     /**
      * IMS proxy protocol
@@ -169,7 +169,7 @@ public abstract class ImsNetworkInterface {
      * @param authentMode IMS authentication mode
      */
 	public ImsNetworkInterface(ImsModule imsModule, int type, NetworkAccess access,
-            String proxyAddr, int proxyPort, String proxyProtocol, String authentMode) {
+            String proxyAddr, int proxyPort, String proxyProtocol, AuthenticationProcedure authentMode) {
 		this.imsModule = imsModule;
 		this.type = type;
 		this.access = access;
@@ -262,7 +262,7 @@ public abstract class ImsNetworkInterface {
      *
      * @return Authentication mode
      */
-	public String getAuthenticationMode() {
+	public AuthenticationProcedure getAuthenticationMode() {
 		return imsAuthentMode;
 	}
 
@@ -279,18 +279,20 @@ public abstract class ImsNetworkInterface {
      * Load the registration procedure associated to the network access
      */
 	public void loadRegistrationProcedure() {
-		if (imsAuthentMode.equals(RcsSettingsData.GIBA_AUTHENT)) {
+		switch (imsAuthentMode) {
+		case GIBA:
 			if (logger.isActivated()) {
 				logger.debug("Load GIBA authentication procedure");
 			}
 			this.registrationProcedure = new GibaRegistrationProcedure();
-		} else
-		if (imsAuthentMode.equals(RcsSettingsData.DIGEST_AUTHENT)) {
+			break;
+		case DIGEST:
 			if (logger.isActivated()) {
 				logger.debug("Load HTTP Digest authentication procedure");
 			}
 			this.registrationProcedure = new HttpDigestRegistrationProcedure();
-        }
+			break;
+		}
 	}
 
 	/**
@@ -300,17 +302,21 @@ public abstract class ImsNetworkInterface {
      */
 	public UserProfile getUserProfile() {
 		UserProfileInterface intf;
-		if (imsAuthentMode.equals(RcsSettingsData.GIBA_AUTHENT)) {
+		switch (imsAuthentMode) {
+		case GIBA:
 			if (logger.isActivated()) {
 				logger.debug("Load user profile derived from IMSI (GIBA)");
 			}
     		intf = new GibaUserProfileInterface();
-    	} else {
+			break;
+		case DIGEST:
+		default:
 			if (logger.isActivated()) {
 				logger.debug("Load user profile from RCS settings database");
 			}
             intf = new SettingsUserProfileInterface();
-    	}
+			break;
+		}
     	return intf.read();
 	}
 

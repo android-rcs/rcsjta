@@ -26,6 +26,7 @@ import android.preference.PreferenceActivity;
 
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImageResizeOption;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -71,7 +72,7 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
         imageResizeOption = (ListPreference) findPreference("image_resize_option");
         imageResizeOption.setPersistent(false);
         imageResizeOption.setOnPreferenceChangeListener(this);
-        imageResizeOption.setValue("" + RcsSettings.getInstance().getImageResizeOption());
+        imageResizeOption.setValue("" + RcsSettings.getInstance().getImageResizeOption().toInt());
                
         ftAutoAccept = (CheckBoxPreference)findPreference("ft_auto_accept");
         ftAutoAccept.setPersistent(false);
@@ -100,8 +101,16 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements Pref
 					rcsSettings.setRespondToDisplayReports((Boolean) objValue);
 				} else {
 					if (preference.getKey().equals("image_resize_option")) {
-						// Set the image resize option
-						rcsSettings.setImageResizeOption(Integer.parseInt((String) objValue));
+						try {
+							ImageResizeOption option = ImageResizeOption.valueOf(Integer.parseInt((String) objValue));
+							// Set the image resize option
+							rcsSettings.setImageResizeOption(option);
+						} catch (Exception e) {
+							if (logger.isActivated()) {
+								logger.warn("Invalid image resize option: "+objValue);
+							}
+						}
+
 					} else {
 						if (preference.getKey().equals("ft_auto_accept")) {
 							Boolean aa = (Boolean) objValue;

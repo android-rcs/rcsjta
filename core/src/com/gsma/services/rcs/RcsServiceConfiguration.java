@@ -166,7 +166,7 @@ public class RcsServiceConfiguration {
 			throw new IllegalArgumentException("Invalid default messaging method");
 		}
 		ContentValues values = new ContentValues();
-		values.put(Settings.VALUE, method);
+		values.put(Settings.VALUE, Integer.toString(method));
 		updateSettings(ctx, values, Settings.DEFAULT_MESSAGING_METHOD);
 	}
 

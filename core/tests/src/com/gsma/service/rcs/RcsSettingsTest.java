@@ -30,6 +30,7 @@ import android.test.AndroidTestCase;
 import com.gsma.services.rcs.RcsServiceConfiguration;
 import com.gsma.services.rcs.RcsServiceConfiguration.Settings;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
 
 public class RcsSettingsTest extends AndroidTestCase {
 	private ContentResolver cr;
@@ -161,14 +162,14 @@ public class RcsSettingsTest extends AndroidTestCase {
 	}
 
 	public void testRcsSessionsUpdateByKey() {
-		int defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
+		DefaultMessagingMethod defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
 		ContentValues values = new ContentValues();
 		values.put(Settings.VALUE, RcsServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS);
 		String where = new StringBuilder(Settings.KEY).append("=?").toString();
 		String[] whereArg = new String[] { Settings.DEFAULT_MESSAGING_METHOD };
 		int row = cr.update(Settings.CONTENT_URI, values, where, whereArg);
 		assertTrue(row == 1);
-		assertTrue(rcsSettings.getDefaultMessagingMethod() == RcsServiceConfiguration.Settings.DefaultMessagingMethods.NON_RCS);
+		assertTrue(DefaultMessagingMethod.NON_RCS.equals(rcsSettings.getDefaultMessagingMethod()));
 		rcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
 	}
 

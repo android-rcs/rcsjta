@@ -28,6 +28,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -107,7 +108,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			return null;
 		}
 		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
-		boolean registered = (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+		boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
 		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName());
 	}
 	
@@ -179,7 +180,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 
 			@Override
 			public boolean inScope(ContactInfo contactInfo) {
-				return (contactInfo.getRegistrationState() == ContactInfo.REGISTRATION_STATUS_ONLINE);
+				return RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
 			}
 		});
 	}
