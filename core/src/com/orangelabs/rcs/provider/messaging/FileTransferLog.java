@@ -297,17 +297,6 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void updateFileTransferChatId(String fileTransferId, String chatId) {
-		if (logger.isActivated()) {
-			logger.debug("updateFileTransferChatId (chatId=" + chatId + ") (fileTransferId=" + fileTransferId + ")");
-		}
-		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_CHAT_ID, chatId);
-		mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
-				null);
-	}
-
-	@Override
 	public void setFileUploadTId(String fileTransferId, String tId) {
 		if (logger.isActivated()) {
 			logger.debug("updateFileUploadTId (tId=" + tId + ") (fileTransferId=" + fileTransferId

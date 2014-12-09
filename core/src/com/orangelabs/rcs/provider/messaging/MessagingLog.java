@@ -360,15 +360,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 		return fileTransferLog.isFileTransfer(fileTransferId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#updateFileTransferChatId(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void updateFileTransferChatId(String fileTransferId, String chatId) {
-		fileTransferLog.updateFileTransferChatId(fileTransferId, chatId);
-	}
 
 	/*
 	 * (non-Javadoc)

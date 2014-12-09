@@ -147,16 +147,6 @@ public interface IFileTransferLog {
 	public boolean isFileTransfer(String fileTransferId);
 
 	/**
-	 * Update file transfer ChatId
-	 * 
-	 * @param fileTransferId
-	 *            File transfer ID
-	 * @param chatId
-	 *            chat Id
-	 */
-	public void updateFileTransferChatId(String fileTransferId, String chatId);
-
-	/**
 	 * Set file upload TID
 	 *
 	 * @param fileTransferId
