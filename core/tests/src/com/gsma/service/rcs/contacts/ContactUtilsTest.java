@@ -30,7 +30,7 @@ public class ContactUtilsTest extends AndroidTestCase {
 
 	private RcsSettings rcsSettings;
 	private ContactUtils contactUtils;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		RcsSettings.createInstance(getContext());
@@ -108,43 +108,48 @@ public class ContactUtilsTest extends AndroidTestCase {
 	public void testFormatContactIdWithInternationalNumbering() {
 		try {
 			ContactId cid = contactUtils.formatContact("+33612345678");
-			assertTrue(cid.toString().equals("+33612345678"));
+			assertEquals("+33612345678", cid.toString());
+			cid = contactUtils.formatContact("+34612345678");
+			assertEquals("+34612345678", cid.toString());
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");
 		}
 	}
-	
+
 	public void testFormatContactIdWithLocalNumbering() {
 		String cac = rcsSettings.getCountryAreaCode();
-		if (TextUtils.isEmpty(cac)) 
+		if (TextUtils.isEmpty(cac))
 			return;
 		String cc = rcsSettings.getCountryCode();
 		try {
-			ContactId cid = contactUtils.formatContact(cac+"612345678");
-			assertTrue(cid.toString().equals(cc+"612345678"));
+			ContactId cid = contactUtils.formatContact(cac + "612345678");
+			assertEquals(cc + "612345678", cid.toString());
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");
 		}
 	}
-	
+
 	public void testFormatContactIdWithLocalNumberingButDifferentCountryAreaCode() {
 		String cac = rcsSettings.getCountryAreaCode();
-		if (TextUtils.isEmpty(cac)) 
+		if (TextUtils.isEmpty(cac))
 			return;
 		try {
 			int cacInteger = Integer.parseInt(cac);
-			contactUtils.formatContact((++cacInteger)+"612345678");
+			contactUtils.formatContact((++cacInteger) + "612345678");
 			fail("RcsContactFormatException expected");
 		} catch (Exception e) {
 			assertTrue(e instanceof RcsContactFormatException);
 		}
 	}
-	
+
 	public void testFormatContactIdWithPrefixedInternationalNumbering() {
 		String cc = rcsSettings.getCountryCode();
 		try {
-			ContactId cid = contactUtils.formatContact("00"+cc.substring(1)+"612345678");
-			assertTrue(cid.toString().equals(cc+"612345678"));
+			ContactId cid = contactUtils.formatContact("00" + cc.substring(1) + "612345678");
+			assertEquals(cc + "612345678", cid.toString());
+			int ccInteger = Integer.parseInt(cc.substring(1)) + 1;
+			cid = contactUtils.formatContact("00" + ccInteger + "612345678");
+			assertEquals("+" + ccInteger + "612345678", cid.toString());
 		} catch (RcsContactFormatException e) {
 			fail("RcsContactFormatException thrown");
 		}

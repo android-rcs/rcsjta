@@ -124,11 +124,6 @@ public class Core {
         // Initialize the phone utils
     	PhoneUtils.initialize(AndroidFactory.getApplicationContext());
 
-    	// Get country code
-        if (logger.isActivated()) {
-            logger.info("My country code is " + PhoneUtils.getCountryCode());
-        }
-
         // Create the address book manager
         addressBookManager = new AddressBookManager();
 

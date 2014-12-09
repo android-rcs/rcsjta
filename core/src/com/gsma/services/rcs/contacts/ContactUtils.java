@@ -38,17 +38,17 @@ public class ContactUtils {
 	/**
 	 * Singleton of ContactUtils
 	 */
-	private static volatile ContactUtils instance = null;
+	private static volatile ContactUtils sInstance;
 
 	/**
 	 * The country code of the device (read from settings provider: is null before first provisioning)
 	 */
-	private String mCountryCode = null;
+	private String mCountryCode;
 
 	/**
 	 * The country area code(read from settings provider)
 	 */
-	private String mCountryAreaCode = null;
+	private String mCountryAreaCode;
 
 	/**
 	 * Regular expression to validate phone numbers
@@ -72,12 +72,22 @@ public class ContactUtils {
 
 	private final static String MSISDN_PREFIX_INTERNATIONAL = "00";
 
-	private String msisdnWithPrefixAndCountryCode;
+	private final static String COUNTRY_CODE_PREFIX = "+";
 
 	/**
 	 * Empty constructor : prevent caller from creating multiple instances
 	 */
 	private ContactUtils() {
+	}
+
+	/**
+	 * Constructor
+	 * @param context
+	 * @param countryCode
+	 */
+	private ContactUtils(Context context, String countryCode) {
+		mCountryCode = countryCode;
+		mCountryAreaCode = RcsServiceConfiguration.getMyCountryAreaCode(context);
 	}
 
 	/**
@@ -88,28 +98,27 @@ public class ContactUtils {
 	 * @return the singleton instance. May be null if country code cannot be read from provider.
 	 */
 	public static ContactUtils getInstance(Context context) {
-		if (instance == null) {
-			synchronized (ContactUtils.class) {
-				if (instance == null) {
-					if (context == null) {
-						throw new IllegalArgumentException("Context is null");
-					}
-					String countryCode = RcsServiceConfiguration.getMyCountryCode(context);
-					if (countryCode != null) {
-						// Check for Country Code validity
-						Matcher matcher = PATTERN_COUNTRY_CODE.matcher(countryCode);
-						if (matcher.find()) {
-							instance = new ContactUtils();
-							instance.mCountryCode = countryCode;
-							instance.mCountryAreaCode = RcsServiceConfiguration.getMyCountryAreaCode(context);
-							instance.msisdnWithPrefixAndCountryCode = new StringBuilder(MSISDN_PREFIX_INTERNATIONAL).append(
-									countryCode.substring(1)).toString();
-						}
+		if (sInstance != null) {
+			return sInstance;
+			
+		}
+		synchronized (ContactUtils.class) {
+			if (sInstance == null) {
+				if (context == null) {
+					throw new IllegalArgumentException("Context is null");
+					
+				}
+				String countryCode = RcsServiceConfiguration.getMyCountryCode(context);
+				if (countryCode != null) {
+					// Check for Country Code validity
+					Matcher matcher = PATTERN_COUNTRY_CODE.matcher(countryCode);
+					if (matcher.find()) {
+						sInstance = new ContactUtils(context, countryCode);
 					}
 				}
 			}
 		}
-		return instance;
+		return sInstance;
 	}
 
 	/**
@@ -122,11 +131,13 @@ public class ContactUtils {
 	private String stripSeparators(String contact) {
 		if (TextUtils.isEmpty(contact)) {
 			return null;
+			
 		}
 		contact = contact.replaceAll("[ -]", "");
 		Matcher matcher = PATTERN_CONTACT.matcher(contact);
 		if (matcher.find()) {
 			return matcher.group();
+			
 		}
 		return null;
 	}
@@ -136,14 +147,14 @@ public class ContactUtils {
 	 * 
 	 * @param contact
 	 *            the contact number
-	 * @return Returns true if the given ContactId have the syntax of valid Rcs ContactId.
+	 * @return Returns true if the given ContactId have the syntax of valid RCS ContactId.
 	 */
 	public boolean isValidContact(String contact) {
 		return (!TextUtils.isEmpty(stripSeparators(contact)));
 	}
 
 	/**
-	 * Formats the given contact to uniquely represent a Rcs contact phone number.
+	 * Formats the given contact to uniquely represent a RCS contact phone number.
 	 * <p>
 	 * May throw a RcsContactFormatException exception if the string contact parameter is not enabled to produce a valid ContactId.
 	 * 
@@ -155,14 +166,14 @@ public class ContactUtils {
 		contact = stripSeparators(contact);
 		if (!TextUtils.isEmpty(contact)) {
 			// Is Country Code provided ?
-			if (contact.charAt(0) != '+') {
+			if (!contact.startsWith(COUNTRY_CODE_PREFIX)) {
 				// CC not provided, does it exists in provider ?
 				if (mCountryCode == null) {
 					throw new RcsContactFormatException("Country code is unknown");
 				}
 				// International numbering with prefix ?
-				if (contact.startsWith(msisdnWithPrefixAndCountryCode)) {
-					contact = new StringBuilder(mCountryCode).append(contact.substring(msisdnWithPrefixAndCountryCode.length()))
+				if (contact.startsWith(MSISDN_PREFIX_INTERNATIONAL)) {
+					contact = new StringBuilder(COUNTRY_CODE_PREFIX).append(contact, MSISDN_PREFIX_INTERNATIONAL.length(), contact.length())
 							.toString();
 				} else {
 					// Local numbering ?
@@ -170,7 +181,8 @@ public class ContactUtils {
 						// Local number must start with Country Area Code
 						if (contact.startsWith(mCountryAreaCode)) {
 							// Remove Country Area Code and add Country Code
-							contact = new StringBuilder(mCountryCode).append(contact.substring(mCountryAreaCode.length())).toString();
+							contact = new StringBuilder(mCountryCode).append(contact, mCountryAreaCode.length(), contact.length())
+									.toString();
 						} else {
 							throw new RcsContactFormatException("Local phone number should be prefixed with Country Area Code");
 						}
@@ -181,6 +193,7 @@ public class ContactUtils {
 				}
 			}
 			return new ContactId(contact);
+			
 		}
 		throw new RcsContactFormatException("Input parameter is null or empty");
 	}
