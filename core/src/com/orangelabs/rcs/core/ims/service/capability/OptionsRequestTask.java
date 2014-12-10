@@ -190,17 +190,17 @@ public class OptionsRequestTask implements Runnable {
         if (logger.isActivated()) {
             logger.info("User " + mContact + " is not registered");
         }
-
-        ContactInfo info = ContactsManager.getInstance().getContactInfo(mContact);
+        ContactsManager contactManager = ContactsManager.getInstance();
+        ContactInfo info = contactManager.getContactInfo(mContact);
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
         	// If we do not have already some info on this contact
         	// We update the database with empty capabilities
         	Capabilities capabilities = new Capabilities();
-        	ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO, RegistrationState.OFFLINE);
+        	contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO, RegistrationState.OFFLINE);
     	} else {
     		// We have some info on this contact
     		// We update the database with its previous infos and set the registration state to offline
-    		ContactsManager.getInstance().setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(), RegistrationState.OFFLINE);
+    		contactManager.setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(), RegistrationState.OFFLINE);
     		
         	// Notify listener
         	imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, info.getCapabilities());
@@ -242,7 +242,8 @@ public class OptionsRequestTask implements Runnable {
     	Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
     	// Update capability time of last refresh
-    	ContactsManager.getInstance().updateCapabilitiesTimeLastRefresh(mContact);
+    	ContactsManager contactManager = ContactsManager.getInstance();
+    	contactManager.updateCapabilitiesTimeLastRefresh(mContact);
     	
     	// Update the database capabilities
     	if (capabilities.isImSessionSupported()) {
@@ -251,14 +252,13 @@ public class OptionsRequestTask implements Runnable {
     		// Note RCS5.1 chapter 2.7.1.1: "a user shall be considered as unregistered when ... a response 
         	// that included the automata tag defined in [RFC3840]".
     		if (capabilities.isSipAutomata()) {
-    			
-    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.OFFLINE);
+    			contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.OFFLINE);
     		} else {
-    			ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+    			contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
     		}
     	} else {
     		// The contact is not RCS
-    		ContactsManager.getInstance().setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+    		contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
     	}
 
     	// Notify listener
