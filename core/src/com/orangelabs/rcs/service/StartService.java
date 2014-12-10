@@ -22,11 +22,6 @@
 
 package com.orangelabs.rcs.service;
 
-import java.io.IOException;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.accounts.Account;
 import android.app.Activity;
 import android.app.Service;
@@ -36,11 +31,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.XmlResourceParser;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
-import android.telephony.TelephonyManager;
 
 import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.R;
@@ -234,72 +227,6 @@ public class StartService extends Service {
         }
     }
 
-    /**
-     * Set the country code
-     * 
-     * @return Boolean
-     */
-    private boolean setCountryCode() {
-        // Get country code 
-        TelephonyManager mgr = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCodeIso = mgr.getSimCountryIso();
-        if (countryCodeIso == null) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't read country code from SIM");
-        	}
-            return false;
-        }
-
-        // Parse country table to resolve the area code and country code
-        try {
-            XmlResourceParser parser = getResources().getXml(R.xml.country_table);
-            parser.next();
-            int eventType = parser.getEventType();
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG) {
-                    if (parser.getName().equals("Data")) {
-                        if (parser.getAttributeValue(null, "code").equalsIgnoreCase(countryCodeIso)) {
-                        	String countryCode = parser.getAttributeValue(null, "cc");
-                        	String areaCode = parser.getAttributeValue(null, "tc");
-                            if (countryCode != null) {
-                                if (!countryCode.startsWith("+")) {
-                                    countryCode = "+" + countryCode;
-                                }
-                                if (logger.isActivated()) {
-                                    logger.info("Set country code to " + countryCode);
-                                }
-                                RcsSettings.getInstance().setCountryCode(countryCode);
-
-                                if (logger.isActivated()) {
-                                    logger.info("Set area code to " + areaCode);
-                                }
-                                RcsSettings.getInstance().setCountryAreaCode(areaCode);
-                                
-                                return true;
-                            }
-                        }
-                    }
-                }
-                eventType = parser.next();
-            }
-
-            if (logger.isActivated()) {
-        		logger.error("Country code not found");
-        	}
-        	return false;
-        } catch (XmlPullParserException e) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't parse country code from XML file", e);
-        	}
-        	return false;
-        } catch (IOException e) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't read country code from XML file", e);
-        	}
-        	return false;
-        }
-    }
-
 	private void broadcastServiceProvisioned() {
 		Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONED);
 		IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
@@ -336,13 +263,6 @@ public class StartService extends Service {
 
         // On the first launch and if SIM card has changed
         if (isFirstLaunch()) {
-            // Set the country code
-            boolean result = setCountryCode();
-            if (!result) {
-            	// Can't set the country code
-            	return false;
-            }
-
             // Set new user flag
             setNewUserAccount(true);
         } else
@@ -357,13 +277,6 @@ public class StartService extends Service {
         		BackupRestoreDb.backupAccount(lastUserAccount);
         	}
         	
-            // Set the country code
-            boolean result = setCountryCode();
-            if (!result) {
-            	// Can't set the country code
-            	return false;
-            }
-
             // Reset RCS account 
             LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver);
 

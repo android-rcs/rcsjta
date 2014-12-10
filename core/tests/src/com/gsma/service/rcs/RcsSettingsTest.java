@@ -80,7 +80,7 @@ public class RcsSettingsTest extends AndroidTestCase {
 		Cursor c = null;
 		try {
 			String where = new StringBuilder(RcsServiceConfiguration.Settings.KEY).append("=?").toString();
-			String[] whereArgs = new String[] { RcsServiceConfiguration.Settings.MY_COUNTRY_CODE };
+			String[] whereArgs = new String[] { RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY };
 			c = cr.query(RcsServiceConfiguration.Settings.CONTENT_URI, null, where, whereArgs, null);
 			// Check projection
 			String[] columnNames = c.getColumnNames();
@@ -100,12 +100,12 @@ public class RcsSettingsTest extends AndroidTestCase {
 		Cursor c = null;
 		try {
 			String where = new StringBuilder(RcsServiceConfiguration.Settings.KEY).append("=?").toString();
-			String[] whereArgs = new String[] { RcsServiceConfiguration.Settings.MY_COUNTRY_CODE };
+			String[] whereArgs = new String[] { RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY };
 			c = cr.query(RcsServiceConfiguration.Settings.CONTENT_URI, null, where, whereArgs, null);
 			assertTrue(c.getCount() == 1);
 			if (c.moveToFirst()) {
 				String key = c.getString(c.getColumnIndexOrThrow(RcsServiceConfiguration.Settings.KEY));
-				assertTrue(key.equals(RcsServiceConfiguration.Settings.MY_COUNTRY_CODE));
+				assertTrue(key.equals(RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY));
 			} else {
 				fail("Cannot find ID");
 			}
@@ -122,12 +122,12 @@ public class RcsSettingsTest extends AndroidTestCase {
 		Cursor c = null;
 		try {
 			String where = new StringBuilder(RcsServiceConfiguration.Settings.KEY).append("= '")
-					.append(RcsServiceConfiguration.Settings.MY_COUNTRY_CODE).append("'").toString();
+					.append(RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY).append("'").toString();
 			c = cr.query(RcsServiceConfiguration.Settings.CONTENT_URI, null, where, null, null);
 			assertTrue(c.getCount() == 1);
 			if (c.moveToFirst()) {
 				String key = c.getString(c.getColumnIndexOrThrow(RcsServiceConfiguration.Settings.KEY));
-				assertTrue(key.equals(RcsServiceConfiguration.Settings.MY_COUNTRY_CODE));
+				assertTrue(key.equals(RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY));
 			} else {
 				fail("Cannot find ID");
 			}
@@ -143,12 +143,12 @@ public class RcsSettingsTest extends AndroidTestCase {
 	public void testRcsSettingsQueryByKeyTer() {
 		Cursor c = null;
 		try {
-			Uri uri = Uri.withAppendedPath(RcsServiceConfiguration.Settings.CONTENT_URI, RcsServiceConfiguration.Settings.MY_COUNTRY_CODE);
+			Uri uri = Uri.withAppendedPath(RcsServiceConfiguration.Settings.CONTENT_URI, RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY);
 			c = cr.query(uri, null, null, null, null);
 			assertTrue(c.getCount() == 1);
 			if (c.moveToFirst()) {
 				String key = c.getString(c.getColumnIndexOrThrow(RcsServiceConfiguration.Settings.KEY));
-				assertTrue(key.equals(RcsServiceConfiguration.Settings.MY_COUNTRY_CODE));
+				assertTrue(key.equals(RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY));
 			} else {
 				fail("Cannot find ID");
 			}

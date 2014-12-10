@@ -1054,44 +1054,6 @@ public class RcsSettings {
 	}
 
 	/**
-	 * Get country code
-	 *
-	 * @return Country code
-	 */
-	public String getCountryCode() {
-		return readString(RcsSettingsData.COUNTRY_CODE, RcsSettingsData.DEFAULT_COUNTRY_CODE);
-	}
-
-	/**
-	 * Set country code
-	 *
-	 * @param code
-	 *            Country code
-	 */
-	public void setCountryCode(String code) {
-		writeParameter(RcsSettingsData.COUNTRY_CODE, code);
-	}
-
-	/**
-	 * Get country area code
-	 *
-	 * @return Area code
-	 */
-	public String getCountryAreaCode() {
-		return readString(RcsSettingsData.COUNTRY_AREA_CODE, RcsSettingsData.DEFAULT_COUNTRY_AREA_CODE);
-	}
-
-	/**
-	 * Set country area code
-	 *
-	 * @param code
-	 *            Area code
-	 */
-	public void setCountryAreaCode(String code) {
-		writeParameter(RcsSettingsData.COUNTRY_AREA_CODE, code);
-	}
-
-	/**
 	 * Get my capabilities
 	 *
 	 * @return capability

@@ -74,8 +74,6 @@ public class RcsSettingsProvider extends ContentProvider {
             .append("','").append(RcsSettingsData.USERPROFILE_IMS_USERNAME).append("','")
             .append(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME).append("','")
             .append(RcsSettingsData.CONFIGURATION_VALID).append("','")
-            .append(RcsSettingsData.COUNTRY_CODE).append("','")
-            .append(RcsSettingsData.COUNTRY_AREA_CODE).append("','")
             .append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
 
     /**
@@ -113,7 +111,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 104;
+        private static final int DATABASE_VERSION = 105;
 
         private Context mContext;
 
@@ -201,8 +199,6 @@ public class RcsSettingsProvider extends ContentProvider {
 			addParameter(db, RcsSettingsData.FT_PROTOCOL, RcsSettingsData.DEFAULT_FT_PROTOCOL);
 			addParameter(db, RcsSettingsData.IM_CONF_URI, RcsSettingsData.DEFAULT_IM_CONF_URI);
 			addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI, RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI);
-			addParameter(db, RcsSettingsData.COUNTRY_CODE, RcsSettingsData.DEFAULT_COUNTRY_CODE);
-			addParameter(db, RcsSettingsData.COUNTRY_AREA_CODE, RcsSettingsData.DEFAULT_COUNTRY_AREA_CODE);
 			addParameter(db, RcsSettingsData.MSISDN, RcsSettingsData.DEFAULT_MSISDN);
 			addParameter(db, RcsSettingsData.CAPABILITY_CS_VIDEO, RcsSettingsData.DEFAULT_CAPABILITY_CS_VIDEO.toString());
 			addParameter(db, RcsSettingsData.CAPABILITY_IMAGE_SHARING, RcsSettingsData.DEFAULT_CAPABILITY_ISH.toString());

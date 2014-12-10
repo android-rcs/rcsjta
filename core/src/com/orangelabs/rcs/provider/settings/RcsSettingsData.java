@@ -673,18 +673,6 @@ public class RcsSettingsData {
 	/* package private */static final String DEFAULT_ENDUSER_CONFIRMATION_URI = "";
 
 	/**
-	 * Country code
-	 */
-	public static final String COUNTRY_CODE = RcsServiceConfiguration.Settings.MY_COUNTRY_CODE;
-	/* package private */static final String DEFAULT_COUNTRY_CODE = "+33";
-
-	/**
-	 * Country area code
-	 */
-	public static final String COUNTRY_AREA_CODE = RcsServiceConfiguration.Settings.MY_COUNTRY_AREA_CODE;
-	/* package private */static final String DEFAULT_COUNTRY_AREA_CODE = "0";
-
-	/**
 	 * Msisdn
 	 */
 	public static final String MSISDN = "MSISDN";

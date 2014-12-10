@@ -157,8 +157,6 @@ public class ProfileProvisioning extends Activity {
 		setEditTextParameter(this, R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, bundle);
 		setEditTextParameter(this, R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, bundle);
 		setEditTextParameter(this, R.id.RcsApn, RcsSettingsData.RCS_APN, bundle);
-		setEditTextParameter(this, R.id.CountryCode, RcsSettingsData.COUNTRY_CODE, bundle);
-		setEditTextParameter(this, R.id.CountryAreaCode, RcsSettingsData.COUNTRY_AREA_CODE, bundle);
 
 		setCheckBoxParameter(this, R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, bundle);
 		setCheckBoxParameter(this, R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, bundle);
@@ -236,8 +234,6 @@ public class ProfileProvisioning extends Activity {
 		saveEditTextParameter(this, R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, bundle);
 		saveEditTextParameter(this, R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, bundle);
 		saveEditTextParameter(this, R.id.RcsApn, RcsSettingsData.RCS_APN, bundle);
-		saveEditTextParameter(this, R.id.CountryCode, RcsSettingsData.COUNTRY_CODE, bundle);
-		saveEditTextParameter(this, R.id.CountryAreaCode, RcsSettingsData.COUNTRY_AREA_CODE, bundle);
 
 		// Save capabilities
 		saveCheckBoxParameter(this, R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, bundle);

@@ -41,8 +41,6 @@
     <string name="IM_conference_URI">IM conference URI:</string>
     <string name="End_user_confirmation_URI">End user confirmation URI:</string>
     <string name="APN">APN:</string>
-    <string name="Country_code">Country code:</string>
-    <string name="Country_area_code">Country area code:</string>
     <string name="Capabilities">Capabilities:</string>
     <string name="Image_sharing">Image sharing</string>
     <string name="Video_sharing">Video sharing</string>

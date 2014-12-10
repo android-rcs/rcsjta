@@ -89,26 +89,6 @@ public class RcsServiceConfiguration {
 	}
 
 	/**
-	 * Returns the user country code.
-	 * 
-	 * @param ctx the context
-	 * @return the country code or null if not provisioned
-	 */
-	public static String getMyCountryCode(Context ctx) {
-		return getStringValueSetting(ctx, Settings.MY_COUNTRY_CODE);
-	}
-
-	/**
-	 * Returns the user country area code.
-	 * 
-	 * @param ctx the context
-	 * @return the country area code or null if not provisioned
-	 */
-	public static String getMyCountryAreaCode(Context ctx) {
-		return getStringValueSetting(ctx, Settings.MY_COUNTRY_AREA_CODE);
-	}
-
-	/**
 	 * Returns the user contact Identifier (i.e. username part of the IMPU).
 	 * 
 	 * @param ctx the context
@@ -242,16 +222,6 @@ public class RcsServiceConfiguration {
 		 * Key to get MyContactId setting
 		 */
 		public static final String MY_CONTACT_ID = "MyContactId";
-
-		/**
-		 * Key to get MyCountryCode setting
-		 */
-		public static final String MY_COUNTRY_CODE = "MyCountryCode";
-
-		/**
-		 * Key to get MyCountryAreaCode setting
-		 */
-		public static final String MY_COUNTRY_AREA_CODE = "CountryAreaCode";
 
 		/**
 		 * Key to get MessagingMode setting

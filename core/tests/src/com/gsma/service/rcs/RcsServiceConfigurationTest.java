@@ -22,21 +22,28 @@ import junit.framework.Assert;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceConfiguration;
+import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 
+import android.content.Context;
 import android.test.AndroidTestCase;
 
 public class RcsServiceConfigurationTest extends AndroidTestCase {
 
-	private RcsSettings rcsSettings;
+	private RcsSettings mRcsSettings;
+	private ContactUtils mContactUtils;
+	private Context mContext;
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		RcsSettings.createInstance(getContext());
-		rcsSettings = RcsSettings.getInstance();
-		assertNotNull("Cannot instantiate RcsSettings", rcsSettings);
+		mContext = getContext();
+		RcsSettings.createInstance(mContext);
+		mRcsSettings = RcsSettings.getInstance();
+		assertNotNull("Cannot instantiate RcsSettings", mRcsSettings);
+		mContactUtils = ContactUtils.getInstance(mContext);
+		assertNotNull("Cannot instantiate ContactUtils", mContactUtils);
 	}
 
 	protected void tearDown() throws Exception {
@@ -45,7 +52,7 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 
 	public void testSetMyDisplayNameNull() {
 		try {
-			RcsServiceConfiguration.setMyDisplayName(getContext(), null);
+			RcsServiceConfiguration.setMyDisplayName(mContext, null);
 			Assert.fail("Expecting exception but none was thrown.");
 		} catch (Exception e) {
 			if (e instanceof IllegalArgumentException == false) {
@@ -55,43 +62,43 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 	}
 
 	public void testSetMyDisplayName() {
-		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		RcsServiceConfiguration.setMyDisplayName(getContext(), "mydisplayname");
-		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(getContext()), "mydisplayname");
-		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
+		String displayNameSav = mRcsSettings.getUserProfileImsDisplayName();
+		RcsServiceConfiguration.setMyDisplayName(mContext, "mydisplayname");
+		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(mContext), "mydisplayname");
+		mRcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testSsetMyDisplayNameWithBlank() {
-		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		RcsServiceConfiguration.setMyDisplayName(getContext(), "my display name");
-		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(getContext()),
+		String displayNameSav = mRcsSettings.getUserProfileImsDisplayName();
+		RcsServiceConfiguration.setMyDisplayName(mContext, "my display name");
+		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(mContext),
 				"my display name");
-		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
+		mRcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testSetMyDisplayNameEmpty() {
-		String displayNameSav = rcsSettings.getUserProfileImsDisplayName();
-		RcsServiceConfiguration.setMyDisplayName(getContext(), "");
-		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(getContext()), "");
-		rcsSettings.setUserProfileImsDisplayName(displayNameSav);
+		String displayNameSav = mRcsSettings.getUserProfileImsDisplayName();
+		RcsServiceConfiguration.setMyDisplayName(mContext, "");
+		Assert.assertEquals(RcsServiceConfiguration.getMyDisplayName(mContext), "");
+		mRcsSettings.setUserProfileImsDisplayName(displayNameSav);
 	}
 
 	public void testDefaultMessagingMethod() {
-		DefaultMessagingMethod defaultMessaginMethod = rcsSettings.getDefaultMessagingMethod();
-		RcsServiceConfiguration.setDefaultMessagingMethod(getContext(),
+		DefaultMessagingMethod defaultMessaginMethod = mRcsSettings.getDefaultMessagingMethod();
+		RcsServiceConfiguration.setDefaultMessagingMethod(mContext,
 				RcsServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC);
 		assertEquals(RcsServiceConfiguration.Settings.DefaultMessagingMethods.AUTOMATIC,
-				RcsServiceConfiguration.getDefaultMessagingMethod(getContext()));
-		RcsServiceConfiguration.setDefaultMessagingMethod(getContext(),
+				RcsServiceConfiguration.getDefaultMessagingMethod(mContext));
+		RcsServiceConfiguration.setDefaultMessagingMethod(mContext,
 				RcsServiceConfiguration.Settings.DefaultMessagingMethods.RCS);
 		assertEquals(RcsServiceConfiguration.Settings.DefaultMessagingMethods.RCS,
-				RcsServiceConfiguration.getDefaultMessagingMethod(getContext()));
-		rcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
+				RcsServiceConfiguration.getDefaultMessagingMethod(mContext));
+		mRcsSettings.setDefaultMessagingMethod(defaultMessaginMethod);
 	}
 
 	public void testSetDefaultMessagingInvalidArgument() {
 		try {
-			RcsServiceConfiguration.setDefaultMessagingMethod(getContext(), 4);
+			RcsServiceConfiguration.setDefaultMessagingMethod(mContext, 4);
 		} catch (Exception e) {
 			if (e instanceof IllegalArgumentException == false) {
 				Assert.fail("Exception thrown was unexpected.");
@@ -99,74 +106,64 @@ public class RcsServiceConfigurationTest extends AndroidTestCase {
 		}
 	}
 
-	public void testGetMyCountryCode() {
-		String countryCode = rcsSettings.getCountryCode();
-		assertEquals(countryCode, RcsServiceConfiguration.getMyCountryCode(getContext()));
-	}
-
-	public void testGetMyCountryAreaCode() {
-		String countryAreaCode = rcsSettings.getCountryAreaCode();
-		assertEquals(countryAreaCode, RcsServiceConfiguration.getMyCountryAreaCode(getContext()));
-	}
-
 	public void testGetMyContactId() {
-		String contactIdSav = rcsSettings.getUserProfileImsUserName();
-		rcsSettings.setUserProfileImsUserName("+33123456789");
+		String contactIdSav = mRcsSettings.getUserProfileImsUserName();
+		mRcsSettings.setUserProfileImsUserName("+33123456789");
 		try {
-			assertEquals("+33123456789", RcsServiceConfiguration.getMyContactId(getContext())
+			assertEquals("+33123456789", RcsServiceConfiguration.getMyContactId(mContext)
 					.toString());
 		} catch (RcsContactFormatException e) {
 			fail("Failed to getMyContactId");
 		}
-		rcsSettings.setUserProfileImsUserName(contactIdSav);
+		mRcsSettings.setUserProfileImsUserName(contactIdSav);
 	}
 
 	public void testGetMyContactIdWithoutCC() {
-		String cac = rcsSettings.getCountryAreaCode();
-		String contactIdSav = rcsSettings.getUserProfileImsUserName();
-		rcsSettings.setUserProfileImsUserName(cac + "23456789");
-		String cc = rcsSettings.getCountryCode();
+		String cac = mContactUtils.getMyCountryAreaCode();
+		String contactIdSav = mRcsSettings.getUserProfileImsUserName();
+		mRcsSettings.setUserProfileImsUserName(cac + "23456789");
+		String cc = mContactUtils.getMyCountryCode();
 		try {
-			assertEquals(cc + "23456789", RcsServiceConfiguration.getMyContactId(getContext())
+			assertEquals(cc + "23456789", RcsServiceConfiguration.getMyContactId(mContext)
 					.toString());
 		} catch (RcsContactFormatException e) {
 			fail("Failed to testGetMyContactIdWithoutCC");
 		}
-		rcsSettings.setUserProfileImsUserName(contactIdSav);
+		mRcsSettings.setUserProfileImsUserName(contactIdSav);
 	}
 
 	public void testGetMyContactIdBadFormat() {
-		String contactIdSav = rcsSettings.getUserProfileImsUserName();
-		rcsSettings.setUserProfileImsUserName("1234w56789");
+		String contactIdSav = mRcsSettings.getUserProfileImsUserName();
+		mRcsSettings.setUserProfileImsUserName("1234w56789");
 		try {
-			RcsServiceConfiguration.getMyContactId(getContext());
+			RcsServiceConfiguration.getMyContactId(mContext);
 			fail("Expecting exception but none was thrown.");
 		} catch (RcsContactFormatException e) {
 			if (e instanceof RcsContactFormatException == false) {
 				Assert.fail("Exception thrown was unexpected.");
 			}
 		}
-		rcsSettings.setUserProfileImsUserName(contactIdSav);
+		mRcsSettings.setUserProfileImsUserName(contactIdSav);
 	}
 
 	public void testIsConfigValid() {
-		boolean isConfigValidSav = rcsSettings.isConfigurationValid();
-		rcsSettings.setConfigurationValid(false);
-		assertFalse(RcsServiceConfiguration.isConfigValid(getContext()));
-		rcsSettings.setConfigurationValid(true);
-		assertTrue(RcsServiceConfiguration.isConfigValid(getContext()));
-		rcsSettings.setConfigurationValid(isConfigValidSav);
+		boolean isConfigValidSav = mRcsSettings.isConfigurationValid();
+		mRcsSettings.setConfigurationValid(false);
+		assertFalse(RcsServiceConfiguration.isConfigValid(mContext));
+		mRcsSettings.setConfigurationValid(true);
+		assertTrue(RcsServiceConfiguration.isConfigValid(mContext));
+		mRcsSettings.setConfigurationValid(isConfigValidSav);
 	}
 
 	public void testGetMessaginUX() {
-		MessagingMode getMessagingUXSav = rcsSettings.getMessagingMode();
-		rcsSettings.setMessagingMode(MessagingMode.CONVERGED);
+		MessagingMode getMessagingUXSav = mRcsSettings.getMessagingMode();
+		mRcsSettings.setMessagingMode(MessagingMode.CONVERGED);
 		assertEquals(MessagingMode.CONVERGED.ordinal(),
-				RcsServiceConfiguration.getMessagingUX(getContext()));
-		rcsSettings.setMessagingMode(MessagingMode.SEAMLESS);
+				RcsServiceConfiguration.getMessagingUX(mContext));
+		mRcsSettings.setMessagingMode(MessagingMode.SEAMLESS);
 		assertEquals(MessagingMode.SEAMLESS.ordinal(),
-				RcsServiceConfiguration.getMessagingUX(getContext()));
-		rcsSettings.setMessagingMode(getMessagingUXSav);
+				RcsServiceConfiguration.getMessagingUX(mContext));
+		mRcsSettings.setMessagingMode(getMessagingUXSav);
 	}
 
 
