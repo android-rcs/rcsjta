@@ -32,7 +32,6 @@ public class ContactUtilsTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		mContactUtils = ContactUtils.getInstance(getContext());
-		assertNotNull("Cannot instantiate ContactUtils", mContactUtils);
 	}
 
 	protected void tearDown() throws Exception {
