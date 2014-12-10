@@ -164,7 +164,9 @@ public class FileTransferLog implements IFileTransferLog {
 			Set<ParticipantInfo> participants = mGroupChatLog.getGroupChatConnectedParticipants(chatId);
 			for (ParticipantInfo participant : participants) {
 				mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
-						participant.getContact(), fileTransferId);
+						participant.getContact(), fileTransferId,
+						com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED,
+						com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {

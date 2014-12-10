@@ -36,12 +36,15 @@ public interface IGroupDeliveryInfoLog {
 
     /**
      * Add a new entry (chat message or file transfer)
-     *
+     * 
      * @param chatId Chat ID of a chat session
      * @param contact Contact phone identifier
      * @param msgId Message ID of a chat message
+     * @param status Delivery info status
+     * @param reasonCode Delivery info status reason code
      */
-    public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId);
+    public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
+            int status, int reasonCode);
 
     /**
      * Set delivery status for outgoing group chat messages and files

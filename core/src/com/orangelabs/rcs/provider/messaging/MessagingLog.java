@@ -385,11 +385,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * (non-Javadoc)
 	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry(java.lang.String,
-	 * com.gsma.services.rcs.contacts.ContactId, java.lang.String)
+	 * com.gsma.services.rcs.contacts.ContactId, java.lang.String, int, int)
 	 */
 	@Override
-	public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId) {
-		return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId);
+	public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
+			int status, int reasonCode) {
+		return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
+				status, reasonCode);
 	}
 
 	/*

@@ -67,17 +67,14 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     }
 
     @Override
-    public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId) {
-        if (logger.isActivated()) {
-            logger.debug("Add new entry: chatID=" + chatId + ", messageID=" + msgId + ", contact="
-                    + contact);
-        }
+    public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
+            int status, int reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_CHAT_ID, chatId);
         values.put(GroupDeliveryInfoData.KEY_ID, msgId);
         values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED);
-        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status);
+        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, 0);
         return mLocalContentResolver.insert(GroupDeliveryInfoData.CONTENT_URI, values);

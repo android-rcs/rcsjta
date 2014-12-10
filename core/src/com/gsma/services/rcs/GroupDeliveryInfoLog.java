@@ -44,29 +44,35 @@ public class GroupDeliveryInfoLog {
 	 * Status of the group delivery info
 	 */
 	public static class Status {
+
+		/**
+		 * Delivery notifications were unsupported at the time the message or
+		 * file-transfer was sent and no delivery notification has been requested.
+		 */
+		public static final int UNSUPPORTED = 0;
 		/**
 		 * The message or file-transfer has not received any delivery report
 		 * for the specified contact.
 		 */
-		public static final int NOT_DELIVERED = 0;
+		public static final int NOT_DELIVERED = 1;
 
 		/**
 		 * The message or file-transfer has received a delivery report for the
 		 * specified contact
 		 */
-		public static final int DELIVERED = 1;
+		public static final int DELIVERED = 2;
 
 		/**
 		 * The message or file-transfer has received a displayed report for the
 		 * specified contact.
 		 */
-		public static final int DISPLAYED = 2;
+		public static final int DISPLAYED = 3;
 
 		/**
 		 * The message or file-transfer has received a delivery report failure
 		 * for the specified contact.
 		 */
-		public static final int FAILED = 3;
+		public static final int FAILED = 4;
 	}
 
 	/**

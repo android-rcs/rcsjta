@@ -40,6 +40,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.provider.LocalContentResolver;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -248,10 +249,15 @@ public class MessageLog implements IMessageLog {
 
 		if (direction == Direction.OUTGOING) {
 			try {
+				int deliveryStatus = com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED;
+				if (RcsSettings.getInstance().isAlbatrosRelease()) {
+					deliveryStatus = com.gsma.services.rcs.GroupDeliveryInfoLog.Status.UNSUPPORTED;
+				}
 				Set<ParticipantInfo> participants = groupChatLog.getGroupChatConnectedParticipants(chatId);
 				for (ParticipantInfo participant : participants) {
 					groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
-							participant.getContact(), msgId);
+							participant.getContact(), msgId, deliveryStatus,
+							com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
 				}
 			} catch (Exception e) {
 				mLocalContentResolver.delete(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
