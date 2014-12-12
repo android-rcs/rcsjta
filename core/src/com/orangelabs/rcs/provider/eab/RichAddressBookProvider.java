@@ -51,7 +51,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * <br>This provider contains the list of the RCS contacts and their status
  * <br>It is used by the AddressBookManager to keep the synchronization between the native address book and the RCS contacts.
  * 
- * <br>It also contains the list of aggregations between native raw contacts and rcs raw contacts
+ * <br>It also contains the list of aggregations between native raw contacts and RCS raw contacts
  */
 public class RichAddressBookProvider extends ContentProvider {
 
@@ -99,8 +99,8 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL,
             RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL,
             RichAddressBookData.KEY_CAPABILITY_EXTENSIONS, RichAddressBookData.KEY_AUTOMATA,
-            RichAddressBookData.KEY_TIMESTAMP
-    };
+            RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH
+            };
 
     private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
             Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
