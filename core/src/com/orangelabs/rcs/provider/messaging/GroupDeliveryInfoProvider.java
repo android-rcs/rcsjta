@@ -6,13 +6,13 @@
 package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.orangelabs.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
