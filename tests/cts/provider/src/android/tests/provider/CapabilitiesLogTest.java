@@ -18,97 +18,129 @@
 package android.tests.provider;
 
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
+//import android.os.*;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 
 public class CapabilitiesLogTest extends InstrumentationTestCase {
-	private ContentResolver mContentResolver;
+
+	private static final String[] CAPABILITIES_LOG_PROJECTION = new String[] { CapabilitiesLog.CONTACT,
+			CapabilitiesLog.CAPABILITY_IMAGE_SHARE, CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+			CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+			CapabilitiesLog.CAPABILITY_GEOLOC_PUSH, CapabilitiesLog.CAPABILITY_EXTENSIONS, CapabilitiesLog.AUTOMATA,
+			CapabilitiesLog.TIMESTAMP };
+
 	private ContentProviderClient mProvider;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mContentResolver = getInstrumentation().getTargetContext().getContentResolver();
-		mProvider = mContentResolver.acquireContentProviderClient(CapabilitiesLog.CONTENT_URI);
+		mProvider = getInstrumentation().getTargetContext().getContentResolver()
+				.acquireContentProviderClient(CapabilitiesLog.CONTENT_URI);
+		assertNotNull(mProvider);
 	}
 
 	/**
 	 * Test the CapabilityLog according to GSMA API specifications.<br>
-	 * Check the following operations:
-	 * <ul>
-	 * <li>query
-	 * <li>insert
-	 * <li>delete
-	 * <li>update
+	 * Check the query operations
 	 */
-	public void testCapabilitiesLog() {
-		final String[] CAPABILITIES_LOG_PROJECTION = new String[] { CapabilitiesLog.CAPABILITY_EXTENSIONS,
-				CapabilitiesLog.CAPABILITY_FILE_TRANSFER, CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
-				CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
-				CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL, CapabilitiesLog.CAPABILITY_IP_VOICE_CALL,
-				CapabilitiesLog.CAPABILITY_VIDEO_SHARE, CapabilitiesLog.CONTACT_NUMBER, CapabilitiesLog.ID };
-
+	public void testCapabilitiesLogQuery() {
 		// Check that provider handles columns names and query operation
-		Cursor c = null;
+		Cursor cursor = null;
 		try {
-			String mSelectionClause = CapabilitiesLog.ID + " = ?";
-			c = mProvider.query(CapabilitiesLog.CONTENT_URI, CAPABILITIES_LOG_PROJECTION, mSelectionClause, null, null);
-			assertNotNull(c);
-			if (c != null) {
-				int num = c.getColumnCount();
-				assertTrue(num == CAPABILITIES_LOG_PROJECTION.length);
-			}
+			String where = CapabilitiesLog.CONTACT.concat("=?");
+			String[] whereArgs = new String[] { "+339000000" };
+			cursor = mProvider.query(CapabilitiesLog.CONTENT_URI, CAPABILITIES_LOG_PROJECTION, where, whereArgs, null);
+			assertNotNull(cursor);
 		} catch (Exception e) {
 			fail("query of CapabilitiesLog failed " + e.getMessage());
 		} finally {
-			if (c != null) {
-				c.close();
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
+	}
 
+	public void testCapabilitiesLogQueryById() {
+		// Check that provider handles columns names and query operation by ID
+		Uri uri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, "+33612345678");
+		// Check that provider handles columns names and query operation
+		Cursor cursor = null;
+		try {
+			cursor = mProvider.query(uri, CAPABILITIES_LOG_PROJECTION, null, null, null);
+			assertNotNull(cursor);
+		} catch (Exception e) {
+			fail("query By Id of CapabilityLog failed " + e.getMessage());
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public void testCapabilitiesLogQueryWithoutWhereClause() {
+		Cursor cursor = null;
+		try {
+			cursor = mProvider.query(CapabilitiesLog.CONTENT_URI, null, null, null, null);
+			assertNotNull(cursor);
+			if (cursor.moveToFirst()) {
+				Utils.checkProjection(CAPABILITIES_LOG_PROJECTION, cursor.getColumnNames());
+			}
+		} catch (Exception e) {
+			fail("query without where clause of CapabilitiesLog failed " + e.getMessage());
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public void testCapabilitiesLogInsert() {
 		// Check that provider does not support insert operation
 		ContentValues values = new ContentValues();
-		values.put(CapabilitiesLog.CAPABILITY_EXTENSIONS, CapabilitiesLog.NOT_SUPPORTED);
+		values.put(CapabilitiesLog.CAPABILITY_EXTENSIONS, "extension1;extension2");
 		values.put(CapabilitiesLog.CAPABILITY_FILE_TRANSFER, CapabilitiesLog.NOT_SUPPORTED);
 		values.put(CapabilitiesLog.CAPABILITY_GEOLOC_PUSH, CapabilitiesLog.NOT_SUPPORTED);
 		values.put(CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.NOT_SUPPORTED);
 		values.put(CapabilitiesLog.CAPABILITY_IMAGE_SHARE, CapabilitiesLog.NOT_SUPPORTED);
-		values.put(CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL, CapabilitiesLog.NOT_SUPPORTED);
-		values.put(CapabilitiesLog.CAPABILITY_IP_VOICE_CALL, CapabilitiesLog.NOT_SUPPORTED);
 		values.put(CapabilitiesLog.CAPABILITY_VIDEO_SHARE, CapabilitiesLog.NOT_SUPPORTED);
-		values.put(CapabilitiesLog.CONTACT_NUMBER, "+3360102030405");
-
-		Throwable exception = null;
+		values.put(CapabilitiesLog.TIMESTAMP, System.currentTimeMillis());
+		values.put(CapabilitiesLog.CONTACT, "+33612345678");
+		values.put(CapabilitiesLog.AUTOMATA, CapabilitiesLog.NOT_SUPPORTED);
 		try {
 			mProvider.insert(CapabilitiesLog.CONTENT_URI, values);
+			fail("CapabilitiesLog is read only");
 		} catch (Exception ex) {
-			exception = ex;
+			assertTrue("insert into CapabilitiesLog should be forbidden", ex instanceof RuntimeException);
 		}
-		assertTrue("insert into CapabilitiesLog should be forbidden", exception instanceof RuntimeException);
+	}
 
+	public void testCapabilitiesLogDelete() {
 		// Check that provider does not support delete operation
-		exception = null;
 		try {
-			String mSelectionClause = CapabilitiesLog.ID + " = -1";
-			mProvider.delete(CapabilitiesLog.CONTENT_URI, mSelectionClause, null);
+			mProvider.delete(CapabilitiesLog.CONTENT_URI, null, null);
+			fail("CapabilitiesLog is read only");
 		} catch (Exception ex) {
-			exception = ex;
+			assertTrue("delete from CapabilitiesLog should be forbidden", ex instanceof RuntimeException);
 		}
-		assertTrue("delete from CapabilitiesLog should be forbidden", exception instanceof RuntimeException);
+	}
 
-		exception = null;
+	public void testCapabilitiesLogUpdate() {
 		// Check that provider does not support update operation
+		ContentValues values = new ContentValues();
+		values.put(CapabilitiesLog.TIMESTAMP, System.currentTimeMillis());
 		try {
-			String mSelectionClause = CapabilitiesLog.ID + " = -1";
-			mProvider.update(CapabilitiesLog.CONTENT_URI, values, mSelectionClause, null);
+			String where = CapabilitiesLog.CONTACT.concat("=?");
+			String[] whereArgs = new String[] { "+339000000" };
+			mProvider.update(CapabilitiesLog.CONTENT_URI, values, where, whereArgs);
+			fail("CapabilitiesLog is read only");
 		} catch (Exception ex) {
-			exception = ex;
+			assertTrue("update of CapabilitiesLog should be forbidden", ex instanceof RuntimeException);
 		}
-		assertTrue("update of CapabilitiesLog should be forbidden", exception instanceof RuntimeException);
 	}
 
 }
