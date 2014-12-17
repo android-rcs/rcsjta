@@ -15,13 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package android.tests.sigtest;
+package android.tests.provider;
 
-/**
- * RCS version to be tested
- * 
- * @author Jean-Marc AUFFRET
- */
-public class ToTest {
-	public static int VERSION = R.xml.blackbird_1_5;
+import android.test.InstrumentationTestCase;
+
+public class Utils extends InstrumentationTestCase  {
+	
+	public static void checkProjection(String[] expected, String[] obtained) {
+		if (expected != null) {
+			if (obtained == null) {
+				fail("projection is null");
+			}
+			assertEquals(expected.length, obtained.length);
+			for (String field1 : expected) {
+				boolean found = false;
+				for (String field2 : obtained) {
+					if (field1.equals(field2)) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					fail("field1 is not present");
+				}
+			}
+		} else {
+			if (obtained != null) {
+				fail("invalid Projection");
+			}
+		}
+	}
 }

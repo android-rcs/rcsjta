@@ -18,22 +18,30 @@
 package android.tests.provider;
 
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
+import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.chat.ChatLog;
 
 public class ChatLogMessageTest extends InstrumentationTestCase {
-	private ContentResolver mContentResolver;
+
+	private static final String[] CHAT_LOG_MESSAGE_PROJECTION = new String[] { ChatLog.Message.CHAT_ID,
+			ChatLog.Message.CONTENT, ChatLog.Message.CONTACT, ChatLog.Message.DIRECTION, ChatLog.Message.READ_STATUS,
+			ChatLog.Message.MESSAGE_ID, ChatLog.Message.MIME_TYPE, ChatLog.Message.TIMESTAMP,
+			ChatLog.Message.REASON_CODE, ChatLog.Message.STATUS, ChatLog.Message.TIMESTAMP_SENT,
+			ChatLog.Message.TIMESTAMP_DELIVERED, ChatLog.Message.TIMESTAMP_DISPLAYED };
+
 	private ContentProviderClient mProvider;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mContentResolver = getInstrumentation().getTargetContext().getContentResolver();
-		mProvider = mContentResolver.acquireContentProviderClient(ChatLog.Message.CONTENT_URI);
+		mProvider = getInstrumentation().getTargetContext().getContentResolver()
+				.acquireContentProviderClient(ChatLog.Message.CONTENT_URI);
+		assertNotNull(mProvider);
 	}
 
 	/**
@@ -45,70 +53,105 @@ public class ChatLogMessageTest extends InstrumentationTestCase {
 	 * <li>delete
 	 * <li>update
 	 */
-	public void testChatLogMessage() {
-		final String[] CHAT_LOG_MESSAGE_PROJECTION = new String[] { ChatLog.Message.ID, ChatLog.Message.BODY,
-				ChatLog.Message.CHAT_ID, ChatLog.Message.CONTACT_NUMBER, ChatLog.Message.DIRECTION, ChatLog.Message.MESSAGE_STATUS,
-				ChatLog.Message.MESSAGE_ID, ChatLog.Message.MESSAGE_TYPE, ChatLog.Message.MIME_TYPE, ChatLog.Message.TIMESTAMP // ,
-		// ChatLog.Message.TIMESTAMP_DELIVERED, TODO
-		// ChatLog.Message.TIMESTAMP_DISPLAYED,
-		// ChatLog.Message.TIMESTAMP_SENT
-		};
 
-		// Check that provider handles columns names and query operation
-		Cursor c = null;
+	public void testChatLogMessageQuery() {
+		// Check that provider handles columns names and query operation with where arguments
+		Cursor cursor = null;
 		try {
-			String mSelectionClause = ChatLog.Message.ID + " = ?";
-			c = mProvider.query(ChatLog.Message.CONTENT_URI, CHAT_LOG_MESSAGE_PROJECTION, mSelectionClause, null, null);
-			assertNotNull(c);
-			if (c != null) {
-				int num = c.getColumnCount();
-				assertTrue(num == CHAT_LOG_MESSAGE_PROJECTION.length);
-			}
+			String where = ChatLog.Message.CHAT_ID.concat("=?");
+			String[] whereArgs = new String[] { "123456789" };
+			cursor = mProvider.query(ChatLog.Message.CONTENT_URI, CHAT_LOG_MESSAGE_PROJECTION, where, whereArgs, null);
+			assertNotNull(cursor);
 		} catch (Exception e) {
 			fail("query of ChatLog.Message failed " + e.getMessage());
 		} finally {
-			if (c != null) {
-				c.close();
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
+	}
 
+	public void testChatLogMessageQueryById() {
+		// Check that provider handles columns names and query operation by ID
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, "123456789");
+		// Check that provider handles columns names and query operation
+		Cursor cursor = null;
+		try {
+			cursor = mProvider.query(uri, CHAT_LOG_MESSAGE_PROJECTION, null, null, null);
+			assertNotNull(cursor);
+		} catch (Exception e) {
+			fail("By Id query of ChatLog.Message failed " + e.getMessage());
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public void testChatLogMessageQueryWithoutWhereClause() {
+		// Check that provider handles columns names and query operation without where clause
+		Cursor cursor = null;
+		try {
+			cursor = mProvider.query(ChatLog.Message.CONTENT_URI, null, null, null, null);
+			assertNotNull(cursor);
+			if (cursor.moveToFirst()) {
+				Utils.checkProjection(CHAT_LOG_MESSAGE_PROJECTION, cursor.getColumnNames());
+			}
+		} catch (Exception e) {
+			fail("Without where clause query of ChatLog.Message failed " + e.getMessage());
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public void testChatLogMessageInsert() {
 		// Check that provider does not support insert operation
 		ContentValues values = new ContentValues();
-		values.put(ChatLog.Message.BODY, "body");
-		values.put(ChatLog.Message.CHAT_ID, "chat_id");
-		values.put(ChatLog.Message.CONTACT_NUMBER, "+3360102030405");
-		values.put(ChatLog.Message.DIRECTION, ChatLog.Message.Direction.INCOMING);
-		values.put(ChatLog.Message.MESSAGE_STATUS, ChatLog.Message.Status.Content.UNREAD);
-		values.put(ChatLog.Message.MESSAGE_ID, "msg_id");
-		values.put(ChatLog.Message.MESSAGE_TYPE, ChatLog.Message.Type.CONTENT);
-		values.put(ChatLog.Message.MIME_TYPE, "text/plain");
+		values.put(ChatLog.Message.CHAT_ID, "0123456789");
+		values.put(ChatLog.Message.CONTENT, "body");
+		values.put(ChatLog.Message.CONTACT, "+3360102030405");
+		values.put(ChatLog.Message.DIRECTION, RcsCommon.Direction.INCOMING);
+		values.put(ChatLog.Message.READ_STATUS, RcsCommon.ReadStatus.UNREAD);
+		values.put(ChatLog.Message.MESSAGE_ID, "012345789");
+		values.put(ChatLog.Message.MIME_TYPE, ChatLog.Message.MimeType.TEXT_MESSAGE);
+		values.put(ChatLog.Message.STATUS, ChatLog.Message.Status.Content.RECEIVED);
+		values.put(ChatLog.Message.REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		values.put(ChatLog.Message.TIMESTAMP, System.currentTimeMillis());
-		Throwable exception = null;
+		values.put(ChatLog.Message.TIMESTAMP_DELIVERED, 0);
+		values.put(ChatLog.Message.TIMESTAMP_DISPLAYED, 0);
+		values.put(ChatLog.Message.TIMESTAMP_SENT, 0);
 		try {
 			mProvider.insert(ChatLog.Message.CONTENT_URI, values);
+			fail("ChatLog is read only");
 		} catch (Exception ex) {
-			exception = ex;
+			assertTrue("insert into ChatLog.Message should be forbidden", ex instanceof RuntimeException);
 		}
-		assertTrue("insert into ChatLog.Message should be forbidden", exception instanceof RuntimeException);
+	}
 
+	public void testChatLogMessageDelete() {
 		// Check that provider supports delete operation
 		try {
-			String mSelectionClause = ChatLog.Message.ID + " = -1";
-			int count = mProvider.delete(ChatLog.Message.CONTENT_URI, mSelectionClause, null);
-			assertTrue(count == 0);
-		} catch (Exception e) {
-			fail("delete of ChatLog.Message failed " + e.getMessage());
+			mProvider.delete(ChatLog.Message.CONTENT_URI, null, null);
+			fail("ChatLog is read only");
+		} catch (Exception ex) {
+			assertTrue("delete of ChatLog.Message should be forbidden", ex instanceof RuntimeException);
 		}
+	}
 
-		exception = null;
+	public void testChatLogMessageUpdate() {
+		ContentValues values = new ContentValues();
+		values.put(ChatLog.Message.TIMESTAMP, System.currentTimeMillis());
 		// Check that provider does not support update operation
 		try {
-			String mSelectionClause = ChatLog.Message.ID + " = -1";
-			mProvider.update(ChatLog.Message.CONTENT_URI, values, mSelectionClause, null);
+			String where = ChatLog.Message.MESSAGE_ID.concat("=?");
+			String[] whereArgs = new String[] { "123456789" };
+			mProvider.update(ChatLog.Message.CONTENT_URI, values, where, whereArgs);
+			fail("ChatLog is read only");
 		} catch (Exception ex) {
-			exception = ex;
+			assertTrue("Updating a ChatLog.Message should be forbidden", ex instanceof RuntimeException);
 		}
-		assertTrue("update of ChatLog.Message should be forbidden", exception instanceof RuntimeException);
 	}
 
 }

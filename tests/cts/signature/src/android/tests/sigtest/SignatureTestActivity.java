@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * This class is used for Signature Test. It will started by the Instrumentation class,
@@ -84,10 +85,11 @@ public class SignatureTestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+		Log.w("[RCS]", "Starts verifying RCS signatures");
         mResultObserver = new DeviceResultObserver();
         start();
         mResultObserver.sendResult(getIntent());
+		Log.w("[RCS]", "Ends verifying RCS signatures");
     }
 
     /**
