@@ -21,16 +21,12 @@ package com.orangelabs.rcs.core.ims.network;
 import java.util.Random;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.telephony.TelephonyManager;
 
 import com.orangelabs.rcs.core.CoreException;
@@ -68,7 +64,7 @@ public class ImsConnectionManager implements Runnable {
     /**
      * IMS polling thread
      */
-    private Thread imsPollingThread = null;
+    private Thread imsPollingThread;
 
     /**
      * IMS polling thread Id
@@ -91,14 +87,9 @@ public class ImsConnectionManager implements Runnable {
 	private String operator;
 
 	/**
-	 * APN
-	 */
-	private String apn;
-
-	/**
 	 * DNS resolved fields
 	 */
-	private DnsResolvedFields mDnsResolvedFields = null;
+	private DnsResolvedFields mDnsResolvedFields;
 	
     /**
      * Battery level state
@@ -130,7 +121,6 @@ public class ImsConnectionManager implements Runnable {
 
 		// Get network operator parameters
 		operator = rcsSettings.getNetworkOperator();
-		apn = rcsSettings.getNetworkApn();
 		
 		// Set the connectivity manager
 		connectivityMgr = (ConnectivityManager)AndroidFactory.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -432,29 +422,6 @@ public class ImsConnectionManager implements Runnable {
 				}
 				return;
 			}
-
-            if (Build.VERSION.SDK_INT < 17) { // From Android 4.2, the management of APN is only for system app 
-				// Test the default APN configuration if mobile network
-				if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-					ContentResolver cr = AndroidFactory.getApplicationContext().getContentResolver();
-					String currentApn = null;
-					Cursor c = cr.query(Uri.parse("content://telephony/carriers/preferapn"),
-							new String[] { "apn" }, null, null, null);
-					if (c != null) {
-						final int apnIndex = c.getColumnIndexOrThrow("apn");
-						if (c.moveToFirst()) {
-							currentApn = c.getString(apnIndex);
-						}
-						c.close();
-					}
-					if ((apn.length() > 0) && !apn.equalsIgnoreCase(currentApn)) {
-						if (logger.isActivated()) {
-							logger.warn("APN not authorized");
-						}
-						return;
-					}
-				}
-            }
 
 			// Test the configuration
 			if (!currentNetworkInterface.isInterfaceConfigured()) {
